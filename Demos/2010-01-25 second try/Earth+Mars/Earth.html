@@ -132,7 +132,7 @@
             ctx.perspectiveMatrix.perspective(30, width/height, 1, 10000);
         }
         
-        function drawOne(ctx, dayangle, yearangle, x, y, z, scale, texture)
+        function drawOne(ctx, angle, x, y, z, scale, texture)
         {
             // setup VBOs
             ctx.enableVertexAttribArray(0);
@@ -153,10 +153,9 @@
             // generate the model-view matrix
             var mvMatrix = new CanvasMatrix4();
             mvMatrix.scale(scale, scale, scale);
-            mvMatrix.rotate(dayangle, 0,1,0);
-            mvMatrix.rotate(25, 1,0,0);
+            mvMatrix.rotate(angle, 0,1,0);
+            mvMatrix.rotate(30, 1,0,0);
             mvMatrix.translate(x,y,z);
-            mvMatrix.rotate(yearangle, 0,1,0);
             ctx.uniformMatrix4fv(ctx.getUniformLocation(ctx.program, "u_modelViewMatrix"), false, mvMatrix.getAsWebGLFloatArray());
 
             // construct the normal matrix from the model-view matrix
@@ -178,27 +177,24 @@
         {
             reshape(ctx);
             ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT);
-
-            drawOne(ctx, earthAngle, yearAngle, -1, 0, 0, 1, (earthActive ? earthTexture : earthTextureGray));
-            drawOne(ctx, marsAngle, yearAngle, 1, 0, 0, 0.6, (marsActive ? marsTexture : marsTextureGray));
+            
+            drawOne(ctx, earthAngle, -1, 0, 0, 1, (earthActive ? earthTexture : earthTextureGray));
+            drawOne(ctx, -marsAngle, 1, 0, 0, 0.6, (marsActive ? marsTexture : marsTextureGray));
 
             ctx.flush();
             
             framerate.snapshot();
 
-            if (yearActive)
-              yearAngle += yearIncAngle;
-
             if (earthActive)
             {
-              earthAngle += dayIncAngle;
+              earthAngle += incAngle;
               if (earthAngle > 360)
                   earthAngle -= 360;
             }
 
             if (marsActive)
             {
-              marsAngle += dayIncAngle;
+              marsAngle += incAngle;
               if (marsAngle > 360)
                   marsAngle -= 360;
             };
@@ -216,11 +212,8 @@
             var ctx = init();
             earthAngle = 0;
             marsAngle = 0;
-            yearAngle = 0;
-            dayIncAngle = 0.2;
-            yearIncAngle = 0.10;
+            incAngle = 0.2;
 
-            yearActive = false;
             earthActive = false;
             marsActive = false;
 
@@ -236,34 +229,24 @@
 
             $("#example").click( function(event)
               {
-                var earthRadius = this.clientHeight * 3.1 / 5 / 2;
-                var marsRadius = earthRadius * 0.6;
+                var centerX = this.clientWidth / 2;
+                var centerY = this.clientHeight / 2;
 
-                var earthOriginX = this.clientWidth / 2 - earthRadius;
-                var earthOriginY = this.clientHeight / 2;
+                var dim = centerY * 3.1 / 5;
 
-                var marsOriginX = this.clientWidth / 2 + earthRadius;
-                var marsOriginY = this.clientHeight / 2;
-
-                var eventX = event.pageX - $(this).offset().left;
-                var eventY = event.pageY - $(this).offset().top;
-
-                if ( eventX > earthOriginX - earthRadius && eventX < earthOriginX + earthRadius && 
-                  eventY > earthOriginY - earthRadius && eventY < earthOriginY + earthRadius )
+                if ( event.offsetX > (centerX - dim - dim) && event.offsetX < (centerX - dim + dim) &&
+                  event.offsetY > centerY - dim && event.offsetY < centerY + dim )
                 {
                   earthActive = !earthActive;
                   $("#lessonearth").addClass( "completed" );
                 }
 
-                if ( eventX > marsOriginX - marsRadius && eventX < marsOriginX + marsRadius && 
-                  eventY > marsOriginY - marsRadius && eventY < marsOriginY + marsRadius )
+                if (  event.offsetX > (centerX + dim - dim*0.6) && event.offsetX < (centerX + dim + dim*0.6) &&
+                  event.offsetY > centerY - dim*0.6 && event.offsetY < centerY + dim*0.6 )
                 {
                   marsActive = !marsActive;
                   $("#lessonmars").addClass( "completed" );
                 }
-                
-                if ( eventX > $(this).width() - 25 && eventY > $(this).height() - 25 )
-                  yearActive = !yearActive;
               }
             );
 
