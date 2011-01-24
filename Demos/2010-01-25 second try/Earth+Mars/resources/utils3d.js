@@ -42,7 +42,7 @@
 // by the caller. By default, it maps to the window.console() function on WebKit and to
 // an empty function on other browsers.
 //
-function initWebGL(canvasName, vshader, fshader, attribs, clearColor, clearDepth)
+function initWebGL(canvasName, vshader, fshader, fshadergray, attribs, clearColor, clearDepth)
 {
     var canvas = document.getElementById(canvasName);
     var gl = canvas.getContext("experimental-webgl");
@@ -54,45 +54,9 @@ function initWebGL(canvasName, vshader, fshader, attribs, clearColor, clearDepth
     // Add a console
     gl.console = ("console" in window) ? window.console : { log: function() { } };
 
-    // create our shaders
-    var vertexShader = loadShader(gl, vshader);
-    var fragmentShader = loadShader(gl, fshader);
-
-    if (!vertexShader || !fragmentShader)
-        return null;
-
-    // Create the program object
-    gl.program = gl.createProgram();
-
-    if (!gl.program)
-        return null;
-
-    // Attach our two shaders to the program
-    gl.attachShader (gl.program, vertexShader);
-    gl.attachShader (gl.program, fragmentShader);
-
-    // Bind attributes
-    for (var i in attribs)
-        gl.bindAttribLocation (gl.program, i, attribs[i]);
-
-    // Link the program
-    gl.linkProgram(gl.program);
-
-    // Check the link status
-    var linked = gl.getProgramParameter(gl.program, gl.LINK_STATUS);
-    if (!linked) {
-        // something went wrong with the link
-        var error = gl.getProgramInfoLog (gl.program);
-        gl.console.log("Error in program linking:"+error);
-
-        gl.deleteProgram(gl.program);
-        gl.deleteProgram(fragmentShader);
-        gl.deleteProgram(vertexShader);
-
-        return null;
-    }
-
-    gl.useProgram(gl.program);
+    gl.programcolor = createProgram(gl, vshader, fshader, attribs);
+    gl.programgray = createProgram(gl, vshader, fshadergray, attribs);
+    // gl.useProgram(gl.program);
 
     gl.clearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
     gl.clearDepth(clearDepth);
@@ -102,6 +66,49 @@ function initWebGL(canvasName, vshader, fshader, attribs, clearColor, clearDepth
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     return gl;
+}
+
+function createProgram(gl, vshader, fshader, attribs)
+{
+    // create our shaders
+    var vertexShader = loadShader(gl, vshader);
+    var fragmentShader = loadShader(gl, fshader);
+
+    if (!vertexShader || !fragmentShader)
+        return null;
+
+    // Create the program object
+    program = gl.createProgram();
+
+    if (!program)
+        return null;
+
+    // Attach our two shaders to the program
+    gl.attachShader (program, vertexShader);
+    gl.attachShader (program, fragmentShader);
+
+    // Bind attributes
+    for (var i in attribs)
+        gl.bindAttribLocation (program, i, attribs[i]);
+
+    // Link the program
+    gl.linkProgram(program);
+
+    // Check the link status
+    var linked = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (!linked) {
+        // something went wrong with the link
+        var error = gl.getProgramInfoLog (program);
+        gl.console.log("Error in program linking:"+error);
+
+        gl.deleteProgram(program);
+        gl.deleteProgram(fragmentShader);
+        gl.deleteProgram(vertexShader);
+
+        return null;
+    }
+    
+    return program;
 }
 
 //
