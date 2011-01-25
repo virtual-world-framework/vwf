@@ -1,0 +1,34 @@
+{
+    "title": "world2.json",
+
+    "properties":
+    {
+        "p1": "world2",
+        "p2": null
+    },
+
+    "methods":
+    {
+        "m1": null,
+        "m2": null
+    },
+
+    "events":
+    {
+        "e1": null,
+        "e2": null
+    },
+
+    "children":
+    {
+        "child1a-world2": {},
+        "child2b-world2": {},
+        "child3c-world2": {}
+    },
+
+    "scripts":
+    [
+        { "source": "http://example.com", "type": "text/javascript" },
+        { "value": "function f() { ... }", "type": "text/javascript" }
+    ]
+}

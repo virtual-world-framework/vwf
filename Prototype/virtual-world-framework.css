@@ -1,0 +1,33 @@
+.vwf-properties, .vwf-methods, .vwf-events, .vwf-children {
+  margin: 0.2em;
+  padding: 0.2em;
+  background-color: #484;
+}
+
+.vwf-node {
+  margin: 0.5em;
+  padding: 0.5em;
+} 
+
+.vwf-depth-1 {
+  background-color: #AAB;
+} 
+
+.vwf-depth-2 {
+  background-color: #BCB;
+} 
+
+.vwf-depth-3 {
+  background-color: #DDC;
+} 
+
+.vwf-depth-4 {
+  background-color: #EDD;
+} 
+
+.vwf-label {
+  margin: 0.2em;
+  padding: 0.2em;
+  background-color: #EEE;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
