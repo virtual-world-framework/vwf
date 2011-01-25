@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <script type="text/javascript" src="jquery-1.4.4.js"></script>
+    <script type="text/javascript" src="virtual-world-framework.js"></script>
+    <script type="text/javascript">$(document).ready( function() { VirtualWorldFramework.initialize( "#vwf-root" ) } )</script>
+    <link rel="stylesheet" href="virtual-world-framework.css" type="text/css" />
+  </head>
+
+  <body>
+    <h1 onclick="console.log( VirtualWorldFramework.world.properties.p2++ )">World [click me]</h1>
+    <div id="vwf-root"></div>
+  </body>
+
+</html>
