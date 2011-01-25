@@ -1,8 +1,10 @@
 {
+    "title": "world.json",
+
     "properties":
     {
         "p1": "world2",
-        "p2": 0
+        "p2": null
     },
 
     "methods":
@@ -19,10 +21,10 @@
 
     "children":
     {
-        "child1z": { "children": { "grandchild1": { "title": "grandchild1" } } },
-        "child1a": { },
-        "child2b": { "children": { "grandchild2": { "title": "grandchild2" } }  },
-        "child3c": { }
+        "child1z": { "title": "child1z", "children": { "grandchild1": { "title": "grandchild1" } } },
+        "child1a": { "title": "child1a" },
+        "child2b": { "title": "child2b" },
+        "child3c": { "title": "child3c" }
     },
 
     "scripts":

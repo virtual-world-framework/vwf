@@ -10,8 +10,41 @@
   </head>
 
   <body>
-    <h1 onclick="console.log( VirtualWorldFramework.world.properties.p2++ )">World</h1>
-    <div id="vwf-root"></div>
+    <h1>World</h1>
+  
+    <div id="vwf-root" class="vwf-node vwf-depth-0">
+      <div id="parent1" class="vwf-node vwf-depth-1">
+        <div id="child11" class="vwf-node vwf-depth-2">
+          <div id="grandchild111" class="vwf-node vwf-depth-3"><p>grandchild111</p></div>
+          <div id="grandchild112" class="vwf-node vwf-depth-3"><p>grandchild112</p></div>
+        </div>
+        <div id="child12" class="vwf-node vwf-depth-2">
+          <div id="grandchild121" class="vwf-node vwf-depth-3"><p>grandchild121</p></div>
+          <div id="grandchild122" class="vwf-node vwf-depth-3"><p>grandchild122</p></div>
+          <div id="grandchild123" class="vwf-node vwf-depth-3"><p>grandchild123</p></div>
+        </div>
+        <div id="child13" class="vwf-node vwf-depth-2">
+          <div id="grandchild131" class="vwf-node vwf-depth-3"><p>grandchild131</p></div>
+        </div>
+      </div>
+      <div id="parent2" class="vwf-node vwf-depth-1">
+        <div id="child21" class="vwf-node vwf-depth-2">
+          <div id="grandchild211" class="vwf-node vwf-depth-3"><p>grandchild211</p></div>
+          <div id="grandchild212" class="vwf-node vwf-depth-3"><p>grandchild212</p></div>
+          <div id="grandchild213" class="vwf-node vwf-depth-3"><p>grandchild213</p></div>
+        </div>
+        <div id="child22" class="vwf-node vwf-depth-2">
+          <div id="grandchild221" class="vwf-node vwf-depth-3"><p>grandchild221</p></div>
+        </div>
+      </div>
+    </div>
+
+
+
+
   </body>
 
 </html>
+
+
+
