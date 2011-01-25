@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="jquery-1.4.4.js"></script>
+    <script type="text/javascript">
+      $(document).ready( function() {
+        $("a").click( function(event) {
+          event.preventDefault();
+          alert( "abc" );
+          alert( resolveAddress( "test.test2" ) );
+        } );
+      } );
+      function resolveAddress( path ) {
+        nodes = path.split( "." );
+        // return $( "#scene > #" + nodes[0] + " > #"+nodes[1] ).attr( "value" );
+        return $( "#scene > #{one} > #{two}".supplant( { one: nodes[0], two: nodes[1] } ) ).attr( "value" );
+       
+        // return $( "#"+path, $("#scene") );
+      }
+
+
+      String.prototype.supplant = function (o) {
+          return this.replace(/{([^{}]*)}/g,
+              function (a, b) {
+                  var r = o[b];
+                  return typeof r === 'string' || typeof r === 'number' ? r : a;
+              }
+          );
+      };
+
+
+
+    </script>
+  </head>
+  <body>
+    <a href="http://jquery.com/">jQuery</a>
+    <div id="scene">
+      <div id="test" value="test div">
+        <div id="test2" value="second test div">
+        </div>
+      </div>
+    </div>
+  </body>
+
+
+<!-- 
+
+
+
+
+root
+  child1
+    child1a
+  child2
+  script
+    child.clicked -> this.image = a : b
+
+script: 
+  $(".root//*").click
+    - foreach property: setter -> onSetPPP() getter -> onGetPPP()
+    - foreach method: MMM()
+  
+  
+  
+  
+
+
+properties:
+  visible: true|false
+  data: { source: uri, type: mime-type }
+methods:
+  click
+
+
+script:
+  click() -> data = a : b
+
+
+
+
+internal:
+  - click -> find target -> callMethod( target, "click", p1, p2, ... ) -> target.click( p1, p2, ... )
+
+external:
+  - click -> find target -> sendToReflector( target, "click", p1, p2, ... )
+  - message-from-reflector -> resolve target -> callMethod( target, "method", p1, p2, ... ) -> target.click( p1, p2, ... )
+
+
+
+
+resolveAddress( "path" )
+callMethod( "method", properties )
+setProperty( "property", value )
+getProperty( "property" )
+
+-->
+
+
+</html>
