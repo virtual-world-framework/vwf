@@ -49,6 +49,23 @@
       
       var earthAngle = 0;
       var marsAngle = 0;
+      
+      var time = lastTime = 0;
+      
+      var timeSetter = function( t ) {
+        lastTime = time;
+        time = t;
+        if ( earthActive ) {
+            earthAngle += ( time - lastTime ) * 0.02;
+            if ( earthAngle > 360 )
+                earthAngle -= 360;
+        }
+        if ( marsActive ) {
+            marsAngle += ( time - lastTime ) * 0.02;
+            if ( marsAngle > 360 )
+                marsAngle -= 360;
+        }
+      }
 
       var enabledSetter = function( nodeID, enabled ) {
         if ( nodeID == earthNodeID )
@@ -65,7 +82,7 @@
       }
 
       $(document).ready( function() {
-        vwf.addEngine( new vwf.webgl( vwf, { enabled: enabledSetter, angle: angleSetter } ) );
+        vwf.addEngine( new vwf.webgl( vwf, { tick: timeSetter, enabled: enabledSetter, angle: angleSetter } ) );
         vwf.addEngine( new vwf.html( vwf, "#vwf-root" ) );
         vwf.addEngine( new vwf.js( vwf ) );
         vwf.initialize();
@@ -243,21 +260,19 @@
 
             framerate.snapshot();
 
-            if (earthActive)
-            {
-              earthAngle += incAngle;
-              if (earthAngle > 360)
-                  earthAngle -= 360;
-              // vwf.setProperty( earthNodeID, "angle", earthAngle );
-            }
+            // if (earthActive)
+            // {
+            //   earthAngle += incAngle;
+            //   if (earthAngle > 360)
+            //       earthAngle -= 360;
+            // }
 
-            if (marsActive)
-            {
-              marsAngle += incAngle;
-              if (marsAngle > 360)
-                  marsAngle -= 360;
-              // vwf.setProperty( marsNodeID, "angle", marsAngle );
-            }
+            // if (marsActive)
+            // {
+            //   marsAngle += incAngle;
+            //   if (marsAngle > 360)
+            //       marsAngle -= 360;
+            // }
         }
 
         function start()
