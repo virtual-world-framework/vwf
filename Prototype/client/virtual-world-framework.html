@@ -17,7 +17,7 @@
       $(document).ready( function() {
         vwf.addEngine( new vwf.html( vwf, "#vwf-root" ) );
         vwf.addEngine( new vwf.js( vwf ) );
-        vwf.initialize( "#vwf-root" )
+        vwf.initialize();
       } )
 
       // function nodeToPath( node ) { var path = ""; while ( node && node.name ) { path = node.name + "." + path; node = node.parent; } return path; }
@@ -28,7 +28,7 @@
   </head>
 
   <body>
-    <h1 onclick="console.log( vwf.world.properties.p3++ )">World [click me]</h1>
+    <h1 onclick="console.log( vwf.root.p2++ )">World [click me]</h1>
     <div id="vwf-root"></div>
     <div id="vwf-orphans"></div>
   </body>

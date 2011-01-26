@@ -22,13 +22,11 @@
     
             var nodeID = ++lastID;
 
-            console.info( "VirtualWorldFramework onConstruct " + nodeID + " " + nodeType + " " + source + " " + mimeType );
+            console.info( "VirtualWorldFramework onConstruct " + nodeID + " " + nodeType + " " + nodeName + " " + source + " " + mimeType );
 
             jQuery.each( engines, function( index, engine ) {
-            	engine.onConstruct( nodeID, nodeType, source, mimeType );
+            	engine.onConstruct( nodeID, nodeType, nodeName, source, mimeType );
             } );
-
-            this.setProperty( nodeID, "name", nodeName );
 
             parentID = parentID || globalID;
             this.addChild( parentID, nodeID );
@@ -70,11 +68,16 @@
 
         this.getProperty = function( nodeID, propertyName ) {
 
+            console.info( "VirtualWorldFramework onGetProperty " + nodeID + " " + propertyName );
+
+            var propertyValue = undefined;
+
             jQuery.each( engines, function( index, engine ) {
-            	engine.onGetProperty( nodeID, propertyName );
+            	var v = engine.onGetProperty( nodeID, propertyName );
+            	propertyValue = v != undefined ? v : propertyValue;
             } );
 
-            return propertyValue; // TODO
+            return propertyValue;
         };
 
         this.createMethod = function( nodeID, methodName ) {
@@ -111,11 +114,7 @@
 
         // deleteNode, addChild, removeChild, moveChild, createProperty, deleteProperty, method, event, ...
 
-        this.initialize = function( rootElementSelector ) {
-
-            // this.addEngine( new HTMLShard( this, rootElementSelector ) );
-            // this.addEngine( new JavaScriptShard( this ) );
-            // this.addEngine( new ... );
+        this.initialize = function() {
 
             var worldURI = jQuery.getQueryString( "world" );
 
