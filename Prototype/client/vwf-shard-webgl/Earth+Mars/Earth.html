@@ -28,58 +28,10 @@
 <html>
   <head>
     <title>Earth and Mars</title>
-
-    <script type="text/javascript" src="jquery-1.4.4.js"></script>
-    <script type="text/javascript" src="jquery-getquerystring.js"></script>
-    <script type="text/javascript" src="socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="virtual-world-framework.js"></script>
-    <script type="text/javascript" src="vwf-shard-javascript.js"></script>
-    <script type="text/javascript" src="vwf-shard-html.js"></script>
-    <script type="text/javascript" src="vwf-shard-webgl.js"></script>
-
-    <script type="text/javascript">
-
-      // vwf.node.constructed = function() { jQuery( "#vwf-root" ).append( "<div><p>" + nodeToPath( this ) + "</p></div>" ) }
-
-      var earthNodeID = 1;
-      var marsNodeID = 2;
-
-      var earthActive = true;
-      var marsActive = true;
-      
-      var earthAngle = 0;
-      var marsAngle = 0;
-
-      var enabledSetter = function( nodeID, enabled ) {
-        if ( nodeID == earthNodeID )
-          earthActive = enabled;
-        else if ( nodeID == marsNodeID )
-          marsActive = enabled;
-      }
-
-      var angleSetter = function( nodeID, angle ) {
-        if ( nodeID == earthNodeID )
-          earthAngle = angle;
-        else if ( nodeID == marsNodeID )
-          marsAngle = angle;
-      }
-
-      $(document).ready( function() {
-        vwf.addEngine( new vwf.webgl( vwf, { enabled: enabledSetter, angle: angleSetter } ) );
-        vwf.addEngine( new vwf.html( vwf, "#vwf-root" ) );
-        vwf.addEngine( new vwf.js( vwf ) );
-        vwf.initialize();
-      } )
-
-      // function nodeToPath( node ) { var path = ""; while ( node && node.name ) { path = node.name + "." + path; node = node.parent; } return path; }
-
-    </script>
-
-    <link rel="stylesheet" href="virtual-world-framework.css" type="text/css" />
-
-    <script type="text/javascript" src="vwf-shard-webgl/common/webgl-utils.js"></script>
-    <script src="vwf-shard-webgl/Earth+Mars/resources/J3DI.js"> </script>
-    <script src="vwf-shard-webgl/Earth+Mars/resources/J3DIMath.js" type="text/javascript"> </script>
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script src="resources/J3DI.js"> </script>
+    <script src="resources/J3DIMath.js" type="text/javascript"> </script>
+    <script src="resources/jquery-1.4.js"> </script>
 
     <script id="vshader" type="x-shader/x-vertex">
         uniform mat4 u_modelViewProjMatrix;
@@ -164,10 +116,10 @@
             gl.sphere = makeSphere(gl, 1, 30, 30);
 
             // get the images
-            earthTexture = loadImageTexture(gl, "vwf-shard-webgl/Earth+Mars/resources/earthmap1k.jpg");
-            earthTextureGray = loadImageTexture(gl, "vwf-shard-webgl/Earth+Mars/resources/earthmap1kgray.jpg");
-            marsTexture = loadImageTexture(gl, "vwf-shard-webgl/Earth+Mars/resources/mars500x250.png");
-            marsTextureGray = loadImageTexture(gl, "vwf-shard-webgl/Earth+Mars/resources/mars500x250gray.png");
+            earthTexture = loadImageTexture(gl, "resources/earthmap1k.jpg");
+            earthTextureGray = loadImageTexture(gl, "resources/earthmap1kgray.jpg");
+            marsTexture = loadImageTexture(gl, "resources/mars500x250.png");
+            marsTextureGray = loadImageTexture(gl, "resources/mars500x250gray.png");
 
             return gl;
         }
@@ -248,7 +200,6 @@
               earthAngle += incAngle;
               if (earthAngle > 360)
                   earthAngle -= 360;
-              // vwf.setProperty( earthNodeID, "angle", earthAngle );
             }
 
             if (marsActive)
@@ -256,7 +207,6 @@
               marsAngle += incAngle;
               if (marsAngle > 360)
                   marsAngle -= 360;
-              // vwf.setProperty( marsNodeID, "angle", marsAngle );
             }
         }
 
@@ -274,12 +224,12 @@
               return;
             }
             framerate = new Framerate("framerate");
-            // earthAngle = 0;
-            // marsAngle = 0;
+            earthAngle = 0;
+            marsAngle = 0;
             incAngle = 0.2;
 
-            // earthActive = false;
-            // marsActive = false;
+            earthActive = false;
+            marsActive = false;
 
             var f = function() {
               drawPicture(ctx)
@@ -303,16 +253,14 @@
                 if ( event.offsetX > (centerX - dim - dim) && event.offsetX < (centerX - dim + dim) &&
                   event.offsetY > centerY - dim && event.offsetY < centerY + dim )
                 {
-                  // earthActive = !earthActive;
-                  vwf.setProperty( earthNodeID, "enabled", !earthActive );
+                  earthActive = !earthActive;
                   $("#lessonearth").addClass( "completed" );
                 }
 
                 if (  event.offsetX > (centerX + dim - dim*0.6) && event.offsetX < (centerX + dim + dim*0.6) &&
                   event.offsetY > centerY - dim*0.6 && event.offsetY < centerY + dim*0.6 )
                 {
-                  // marsActive = !marsActive;
-                  vwf.setProperty( marsNodeID, "enabled", !marsActive );
+                  marsActive = !marsActive;
                   $("#lessonmars").addClass( "completed" );
                 }
               }
@@ -333,9 +281,7 @@
         .completed { color: #008000; }
     </style>
   </head>
-
   <body onload="start()">
-
     <table border="0" cellspacing="5" cellpadding="5">
       <tr>
         <td>
@@ -343,21 +289,16 @@
             There is supposed to be an example drawing here, but it's not important.
           </canvas>
         </td>
-        <!-- td class="lesson">
+        <td class="lesson">
           <h2>Lesson</h2>
           <ol>
             <li id="lessonearth">Click on Earth</li>
             <li id="lessonmars">Click on Mars</li>
           </ol>
-        </td -->
+        </td>
       </tr>
     </table>
     <div id="framerate"></div>
     <div id="console"></div>
-
-    <div id="vwf-root"></div>
-    <div id="vwf-orphans"></div>
-
   </body>
-
 </html>
