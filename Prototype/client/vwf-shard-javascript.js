@@ -90,6 +90,10 @@
         
         };
 
+        this.onTick = function( time ) {
+        
+        };
+
         // Node
 
         var Node = JavaScriptShard.Node = function( nodeID, nodeName, source, mimeType ) {

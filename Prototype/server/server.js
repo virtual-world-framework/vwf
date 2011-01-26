@@ -23,7 +23,7 @@ var server = http.createServer( function( request, response ) {
 
 } );
 
-server.listen( 8003 );
+server.listen( 8002 );
 
 var socket = io.listen( server, { flashPolicyServer: false, log: null } ); 
 
@@ -32,6 +32,14 @@ socket.on( "connection", function( client ) {
     client.on( "message", function( message ) { console.log( "(server) Message from " +  + client.sessionId + " : " + message ); socket.broadcast( message ); } );
     client.on( "disconnect", function() { console.log( "(server) Disconnection by " + client.sessionId ) } );
 } );
+
+
+var currentTime = 0;
+
+setInterval( function() {
+	currentTime += 100;
+	socket.broadcast( currentTime.toString() );
+}, 100 );
 
 
 

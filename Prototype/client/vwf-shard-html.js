@@ -130,6 +130,10 @@ propertyQuery.children( ".vwf-label" ).click( function() {
         
         };
 
+        this.onTick = function( time ) {
+        
+        };
+
         var findOrCreate = function( contextQuery, traverser, manipulator ) {
             var traversalQuery = traverser.call( contextQuery );
             return traversalQuery.length ? traversalQuery : manipulator.call( contextQuery );

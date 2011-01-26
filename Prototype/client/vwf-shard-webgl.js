@@ -63,6 +63,12 @@
         
         };
 
+        this.onTick = function( time ) {
+        
+            setters.tick( time );
+
+        };
+
         var findOrCreate = function( contextQuery, traverser, manipulator ) {
             var traversalQuery = traverser.call( contextQuery );
             return traversalQuery.length ? traversalQuery : manipulator.call( contextQuery );
