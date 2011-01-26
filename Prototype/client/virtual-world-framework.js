@@ -66,7 +66,7 @@ vwf.internal--;
 
             console.info( "VirtualWorldFramework onSetProperty " + vwf.internal + " " + nodeID + " " + propertyName + " " + propertyValue );
 
-            if ( vwf.internal == 0 )
+            if ( vwf.internal == 0 && vwf.socket )
                 vwf.socket.send( "0 " + nodeID + " " + propertyName  + "=" + propertyValue );
             else {
                 
@@ -133,29 +133,35 @@ vwf.internal--;
 
         this.initialize = function() {
 
-            vwf.socket = new io.Socket();
-            vwf.socket.on( "connect", function() { console.log( "(client) Connected" ) } );
+            try {
+                vwf.socket = new io.Socket();
+            } catch ( e ) {
+            }
 
-            vwf.socket.on( "message", function( message ) {
+            if ( vwf.socket ) {
 
-                console.log( "(client) Message: " + message );
+                vwf.socket.on( "connect", function() { console.log( "(client) Connected" ) } );
+
+                vwf.socket.on( "message", function( message ) {
+
+                    console.log( "(client) Message: " + message );
 
 vwf.internal++;
 
-                time_node_statement = message.split( " " );
-                property_value = time_node_statement[2].split( "=" );
+                    time_node_statement = message.split( " " );
+                    property_value = time_node_statement[2].split( "=" );
 
-                vwf.setProperty( time_node_statement[1], property_value[0], property_value[1] );
+                    vwf.setProperty( time_node_statement[1], property_value[0], property_value[1] );
 
 vwf.internal--;
 
-            } );
+                } );
 
-            vwf.socket.on( "disconnect", function() { console.log( "(client) Disconnected" ) } );
+                vwf.socket.on( "disconnect", function() { console.log( "(client) Disconnected" ) } );
 
-            vwf.socket.connect();
+                vwf.socket.connect();
 
-
+            }
 
 
 
