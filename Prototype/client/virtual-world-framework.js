@@ -4,222 +4,225 @@
 //   - HTML: HTML-encoded text
 //   - JSON: JSON-encoded text
 
-
 ( function( window ) {
 
-var root = undefined; // TODO: temp
+    var VirtualWorldFramework = new function() {
 
-    var VirtualWorldFramework = {
+        var vwf = this;
 
-        root: undefined,
+        var engines = [];
 
-        initialize: function( rootElementSelector ) {
+        var globalID = 0, lastID = globalID;
+
+        this.addEngine = function( engine ) {
+            engines.unshift( engine );
+        }
+
+        this.createNode = function( nodeType, nodeName, source, mimeType, parentID ) {
+    
+            var nodeID = ++lastID;
+
+            jQuery.each( engines, function( index, engine ) {
+            	engine.onConstruct( nodeID, nodeType, source, mimeType );
+            } );
+
+            this.setProperty( nodeID, "name", nodeName );
+
+            parentID = parentID || globalID;
+            this.addChild( parentID, nodeID );
+
+            return nodeID;
+        };
+
+        this.addChild = function( nodeID, childID ) {
+
+            jQuery.each( engines, function( index, engine ) {
+                engine.onChildAdded( nodeID, childID );
+            } );
+
+        }
+
+        this.setProperty = function( nodeID, propertyName, propertyValue ) {
+
+            jQuery.each( engines, function( index, engine ) {
+            	engine.onSetProperty( nodeID, propertyName, propertyValue );
+            } );
+
+            return propertyValue;
+        };
+
+        this.getProperty = function( nodeID, propertyName ) {
+
+            jQuery.each( engines, function( index, engine ) {
+            	engine.onGetProperty( nodeID, propertyName );
+            } );
+
+            return propertyValue; // TODO
+        };
+
+        // deleteNode, addChild, removeChild, moveChild, createProperty, deleteProperty, method, event, ...
+
+        this.initialize = function( rootElementSelector ) {
+
+            this.addEngine( new HTMLShard( this, rootElementSelector ) );
+            this.addEngine( new JavaScriptShard( this ) );
+            // this.addEngine( new ... );
 
             var worldURI = jQuery.getQueryString( "world" );
-            var parentQuery = jQuery( rootElementSelector );
 
             jQuery.ajax( {
                 url: worldURI,
                 dataType: "jsonp",
                 jsonpCallback: "cb", // use statically-defined callback=cb with static js files until JSON provider can do JSONP
-                success: function( json ) { VirtualWorldFramework.root = root = new Node( undefined, json ) }
+                success: function( json ) { vwf.load( json, 0 ) } // TODO: parentID
             } );
 
-            return parentQuery;
+    	}; // initialize
 
-    	} // initialize
+        this.load = function( json, parentID ) {
+
+            if ( json ) {
+
+                json.children && jQuery.each( json.children, function( index, valueJSON ) {
+                    var childID = vwf.createNode( undefined, index, undefined, undefined, parentID );
+                    vwf.load( valueJSON, childID );
+                } );
+            }
+
+        }; // load
+        
+    };
+
+    var JavaScriptShard = VirtualWorldFramework.JavaScriptShard = function( vwf ) {
+
+        var map = {};
+        
+        this.onConstruct = function( nodeID, nodeType, source, mimeType ) {
+console.log( "JavaScriptShard onConstruct " + nodeID );
+            map[nodeID] = new Node( nodeID, source, mimeType );
+        };
+
+        this.onDestruct = function( nodeID ) {
+        
+        };
+
+        this.onChildAdded = function( nodeID, childID ) { // TODO: node undef for root?
+console.log( "JavaScriptShard onChildAdded " + nodeID + " " + childID );
+
+            var node = map[nodeID];
+            var child = map[childID];
+
+            if ( node ) {
+                node.children[child.name] = child;
+                node.children.push( child );
+
+                Object.defineProperty( node, child.name, {
+                    get: function() { return child },
+                    set: function( child ) { }, // TODO
+                    enumerable: true
+                } );
+            }
+
+        };
+
+        this.onChildRemoved = function( nodeID ) {
+        
+        };
+
+        this.onResolveAddress = function( nodeID ) {
+        
+        };
+    
+        this.onChildren = function( nodeID ) {
+        
+        };
+
+        this.onCreateProperty = function( nodeID, propertyName, propertyValue ) {
+console.log( "JavaScriptShard onCreateProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        };
+
+        this.onSetProperty = function( nodeID, propertyName, propertyValue ) {
+console.log( "JavaScriptShard onSetProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        };
+
+        this.onGetProperty = function( nodeID, propertyName ) {
+        
+        };
+
+        // Node
+
+        var Node = JavaScriptShard.Node = function( nodeID, source, mimeType ) {
+            this.id = nodeID; // private
+            this.parent = undefined;
+            this.children = [];
+        };
+
+        Node.prototype.createChild = function( nodeType, nodeName, source, mimeType ) {
+            return vwf.createNode( nodeType, nodeName, source, mimeType, this.id );
+        };
+
+        Node.prototype.createProperty = function( propertyName, propertyValue ) {
+            return vwf.createProperty( this.id, propertyName, propertyValue );
+        };
 
     };
 
-    var Node = VirtualWorldFramework.node = function( parent, json, name ) {
-
-this.name = name;
-
-        this.parent = parent;
-
-        this.properties = {};
-        Object.defineProperty( this.properties, "added", { writable: true, value: undefined } );
-        Object.defineProperty( this.properties, "removed", { writable: true, value: undefined } );
-
-        this.methods = {};
-        Object.defineProperty( this.methods, "added", { writable: true, value: undefined } );
-        Object.defineProperty( this.methods, "removed", { writable: true, value: undefined } );
-
-        this.events = {};
-        Object.defineProperty( this.events, "added", { writable: true, value: undefined } );
-        Object.defineProperty( this.events, "removed", { writable: true, value: undefined } );
-
-        this.children = [];
-        Object.defineProperty( this.children, "added", { writable: true, value: undefined } );
-        Object.defineProperty( this.children, "removed", { writable: true, value: undefined } );
-
-        this.constructed = null;
-        this.initialized = null;
-
-this.constructed = function() { console.log( "constructed " + this.name ) };
-this.initialized = function() { console.log( "initialized " + this.name ) };
-
-        if ( json ) {
-
-            var node = this;
-
-            json.properties && jQuery.each( json.properties, function( index, valueJSON ) {
-                node.createProperty( index, valueJSON );
-            } );
-
-            json.methods && jQuery.each( json.methods, function( index, valueJSON ) {
-                node.createMethod( index, valueJSON );
-            } );
-
-            json.events && jQuery.each( json.events, function( index, valueJSON ) {
-                node.createEvent( index, valueJSON );
-            } );
-
-            // TODO: scripts
-        }
-
-        this.constructed && this.constructed.call( this ); // TODO: better names
-
-        if ( json ) {
-
-            var node = this;
-
-            json.children && jQuery.each( json.children, function( index, valueJSON ) {
-                node.createChild( index, valueJSON );
-            } );
-        }
-
-        this.initialized && this.initialized.call( this ); // TODO: better names
-    };
-
-    Node.prototype.createProperty = function( name, json ) {
-
-        var property = this.properties[name] = new Property( this, json ); // TODO: value from json
-
-        var node = this;
-
-        Object.defineProperty( this, name, {
-            get: function() { return property.get ? property.get.call( node ) : property.value },
-            set: function( value ) { property.set ? property.set.call( node, value ) : ( property.value = value ) },
-            enumerable: true
-        } );
-
-        this.properties.added && this.properties.added.call( this, property ); // TODO: not during construction
-
-        return property;
-    };
-
-    Node.prototype.createMethod = function( name, json ) {
-
-        var method = this.methods[name] = new Method( this );
-
-        this.methods.added && this.methods.added.call( this, method ); // TODO: not during construction
-
-        return method;
-    };
-
-    Node.prototype.createEvent = function( name, json ) {
-
-        var event = this.events[name] = new Event( this );
-
-        this.events.added && this.events.added.call( this, event ); // TODO: not during construction
-
-        return event;
-    };
-
-    Node.prototype.createChild = function( name, json ) {
-
-        var child = this.children[name] = new Node( this, json, name );
-        this.children.push( child );
-
-        Object.defineProperty( this, name, {
-            get: function() { return child },
-            set: function( child ) { }, // TODO
-            enumerable: true
-        } );
-
-        this.children.added && this.children.added.call( this, child ); // TODO: not during construction
-
-        return child;
-    };
-
-    // TODO: assign parent after construct, before init? after construct, after init?
-
-
-    // root
-    // - a
-    //   - aa
-    // - b
-
-    // root.new: parent=null, p=defined, children=[]
-    //   a.new: parent=?, p=defined, children=[]
-    //     aa.new: parent=?, p=defined, children=[]
-    //     aa.init: parent=?, p=defined, children=[]
-    //   a.init: parent=?, p=defined, children=[aa]
-    //   b.new: parent=?, p=defined, children=[]
-    //   b.init: parent=?, p=defined, children=[]
-    // root.init: parent=null, p=defined, children=[a,b]
-
-
-    // construct parent
-    //   construct child1
-    //   construct child2
-    //   child1.parent = parent
-    //   child2.parent = parent
-    //   init child1
-    //   init child2
-    // init parent
-
-    // construct parent
-    //   construct child1
-    //   init child1
-    //   child1.parent = parent
-    //   construct child2
-    //   init child2
-    //   child2.parent = parent
-    // init parent
-    // parent.parent = null
 
 
 
-    var Property = VirtualWorldFramework.property = function( node, value ) {
 
-        this.node = node;
-        this.value = value;
 
-        this.get = undefined;
-        this.set = undefined;
+
+
+
+    // HTML document view
+
+    var HTMLShard = VirtualWorldFramework.HtmlShard = function( vwf, rootSelector ) {
+
+        this.onConstruct = function( nodeID, nodeType, source, mimeType ) {
+console.log( "HTMLShard onConstruct " + nodeID );
+            // jQuery( "#vwf-orphans" ).append( "<div id='" + node + "' class='"vwf-node"'><p>" + name + "</p></div>" ) }; // create div, associate with name, and hang on to
+        };
+
+        this.onDestruct = function( node ) {
+
+        };
+
+        this.onChildAdded = function( nodeID, childID ) { // TODO: node undef for root?
+console.log( "HTMLShard onChildAdded " + nodeID + " " + childID );
+            // jQuery( node ? "#" + node : this.rootSelector ).append( "#" + child ) }; // find div for node, find div for child, annotate, and attach
+        };
+
+        this.onChildRemoved = function( node ) {
+
+        };
+
+        this.onResolveAddress = function( node ) {
+
+        };
+
+        this.onChildren = function( node ) {
+
+        };
+
+        this.onCreateProperty = function( nodeID, propertyName, propertyValue ) {
+console.log( "HTMLShard onCreateProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        };
+
+        this.onSetProperty = function( nodeID, propertyName, propertyValue ) {
+console.log( "HTMLShard onSetProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        };
+
+        this.onGetProperty = function( node, name ) {
+
+        };
 
     };
 
-    var Method = VirtualWorldFramework.method = function( node ) {
-
-        this.node = node;
-
-        this.call = undefined;
-
-    };
-
-    var Event = VirtualWorldFramework.event = function( node ) {
-
-        this.node = node;
-        this.listeners = [];
-
-    };
-
-    Event.prototype.fire = function() {
-
-        var event = this, args = arguments;
-
-        jQuery.each( event.listeners, function( index, value ) {
-            value.apply( event.node, args );
-        } );
-    };
 
     return window.vwf = VirtualWorldFramework;
 
 } ) ( window );
-
 
 
 
