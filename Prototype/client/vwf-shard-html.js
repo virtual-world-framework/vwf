@@ -63,7 +63,19 @@
             var propertyQuery = containerQuery.append( "<div id='" + nodeID + "-" + propertyName + "'></div>" ).children().last().
                 addClass( "vwf-property" ).
                 append( "<p>" + propertyName + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
-                
+
+
+// Demo hacks: increment by 1 on click
+
+if ( propertyName == "hello_my_name_is" ) {
+    
+} else {
+    propertyQuery.children( ".vwf-label" ).click( function() {
+        var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
+        vwf.setProperty( nodeID, propertyName, Number( vwf.getProperty( nodeID, propertyName ) ) + 1 );
+    } );
+}
+
             return this.onSetProperty( nodeID, propertyName, propertyValue );
         };
 

@@ -10,6 +10,9 @@
 
         var vwf = this;
 
+        vwf.socket = undefined;
+        vwf.internal = 0;
+
         var engines = [];
 
         var globalID = 0, lastID = globalID;
@@ -22,7 +25,7 @@
     
             var nodeID = ++lastID;
 
-            console.info( "VirtualWorldFramework onConstruct " + nodeID + " " + nodeType + " " + nodeName + " " + source + " " + mimeType );
+            console.info( "VirtualWorldFramework onConstruct " + vwf.internal + " " + nodeID + " " + nodeType + " " + nodeName + " " + source + " " + mimeType );
 
             jQuery.each( engines, function( index, engine ) {
             	engine.onConstruct( nodeID, nodeType, nodeName, source, mimeType );
@@ -36,7 +39,7 @@
 
         this.addChild = function( nodeID, childID ) {
 
-            console.info( "VirtualWorldFramework onChildAdded " + nodeID + " " + childID );
+            console.info( "VirtualWorldFramework onChildAdded " + vwf.internal + " " + nodeID + " " + childID );
 
             jQuery.each( engines, function( index, engine ) {
                 engine.onChildAdded( nodeID, childID );
@@ -46,29 +49,43 @@
 
         this.createProperty = function( nodeID, propertyName, propertyValue ) {
 
-            console.info( "VirtualWorldFramework onCreateProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            console.info( "VirtualWorldFramework onCreateProperty " + vwf.internal + " " + nodeID + " " + propertyName + " " + propertyValue );
+
+vwf.internal++;
 
             jQuery.each( engines, function( index, engine ) {
             	engine.onCreateProperty( nodeID, propertyName, propertyValue );
             } );
+
+vwf.internal--;
 
             return propertyValue;
         };
 
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
-            console.info( "VirtualWorldFramework onSetProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            console.info( "VirtualWorldFramework onSetProperty " + vwf.internal + " " + nodeID + " " + propertyName + " " + propertyValue );
 
-            jQuery.each( engines, function( index, engine ) {
-            	engine.onSetProperty( nodeID, propertyName, propertyValue );
-            } );
+            if ( vwf.internal == 0 )
+                vwf.socket.send( "0 " + nodeID + " " + propertyName  + "=" + propertyValue );
+            else {
+                
+vwf.internal++;
+
+                jQuery.each( engines, function( index, engine ) {
+                	engine.onSetProperty( nodeID, propertyName, propertyValue );
+                } );
+
+vwf.internal--;
+
+        }
 
             return propertyValue;
         };
 
         this.getProperty = function( nodeID, propertyName ) {
 
-            console.info( "VirtualWorldFramework onGetProperty " + nodeID + " " + propertyName );
+            console.info( "VirtualWorldFramework onGetProperty " + vwf.internal + " " + nodeID + " " + propertyName );
 
             var propertyValue = undefined;
 
@@ -115,6 +132,32 @@
         // deleteNode, addChild, removeChild, moveChild, createProperty, deleteProperty, method, event, ...
 
         this.initialize = function() {
+
+            vwf.socket = new io.Socket();
+            vwf.socket.on( "connect", function() { console.log( "(client) Connected" ) } );
+
+            vwf.socket.on( "message", function( message ) {
+
+                console.log( "(client) Message: " + message );
+
+vwf.internal++;
+
+                time_node_statement = message.split( " " );
+                property_value = time_node_statement[2].split( "=" );
+
+                vwf.setProperty( time_node_statement[1], property_value[0], property_value[1] );
+
+vwf.internal--;
+
+            } );
+
+            vwf.socket.on( "disconnect", function() { console.log( "(client) Disconnected" ) } );
+
+            vwf.socket.connect();
+
+
+
+
 
             var worldURI = jQuery.getQueryString( "world" );
 
