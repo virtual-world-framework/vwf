@@ -5,7 +5,6 @@
         var map = {};
         
         this.onConstruct = function( nodeID, nodeType, source, mimeType ) {
-console.log( "JavaScriptShard onConstruct " + nodeID );
             map[nodeID] = new Node( nodeID, source, mimeType );
         };
 
@@ -14,7 +13,6 @@ console.log( "JavaScriptShard onConstruct " + nodeID );
         };
 
         this.onChildAdded = function( nodeID, childID ) { // TODO: node undef for root?
-console.log( "JavaScriptShard onChildAdded " + nodeID + " " + childID );
 
             var node = map[nodeID];
             var child = map[childID];
@@ -45,14 +43,30 @@ console.log( "JavaScriptShard onChildAdded " + nodeID + " " + childID );
         };
 
         this.onCreateProperty = function( nodeID, propertyName, propertyValue ) {
-console.log( "JavaScriptShard onCreateProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
         };
 
         this.onSetProperty = function( nodeID, propertyName, propertyValue ) {
-console.log( "JavaScriptShard onSetProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
         };
 
         this.onGetProperty = function( nodeID, propertyName ) {
+        
+        };
+
+        this.onCreateMethod = function( nodeID, methodName ) {
+        
+        };
+
+        this.onCallMethod = function( nodeID, methodName ) {
+        
+        };
+
+        this.onCreateEvent = function( nodeID, eventName ) {
+        
+        };
+
+        this.onFireEvent = function( nodeID, eventName ) {
         
         };
 
