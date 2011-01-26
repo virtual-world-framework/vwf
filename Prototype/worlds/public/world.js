@@ -1,8 +1,9 @@
-{
+cb( {
     "properties":
     {
         "p1": "world2",
-        "p2": 0
+        "p2": 0,
+        "p3": 17
     },
 
     "methods":
@@ -30,4 +31,4 @@
         { "type": "text/javascript", "source": "http://example.com" },
         { "type": "text/javascript", "text": "function f() { ... }" }
     ]
-}
+} )

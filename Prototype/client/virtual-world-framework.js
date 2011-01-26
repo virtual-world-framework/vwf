@@ -32,14 +32,45 @@ jQuery.extend( {
 
     var VirtualWorldFramework = function() { };
 
+    VirtualWorldFramework.socket = undefined;
     VirtualWorldFramework.world = undefined;
 
     VirtualWorldFramework.initialize = function( rootElementSelector ) {
 
+        VirtualWorldFramework.socket = new io.Socket();
+        VirtualWorldFramework.socket.on( "connect", function() { console.log( "(client) Connected" ) } );
+
+        VirtualWorldFramework.socket.on( "message", function( message ) {
+            console.log( "(client) Message: " + message );
+
+            time_statement = message.split( " " );
+            property_value = time_statement[1].split( "=" );
+
+            VirtualWorldFramework.world.properties.values[property_value[0]] = property_value[1];
+console.log( "(client) " + "vwf-root.Properties." + property_value[0] + " / " + property_value[0] + ": " + property_value[1] );
+            jQuery( "#vwf-root-Properties-" + property_value[0] ).children().text( property_value[0] + ": " + property_value[1] );
+
+        } );
+
+        VirtualWorldFramework.socket.on( "disconnect", function() { console.log( "(client) Disconnected" ) } );
+
+        VirtualWorldFramework.socket.connect();
+        // VirtualWorldFramework.socket.send( "Test message" );
+
+
         var worldURI = jQuery.getQueryString( "world" );
         var parentQuery = jQuery( rootElementSelector );
 
-        jQuery.getJSON( worldURI, function( data ) { VirtualWorldFramework.loadWorld( parentQuery, data ) } );
+        // jQuery.getJSON( worldURI + "?callback=?", function( data ) { VirtualWorldFramework.loadWorld( parentQuery, data ) } );
+
+        jQuery.ajax( {
+            url: worldURI,
+            dataType: "jsonp",
+            jsonpCallback: "cb",
+            success: function( data ) {
+                VirtualWorldFramework.loadWorld( parentQuery, data )
+            }
+        } );
 
         return parentQuery;
 
@@ -68,11 +99,22 @@ jQuery.extend( {
 
             jQuery.each( properties, function( index, value ) {
 
-                var childQuery = VirtualWorldFramework.createBlock( containerQuery, index + ": " + value, "vwf-property", true );
+                var childQuery = VirtualWorldFramework.createBlock( containerQuery, index, "vwf-property", true );
+                childQuery.children().text( index + ": " + value );
 
                 Object.defineProperty( properties, index, {
-                    get: function() { console.log( "get " + index ); return properties.values[index] },
-                    set: function( value ) { console.log( "set " + index ); childQuery.children().text( index + ": " + value ); properties.values[index] = value }
+
+                    get: function() {
+                        console.log( "get " + index ); return properties.values[index]
+                    },
+
+                    set: function( value ) {
+                        console.log( "set " + index );
+                        VirtualWorldFramework.socket.send( "0 " + index + "=" + value );
+                        // childQuery.children().text( index + ": " + value );
+                        // properties.values[index] = value;
+                    }
+
                 } );
 
                 properties.values[index] = value;
@@ -120,13 +162,13 @@ jQuery.extend( {
             // make container: class = vwf-children
             // make each child: class = vwf-node, vwf-depth
 
-            var containerQuery = VirtualWorldFramework.createBlock( parentQuery, "Children", "vwf-children", true );
-
             var parentClass = parentQuery.attr( "class" ) || "";
             var parentDepth = Number( ( " " + parentClass + " " ).match( / vwf-depth-(\d+) / )[1] || "0" );
 
             var childDepth = parentDepth + 1;
             var childClass = "vwf-node vwf-depth-" + childDepth;
+
+            var containerQuery = VirtualWorldFramework.createBlock( parentQuery, "Children", "vwf-children vwf-depth-" + childDepth, true );
 
             jQuery.each( children, function( index, value ) {
                 // var childQuery = VirtualWorldFramework.findOrCreate( parentQuery, index );
@@ -154,7 +196,7 @@ jQuery.extend( {
     VirtualWorldFramework.createBlock = function( parentQuery, childName, childClass, labelChild ) {
 
         var parentID = parentQuery.attr( "id" ) || "";
-        var childID = ( parentID && parentID + "." ) + childName;
+        var childID = ( parentID && parentID + "-" ) + childName;
 
         var childIDHTML = childID ? "id='" + childID + "' " : "";
         var childClassHTML = childClass ? "class='" + childClass + "' " : "";
