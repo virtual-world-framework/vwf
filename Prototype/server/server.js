@@ -23,7 +23,7 @@ var server = http.createServer( function( request, response ) {
 
 } );
 
-server.listen( 8011 );
+server.listen( 8003 );
 
 var socket = io.listen( server, { flashPolicyServer: false, log: null } ); 
 
