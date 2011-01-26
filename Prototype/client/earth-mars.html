@@ -47,20 +47,38 @@
       var earthActive = true;
       var marsActive = true;
       
+      var earthSuspendedAt = 0;
+      var marsSuspendedAt = 0;
+      
+      var mouseDownTime1 = mouseDownTime2 = 0;
+      
       var earthAngle = 0;
       var marsAngle = 0;
       
       var time = lastTime = 0;
-      
+            
       var timeSetter = function( t ) {
+
         lastTime = time;
         time = t;
-        if ( earthActive ) {
+        
+        if ( earthSuspendedAt > 0 && time - earthSuspendedAt > 500 ) {
+            earthSuspendedAt = 0;
+            mouseDownTime1 = mouseDownTime2 = 0;
+        }
+
+        if ( earthActive && earthSuspendedAt == 0 ) {
             earthAngle += ( time - lastTime ) * 0.02;
             if ( earthAngle > 360 )
                 earthAngle -= 360;
         }
-        if ( marsActive ) {
+        
+        if ( marsSuspendedAt > 0 && time - marsSuspendedAt > 500 ) {
+            marsSuspendedAt = 0;
+            mouseDownTime1 = mouseDownTime2 = 0;
+        }
+
+        if ( marsActive && marsSuspendedAt == 0 ) {
             marsAngle += ( time - lastTime ) * 0.02;
             if ( marsAngle > 360 )
                 marsAngle -= 360;
@@ -310,28 +328,88 @@
 
             $("#example").click( function(event)
               {
+                if ( mouseDownTime2 == 0 || time - mouseDownTime2 < 50 )
+                {
+                    var p = pick.call( this, event );
+
+                    if ( p.earth )
+                    {
+                      vwf.setProperty( earthNodeID, "enabled", !earthActive );
+                    }
+
+                    else if ( p.mars )
+                    {
+                      vwf.setProperty( marsNodeID, "enabled", !marsActive );
+                    }
+                    
+                    mouseDownTime1 = mouseDownTime2 = 0;
+                }
+              }
+            );
+
+
+            $("#example").mousedown( function(event)
+              {
+                mouseDownTime1 = mouseDownTime2 = time;
+              }
+            );
+
+            $("#example").mouseup( function(event)
+              {
+                  mouseDownTime1 = 0;
+              }
+            );
+
+            $("#example").mousemove( function(event)
+              {
+                if ( mouseDownTime1 > 0 && time - mouseDownTime1 >= 50 )
+                {
+                    var p = pick.call( this, event );
+
+                    if ( p.earth )
+                    {
+                        earthSuspendedAt = time;
+                        vwf.setProperty( earthNodeID, "angle", p.coord * 360 );
+                    }
+
+                    if ( p.mars )
+                    {
+                        marsSuspendedAt = time;
+                        vwf.setProperty( marsNodeID, "angle", -p.coord * 360 );
+                    }
+                }
+              }
+            );
+
+
+            function pick( event )
+            {
                 var centerX = this.clientWidth / 2;
                 var centerY = this.clientHeight / 2;
 
                 var dim = centerY * 3.1 / 5;
 
+                var ret = {};
+
                 if ( event.offsetX > (centerX - dim - dim) && event.offsetX < (centerX - dim + dim) &&
                   event.offsetY > centerY - dim && event.offsetY < centerY + dim )
                 {
-                  // earthActive = !earthActive;
-                  vwf.setProperty( earthNodeID, "enabled", !earthActive );
-                  $("#lessonearth").addClass( "completed" );
+                    var coord = ( event.offsetX - ( centerX - dim - dim ) ) / (dim + dim ); // 0..1
+                    var ret = { earth: true, mars: false, coord: coord };
                 }
 
                 if (  event.offsetX > (centerX + dim - dim*0.6) && event.offsetX < (centerX + dim + dim*0.6) &&
                   event.offsetY > centerY - dim*0.6 && event.offsetY < centerY + dim*0.6 )
                 {
-                  // marsActive = !marsActive;
-                  vwf.setProperty( marsNodeID, "enabled", !marsActive );
-                  $("#lessonmars").addClass( "completed" );
+                    var coord = ( event.offsetX - ( centerX + dim - dim*0.6 ) ) / (dim*0.6 + dim*0.6 ); // 0..1
+                    var ret = { earth: false, mars: true, coord: coord };
                 }
-              }
-            );
+                
+                return ret;
+            }
+
+
+
 
             // $("#lessonearth").click( function() { earthActive = !earthActive } );
             // $("#lessonmars").click( function() { marsActive = !marsActive } );
