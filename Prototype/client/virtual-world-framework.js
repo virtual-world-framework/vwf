@@ -99,13 +99,13 @@ console.log( "(client) " + "vwf-root.Properties." + property_value[0] + " / " + 
 
             jQuery.each( properties, function( index, value ) {
 
-                var childQuery = VirtualWorldFramework.createBlock( containerQuery, index, "vwf-property", true );
-                childQuery.children().text( index + ": " + value );
+                properties.values[index] = value;
 
                 Object.defineProperty( properties, index, {
 
                     get: function() {
-                        console.log( "get " + index ); return properties.values[index]
+                        console.log( "get " + index );
+                        return properties.values[index];
                     },
 
                     set: function( value ) {
@@ -117,7 +117,12 @@ console.log( "(client) " + "vwf-root.Properties." + property_value[0] + " / " + 
 
                 } );
 
-                properties.values[index] = value;
+
+
+                var childQuery = VirtualWorldFramework.createBlock( containerQuery, index, "vwf-property", true );
+                childQuery.children().text( index + ": " + value );
+
+
 
             } );
 
@@ -214,7 +219,53 @@ console.log( "(client) " + "vwf-root.Properties." + property_value[0] + " / " + 
         return childQuery;
 
     }; // createBlock
+
+
+    var Node = VirtualWorldFramework.node = function() {
+
+        this.parent = undefined;
+        this.children = [];
+
+        this.properties = [];
+        this.methods = [];
+        this.events = [];
+
+    };
+
+    Node.prototype.createProperty = function( name, value ) {
+
+        var property = new Property( value );
+
+        Object.defineProperty( this.properties, name, {
+            get: function() { return property.value; },
+            set: function( value ) { property.value = value; }
+        } );
+
+    };
+
+    var Property = VirtualWorldFramework.property = function( value ) {
+
+        this.changing = new Event();
+        this.changed = new Event();
+
+        this.value = value;
+
+    };
+
+    var Event = VirtualWorldFramework.event = function() {
+
+        this.listeners = [];
+
+    };
+
+    Event.prototype.fire = function() {
+
+        jQuery.each( listeners, function( index, value ) {
+            value();
+        } );
+
+    };
     
-    return window.VirtualWorldFramework = VirtualWorldFramework;
+    return window.vwf = VirtualWorldFramework;
 
 } ) ( window );

@@ -20,9 +20,9 @@ cb( {
 
     "children":
     {
-        "child1z": { "children": { "grandchild1": { "title": "grandchild1" } } },
+        "child1z": { "children": { "grandchild1": { } } },
         "child1a": { },
-        "child2b": { "children": { "grandchild2": { "title": "grandchild2" } }  },
+        "child2b": { "children": { "grandchild2": { } } },
         "child3c": { }
     },
 
