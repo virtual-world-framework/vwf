@@ -7,13 +7,20 @@
     <script type="text/javascript" src="jquery-getquerystring.js"></script>
     <script type="text/javascript" src="socket.io/socket.io.js"></script>
     <script type="text/javascript" src="virtual-world-framework.js"></script>
+    <script type="text/javascript" src="vwf-shard-javascript.js"></script>
+    <script type="text/javascript" src="vwf-shard-html.js"></script>
 
     <script type="text/javascript">
 
       // vwf.node.constructed = function() { jQuery( "#vwf-root" ).append( "<div><p>" + nodeToPath( this ) + "</p></div>" ) }
-      $(document).ready( function() { vwf.initialize( "#vwf-root" ) } )
 
-      function nodeToPath( node ) { var path = ""; while ( node && node.name ) { path = node.name + "." + path; node = node.parent; } return path; }
+      $(document).ready( function() {
+        vwf.addEngine( new vwf.html( vwf, "#vwf-root" ) );
+        vwf.addEngine( new vwf.js( vwf ) );
+        vwf.initialize( "#vwf-root" )
+      } )
+
+      // function nodeToPath( node ) { var path = ""; while ( node && node.name ) { path = node.name + "." + path; node = node.parent; } return path; }
 
     </script>
 
