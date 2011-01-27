@@ -14,51 +14,51 @@ body {
   background-color: #CCD;
 }
 
-.vwf-children.vwf-depth-1 {
+.vwf-children {
   background-color: #CCC;
 }
 
-.vwf-node.vwf-depth-1:nth-child(odd) {
+.vwf-children .vwf-node:nth-child(odd) {
   background-color: #BCC;
 }
 
-.vwf-node.vwf-depth-1:nth-child(even) {
+.vwf-children .vwf-node:nth-child(even) {
   background-color: #CBC;
 }
 
-.vwf-children.vwf-depth-2 {
+.vwf-children .vwf-children {
   background-color: #AAA;
 }
 
-.vwf-node.vwf-depth-2:nth-child(odd) {
+.vwf-children .vwf-children .vwf-node:nth-child(odd) {
   background-color: #9AA;
 }
 
-.vwf-node.vwf-depth-2:nth-child(even) {
+.vwf-children .vwf-children .vwf-node:nth-child(even) {
   background-color: #A9A;
 }
 
-.vwf-children.vwf-depth-3 {
+.vwf-children .vwf-children .vwf-children {
   background-color: #888;
 }
 
-.vwf-node.vwf-depth-3:nth-child(odd) {
+.vwf-children .vwf-children .vwf-children .vwf-node:nth-child(odd) {
   background-color: #788;
 }
 
-.vwf-node.vwf-depth-3:nth-child(even) {
+.vwf-children .vwf-children .vwf-children .vwf-node:nth-child(even) {
   background-color: #878;
 }
 
-.vwf-children.vwf-depth-4 {
+.vwf-children .vwf-children .vwf-children .vwf-children {
   background-color: #666;
 }
 
-.vwf-node.vwf-depth-4:nth-child(odd) {
+.vwf-children .vwf-children .vwf-children .vwf-children .vwf-node:nth-child(odd) {
   background-color: #566;
 }
 
-.vwf-node.vwf-depth-4:nth-child(even) {
+.vwf-children .vwf-children .vwf-children .vwf-children .vwf-node:nth-child(even) {
   background-color: #656;
 }
 
