@@ -25,18 +25,12 @@
         this.onChildAdded = function( nodeID, childID ) { // TODO: node undef for root?
 
             var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
-
-            var nodeDepth = Number( ( ( nodeQuery.parent( ".vwf-children" ).attr( "class" ) || "" ).
-                match( /\bvwf-depth-(\d+)\b/ ) || [] )[1] || "0" );
-
-            var childDepth = nodeDepth + 1;
-
             var containerQuery = nodeQuery.children( ".vwf-children" );
 
             if ( containerQuery.length == 0 ) {
 
                 containerQuery = nodeQuery.append(
-                    "<div class='vwf-children vwf-depth-" + childDepth + "'>" +
+                    "<div class='vwf-children'>" +
                         "<p class='vwf-label'>Children</p>" +
                     "</div>"
                 ).children( ":last" );
@@ -48,9 +42,7 @@
             }
 
             var childQuery = jQuery( "#" + childID );
-
-            containerQuery.append( childQuery ).children().last().
-                addClass( "vwf-depth-" + ( nodeDepth + 1 ) );
+            containerQuery.append( childQuery );
 
         };
 
