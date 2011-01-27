@@ -139,7 +139,78 @@ vwf.internal--;
 
         // deleteNode, addChild, removeChild, moveChild, createProperty, deleteProperty, method, event, ...
 
-        this.initialize = function() {
+        // With no arguments, the world is empty unless it is specified in the URI. Use the default
+        // shard configurations.
+
+        //   vwf.initialize()
+
+        // Specify a world using a URI or a configuration object. Use the default shard
+        // configurations.
+
+        //   vwf.initialize( "http://example.com/path/to/world" )
+        //   vwf.initialize( { properties: { worldconfig: value } } )
+
+        // Specify one or more shard configurations, but don't specify a world.
+
+        //   vwf.initialize( { html: [ "html shard arguments", ... ],
+        //     webgl: [ "webgl shard arguments", ... ], ... } )
+
+        // Specify a world using either a URI or a configuration object and specify shard
+        // configurations.
+
+        //   vwf.initialize( "http://example.com/path/to/world",
+        //     { html: [ "html shard arguments", ... ],
+        //       webgl: [ "webgl shard arguments", ... ], ... } )
+
+        //   vwf.initialize( { properties: { worldconfig: value } },
+        //     { html: [ "html shard arguments", ... ],
+        //       webgl: [ "webgl shard arguments", ... ], ... } )
+
+        this.initialize = function( /* [ worldURI|worldObject, ] [ shardArguments ] */ ) {
+
+            var args = Array.prototype.slice.call( arguments );
+
+            // Get the world specification if one is provided in the query string. Parse it into a
+            // world specification object if it's valid JSON, otherwise keep the query string and
+            // assume it's a URI.
+
+            var world = jQuery.getQueryString( "world" );
+
+            try { world = jQuery.parseJSON( world ) || world; } catch( e ) { }
+
+            // Parse the function arguments. The first parameter is a world specification if there
+            // are two or more parameters, it's a string, or it's an object with the right keys.
+            // Otherwise, fall back to whatever was in the query string.
+
+            if ( args.length > 0 ) {
+                if ( args.length > 1 ) {
+                    world = args.shift();
+                } else if ( typeof args[0] == "string" || args[0] instanceof String ) {
+                    world = args.shift();
+                } else if ( args[0] != null && ( typeof args[0] == "object" || args[0] instanceof Object ) &&
+                        ( args[0].properties || args[0].methods || args[0].events || args[0].children || args[0].scripts ) ) {
+                    world = args.shift();
+                }
+            }
+
+            // Shift off the object containing arguments for the shards.
+
+            var shardArguments = args.shift() || {};
+
+            if ( typeof shardArguments != "object" && ! shardArguments instanceof Object )
+                shardArguments = {};
+
+            // When the document is ready, create and attach the shards and load the world.
+
+            jQuery( window.document ).ready( function() {
+                vwf.addEngine( vwf.html.apply( new vwf.html(), [ vwf ].concat( shardArguments.html || [] ) ) );
+                vwf.addEngine( vwf.js.apply( new vwf.js(), [ vwf ].concat( shardArguments.js || [] ) ) );
+                vwf.ready( world );
+            } );
+
+        }; // initialize
+
+        this.ready = function( world ) {
 
             try {
                 vwf.socket = new io.Socket();
@@ -190,18 +261,22 @@ vwf.internal--;
 
             }
 
+            if ( typeof world == "string" || world instanceof String ) {
 
+                jQuery.ajax( {
+                    url: world,
+                    dataType: "jsonp",
+                    jsonpCallback: "cb", // use statically-defined callback=cb with static js files until JSON provider can do JSONP
+                    success: function( json ) { vwf.load( json, 0 ) } // TODO: parentID
+                } );
 
-            var worldURI = jQuery.getQueryString( "world" );
+            } else {
 
-            jQuery.ajax( {
-                url: worldURI,
-                dataType: "jsonp",
-                jsonpCallback: "cb", // use statically-defined callback=cb with static js files until JSON provider can do JSONP
-                success: function( json ) { vwf.load( json, 0 ) } // TODO: parentID
-            } );
+                vwf.load( world, 0 );
 
-        }; // initialize
+            }
+
+        }; // ready
 
         this.load = function( json, parentID ) {
 

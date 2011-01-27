@@ -3,34 +3,24 @@
 <html>
 
   <head>
+
     <script type="text/javascript" src="jquery-1.4.4.js"></script>
-    <script type="text/javascript" src="jquery-getquerystring.js"></script>
     <script type="text/javascript" src="socket.io/socket.io.js"></script>
+
     <script type="text/javascript" src="index.js"></script>
     <script type="text/javascript" src="vwf-shard-javascript.js"></script>
     <script type="text/javascript" src="vwf-shard-html.js"></script>
 
-    <script type="text/javascript">
-
-      // vwf.node.constructed = function() { jQuery( "#vwf-root" ).append( "<div><p>" + nodeToPath( this ) + "</p></div>" ) }
-
-      $(document).ready( function() {
-        vwf.addEngine( new vwf.html( vwf, "#vwf-root" ) );
-        vwf.addEngine( new vwf.js( vwf ) );
-        vwf.initialize();
-      } )
-
-      // function nodeToPath( node ) { var path = ""; while ( node && node.name ) { path = node.name + "." + path; node = node.parent; } return path; }
-
-    </script>
+    <script type="text/javascript">vwf.initialize( "http://david256.com:8001/world", { html: "#vwf-root" } )</script>
 
     <link rel="stylesheet" href="index.css" type="text/css" />
+
   </head>
 
   <body>
     <h1>World</h1>
     <div id="vwf-root"></div>
-    <div id="vwf-orphans"></div>
+    
   </body>
 
 </html>

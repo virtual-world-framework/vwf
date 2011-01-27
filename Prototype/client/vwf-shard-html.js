@@ -2,11 +2,15 @@
 
     var HTMLShard = function( vwf, rootSelector ) {
 
-        jQuery( rootSelector ).addClass( "vwf-node" );
+        if ( ! vwf ) return;
+
+        jQuery( rootSelector ).
+            addClass( "vwf-node" ).
+            append( "<div class='vwf-orphanage' style='display:none'></div>" );
 
         this.onConstruct = function( nodeID, nodeType, nodeName, source, mimeType ) {
 
-            var nodeQuery = jQuery( "#vwf-orphans" ).append(
+            var nodeQuery = jQuery( ".vwf-orphanage" ).append(
                 "<div id='" + nodeID + "' class='vwf-node'>" +
                     "<p class='vwf-label'>" + nodeName + "</p>" +
                 "</div>"
@@ -177,6 +181,8 @@
             var traversalQuery = traverser.call( contextQuery );
             return traversalQuery.length ? traversalQuery : manipulator.call( contextQuery );
         };
+        
+        return this;
 
     };
 
