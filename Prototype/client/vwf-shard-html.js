@@ -6,9 +6,15 @@
 
         this.onConstruct = function( nodeID, nodeType, nodeName, source, mimeType ) {
 
-            var nodeQuery = jQuery( "#vwf-orphans" ).append( "<div id='" + nodeID + "'></div>" ).children().last().
-                addClass( "vwf-node" ).
-                append( "<p>" + nodeName + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
+            var nodeQuery = jQuery( "#vwf-orphans" ).append(
+                "<div id='" + nodeID + "' class='vwf-node'>" +
+                    "<p class='vwf-label'>" + nodeName + "</p>" +
+                "</div>"
+            ). children( ":last" );
+
+            nodeQuery.children( ".vwf-label" ).click( function() {
+                jQuery(this).siblings( ".vwf-properties, .vwf-methods, .vwf-events, .vwf-children" ).toggle();
+            } );
 
         };
 
@@ -25,11 +31,21 @@
 
             var childDepth = nodeDepth + 1;
 
-            var containerQuery = findOrCreate( nodeQuery, function() { return this.children( ".vwf-children" ) }, function() {
-                return this.append( "<div></div>" ).children().last().
-                    addClass( "vwf-children vwf-depth-" + childDepth ).
-                    append( "<p>" + "Children" + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
-            } );
+            var containerQuery = nodeQuery.children( ".vwf-children" );
+
+            if ( containerQuery.length == 0 ) {
+
+                containerQuery = nodeQuery.append(
+                    "<div class='vwf-children vwf-depth-" + childDepth + "'>" +
+                        "<p class='vwf-label'>Children</p>" +
+                    "</div>"
+                ).children( ":last" );
+
+                containerQuery.children( ".vwf-label" ).click( function() {
+                    jQuery(this).siblings( ".vwf-node" ).toggle();
+                } );
+
+            }
 
             var childQuery = jQuery( "#" + childID );
 
@@ -53,24 +69,34 @@
         this.onCreateProperty = function( nodeID, propertyName, propertyValue ) {
 
             var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
+            var containerQuery = nodeQuery.children( ".vwf-properties" );
 
-            var containerQuery = findOrCreate( nodeQuery, function() { return this.children( ".vwf-properties" ) }, function() {
-                return this.append( "<div></div>" ).children().last().
-                    addClass( "vwf-properties" ).
-                    append( "<p>" + "Properties" + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
-            } );
+            if ( containerQuery.length == 0 ) {
 
-            var propertyQuery = containerQuery.append( "<div id='" + nodeID + "-" + propertyName + "'></div>" ).children().last().
-                addClass( "vwf-property" ).
-                append( "<p>" + propertyName + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
+                containerQuery = nodeQuery.append(
+                    "<div class='vwf-properties'>" +
+                        "<p class='vwf-label'>Properties</p>" +
+                    "</div>"
+                ).children( ":last" );
 
+                containerQuery.children( ".vwf-label" ).click( function() {
+                    jQuery(this).siblings( ".vwf-property" ).toggle();
+                } );
+
+            }
+
+            var propertyQuery = containerQuery.append(
+                "<div id='" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + "</p>" +
+                "</div>"
+            ). children( ":last" );
 
 // Demo hack: increment by 1 on click
 
-propertyQuery.children( ".vwf-label" ).click( function() {
-    var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
-    vwf.setProperty( nodeID, propertyName, Number( vwf.getProperty( nodeID, propertyName ) ) + 1 );
-} );
+            propertyQuery.click( function() {
+                var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
+                vwf.setProperty( nodeID, propertyName, Number( vwf.getProperty( nodeID, propertyName ) ) + 1 );
+            } );
 
             return this.onSetProperty( nodeID, propertyName, propertyValue );
         };
@@ -93,17 +119,27 @@ propertyQuery.children( ".vwf-label" ).click( function() {
         this.onCreateMethod = function( nodeID, methodName ) {
         
             var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
+            var containerQuery = nodeQuery.children( ".vwf-methods" );
 
-            var containerQuery = findOrCreate( nodeQuery, function() { return this.children( ".vwf-methods" ) }, function() {
-                return this.append( "<div></div>" ).children().last().
-                    addClass( "vwf-methods" ).
-                    append( "<p>" + "Methods" + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
-            } );
+            if ( containerQuery.length == 0 ) {
 
-            containerQuery.append( "<div id='" + nodeID + "-" + methodName + "'></div>" ).children().last().
-                addClass( "vwf-method" ).
-                append( "<p>" + methodName + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
+                containerQuery = nodeQuery.append(
+                    "<div class='vwf-methods'>" +
+                        "<p class='vwf-label'>Methods</p>" +
+                    "</div>"
+                ).children( ":last" );
 
+                containerQuery.children( ".vwf-label" ).click( function() {
+                    jQuery(this).siblings( ".vwf-method" ).toggle();
+                } );
+
+            }
+
+            var methodQuery = containerQuery.append(
+                "<div id='" + nodeID + "-" + methodName + "' class='vwf-method'>" +
+                    "<p class='vwf-label'>" + methodName + "</p>" +
+                "</div>"
+            ). children( ":last" );
         };
 
         this.onCallMethod = function( nodeID, methodName ) {
@@ -113,16 +149,27 @@ propertyQuery.children( ".vwf-label" ).click( function() {
         this.onCreateEvent = function( nodeID, eventName ) {
         
             var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
+            var containerQuery = nodeQuery.children( ".vwf-events" );
 
-            var containerQuery = findOrCreate( nodeQuery, function() { return this.children( ".vwf-events" ) }, function() {
-                return this.append( "<div></div>" ).children().last().
-                    addClass( "vwf-events" ).
-                    append( "<p>" + "Events" + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
-            } );
+            if ( containerQuery.length == 0 ) {
 
-            containerQuery.append( "<div id='" + nodeID + "-" + eventName + "'></div>" ).children().last().
-                addClass( "vwf-event" ).
-                append( "<p>" + eventName + "</p>" ).children().last().addClass( "vwf-label" ).end().end();
+                containerQuery = nodeQuery.append(
+                    "<div class='vwf-events'>" +
+                        "<p class='vwf-label'>Events</p>" +
+                    "</div>"
+                ).children( ":last" );
+
+                containerQuery.children( ".vwf-label" ).click( function() {
+                    jQuery(this).siblings( ".vwf-event" ).toggle();
+                } );
+
+            }
+
+            var eventQuery = containerQuery.append(
+                "<div id='" + nodeID + "-" + eventName + "' class='vwf-event'>" +
+                    "<p class='vwf-label'>" + eventName + "</p>" +
+                "</div>"
+            ). children( ":last" );
 
         };
 
