@@ -2,6 +2,8 @@
 
     var WebGLShard = function( vwf, setters ) {
 
+        if ( ! vwf ) return;
+
         this.onConstruct = function( nodeID, nodeType, nodeName, source, mimeType ) {
 
         };
@@ -73,6 +75,8 @@
             var traversalQuery = traverser.call( contextQuery );
             return traversalQuery.length ? traversalQuery : manipulator.call( contextQuery );
         };
+        
+        return this;
 
     };
 

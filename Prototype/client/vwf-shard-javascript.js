@@ -2,6 +2,8 @@
 
     var JavaScriptShard = function( vwf ) {
 
+        if ( ! vwf ) return;
+
         var map = {};
         
         this.onConstruct = function( nodeID, nodeType, nodeName, source, mimeType ) {
@@ -136,6 +138,9 @@
         };
 
         vwf.root = map[0] = new Node( 0 ); // TODO: symbol for global node ID
+        
+        return this;
+
     };
     
     return window.vwf.js = JavaScriptShard;
