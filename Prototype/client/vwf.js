@@ -83,6 +83,7 @@
             // When the document is ready, create and attach the shards and load the world.
 
             jQuery( window.document ).ready( function() {
+                shardArguments.webgl && vwf.addEngine( vwf.webgl.apply( new vwf.webgl(), [ vwf ].concat( shardArguments.webgl || [] ) ) );
                 vwf.addEngine( vwf.html.apply( new vwf.html(), [ vwf ].concat( shardArguments.html || [] ) ) );
                 vwf.addEngine( vwf.js.apply( new vwf.js(), [ vwf ].concat( shardArguments.js || [] ) ) );
                 vwf.ready( world );
