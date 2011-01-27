@@ -26,20 +26,19 @@
  */
  -->
 <html>
+
   <head>
     <title>Earth and Mars</title>
 
     <script type="text/javascript" src="jquery-1.4.4.js"></script>
-    <script type="text/javascript" src="jquery-getquerystring.js"></script>
     <script type="text/javascript" src="socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="index.js"></script>
+
+    <script type="text/javascript" src="vwf.js"></script>
     <script type="text/javascript" src="vwf-shard-javascript.js"></script>
     <script type="text/javascript" src="vwf-shard-html.js"></script>
     <script type="text/javascript" src="vwf-shard-webgl.js"></script>
 
     <script type="text/javascript">
-
-      // vwf.node.constructed = function() { jQuery( "#vwf-root" ).append( "<div><p>" + nodeToPath( this ) + "</p></div>" ) }
 
       var earthNodeID = 1;
       var marsNodeID = 2;
@@ -99,14 +98,58 @@
           marsAngle = angle;
       }
 
-      $(document).ready( function() {
-        vwf.addEngine( new vwf.webgl( vwf, { tick: timeSetter, enabled: enabledSetter, angle: angleSetter } ) );
-        vwf.addEngine( new vwf.html( vwf, "#vwf-root" ) );
-        vwf.addEngine( new vwf.js( vwf ) );
-        vwf.initialize();
-      } )
+      vwf.initialize(
 
-      // function nodeToPath( node ) { var path = ""; while ( node && node.name ) { path = node.name + "." + path; node = node.parent; } return path; }
+        // This is the world specification. Provide either a string containing the URI of a world
+        // specification document or a literal world specification.
+
+        // As a string:
+
+        // "http://david256.com:8001/earth-mars",
+
+        // Or, as a literal:
+
+        {
+            children:
+            {
+                earth:
+                {
+                    properties:
+                    {
+                        enabled: true,
+                        angle: 0
+                    }
+                },
+                mars:
+                {
+                    properties:
+                    {
+                        enabled: true,
+                        angle: 0
+                    }
+                }
+            }
+        },
+
+        // These are shard configurations. Key by the shard name to an array of values, or a single
+        // value, to be passed as parameters to the shard's constructor.
+
+        {
+            // With an array of parameters for the "example" shard:
+            
+            // example: [ p1, p2, ... ], // ==> new vwf.example( vwf, p1, p2, ... )
+
+            // As a single parameter to the "html" shard:
+
+            html: "#vwf-root", // ==> new vwf.html( vwf, "#vwf-root" )
+
+            // The "webgl" shard with a single hash parameter:
+
+            webgl: { tick: timeSetter, enabled: enabledSetter, angle: angleSetter } // => new vwf.webl( vwf, { ... } )
+
+        }
+
+      )
 
     </script>
 
@@ -449,7 +492,6 @@
     <div id="console"></div>
 
     <div id="vwf-root"></div>
-    <div id="vwf-orphans"></div>
 
   </body>
 
