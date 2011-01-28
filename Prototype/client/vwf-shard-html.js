@@ -105,17 +105,34 @@
 
             var propertyQuery = containerQuery.append(
                 "<div id='" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
-                    "<p class='vwf-label'>" + propertyName + "</p>" +
+                    "<p class='vwf-label'>" + propertyName +
+                        // Demo hack 2
+                        // "<input type='text' class='vwf-control'></input>" +
+                    "</p>" +
                 "</div>"
             ). children( ":last" );
-
-// Demo hack: increment by 1 on click
-
+            
+            // Demo hack 1: increment by 1 on click
+            
             propertyQuery.click( function() {
                 var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
                 vwf.setProperty( nodeID, propertyName, Number( vwf.getProperty( nodeID, propertyName ) ) + 1 );
             } );
 
+            // Demo hack 2: show a text control and update character-by-character
+
+            // var controlQuery = propertyQuery.find( ".vwf-control" );
+
+            // controlQuery.keyup( function() {
+            //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
+            //     vwf.setProperty( nodeID, propertyName, jQuery(this).val() );
+            // } );
+
+            // controlQuery.change( function() {
+            //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
+            //     vwf.setProperty( nodeID, propertyName, jQuery(this).val() ); // TODO: json exceptions?
+            // } );
+            
             return this.onSetProperty( nodeID, propertyName, propertyValue );
         };
 
@@ -124,7 +141,17 @@
             var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
 
             var propertyQuery = nodeQuery.children( ".vwf-properties" ).children( "#" + nodeID + "-" + propertyName );
+
+            // Demo hack 1
+
             propertyQuery.children( ".vwf-label" ).text( propertyName + ": " + propertyValue );
+
+            // Demo hack 2
+
+            // var controlQuery = propertyQuery.find(".vwf-control");
+
+            // controlQuery.val() == propertyValue && typeof controlQuery.val() == typeof propertyValue ||
+            //     controlQuery.val( propertyValue );
 
             return undefined;
         };
