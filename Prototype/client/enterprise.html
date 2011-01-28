@@ -1,36 +1,99 @@
 
-<html><head> 
-<title>Enterprise</title> 
+<html>
+  <head> 
+    <title>Enterprise</title> 
+
+    <script type="text/javascript" src="jquery-1.4.4.js"></script>
+    <script type="text/javascript" src="jquery-getquerystring.js"></script>
+    <script type="text/javascript" src="socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="vwf-shard-javascript.js"></script>
+    <script type="text/javascript" src="vwf-shard-html.js"></script>
+    <script type="text/javascript" src="vwf-shard-webgl.js"></script>
+
+    <script type="text/javascript">
+    
+        // vwf.node.constructed = function() { jQuery( "#vwf-root" ).append( "<div><p>" + nodeToPath( this ) + "</p></div>" ) }
+
+        var enterpriseNodeID = 1;
+        var enterpriseActive = true;
+        var enterpriseSuspendedAt = 0;
+
+        var mouseDownTime1 = mouseDownTime2 = 0;
+
+        var enterpriseAngle = 0;
+
+        var time = lastTime = 0;
+
+        var timeSetter = function (t) {
+
+            lastTime = time;
+            time = t;
+
+            if (enterpriseSuspendedAt > 0 && time - enterpriseSuspendedAt > 500) {
+                enterpriseSuspendedAt = 0;
+                mouseDownTime1 = mouseDownTime2 = 0;
+            }
+
+            if (enterpriseActive && enterpriseSuspendedAt == 0) {
+                enterpriseAngle += (time - lastTime) * 0.02;
+                if (enterpriseAngle > 360)
+                    enterpriseAngle -= 360;
+            }
+       }
+
+        var enabledSetter = function (nodeID, enabled) {
+            if (nodeID == enterpriseNodeID)
+                enterpriseActive = enabled;
+        }
+
+        var angleSetter = function (nodeID, angle) {
+            if (nodeID == enterpriseNodeID)
+                enterpriseAngle = angle;
+         }
+
+        $(document).ready(function () {
+            vwf.addEngine(new vwf.webgl(vwf, { tick: timeSetter, enabled: enabledSetter, angle: angleSetter }));
+            vwf.addEngine(new vwf.html(vwf, "#vwf-root"));
+            vwf.addEngine(new vwf.js(vwf));
+            vwf.initialize();
+        })
+
+        // function nodeToPath( node ) { var path = ""; while ( node && node.name ) { path = node.name + "." + path; node = node.parent; } return path; }
+
+    </script>
+
+    <link rel="stylesheet" href="index.css" type="text/css" />
+    <script type="text/javascript" src="vwf-shard-webgl/common/webgl-utils.js"></script>
+    <script type="text/javascript" src="vwf-shard-webgl/Enterprise/resources/CanvasMatrix.js"> </script>
  
-<script type="text/javascript" src="resources/CanvasMatrix.js"> </script>
+    <script id="shader-vs" type="x-shader/x-vertex"> 
+      attribute vec3 aPos;
+      attribute vec3 aNorm;
+      uniform mat4 mvMatrix;
+      uniform mat4 prMatrix;
+      varying vec4 color;
+      const vec4 dirDif = vec4(0., 0., 1., 0.);
+      const vec4 dirHalf = vec4(.4034, .259, .8776, 0.);
+    void main(void) {
+       gl_Position = prMatrix * mvMatrix * vec4(aPos, 1.);
+       vec4 rotNorm = mvMatrix * vec4(aNorm, .0);
+       float i = abs(dot(rotNorm, dirDif));
+       color = vec4(.5*i+.2, .5*i+.2, .8*i+.2, 1.);
+       i = pow( abs(dot(rotNorm, dirHalf)) , 40.);
+       color += vec4(i, i, i, 0.);
+    }
+    </script> 
  
-<script id="shader-vs" type="x-shader/x-vertex"> 
-  attribute vec3 aPos;
-  attribute vec3 aNorm;
-  uniform mat4 mvMatrix;
-  uniform mat4 prMatrix;
-  varying vec4 color;
-  const vec4 dirDif = vec4(0., 0., 1., 0.);
-  const vec4 dirHalf = vec4(.4034, .259, .8776, 0.);
-void main(void) {
-   gl_Position = prMatrix * mvMatrix * vec4(aPos, 1.);
-   vec4 rotNorm = mvMatrix * vec4(aNorm, .0);
-   float i = abs(dot(rotNorm, dirDif));
-   color = vec4(.5*i+.2, .5*i+.2, .8*i+.2, 1.);
-   i = pow( abs(dot(rotNorm, dirHalf)) , 40.);
-   color += vec4(i, i, i, 0.);
-}
-</script> 
- 
-<script id="shader-fs" type="x-shader/x-fragment"> 
-#ifdef GL_ES
-precision highp float;
-#endif
-  varying vec4 color;
-void main(void) {
-   gl_FragColor = color;
-}
-</script> 
+    <script id="shader-fs" type="x-shader/x-fragment"> 
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+      varying vec4 color;
+    void main(void) {
+       gl_FragColor = color;
+    }
+    </script> 
  
 <script type="text/javascript">
     var gl,
@@ -728,7 +791,6 @@ void main(void) {
         gl.clearDepth(1.0);
         gl.clearColor(0, 0, .3, 1);
 
-        var spinAngle = 0;
         var spinEnabled = true;
         var xOffs = yOffs = 0, drag = 0;
         var xRot = yRot = 0;
@@ -736,10 +798,8 @@ void main(void) {
         drawScene();
 
         function drawScene() {
-            //console.info("spinAngle =  " + spinAngle );
-            //rotMat.rotate( xRot / 3, 1, 0, 0 );
-            rotMat.rotate( yRot / 3, 0, 1, 0 );
-            //rotMat.rotate(spinAngle /4, 0, 1, 0);
+            console.info("enterpriseAngle = " + enterpriseAngle);
+            rotMat.rotate(enterpriseAngle, 0, 1, 0);
 
             yRot = 0; 
             xRot = 0;
@@ -786,9 +846,10 @@ void main(void) {
             yOffs = ev.clientY;
 
             if (spinEnabled) {
-                spinAngle = spinAngle + yRot;
-                if (spinAngle > 360)
-                    spinAngle = spinAngle - 360;
+                enterpriseAngle = yRot;
+                if (enterpriseAngle > 360)
+                    enterpriseAngle = enterpriseAngle - 360;
+                vwf.setProperty(enterpriseNodeID, "angle", enterpriseAngle);
             }
 
 
@@ -801,12 +862,8 @@ void main(void) {
 <body onload="webGLStart();" onresize="webGLStart();"> 
    <canvas id="canvas" width="500" height="500"></canvas> 
  
-<br>Enterprise. Spline based model I've found in the Net in 2001.
-<br>Drag mouse to rotate model. Hold <i>shift</i> key to zoom it
-(canvas is matched to the browser window).
- 
-<hr><a href="../webgl.htm">WebGL Demos</a> 
-&nbsp; &nbsp; <i>updated</i> 1 June 2010
- 
+<br>Enterprise VWF example. 
+<br>Drag mouse to rotate the enterprise. 
+
 </body>
 </html>
