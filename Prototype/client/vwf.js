@@ -15,7 +15,7 @@
 
         var engines = [];
 
-        var globalID = 0, lastID = globalID;
+        var rootID = 0, lastID = undefined;
 
         // deleteNode, addChild, removeChild, moveChild, createProperty, deleteProperty, method, event, ...
 
@@ -56,7 +56,7 @@
 
             var world = jQuery.getQueryString( "world" );
 
-            try { world = jQuery.parseJSON( world ) || world; } catch( e ) { }
+            try { world = jQuery.parseJSON( world ) || world || {}; } catch( e ) { }
 
             // Parse the function arguments. The first parameter is a world specification if there
             // are two or more parameters, it's a string, or it's an object with the right keys.
@@ -148,18 +148,28 @@ vwf.internal--;
                     url: world,
                     dataType: "jsonp",
                     jsonpCallback: "cb", // use statically-defined callback=cb with static js files until JSON provider can do JSONP
-                    success: function( json ) { vwf.load( json, 0 ) } // TODO: parentID
+                    success: function( json ) { vwf.load( json ) }
                 } );
 
             } else {
 
-                vwf.load( world, 0 );
+                vwf.load( world );
 
             }
 
         }; // ready
 
         this.load = function( json, parentID ) {
+
+            if ( parentID == undefined ) {
+
+                parentID = rootID;
+
+                vwf.createNode( undefined,
+                    json.extends, json.implements && [].concat( json.implements ),
+                    json.source, json.type, undefined );
+
+            }
 
             if ( json ) {
 
@@ -176,9 +186,17 @@ vwf.internal--;
                 } );
 
                 json.children && jQuery.each( json.children, function( index, valueJSON ) {
-                    var childID = vwf.createNode( undefined, index, undefined, undefined, parentID );
-                    vwf.load( valueJSON, childID );
+                    vwf.load( valueJSON, vwf.createNode( index,
+                        valueJSON.extends, valueJSON.implements && [].concat( valueJSON.implements ),
+                        valueJSON.source, valueJSON.type, parentID )
+                    );
                 } );
+
+                json.scripts && jQuery.each( json.scripts, function( index, valueJSON ) {
+valueJSON.text && // TODO: external scripts too
+                    vwf.execute( parentID, valueJSON.text, valueJSON.type );
+                } );
+
             }
 
         }; // load
@@ -187,18 +205,21 @@ vwf.internal--;
             engines.unshift( engine );
         };
 
-        this.createNode = function( nodeType, nodeName, source, mimeType, parentID ) {
-    
-            var nodeID = ++lastID;
+        this.createNode = function( nodeName, nodeExtends, nodeImplements, nodeSource, nodeType, parentID ) {
 
-            console.info( "VirtualWorldFramework onConstruct " + vwf.internal + " " + nodeID + " " + nodeType + " " + nodeName + " " + source + " " + mimeType );
+            var nodeID = ( lastID == undefined ? ( lastID = rootID ) : ++lastID );
+
+            console.info( "VirtualWorldFramework onConstruct " + vwf.internal + " " + nodeID + " " +
+                nodeName + " " + nodeExtends + " " + nodeImplements + " " + nodeSource + " " + nodeType );
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onConstruct( nodeID, nodeType, nodeName, source, mimeType );
+                engine.onConstruct && engine.onConstruct( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType );
             } );
 
-            parentID = parentID || globalID;
-            this.addChild( parentID, nodeID );
+            if ( nodeID != rootID ) {
+                parentID = parentID || rootID;
+                this.addChild( parentID, nodeID );
+            }
 
             return nodeID;
         };
@@ -208,7 +229,7 @@ vwf.internal--;
             console.info( "VirtualWorldFramework onChildAdded " + vwf.internal + " " + nodeID + " " + childID );
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onChildAdded( nodeID, childID );
+                engine.onChildAdded && engine.onChildAdded( nodeID, childID );
             } );
 
         };
@@ -220,7 +241,7 @@ vwf.internal--;
 vwf.internal++;
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onCreateProperty( nodeID, propertyName, propertyValue );
+                engine.onCreateProperty && engine.onCreateProperty( nodeID, propertyName, propertyValue );
             } );
 
 vwf.internal--;
@@ -239,7 +260,7 @@ vwf.internal--;
 vwf.internal++;
 
                 jQuery.each( engines, function( index, engine ) {
-                    engine.onSetProperty( nodeID, propertyName, propertyValue );
+                    engine.onSetProperty && engine.onSetProperty( nodeID, propertyName, propertyValue );
                 } );
 
 vwf.internal--;
@@ -256,7 +277,7 @@ vwf.internal--;
             var propertyValue = undefined;
 
             jQuery.each( engines, function( index, engine ) {
-                var v = engine.onGetProperty( nodeID, propertyName );
+                var v = engine.onGetProperty && engine.onGetProperty( nodeID, propertyName );
                 propertyValue = v != undefined ? v : propertyValue;
             } );
 
@@ -266,7 +287,7 @@ vwf.internal--;
         this.createMethod = function( nodeID, methodName ) {
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onCreateMethod( nodeID, methodName );
+                engine.onCreateMethod && engine.onCreateMethod( nodeID, methodName );
             } );
 
         };
@@ -274,7 +295,7 @@ vwf.internal--;
         this.callMethod = function( nodeID, methodName ) {
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onCallMethod( nodeID, methodName );
+                engine.onCallMethod && engine.onCallMethod( nodeID, methodName );
             } );
 
         };
@@ -282,7 +303,7 @@ vwf.internal--;
         this.createEvent = function( nodeID, eventName ) {
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onCreateEvent( nodeID, eventName );
+                engine.onCreateEvent && engine.onCreateEvent( nodeID, eventName );
             } );
 
         };
@@ -290,7 +311,15 @@ vwf.internal--;
         this.fireEvent = function( nodeID, eventName ) {
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onFireEvent( nodeID, eventName );
+                engine.onFireEvent && engine.onFireEvent( nodeID, eventName );
+            } );
+
+        };
+
+        this.execute = function( nodeID, scriptText, scriptType ) {
+
+            jQuery.each( engines, function( index, engine ) {
+                engine.onExecute && engine.onExecute( nodeID, scriptText, scriptType );
             } );
 
         };
@@ -298,7 +327,7 @@ vwf.internal--;
         this.tick = function( time ) {
 
             jQuery.each( engines, function( index, engine ) {
-                engine.onTick( time );
+                engine.onTick && engine.onTick( time );
             } );
 
         };

@@ -11,53 +11,55 @@
     <script type="text/javascript" src="vwf-shard-javascript.js"></script>
     <script type="text/javascript" src="vwf-shard-html.js"></script>
 
-    <script type="text/javascript">vwf.initialize(
+    <script type="text/javascript">
+    
+        vwf.initialize(
 
-        // This is the world specification. Provide either a string containing the URI of a world
-        // specification document or a literal world specification.
+            // This is the world specification. Provide either a string containing the URI of a world
+            // specification document or a literal world specification.
 
-        // As a string:
+            // As a string:
 
-        // "http://david256.com:8001/earth-mars",
+            // "http://david256.com:8001/earth-mars",
 
-        // Or, as a literal:
+            // Or, as a literal:
 
-        {
-            children:
             {
-                earth:
+                children:
                 {
-                    properties:
+                    earth:
                     {
-                        enabled: true,
-                        angle: 0
-                    }
-                },
-                mars:
-                {
-                    properties:
+                        properties:
+                        {
+                            enabled: true,
+                            angle: 0
+                        }
+                    },
+                    mars:
                     {
-                        enabled: true,
-                        angle: 0
+                        properties:
+                        {
+                            enabled: true,
+                            angle: 0
+                        }
                     }
                 }
+            },
+
+            // These are shard configurations. Key by the shard name to an array of values, or a single
+            // value, to be passed as parameters to the shard's constructor.
+
+            {
+                // With an array of parameters for the "example" shard:
+                
+                // example: [ p1, p2, ... ], // ==> new vwf.example( vwf, p1, p2, ... )
+
+                // As a single parameter to the "html" shard:
+
+                html: "#vwf-root" // ==> new vwf.html( vwf, "#vwf-root" )
             }
-        },
 
-        // These are shard configurations. Key by the shard name to an array of values, or a single
-        // value, to be passed as parameters to the shard's constructor.
-
-        {
-            // With an array of parameters for the "example" shard:
-            
-            // example: [ p1, p2, ... ], // ==> new vwf.example( vwf, p1, p2, ... )
-
-            // As a single parameter to the "html" shard:
-
-            html: "#vwf-root" // ==> new vwf.html( vwf, "#vwf-root" )
-        }
-
-    )
+        )
 
     </script>
 

@@ -4,20 +4,42 @@
 
         if ( ! vwf ) return;
 
-        jQuery( rootSelector ).
-            addClass( "vwf-node" ).
-            append( "<div class='vwf-orphanage' style='display:none'></div>" );
+        jQuery( rootSelector ).append( "<div class='vwf-orphanage' style='display:none'></div>" )
 
-        this.onConstruct = function( nodeID, nodeType, nodeName, source, mimeType ) {
+        this.onConstruct = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
 
-            var nodeQuery = jQuery( ".vwf-orphanage" ).append(
-                "<div id='" + nodeID + "' class='vwf-node'>" +
-                    "<p class='vwf-label'>" + nodeName + "</p>" +
-                "</div>"
-            ). children( ":last" );
+            if ( nodeID == 0 ) { // TODO: const for root id
+            
+                var nodeQuery = jQuery( rootSelector ).addClass( "vwf-node" ).append(
+                    "<p class='vwf-label'>" +
+                        "<span class='vwf-attribute'>" +
+                            ( [ nodeExtends ].concat( nodeImplements || [] ).join( ", " ) ) +
+                        "</span>" +
+                        ( nodeSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
+                            "source=\"" + nodeSource + "\" type=\"" + ( nodeType || "" ) + "\"" +
+                        "</span>" : "" ) +
+                    "</p>"
+                );
+            
+            } else {
+
+                var nodeQuery = jQuery( ".vwf-orphanage" ).append(
+                    "<div id='" + nodeID + "' class='vwf-node'>" +
+                        "<p class='vwf-label'>" + nodeName + ( nodeExtends || ( nodeImplements && nodeImplements.length ) ? ": " : "" ) +
+                            "<span class='vwf-attribute'>" +
+                                ( [ nodeExtends ].concat( nodeImplements || [] ).join( ", " ) ) +
+                            "</span>" +
+                            ( nodeSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
+                                "source=\"" + nodeSource + "\" type=\"" + ( nodeType || "" ) + "\"" +
+                            "</span>" : "" ) +
+                        "</p>" +
+                    "</div>"
+                ). children( ":last" );
+
+            }
 
             nodeQuery.children( ".vwf-label" ).click( function() {
-                jQuery(this).siblings( ".vwf-properties, .vwf-methods, .vwf-events, .vwf-children" ).toggle();
+                jQuery(this).siblings( ".vwf-properties, .vwf-methods, .vwf-events, .vwf-children, .vwf-scripts" ).toggle();
             } );
 
         };
@@ -171,6 +193,33 @@
 
         this.onFireEvent = function( nodeID, eventName ) {
         
+        };
+
+        this.onExecute = function( nodeID, scriptText, scriptType ) {
+
+            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
+            var containerQuery = nodeQuery.children( ".vwf-scripts" );
+
+            if ( containerQuery.length == 0 ) {
+
+                containerQuery = nodeQuery.append(
+                    "<div class='vwf-scripts'>" +
+                        "<p class='vwf-label'>Scripts</p>" +
+                    "</div>"
+                ).children( ":last" );
+
+                containerQuery.children( ".vwf-label" ).click( function() {
+                    jQuery(this).siblings( ".vwf-script" ).toggle();
+                } );
+
+            }
+
+            var scriptQuery = containerQuery.append(
+                "<div class='vwf-script'>" +
+                    "<p class='vwf-label'><span class='vwf-attribute'>" + scriptType + "</span>&nbsp;&nbsp;" + scriptText + "</p>" +
+                "</div>"
+            ). children( ":last" );
+
         };
 
         this.onTick = function( time ) {

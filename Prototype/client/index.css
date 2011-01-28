@@ -66,11 +66,15 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #656;
 }
 
-.vwf-properties, .vwf-methods, .vwf-events, .vwf-children {
+.vwf-scripts {
+  background-color: #CDD;
+}
+
+.vwf-properties, .vwf-methods, .vwf-events, .vwf-children, .vwf-scripts {
   padding: 0;
 }
 
-.vwf-properties > .vwf-label, .vwf-methods > .vwf-label, .vwf-events > .vwf-label, .vwf-children > .vwf-label {
+.vwf-properties > .vwf-label, .vwf-methods > .vwf-label, .vwf-events > .vwf-label, .vwf-children > .vwf-label, .vwf-scripts> .vwf-label {
   margin: 0;
   padding: 8px 5px 5px 5px;
   font-size: 12px;
@@ -93,6 +97,10 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #BBB;
 }
 
+.vwf-scripts > .vwf-label {
+  background-color: #BCC;
+}
+
 .vwf-node > .vwf-label {
   padding-left: 3px;
   padding-bottom: 5px;
@@ -103,6 +111,14 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2px 5px 2px 5px;
   font-size: 18px;
   font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+.vwf-attribute {
+  font-size: 14px;
+}
+
+#vwf-root > .vwf-label > .vwf-attribute {
+  font-size: 18px;
 }
 
 .vwf-node {
