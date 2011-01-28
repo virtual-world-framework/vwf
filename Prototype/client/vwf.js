@@ -186,10 +186,30 @@ vwf.internal--;
                 } );
 
                 json.children && jQuery.each( json.children, function( index, valueJSON ) {
-                    vwf.load( valueJSON, vwf.createNode( index,
-                        valueJSON.extends, valueJSON.implements && [].concat( valueJSON.implements ),
-                        valueJSON.source, valueJSON.type, parentID )
-                    );
+
+                    if ( typeof valueJSON == "string" || valueJSON instanceof String ) {
+
+                        jQuery.ajax( {
+                            url: valueJSON,
+                            dataType: "jsonp",
+                            jsonpCallback: "cb", // use statically-defined callback=cb with static js files until JSON provider can do JSONP
+                            success: function( json ) {
+                                vwf.load( json, vwf.createNode( index,
+                                    json.extends, json.implements && [].concat( json.implements ),
+                                    json.source, json.type, parentID )
+                                );
+                            }
+                        } );
+
+                    } else {
+
+                        vwf.load( valueJSON, vwf.createNode( index,
+                            valueJSON.extends, valueJSON.implements && [].concat( valueJSON.implements ),
+                            valueJSON.source, valueJSON.type, parentID )
+                        );
+
+                    }
+
                 } );
 
                 json.scripts && jQuery.each( json.scripts, function( index, valueJSON ) {
