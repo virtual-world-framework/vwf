@@ -6,9 +6,9 @@
 
         var map = {};
         
-        this.onConstruct = function( nodeID, nodeType, nodeName, source, mimeType ) {
+        this.onConstruct = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
 
-            map[nodeID] = new Node( nodeID, nodeName, source, mimeType );
+            map[nodeID] = new Node( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType );
 
         };
 
@@ -92,20 +92,29 @@
         
         };
 
+        this.onExecute = function( nodeID, scriptText, scriptType ) {
+
+        };
+
         this.onTick = function( time ) {
         
         };
 
         // Node
 
-        var Node = JavaScriptShard.Node = function( nodeID, nodeName, source, mimeType ) {
+        var Node = JavaScriptShard.Node = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
 
-            this.id = nodeID; // TODO: make private
             this.parent = undefined;
 
+            this.id = nodeID; // TODO: make private
+
             this.name = nodeName;
-            this.source = source;
-            this.mimeType = mimeType;
+            
+            this.extends = nodeExtends; // TODO: install as prototype and dont' record as property
+            this.implements = nodeImplements; // TODO: import as modules
+            
+            this.source = nodeSource;
+            this.type = nodeType;
 
             this.properties = {};
             this.methods = {};
@@ -114,8 +123,8 @@
 
         };
 
-        Node.prototype.createChild = function( nodeType, nodeName, source, mimeType ) {
-            return vwf.createNode( nodeType, nodeName, source, mimeType, this.id );
+        Node.prototype.createChild = function( nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
+            return vwf.createNode( nodeName, nodeExtends, nodeImplements, nodeSource, nodeType, this.id );
         };
 
         Node.prototype.createProperty = function( propertyName, propertyValue ) {
@@ -136,8 +145,6 @@
             this.get = undefined;
             this.set = undefined;
         };
-
-        vwf.root = map[0] = new Node( 0 ); // TODO: symbol for global node ID
         
         return this;
 

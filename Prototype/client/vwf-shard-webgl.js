@@ -4,7 +4,7 @@
 
         if ( ! vwf ) return;
 
-        this.onConstruct = function( nodeID, nodeType, nodeName, source, mimeType ) {
+        this.onConstruct = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
 
         };
 
