@@ -46,7 +46,7 @@
         this.onCreateProperty = function( nodeID, propertyName, propertyValue ) {
 
             var node = map[nodeID];
-            var property = node.properties[propertyName] = new Property( node, propertyValue ); // TODO: value from json
+            var property = node.properties[propertyName] = new Property( node, propertyValue );
 
             Object.defineProperty( node, propertyName, {
                 get: function() { return vwf.getProperty( nodeID, propertyName ) },
@@ -110,8 +110,8 @@
 
             this.name = nodeName;
             
-            this.extends = nodeExtends; // TODO: install as prototype and dont' record as property
-            this.implements = nodeImplements; // TODO: import as modules
+            this["extends"] = nodeExtends; // TODO: install as prototype and dont' record as property
+            this["implements"] = nodeImplements; // TODO: import as modules
             
             this.source = nodeSource;
             this.type = nodeType;

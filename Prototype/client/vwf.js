@@ -166,7 +166,7 @@ vwf.internal--;
                 parentID = rootID;
 
                 vwf.createNode( undefined,
-                    json.extends, json.implements && [].concat( json.implements ),
+                    json["extends"], json["implements"] && [].concat( json["implements"] ),
                     json.source, json.type, undefined );
 
             }
@@ -195,7 +195,7 @@ vwf.internal--;
                             jsonpCallback: "cb", // use statically-defined callback=cb with static js files until JSON provider can do JSONP
                             success: function( json ) {
                                 vwf.load( json, vwf.createNode( index,
-                                    json.extends, json.implements && [].concat( json.implements ),
+                                    json["extends"], json["implements"] && [].concat( json["implements"] ),
                                     json.source, json.type, parentID )
                                 );
                             }
@@ -204,7 +204,7 @@ vwf.internal--;
                     } else {
 
                         vwf.load( valueJSON, vwf.createNode( index,
-                            valueJSON.extends, valueJSON.implements && [].concat( valueJSON.implements ),
+                            valueJSON["extends"], valueJSON["implements"] && [].concat( valueJSON["implements"] ),
                             valueJSON.source, valueJSON.type, parentID )
                         );
 
