@@ -5,10 +5,24 @@
         if ( ! vwf ) return;
 
         var map = {};
-        
-        this.onConstruct = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
 
-            map[nodeID] = new Node( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType );
+        var types = {};
+
+
+
+
+
+
+        
+        this.onConstruct = function( nodeID, nodeName, ... nodeExtends, nodeImplements ..., nodeSource, nodeType ) {
+
+            if ( nodeExtends && types[nodeExtends] ) {
+                map[nodeID] = new types[nodeExtends]( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType );
+            } else {
+                map[nodeID] = new vwf.Node( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType );
+            }
+
+if ( nodeID == 0 ) vwf.root = map[nodeID];
 
         };
 
@@ -46,10 +60,10 @@
         this.onCreateProperty = function( nodeID, propertyName, propertyValue ) {
 
             var node = map[nodeID];
-            var property = node.properties[propertyName] = new Property( node, propertyValue );
+            var property = node.properties[propertyName] = new vwf.Property( node, propertyValue );
 
             Object.defineProperty( node, propertyName, {
-                get: function() { return vwf.getProperty( nodeID, propertyName ) },
+                get: function() { return vwf.getProperty( nodeID, propertyName ) }, // "this" is property's node
                 set: function( value ) { vwf.setProperty( nodeID, propertyName, value ) },
                 enumerable: true
             } );
@@ -71,7 +85,8 @@
         this.onGetProperty = function( nodeID, propertyName ) {
         
             var node = map[nodeID];
-            var property = node.properties[propertyName];
+            var property = node.properties[propertyName] ||
+node.prototype.properties[propertyName] || node.prototype.prototype.properties[propertyName];
 
             return property.get ? property.get.call( node ) : property.value;
         };
@@ -100,51 +115,109 @@
         
         };
 
-        // Node
 
-        var Node = JavaScriptShard.Node = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
 
-            this.parent = undefined;
 
-            this.id = nodeID; // TODO: make private
 
-            this.name = nodeName;
+
+        JavaScriptShard.createTestClasses = function() {
             
-            this["extends"] = nodeExtends; // TODO: install as prototype and dont' record as property
-            this["implements"] = nodeImplements; // TODO: import as modules
-            
-            this.source = nodeSource;
-            this.type = nodeType;
 
-            this.properties = {};
-            this.methods = {};
-            this.events = {};
-            this.children = [];
+vwf.makingPrototypes = true;
 
-        };
+// var node = function( name, source, type )
+// {
+//     if ( arguments.length > 0 )
+//     {
+//         this.name = name;
+//         this.source = source;
+//         this.type = type;
+// 
+//         this.properties = {};
+//     }
+// };
 
-        Node.prototype.createChild = function( nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
-            return vwf.createNode( nodeName, nodeExtends, nodeImplements, nodeSource, nodeType, this.id );
-        };
+// var node3 = function( name, source, type, transform )
+// {
+//     node.call( this, name, source, type );
+//     
+//     if ( arguments.length > 0 )
+//     {
+//         this.properties.transform = transform;
+//     }
+// };
 
-        Node.prototype.createProperty = function( propertyName, propertyValue ) {
-            return vwf.createProperty( this.id, propertyName, propertyValue );
-        };
+// node3.prototype = new node();
+// node3.prototype.constructor = node3; // with defineProperty to disable enum?
 
-        Node.prototype.createMethod = function( methodName ) {
-            return vwf.createMethoe( this.id, methodName );
-        };
 
-        Node.prototype.createEvent = function( eventName ) {
-            return vwf.createEvent( this.id, eventName );
-        };
 
-        var Property = JavaScriptShard.Property = function( node, value ) {
-            this.node = node; // TODO: make private
-            this.value = value;
-            this.get = undefined;
-            this.set = undefined;
-        };
+
+
+
+
+
+        // base: { properties: { basep1: true, basep2: [ 1, 2, 3 ] } }
+
+        var base = types["base"] = function() { vwf.Node.apply( this, arguments ) };
+
+var basePrototypeID = vwf.createNode( "base" );
+map[basePrototypeID].this_is_the_base_prototype = true;
+        base.prototype = map[basePrototypeID]; // new Node( /* { properties: { basep1: true, basep2: [ 1, 2, 3 ] } } */ );
+        base.prototype.constructor = base;
+
+        vwf.createProperty( basePrototypeID, "basep1", true );
+
+        // base.prototype.properties["basep1"] = new Property( base.prototype, true );
+        // 
+        // Object.defineProperty( base.prototype, "basep1", {
+        //     get: function() { return base.prototype.properties["basep1"].value },
+        //     set: function( value ) { base.prototype.properties["basep1"].value = value },
+        //     enumerable: true
+        // } );
+
+        vwf.createProperty( basePrototypeID, "basep2", [ 1, 2, 3 ] );
+
+        // base.prototype.properties["basep2"] = new Property( base.prototype, [ 1, 2, 3 ] );
+        // 
+        // Object.defineProperty( base.prototype, "basep2", {
+        //     get: function() { return base.prototype.properties["basep2"].value },
+        //     set: function( value ) { base.prototype.properties["basep2"].value = value },
+        //     enumerable: true
+        // } );
+
+        // derived: { properties: { derivedp1: "abcde" } }
+
+        var derived = types["derived"] = function() { base.apply( this, arguments ) };
+
+var derivedPrototypeID = vwf.createNode( "derived", "base" );
+map[derivedPrototypeID].this_is_the_derived_prototype = true;
+        derived.prototype = map[derivedPrototypeID]; // new base( /* { properties: { derivedp1: "abcde" } } */ );
+        derived.prototype.constructor = derived;
+
+        // derived.prototype.properties["derivedp1"] = new Property( derived.prototype, "abcde" );
+        // 
+        // Object.defineProperty( derived.prototype, "derivedp1", {
+        //     get: function() { return derived.prototype.properties["derivedp1"].value },
+        //     set: function( value ) { derived.prototype.properties["derivedp1"].value = value },
+        //     enumerable: true
+        // } );
+
+        vwf.createProperty( derivedPrototypeID, "derivedp2", "abcde" );
+
+
+
+
+vwf.makingPrototypes = false;
+
+        }; // createTestClasses
+
+
+
+
+
+
+
         
         return this;
 
