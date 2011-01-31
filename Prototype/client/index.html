@@ -8,7 +8,7 @@
     <script type="text/javascript" src="socket.io/socket.io.js"></script>
 
     <script type="text/javascript" src="vwf.js"></script>
-    <script type="text/javascript" src="vwf-shard-javascript.js"></script>
+    <!-- script type="text/javascript" src="vwf-shard-javascript.js"></script -->
     <script type="text/javascript" src="vwf-shard-html.js"></script>
 
     <script type="text/javascript">
@@ -32,20 +32,49 @@
                     // world1: "http://david256.com:8001/world",
                     // world2: "http://david256.com:8001/world2",
 
-                    earth:
+                    scene:
                     {
-                        properties:
+                        name: "scene",
+                        
+                        children:
                         {
-                            enabled: true,
-                            angle: 0
-                        }
-                    },
-                    mars:
-                    {
-                        properties:
-                        {
-                            enabled: true,
-                            angle: 0
+                            earth:
+                            {
+                                name: "earth",
+                                
+                                extends: "node3",
+
+                                properties:
+                                {
+                                    transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, 3 ],
+                                    enabled: true,
+                                    angle: 0,
+                                }
+                            },
+
+                            mars:
+                            {
+                                name: "mars",
+                                
+                                extends: "node3",
+
+                                properties:
+                                {
+                                    transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 5, 6 ],
+                                    enabled: true,
+                                    angle: 0
+                                }
+                            },
+
+                            venus:
+                            {
+                                name: "venus",
+                                
+                                // extends: "http://components.vwf.example.com/planet",
+                                // extends: { p: { p1: 1, p2: 2 } },
+                                extends: "node3",
+                                source: "http://assets.vwf.example.com/venus.js", type: "x-model/scenejs",
+                            },
                         }
                     }
                 }
