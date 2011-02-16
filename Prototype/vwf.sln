@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vwf", "vwf.csproj", "{0B6BCF4F-FDB6-4444-80D6-E558973EA058}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jquery-require-sample", "..\References\jquery-require-sample\jquery-require-sample.csproj", "{AA6A5E10-2B9D-4C81-ABD8-E60460DF7A88}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0B6BCF4F-FDB6-4444-80D6-E558973EA058}.Debug|x86.ActiveCfg = Debug|x86
+		{0B6BCF4F-FDB6-4444-80D6-E558973EA058}.Debug|x86.Build.0 = Debug|x86
+		{0B6BCF4F-FDB6-4444-80D6-E558973EA058}.Release|x86.ActiveCfg = Release|x86
+		{0B6BCF4F-FDB6-4444-80D6-E558973EA058}.Release|x86.Build.0 = Release|x86
+		{AA6A5E10-2B9D-4C81-ABD8-E60460DF7A88}.Debug|x86.ActiveCfg = Debug|x86
+		{AA6A5E10-2B9D-4C81-ABD8-E60460DF7A88}.Debug|x86.Build.0 = Debug|x86
+		{AA6A5E10-2B9D-4C81-ABD8-E60460DF7A88}.Release|x86.ActiveCfg = Release|x86
+		{AA6A5E10-2B9D-4C81-ABD8-E60460DF7A88}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
