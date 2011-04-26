@@ -30,8 +30,8 @@
 
     // == Response API =============================================================================
 
-    // This is a placeholder for providing a natural integration between simulation and the browser's
-    // JavaScript environment.
+    // This is a placeholder for providing a natural integration between simulation and the
+    // browser's JavaScript environment.
     // 
     // Within the JavaScript environment, component instances appear as JavaScript objects.
     // 
@@ -53,7 +53,8 @@
 
     module.prototype.creatingNode = function( nodeID, nodeName, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
 
-        console.info( "vwf.model.javascript.creatingNode " + nodeID + " " +  nodeName + " " +  nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
+        console.info( "vwf.model.javascript.creatingNode " + nodeID + " " +  nodeName + " " + 
+            nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
 
         var type = this.types[nodeExtendsID];
 
@@ -88,6 +89,59 @@
 
     };
 
+
+
+
+Node.prototype.createProperty = function( propertyName, propertyValue ) {
+
+    var property = this.properties[propertyName] = new vwf.property( this, propertyValue );
+
+    Object.defineProperty( this, propertyName, {
+        get: function() { return property.value }, // "this" is property's node
+        set: function( value ) { property.value = value }, // TODO: getters & setters
+        enumerable: true
+    } );
+
+    var result = this.setProperty( propertyName, propertyValue );
+
+    vwf.onCreateProperty( this.id, propertyName, propertyValue ); // TODO: redundancy with onSetProperty call
+
+    return result;
+};
+
+Node.prototype.setProperty = function( propertyName, propertyValue ) {
+
+    var property = this.properties[propertyName];
+
+    var result = property.set ? property.set.call( this, propertyValue ) : ( property.value = propertyValue );
+
+    vwf.onSetProperty( this.id, propertyName, propertyValue );
+
+    return result;
+};
+
+Node.prototype.getProperty = function( propertyName ) {
+
+    var property = this.properties[propertyName] ||
+this.prototype.properties[propertyName] || this.prototype.prototype.properties[propertyName]; // TODO: make recursive
+
+    var result =  property.get ? property.get.call( this ) : property.value;
+
+    vwf.onGetProperty( this.id, propertyName );
+
+    return result;
+};
+
+
+
+
+
+
+
+
+
+
+
     // == Node =====================================================================================
 
     var node = function( nodeName, nodeSource, nodeType ) {
@@ -103,6 +157,17 @@
         this.methods = {};
         this.events = {};
         this.children = [];
+
+    };
+
+    // == Property =================================================================================
+
+    var property = function( node, value ) {
+
+        this.node = node; // TODO: make private
+        this.value = value;
+        this.get = undefined;
+        this.set = undefined;
 
     };
 
