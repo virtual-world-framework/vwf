@@ -84,15 +84,15 @@
             //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
 
             {
-                javascript: null,
-                scenejs: null
+                javascript: [],         // invokes: new vwf.modules.javascript( vwf )
+                scenejs: []             // invokes: new vwf.modules.scene( vwf )
             },
 
             // These are the view configurations. They use the same format at the model
             // configurations.
 
             {
-                html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" )
+                html: "#vwf-root"       // invokes: new vwf.modules.html( vwf, "#vwf-root" )
             }
 
         )
