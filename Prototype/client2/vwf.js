@@ -41,19 +41,19 @@
 
         var types = this.private.types = {}; // URI => ID
 
-        // Control messages from the conference server are stored here in a priority queue, order by
-        // execution time.
+        // Control messages from the conference server are stored here in a priority queue, ordered
+        // by execution time.
 
         var queue = this.private.queue = [];
 
         // This is the connection to the conference server. In this sample implementation, "socket"
-        // a socket.io client that communicates over a channel provided by the server hosting the
+        // is a socket.io client that communicates over a channel provided by the server hosting the
         // client documents.
 
         var socket = undefined;
 
         // The proto-prototype of all nodes is "node", identified by this URI. This type is
-        // intrinsic to the system and is nothing is loaded from the URI.
+        // intrinsic to the system and nothing is loaded from the URI.
 
         var nodeTypeURI = "http://vwf.example.com/types/node";
 
@@ -330,7 +330,7 @@
 
         // Create a node from a component specification. Construction may require loading data from
         // multiple remote documents. This function returns before construction is complete. A
-        // callback invoked once the node has fully loaded.
+        // callback is invoked once the node has fully loaded.
         // 
         // A simple node consists of a set of properties, methods and events, but a node may
         // specialize a prototype component and may also contain multiple child nodes, any of which
@@ -360,7 +360,7 @@
             // directly.
 
             // We must resolve a URI to an object before we can create the component. If the
-            // specification parameter is a string, treat is as URI and load the document at that
+            // specification parameter is a string, treat it as a URI and load the document at that
             // location. Call construct() with the specification once it has loaded.
 
             if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
@@ -401,7 +401,7 @@
 
                 }
 
-            // If an component literal was provided, call findType() to locate or load the prototype
+            // If a component literal was provided, call findType() to locate or load the prototype
             // node, then pass the prototype and the component specification to construct().
 
             } else {
@@ -443,7 +443,7 @@
                     model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
                 } );
 
-                // Call createdNode() on each view. The view is being notified of a model that has
+                // Call createdNode() on each view. The view is being notified of a node that has
                 // been constructed.
 
                 jQuery.each( vwf.views, function( index, view ) {
