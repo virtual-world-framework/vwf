@@ -2,28 +2,62 @@
 
 <html>
 
+  <!-- The Virtual World Framework client is a collection of scripts and a world specification   -->
+  <!-- passed to an initialization call. In this sample, the world specification is provided     -->
+  <!-- inline for clarity, but it is normally provided by the conference server or may be        -->
+  <!-- specified as a URI and loaded from a network-visible location.                            -->
+
   <head>
+
+    <title>Virtual World Framework</title>
+
+    <!-- The Virtual World Framework makes use of the jQuery library.                            -->
 
     <script type="text/javascript" src="jquery-1.4.4.js"></script>
 
+    <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
+    <!-- the global window object as window.vwf. All access to the framework is through that     -->
+    <!-- reference, and no other objects are visible globally.                                   -->
+
     <script type="text/javascript" src="vwf.js"></script>
+
+    <!-- The core framework manages the simulation and synchronizes it across worlds shared by   -->
+    <!-- multiple users. But, the manner in which the simulation is expressed is controlled by   -->
+    <!-- extension modules. There are two flavors. Models directly control the simulation but    -->
+    <!-- cannot accept external input. The model configuration is identical for all participants -->
+    <!-- in a shared world. Views may accept external input - such as pointer and key events or  -->
+    <!-- a connection to an outside engine--that is not visible to all users, but may only       -->
+    <!-- affected the simulation indirectly through the synchronization server.                  -->
+
+    <!-- This is the common model implementation and an example model that connects the          -->
+    <!-- simulation to a WebGL scene manager.                                                    -->
+
     <script type="text/javascript" src="vwf-model.js"></script>
     <script type="text/javascript" src="vwf-model-scenejs.js"></script>
+
+    <!-- This is the common view implementation and an example view that summarizes the          -->
+    <!-- simulation state in HTML on the main page.                                              -->
+
     <script type="text/javascript" src="vwf-view.js"></script>
     <script type="text/javascript" src="vwf-view-html.js"></script>
+
+    <!-- With the scripts loaded, we must initialize the framework. vwf.initialize() accepts     -->
+    <!-- three parameters: a world specification, model configuration parameters, and view       -->
+    <!-- configuration parameters.                                                               -->
 
     <script type="text/javascript">
     
         vwf.initialize(
 
-            // This is the world specification. Provide either a string with the URI of a compoment
-            // or a literal component specficiation to load as the world.
+            // This is the world specification. The world may be specified using a component literal
+            // as shown here, or the specification may be placed in a network-visible location and
+            // specified here as a URI or as a query parameter to this index page.
+
+            // As a literal:
+            //     { extends: "http://vwf.example.com/types/example-type", properties: { ... }, ... }
 
             // As a string:
             //     "http://vwf.example.com/types/example-type",
-
-            // Or, as a literal:
-            //     { extends: "http://vwf.example.com/types/example-type", properties: { ... }, ... }
 
             {
                 children:
@@ -67,15 +101,17 @@
                                 name: "venus",
                                 
                                 extends: "node3",
-                                source: "http://assets.vwf.example.com/venus.js", type: "x-model/scenejs",
+                                source: "http://assets.vwf.example.com/venus.js",
+                                type: "x-model/scenejs"
                             },
                         }
                     }
                 }
             },
 
-            // These are the model configurations. Key by the model name to an array of values, or
-            // to a single value, to be passed as arguments to the model's constructor.
+            // These are the model configurations. Each key within the configuration object is a
+            // model name, and each value is an argument or an array of arguments to be passed to
+            // the model's constructor.
 
             // With an array of arguments for the "example" model:
             //     { example: [ p1, p2, ... ], // ==> new vwf.modules.example( vwf, p1, p2, ... ) }
@@ -85,7 +121,7 @@
 
             {
                 javascript: [],         // invokes: new vwf.modules.javascript( vwf )
-                scenejs: []             // invokes: new vwf.modules.scene( vwf )
+                scenejs: "#vwf-scene",  // invokes: new vwf.modules.scene( vwf, "#vwf-scene" )
             },
 
             // These are the view configurations. They use the same format at the model
@@ -104,7 +140,20 @@
   </head>
 
   <body>
+
+    <!-- Generic clients may have nearly empty pages, but pages for custom clients may be laid   -->
+    <!-- out in any manner desired. Any view and models that render to the page should be        -->
+    <!-- instructed where to attach there content.                                               -->
+
     <h1>World</h1>
+
+    <!-- For this sample, the "scenejs" model has been configured to render to "#vwf-scene", the -->
+    <!-- item with the id "vwf-scene".                                                           -->
+
+    <div id="vwf-scene"></div>
+
+    <!-- The "html" view has been configured to render to "#vwf-root"                            -->
+
     <div id="vwf-root"></div>
     
   </body>
