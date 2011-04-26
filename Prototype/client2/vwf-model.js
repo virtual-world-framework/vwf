@@ -1,11 +1,30 @@
-( function( vwf ) {
+( function( modules ) {
 
-    vwf.models.push( function( vwf ) {
+console.info( "loading vwf.model" );
 
-        this.onConstruct = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
+    var module = modules.model = function( vwf ) {
 
-        };
+        if ( ! vwf ) return;
+        
+console.info( "creating vwf.model" );
 
-    } );
+        this.vwf = vwf;
 
-} ) ( window.vwf );
+        return this;
+    };
+
+    // -- xxx --------------------------------------------------------------------------------------
+
+    module.prototype.createNode = function( component_uri_or_object, callback ) {
+console.info( "vwf.model.createNode " + component_uri_or_object )
+        return this.vwf.createNode( component_uri_or_object, callback );
+    };
+
+    // -- xxx --------------------------------------------------------------------------------------
+
+    module.prototype.constructing = function( nodeID, nodeName, nodeExtends, nodeImplements, nodeSource, nodeType ) {
+console.info( "vwf.model.constructing " + nodeID + " " +  nodeName + " " +  nodeExtends + " " +  nodeImplements + " " +  nodeSource + " " +  nodeType );
+        return undefined;
+    };
+
+} ) ( window.vwf.modules );
