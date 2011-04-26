@@ -2,6 +2,11 @@
 
     console.info( "loading vwf.model.scenejs" );
 
+    // vwf-model-scenejs.js is a placeholder for a 3-D scene manager.
+    //
+    // vwf-model is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It
+    // attaches to the vwf modules list as vwf.modules.scenejs.
+
     var module = modules.scenejs = function( vwf ) {
 
         if ( ! vwf ) return;
@@ -13,7 +18,13 @@
         return this;
     };
 
+    // Delegate any unimplemented functions to vwf-model.
+
     module.prototype = new modules.model();
+
+    // == Response API =============================================================================
+
+    // This is a placeholder for connecting to the SceneJS WebGL scene manager.
 
     // -- creatingNode -----------------------------------------------------------------------------
 
