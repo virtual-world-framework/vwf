@@ -1,25 +1,34 @@
 ( function( window ) {
 
-console.info( "loading vwf" );
+    console.info( "loading vwf" );
 
     window.vwf = new function() {
 
-console.info( "creating vwf" );
+        console.info( "creating vwf" );
+
+        // == Private variables ====================================================================
 
         var vwf = this;
 
-        // -- Public attributes --------------------------------------------------------------------
+        var rootID = 0, lastID = undefined;
+        var nodePrototypeID = -1, lastPrototypeID = undefined;
 
-        this.root = undefined;
+        var queue = [];
+
+        // == Public attributes ====================================================================
 
         this.modules = [];
-        
-        this.types = {};
 
         this.models = [];
         this.views = [];
 
-        // -- Public functions ---------------------------------------------------------------------
+        this.types = {}; // TODO: "http://vwf.example.com/types/node": nodePrototypeID ?
+
+        this.time = 0;
+
+        // == Public functions =====================================================================
+
+        // -- initialize ---------------------------------------------------------------------------
 
         this.initialize = function( /* [ componentURI|componentObject ] [ modelArguments ] [ viewArguments ] */ ) {
 
@@ -49,7 +58,7 @@ console.info( "creating vwf" );
             if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
                 viewArgumentLists = {};
 
-            // When the document is ready, create and attach the models and views, then load the
+            // When the document is ready, create and attach the models and views and load the
             // world.
 
             jQuery( window.document ).ready( function() {
@@ -70,30 +79,127 @@ console.info( "creating vwf" );
 
         }; // initialize
 
-var rootID = 0, lastID = undefined;
+        // -- ready --------------------------------------------------------------------------------
 
         this.ready = function( component_uri_or_object ) {
 
-            vwf.createNode( component_uri_or_object, function( node ) {
-                vwf.root = node;
-            } );
+            this.createNode( component_uri_or_object );
 
         }; // ready
 
-        this.createNode = function( component_uri_or_object, callback ) {
+        // -- send ---------------------------------------------------------------------------------
 
-console.info( "vwf.createNode " + component_uri_or_object );
+        this.send = function( nodeID, actionName /* , parameters ... */ ) {
 
-var spec = {};
-var type = vwf.types.node;
+            var args = Array.prototype.slice.call( arguments );
+
+            var message = nodeID + " " + actionName + " " + args.slice( 2 ).join( " " ); // TODO: json encode
+
+            if ( this.socket ) {
+
+                this.socket.send( this.time + " " + message );
+
+            } else {
+
+                queue.push( { time: this.time, message: message } );
+                queue.sort( function( a, b ) { return a.time - b.time } );
+
+            }
+
+        }; // send
+
+        // -- receive ------------------------------------------------------------------------------
+
+        this.receive = function( message ) {
+
+            var parameters = message.split( " " );
+
+            var nodeID = parameters.shift();
+            var actionName = parameters.shift();
+
+            this[actionName] && this[actionName].apply( this, [ nodeID ] + parameters ); // TODO: decode from json
+            
+        }; // receive
+
+        // -- createNode ---------------------------------------------------------------------------
+
+        this.createNode = function( /* [ parentID, ] */ component_uri_or_object, callback ) {
+
+            console.info( "vwf.createNode " + component_uri_or_object );
+
+var type = vwf.types["http://vwf.example.com/types/node"];
+var spec = component_uri_or_object;
+var name = undefined;
+
 var nodeID = ( lastID == undefined ? ( lastID = rootID ) : ++lastID );
+var prototypeID = nodePrototypeID;
 
-            var node = new type( spec.name, type.prototype.name, undefined, spec.source, spec.type, nodeID ); // TODO: name from parent, not child
+            // Call creatingNode() on each model.
 
+            jQuery.each( vwf.models, function( index, model ) {
+                model.creatingNode && model.creatingNode( nodeID, name, prototypeID, [], spec.source, spec.type );
+            } );
 
-        }
+            // Call createdNode() on each view.
 
-        // -- Private functions --------------------------------------------------------------------
+            jQuery.each( vwf.views, function( index, view ) {
+                view.createdNode && view.createdNode( nodeID, name, prototypeID, [], spec.source, spec.type );
+            } );
+            
+            return nodeID; // TODO: not with callback ...
+        };
+
+        // -- setProperty --------------------------------------------------------------------------
+
+        this.setProperty = function( nodeID, propertyName, propertyValue ) {
+
+            console.info( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
+            // Call settingProperty() on each model.
+
+            jQuery.each( vwf.models, function( index, model ) {
+                model.settingProperty && model.settingProperty( nodeID, propertyName, propertyValue );
+            } );
+
+            // Call satProperty() on each view.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
+            } );
+
+            return propertyValue;
+        };
+
+        // -- getProperty --------------------------------------------------------------------------
+
+        this.getProperty = function( nodeID, propertyName ) {
+
+            console.info( "vwf.getProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
+            // Call gettingProperty() on each model.
+
+            var propertyValue = undefined;
+
+            jQuery.each( vwf.models, function( index, model ) {
+                var value = model.gettingProperty && model.gettingProperty( nodeID, propertyName );
+                propertyValue = value !== undefined ? value : propertyValue;
+            } );
+
+            // Call gotProperty() on each view.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );
+            } );
+
+            return propertyValue;
+        };
+
+        // == Private functions ====================================================================
+
+        // -- objectIsComponent --------------------------------------------------------------------
+
+        // Determine if a JavaScript object is a component specification by searching for component
+        // specification attributes in the candidate object.
 
         var objectIsComponent = function( candidate ) {
 
@@ -120,35 +226,6 @@ var nodeID = ( lastID == undefined ? ( lastID = rootID ) : ++lastID );
             }
             
             return isComponent; 
-        };
-
-        // -- Private functions --------------------------------------------------------------------
-
-        var node = vwf.types.node = function( nodeName, nodeExtends, nodeImplements, nodeSource, nodeType, nodeID ) {
-
-this.id = nodeID;
-// TODO: name not in component
-
-            this.parent = undefined;
-
-            this.name = nodeName;
-
-            this.source = nodeSource;
-            this.type = nodeType;
-
-            this.properties = {};
-            this.methods = {};
-            this.events = {};
-            this.children = [];
-
-            jQuery.each( vwf.models, function( index, model ) {
-                model.constructing && model.constructing( this.id, this.name, nodeExtends, nodeImplements, this.source, this.type );
-            } );
-
-            jQuery.each( vwf.views, function( index, view ) {
-                view.constructed && view.constructed( this.id, this.name, nodeExtends, nodeImplements, this.source, this.type );
-            } );
-
         };
 
     };
