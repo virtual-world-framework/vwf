@@ -10,10 +10,19 @@
 
         var vwf = this;
 
-        var rootID = 0, lastID = undefined;
-        var nodePrototypeID = -1, lastPrototypeID = undefined;
+        this.private = {}; // for debugging
 
-        var queue = [];
+        var lastID = 0;
+
+        var nodeTypeURI = "http://vwf.example.com/types/node";
+        var nodeTypeID = 1; // convention
+
+        var rootID = 2; // by convention
+
+        var socket = undefined;
+        var queue = this.private.queue = [];
+
+        var types = this.private.types = {}; // maps type URIs to node IDs
 
         // == Public attributes ====================================================================
 
@@ -22,7 +31,6 @@
         this.models = [];
         this.views = [];
 
-        this.types = {}; // TODO: "http://vwf.example.com/types/node": nodePrototypeID ?
 
         this.time = 0;
 
@@ -34,7 +42,13 @@
 
             var args = Array.prototype.slice.call( arguments );
 
-            var world = undefined;
+            // Get the world specification if one is provided in the query string. Parse it into a
+            // world specification object if it's valid JSON, otherwise keep the query string and
+            // assume it's a URI.
+
+            var world = jQuery.getQueryString( "world" );
+
+            try { world = jQuery.parseJSON( world ) || world || {}; } catch( e ) { }
 
             // Parse the function parameters. If the first parameter is a string or contains
             // component properties, then treat it as the world specification. Otherwise, fall back
@@ -77,49 +91,108 @@
 
             } );
 
-        }; // initialize
+        };
 
         // -- ready --------------------------------------------------------------------------------
 
         this.ready = function( component_uri_or_object ) {
 
-            this.createNode( component_uri_or_object );
+            try {
 
-        }; // ready
+                socket = new io.Socket();
 
-        // -- send ---------------------------------------------------------------------------------
+            } catch ( e ) {
 
-        this.send = function( nodeID, actionName /* , parameters ... */ ) {
+                this.dispatch( 0 );
 
-            var args = Array.prototype.slice.call( arguments );
+                setInterval( function() {
 
-            var message = nodeID + " " + actionName + " " + args.slice( 2 ).join( " " ); // TODO: json encode
+                    vwf.time += 10;
+                    vwf.dispatch( vwf.time );
 
-            if ( this.socket ) {
-
-                this.socket.send( this.time + " " + message );
-
-            } else {
-
-                queue.push( { time: this.time, message: message } );
-                queue.sort( function( a, b ) { return a.time - b.time } );
+                }, 10 );
 
             }
 
-        }; // send
+            if ( socket ) {
+
+                socket.on( "connect", function() { console.info( "vwf.socket connected" ) } );
+
+                socket.on( "message", function( message ) {
+
+                    console.info( "vwf.socket message " + message );
+
+                    var fields = message.split( " " );
+                    var time = Number( fields[0] );
+
+                    vwf.dispatch( time );
+
+                } );
+
+                socket.on( "disconnect", function() { console.log( "vwf.socket disconnected" ) } );
+
+                socket.connect();
+
+            }
+
+            this.createNode( component_uri_or_object );
+
+        };
+
+        // -- send ---------------------------------------------------------------------------------
+
+        this.send = function( /* nodeID, actionName, parameters ... */ ) {
+
+            var args = Array.prototype.slice.call( arguments );
+
+            var fields = [ this.time ].concat( args );
+
+            if ( socket ) {
+
+                var message = fields.join( " " ); // TODO: json encode
+                socket.send( message );
+
+            } else {
+
+                queue.push( fields );
+                queue.sort( function( a, b ) { return a[0] - b[0] } );
+
+            }
+
+        };
 
         // -- receive ------------------------------------------------------------------------------
 
         this.receive = function( message ) {
 
-            var parameters = message.split( " " );
+            var fields = message.split( " " ); // TODO: json decode
 
-            var nodeID = parameters.shift();
-            var actionName = parameters.shift();
+            var time = Number( fields.shift() );
+            var nodeID = Number( fields.shift() );
+            var actionName = fields.shift();
 
-            this[actionName] && this[actionName].apply( this, [ nodeID ] + parameters ); // TODO: decode from json
+            this[actionName] && this[actionName].apply( this, [ nodeID ] + parameters );
             
-        }; // receive
+        };
+
+        // -- dispatch -----------------------------------------------------------------------------
+
+        this.dispatch = function( currentTime ) {
+
+            while ( queue.length > 0 ) {
+
+                var fields = queue[0].split( " " );
+                var messageTime = Number( fields[0] );
+
+                if ( messageTime > currentTime ) {
+                    break;
+                }
+
+                this.receive( queue.shift() );
+
+            }
+            
+        };
 
         // -- createNode ---------------------------------------------------------------------------
 
@@ -127,26 +200,112 @@
 
             console.info( "vwf.createNode " + component_uri_or_object );
 
-var type = vwf.types["http://vwf.example.com/types/node"];
-var spec = component_uri_or_object;
 var name = undefined;
 
-var nodeID = ( lastID == undefined ? ( lastID = rootID ) : ++lastID );
-var prototypeID = nodePrototypeID;
+            // spec|uri => spec => type
 
-            // Call creatingNode() on each model.
+            if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
 
-            jQuery.each( vwf.models, function( index, model ) {
-                model.creatingNode && model.creatingNode( nodeID, name, prototypeID, [], spec.source, spec.type );
-            } );
+                if ( component_uri_or_object == nodeTypeURI ) {
 
-            // Call createdNode() on each view.
+                    var prototypeID = undefined;
+                    var component = {};
 
-            jQuery.each( vwf.views, function( index, view ) {
-                view.createdNode && view.createdNode( nodeID, name, prototypeID, [], spec.source, spec.type );
-            } );
+                    console.log( "vwf.createNode: creating " + nodeTypeURI + " prototype" );
+                    construct.call( this, prototypeID, component );
+
+                } else {
+
+                    console.log( "vwf.createNode: creating node of type " + component_uri_or_object );
+
+                    jQuery.ajax( {
+                        url: component_uri_or_object,
+                        dataType: "jsonp",
+                        jsonpCallback: "cb",
+                        success: function( component ) {
+                            this.findType( component["extends"] || nodeTypeURI, function( prototypeID ) {
+                                construct.call( this, prototypeID, component );
+                            } )
+                        },
+                        context: this
+                    } );
+
+                }
+            } else {
+
+                var component = component_uri_or_object;
+
+                console.log( "vwf.createNode: creating node of literal subclass of " + ( component["extends"] || nodeTypeURI ) );
+
+                this.findType( component["extends"] || nodeTypeURI, function( prototypeID ) {
+                    construct.call( this, prototypeID, component );
+                } );
+
+            }
+
+            // type => new/init
+
+            function construct( prototypeID, component ) {
+
+                var nodeID = ++lastID;
+
+                console.info( "vwf.createNode " + nodeID + " " + component.source + " " + component.type );
+
+                // Call creatingNode() on each model.
+
+                jQuery.each( vwf.models, function( index, model ) {
+                    model.creatingNode && model.creatingNode( nodeID, name, prototypeID, [], component.source, component.type );
+                } );
+
+                // Call createdNode() on each view.
+
+                jQuery.each( vwf.views, function( index, view ) {
+                    view.createdNode && view.createdNode( nodeID, name, prototypeID, [], component.source, component.type );
+                } );
+
+// PMEC here
+
+                callback && callback.call( this, nodeID, prototypeID );
+
+            }
+
+        };
+
+        // -- findType -----------------------------------------------------------------------------
+
+        this.findType = function( component_uri_or_object, callback ) {
+
+            var typeURI = undefined, typeID = undefined;
+
+            if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
+                typeURI = component_uri_or_object;
+                typeID = types[typeURI];
+            }
             
-            return nodeID; // TODO: not with callback ...
+            if ( typeID ) {
+
+                callback && callback.call( this, typeID );
+
+//            } else if ( typeURI == nodeTypeURI ) {
+
+//                typeID = nodeTypeID;
+//                callback && callback.call( this, typeID );
+
+            } else if ( typeURI ) {
+
+                this.createNode( component_uri_or_object, function( typeID, prototypeID ) {
+                    types[typeURI] = typeID;
+                    callback && callback.call( this, typeID );
+                } );
+
+            } else {
+
+                this.createNode( component_uri_or_object, function( typeID, prototypeID ) {
+                    callback && callback.call( this, typeID );
+                } );
+
+            }
+
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -231,3 +390,43 @@ var prototypeID = nodePrototypeID;
     };
 
 } ) ( window );
+
+
+
+
+
+
+
+
+
+
+
+// From http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/2880929#2880929
+// and http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/3867610#3867610.
+
+jQuery.extend( {
+
+    getQueryString: function( name ) {
+
+        function parseParams() {
+            var params = {},
+                e,
+                a = /\+/g, // regex for replacing addition symbol with a space
+                r = /([^&;=]+)=?([^&;]*)/g,
+                d = function( s ) { return decodeURIComponent( s.replace(a, " ") ); },
+                q = window.location.search.substring(1);
+
+            while ( e = r.exec(q) )
+                params[ d(e[1]) ] = d(e[2]);
+
+            return params;
+        }
+
+        if ( !this.queryStringParams )
+            this.queryStringParams = parseParams();
+
+        return this.queryStringParams[name];
+
+    } // getQueryString
+
+} );
