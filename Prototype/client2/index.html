@@ -17,7 +17,7 @@
 
     <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
     <!-- the global window object as window.vwf. All access to the framework is through that     -->
-    <!-- reference, and no other objects are visible globally.                                   -->
+    <!-- reference, and no other objects are globally visible.                                   -->
 
     <script type="text/javascript" src="vwf.js"></script>
 
@@ -25,9 +25,9 @@
     <!-- multiple users. But, the manner in which the simulation is expressed is controlled by   -->
     <!-- extension modules. There are two flavors. Models directly control the simulation but    -->
     <!-- cannot accept external input. The model configuration is identical for all participants -->
-    <!-- in a shared world. Views may accept external input - such as pointer and key events or  -->
-    <!-- a connection to an outside engine--that is not visible to all users, but may only       -->
-    <!-- affected the simulation indirectly through the synchronization server.                  -->
+    <!-- in a shared world. Views may accept external input -such as pointer and key events or   -->
+    <!-- directives from a connection to an outside engine that is not visible to all users- but -->
+    <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
     <!-- This is the common model implementation and an example model that connects the          -->
     <!-- simulation to a WebGL scene manager.                                                    -->
