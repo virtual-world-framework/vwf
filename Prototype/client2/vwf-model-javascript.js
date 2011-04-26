@@ -51,9 +51,9 @@
 
     // -- creatingNode -----------------------------------------------------------------------------
 
-    module.prototype.creatingNode = function( nodeID, nodeName, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+    module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
 
-        console.info( "vwf.model.javascript.creatingNode " + nodeID + " " +  nodeName + " " + 
+        console.info( "vwf.model.javascript.creatingNode " + nodeID + " " +
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
 
         var type = this.types[nodeExtendsID];
@@ -69,7 +69,7 @@
 
         }
 
-        this.nodes[nodeID] = new type( nodeName, nodeSource, nodeType );
+        this.nodes[nodeID] = new type( nodeSource, nodeType );
 
     };
 
@@ -92,45 +92,45 @@
 
 
 
-Node.prototype.createProperty = function( propertyName, propertyValue ) {
+//Node.prototype.createProperty = function( propertyName, propertyValue ) {
 
-    var property = this.properties[propertyName] = new vwf.property( this, propertyValue );
+//    var property = this.properties[propertyName] = new vwf.property( this, propertyValue );
 
-    Object.defineProperty( this, propertyName, {
-        get: function() { return property.value }, // "this" is property's node
-        set: function( value ) { property.value = value }, // TODO: getters & setters
-        enumerable: true
-    } );
+//    Object.defineProperty( this, propertyName, {
+//        get: function() { return property.value }, // "this" is property's node
+//        set: function( value ) { property.value = value }, // TODO: getters & setters
+//        enumerable: true
+//    } );
 
-    var result = this.setProperty( propertyName, propertyValue );
+//    var result = this.setProperty( propertyName, propertyValue );
 
-    vwf.onCreateProperty( this.id, propertyName, propertyValue ); // TODO: redundancy with onSetProperty call
+//    vwf.onCreateProperty( this.id, propertyName, propertyValue ); // TODO: redundancy with onSetProperty call
 
-    return result;
-};
+//    return result;
+//};
 
-Node.prototype.setProperty = function( propertyName, propertyValue ) {
+//Node.prototype.setProperty = function( propertyName, propertyValue ) {
 
-    var property = this.properties[propertyName];
+//    var property = this.properties[propertyName];
 
-    var result = property.set ? property.set.call( this, propertyValue ) : ( property.value = propertyValue );
+//    var result = property.set ? property.set.call( this, propertyValue ) : ( property.value = propertyValue );
 
-    vwf.onSetProperty( this.id, propertyName, propertyValue );
+//    vwf.onSetProperty( this.id, propertyName, propertyValue );
 
-    return result;
-};
+//    return result;
+//};
 
-Node.prototype.getProperty = function( propertyName ) {
+//Node.prototype.getProperty = function( propertyName ) {
 
-    var property = this.properties[propertyName] ||
-this.prototype.properties[propertyName] || this.prototype.prototype.properties[propertyName]; // TODO: make recursive
+//    var property = this.properties[propertyName] ||
+//this.prototype.properties[propertyName] || this.prototype.prototype.properties[propertyName]; // TODO: make recursive
 
-    var result =  property.get ? property.get.call( this ) : property.value;
+//    var result =  property.get ? property.get.call( this ) : property.value;
 
-    vwf.onGetProperty( this.id, propertyName );
+//    vwf.onGetProperty( this.id, propertyName );
 
-    return result;
-};
+//    return result;
+//};
 
 
 
@@ -144,11 +144,11 @@ this.prototype.properties[propertyName] || this.prototype.prototype.properties[p
 
     // == Node =====================================================================================
 
-    var node = function( nodeName, nodeSource, nodeType ) {
+    var node = function( nodeSource, nodeType ) {
 
         this.parent = undefined;
 
-        this.name = nodeName;
+        // this.name = nodeName;
 
         this.source = nodeSource;
         this.type = nodeType;
