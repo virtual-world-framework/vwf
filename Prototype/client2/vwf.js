@@ -350,7 +350,7 @@
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( /* [ parentID, ] */ component_uri_or_object, callback ) {
+        this.createNode = function( component_uri_or_object, callback ) {
 
             console.info( "vwf.createNode " + component_uri_or_object );
 
@@ -409,7 +409,7 @@
 
                 var component = component_uri_or_object;
 
-                console.log( "vwf.createNode: creating node of literal subclass of " + ( component["extends"] || nodeTypeURI ) );
+                console.log( "vwf.createNode: creating " + ( component["extends"] || nodeTypeURI ) + " literal" );
 
                 this.findType( component["extends"] || nodeTypeURI, function( prototypeID ) {
                     construct.call( this, prototypeID, component );
@@ -451,27 +451,41 @@
                     view.createdNode && view.createdNode( nodeID, name, prototypeID, [], component.source, component.type );
                 } );
 
-                // Create the properties, methods, and events.
+                // Create the properties, methods, and events. For each item in each set, invoke
+                // createProperty(), createMethod(), or createEvent() to create the field. Each
+                // delegates to the models and views as above.
 
-                // This is a placeholder for creating the properties, methods, and events. For each
-                // item in each set, we invoke vwf.createProperty(), vwf.createMethod(), or
-                // vwf.createEvent() to create the field. Each of those functions delegates to the
-                // models and views as we just did above.
+                component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
+                    vwf.createProperty( nodeID, propertyName, propertyValue );
+                } );
 
-                // Create and attach the children.
+                component.methods && jQuery.each( component.methods, function( methodName ) {
+                    vwf.createMethod( nodeID, methodName );
+                } );
 
-                // This is a placeholder for creating and attaching the children. For each child, we
-                // call vwf.createNode() with the child's component specification, then once loaded,
-                // call vwf.addChild() to attach the new node as a child. addChild() delegates to
-                // the models and views as before.
+                component.events && jQuery.each( component.events, function( eventName ) {
+                    vwf.createEvent( nodeID, eventName );
+                } );
 
-                // Attach the scripts.
+                // Create and attach the children. For each child, call createNode() with the
+                // child's component specification, then once loaded, call addChild() to attach the
+                // new node as a child. addChild() delegates to the models and views as before.
 
-                // This is a placeholder for attaching and evaluating scripts. For each script, we
-                // the network resource if the script is specified with as a URI, then once loaded,
-                // call vwf.execute() to direct any model that manages scripts of this item's type
-                // to evaluate the script, perform any immediate actions, and retain any callbacks
-                // as appropriate for the script type.
+                component.children && jQuery.each( component.children, function( childName, child_uri_or_object ) {
+                    vwf.createNode( child_uri_or_object, function( childID, childTypeID ) {
+                        vwf.addChild( nodeID, childID, childName );
+                    } );
+                } );
+
+                // Attach the scripts. For each script, load the network resource if the script is
+                // specified as a URI, then once loaded, call execute() to direct any model that
+                // manages scripts of this script's type to evaluate the script where it will
+                // perform any immediate actions and retain any callbacks as appropriate for the
+                // script type.
+
+                component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
+                    script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                } );
 
                 // Invoke an initialization method.
 
@@ -539,6 +553,75 @@
 
         };
 
+        // -- addChild -----------------------------------------------------------------------------
+
+        this.addChild = function( nodeID, childID, childName ) {
+
+            console.info( "vwf.addChild " + nodeID + " " + childID + " " + childName );
+
+            // Call addingChild() on each model. The child is considered added after each model has
+            // run.
+
+            jQuery.each( vwf.models, function( index, model ) {
+                model.addingChild && model.addingChild( nodeID, childID, childName );
+            } );
+
+            // Call addedChild() on each view. The view is being notified that a child has been
+            // added.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.addedChild && view.addedChild( nodeID, childID, childName );
+            } );
+
+        };
+
+        // -- removeChild --------------------------------------------------------------------------
+
+        this.removeChild = function( nodeID, childID ) {
+
+            console.info( "vwf.removeChild " + nodeID + " " + childID );
+
+            // Call removingChild() on each model. The child is considered removed after each model
+            // has run.
+
+            jQuery.each( vwf.models, function( index, model ) {
+                model.removingChild && model.removingChild( nodeID, childID );
+            } );
+
+            // Call removedChild() on each view. The view is being notified that a child has been
+            // removed.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.removedChild && view.removedChild( nodeID, childID );
+            } );
+
+        };
+
+        // -- createProperty -----------------------------------------------------------------------
+
+        // Create a property on a node and assign an initial value.
+
+        this.createProperty = function( nodeID, propertyName, propertyValue ) {
+
+            console.info( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
+            // Call creatingProperty() on each model. The property is considered created after each
+            // model has run.
+
+            jQuery.each( vwf.models, function( index, model ) {
+                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue );
+            } );
+
+            // Call createdProperty() on each view. The view is being notified that a property has
+            // been created.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue );
+            } );
+
+            return propertyValue;
+        };
+
         // -- setProperty --------------------------------------------------------------------------
 
         // Set a property value on a node.
@@ -554,8 +637,8 @@
                 model.settingProperty && model.settingProperty( nodeID, propertyName, propertyValue );
             } );
 
-            // Call satProperty() on each view. The view is being notified of a property that has
-            // been set.
+            // Call satProperty() on each view. The view is being notified that a property has been
+            // set.
 
             jQuery.each( vwf.views, function( index, view ) {
                 view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );

@@ -50,9 +50,30 @@
         return this.vwf.createNode( component_uri_or_object, callback );
     };
 
-    // deleteNode, addChild, removeChild
+    // TODO: deleteNode
 
-    // createProperty, deleteProperty
+    // -- addChild ---------------------------------------------------------------------------------
+
+    module.prototype.addChild = function( nodeID, childID, childName) {
+        console.info( "vwf.model.addChild " + nodeID + " " + childID + " " + childName );
+        return this.vwf.addChild( nodeID, childID, childName );
+    };
+
+    // -- removeChild ------------------------------------------------------------------------------
+
+    module.prototype.removeChild = function( nodeID, childID ) {
+        console.info( "vwf.model.removeChild " + nodeID + " " + childID );
+        return this.vwf.removeChild( nodeID, childID );
+    };
+
+    // -- createProperty ---------------------------------------------------------------------------
+
+    module.prototype.createProperty = function( nodeID, propertyName, propertyValue ) {
+        console.info( "vwf.model.createProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        return this.vwf.createProperty( nodeID, propertyName, propertyValue );
+    };
+
+    // TODO: deleteProperty
 
     // -- setProperty ------------------------------------------------------------------------------
 
@@ -68,13 +89,13 @@
         return this.vwf.getProperty( nodeID, propertyName, propertyValue );
     };
 
-    // createMethod, deleteMethod, callMethod
+    // TODO: createMethod, deleteMethod, callMethod
     
-    // createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
+    // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
 
-    // execute
+    // TODO: execute
 
-    // time
+    // TODO: time
 
     // == Response API =============================================================================
 
@@ -95,9 +116,27 @@
         console.info( "vwf.model.creatingNode " + nodeID + " " +  nodeName + " " +  nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
     };
 
-    // deletingNode, addingChild, removingChild
+    // TODO: deletingNode
 
-    // creatingProperty, deletingProperty
+    // -- addingChild ------------------------------------------------------------------------------
+
+    module.prototype.addingChild = function( nodeID, childID, childName ) {
+        console.info( "vwf.model.addingChild " + nodeID + " " + childID + " " + childName );
+    };
+
+    // -- removingChild ----------------------------------------------------------------------------
+
+    module.prototype.removingChild = function( nodeID, childID ) {
+        console.info( "vwf.model.removingChild " + nodeID + " " + childID );
+    };
+
+    // -- creatingProperty -------------------------------------------------------------------------
+
+    module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
+        console.info( "vwf.model.creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+    };
+
+    // TODO: deletingProperty
 
     // -- settingProperty --------------------------------------------------------------------------
 
@@ -111,10 +150,10 @@
         console.info( "vwf.model.gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
-    // creatingMethod, deletingMethod, callingMethod
+    // TODO: creatingMethod, deletingMethod, callingMethod
 
-    // creatingEvent, deltetingEvent, firingEvent
+    // TODO: creatingEvent, deltetingEvent, firingEvent
 
-    // executing
+    // TODO: executing
 
 } ) ( window.vwf.modules );
