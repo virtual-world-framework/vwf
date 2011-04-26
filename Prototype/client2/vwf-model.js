@@ -112,8 +112,9 @@
 
     // -- creatingNode -----------------------------------------------------------------------------
 
-    module.prototype.creatingNode = function( nodeID, nodeName, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
-        console.info( "vwf.model.creatingNode " + nodeID + " " +  nodeName + " " +  nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
+    module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+        console.info( "vwf.model.creatingNode " + nodeID + " " + 
+            nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
     };
 
     // TODO: deletingNode

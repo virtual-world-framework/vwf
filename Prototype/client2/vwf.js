@@ -278,13 +278,13 @@
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( message ) {
+        this.receive = function( fields ) {
 
             // Note that this example code doesn't implement a robust parser capable of handing
             // arbitrary text. Additionally, the message should be validated before looking up and
             // invoking an arbitrary handler.
 
-            var fields = message.split( " " );
+//            var fields = message.split( " " );
 
             // Shift off the now-unneeded time parameter (dispatch() has already advanced the time)
             // and locate the node ID and action name.
@@ -295,7 +295,8 @@
 
             // Look up the action handler and invoke it with the remaining parameters.
 
-            this[actionName] && this[actionName].apply( this, [ nodeID ] + parameters );
+//            this[actionName] && this[actionName].apply( this, [ nodeID ] + fields );
+            this[actionName] && this[actionName].call( this, nodeID, fields[0], fields[1] );
             
         };
 
@@ -314,7 +315,7 @@
                 // Set the simulation time to the message time, remove the message and perform the
                 // action.
 
-                this.time = messageTime;
+                this.time = Number( queue[0][0] );
                 this.receive( queue.shift() );
 
             }
@@ -353,8 +354,6 @@
         this.createNode = function( component_uri_or_object, callback ) {
 
             console.info( "vwf.createNode " + component_uri_or_object );
-
-            var name = undefined;
 
             // Any component specification may be provided as either a URI identifying a network
             // resource containing the specification or as an object literal that provides the data
@@ -441,14 +440,14 @@
                 // each model has run.
 
                 jQuery.each( vwf.models, function( index, model ) {
-                    model.creatingNode && model.creatingNode( nodeID, name, prototypeID, [], component.source, component.type );
+                    model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
                 } );
 
                 // Call createdNode() on each view. The view is being notified of a model that has
                 // been constructed.
 
                 jQuery.each( vwf.views, function( index, view ) {
-                    view.createdNode && view.createdNode( nodeID, name, prototypeID, [], component.source, component.type );
+                    view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type );
                 } );
 
                 // Create the properties, methods, and events. For each item in each set, invoke
