@@ -17,7 +17,9 @@
 
         modules.view.call( this, vwf );
 
-        jQuery( rootSelector ).append( "<div class='vwf-orphanage' style='display:none'></div>" )
+        jQuery( rootSelector ).append( "<h2>Types</h2>" )
+        jQuery( rootSelector ).append( "<div class='vwf-orphanage'></div>" )
+        jQuery( rootSelector ).append( "<h2>World</h2>" )
         this.rootSelector = rootSelector;
 
         return this;
@@ -39,35 +41,20 @@
         console.info( "vwf.view.html.createdNode " + nodeID + " " +
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
 
-        if ( nodeID == 2 ) { // TODO: const for root id
-            
-            var nodeQuery = jQuery( this.rootSelector ).addClass( "vwf-node" ).append(
+        var nodeQuery = jQuery( ".vwf-orphanage" ).append(
+            "<div id='" + nodeID + "' class='vwf-node'>" +
                 "<p class='vwf-label'>" +
+                    nodeID + " " + "<span class='vwf-name'/>" +
+                        ( nodeExtendsID || ( nodeImplementsIDs && nodeImplementsIDs.length ) ? ", type: " : "" ) +
                     "<span class='vwf-attribute'>" +
                         ( [ nodeExtendsID ].concat( nodeImplementsIDs || [] ).join( ", " ) ) +
                     "</span>" +
                     ( nodeSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
                         "source=\"" + nodeSource + "\" type=\"" + ( nodeType || "" ) + "\"" +
                     "</span>" : "" ) +
-                "</p>"
-            );
-            
-        } else {
-
-            var nodeQuery = jQuery( ".vwf-orphanage" ).append(
-                "<div id='" + nodeID + "' class='vwf-node'>" +
-                    "<p class='vwf-label'>" + "name" + ( nodeExtendsID || ( nodeImplementsIDs && nodeImplementsIDs.length ) ? ", type: " : "" ) +
-                        "<span class='vwf-attribute'>" +
-                            ( [ nodeExtendsID ].concat( nodeImplementsIDs || [] ).join( ", " ) ) +
-                        "</span>" +
-                        ( nodeSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
-                            "source=\"" + nodeSource + "\" type=\"" + ( nodeType || "" ) + "\"" +
-                        "</span>" : "" ) +
-                    "</p>" +
-                "</div>"
-            ). children( ":last" );
-
-        }
+                "</p>" +
+            "</div>"
+        ). children( ":last" );
 
         nodeQuery.children( ".vwf-label" ).click( function() {
             jQuery(this).siblings( ".vwf-properties, .vwf-methods, .vwf-events, .vwf-children, .vwf-scripts" ).toggle();
@@ -79,7 +66,7 @@
 
         console.info( "vwf.view.html.addedChild " + nodeID + " " + childID + " " + childName );
 
-        var nodeQuery = jQuery( nodeID == 2 ? this.rootSelector : "#" + nodeID ); // TODO: const for root id
+        var nodeQuery = jQuery( nodeID == 0 ? this.rootSelector : "#" + nodeID ); // TODO: const for root id
         var containerQuery = nodeQuery.children( ".vwf-children" );
 
         if ( containerQuery.length == 0 ) {
@@ -97,6 +84,7 @@
         }
 
         var childQuery = jQuery( "#" + childID );
+        childQuery.find( ".vwf-name" ).first().html( childName );
         containerQuery.append( childQuery );
 
     };
@@ -107,7 +95,7 @@
 
         console.info( "vwf.view.html.createdProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
-        var nodeQuery = jQuery( nodeID == 2 ? this.rootSelector : "#" + nodeID ); // TODO: const for root id
+        var nodeQuery = jQuery( nodeID == 0 ? this.rootSelector : "#" + nodeID ); // TODO: const for root id
         var containerQuery = nodeQuery.children( ".vwf-properties" );
 
         if ( containerQuery.length == 0 ) {
@@ -139,8 +127,8 @@
 var view = this;
 
         propertyQuery.click( function() {
-            var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 2; // TODO: symbol for global id
-            var nodeQuery = jQuery( nodeID == 2 ? rootSelector : "#" + nodeID );
+            var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
+            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
             var propertyQuery = nodeQuery.children( ".vwf-properties" ).children( "#" + nodeID + "-" + propertyName );
             view.setProperty( nodeID, propertyName, Number( JSON.parse( propertyQuery.find( ".vwf-value" ).text() ) ) + 1 );
         } );
@@ -150,12 +138,12 @@ var view = this;
         // var controlQuery = propertyQuery.find( ".vwf-control" );
 
         // controlQuery.keyup( function() {
-        //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 2; // TODO: symbol for global id
+        //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
         //     view.setProperty( nodeID, propertyName, jQuery(this).val() );
         // } );
 
         // controlQuery.change( function() {
-        //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 2; // TODO: symbol for global id
+        //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id ) || 0; // TODO: symbol for global id
         //     view.setProperty( nodeID, propertyName, jQuery(this).val() ); // TODO: json exceptions?
         // } );
             
@@ -167,7 +155,7 @@ var view = this;
 
         console.info( "vwf.view.html.satProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
-        var nodeQuery = jQuery( nodeID == 2 ? rootSelector : "#" + nodeID ); // TODO: symbol for global id
+        var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID ); // TODO: symbol for global id
         var propertyQuery = nodeQuery.children( ".vwf-properties" ).children( "#" + nodeID + "-" + propertyName );
 
         // Demo hack 1
