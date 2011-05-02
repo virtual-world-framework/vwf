@@ -18,6 +18,18 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #CCD;
 }
 
+.vwf-orphanage {
+  background-color: #CCC;
+}
+
+.vwf-orphanage .vwf-node:nth-child(odd) {
+  background-color: #BCC;
+}
+
+.vwf-orphanage .vwf-node:nth-child(even) {
+  background-color: #CBC;
+}
+
 .vwf-children {
   background-color: #CCC;
 }
