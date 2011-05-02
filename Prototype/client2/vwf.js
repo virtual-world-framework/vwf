@@ -12,7 +12,7 @@
 
         console.info( "creating vwf" );
 
-        // == Public attributes ====================================================================
+        // == Public variables =====================================================================
 
         // Each model and view module loaded by the main page registers itself here.
 
@@ -236,10 +236,12 @@
             }
 
             // Load the world. The world is a rooted in a single node constructed here as an
-            // instance of the component passed to initialize(). That component, it's prototype(s),
-            // and it's children, and their prototypes and children, flesh out the entire world.
+            // instance of the component passed to initialize(). That component, its prototype(s),
+            // and its children, and their prototypes and children, flesh out the entire world.
 
-            this.createNode( component_uri_or_object );
+            this.createNode( component_uri_or_object, function( rootID, rootTypeID ) {
+                vwf.addChild( 0, rootID, undefined );
+            } );
 
         };
 
