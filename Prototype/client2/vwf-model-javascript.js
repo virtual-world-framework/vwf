@@ -85,6 +85,27 @@ node.id = nodeID;
 
     };
 
+    // -- addingChild ------------------------------------------------------------------------------
+
+    module.prototype.addingChild = function( nodeID, childID, childName ) {
+
+        console.info( "vwf.model.javascript.addingChild " + nodeID + " " + childID + " " + childName );
+
+        var node = this.nodes[nodeID];
+        var child = this.nodes[childID];
+
+        child.name = childName;
+        child.parent = node;
+
+        if ( node ) {
+            node.children.push( child );
+            node.children[childName] = child;
+            node[childName] = child;  // TODO: if no conflict with other names on node
+        }
+    };
+
+    // TODO: removingChild
+
     // -- creatingProperty -------------------------------------------------------------------------
 
     module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
@@ -92,7 +113,22 @@ node.id = nodeID;
         console.info( "vwf.model.javascript.creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
-        var property = node.properties[propertyName] = { node: node, value: propertyValue, get: undefined, set: undefined };
+
+        var property = node.properties[propertyName] = {
+            getter: undefined,
+            setter: undefined,
+            value: undefined,
+            getting: false, // TODO: make private?
+            setting: false, // TODO: make private?
+            internal: propertyValue // TODO: make private?
+        };
+
+        Object.defineProperty( property, "value", {
+            get: function() { return vwf.getProperty( nodeID, propertyName ) }, // "this" is property's node
+            set: function( value ) { vwf.setProperty( nodeID, propertyName, value ) }
+        } );
+
+        // TODO: if no conflict with other names on node
 
         Object.defineProperty( node, propertyName, {
             get: function() { return vwf.getProperty( nodeID, propertyName ) }, // "this" is property's node
@@ -111,10 +147,17 @@ node.id = nodeID;
         console.info( "vwf.model.javascript.settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
-        var property = node.properties[propertyName];
+        var property = node.properties[propertyName]; // TODO: search recursively through prototypes and copy on write.
 
-        // return property.set ? property.set.call( node, propertyValue ) : ( property.value = propertyValue );
-        return node["onSetProperty"] ? node["onSetProperty"].call( node, propertyValue ) : ( property.value = propertyValue );
+        if ( property.setter && !property.setting ) {
+            property.setting = true;
+            value = property.setter.call( node, propertyValue );
+            property.setting = false;
+        } else {
+            value = property.internal = propertyValue;
+        }
+
+        return value;
 
     };
 
@@ -125,10 +168,17 @@ node.id = nodeID;
         console.info( "vwf.model.javascript.gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
-        var property = node.properties[propertyName] ||
-( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] );
+        var property = node.properties[propertyName] || ( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] ); // TODO: search recursively through prototypes.
 
-        return property.get ? property.get.call( node ) : property.value;
+        if ( property.getter && !property.getting ) {
+            property.getting = true;
+            value = property.getter.call( node );
+            property.getting = false;
+        } else {
+            value = property.internal;
+        }
+
+        return value;
 
     };
 
