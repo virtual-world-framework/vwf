@@ -367,43 +367,14 @@
 
             if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
 
-                // nodeTypeURI is a special URI identifying the base "node" component that is the
-                // ultimate prototype of all other components. Its specification is known
-                // intrinsicly and does not exist as a network resource. If the component URI
-                // identifies "node", call construct() directly and pass a null prototype and an
-                // empty specification.
+                console.log( "vwf.createNode: creating node of type " + component_uri_or_object );
 
-                if ( component_uri_or_object == nodeTypeURI ) {
-
-                    var prototypeID = undefined;
+                this.getType( component_uri_or_object, function( prototypeID ) {
                     var component = {};
+                    construct.call( this, component, prototypeID, callback );
+                } );
 
-                    console.log( "vwf.createNode: creating " + nodeTypeURI + " prototype" );
-                    construct.call( this, prototypeID, component );
-
-                // For any other URI, load the document. Once it loads, call findType() to locate or
-                // load the prototype node, then pass the prototype and the component specification
-                // to construct().
-
-                } else {
-
-                    console.log( "vwf.createNode: creating node of type " + component_uri_or_object );
-
-                    jQuery.ajax( {
-                        url: component_uri_or_object,
-                        dataType: "jsonp",
-                        jsonpCallback: "cb",
-                        success: function( component ) {
-                            this.findType( component["extends"] || nodeTypeURI, function( prototypeID ) {
-                                construct.call( this, prototypeID, component );
-                            } )
-                        },
-                        context: this
-                    } );
-
-                }
-
-            // If a component literal was provided, call findType() to locate or load the prototype
+            // If a component literal was provided, call getType() to locate or load the prototype
             // node, then pass the prototype and the component specification to construct().
 
             } else {
@@ -412,98 +383,15 @@
 
                 console.log( "vwf.createNode: creating " + ( component["extends"] || nodeTypeURI ) + " literal" );
 
-                this.findType( component["extends"] || nodeTypeURI, function( prototypeID ) {
-                    construct.call( this, prototypeID, component );
+                this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) {
+                    construct.call( this, component, prototypeID, callback );
                 } );
-
-            }
-
-            // When we arrive here, we have a prototype node in hand (by way of its ID) and an
-            // object containing a component specification. We now need to create and assemble the
-            // new node.
-            // 
-            // The VWF manager doesn't directly manipulate any node. The various models act in
-            // federation to create the greater model. The manager simply routes messages within the
-            // system to allow the models to maintain the necessary data. Additionally, the views
-            // receive similar messages that allow them to keep their interfaces current.
-            //
-            // To create a node, we simply assign a new ID, then invoke a notification on each model
-            // and a notification on each view.
-
-            function construct( prototypeID, component ) {
-
-                // Allocate an ID for the node. We just use an incrementing counter.
-
-                var nodeID = ++lastID;
-
-                console.info( "vwf.createNode " + nodeID + " " + component.source + " " + component.type );
-
-                // Call creatingNode() on each model. The node is considered to be constructed after
-                // each model has run.
-
-                jQuery.each( vwf.models, function( index, model ) {
-                    model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
-                } );
-
-                // Call createdNode() on each view. The view is being notified of a node that has
-                // been constructed.
-
-                jQuery.each( vwf.views, function( index, view ) {
-                    view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type );
-                } );
-
-                // Create the properties, methods, and events. For each item in each set, invoke
-                // createProperty(), createMethod(), or createEvent() to create the field. Each
-                // delegates to the models and views as above.
-
-                component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
-                    vwf.createProperty( nodeID, propertyName, propertyValue );
-                } );
-
-                component.methods && jQuery.each( component.methods, function( methodName ) {
-                    vwf.createMethod( nodeID, methodName );
-                } );
-
-                component.events && jQuery.each( component.events, function( eventName ) {
-                    vwf.createEvent( nodeID, eventName );
-                } );
-
-                // Create and attach the children. For each child, call createNode() with the
-                // child's component specification, then once loaded, call addChild() to attach the
-                // new node as a child. addChild() delegates to the models and views as before.
-
-                component.children && jQuery.each( component.children, function( childName, child_uri_or_object ) {
-                    vwf.createNode( child_uri_or_object, function( childID, childTypeID ) {
-                        vwf.addChild( nodeID, childID, childName );
-                    } );
-                } );
-
-                // Attach the scripts. For each script, load the network resource if the script is
-                // specified as a URI, then once loaded, call execute() to direct any model that
-                // manages scripts of this script's type to evaluate the script where it will
-                // perform any immediate actions and retain any callbacks as appropriate for the
-                // script type.
-
-                component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
-                    script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                } );
-
-                // Invoke an initialization method.
-
-                // This is placeholder for a call into the object to invoke its initialize() method
-                // if it has a script attached that provides one.
-
-                // The node is complete. Invoke the callback method and pass the new node ID and the
-                // ID of its prototype. If this was the root node for the world, the world is now
-                // fully initialized.
-
-                callback && callback.call( this, nodeID, prototypeID );
 
             }
 
         };
 
-        // -- findType -----------------------------------------------------------------------------
+        // -- getType ------------------------------------------------------------------------------
 
         // Find or load a node that will serve as the prototype for a component specification. If
         // the component is identified using a URI, save a mapping from the URI to the prototype ID
@@ -511,43 +399,65 @@
         // save a reference in the database (since no other component can refer to it), and just
         // create it as an anonymous type.
 
-        this.findType = function( component_uri_or_object, callback ) {
+        this.getType = function( uri, callback ) {
 
-            var typeURI = undefined, typeID = undefined;
-
-            // If the component is identified using a URI, look in the database to see if it has
-            // already been loaded.
-
-            if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
-                typeURI = component_uri_or_object;
-                typeID = types[typeURI];
-            }
+            var id = types[uri];
 
             // If we found the URI in the database, invoke the callback with the ID of the
             // previously-loaded prototype node.
             
-            if ( typeID ) {
+            if ( id ) {
 
-                callback && callback.call( this, typeID );
+                callback && callback.call( this, id );
 
             // If the type has not been loaded but is identified with a URI, call createNode() to
             // make the node that we will use as the prototype. When it loads, save the ID in the
             // types database and invoke the callback with the new prototype node's ID.
 
-            } else if ( typeURI ) {
+            // nodeTypeURI is a special URI identifying the base "node" component that is the
+            // ultimate prototype of all other components. Its specification is known
+            // intrinsicly and does not exist as a network resource. If the component URI
+            // identifies "node", call construct() directly and pass a null prototype and an
+            // empty specification.
 
-                this.createNode( component_uri_or_object, function( typeID, prototypeID ) {
-                    types[typeURI] = typeID;
-                    callback && callback.call( this, typeID );
+            } else if ( uri == nodeTypeURI ) {
+
+                var component = {};
+                var prototypeID = undefined;
+
+                console.log( "vwf.getType: creating " + uri + " prototype" );
+
+                construct.call( this, component, prototypeID, function( id, prototypeID ) {
+                    types[uri] = id;
+                    callback && callback.call( this, id );
                 } );
 
-            // If the type is specified as a component literal, call createNode() then invoke the
-            // callback, but don't save a reference in the types database.
+            // For any other URI, load the document. Once it loads, call getType() to locate or
+            // load the prototype node, then pass the prototype and the component specification
+            // to construct().
 
             } else {
 
-                this.createNode( component_uri_or_object, function( typeID, prototypeID ) {
-                    callback && callback.call( this, typeID );
+                console.log( "vwf.getType: creating " + uri + " prototype" );
+
+                jQuery.ajax( {
+                    url: uri,
+                    dataType: "jsonp",
+                    jsonpCallback: "cb",
+                    success: function( component ) {
+                        this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
+                            if ( ! types[uri] ) {
+                                construct.call( this, component, prototypeID, function( id, prototypeID ) {
+                                    types[uri] = id;
+                                    callback && callback.call( this, id );
+                                } );
+                            } else { // TODO: handle multiple loads of same type better
+                                id = types[uri];
+                                callback && callback.call( this, id );
+                            }
+                        } )
+                    },
+                    context: this
                 } );
 
             }
@@ -675,7 +585,117 @@
             return propertyValue;
         };
 
+        // -- execute ------------------------------------------------------------------------------
+
+        this.execute = function( nodeID, scriptText, scriptType ) {
+
+            console.info( "vwf.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+
+            // Call executing() on each model. The script is considered executed after each model
+            // has run.
+
+            var scriptValue = undefined;
+
+            jQuery.each( vwf.models, function( index, model ) {
+                var value = model.executing && model.executing( nodeID, scriptText, scriptType ); // TODO: return value
+                scriptValue = value !== undefined ? value : scriptValue;
+            } );
+
+            // Call executed() on each view. The view is being notified that a script has been
+            // executed.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.executed && view.executed( nodeID, scriptText, scriptType );
+            } );
+
+            return scriptValue;
+        };
+
         // == Private functions ====================================================================
+
+        // -- construct ----------------------------------------------------------------------------
+
+        // When we arrive here, we have a prototype node in hand (by way of its ID) and an object
+        // containing a component specification. We now need to create and assemble the new node.
+        // 
+        // The VWF manager doesn't directly manipulate any node. The various models act in
+        // federation to create the greater model. The manager simply routes messages within the
+        // system to allow the models to maintain the necessary data. Additionally, the views
+        // receive similar messages that allow them to keep their interfaces current.
+        //
+        // To create a node, we simply assign a new ID, then invoke a notification on each model and
+        // a notification on each view.
+
+        var construct = function( component, prototypeID, callback ) {
+
+            // Allocate an ID for the node. We just use an incrementing counter.
+
+            var nodeID = ++lastID;
+
+            console.info( "vwf.createNode " + nodeID + " " + component.source + " " + component.type );
+
+            // Call creatingNode() on each model. The node is considered to be constructed after
+            // each model has run.
+
+            jQuery.each( vwf.models, function( index, model ) {
+                model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
+            } );
+
+            // Call createdNode() on each view. The view is being notified of a node that has
+            // been constructed.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type );
+            } );
+
+            // Create the properties, methods, and events. For each item in each set, invoke
+            // createProperty(), createMethod(), or createEvent() to create the field. Each
+            // delegates to the models and views as above.
+
+            component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
+                vwf.createProperty( nodeID, propertyName, propertyValue );
+            } );
+
+            component.methods && jQuery.each( component.methods, function( methodName ) {
+                vwf.createMethod( nodeID, methodName );
+            } );
+
+            component.events && jQuery.each( component.events, function( eventName ) {
+                vwf.createEvent( nodeID, eventName );
+            } );
+
+            // Create and attach the children. For each child, call createNode() with the
+            // child's component specification, then once loaded, call addChild() to attach the
+            // new node as a child. addChild() delegates to the models and views as before.
+
+            component.children && jQuery.each( component.children, function( childName, child_uri_or_object ) {
+                vwf.createNode( child_uri_or_object, function( childID, childTypeID ) {
+                    vwf.addChild( nodeID, childID, childName );
+                } );
+            } );
+
+            // Attach the scripts. For each script, load the network resource if the script is
+            // specified as a URI, then once loaded, call execute() to direct any model that
+            // manages scripts of this script's type to evaluate the script where it will
+            // perform any immediate actions and retain any callbacks as appropriate for the
+            // script type.
+
+            component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
+                script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+            } );
+
+            // Invoke an initialization method.
+
+            // This is placeholder for a call into the object to invoke its initialize() method
+            // if it has a script attached that provides one.
+
+            // The node is complete. Invoke the callback method and pass the new node ID and the
+            // ID of its prototype. If this was the root node for the world, the world is now
+            // fully initialized.
+
+            callback && callback.call( this, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
+
+        }
 
         // -- objectIsComponent --------------------------------------------------------------------
 
