@@ -113,7 +113,8 @@ node.id = nodeID;
         var node = this.nodes[nodeID];
         var property = node.properties[propertyName];
 
-        return property.set ? property.set.call( node, propertyValue ) : ( property.value = propertyValue );
+        // return property.set ? property.set.call( node, propertyValue ) : ( property.value = propertyValue );
+        return node["onSetProperty"] ? node["onSetProperty"].call( node, propertyValue ) : ( property.value = propertyValue );
 
     };
 
@@ -131,7 +132,19 @@ node.id = nodeID;
 
     };
 
+    // -- executing --------------------------------------------------------------------------------
 
+    module.prototype.executing = function( nodeID, scriptText, scriptType ) {
+
+        console.info( "vwf.model.javascript.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+
+        var node = this.nodes[nodeID];
+
+        if ( scriptType == "application/javascript" ) { // TODO: or others
+            ( function( scriptText ) { eval( scriptText ) } ).call( node, scriptText );
+        }
+
+    };
 
 
 
