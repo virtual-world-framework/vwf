@@ -60,55 +60,8 @@
             // As a string:
             //     "http://vwf.example.com/types/example-type",
 
-            {
-                children:
-                {
-                    scene:
-                    {
-                        name: "scene",
-                        
-                        children:
-                        {
-                            earth:
-                            {
-                                name: "earth",
-                                
-                                // extends: "node3",
-
-                                properties:
-                                {
-                                    transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, 3 ],
-                                    enabled: true,
-                                    angle: 0,
-                                }
-                            },
-
-                            mars:
-                            {
-                                name: "mars",
-                                
-                                // extends: "node3",
-
-                                properties:
-                                {
-                                    transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 5, 6 ],
-                                    enabled: true,
-                                    angle: 0
-                                }
-                            },
-
-                            venus:
-                            {
-                                name: "venus",
-                                
-                                // extends: "node3",
-                                source: "http://assets.vwf.example.com/venus.js",
-                                type: "x-model/scenejs"
-                            },
-                        }
-                    }
-                }
-            },
+            // { extends: "http://localhost/test1.js" },
+            "http://localhost/test1.js",
 
             // These are the model configurations. Each key within the configuration object is a
             // model name, and each value is an argument or an array of arguments to be passed to
