@@ -85,7 +85,12 @@
     
     // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
 
-    // TODO: execute
+    // -- execute ----------------------------------------------------------------------------------
+
+    module.prototype.execute = function( nodeID, scriptText, scriptType ) {
+        console.info( "vwf.view.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+        this.vwf.send( nodeID, "execute", scriptText, scriptType );
+    };
 
     // TODO: time
 
@@ -148,6 +153,10 @@
 
     // TODO: createdEvent, deletedEvent, firedEvent
 
-    // TODO: executed
+    // -- executed ---------------------------------------------------------------------------------
+
+    module.prototype.executed = function( nodeID, scriptText, scriptType ) {
+        console.info( "vwf.view.executed " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+    };
 
 } ) ( window.vwf.modules );
