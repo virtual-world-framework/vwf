@@ -56,28 +56,64 @@
         console.info( "vwf.model.javascript.creatingNode " + nodeID + " " +
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
 
-        var type = this.types[nodeExtendsID];
+        var type = nodeExtendsID ? this.types[nodeExtendsID] : Object;
 
         if ( ! type ) {
 
             var prototype = this.nodes[nodeExtendsID];
 
-            this.types[nodeExtendsID] = type = function() { base.apply( this, arguments ) }; // TODO: base?
+            type = this.types[nodeExtendsID] = function() { };
 
             type.prototype = prototype;
             type.prototype.constructor = type; // resetting constructor breaks enumerables?
 
         }
 
-        this.nodes[nodeID] = new type( nodeSource, nodeType );
+        var node = this.nodes[nodeID] = new type( nodeSource, nodeType );
+
+node.id = nodeID;
+
+        node.parent = undefined;
+
+        node.source = nodeSource;
+        node.type = nodeType;
+
+        node.properties = {};
+        node.methods = {};
+        node.events = {};
+        node.children = [];
 
     };
+
+    // -- creatingProperty -------------------------------------------------------------------------
+
+    module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
+
+        console.info( "vwf.model.javascript.creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
+        var node = this.nodes[nodeID];
+        var property = node.properties[propertyName] = { node: node, value: propertyValue, get: undefined, set: undefined };
+
+        Object.defineProperty( node, propertyName, {
+            get: function() { return vwf.getProperty( nodeID, propertyName ) }, // "this" is property's node
+            set: function( value ) { vwf.setProperty( nodeID, propertyName, value ) },
+            enumerable: true
+        } );
+
+    };
+
+    // TODO: deletingProperty
 
     // -- settingProperty --------------------------------------------------------------------------
 
     module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
 
         console.info( "vwf.model.javascript.settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
+        var node = this.nodes[nodeID];
+        var property = node.properties[propertyName];
+
+        return property.set ? property.set.call( node, propertyValue ) : ( property.value = propertyValue );
 
     };
 
@@ -87,50 +123,13 @@
 
         console.info( "vwf.model.javascript.gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
+        var node = this.nodes[nodeID];
+        var property = node.properties[propertyName] ||
+( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] );
+
+        return property.get ? property.get.call( node ) : property.value;
+
     };
-
-
-
-
-//Node.prototype.createProperty = function( propertyName, propertyValue ) {
-
-//    var property = this.properties[propertyName] = new vwf.property( this, propertyValue );
-
-//    Object.defineProperty( this, propertyName, {
-//        get: function() { return property.value }, // "this" is property's node
-//        set: function( value ) { property.value = value }, // TODO: getters & setters
-//        enumerable: true
-//    } );
-
-//    var result = this.setProperty( propertyName, propertyValue );
-
-//    vwf.onCreateProperty( this.id, propertyName, propertyValue ); // TODO: redundancy with onSetProperty call
-
-//    return result;
-//};
-
-//Node.prototype.setProperty = function( propertyName, propertyValue ) {
-
-//    var property = this.properties[propertyName];
-
-//    var result = property.set ? property.set.call( this, propertyValue ) : ( property.value = propertyValue );
-
-//    vwf.onSetProperty( this.id, propertyName, propertyValue );
-
-//    return result;
-//};
-
-//Node.prototype.getProperty = function( propertyName ) {
-
-//    var property = this.properties[propertyName] ||
-//this.prototype.properties[propertyName] || this.prototype.prototype.properties[propertyName]; // TODO: make recursive
-
-//    var result =  property.get ? property.get.call( this ) : property.value;
-
-//    vwf.onGetProperty( this.id, propertyName );
-
-//    return result;
-//};
 
 
 
