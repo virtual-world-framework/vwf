@@ -6,8 +6,8 @@
     // for any number of potential UI elements, including WebGL renderings, traditional UI controls,
     // and connections to external services.
     //
-    // vwf-view is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It
-    // attaches to the vwf modules list as vwf.modules.html.
+    // vwf-view-html is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
+    // It attaches to the vwf modules list as vwf.modules.html.
 
     var module = modules.html = function( vwf, rootSelector ) {
 

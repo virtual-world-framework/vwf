@@ -40,7 +40,10 @@
     <!-- simulation state in HTML on the main page.                                              -->
 
     <script type="text/javascript" src="vwf-view.js"></script>
+    <script type="text/javascript" src="vwf-view-glge.js"></script>
     <script type="text/javascript" src="vwf-view-html.js"></script>
+
+    <script type="text/javascript" src="vwf-view-glge/glge-compiled.js"></script> 
 
     <!-- With the scripts loaded, we must initialize the framework. vwf.initialize() accepts     -->
     <!-- three parameters: a world specification, model configuration parameters, and view       -->
@@ -75,14 +78,14 @@
 
             {
                 javascript: [],         // invokes: new vwf.modules.javascript( vwf )
-                scenejs: "#vwf-scene",  // invokes: new vwf.modules.scene( vwf, "#vwf-scene" )
             },
 
             // These are the view configurations. They use the same format as the model
             // configurations.
 
             {
-                html: "#vwf-root"       // invokes: new vwf.modules.html( vwf, "#vwf-root" )
+                glge: "#vwf-scene",     // invokes: new vwf.modules.glge( vwf, "#vwf-scene" )
+                html: "#vwf-root",      // invokes: new vwf.modules.html( vwf, "#vwf-root" )
             }
 
         )
