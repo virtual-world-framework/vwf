@@ -16,10 +16,10 @@
 
         modules.model.call( this, vwf );
 
-        this.types = {};
+        this.types = {}; // id => function() { }
 
         this.root = undefined;
-        this.nodes = {};
+        this.nodes = {}; // id => new type()
 
         return this;
     };

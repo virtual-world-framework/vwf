@@ -3,14 +3,10 @@
     {
         scene:
         {
-            name: "scene",
-                        
             children:
             {
                 earth:
                 {
-                    name: "earth",
-                                
                     extends: "http://localhost/node3.js",
 
                     properties:
@@ -23,8 +19,6 @@
 
                 mars:
                 {
-                    name: "mars",
-                                
                     extends: "http://localhost/node3.js",
 
                     properties:
@@ -48,13 +42,17 @@
 
                 venus:
                 {
-                    name: "venus",
-
                     extends: "http://localhost/node3.js",
                     source: "http://assets.vwf.example.com/venus.js",
                     type: "x-model/scenejs",
                 },
             },
+        },
+        glge:
+        {
+            extends: "http://localhost/glge.js",
+            source: "vwf-view-glge/collada/level.xml",
+            type: "model/x-glge",
         },
     },
 } )
