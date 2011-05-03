@@ -19,10 +19,6 @@
 
         this.scenes = {}; // id => { document: new GLGE.Document(), renderer: new GLGE.Renderer(), scene: new GLGE.Scene() }
 
-        jQuery( rootSelector ).append( "<h2>Scene</h2>" );
-        jQuery( rootSelector ).append( "<canvas id='canvas' width='900' height='500'/>" );
-        jQuery( rootSelector ).append( "<div id='debug' style='padding: 5px'/>" );
-
         return this;
     };
 
@@ -42,7 +38,15 @@
         console.info( "vwf.view.glge.createdNode " + nodeID + " " +
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
 
-        if ( nodeSource && nodeType == "model/x-glge" /* nodeExtendsID == 9 */ ) {  // TODO: glge: scene : node2 type
+        if ( nodeSource && nodeType == "model/x-glge" /* nodeExtendsID == 99 */ ) {  // TODO: glge: scene : node2 type
+
+            jQuery( this.rootSelector ).append(
+                "<h2>Scene</h2>"
+            );
+
+            var canvasQuery = jQuery( this.rootSelector ).append(
+                "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='450'/>"
+            ) .children( ":last" );
 
             var scene = this.scenes[nodeID] = {
                 document: new GLGE.Document(),
@@ -50,10 +54,8 @@
                 scene: undefined
             };
 
-var view = this;
-
             scene.document.onLoad = function() {
-                scene.renderer = new GLGE.Renderer( jQuery( view.rootSelector ).find( "#canvas" ).get(0) );
+                scene.renderer = new GLGE.Renderer( canvasQuery.get(0) );
                 scene.scene = scene.document.getElement( "mainscene" );
                 scene.renderer.setScene( scene.scene );
                 function render() { scene.renderer.render() }
@@ -61,7 +63,7 @@ var view = this;
             };
 
             if ( nodeSource && nodeType == "model/x-glge" ) {
-                scene.document.load( nodeSource );  // TODO: else onLoad now?  // TODO: adjust relative paths?
+                scene.document.load( nodeSource );  // TODO: else onLoad now?
             }
 
         }
