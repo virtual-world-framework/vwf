@@ -84,8 +84,8 @@
             // configurations.
 
             {
-                glge: "#vwf-scene",     // invokes: new vwf.modules.glge( vwf, "#vwf-scene" )
-                html: "#vwf-root",      // invokes: new vwf.modules.html( vwf, "#vwf-root" )
+                glge: "#vwf-root",      // invokes: new vwf.modules.glge( vwf, "#vwf-root" )
+                html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
             }
 
         )
@@ -104,14 +104,13 @@
 
     <h1>Virtual World Framework</h1>
 
-    <!-- For this sample, the "scenejs" model has been configured to render to "#vwf-scene", the -->
-    <!-- item with the id "vwf-scene".                                                           -->
-
-    <div id="vwf-scene"></div>
-
-    <!-- The "html" view has been configured to render to "#vwf-root".                           -->
+    <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
     <div id="vwf-root"></div>
+
+    <!-- The "html" view has been configured to render to "#vwf-listing".                        -->
+
+    <div id="vwf-listing"></div>
     
   </body>
 
