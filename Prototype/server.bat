@@ -1,0 +1,2 @@
+START /D "C:\Program Files\Common Files\Microsoft Shared\DevServer\9.0" /B WebDev.WebServer.EXE /port:8080 /path:"C:\Documents and Settings\David Easter\My Documents\Development\Virtual World Framework\Prototype\client2"
+START /D "C:\Program Files\Common Files\Microsoft Shared\DevServer\9.0" /B WebDev.WebServer.EXE /port:80 /path:"C:\Documents and Settings\David Easter\My Documents\Development\Virtual World Framework\Prototype\worlds\public"
