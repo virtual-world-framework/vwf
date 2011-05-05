@@ -1,55 +1,61 @@
 ﻿cb( {
+
+    extends: "http://localhost/glge.js",
+
+    source: "vwf-view-glge/collada/level.xml",
+    type: "model/x-glge",
+
     children:
     {
-        scene:
-        {
-            extends: "http://localhost/glge.js",
-            source: "vwf-view-glge/collada/level.xml",
-            type: "model/x-glge",
-
-            children:
-            {
-                earth:
-                {
-                    extends: "http://localhost/node3.js",
-
-                    properties:
-                    {
-                        transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, 3 ],
-                        enabled: true,
-                        angle: 0,
-                    },
-                },
-
-                mars:
-                {
-                    extends: "http://localhost/node3.js",
-
-                    properties:
-                    {
-                        transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 5, 6 ],
-                        enabled: true,
-                        angle: 0,
-                    },
-
-                    scripts:
-                    [
-                        {
-                            text:
-                                "this.properties.angle.setter = function( value ) {" + " " +
-                                    "this.parent.earth.angle = value + 1;" + " " +
-                                "}",
-                            type: "application/javascript"
-                        },
-                    ],
-                },
-
-                venus:
-                {
-                    extends: "http://localhost/node3.js",
-                },
-            },
+        wallobject: {
+            extends: "http://localhost/node3.js",
+            properties: { angle: 0, },
         },
 
-    },
+        "http://localhost:8080/vwf-view-glge/collada/duck.dae": {
+            extends: "http://localhost/node3.js",
+
+            properties: { angle: 0, },
+
+            children: {
+                "bone1": {
+                    extends: "http://localhost/node3.js",
+
+                    children: {
+                        "untitled": {
+                            extends: "http://localhost/node3.js",
+                        },
+                    },
+                },
+            },
+
+            scripts: [ {
+                text: "this.properties.angle.setter = function( value ) {" + " " +
+                    "this.parent['http://localhost:8080/vwf-view-glge/collada/seymourplane_triangulate.dae'].angle = value + 1;" + " " + "}",
+                type: "application/javascript"
+            }, ],
+
+        },
+
+        "http://localhost:8080/vwf-view-glge/collada/seymourplane_triangulate.dae": {
+            extends: "http://localhost/node3.js",
+
+            properties: { angle: 0, },
+
+            children: {
+                "bone1": {
+                    extends: "http://localhost/node3.js",
+                    
+                    children: {
+                        "untitled": {
+                            extends: "http://localhost/node3.js",
+                        },
+                    },
+                },
+            },
+
+        },
+
+    }
+
 } )
