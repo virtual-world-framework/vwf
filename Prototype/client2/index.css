@@ -6,6 +6,23 @@ h1, h2, h3, h4, h5, h6 {
   font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
+table {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+form {
+    margin: 2em;
+}
+
+label {
+  font-size: 18px;
+}
+
+input {
+  font-size: 18px;
+  padding: 5px;
+}
+
 .vwf-properties {
   background-color: #DCC;
 }
