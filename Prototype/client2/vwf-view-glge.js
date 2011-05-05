@@ -296,33 +296,34 @@
 
     var initMouseEvents = function (canvas, nodeID, view) {
         var scene = view.scenes[nodeID], child;
+        var sceneView = view;
         var mouseDown = false;
         var mouseOverCanvas = false;
 
-        var mouseDownObject = null;
-        var mouseOverObject = null;
+        var mouseDownObjectID = undefined;
+        var mouseOverObjectID = undefined;
 
         canvas.onmousedown = function (e) {
             mouseDown = true;
-            mouseDownObject = mousePick(e, scene);
+            mouseDownObjectID = mousePick(e, scene, sceneView);
 
-            //console.info("CANVAS mouseDown: " + path(mouseDownObject));
-            //this.throwEvent( "onMouseDown", path(mouseDownObject) );
+            //console.info("CANVAS mouseDown: " + mouseDownObjectID);
+            //this.throwEvent( "onMouseDown", mouseDownObjectID);
 
         }
 
         canvas.onmouseup = function (e) {
-            var mouseUpObject = mousePick(e, scene);
+            var mouseUpObjectID = mousePick(e, scene, sceneView);
             // check for time??
-            if (mouseUpObject && mouseDownObject && path(mouseUpObject) == path(mouseDownObject)) {
-                //console.info("CANVAS onMouseClick: " + path(mouseDownObject));
-                //this.throwEvent( "onMouseClick", path(mouseDownObject) );
+            if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
+                //console.info("CANVAS onMouseClick: " + mouseDownObjectID);
+                //this.throwEvent( "onMouseClick", mouseDownObjectID);
             }
 
-            //console.info("CANVAS onMouseUp: " + path(mouseDownObject));
-            //this.throwEvent( "onMouseUp", path(mouseDownObject) );
+            //console.info("CANVAS onMouseUp: " + mouseDownObjectID);
+            //this.throwEvent( "onMouseUp", mouseDownObjectID);
 
-            mouseDownObject = null;
+            mouseDownObjectID = undefined;
             mouseDown = false;
         }
 
@@ -333,45 +334,45 @@
         canvas.onmousemove = function (e) {
 
             if (mouseDown) {
-                if (mouseDownObject) {
+                if (mouseDownObjectID) {
 
-                    //console.info("CANVAS onMouseMove: " + path(mouseDownObject));
-                    //this.throwEvent( "onMouseMove", path(mouseDownObject) );
+                    //console.info("CANVAS onMouseMove: " + mouseDownObjectID);
+                    //this.throwEvent( "onMouseMove", mouseDownObjectID);
                 }
             }
             else {
-                var objectOver = mousePick(e, scene);
+                var objectOver = mousePick(e, scene, sceneView);
                 if (objectOver) {
-                    if (mouseOverObject) {
-                        if (path(objectOver) != path(mouseOverObject)) {
+                    if (mouseOverObjectID) {
+                        if ( objectOver != mouseOverObjectID ) {
 
-                            //console.info("CANVAS onMouseLeave: " + path(mouseOverObject));
-                            //this.throwEvent( "onMouseLeave", path(mouseOverObject) );
+                            //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                            //this.throwEvent( "onMouseLeave", mouseOverObjectID);
 
-                            mouseOverObject = objectOver;
+                            mouseOverObjectID = objectOver;
 
-                            //console.info("CANVAS onMouseEnter: " + path(mouseOverObject));
-                            //this.throwEvent( "onMouseEnter", path(mouseOverObject) );
+                            //console.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+                            //this.throwEvent( "onMouseEnter", mouseOverObjectID);
                         }
                         else {
-                            //console.info("CANVAS onMouseHover: " + path(mouseOverObject));
-                            //this.throwEvent( "onMouseHover", path(mouseOverObject) );
+                            //console.info("CANVAS onMouseHover: " + mouseOverObjectID);
+                            //this.throwEvent( "onMouseHover", mouseOverObjectID);
 
                         }
                     }
                     else {
-                        mouseOverObject = objectOver;
+                        mouseOverObjectID = objectOver;
 
-                        //console.info("CANVAS onMouseEnter: " + path(mouseOverObject));
-                        //this.throwEvent( "onMouseEnter", path(mouseOverObject) );
+                        //console.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+                        //this.throwEvent( "onMouseEnter", mouseOverObjectID);
                     }
 
                 }
                 else {
-                    if (mouseOverObject) {
-                        //console.info("CANVAS onMouseLeave: " + path(mouseOverObject));
-                        //this.throwEvent( "onMouseLeave", path(mouseOverObject) );
-                        mouseOverObject = null;
+                    if (mouseOverObjectID) {
+                        //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                        //this.throwEvent( "onMouseLeave", mouseOverObjectID);
+                        mouseOverObjectID = undefined;
 
                     }
                 }
@@ -382,10 +383,10 @@
         }
 
         canvas.onmouseout = function (e) {
-            if (mouseOverObject) {
-                //console.info("CANVAS onMouseLeave: " + path(mouseOverObject));
-                //this.throwEvent( "onMouseLeave", path(mouseOverObject) );
-                mouseOverObject = null;
+            if (mouseOverObjectID) {
+                //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                //this.throwEvent( "onMouseLeave", mouseOverObjectID);
+                mouseOverObjectID = undefined;
             }
             mouseOverCanvas = false;
         }
@@ -394,36 +395,23 @@
         }
     };
 
-    // path() and name() should go away
-    var path = function (glgeObject) {
-        var sOut = "";
-        var sName = "";
-
-        while (glgeObject && glgeObject.parent) {
-            if (sOut == "")
-                sOut = name(glgeObject);
-            else
-                sOut = name(glgeObject) + "." + sOut;
-            glgeObject = glgeObject.parent;
-        }
-        return sOut;
-    };
-
-    var name = function (glgeObject) {
-        return glgeObject.colladaName || glgeObject.colladaId || glgeObject.getName();
-    }
-    // path() and name() should go away
-
-    var mousePick = function (e, scene) {
+    var mousePick = function (e, scene, view) {
         if (scene && scene.glgeScene) {
             var pickInfo = scene.glgeScene.pick(e.clientX - e.currentTarget.offsetLeft, e.clientY - e.currentTarget.offsetTop);
-            if (pickInfo) {
-                //if (pickInfo.object)
-                //    console.info("mousePick: " + path(pickInfo.object));
-                return pickInfo.object;
+            if ( pickInfo && pickInfo.object ) {
+                var objects = [];
+                var objectToLookFor = pickInfo.object;
+                while ( objects.length == 0 && objectToLookFor ) {
+                    objects = jQuery.grep( view.nodes, function ( node, nodeID ) {
+                            return node.glgeObject = objectToLookFor; 
+                        } );
+                    objectToLookFor = objectToLookFor.parent;
+                }
+                if ( objects )
+                    return objects.shift();
             }
         }
-        return null;
+        return undefined;
     };
 
 
