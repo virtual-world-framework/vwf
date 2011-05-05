@@ -39,7 +39,11 @@
         // that we can find it if it is reused. Components specified internally as object literals
         // are anonymous and are not indexed here.
 
-        var types = this.private.types = {}; // URI => ID
+        var types = this.private.types = {}; // maps URI => id
+
+// TODO: keep these public like this and replace "var types", or provide accessors?
+this.typeIDs = {}; // maps URI => id
+this.typeURIs = {}; // maps id => URI
 
         // Control messages from the conference server are stored here in a priority queue, ordered
         // by execution time.
@@ -367,10 +371,11 @@
 
             if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
 
+                var component = {};
+
                 console.log( "vwf.createNode: creating node of type " + component_uri_or_object );
 
                 this.getType( component_uri_or_object, function( prototypeID ) {
-                    var component = {};
                     construct.call( this, component, prototypeID, callback );
                 } );
 
@@ -429,6 +434,8 @@
 
                 construct.call( this, component, prototypeID, function( id, prototypeID ) {
                     types[uri] = id;
+this.typeIDs[uri] = id;
+this.typeURIs[id] = uri;
                     callback && callback.call( this, id );
                 } );
 
@@ -449,6 +456,8 @@
                             if ( ! types[uri] ) {
                                 construct.call( this, component, prototypeID, function( id, prototypeID ) {
                                     types[uri] = id;
+this.typeIDs[uri] = id;
+this.typeURIs[id] = uri;
                                     callback && callback.call( this, id );
                                 } );
                             } else { // TODO: handle multiple loads of same type better
@@ -717,6 +726,16 @@
                 vwf.createEvent( nodeID, eventName );
             } );
 
+            // The node is complete. Invoke the callback method and pass the new node ID and the
+            // ID of its prototype. If this was the root node for the world, the world is now
+            // fully initialized.
+
+            // TODO: this was moved up from the end so that for a => b => c, addChild( a, b ) occurs
+            // before addChild( b, c ) so that b can resolve to a before c attempts to resolve to b.
+            // But this isn't at the end anymore. Is that OK? The comment above is wrong.
+
+            callback && callback.call( this, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
+
             // Create and attach the children. For each child, call createNode() with the
             // child's component specification, then once loaded, call addChild() to attach the
             // new node as a child. addChild() delegates to the models and views as before.
@@ -741,12 +760,6 @@
 
             // This is placeholder for a call into the object to invoke its initialize() method
             // if it has a script attached that provides one.
-
-            // The node is complete. Invoke the callback method and pass the new node ID and the
-            // ID of its prototype. If this was the root node for the world, the world is now
-            // fully initialized.
-
-            callback && callback.call( this, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
 
         }
 

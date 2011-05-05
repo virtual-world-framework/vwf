@@ -16,10 +16,10 @@
 
         modules.model.call( this, vwf );
 
-        this.types = {}; // id => function() { }
+        this.types = {}; // maps id => function() { }
 
         this.root = undefined;
-        this.nodes = {}; // id => new type()
+        this.nodes = {}; // maps id => new type()
 
         return this;
     };

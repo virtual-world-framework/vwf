@@ -17,7 +17,8 @@
 
         this.rootSelector = rootSelector;
 
-        this.scenes = {}; // id => { document: new GLGE.Document(), renderer: new GLGE.Renderer(), scene: new GLGE.Scene() }
+        this.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
+        this.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
 
         return this;
     };
@@ -38,7 +39,7 @@
         console.info( "vwf.view.glge.createdNode " + nodeID + " " +
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
 
-        if ( nodeSource && nodeType == "model/x-glge" /* nodeExtendsID == 99 */ ) {  // TODO: glge: scene : node2 type
+        if ( vwf.typeURIs[nodeExtendsID] == "http://localhost/glge.js" ) {
 
             jQuery( this.rootSelector ).append(
                 "<h2>Scene</h2>"
@@ -49,22 +50,48 @@
             ) .children( ":last" );
 
             var scene = this.scenes[nodeID] = {
-                document: new GLGE.Document(),
-                renderer: undefined,
-                scene: undefined
+                glgeDocument: new GLGE.Document(),
+                glgeRenderer: undefined,
+                glgeScene: undefined
             };
 
-            scene.document.onLoad = function() {
-                scene.renderer = new GLGE.Renderer( canvasQuery.get(0) );
-                scene.scene = scene.document.getElement( "mainscene" );
-                scene.renderer.setScene( scene.scene );
-                function render() { scene.renderer.render() }
-                setInterval( render, 1 );
+            var view = this;
+
+            scene.glgeDocument.onLoad = function() {
+
+                scene.glgeRenderer = new GLGE.Renderer( canvasQuery.get(0) );
+                scene.glgeScene = scene.glgeDocument.getElement( "mainscene" );
+                scene.glgeRenderer.setScene( scene.glgeScene );
+
+                // Resolve the mapping from VWF nodes to their corresponding GLGE objects for the
+                // objects just loaded.
+
+                bindSceneChildren( nodeID, view );
+
+                // GLGE doesn't provide an onLoad() callback for any Collada documents referenced by
+                // the GLGE document. They may still be loaded after we receive onLoad(). As a work-
+                // around, wait 5 seconds after load and rebind.
+
+                setTimeout( bindSceneChildren, 5000, nodeID, view );
+
+                // Schedule the renderer.
+
+                setInterval( function() { scene.glgeRenderer.render() }, 1 );
+
             };
+
+            // Load the GLGE document into the scene.
 
             if ( nodeSource && nodeType == "model/x-glge" ) {
-                scene.document.load( nodeSource );  // TODO: else onLoad now?
+                scene.glgeDocument.load( nodeSource );
             }
+
+        } else if ( vwf.typeURIs[nodeExtendsID] == "http://localhost/node3.js" ) {
+
+            var node = this.nodes[nodeID] = {
+                name: undefined,  // TODO: needed?
+                glgeObject: undefined
+            };
 
         }
 
@@ -77,6 +104,12 @@
     module.prototype.addedChild = function( nodeID, childID, childName ) {
 
         console.info( "vwf.view.glge.addedChild " + nodeID + " " + childID + " " + childName );
+
+        var child = this.nodes[childID];
+
+        if( child ) {
+            bindChild( this.scenes[nodeID], this.nodes[nodeID], child, childName );
+        }
 
     };
 
@@ -104,6 +137,14 @@
 
         console.info( "vwf.view.glge.satProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
+        var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
+
+        // Demo hack: pause/resume an object's animation when its "angle" property is odd/even.
+
+        if ( node && node.glgeObject && propertyName == "angle" ) {
+            node.glgeObject.setPaused( ( propertyValue & 1 ) ? GLGE.TRUE : GLGE.FALSE );
+        }
+
     };
 
     // -- gotProperty ------------------------------------------------------------------------------
@@ -111,6 +152,75 @@
     module.prototype.gotProperty = function( nodeID, propertyName, propertyValue ) {
 
         console.info( "vwf.view.glge.gotProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
+    };
+
+    // == Private functions ========================================================================
+
+    var bindSceneChildren = function( nodeID, view ) {
+
+        var scene = view.scenes[nodeID], child;
+
+        jQuery.each ( vwf.children( nodeID ), function( childIndex, childID ) {
+            if ( child = view.nodes[childID] ) {
+                if ( bindChild( scene, undefined, child, vwf.name( childID ) ) ) {
+                    bindNodeChildren( childID, view );
+                }
+            }
+        } );
+
+    };
+
+    var bindNodeChildren = function( nodeID, view ) {
+
+        var node = view.nodes[nodeID], child;
+
+        jQuery.each ( vwf.children( nodeID ), function( childIndex, childID ) {
+            if ( child = view.nodes[childID] ) {
+                if ( bindChild( undefined, node, child, vwf.name( childID ) ) ) {
+                    bindNodeChildren( childID, view );
+                }
+            }
+        } );
+
+    };
+
+    var bindChild = function( scene, node, child, childName ) {
+
+        if ( scene ) {
+            child.name = childName;
+            child.glgeObject = scene.glgeScene && glgeSceneChild( scene.glgeScene, childName );
+        }
+
+        else if ( node ) {
+            child.name = childName;
+            child.glgeObject = node.glgeObject && glgeObjectChild( node.glgeObject, childName );
+        }
+
+        return Boolean( child.glgeObject );
+
+//console.info( "scene: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
+//console.info( "node: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
+
+    };
+
+    // Search a GLGE.Scene for a child with the given name.
+
+    var glgeSceneChild = function( glgeScene, childName ) {
+
+        return jQuery.grep( glgeScene.children || [], function( glgeChild ) {
+            return ( glgeChild.name || glgeChild.id || glgeChild.docURL || "" ) == childName;
+        } ) .shift();
+
+    };
+
+    // Search a GLGE.Object, GLGE.Collada, GLGE.Light for a child with the given name.  TODO: really, it's anything with children[]; could be the same as glgeSceneChild().
+
+    var glgeObjectChild = function( glgeObject, childName ) {
+
+        return jQuery.grep( glgeObject.children || [], function( glgeChild ) {
+            return ( glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "" ) == childName;
+        } ) .shift();
 
     };
 
