@@ -111,6 +111,15 @@
             };
 
         }
+        else if (vwf.typeURIs[nodeExtendsID] == "http://localhost/camera.js") {
+
+            var node = this.nodes[nodeID] = {
+                name: undefined,
+                glgeObject: undefined
+            };
+            this.camera = node;
+            this.cameraID = nodeID;
+        }
 
     };
 
@@ -257,11 +266,11 @@
                 var xinc = 0;
                 var zinc = 0;
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
-                    yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]); 
+                    yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
                 }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
-                    yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]); 
-                 }
+                    yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
+                }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_E)) { zinc = zinc + 1.0 }
