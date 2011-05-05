@@ -2411,7 +2411,7 @@ GLGE.Document.prototype.getAbsolutePath=function(path,relativeto){
 	else
 	{
 		if(!relativeto){
-			relativeto=window.location.href;
+			relativeto=window.location.protocol+"//"+window.location.host+window.location.pathname;
 		}
 		//find the path compoents
 		var bits=relativeto.split("/");
