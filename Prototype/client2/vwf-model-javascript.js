@@ -71,7 +71,7 @@
 
         var node = this.nodes[nodeID] = new type( nodeSource, nodeType );
 
-node.id = nodeID;
+node.id = nodeID; // TODO: move to a backstop model
 
         node.parent = undefined;
 
@@ -105,6 +105,41 @@ node.id = nodeID;
     };
 
     // TODO: removingChild
+
+    // -- parenting --------------------------------------------------------------------------------
+
+    module.prototype.parenting = function( nodeID ) {  // TODO: move to a backstop model
+
+        console.info( "vwf.model.javascript.parenting " + nodeID );
+
+        var node = this.nodes[nodeID];
+
+        return node.parent && node.parent.id || 0;
+    };
+
+    // -- childrening ------------------------------------------------------------------------------
+
+    module.prototype.childrening = function( nodeID ) {  // TODO: move to a backstop model
+
+        console.info( "vwf.model.javascript.childrening " + nodeID );
+
+        var node = this.nodes[nodeID];
+
+        return jQuery.map( node.children, function( child ) {
+            return child.id;
+        } );
+    };
+
+    // -- naming -----------------------------------------------------------------------------------
+
+    module.prototype.naming = function( nodeID ) {  // TODO: move to a backstop model
+
+        console.info( "vwf.model.javascript.naming " + nodeID );
+
+        var node = this.nodes[nodeID];
+
+        return node.name || "";
+    };
 
     // -- creatingProperty -------------------------------------------------------------------------
 
@@ -158,7 +193,6 @@ node.id = nodeID;
         }
 
         return value;
-
     };
 
     // -- gettingProperty --------------------------------------------------------------------------
@@ -179,7 +213,6 @@ node.id = nodeID;
         }
 
         return value;
-
     };
 
     // -- executing --------------------------------------------------------------------------------

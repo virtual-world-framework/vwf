@@ -66,6 +66,27 @@
         return this.vwf.removeChild( nodeID, childID );
     };
 
+    // -- parent -----------------------------------------------------------------------------------
+
+    module.prototype.parent = function( nodeID ) {
+        console.info( "vwf.model.parent " + nodeID );
+        return this.vwf.parent( nodeID );
+    };
+
+    // -- children ---------------------------------------------------------------------------------
+
+    module.prototype.children = function( nodeID ) {
+        console.info( "vwf.model.children " + nodeID );
+        return this.vwf.children( nodeID );
+    };
+
+    // -- name  ------------------------------------------------------------------------------------
+
+    module.prototype.name = function( nodeID ) {
+        console.info( "vwf.model.name " + nodeID );
+        return this.vwf.name( nodeID );
+    };
+
     // -- createProperty ---------------------------------------------------------------------------
 
     module.prototype.createProperty = function( nodeID, propertyName, propertyValue ) {
@@ -134,6 +155,24 @@
 
     module.prototype.removingChild = function( nodeID, childID ) {
         console.info( "vwf.model.removingChild " + nodeID + " " + childID );
+    };
+
+    // -- parenting --------------------------------------------------------------------------------
+
+    module.prototype.parenting = function( nodeID ) {
+        console.info( "vwf.model.parenting " + nodeID );
+    };
+
+    // -- childrening ------------------------------------------------------------------------------
+
+    module.prototype.childrening = function( nodeID ) {
+        console.info( "vwf.model.childrening " + nodeID );
+    };
+
+    // -- naming -----------------------------------------------------------------------------------
+
+    module.prototype.naming = function( nodeID ) {
+        console.info( "vwf.model.naming " + nodeID );
     };
 
     // -- creatingProperty -------------------------------------------------------------------------
