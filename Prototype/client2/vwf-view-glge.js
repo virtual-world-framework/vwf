@@ -52,7 +52,8 @@
             var scene = this.scenes[nodeID] = {
                 glgeDocument: new GLGE.Document(),
                 glgeRenderer: undefined,
-                glgeScene: undefined
+                glgeScene: undefined,
+                glgeKeys: new GLGE.KeyInput()
             };
 
             var view = this;
@@ -79,7 +80,16 @@
 
                 // Schedule the renderer.
 
-                setInterval(function () { scene.glgeRenderer.render() }, 1);
+                var lasttime = 0;
+                var now;
+                function renderScene() {
+                    now = parseInt(new Date().getTime());
+                    scene.glgeRenderer.render();
+                    checkKeys(nodeID, view, now, lasttime);
+                    lasttime = now;
+                };
+
+                setInterval(renderScene, 1);
 
             };
 
@@ -232,6 +242,46 @@
 
     };
 
+    var checkKeys = function (nodeID, view, now, lasttime) {
+        var scene = view.scenes[nodeID], child;
+        if (scene && scene.glgeScene) {
+            var camera = scene.glgeScene.camera;
+            if (camera) {
+                camerapos = camera.getPosition();
+                camerarot = camera.getRotation();
+                var mat = camera.getRotMatrix();
+                var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
+                var mag = Math.pow(Math.pow(trans[0], 2) + Math.pow(trans[1], 2), 0.5);
+                trans[0] = trans[0] / mag;
+                trans[1] = trans[1] / mag;
+                var yinc = 0;
+                var xinc = 0;
+                var zinc = 0;
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_W)) { yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_S)) { yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_E)) { zinc = zinc + 1.0 }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW)) { camera.setRotY(camerarot.y + 0.02); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) { camera.setRotY(camerarot.y - 0.02); }
+                //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) xinc = 0;
+                //if (levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) yinc = 0;
+                //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) { 
+                //    yinc = 0; xinc = 0; }
+                //else {
+                //    camera.setLocZ(levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
+                //}
+                if (xinc != 0 || yinc != 0 || zinc != 0) {
+                    camera.setLocY(camerapos.y + yinc * 0.05 * (now - lasttime));
+                    camera.setLocX(camerapos.x + xinc * 0.05 * (now - lasttime));
+                    camera.setLocZ(camerapos.z + zinc);
+
+                }
+            }
+        }
+    }
+
     var initMouseEvents = function (canvas, nodeID, view) {
         var scene = view.scenes[nodeID], child;
         var mouseDown = false;
@@ -259,7 +309,7 @@
 
             //console.info("CANVAS onMouseUp: " + path(mouseDownObject));
             //this.throwEvent( "onMouseUp", path(mouseDownObject) );
-           
+
             mouseDownObject = null;
             mouseDown = false;
         }
@@ -272,7 +322,7 @@
 
             if (mouseDown) {
                 if (mouseDownObject) {
-                    
+
                     //console.info("CANVAS onMouseMove: " + path(mouseDownObject));
                     //this.throwEvent( "onMouseMove", path(mouseDownObject) );
                 }
