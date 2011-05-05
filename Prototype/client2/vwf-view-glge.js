@@ -90,7 +90,6 @@
                 };
 
                 setInterval(renderScene, 1);
-
             };
 
             // Load the GLGE document into the scene.
@@ -257,8 +256,12 @@
                 var yinc = 0;
                 var xinc = 0;
                 var zinc = 0;
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_W)) { yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]); }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_S)) { yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+                    yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]); 
+                }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+                    yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]); 
+                 }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_E)) { zinc = zinc + 1.0 }
