@@ -64,7 +64,7 @@
             //     "http://vwf.example.com/types/example-type",
 
             // { extends: "http://localhost/test1.js" },
-            "http://localhost/test1.js",
+            // "http://localhost/test1.js",
 
             // These are the model configurations. Each key within the configuration object is a
             // model name, and each value is an argument or an array of arguments to be passed to
@@ -88,7 +88,28 @@
                 html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
             }
 
-        )
+        );
+
+        jQuery( window.document ).ready( function() {
+
+            if ( window.location.search ) {
+
+                jQuery( "#world-selection" ).hide();
+
+            } else {
+
+                $( ".world-option" ).change( function() {
+                    jQuery( "#world-choice" ).val( jQuery( this ).val() );
+                } );
+
+                $( "#world-selection" ).submit( function () {
+                    window.location.href = window.location.protocol + "//" + window.location.host + window.location.pathname + "?world=" + jQuery( "#world-choice" ).val();
+                    return false;
+                } );
+
+            }
+
+        } );
 
     </script>
 
@@ -107,6 +128,28 @@
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
     <div id="vwf-root"></div>
+
+    <!-- Show a world selection form. The form is hidden if window.location contains a world     -->
+    <!-- specification.                                                                          -->
+
+    <form id="world-selection">
+
+        <table>
+            <tr>
+                <td>
+                    <p><label><input class="world-option" type="radio" name="world-option" value="http://localhost/cityblock.js" /> City Block</label><br /></p>
+                    <p><label><input class="world-option" type="radio" name="world-option" value="http://localhost/test1.js" /> Duck and Plane</label></p>
+                </td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </td>
+                <td>
+                    <input id="world-choice" type="text" size="50" /> <input type="submit" value="Load" />
+                </td>
+            </tr>
+        </table>
+
+    </form>
 
     <!-- The "html" view has been configured to render to "#vwf-listing".                        -->
 
