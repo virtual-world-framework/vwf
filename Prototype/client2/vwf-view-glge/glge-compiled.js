@@ -13621,6 +13621,8 @@ GLGE.Collada.prototype.getNode=function(node,ref){
 	var newGroup=new GLGE.Group();
 	var name="bone"+(++this.boneIdx);
 	newGroup.setName(name);
+    newGroup.colladaId = node.getAttribute( "id" );
+    newGroup.colladaName = node.getAttribute( "name" );
 	if (!node) {
         return newGroup;
     }
