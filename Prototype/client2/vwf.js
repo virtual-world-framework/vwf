@@ -508,6 +508,59 @@
 
         };
 
+        // -- parent -------------------------------------------------------------------------------
+
+        this.parent = function( nodeID ) {
+
+            // Call parenting() on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var parent = undefined;
+
+            jQuery.each( vwf.models, function( index, model ) {
+                var modelParent = model.parenting && model.parenting( nodeID );
+                parent = modelParent !== undefined ? modelParent  : parent;
+            } );
+
+            return parent;
+        };
+
+        // -- children -----------------------------------------------------------------------------
+
+        this.children = function( nodeID ) {
+
+            console.info( "vwf.children " + nodeID );
+
+            // Call childrening() on each model. The return value is the union of the non-undefined
+            // results.
+
+            var children = [];
+
+            jQuery.each( vwf.models, function( index, model ) {
+                var modelChildren = model.childrening && model.childrening( nodeID ) || [];
+                Array.prototype.push.apply( children, modelChildren );
+            } );
+
+            return children; // TODO: remove duplicates, hopefully without re-ordering.
+        };
+
+        // -- name ---------------------------------------------------------------------------------
+
+        this.name = function( nodeID ) {
+
+            // Call naming() on each model. The first model to return a non-undefined value dictates
+            // the return value.
+
+            var name = undefined;
+
+            jQuery.each( vwf.models, function( index, model ) {
+                var modelName = model.naming && model.naming( nodeID );
+                name = modelName !== undefined ? modelName : name;
+            } );
+
+            return name;
+        };
+
         // -- createProperty -----------------------------------------------------------------------
 
         // Create a property on a node and assign an initial value.
@@ -564,7 +617,7 @@
 
         this.getProperty = function( nodeID, propertyName ) {
 
-            console.info( "vwf.getProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            console.info( "vwf.getProperty " + nodeID + " " + propertyName );
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
