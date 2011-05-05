@@ -68,3 +68,161 @@
     }
 
 } )
+
+
+
+/*
+
+      children:
+      {
+            bone1:
+            {
+               extends: "http://localhost/node3.js",
+               properties:
+               {
+                  enabled: true,
+               },
+               children:
+               {
+                  untitled:
+                  {
+                     extends: "http://localhost/node3.js",
+                     properties:
+                     {
+                        enabled: true,
+                     },
+                     children:
+                     {
+                        LOD3sp:
+                        {
+                           extends: "http://localhost/node3.js",
+                           properties:
+                           {
+                              enabled: true,
+                           },
+                           children:
+                           {
+                              undefined:
+                              {
+                                 extends: 'http://localhost/node3.js'
+                                 properties:
+                                 {
+                                    angle: 0,
+                                 },
+                              },
+                           },
+                        },
+                        camera1:
+                        {
+                           extends: "http://localhost/node3.js",
+                           properties:
+                           {
+                              enabled: true,
+                           },
+                           children:
+                           {
+                           },
+                        },
+                        directionalLight1:
+                        {
+                           extends: "http://localhost/node3.js",
+                           properties:
+                           {
+                              enabled: true,
+                           },
+                           children:
+                           {
+                           },
+                        },
+                     },
+                  },
+               },
+            },
+      }
+      children:
+      {
+            bone1:
+            {
+               extends: "http://localhost/node3.js",
+               properties:
+               {
+                  enabled: true,
+               },
+               children:
+               {
+                  untitled:
+                  {
+                     extends: "http://localhost/node3.js",
+                     properties:
+                     {
+                        enabled: true,
+                     },
+                     children:
+                     {
+                        plane:
+                        {
+                           extends: "http://localhost/node3.js",
+                           properties:
+                           {
+                              enabled: true,
+                           },
+                           children:
+                           {
+                              undefined:
+                              {
+                                 extends: 'http://localhost/node3.js'
+                                 properties:
+                                 {
+                                    angle: 0,
+                                 },
+                              },
+                              prop:
+                              {
+                                 extends: "http://localhost/node3.js",
+                                 properties:
+                                 {
+                                    enabled: true,
+                                 },
+                                 children:
+                                 {
+                                    undefined:
+                                    {
+                                       extends: 'http://localhost/node3.js'
+                                       properties:
+                                       {
+                                          angle: 0,
+                                       },
+                                    },
+                                 },
+                              },
+                           },
+                        },
+                        directionalLight1:
+                        {
+                           extends: "http://localhost/node3.js",
+                           properties:
+                           {
+                              enabled: true,
+                           },
+                           children:
+                           {
+                           },
+                        },
+                        camera1:
+                        {
+                           extends: "http://localhost/node3.js",
+                           properties:
+                           {
+                              enabled: true,
+                           },
+                           children:
+                           {
+                           },
+                        },
+                     },
+                  },
+               },
+            },
+      }
+
+*/
