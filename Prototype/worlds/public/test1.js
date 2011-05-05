@@ -7,6 +7,11 @@
 
     children:
     {
+        maincamera: {
+            extends: "http://localhost/camera.js",
+            properties: { angle: 0, },
+        },
+        
         wallobject: {
             extends: "http://localhost/node3.js",
             properties: { angle: 0, },
@@ -51,6 +56,10 @@
                             extends: "http://localhost/node3.js",
                         },
                     },
+                },
+                "prop": {
+                    extends: "http://localhost/node3.js",
+                
                 },
             },
 
