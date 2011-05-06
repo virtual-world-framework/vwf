@@ -7,12 +7,12 @@
 
     children:
     {
-        maincamera: {
+        "maincamera": {
             extends: "http://localhost:8001/camera.js",
             properties: { angle: 0, },
         },
         
-        wallobject: {
+        "wallobject": {
             extends: "http://localhost:8001/node3.js",
             properties: { angle: 0, },
         },
