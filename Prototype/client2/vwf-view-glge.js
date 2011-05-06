@@ -46,7 +46,7 @@
             );
 
             var canvasQuery = jQuery(this.rootSelector).append(
-                "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='450'/>"
+                "<canvas id='" + nodeID + "' class='vwf-scene' width='1200' height='600'/>"
             ).children(":last");
 
             var scene = this.scenes[nodeID] = {
@@ -185,6 +185,7 @@
 
     var bindSceneChildren = function (nodeID, view) {
 
+        //console.info("      bindSceneChildren: " + nodeID);
         var scene = view.scenes[nodeID], child;
 
         jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
@@ -199,6 +200,7 @@
 
     var bindNodeChildren = function (nodeID, view) {
 
+        //console.info("      bindNodeChildren: " + nodeID);
         var node = view.nodes[nodeID], child;
 
         jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
@@ -213,6 +215,7 @@
 
     var bindChild = function (scene, node, child, childName) {
 
+        //console.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
         if (scene) {
             child.name = childName;
             child.glgeObject = scene.glgeScene && glgeSceneChild(scene.glgeScene, childName);
@@ -224,19 +227,20 @@
         }
 
         return Boolean(child.glgeObject);
-
         //console.info( "scene: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
         //console.info( "node: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
-
     };
 
     // Search a GLGE.Scene for a child with the given name.
 
     var glgeSceneChild = function (glgeScene, childName) {
 
-        return jQuery.grep(glgeScene.children || [], function (glgeChild) {
+        var childToReturn = jQuery.grep(glgeScene.children || [], function (glgeChild) {
             return (glgeChild.name || glgeChild.id || glgeChild.docURL || "") == childName;
         }).shift();
+
+        //console.info("      glgeSceneChild( " + childName + " ) returns " + childToReturn);
+        return childToReturn;
 
     };
 
@@ -244,9 +248,12 @@
 
     var glgeObjectChild = function (glgeObject, childName) {
 
-        return jQuery.grep(glgeObject.children || [], function (glgeChild) {
+        var childToReturn = jQuery.grep(glgeObject.children || [], function (glgeChild) {
             return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
         }).shift();
+
+        //console.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
+        return childToReturn;
 
     };
 
@@ -271,12 +278,21 @@
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
                     yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
                 }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_E)) { zinc = zinc + 1.0 }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) { yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_E)) { yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW)) { camera.setRotY(camerarot.y + 0.02); }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW)) { camera.setRotY(camerarot.y - 0.02); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_A)) {
+                    camera.setRotY(camerarot.y + 0.04);
+                }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_D)) {
+                    camera.setRotY(camerarot.y - 0.04);
+                }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
+                    console.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z );
+                    console.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
+                }
+
                 //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) xinc = 0;
                 //if (levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) yinc = 0;
                 //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) { 
@@ -296,12 +312,15 @@
 
     var initMouseEvents = function (canvas, nodeID, view) {
         var scene = view.scenes[nodeID], child;
+        var sceneID = nodeID;
         var sceneView = view;
         var mouseDown = false;
         var mouseOverCanvas = false;
 
         var mouseDownObjectID = undefined;
         var mouseOverObjectID = undefined;
+
+        var bindOnClick = false;
 
         canvas.onmousedown = function (e) {
             mouseDown = true;
@@ -315,9 +334,14 @@
         canvas.onmouseup = function (e) {
             var mouseUpObjectID = mousePick(e, scene, sceneView);
             // check for time??
-            if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
-                //console.info("CANVAS onMouseClick: " + mouseDownObjectID);
+            if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
+                console.info("CANVAS onMouseClick: " + mouseDownObjectID);
                 //this.throwEvent( "onMouseClick", mouseDownObjectID);
+            }
+
+            if (bindOnClick) {
+                bindSceneChildren(sceneID, sceneView);
+                bindOnClick = false;
             }
 
             //console.info("CANVAS onMouseUp: " + mouseDownObjectID);
@@ -344,7 +368,7 @@
                 var objectOver = mousePick(e, scene, sceneView);
                 if (objectOver) {
                     if (mouseOverObjectID) {
-                        if ( objectOver != mouseOverObjectID ) {
+                        if (objectOver != mouseOverObjectID) {
 
                             //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseLeave", mouseOverObjectID);
@@ -395,20 +419,43 @@
         }
     };
 
+    function name(obj) {
+        return obj.colladaName || obj.colladaId || obj.name || obj.id || "";
+    }
+
+
+    function path(obj) {
+        var sOut = "";
+        var sName = "";
+
+        while (obj && obj.parent) {
+            if (sOut == "")
+                sOut = name(obj);
+            else
+                sOut = name(obj) + "." + sOut;
+            obj = obj.parent;
+        }
+        return sOut;
+    }
+
     var mousePick = function (e, scene, view) {
         if (scene && scene.glgeScene) {
             var pickInfo = scene.glgeScene.pick(e.clientX - e.currentTarget.offsetLeft, e.clientY - e.currentTarget.offsetTop);
-            if ( pickInfo && pickInfo.object ) {
-                var objects = [];
+            if (pickInfo && pickInfo.object) {
+                var objectIDFound = -1;
                 var objectToLookFor = pickInfo.object;
-                while ( objects.length == 0 && objectToLookFor ) {
-                    objects = jQuery.grep( view.nodes, function ( node, nodeID ) {
-                            return node.glgeObject = objectToLookFor; 
-                        } );
+
+                while (objectIDFound == -1 && objectToLookFor) {
+                    //console.info("Searching for: " + path(objectToLookFor));
+                    objects = jQuery.each(view.nodes, function (nodeID, node) {
+                        if (node.glgeObject == objectToLookFor) {
+                            objectIDFound = nodeID;
+                        }
+                    });
                     objectToLookFor = objectToLookFor.parent;
                 }
-                if ( objects )
-                    return objects.shift();
+                if (objectIDFound != -1)
+                    return objectIDFound;
             }
         }
         return undefined;
