@@ -1,6 +1,6 @@
 ﻿cb( {
 
-    extends: "http://localhost/glge.js",
+    extends: "http://localhost:8001/glge.js",
 
     source: "vwf-view-glge/collada/level.xml",
     type: "model/x-glge",
@@ -8,27 +8,27 @@
     children:
     {
         maincamera: {
-            extends: "http://localhost/camera.js",
+            extends: "http://localhost:8001/camera.js",
             properties: { angle: 0, },
         },
         
         wallobject: {
-            extends: "http://localhost/node3.js",
+            extends: "http://localhost:8001/node3.js",
             properties: { angle: 0, },
         },
 
         "http://localhost:8080/vwf-view-glge/collada/duck.dae": {
-            extends: "http://localhost/node3.js",
+            extends: "http://localhost:8001/node3.js",
 
             properties: { angle: 0, },
 
             children: {
                 "bone1": {
-                    extends: "http://localhost/node3.js",
+                    extends: "http://localhost:8001/node3.js",
 
                     children: {
                         "untitled": {
-                            extends: "http://localhost/node3.js",
+                            extends: "http://localhost:8001/node3.js",
                         },
                     },
                 },
@@ -43,22 +43,22 @@
         },
 
         "http://localhost:8080/vwf-view-glge/collada/seymourplane_triangulate.dae": {
-            extends: "http://localhost/node3.js",
+            extends: "http://localhost:8001/node3.js",
 
             properties: { angle: 0, },
 
             children: {
                 "bone1": {
-                    extends: "http://localhost/node3.js",
+                    extends: "http://localhost:8001/node3.js",
                     
                     children: {
                         "untitled": {
-                            extends: "http://localhost/node3.js",
+                            extends: "http://localhost:8001/node3.js",
                         },
                     },
                 },
                 "prop": {
-                    extends: "http://localhost/node3.js",
+                    extends: "http://localhost:8001/node3.js",
                 
                 },
             },
@@ -77,7 +77,7 @@
       {
             bone1:
             {
-               extends: "http://localhost/node3.js",
+               extends: "http://localhost:8001/node3.js",
                properties:
                {
                   enabled: true,
@@ -86,7 +86,7 @@
                {
                   untitled:
                   {
-                     extends: "http://localhost/node3.js",
+                     extends: "http://localhost:8001/node3.js",
                      properties:
                      {
                         enabled: true,
@@ -95,7 +95,7 @@
                      {
                         LOD3sp:
                         {
-                           extends: "http://localhost/node3.js",
+                           extends: "http://localhost:8001/node3.js",
                            properties:
                            {
                               enabled: true,
@@ -104,7 +104,7 @@
                            {
                               undefined:
                               {
-                                 extends: 'http://localhost/node3.js'
+                                 extends: 'http://localhost:8001/node3.js'
                                  properties:
                                  {
                                     angle: 0,
@@ -114,7 +114,7 @@
                         },
                         camera1:
                         {
-                           extends: "http://localhost/node3.js",
+                           extends: "http://localhost:8001/node3.js",
                            properties:
                            {
                               enabled: true,
@@ -125,7 +125,7 @@
                         },
                         directionalLight1:
                         {
-                           extends: "http://localhost/node3.js",
+                           extends: "http://localhost:8001/node3.js",
                            properties:
                            {
                               enabled: true,
@@ -143,7 +143,7 @@
       {
             bone1:
             {
-               extends: "http://localhost/node3.js",
+               extends: "http://localhost:8001/node3.js",
                properties:
                {
                   enabled: true,
@@ -152,7 +152,7 @@
                {
                   untitled:
                   {
-                     extends: "http://localhost/node3.js",
+                     extends: "http://localhost:8001/node3.js",
                      properties:
                      {
                         enabled: true,
@@ -161,7 +161,7 @@
                      {
                         plane:
                         {
-                           extends: "http://localhost/node3.js",
+                           extends: "http://localhost:8001/node3.js",
                            properties:
                            {
                               enabled: true,
@@ -170,7 +170,7 @@
                            {
                               undefined:
                               {
-                                 extends: 'http://localhost/node3.js'
+                                 extends: 'http://localhost:8001/node3.js'
                                  properties:
                                  {
                                     angle: 0,
@@ -178,7 +178,7 @@
                               },
                               prop:
                               {
-                                 extends: "http://localhost/node3.js",
+                                 extends: "http://localhost:8001/node3.js",
                                  properties:
                                  {
                                     enabled: true,
@@ -187,7 +187,7 @@
                                  {
                                     undefined:
                                     {
-                                       extends: 'http://localhost/node3.js'
+                                       extends: 'http://localhost:8001/node3.js'
                                        properties:
                                        {
                                           angle: 0,
@@ -199,7 +199,7 @@
                         },
                         directionalLight1:
                         {
-                           extends: "http://localhost/node3.js",
+                           extends: "http://localhost:8001/node3.js",
                            properties:
                            {
                               enabled: true,
@@ -210,7 +210,7 @@
                         },
                         camera1:
                         {
-                           extends: "http://localhost/node3.js",
+                           extends: "http://localhost:8001/node3.js",
                            properties:
                            {
                               enabled: true,

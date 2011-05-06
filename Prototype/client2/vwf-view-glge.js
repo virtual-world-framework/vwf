@@ -39,7 +39,7 @@
         console.info("vwf.view.glge.createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
-        if (vwf.typeURIs[nodeExtendsID] == "http://localhost/glge.js") {
+        if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/glge.js") {
 
             jQuery(this.rootSelector).append(
                 "<h2>Scene</h2>"
@@ -103,7 +103,7 @@
                 scene.document.getElement("mainscene").addCollada(newCollada);
             }
 
-        } else if (vwf.typeURIs[nodeExtendsID] == "http://localhost/node3.js") {
+        } else if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/node3.js") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,  // TODO: needed?
@@ -111,7 +111,7 @@
             };
 
         }
-        else if (vwf.typeURIs[nodeExtendsID] == "http://localhost/camera.js") {
+        else if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/camera.js") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
