@@ -164,13 +164,27 @@
         console.info("vwf.view.glge.satProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
+        var value = propertyValue;
 
-        // Demo hack: pause/resume an object's animation when its "angle" property is odd/even.
+        if ( node && node.glgeObject ) {
 
-        if (node && node.glgeObject && propertyName == "angle") {
-            node.glgeObject.setPaused((propertyValue & 1) ? GLGE.TRUE : GLGE.FALSE);
+            switch ( propertyName ) {
+
+                case "playing":
+                    node.glgeObject.setPaused( Boolean( propertyValue ) ? GLGE.FALSE: GLGE.TRUE );
+                    break;
+
+                case "looping":
+                    node.glgeObject.setLoop( Boolean( propertyValue ) ? GLGE.TRUE : GLGE.FALSE );
+                    break;
+
+                case "speed":
+                    node.glgeObject.setFrameRate( Number( propertyValue ) * 30 ); // TODO: not safe to assume default speed is 30 fps
+                    break;
+            }
         }
 
+        return value;
     };
 
     // -- gotProperty ------------------------------------------------------------------------------
@@ -179,6 +193,28 @@
 
         console.info("vwf.view.glge.gotProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
+        var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
+        var value;
+
+        if ( node && node.glgeObject ) {
+
+            switch ( propertyName ) {
+
+                case "playing":
+                    value = ! Boolean( node.glgeObject.getPaused() );
+                    break;
+
+                case "looping":
+                    value = Boolean( node.glgeObject.getLoop() );
+                    break;
+
+                case "speed":
+                    value = node.glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
+                    break;
+            }
+        }
+
+        return value;
     };
 
     // == Private functions ========================================================================
@@ -368,6 +404,7 @@
             if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
                 console.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
                 //this.throwEvent( "onMouseClick", mouseDownObjectID);
+                vwf.callMethod( mouseUpObjectID, "pointerClick" );
             }
 
             if (bindOnClick) {
