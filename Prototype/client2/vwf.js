@@ -592,7 +592,6 @@ this.typeURIs[id] = uri;
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue );
             } );
 
-            return propertyValue;
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -645,6 +644,53 @@ this.typeURIs[id] = uri;
             } );
 
             return propertyValue;
+        };
+
+        // -- createMethod -------------------------------------------------------------------------
+
+        this.createMethod = function ( nodeID, methodName ) {
+
+            console.info( "vwf.createMethod " + nodeID + " " + methodName );
+
+            // Call creatingMethod() on each model. The method is considered created after each
+            // model has run.
+
+            jQuery.each( vwf.models, function ( index, model ) {
+                model.creatingMethod && model.creatingMethod( nodeID, methodName );
+            } );
+
+            // Call createdMethod() on each view. The view is being notified that a method has been
+            // created.
+
+            jQuery.each( vwf.views, function ( index, view ) {
+                view.createdMethod && view.createdMethod( nodeID, methodName );
+            });
+
+        };
+
+        // -- callMethod ---------------------------------------------------------------------------
+
+        this.callMethod = function( nodeID, methodName ) { // TODO: parameters
+
+            console.info( "vwf.callMethod " + nodeID + " " + methodName ); // TODO: parameters
+
+            // Call callingMethod() on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var methodValue = undefined;
+
+            jQuery.each( vwf.models, function( index, model ) {
+                var value = model.callingMethod && model.callingMethod( nodeID, methodName ); // TODO: parameters
+                methodValue = value !== undefined ? value : methodValue;
+            } );
+
+            // Call calledMethod() on each view.
+
+            jQuery.each( vwf.views, function( index, view ) {
+                view.calledMethod && view.calledMethod( nodeID, methodName ); // TODO: parameters
+            } );
+
+            return methodValue;
         };
 
         // -- execute ------------------------------------------------------------------------------

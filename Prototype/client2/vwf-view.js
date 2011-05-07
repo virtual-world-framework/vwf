@@ -80,8 +80,22 @@
         console.info( "vwf.view.getProperty " + nodeID + " " + propertyName + " " + propertyValue );
         this.vwf.send( nodeID, "getProperty", propertyName, propertyValue );
     };
+    
+    // -- createMethod -----------------------------------------------------------------------------
 
-    // TODO: createMethod, deleteMethod, callMethod
+    module.prototype.createMethod = function( nodeID, methodName ) {
+        console.info( "vwf.view.createMethod " + nodeID + " " + methodName );
+        this.vwf.send( nodeID, "createMethod", methodName );
+    };
+
+    // TODO: deleteMethod
+
+    // -- callMethod -------------------------------------------------------------------------------
+
+    module.prototype.callMethod = function( nodeID, methodName ) { // TODO: parameters
+        console.info( "vwf.view.callMethod " + nodeID + " " + methodName ); // TODO: parameters
+        this.vwf.send( nodeID, "callMethod", methodName ); // TODO: parameters
+    };
     
     // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
 
@@ -149,7 +163,19 @@
         console.info( "vwf.view.gotProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
-    // TODO: createdMethod, deletedMethod, calledMethod
+    // -- createdMethod ----------------------------------------------------------------------------
+
+    module.prototype.createdMethod = function( nodeID, methodName ) {
+        console.info( "vwf.view.createdMethod " + nodeID + " " + methodName );
+    };
+
+    // TODO: deletedMethod
+
+    // -- calledMethod -----------------------------------------------------------------------------
+
+    module.prototype.calledMethod = function( nodeID, methodName ) { // TODO: parameters
+        console.info( "vwf.view.calledMethod " + nodeID + " " + methodName ); // TODO: parameters
+    };
 
     // TODO: createdEvent, deletedEvent, firedEvent
 

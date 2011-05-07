@@ -110,7 +110,21 @@
         return this.vwf.getProperty( nodeID, propertyName, propertyValue );
     };
 
-    // TODO: createMethod, deleteMethod, callMethod
+    // -- createMethod -----------------------------------------------------------------------------
+
+    module.prototype.createMethod = function( nodeID, methodName ) {
+        console.info( "vwf.model.createMethod " + nodeID + " " + methodName );
+        return this.vwf.createMethod( nodeID, methodName );
+    };
+
+    // TODO: deleteMethod
+
+    // -- callMethod -------------------------------------------------------------------------------
+
+    module.prototype.callMethod = function( nodeID, methodName ) { // TODO: parameters
+        console.info( "vwf.model.callMethod " + nodeID + " " + methodName ); // TODO: parameters
+        return this.vwf.callMethod( nodeID, methodName ); // TODO: parameters
+    };
     
     // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
 
@@ -195,7 +209,19 @@
         console.info( "vwf.model.gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
-    // TODO: creatingMethod, deletingMethod, callingMethod
+    // -- creatingMethod ---------------------------------------------------------------------------
+
+    module.prototype.creatingMethod = function( nodeID, methodName ) {
+        console.info( "vwf.model.creatingMethod " + nodeID + " " + methodName );
+    };
+
+    // TODO: deletingMethod
+
+    // -- callingMethod ----------------------------------------------------------------------------
+
+    module.prototype.callingMethod = function( nodeID, methodName ) { // TODO: parameters
+        console.info( "vwf.model.callingMethod " + nodeID + " " + methodName ); // TODO: parameters
+    };
 
     // TODO: creatingEvent, deltetingEvent, firingEvent
 
