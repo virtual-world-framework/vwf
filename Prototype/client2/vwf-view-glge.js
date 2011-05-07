@@ -176,15 +176,18 @@
             switch ( propertyName ) {
 
                 case "playing":
-                    node.glgeObject.setPaused( Boolean( propertyValue ) ? GLGE.FALSE: GLGE.TRUE );
+                    var glgePaused = ! Boolean( propertyValue ) ? GLGE.TRUE : GLGE.FALSE;
+                    node.glgeObject.getPaused() != glgePaused && node.glgeObject.setPaused( glgePaused ); // don't unpause if not paused
                     break;
 
                 case "looping":
-                    node.glgeObject.setLoop( Boolean( propertyValue ) ? GLGE.TRUE : GLGE.FALSE );
+                    var glgeLoop = Boolean( propertyValue ) ? GLGE.TRUE : GLGE.FALSE;
+                    node.glgeObject.setLoop( glgeLoop );
                     break;
 
                 case "speed":
-                    node.glgeObject.setFrameRate( Number( propertyValue ) * 30 ); // TODO: not safe to assume default speed is 30 fps
+                    var glgeFrameRate = Number( propertyValue ) * 30; // TODO: not safe to assume default speed is 30 fps
+                    node.glgeObject.setFrameRate( glgeFrameRate );
                     break;
             }
         }
