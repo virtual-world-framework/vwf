@@ -2067,7 +2067,7 @@ GLGE.Animatable.prototype.getName=function(){
 		frame=1;
 	}
 
-	return Math.round(frame);
+	return parseInt(frame);
 }
  
 /**
@@ -2111,7 +2111,7 @@ GLGE.Animatable.prototype.getName=function(){
 			}
 		}
 	}
-	return this;l
+	return this;
  }
  
  /**
@@ -2234,7 +2234,7 @@ GLGE.Animatable.prototype.animate=function(now,nocache){
 			}
 		}
 	}
-	if(this.animation && !this.animFinished && this.blendTime==0 && this.animation.frames==frame && !nocache){
+	if(this.animation && !this.animFinished && this.blendTime==0 && this.animFrames==frame && !nocache){
 		this.animFinished=true;
 		this.fireEvent("animFinished",{});
 	}
@@ -13119,7 +13119,7 @@ GLGE.Collada.prototype.getAnimationVector=function(channels){
 		var target=channels[i].target;
 		var animcurves=this.getAnimationSampler(channels[i].source,/ANGLE/i.test(target));
 		for(j=0;j<animcurves.length;j++){
-			maxFrame=Math.max(maxFrame,animcurves[j].keyFrames[animcurves[j].keyFrames.length-1].x);
+			maxFrame=Math.round(Math.max(maxFrame,animcurves[j].keyFrames[animcurves[j].keyFrames.length-1].x));
 		}
 		if(target[1].indexOf(".")!=-1){
 			var splittarget=target[1].split(".");
