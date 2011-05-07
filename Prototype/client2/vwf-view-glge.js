@@ -327,7 +327,7 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
     var glgeSceneChild = function (glgeScene, childName) {
 
         var childToReturn = jQuery.grep(glgeScene.children || [], function (glgeChild) {
-            return (glgeChild.name || glgeChild.id || glgeChild.docURL || "") == childName;
+            return (glgeChild.name || glgeChild.id || glgeChild.sourceURL || "") == childName;
         }).shift();
 
         //console.info("      glgeSceneChild( " + childName + " ) returns " + childToReturn);

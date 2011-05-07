@@ -15,7 +15,7 @@
             extends: "http://localhost:8001/node3.js",
         },
 
-        "http://localhost:8080/vwf-view-glge/collada/duck.dae": {
+        "duck.dae": {
             extends: "http://localhost:8001/node3.js",
 
             properties: { angle: 0, playing: false },
@@ -31,7 +31,7 @@
 
         },
 
-        "http://localhost:8080/vwf-view-glge/collada/seymourplane_triangulate.dae": {
+        "seymourplane_triangulate.dae": {
             extends: "http://localhost:8001/node3.js",
 
             properties: { angle: 0, },
