@@ -70,13 +70,13 @@
                 // Resolve the mapping from VWF nodes to their corresponding GLGE objects for the
                 // objects just loaded.
 
-                bindSceneChildren(nodeID, view);
+                bindSceneChildren(view, nodeID);
 
                 // GLGE doesn't provide an onLoad() callback for any Collada documents referenced by
                 // the GLGE document. They may still be loaded after we receive onLoad(). As a work-
                 // around, wait 5 seconds after load and rebind.
 
-                setTimeout(bindSceneChildren, 5000, nodeID, view);
+                setTimeout(bindSceneChildren, 5000, view, nodeID);
 
                 // Schedule the renderer.
 
@@ -139,7 +139,7 @@
         var child = this.nodes[childID];
 
         if (child) {
-            bindChild(this.scenes[nodeID], this.nodes[nodeID], child, childName);
+            bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID);
         }
 
     };
@@ -173,23 +173,53 @@
 
         if ( node && node.glgeObject ) {
 
-            switch ( propertyName ) {
+            var glgeObject = node.glgeObject;
+            var isAnimatable = glgeObject.animate !== undefined; // implements GLGE.Animatable?
+isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
 
-                case "playing":
-                    var glgePaused = ! Boolean( propertyValue ) ? GLGE.TRUE : GLGE.FALSE;
-                    node.glgeObject.getPaused() != glgePaused && node.glgeObject.setPaused( glgePaused ); // don't unpause if not paused
-                    break;
+            if ( isAnimatable ) {
 
-                case "looping":
-                    var glgeLoop = Boolean( propertyValue ) ? GLGE.TRUE : GLGE.FALSE;
-                    node.glgeObject.setLoop( glgeLoop );
-                    break;
+                switch ( propertyName ) {
 
-                case "speed":
-                    var glgeFrameRate = Number( propertyValue ) * 30; // TODO: not safe to assume default speed is 30 fps
-                    node.glgeObject.setFrameRate( glgeFrameRate );
-                    break;
+                    case "playing":
+
+if ( !Boolean( propertyValue ) && glgeObject.animFinished ) {  // TODO: GLGE finished doesn't flow back into node3's playing yet; assume playing is being toggled and interpret it as true if the animation has played and finished.
+    propertyValue = true;
+}
+
+if ( !node.initialized ) {  // TODO: this is a hack to set the animation to frame 0 during initialization
+    if ( glgeObject.animFrames == 100 ) { glgeObject.setFrames( 50 ); } // hack to use only the opening half of the door animation
+    glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
+    glgeObject.getInitialValues( glgeObject.animation, glgeObject.animationStart );
+}
+
+                        if ( Boolean( propertyValue ) ) {
+                            if ( glgeObject.animFinished ) {
+                                glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
+                            } else if ( glgeObject.getPaused() ) {
+                                glgeObject.setPaused( GLGE.FALSE );
+                            }
+                        }
+
+                        else {
+                            glgeObject.setPaused( GLGE.TRUE );
+                        }
+
+                        break;
+
+                    case "looping":
+                        var glgeLoop = Boolean( propertyValue ) ? GLGE.TRUE : GLGE.FALSE;
+                        glgeObject.setLoop( glgeLoop );
+                        break;
+
+                    case "speed":
+                        var glgeFrameRate = Number( propertyValue ) * 30; // TODO: not safe to assume default speed is 30 fps
+                        glgeObject.setFrameRate( glgeFrameRate );
+                        break;
+                }
+
             }
+
         }
 
         return value;
@@ -206,19 +236,26 @@
 
         if ( node && node.glgeObject ) {
 
-            switch ( propertyName ) {
+            var glgeObject = node.glgeObject;
+            var isAnimatable = glgeObject.animate !== undefined; // implements GLGE.Animatable?
+isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
 
-                case "playing":
-                    value = ! Boolean( node.glgeObject.getPaused() );
-                    break;
+            if ( isAnimatable ) {
 
-                case "looping":
-                    value = Boolean( node.glgeObject.getLoop() );
-                    break;
+                switch ( propertyName ) {
 
-                case "speed":
-                    value = node.glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
-                    break;
+                    case "playing":
+                        value = !Boolean( glgeObject.getPaused() );
+                        break;
+
+                    case "looping":
+                        value = Boolean( glgeObject.getLoop() );
+                        break;
+
+                    case "speed":
+                        value = glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
+                        break;
+                }
             }
         }
 
@@ -227,47 +264,57 @@
 
     // == Private functions ========================================================================
 
-    var bindSceneChildren = function (nodeID, view) {
+    var bindSceneChildren = function (view, nodeID) {
 
         //console.info("      bindSceneChildren: " + nodeID);
-        var scene = view.scenes[nodeID], child;
+        var scene = view.scenes[nodeID];
+        var child;
 
         jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
             if (child = view.nodes[childID]) {
-                if (bindChild(scene, undefined, child, vwf.name(childID))) {
-                    bindNodeChildren(childID, view);
+                if (bindChild(view, scene, undefined, child, vwf.name(childID), childID)) {
+                    bindNodeChildren(view, childID);
                 }
             }
         });
 
     };
 
-    var bindNodeChildren = function (nodeID, view) {
+    var bindNodeChildren = function (view, nodeID) {
 
         //console.info("      bindNodeChildren: " + nodeID);
-        var node = view.nodes[nodeID], child;
+        var node = view.nodes[nodeID];
+        var child;
 
         jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
             if (child = view.nodes[childID]) {
-                if (bindChild(undefined, node, child, vwf.name(childID))) {
-                    bindNodeChildren(childID, view);
+                if (bindChild(view, undefined, node, child, vwf.name(childID), childID)) {
+                    bindNodeChildren(view, childID);
                 }
             }
         });
 
     };
 
-    var bindChild = function (scene, node, child, childName) {
+    var bindChild = function (view, scene, node, child, childName, childID) {
 
         //console.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
-        if (scene) {
+        if (scene && !child.glgeObject) {
             child.name = childName;
             child.glgeObject = scene.glgeScene && glgeSceneChild(scene.glgeScene, childName);
+            if (child.glgeObject) {
+                glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+                child.initialized = true;
+            }
         }
 
-        else if (node) {
+        else if (node && !child.glgeObject) {
             child.name = childName;
             child.glgeObject = node.glgeObject && glgeObjectChild(node.glgeObject, childName);
+            if (child.glgeObject) {
+                glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+                child.initialized = true;
+            }
         }
 
         return Boolean(child.glgeObject);
@@ -298,6 +345,14 @@
 
         //console.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
+
+    };
+
+    var glgeObjectInitializeFromProperties = function( view, nodeID, glgeObject ) {
+
+        view.satProperty( nodeID, "playing", vwf.getProperty( nodeID, "playing" ) );
+        view.satProperty( nodeID, "looping", vwf.getProperty( nodeID, "looping" ) );
+        view.satProperty( nodeID, "speed", vwf.getProperty( nodeID, "speed" ) );
 
     };
 
@@ -412,11 +467,11 @@
             if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
                 console.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
                 //this.throwEvent( "onMouseClick", mouseDownObjectID);
-                vwf.callMethod( mouseUpObjectID, "pointerClick" );
+                view.callMethod( mouseUpObjectID, "pointerClick" );
             }
 
             if (bindOnClick) {
-                bindSceneChildren(sceneID, sceneView);
+                bindSceneChildren(sceneView, sceneID);
                 bindOnClick = false;
             }
 
