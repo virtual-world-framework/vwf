@@ -183,6 +183,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
         var node = this.nodes[nodeID];
         var property = node.properties[propertyName]; // TODO: search recursively through prototypes and copy on write.
+        var value;
 
         if ( property.setter && !property.setting ) {
             property.setting = true;
@@ -203,6 +204,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
         var node = this.nodes[nodeID];
         var property = node.properties[propertyName] || ( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] ); // TODO: search recursively through prototypes.
+        var value;
 
         if ( property.getter && !property.getting ) {
             property.getting = true;
@@ -215,6 +217,23 @@ node.id = nodeID; // TODO: move to a backstop model
         return value;
     };
 
+    // TODO: creatingMethod, deletingMethod
+
+    // -- callingMethod ----------------------------------------------------------------------------
+
+    module.prototype.callingMethod = function( nodeID, methodName ) { // TODO: parameters
+
+        console.info( "vwf.model.javascript.callingMethod " + nodeID + " " + methodName ); // TODO: parameters
+
+        var node = this.nodes[nodeID];
+        // var method = ... verify it's in node.methods[], search prototypes, etc.
+        var value;
+
+        value = node[methodName] && node[methodName]();
+
+        return value;
+    };
+
     // -- executing --------------------------------------------------------------------------------
 
     module.prototype.executing = function( nodeID, scriptText, scriptType ) {
@@ -222,11 +241,13 @@ node.id = nodeID; // TODO: move to a backstop model
         console.info( "vwf.model.javascript.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
 
         var node = this.nodes[nodeID];
+        var value;
 
         if ( scriptType == "application/javascript" ) { // TODO: or others
-            ( function( scriptText ) { eval( scriptText ) } ).call( node, scriptText );
+            value = ( function( scriptText ) { eval( scriptText ) } ).call( node, scriptText ); // TODO: return result?
         }
 
+        return value;
     };
 
 
