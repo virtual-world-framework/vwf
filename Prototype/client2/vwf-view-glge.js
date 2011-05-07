@@ -97,13 +97,16 @@
             if (nodeSource && nodeType == "model/x-glge") {
                 scene.glgeDocument.load(nodeSource);
             }
-            else if (nodeSource && nodeType == "model/collada") {
+
+            else if (nodeSource && nodeType == "model/vnd.collada+xml") {  // TODO: need to loadDocument() from somewhere first
                 var newCollada = new GLGE.Collada;
                 newCollada.setDocument(nodeSource, window.location.href);
-                scene.document.getElement("mainscene").addCollada(newCollada);
+                scene.glgeDocument.getElement("mainscene").addCollada(newCollada);
             }
 
-        } else if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/node3.js") {
+        }
+        
+        else if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/node3.js") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,  // TODO: needed?
@@ -111,12 +114,14 @@
             };
 
         }
+
         else if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/camera.js") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
                 glgeObject: undefined
             };
+
             this.camera = node;
             this.cameraID = nodeID;
         }
