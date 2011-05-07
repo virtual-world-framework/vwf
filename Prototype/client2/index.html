@@ -15,6 +15,8 @@
 
     <script type="text/javascript" src="jquery-1.4.4.js"></script>
 
+    <script type="text/javascript" src="socket.io/socket.io.js"></script>
+
     <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
     <!-- the global window object as window.vwf. All access to the framework is through that     -->
     <!-- reference, and no other objects are globally visible.                                   -->
@@ -85,7 +87,7 @@
 
             {
                 glge: "#vwf-root",      // invokes: new vwf.modules.glge( vwf, "#vwf-root" )
-                html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
+                // html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
             }
 
         );

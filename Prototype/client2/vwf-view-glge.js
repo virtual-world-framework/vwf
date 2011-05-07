@@ -41,9 +41,9 @@
 
         if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/glge.js") {
 
-            jQuery(this.rootSelector).append(
-                "<h2>Scene</h2>"
-            );
+            // jQuery(this.rootSelector).append(
+            //     "<h2>Scene</h2>"
+            // );
 
             var canvasQuery = jQuery(this.rootSelector).append(
                 "<canvas id='" + nodeID + "' class='vwf-scene' width='1200' height='600'/>"
