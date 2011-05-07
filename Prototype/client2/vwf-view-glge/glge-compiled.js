@@ -12146,6 +12146,7 @@ GLGE.Collada.prototype.setDocument=function(url,relativeTo,cb){
 		this.rootId=url.substr(url.indexOf("#")+1);
 		url=url.substr(0,url.indexOf("#"));
 	}
+    this.sourceURL=url;
 	if(relativeTo) url=this.getAbsolutePath(url,relativeTo);
 	this.docURL=url;
 	if(GLGE.ColladaDocuments[url]){
