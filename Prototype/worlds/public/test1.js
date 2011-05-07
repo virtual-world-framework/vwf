@@ -20,23 +20,14 @@
         "http://localhost:8080/vwf-view-glge/collada/duck.dae": {
             extends: "http://localhost:8001/node3.js",
 
-            properties: { angle: 0, },
-
-            children: {
-                "bone1": {
-                    extends: "http://localhost:8001/node3.js",
-
-                    children: {
-                        "untitled": {
-                            extends: "http://localhost:8001/node3.js",
-                        },
-                    },
-                },
-            },
+            properties: { angle: 0, playing: false, looping: false, speed: 1 },
 
             scripts: [ {
                 text: "this.properties.angle.setter = function( value ) {" + " " +
                     "this.parent['http://localhost:8080/vwf-view-glge/collada/seymourplane_triangulate.dae'].angle = value + 1;" + " " + "}",
+                type: "application/javascript"
+            }, {
+                text: "this.pointerClick = function() { this.playing = !this.playing }",
                 type: "application/javascript"
             }, ],
 
