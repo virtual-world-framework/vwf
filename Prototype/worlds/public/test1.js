@@ -9,18 +9,16 @@
     {
         "maincamera": {
             extends: "http://localhost:8001/camera.js",
-            properties: { angle: 0, },
         },
         
         "wallobject": {
             extends: "http://localhost:8001/node3.js",
-            properties: { angle: 0, },
         },
 
         "http://localhost:8080/vwf-view-glge/collada/duck.dae": {
             extends: "http://localhost:8001/node3.js",
 
-            properties: { angle: 0, playing: false, looping: false, speed: 1 },
+            properties: { angle: 0, playing: false },
 
             scripts: [ {
                 text: "this.properties.angle.setter = function( value ) {" + " " +
