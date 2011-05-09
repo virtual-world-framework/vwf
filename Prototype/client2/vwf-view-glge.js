@@ -125,6 +125,11 @@
             this.camera = node;
             this.cameraID = nodeID;
         }
+        
+        if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/particleSystem.js") {
+            this.smoke = node;
+            this.smokeID = nodeID;
+        }
 
     };
 
@@ -176,12 +181,14 @@
             var glgeObject = node.glgeObject;
             var isAnimatable = glgeObject.animate !== undefined; // implements GLGE.Animatable?
 isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
+//isAnimatable = isAnimatable && glgeObject.constructor != GLGE.Collada;; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
 
-            if ( isAnimatable ) {
+            if ( isAnimatable || ( glgeObject.constructor == GLGE.ParticleSystem ) ) {
 
                 switch ( propertyName ) {
 
                     case "playing":
+                        if ( glgeObject.constructor != GLGE.ParticleSystem ) {
 
 if ( !Boolean( propertyValue ) && glgeObject.animFinished ) {  // TODO: GLGE finished doesn't flow back into node3's playing yet; assume playing is being toggled and interpret it as true if the animation has played and finished.
     propertyValue = true;
@@ -193,16 +200,17 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
     glgeObject.getInitialValues( glgeObject.animation, glgeObject.animationStart );
 }
 
-                        if ( Boolean( propertyValue ) ) {
-                            if ( glgeObject.animFinished ) {
-                                glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
-                            } else if ( glgeObject.getPaused() ) {
-                                glgeObject.setPaused( GLGE.FALSE );
+                            if ( Boolean( propertyValue ) ) {
+                                if ( glgeObject.animFinished ) {
+                                    glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
+                                } else if ( glgeObject.getPaused() ) {
+                                    glgeObject.setPaused( GLGE.FALSE );
+                                }
                             }
-                        }
 
-                        else {
-                            glgeObject.setPaused( GLGE.TRUE );
+                            else {
+                                glgeObject.setPaused( GLGE.TRUE );
+                            }
                         }
 
                         break;
@@ -213,12 +221,21 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         break;
 
                     case "speed":
-                        var glgeFrameRate = Number( propertyValue ) * 30; // TODO: not safe to assume default speed is 30 fps
-                        glgeObject.setFrameRate( glgeFrameRate );
+                        if ( glgeObject.constructor != GLGE.ParticleSystem ){
+                            var glgeFrameRate = Number( propertyValue ) * 30; // TODO: not safe to assume default speed is 30 fps
+                            glgeObject.setFrameRate( glgeFrameRate );
+                        }
                         break;
+
+
+
                 }
 
             }
+            else {
+                console.info( "     unable to set " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
+            }
+
 
         }
 
@@ -238,14 +255,17 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 
             var glgeObject = node.glgeObject;
             var isAnimatable = glgeObject.animate !== undefined; // implements GLGE.Animatable?
+            
 isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
+//isAnimatable = isAnimatable && glgeObject.constructor != GLGE.Collada;; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
 
-            if ( isAnimatable ) {
+            if ( isAnimatable || ( glgeObject.constructor == GLGE.ParticleSystem ) ) {
 
                 switch ( propertyName ) {
 
                     case "playing":
-                        value = !Boolean( glgeObject.getPaused() );
+                        if ( glgeObject.constructor != GLGE.ParticleSystem )
+                            value = !Boolean( glgeObject.getPaused() );
                         break;
 
                     case "looping":
@@ -253,10 +273,15 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
                         break;
 
                     case "speed":
-                        value = glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
+                        if ( glgeObject.constructor != GLGE.ParticleSystem )
+                            value = glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
                         break;
                 }
             }
+            else {
+                console.info( "     unsable to get " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
+            }
+
         }
 
         return value;
@@ -317,7 +342,11 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
             }
         }
 
-        return Boolean(child.glgeObject);
+        var success = Boolean(child.glgeObject);
+        if ( !success ) {
+            console.info( "     unable to bind: " + childName );
+        }
+        return success;
         //console.info( "scene: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
         //console.info( "node: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
     };
@@ -350,9 +379,12 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
 
     var glgeObjectInitializeFromProperties = function( view, nodeID, glgeObject ) {
 
-        view.satProperty( nodeID, "playing", vwf.getProperty( nodeID, "playing" ) );
+        if ( 9 != nodeID ){
+            view.satProperty( nodeID, "playing", vwf.getProperty( nodeID, "playing" ) );
+            view.satProperty( nodeID, "speed", vwf.getProperty( nodeID, "speed" ) );
+        }
+
         view.satProperty( nodeID, "looping", vwf.getProperty( nodeID, "looping" ) );
-        view.satProperty( nodeID, "speed", vwf.getProperty( nodeID, "speed" ) );
 
     };
 
@@ -397,12 +429,19 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
                 }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
-                if ( scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
                     console.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
                     console.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
                 }
+                if (scene.glgeKeys.isKeyPressed(GLGE.KI_P)) {
+                    //view.callMethod( 9, "toggleEnabled" );
+                    var wasLooping = vwf.getProperty( 9, "looping" );
+                    //console.info( "Setting the particle system loop to: " + (!wasLooping) );
+                    view.satProperty( 9, "looping", !wasLooping );
+                }
+
                 var cp = "";
                 if (scene.glgeKeys.isKeyPressed(GLGE.KI_1)) cp = "1";
                 else if (scene.glgeKeys.isKeyPressed(GLGE.KI_2)) cp = "2";
@@ -454,7 +493,7 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
 
         canvas.onmousedown = function (e) {
             mouseDown = true;
-            mouseDownObjectID = mousePick(e, scene, sceneView);
+            mouseDownObjectID = mousePick(e, scene, sceneView, true);
 
             //console.info("CANVAS mouseDown: " + mouseDownObjectID);
             //this.throwEvent( "onMouseDown", mouseDownObjectID);
@@ -462,7 +501,7 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
         }
 
         canvas.onmouseup = function (e) {
-            var mouseUpObjectID = mousePick(e, scene, sceneView);
+            var mouseUpObjectID = mousePick(e, scene, sceneView, false);
             // check for time??
             if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
                 console.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
@@ -496,7 +535,7 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
                 }
             }
             else {
-                var objectOver = mousePick(e, scene, sceneView);
+                var objectOver = mousePick(e, scene, sceneView, false);
                 if (objectOver) {
                     if (mouseOverObjectID) {
                         if (objectOver != mouseOverObjectID) {
@@ -555,21 +594,21 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
     }
 
 
-//    function path(obj) {
-//        var sOut = "";
-//        var sName = "";w
+    function path(obj) {
+        var sOut = "";
+        var sName = "";
 
-//        while (obj && obj.parent) {
-//            if (sOut == "")
-//                sOut = name(obj);
-//            else
-//                sOut = name(obj) + "." + sOut;
-//            obj = obj.parent;
-//        }
-//        return sOut;
-//    }
+        while (obj && obj.parent) {
+            if (sOut == "")
+                sOut = name(obj);
+            else
+                sOut = name(obj) + "." + sOut;
+            obj = obj.parent;
+        }
+        return sOut;
+    }
 
-    var mousePick = function (e, scene, view) {
+    var mousePick = function (e, scene, view, debug) {
         if (scene && scene.glgeScene) {
             var pickInfo = scene.glgeScene.pick(e.clientX - e.currentTarget.offsetLeft, e.clientY - e.currentTarget.offsetTop);
             if (pickInfo && pickInfo.object) {
@@ -577,7 +616,8 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
                 var objectToLookFor = pickInfo.object;
 
                 while (objectIDFound == -1 && objectToLookFor) {
-                    //console.info("Searching for: " + path(objectToLookFor));
+                    if ( debug ) 
+                        console.info("Searching for: " + path(objectToLookFor));
                     objects = jQuery.each(view.nodes, function (nodeID, node) {
                         if (node.glgeObject == objectToLookFor) {
                             //console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
