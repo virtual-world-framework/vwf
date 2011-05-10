@@ -20,6 +20,9 @@
         this.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
         this.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
 
+        this.smoke = undefined; // { name: string, glgeObject: GLGE.ParticleSystem }
+        this.smokeID = undefined;
+
         return this;
     };
 
@@ -74,9 +77,11 @@
 
                 // GLGE doesn't provide an onLoad() callback for any Collada documents referenced by
                 // the GLGE document. They may still be loaded after we receive onLoad(). As a work-
-                // around, wait 5 seconds after load and rebind.
+                // around, click on an <h1/> element on the page to rebind.
 
-                setTimeout(bindSceneChildren, 5000, view, nodeID);
+                jQuery( "h1" ).click( function() {
+                    bindSceneChildren( view, nodeID );
+                } )
 
                 // Schedule the renderer.
 
@@ -179,9 +184,9 @@
         if ( node && node.glgeObject ) {
 
             var glgeObject = node.glgeObject;
-            var isAnimatable = glgeObject.animate !== undefined; // implements GLGE.Animatable?
-isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
-//isAnimatable = isAnimatable && glgeObject.constructor != GLGE.Collada;; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
+            var isAnimatable = glgeObject.animate; // implements GLGE.Animatable?
+isAnimatable = isAnimatable && glgeObject.animation || propertyName == "looping" && glgeObject.constructor == GLGE.ParticleSystem; // has an animation?
+isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a hack to prevent disabling the animation that keeps the world upright
 
             if ( isAnimatable || ( glgeObject.constructor == GLGE.ParticleSystem ) ) {
 
@@ -254,10 +259,9 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
         if ( node && node.glgeObject ) {
 
             var glgeObject = node.glgeObject;
-            var isAnimatable = glgeObject.animate !== undefined; // implements GLGE.Animatable?
-            
-isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
-//isAnimatable = isAnimatable && glgeObject.constructor != GLGE.Collada;; // TODO: this is a hack to prevent disabling the animation on the world that keeps it upright
+            var isAnimatable = glgeObject.animate; // implements GLGE.Animatable?
+isAnimatable = isAnimatable && glgeObject.animation || propertyName == "looping" && glgeObject.constructor == GLGE.ParticleSystem; // has an animation?
+isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a hack to prevent disabling the animation that keeps the world upright
 
             if ( isAnimatable || ( glgeObject.constructor == GLGE.ParticleSystem ) ) {
 
@@ -342,6 +346,11 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
             }
         }
 
+        if (child.glgeObject && child.glgeObject.constructor == GLGE.ParticleSystem && child.name == "smoke") {
+            view.smoke = child;
+            view.smokeID = childID;
+        }
+
         var success = Boolean(child.glgeObject);
         if ( !success ) {
             console.info( "     unable to bind: " + childName );
@@ -388,17 +397,18 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
 
     };
 
+    var cameraPositions = {
+        "1": { "position": [ 42.5, 198.2, 113 ], "rotation": [ 1.56, 2.9, 0 ], },
+        "2": { "position": [ 114.8, -157.9, 98 ], "rotation": [ 1.56, -0.26, 0 ], },
+        "3": { "position": [ 53.6, 97.1, 98 ], "rotation": [ 1.56, 4.4, 0 ], },
+        "4": { "position": [ -41.7, 111.5, 98 ], "rotation": [ 1.56, 3.14, 0 ], },
+        "5": { "position": [ -149.6, 44, 98 ], "rotation": [ 1.56, 4.8, 0 ], },
+        "6": { "position": [ -154.2, -7.3, 98 ], "rotation": [ 1.56, 4.54, 0 ], },
+        "7": { "position": [ -70.7, -122, 98 ], "rotation": [ 1.56, 6.02, 0 ], },
+        "8": { "position": [ 165, -70, 98 ], "rotation": [ 1.56, 2.0, 0 ], },
+    };
+
     var checkKeys = function (nodeID, view, now, lasttime) {
-        var cameraPositions = {
-            "1": { "position": [ 42.5, 198.2, 113 ], "rotation": [ 1.56, 2.9, 0 ], },
-            "2": { "position": [ 114.8, -157.9, 98 ], "rotation": [ 1.56, -0.26, 0 ], },
-            "3": { "position": [ 53.6, 97.1, 98 ], "rotation": [ 1.56, 4.4, 0 ], },
-            "4": { "position": [ -41.7, 111.5, 98 ], "rotation": [ 1.56, 3.14, 0 ], },
-            "5": { "position": [ -149.6, 44, 98 ], "rotation": [ 1.56, 4.8, 0 ], },
-            "6": { "position": [ -154.2, -7.3, 98 ], "rotation": [ 1.56, 4.54, 0 ], },
-            "7": { "position": [ -70.7, -122, 98 ], "rotation": [ 1.56, 6.02, 0 ], },
-            "8": { "position": [ 165, -70, 98 ], "rotation": [ 1.56, 2.0, 0 ], },
-       };
 
         var scene = view.scenes[nodeID], child;
         if (scene && scene.glgeScene) {
@@ -435,11 +445,12 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
                     console.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
                     console.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
                 }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_P)) {
-                    //view.callMethod( 9, "toggleEnabled" );
-                    var wasLooping = vwf.getProperty( 9, "looping" );
-                    //console.info( "Setting the particle system loop to: " + (!wasLooping) );
-                    view.satProperty( 9, "looping", !wasLooping );
+                if (view.smokeID && scene.glgeKeys.isKeyPressed(GLGE.KI_P)) {
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_SHIFT)) {
+                        view.setProperty( view.smokeID, "looping", false );
+                    } else {
+                        view.setProperty( view.smokeID, "looping", true );
+                    }
                 }
 
                 var cp = "";
@@ -489,8 +500,6 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
         var mouseDownObjectID = undefined;
         var mouseOverObjectID = undefined;
 
-        var bindOnClick = false;
-
         canvas.onmousedown = function (e) {
             mouseDown = true;
             mouseDownObjectID = mousePick(e, scene, sceneView, true);
@@ -507,11 +516,6 @@ isAnimatable = isAnimatable && glgeObject.animFrames > 5; // TODO: this is a hac
                 console.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
                 //this.throwEvent( "onMouseClick", mouseDownObjectID);
                 view.callMethod( mouseUpObjectID, "pointerClick" );
-            }
-
-            if (bindOnClick) {
-                bindSceneChildren(sceneView, sceneID);
-                bindOnClick = false;
             }
 
             //console.info("CANVAS onMouseUp: " + mouseDownObjectID);
