@@ -439,7 +439,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var cameraPositions = {
         "1": { "position": [ 42.5, 198.2, 113 ], "rotation": [ 1.56, 2.9, 0 ], },
-        "2": { "position": [ 114.8, -157.9, 98 ], "rotation": [ 1.56, -0.26, 0 ], },
+        "2": { "position": [ -165.9, 130.8, 98 ], "rotation": [ 1.56, 4.26, 0 ], },
         "3": { "position": [ 53.6, 97.1, 98 ], "rotation": [ 1.56, 4.4, 0 ], },
         "4": { "position": [ -41.7, 111.5, 98 ], "rotation": [ 1.56, 3.14, 0 ], },
         "5": { "position": [ -149.6, 44, 98 ], "rotation": [ 1.56, 4.8, 0 ], },
