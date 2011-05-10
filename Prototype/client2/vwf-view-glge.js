@@ -254,7 +254,7 @@ if ( !Boolean( propertyValue ) && glgeObject.animFinished ) {  // TODO: GLGE fin
 }
 
 if ( !node.initialized ) {  // TODO: this is a hack to set the animation to frame 0 during initialization
-    if ( glgeObject.animFrames == 100 ) { glgeObject.setFrames( 50 ); } // hack to use only the opening half of the door animation
+    //if ( glgeObject.animFrames == 100 ) { glgeObject.setFrames( 50 ); } // hack to use only the opening half of the door animation
     glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
     glgeObject.getInitialValues( glgeObject.animation, glgeObject.animationStart );
 }
@@ -263,6 +263,9 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                             if ( glgeObject.animFinished ) {
                                 glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
                             } else if ( glgeObject.getPaused() ) {
+                                if ( glgeObject.animFrames == 100 ) {
+                                    glgeObject.setFrames( 50 );
+                                }
                                 glgeObject.setPaused( GLGE.FALSE );
                             }
                         }
