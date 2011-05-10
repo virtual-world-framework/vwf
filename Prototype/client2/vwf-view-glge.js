@@ -651,7 +651,10 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var mousePick = function (e, scene, view, debug) {
         if (scene && scene.glgeScene) {
-            var pickInfo = scene.glgeScene.pick(e.clientX - e.currentTarget.offsetLeft, e.clientY - e.currentTarget.offsetTop);
+            var x = e.clientX - e.currentTarget.offsetLeft + window.scrollX;
+            var y = e.clientY - e.currentTarget.offsetTop + window.scrollY;
+
+            var pickInfo = scene.glgeScene.pick(x, y);
             if (pickInfo && pickInfo.object) {
                 var objectIDFound = -1;
                 var objectToLookFor = pickInfo.object;
