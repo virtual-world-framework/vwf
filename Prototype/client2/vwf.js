@@ -176,7 +176,21 @@ this.typeURIs = {}; // maps id => URI
 
             try {
 
-                socket = new io.Socket();
+                socket = new io.Socket( undefined, {
+
+                    // Increase the timeout due to starvation while loading the scene. The server
+                    // timeout must also be increased.
+
+                    transportOptions: {
+                        "websocket": { timeout: 60000 },
+                        "flashsocket": { timeout: 60000 },
+                        "htmlfile": { timeout: 60000 },
+                        "xhr-multipart": { timeout: 60000 },
+                        "xhr-polling": { timeout: 60000 },
+                        "jsonp-polling": { timeout: 60000 },
+    			    }
+
+    			} );
 
             } catch ( e ) {
 
