@@ -1,6 +1,6 @@
 ﻿cb( {
 
-    extends: "http://localhost:8001/node3.js",
+    extends: "http://vwf.example.com/types/node3",
 
     properties:
     {

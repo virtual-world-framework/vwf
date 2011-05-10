@@ -42,7 +42,7 @@
         console.info("vwf.view.glge.createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
-        if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/glge.js") {
+        if (vwf.typeURIs[nodeExtendsID] == "http://vwf.example.com/types/glge") {
 
             // jQuery(this.rootSelector).append(
             //     "<h2>Scene</h2>"
@@ -111,7 +111,7 @@
 
         }
         
-        else if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/node3.js") {
+        else if (vwf.typeURIs[nodeExtendsID] == "http://vwf.example.com/types/node3") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,  // TODO: needed?
@@ -120,7 +120,7 @@
 
         }
 
-        else if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/camera.js") {
+        else if (vwf.typeURIs[nodeExtendsID] == "http://vwf.example.com/types/camera") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
@@ -129,11 +129,6 @@
 
             this.camera = node;
             this.cameraID = nodeID;
-        }
-        
-        if (vwf.typeURIs[nodeExtendsID] == "http://localhost:8001/particleSystem.js") {
-            this.smoke = node;
-            this.smokeID = nodeID;
         }
 
     };
@@ -188,12 +183,11 @@
 isAnimatable = isAnimatable && glgeObject.animation || propertyName == "looping" && glgeObject.constructor == GLGE.ParticleSystem; // has an animation?
 isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a hack to prevent disabling the animation that keeps the world upright
 
-            if ( isAnimatable || ( glgeObject.constructor == GLGE.ParticleSystem ) ) {
+            if ( isAnimatable ) {
 
                 switch ( propertyName ) {
 
                     case "playing":
-                        if ( glgeObject.constructor != GLGE.ParticleSystem ) {
 
 if ( !Boolean( propertyValue ) && glgeObject.animFinished ) {  // TODO: GLGE finished doesn't flow back into node3's playing yet; assume playing is being toggled and interpret it as true if the animation has played and finished.
     propertyValue = true;
@@ -205,17 +199,16 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
     glgeObject.getInitialValues( glgeObject.animation, glgeObject.animationStart );
 }
 
-                            if ( Boolean( propertyValue ) ) {
-                                if ( glgeObject.animFinished ) {
-                                    glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
-                                } else if ( glgeObject.getPaused() ) {
-                                    glgeObject.setPaused( GLGE.FALSE );
-                                }
+                        if ( Boolean( propertyValue ) ) {
+                            if ( glgeObject.animFinished ) {
+                                glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
+                            } else if ( glgeObject.getPaused() ) {
+                                glgeObject.setPaused( GLGE.FALSE );
                             }
+                        }
 
-                            else {
-                                glgeObject.setPaused( GLGE.TRUE );
-                            }
+                        else {
+                            glgeObject.setPaused( GLGE.TRUE );
                         }
 
                         break;
@@ -226,21 +219,16 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         break;
 
                     case "speed":
-                        if ( glgeObject.constructor != GLGE.ParticleSystem ){
-                            var glgeFrameRate = Number( propertyValue ) * 30; // TODO: not safe to assume default speed is 30 fps
-                            glgeObject.setFrameRate( glgeFrameRate );
-                        }
+                        var glgeFrameRate = Number( propertyValue ) * 30; // TODO: not safe to assume default speed is 30 fps
+                        glgeObject.setFrameRate( glgeFrameRate );
                         break;
-
-
-
                 }
 
             }
-            else {
-                console.info( "     unable to set " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
-            }
 
+            // else {
+            //     console.info( "     unable to set " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
+            // }
 
         }
 
@@ -263,13 +251,12 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 isAnimatable = isAnimatable && glgeObject.animation || propertyName == "looping" && glgeObject.constructor == GLGE.ParticleSystem; // has an animation?
 isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a hack to prevent disabling the animation that keeps the world upright
 
-            if ( isAnimatable || ( glgeObject.constructor == GLGE.ParticleSystem ) ) {
+            if ( isAnimatable ) {
 
                 switch ( propertyName ) {
 
                     case "playing":
-                        if ( glgeObject.constructor != GLGE.ParticleSystem )
-                            value = !Boolean( glgeObject.getPaused() );
+                        value = !Boolean( glgeObject.getPaused() );
                         break;
 
                     case "looping":
@@ -277,14 +264,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                         break;
 
                     case "speed":
-                        if ( glgeObject.constructor != GLGE.ParticleSystem )
-                            value = glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
+                        value = glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
                         break;
                 }
             }
-            else {
-                console.info( "     unsable to get " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
-            }
+
+            // else {
+            //     console.info( "     unsable to get " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
+            // }
 
         }
 
@@ -352,10 +339,13 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         var success = Boolean(child.glgeObject);
-        if ( !success ) {
-            console.info( "     unable to bind: " + childName );
-        }
+
+        // if ( !success ) {
+        //     console.info( "     unable to bind: " + childName );
+        // }
+
         return success;
+
         //console.info( "scene: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
         //console.info( "node: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
     };
@@ -388,12 +378,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var glgeObjectInitializeFromProperties = function( view, nodeID, glgeObject ) {
 
-        if ( 9 != nodeID ){
-            view.satProperty( nodeID, "playing", vwf.getProperty( nodeID, "playing" ) );
-            view.satProperty( nodeID, "speed", vwf.getProperty( nodeID, "speed" ) );
-        }
-
+        view.satProperty( nodeID, "playing", vwf.getProperty( nodeID, "playing" ) );
         view.satProperty( nodeID, "looping", vwf.getProperty( nodeID, "looping" ) );
+        view.satProperty( nodeID, "speed", vwf.getProperty( nodeID, "speed" ) );
 
     };
 
@@ -621,7 +608,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
                 while (objectIDFound == -1 && objectToLookFor) {
                     if ( debug ) 
-                        console.info("Searching for: " + path(objectToLookFor));
+                        console.info("vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
                     objects = jQuery.each(view.nodes, function (nodeID, node) {
                         if (node.glgeObject == objectToLookFor) {
                             //console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
