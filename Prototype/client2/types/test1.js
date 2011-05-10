@@ -1,6 +1,6 @@
 ﻿cb( {
 
-    extends: "http://localhost:8001/glge.js",
+    extends: "http://vwf.example.com/types/glge",
 
     source: "vwf-view-glge/collada/level.xml",
     type: "model/x-glge",
@@ -8,15 +8,15 @@
     children:
     {
         "maincamera": {
-            extends: "http://localhost:8001/camera.js",
+            extends: "http://vwf.example.com/types/camera",
         },
         
         "wallobject": {
-            extends: "http://localhost:8001/node3.js",
+            extends: "http://vwf.example.com/types/node3",
         },
 
         "duck.dae": {
-            extends: "http://localhost:8001/node3.js",
+            extends: "http://vwf.example.com/types/node3",
 
             properties: { angle: 0, playing: false },
 
@@ -32,22 +32,22 @@
         },
 
         "seymourplane_triangulate.dae": {
-            extends: "http://localhost:8001/node3.js",
+            extends: "http://vwf.example.com/types/node3",
 
             properties: { angle: 0, },
 
             children: {
                 "bone1": {
-                    extends: "http://localhost:8001/node3.js",
+                    extends: "http://vwf.example.com/types/node3",
                     
                     children: {
                         "untitled": {
-                            extends: "http://localhost:8001/node3.js",
+                            extends: "http://vwf.example.com/types/node3",
                         },
                     },
                 },
                 "prop": {
-                    extends: "http://localhost:8001/node3.js",
+                    extends: "http://vwf.example.com/types/node3",
                 
                 },
             },
@@ -66,7 +66,7 @@
       {
             bone1:
             {
-               extends: "http://localhost:8001/node3.js",
+               extends: "http://vwf.example.com/types/node3",
                properties:
                {
                   enabled: true,
@@ -75,7 +75,7 @@
                {
                   untitled:
                   {
-                     extends: "http://localhost:8001/node3.js",
+                     extends: "http://vwf.example.com/types/node3",
                      properties:
                      {
                         enabled: true,
@@ -84,7 +84,7 @@
                      {
                         LOD3sp:
                         {
-                           extends: "http://localhost:8001/node3.js",
+                           extends: "http://vwf.example.com/types/node3",
                            properties:
                            {
                               enabled: true,
@@ -93,7 +93,7 @@
                            {
                               undefined:
                               {
-                                 extends: 'http://localhost:8001/node3.js'
+                                 extends: 'http://vwf.example.com/types/node3'
                                  properties:
                                  {
                                     angle: 0,
@@ -103,7 +103,7 @@
                         },
                         camera1:
                         {
-                           extends: "http://localhost:8001/node3.js",
+                           extends: "http://vwf.example.com/types/node3",
                            properties:
                            {
                               enabled: true,
@@ -114,7 +114,7 @@
                         },
                         directionalLight1:
                         {
-                           extends: "http://localhost:8001/node3.js",
+                           extends: "http://vwf.example.com/types/node3",
                            properties:
                            {
                               enabled: true,
@@ -132,7 +132,7 @@
       {
             bone1:
             {
-               extends: "http://localhost:8001/node3.js",
+               extends: "http://vwf.example.com/types/node3",
                properties:
                {
                   enabled: true,
@@ -141,7 +141,7 @@
                {
                   untitled:
                   {
-                     extends: "http://localhost:8001/node3.js",
+                     extends: "http://vwf.example.com/types/node3",
                      properties:
                      {
                         enabled: true,
@@ -150,7 +150,7 @@
                      {
                         plane:
                         {
-                           extends: "http://localhost:8001/node3.js",
+                           extends: "http://vwf.example.com/types/node3",
                            properties:
                            {
                               enabled: true,
@@ -159,7 +159,7 @@
                            {
                               undefined:
                               {
-                                 extends: 'http://localhost:8001/node3.js'
+                                 extends: 'http://vwf.example.com/types/node3'
                                  properties:
                                  {
                                     angle: 0,
@@ -167,7 +167,7 @@
                               },
                               prop:
                               {
-                                 extends: "http://localhost:8001/node3.js",
+                                 extends: "http://vwf.example.com/types/node3",
                                  properties:
                                  {
                                     enabled: true,
@@ -176,7 +176,7 @@
                                  {
                                     undefined:
                                     {
-                                       extends: 'http://localhost:8001/node3.js'
+                                       extends: 'http://vwf.example.com/types/node3'
                                        properties:
                                        {
                                           angle: 0,
@@ -188,7 +188,7 @@
                         },
                         directionalLight1:
                         {
-                           extends: "http://localhost:8001/node3.js",
+                           extends: "http://vwf.example.com/types/node3",
                            properties:
                            {
                               enabled: true,
@@ -199,7 +199,7 @@
                         },
                         camera1:
                         {
-                           extends: "http://localhost:8001/node3.js",
+                           extends: "http://vwf.example.com/types/node3",
                            properties:
                            {
                               enabled: true,

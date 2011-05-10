@@ -448,7 +448,7 @@ this.typeURIs[id] = uri;
                 console.log( "vwf.getType: creating " + uri + " prototype" );
 
                 jQuery.ajax( {
-                    url: uri,
+                    url: remappedURI( uri ),
                     dataType: "jsonp",
                     jsonpCallback: "cb",
                     success: function( component ) {
@@ -839,6 +839,28 @@ this.typeURIs[id] = uri;
             }
             
             return isComponent; 
+        };
+
+        // -- remappedURI --------------------------------------------------------------------------
+
+        // Remap a type identifier to its location in a local cache.
+
+        // http://vwf.example.com/types/sometype => http://localhost:8001/types/sometype.js
+
+        var remappedURI = function( uri ) {
+
+            var match = uri.match( RegExp( "http://vwf.example.com/types/(.*)" ) );
+
+            if ( match ) {
+
+                var document_uri = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                var document_base = document_uri.substring( 0, document_uri.lastIndexOf( "/" ) );
+
+                uri = document_base + "/types/" + match[1] + ".js";
+            }
+
+            return uri;
+
         };
 
     };
