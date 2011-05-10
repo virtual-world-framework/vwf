@@ -23,6 +23,8 @@
         this.smoke = undefined; // { name: string, glgeObject: GLGE.ParticleSystem }
         this.smokeID = undefined;
 
+        this.glgeColladaObjects = new Array();
+
         return this;
     };
 
@@ -67,17 +69,20 @@
                 scene.glgeScene = scene.glgeDocument.getElement("mainscene");
                 scene.glgeRenderer.setScene(scene.glgeScene);
 
+                view.findAllColladaObjs( scene.glgeScene, view, nodeID );
+
                 // set up all of the mouse event handlers
                 initMouseEvents(canvas, nodeID, view);
 
                 // Resolve the mapping from VWF nodes to their corresponding GLGE objects for the
                 // objects just loaded.
 
-                bindSceneChildren(view, nodeID);
+                //bindSceneChildren(view, nodeID);
 
                 // GLGE doesn't provide an onLoad() callback for any Collada documents referenced by
                 // the GLGE document. They may still be loaded after we receive onLoad(). As a work-
                 // around, click on an <h1/> element on the page to rebind.
+
 
                 jQuery( "h1" ).click( function() {
                     bindSceneChildren( view, nodeID );
@@ -99,12 +104,28 @@
 
             // Load the GLGE document into the scene.
 
+            function colladaLoaded( collada ) { 
+                var bRemoved = false;
+                for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
+                    if ( view.glgeColladaObjects[j] == collada ){
+                        view.glgeColladaObjects.splice( j, 1 );
+                        bRemoved = true;
+                    }
+                } 
+
+                if ( bRemoved && view.glgeColladaObjects.length == 0 ){
+                    bindSceneChildren( view, nodeID );
+                }
+            }
+
             if (nodeSource && nodeType == "model/x-glge") {
                 scene.glgeDocument.load(nodeSource);
             }
 
             else if (nodeSource && nodeType == "model/vnd.collada+xml") {  // TODO: need to loadDocument() from somewhere first
                 var newCollada = new GLGE.Collada;
+                glgeColladaObjects.push( newCollada );
+                newCollada.loadedCallback = colladaLoaded;
                 newCollada.setDocument(nodeSource, window.location.href);
                 scene.glgeDocument.getElement("mainscene").addCollada(newCollada);
             }
@@ -132,6 +153,45 @@
         }
 
     };
+
+    module.prototype.findCollada = function ( grp, view, nodeID ) {
+
+        if ( grp && grp.getChildren ) {
+            var children = grp.getChildren();
+            var glgeView = view;
+            var viewID = nodeID;
+  
+            function colladaLoaded( collada ) { 
+                var bRemoved = false;
+                for ( var j = 0; j < glgeView.glgeColladaObjects.length; j++ ) {
+                    if ( glgeView.glgeColladaObjects[j] == collada ){
+                        glgeView.glgeColladaObjects.splice( j, 1 );
+                        bRemoved = true;
+                    }
+                } 
+
+                if ( bRemoved && glgeView.glgeColladaObjects.length == 0 ){
+                    bindSceneChildren( glgeView, viewID );
+                }
+            }
+  
+            for ( var i = 0; i < children.length; i++ ) {
+                if ( children[i].constructor == GLGE.Collada ) {
+                    glgeView.glgeColladaObjects.push( children[i] );
+                    children[i].loadedCallback = colladaLoaded;
+                }
+                view.findCollada( children[i], view ); 
+            }
+        }
+        
+    }
+
+    module.prototype.findAllColladaObjs = function (glgeScene, view, nodeID) {
+
+        this.findCollada( glgeScene, view, nodeID );
+
+    }
+
 
     // TODO: deletedNode
 
@@ -223,13 +283,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         glgeObject.setFrameRate( glgeFrameRate );
                         break;
                 }
-
             }
-
-            // else {
-            //     console.info( "     unable to set " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
-            // }
-
         }
 
         return value;
@@ -268,11 +322,6 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                         break;
                 }
             }
-
-            // else {
-            //     console.info( "     unsable to get " + propertyName + " on " + nodeID + "  " + name( glgeObject ) );
-            // }
-
         }
 
         return value;
@@ -333,6 +382,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             }
         }
 
+
         if (child.glgeObject && child.glgeObject.constructor == GLGE.ParticleSystem && child.name == "smoke") {
             view.smoke = child;
             view.smokeID = childID;
@@ -340,9 +390,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         var success = Boolean(child.glgeObject);
 
-        // if ( !success ) {
-        //     console.info( "     unable to bind: " + childName );
-        // }
+        if ( !success ) {
+            console.info( "     unable to bind: " + childName );
+        }
 
         return success;
 
