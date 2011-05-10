@@ -182,12 +182,12 @@ this.typeURIs = {}; // maps id => URI
                     // timeout must also be increased.
 
                     transportOptions: {
-                        "websocket": { timeout: 60000 },
-                        "flashsocket": { timeout: 60000 },
-                        "htmlfile": { timeout: 60000 },
-                        "xhr-multipart": { timeout: 60000 },
-                        "xhr-polling": { timeout: 60000 },
-                        "jsonp-polling": { timeout: 60000 },
+                        "websocket": { timeout: 90000 },
+                        "flashsocket": { timeout: 90000 },
+                        "htmlfile": { timeout: 90000 },
+                        "xhr-multipart": { timeout: 90000 },
+                        "xhr-polling": { timeout: 90000 },
+                        "jsonp-polling": { timeout: 90000 },
     			    }
 
     			} );
