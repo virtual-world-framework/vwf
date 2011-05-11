@@ -112,7 +112,7 @@ Client.prototype._payload = function(){
 Client.prototype._heartbeat = function(){
   var self = this;
   this._heartbeatInterval = setTimeout(function(){
-    self.send('~h~' + ++self._heartbeats); // self.send('~h~' + ++self._heartbeats + ' ' + self.options.heartbeatInterval);
+    self.send('~h~' + ++self._heartbeats);
     self._heartbeatTimeout = setTimeout(function(){
       self._onClose();
     }, self.options.timeout);
