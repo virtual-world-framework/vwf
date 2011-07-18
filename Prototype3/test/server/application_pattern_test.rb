@@ -68,6 +68,15 @@ class ServerTest
       assert_pattern_match [ "/directory/component", "component", nil, "socket", nil ], "/directory/component/socket"
     end
 
+    # Identifies a socket.io path with a session id.
+
+    def test_application_with_socket
+      assert_pattern_match [ "/", "index", nil, "websocket/session", nil ], "/websocket/session"
+      assert_pattern_match [ "/component", "component", nil, "websocket/session", nil ], "/component/websocket/session"
+      assert_pattern_match [ "/directory", "index", nil, "websocket/session", nil ], "/directory/websocket/session"
+      assert_pattern_match [ "/directory/component", "component", nil, "websocket/session", nil ], "/directory/component/websocket/session"
+    end
+
     # Identifies the path segments following the application as a path to client files.
 
     def test_application_with_public_path
@@ -101,6 +110,15 @@ class ServerTest
       assert_pattern_match [ "/component", "component", "0000000000000000", "socket", nil ], "/component/0000000000000000/socket"
       assert_pattern_match [ "/directory", "index", "0000000000000000", "socket", nil ], "/directory/0000000000000000/socket"
       assert_pattern_match [ "/directory/component", "component", "0000000000000000", "socket", nil ], "/directory/component/0000000000000000/socket"
+    end
+
+    # Identifies a socket.io path with a session id.
+
+    def test_application_with_socket
+      assert_pattern_match [ "/", "index", "0000000000000000", "websocket/session", nil ], "/0000000000000000/websocket/session"
+      assert_pattern_match [ "/component", "component", "0000000000000000", "websocket/session", nil ], "/component/0000000000000000/websocket/session"
+      assert_pattern_match [ "/directory", "index", "0000000000000000", "websocket/session", nil ], "/directory/0000000000000000/websocket/session"
+      assert_pattern_match [ "/directory/component", "component", "0000000000000000", "websocket/session", nil ], "/directory/component/0000000000000000/websocket/session"
     end
 
     # Identifies the path segments following the application as a path to client files.

@@ -20,7 +20,19 @@ class Server < Sinatra::Base
 
   end
 
+  configure :production do
+    use Rack::Logger, ::Logger::WARN  # TODO: remove after Sinatra 1.3
+    enable :logging
+  end
+
+  configure :development do
+    use Rack::Logger, ::Logger::DEBUG  # TODO: remove after Sinatra 1.3
+    set :logging, ::Logger::DEBUG
+  end
+
   configure :test do
+
+    use Rack::NullLogger  # TODO: remove after Sinatra 1.3
 
     # For testing, assume that the filesystem consists of these directories containing these files.
 
@@ -50,7 +62,12 @@ class Server < Sinatra::Base
     end
   end
 
+# websocket[/sessionid]
+
+
   get ApplicationPattern.new do |application_path, application, session, socket, public_path|
+
+    logger.debug "Server#get ApplicationPattern #{application_path} #{application} #{session} #{socket} #{public_path}"
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
     # to "/path/to/application/session/".
@@ -85,6 +102,10 @@ class Server < Sinatra::Base
 
     def yaml template, options = {}, locals = {}
       render :yaml, template, options.merge( component_options ), locals
+    end
+
+    def logger  # TODO: remove after Sinatra 1.3
+      request.logger
     end
 
   private

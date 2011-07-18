@@ -20,7 +20,8 @@ end
 class JSONComponentTemplate < ComponentTemplate
 
   def prepare
-data.gsub!("\xEF\xBB\xBF", '')  # TODO
+data.gsub!("\xEF\xBB\xBF", '')  # TODO: handle encodings properly
+# TODO: catch parse errors
     @component = JSON.parse data.empty? ? "{}" : data  # receives empty string first time
   end
 
