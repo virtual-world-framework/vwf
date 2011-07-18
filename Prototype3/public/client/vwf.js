@@ -217,16 +217,19 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
                 socket.on( "connect", function() { console.info( "vwf.socket connected" ) } );
 
-                // Configure a handler to receive messages from the server. Note that this example
-                // code doesn't implement a robust parser capable of handing arbitrary text and that
-                // the messages should be placed in a dedicated priority queue for best performance
-                // rather than resorting the queue as each message arrives. Additionally, 
-                // overlapping messages may cause actions to be performed out of order in some cases
-                // if messages are not processed on a single thread.
+                // Configure a handler to receive messages from the server.
+                
+                // Note that this example code doesn't implement a robust parser capable of handling
+                // arbitrary text and that the messages should be placed in a dedicated priority
+                // queue for best performance rather than resorting the queue as each message
+                // arrives. Additionally, overlapping messages may cause actions to be performed out
+                // of order in some cases if messages are not processed on a single thread.
 
                 socket.on( "message", function( message ) {
 
                     console.info( "vwf.socket message " + message );
+
+                    // Unpack the arguments.
 
                     var fields = message.split( " " );
 
@@ -253,32 +256,6 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
                 // Start communication with the conference server. 
 
                 socket.connect();
-
-            } else {
-
-                // socket.io: socket.connect( location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
-                ws = new WebSocket( "ws://" + location.host + location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
-
-                ws.onopen = function() {
-                  console.info("connected...");
-                  ws.send("hello server");
-                  ws.send("hello again");
-                };
-
-                ws.onmessage = function(evt) {
-                  console.info("Message: " + evt.data);
-                  jQuery( "#vwf-listing" ).append(
-                        "<div class='vwf-property'>" +
-                            "<p class='vwf-label'>" + evt.data + "</p>" +
-                        "</div>"
-                    ).children( ":last" );
-                };
-
-                ws.onclose = function() { console.info("socket closed"); };
-
-
-
-
 
             }
 
@@ -329,23 +306,26 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
         this.receive = function( fields ) {
 
-            // Note that this example code doesn't implement a robust parser capable of handing
-            // arbitrary text. Additionally, the message should be validated before looking up and
-            // invoking an arbitrary handler.
-
-//            var fields = message.split( " " );
-
             // Shift off the now-unneeded time parameter (dispatch() has already advanced the time)
             // and locate the node ID and action name.
 
+// TODO: delegate parsing and validation to each action.
+
             var time = Number( fields.shift() );
+if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_uri_or_object" correctly
             var nodeID = Number( fields.shift() );
             var actionName = fields.shift();
 
             // Look up the action handler and invoke it with the remaining parameters.
 
-//            this[actionName] && this[actionName].apply( this, [ nodeID ] + fields );
-            this[actionName] && this[actionName].call( this, nodeID, fields[0], fields[1] );
+            // Note that the message should be validated before looking up and invoking an arbitrary
+            // handler.
+
+if ( actionName != "createNode" )
+            this[actionName] && this[actionName].apply( this, [ nodeID ] + fields );
+            // this[actionName] && this[actionName].call( this, nodeID, fields[0], fields[1] );
+else
+this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to parse "t createNode component_uri_or_object" correctly
             
         };
 
@@ -493,7 +473,7 @@ this.typeURIs[id] = uri;
                 jQuery.ajax( {
                     url: remappedURI( uri ),
                     dataType: "jsonp",
-                    jsonpCallback: "cb",
+                    // jsonpCallback: "cb",
                     success: function( component ) {
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
                             if ( ! types[uri] ) {

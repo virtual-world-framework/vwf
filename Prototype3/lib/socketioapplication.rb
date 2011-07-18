@@ -12,7 +12,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def onmessage message
-    logger.info "SocketIOApplication#onmessage"
+    logger.debug "SocketIOApplication#onmessage"
   end
 
   def ondisconnect
@@ -20,16 +20,16 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def send message
-    logger.info "SocketIOApplication#send #{message}"
-    unless connected
-      queue message  # TODO
-    else
+    logger.debug "SocketIOApplication#send #{message}"
+    # unless connected
+    #   queue message  # TODO
+    # else
       if message.is_a?( Array ) || message.is_a?( Hash )
         send_serialization "~j~" + JSON.generate( message )  # TODO: errors
       else
         send_serialization message.to_s
       end
-    end
+    # end
   end
   
   def broadcast message
@@ -41,7 +41,7 @@ class SocketIOApplication < Rack::WebSocket::Application
     @heartbeat_interval = EventMachine::Timer.new 10 do  # TODO: options.heartbeatInterval
       send_heartbeat ( @heartbeats += 1 ).to_s
       @heartbeat_timeout = EventMachine::Timer.new 8 do  # TODO: options.timeout
-        logger.debug "SocketIOApplication#schedule_heartbeat timeout #{@heartbeats}"
+        logger.debug"SocketIOApplication#schedule_heartbeat timeout #{@heartbeats}"
         # TODO: close
       end
     end
@@ -61,7 +61,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def on_serialization serialization
-    logger.debug "SocketIOApplication#on_serialization #{serialization}"
+    # logger.debug "SocketIOApplication#on_serialization #{serialization}"
     case serialization[0, 3]
       when "~h~"
         on_heartbeat serialization[3..-1]
@@ -77,16 +77,16 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def send_serialization *serializations
-    logger.debug "SocketIOApplication#send_serialization #{serializations}"
+    # logger.debug "SocketIOApplication#send_serialization #{serializations}"
     data = serializations.reduce "" do |data, serialization|
       data + "~m~" + serialization.length.to_s + "~m~" + serialization
     end
-    logger.debug "Rack::WebSocket::Application#send_data #{data}"
+    # logger.debug "Rack::WebSocket::Application#send_data #{data}"
     send_data data
   end
 
   def on_open env
-    logger.debug "SocketIOApplication#on_open"
+    # logger.debug "SocketIOApplication#on_open"
     @session_id = rand( 1000000 ).to_s  # TODO: more random, map to server's actual session
     @heartbeats = 0
     send_serialization @session_id
@@ -95,7 +95,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def on_message env, data
-    logger.debug "Rack::WebSocket::Application#on_data #{data}"
+    # logger.debug "Rack::WebSocket::Application#on_data #{data}"
     until data.empty?
       if matchdata = data.match( /~m~(\d+)~m~/ )
         match, length = *matchdata
@@ -108,11 +108,11 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
   
   def on_close env
-    logger.debug "SocketIOApplication#on_close"
+    # logger.debug "SocketIOApplication#on_close"
   end
   
   def on_error env, err
-    logger.debug "SocketIOApplication#on_error #{err}"
+    # logger.debug "SocketIOApplication#on_error #{err}"
   end
 
 private
