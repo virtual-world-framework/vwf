@@ -9,13 +9,12 @@ class Server < Sinatra::Base
     set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
 
     set :client, lambda { File.join( settings.root, "support", "client" ) }
-    # set :applications, lambda { File.join( settings.root, "public", "applications" ) }  # TODO: better name
 
     set :component_template_types, [ :json, :yaml ]
 
     set :mock_filesystem, nil
 
-    mime_type :json, "application/json"
+    mime_type :json, "application/json"  # TODO: already in Rack::Mime.MIME_TYPES?
     mime_type :jsonp, "application/javascript"
 
   end
@@ -62,42 +61,39 @@ class Server < Sinatra::Base
     end
   end
 
-# require "debug_cascade"
-
   get ApplicationPattern.new do |public_path, application, session, private_path|
-
-# redirect file to directory for wants-html, not for wants-javascript
-#* remove application_path, replace with public_path
-#* change public_path to private_path
-#* remove socket, show in private_path
-#* allow application to be not nil when file (not directory); test path here
 
     logger.debug "Server#get ApplicationPattern #{public_path} #{application} #{session} #{private_path}"
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
     # to "/path/to/application/session/".
 
-    if private_path.nil? && request.route[-1,1] != "/"
+    # TODO: only for wants-html, not for wants-javascript; this resolves a possible ambiguity with
+    # an XHR to /path/to/application/path/to/component; should not attempt to redirect
+
+    if private_path.nil? && request.route[-1,1] != "/" && request.accept.include?( mime_type :html )
       redirect to request.route + "/"
 
     # For "/path/to/application/", create a session and redirect to "/path/to/application/session/".
 
-    elsif private_path.nil? && session.nil?
+    elsif private_path.nil? && session.nil? && request.accept.include?( mime_type :html )
       redirect to request.route + "0000000000000000/"
 
-    # Delegate session socket connections to the reflector.
-
-#    elsif private_path =~ %r{^(socket|websocket)(/|$)}
-#      Socketsss.new.call env.merge( "vwf.application" => application )  # TODO: path?
-
-    # Delegate everything else to the static file server on the client files directory.
+    # Delegate everything else based on the private_path.
 
     else
+
+      delegated_env = env.merge(
+        "vwf.application" => application,  # TODO: needed? path for socket?
+        "PATH_INFO" => "/#{ private_path || "index.html" }"
+        # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env?
+      )
+
 		  Rack::Cascade.new( [
-        Rack::File.new( settings.client ),
-        Rack::File.new( File.join settings.public, public_path ),
-        Socketsss.new
-      ] ).call env.merge( "vwf.application" => application, "PATH_INFO" => "/#{ private_path || "index.html" }" )  # TODO: index.html?  # TODO: path for socket?
+        Rack::File.new( settings.client ),      # Client files from ^/support/client
+        Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public
+        Socketsss.new                           # The WebSocket reflector
+      ] ).call delegated_env
 
     end
 

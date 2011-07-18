@@ -33,7 +33,7 @@ class ServerTest < Test::Unit::TestCase
   # Redirects the application at the root to a new session for that application.
 
   def test_root
-    get "/"
+    get "/", {}, "HTTP_ACCEPT" => "text/html"
     assert last_response.redirection?
     assert_match %r{/0000000000000000/$}, last_response.location
   end
@@ -42,15 +42,22 @@ class ServerTest < Test::Unit::TestCase
   # (trailing slash).
 
   def test_application_as_file_url
-    get "/directory/component.vwf"
+    get "/directory/component.vwf", {}, "HTTP_ACCEPT" => "text/html"
     assert last_response.redirection?
     assert_match %r{/directory/component.vwf/$}, last_response.location
   end
 
+  # But doesn't redirect for an XHR request for a component file.
+
+  def test_application_as_file_url_from_xhr
+    get "/directory/component.vwf"  # TODO: verify the HTTP_ACCEPT headers for an XHR for a component
+    assert last_response.ok? # 200, not 3xx
+  end
+
   # Redirects an application to a new session for that application.
 
-  def test_application_as_directory_url
-    get "/directory/component.vwf/"
+  def test_application_as_directory_ulr 
+    get "/directory/component.vwf/", {}, "HTTP_ACCEPT" => "text/html"
     assert last_response.redirection?
     assert_match %r{/0000000000000000/$}, last_response.location
   end
@@ -59,7 +66,7 @@ class ServerTest < Test::Unit::TestCase
   # directory URL (trailing slash).
 
   def test_application_session_as_file
-    get "/directory/component.vwf/0000000000000000"
+    get "/directory/component.vwf/0000000000000000", {}, "HTTP_ACCEPT" => "text/html"
     assert last_response.redirection?
     assert_match %r{/directory/component.vwf/0000000000000000/$}, last_response.location
   end
