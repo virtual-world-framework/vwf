@@ -140,17 +140,4 @@ class ServerTest < Test::Unit::TestCase
 
 
 
-  def test_delegates_to_test_test
-
-    get "/test/test"
-    assert_equal "index", last_response.body
-
-    get "/test/test/a"
-    assert_equal "A", last_response.body
-
-    get "/test/test/b"
-    assert_equal "B", last_response.body
-
-  end
-
 end

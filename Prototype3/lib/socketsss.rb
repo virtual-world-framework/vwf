@@ -1,8 +1,6 @@
-require "socketioapplication"
+require "socketio_application"
 
 class Socketsss < SocketIOApplication
-
-require "pp"
 
   def call env
     if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}  # TODO: configuration parameter for paths accepted; "websocket/session" is for socket.io
