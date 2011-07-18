@@ -1,4 +1,4 @@
-require "component_templates"
+# require "component_templates"
 
 class Server < Sinatra::Base
 
@@ -7,15 +7,14 @@ class Server < Sinatra::Base
   configure do
 
     set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
-
     set :client, lambda { File.join( settings.root, "support", "client" ) }
 
     set :component_template_types, [ :json, :yaml ]
 
     set :mock_filesystem, nil
 
-    mime_type :json, "application/json"  # TODO: already in Rack::Mime.MIME_TYPES?
-    mime_type :jsonp, "application/javascript"
+    #mime_type :json, "application/json"  # TODO: already in Rack::Mime.MIME_TYPES?
+    #mime_type :jsonp, "application/javascript"
 
   end
 
@@ -45,21 +44,13 @@ class Server < Sinatra::Base
 
   end
 
-  get "/test/test" do
-    TestServer.new.call env.merge( "PATH_INFO" => "/" )
-  end
-  
-  get "/test/test/*" do |path|
-    TestServer.new.call env.merge( "PATH_INFO" => "/#{path}" )
-  end
-  
-  get %r{/types/(.*)} do |path|  # TODO: "/types"?
-    begin
-      json path.to_sym
-    rescue Errno::ENOENT  # TODO: there must be a better way to do this
-      yaml path.to_sym
-    end
-  end
+  #get %r{/types/(.*)} do |path|  # TODO: "/types"?
+  #  begin
+  #    json path.to_sym
+  #  rescue Errno::ENOENT  # TODO: there must be a better way to do this
+  #    yaml path.to_sym
+  #  end
+  #end
 
   get ApplicationPattern.new do |public_path, application, session, private_path|
 
@@ -67,9 +58,6 @@ class Server < Sinatra::Base
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
     # to "/path/to/application/session/".
-
-    # TODO: only for wants-html, not for wants-javascript; this resolves a possible ambiguity with
-    # an XHR to /path/to/application/path/to/component; should not attempt to redirect
 
     if private_path.nil? && request.route[-1,1] != "/" && request.accept.include?( mime_type :html )
       redirect to request.route + "/"
@@ -86,12 +74,13 @@ class Server < Sinatra::Base
       delegated_env = env.merge(
         "vwf.application" => application,  # TODO: needed? path for socket?
         "PATH_INFO" => "/#{ private_path || "index.html" }"
-        # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env?
+        # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
       )
 
 		  Rack::Cascade.new( [
         Rack::File.new( settings.client ),      # Client files from ^/support/client
         Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public
+        Component.new( File.join settings.public, public_path ),  # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
         Socketsss.new                           # The WebSocket reflector
       ] ).call delegated_env
 
@@ -101,13 +90,13 @@ class Server < Sinatra::Base
 
   helpers do
 
-    def json template, options = {}, locals = {}
-      render :json, template, options.merge( component_options ), locals
-    end
-
-    def yaml template, options = {}, locals = {}
-      render :yaml, template, options.merge( component_options ), locals
-    end
+    #def json template, options = {}, locals = {}
+    #  render :json, template, options.merge( component_options ), locals
+    #end
+    #
+    #def yaml template, options = {}, locals = {}
+    #  render :yaml, template, options.merge( component_options ), locals
+    #end
 
     def logger  # TODO: remove after Sinatra 1.3
       request.logger
@@ -115,13 +104,13 @@ class Server < Sinatra::Base
 
   private
 
-    def component_options
-      if callback = params["callback"]
-        { :layout => false, :views => "./types", :default_content_type => :jsonp, :callback => callback }
-      else
-        { :layout => false, :views => "./types", :default_content_type => :json }
-      end
-    end
+    #def component_options
+    #  if callback = params["callback"]
+    #    { :layout => false, :views => "./types", :default_content_type => :jsonp, :callback => callback }
+    #  else
+    #    { :layout => false, :views => "./types", :default_content_type => :json }
+    #  end
+    #end
 
   end
 
