@@ -18,6 +18,20 @@ class Server::ApplicationPattern
 
   end
 
+  # incoming path                                       application_path        application     session         socket          public_path             
+
+  # /path/to/application                                "/path/to/application"  nil             nil             nil             nil                     
+  # /path/to/application/                               "/path/to/application"  "index"         nil             nil             nil                     
+
+  # /path/to/application/socket                         "/path/to/application"  "index"         nil             "socket"        nil                     
+  # /path/to/application/path/to/client/file            "/path/to/application"  "index"         nil             nil             "path/to/client/file"  
+
+  # /path/to/application/session                        "/path/to/application"  nil             "session"       nil             nil                     
+  # /path/to/application/session/                       "/path/to/application"  "index"         "session"       nil             nil                     
+
+  # /path/to/application/session/socket                 "/path/to/application"  "index"         "session"       "socket"        nil                     
+  # /path/to/application/session/path/to/client/file    "/path/to/application"  "index"         "session"       nil             "path/to/client/file"  
+
   def match path
 
     application_path = "/"
@@ -25,7 +39,7 @@ class Server::ApplicationPattern
     segments = path.split "/"
     segments.shift # the first segment is empty since path has a leading slash
 
-    trailing_slash = path[-1,1] == "/"
+    file_url = path[-1,1] != "/"
 
     while segment = segments.first and directory? File.join( application_path, segment )
       application_path = File.join application_path, segments.shift
@@ -39,15 +53,24 @@ class Server::ApplicationPattern
     end
 
     if extension
-      application_path = File.join( application_path, "" ) if !segments.empty? || trailing_slash
+
       session = segments.shift if segments.first && session?( segments.first )
-      socket = segments.shift if session && segments.first && socket?( segments.first )
-      public_path = !segments.empty? ? File.join( segments.unshift( "" ) ) : nil
-      Match.new [ application_path, public_path, application, session, socket ]
+      application = nil if segments.empty? && file_url
+      socket = segments.shift if segments.first && socket?( segments.first )
+      public_path = File.join segments unless segments.empty?
+
+      Match.new [ application_path, application, session, socket, public_path ]
+
     end
 
     # TODO: which parts are URL paths and which are filesystem paths? don't use File.join on URL paths
 
+  end
+
+  # Assemble the pieces back into a path.
+
+  def self.assemble application_path, application, session, socket, public_path
+    "#{ application_path == "/" ? "" : application_path }#{ session && "/" + session }#{ application && "/" }#{ socket }#{ public_path }"
   end
 
 private

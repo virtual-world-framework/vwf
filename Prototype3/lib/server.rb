@@ -8,7 +8,7 @@ class Server < Sinatra::Base
 
     set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
 
-    set :public, lambda { File.join( settings.root, "public", "client" ) }  # TODO: remove
+    set :client, lambda { File.join( settings.root, "public", "client" ) }
     set :applications, lambda { File.join( settings.root, "public", "applications" ) }  # TODO: better name
 
     set :component_template_types, [ :json, :yaml ]
@@ -22,10 +22,12 @@ class Server < Sinatra::Base
 
   configure :test do
 
+    # For testing, assume that the filesystem consists of these directories containing these files.
+
     MOCK_FILESYSTEM =
     {
-      "/" =>                    [ "index.yaml", "component.yaml" ],
-      "/directory" =>           [ "index.yaml", "component.yaml" ]
+      "/" =>                    [ "index", "component" ],
+      "/directory" =>           [ "index", "component" ]
     }
 
     set :mock_filesystem, MOCK_FILESYSTEM
@@ -48,47 +50,32 @@ class Server < Sinatra::Base
     end
   end
 
-  get ApplicationPattern.new do |application_path, public_path, application, session, socket|
+  get ApplicationPattern.new do |application_path, application, session, socket, public_path|
 
-puts "--- #{env["PATH_INFO"]}"
-puts "application_path: #{application_path}"
-puts "public_path: #{public_path}"
-puts "application: #{application}"
-puts "session: #{session}"
-puts "socket #{socket}"
+    # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
+    # to "/path/to/application/session/".
 
-    if socket
+    if application.nil?
+      redirect to( ApplicationPattern.assemble application_path, "dummy", session, socket, public_path )
+
+    # For "/path/to/application/", create a session and redirect to "/path/to/application/session/".
+
+    elsif session.nil?
+      redirect to( ApplicationPattern.assemble application_path, application, "0000000000000000", socket, public_path )  # TODO: create session
+
+    # Delegate session socket connections to the reflector.
+
+    elsif socket
       Socketsss.new.call env  # TODO: path?
-    elsif application_path[-1,1] == "/"
-      Rack::File.new( settings.public ).call env.merge( "PATH_INFO" => public_path || "/index.html" )
+
+    # Delegate everything else to the static file server on the client files directory.
+
     else
-      redirect to( application_path + "/" )
+      Rack::File.new( settings.client ).call env.merge( "PATH_INFO" => "/#{ public_path || "index.html" }" )
+
     end
 
-
-      
-    # if public_path.empty?
-    #   [ 200, { "Content-Type" => "text/plain" }, "Application: #{application}" ]
-    # else
-    #   Rack::File.new( settings.public ).call env.merge( "PATH_INFO" => public_path )
-    # end
-
-    # pass unless public_path.empty?
-
   end
-
-  # get "*/socket" do |application|
-  #   Socketsss.new.call env
-  # end
-
-
-
-# /path/to/application
-# /path/to/application/
-
-  # get "/" do
-  #   call env.merge( "PATH_INFO" => "/index.html" )
-  # end
 
   helpers do
 
@@ -116,12 +103,6 @@ end
 
 
 
-# application_path session file_path
-
-#<root>/<PATH_INFO> exists?
-#   pi is file: pi, pi.json, pi.yaml
-#   pi is dir: pi/index, pi/index.json, pi/index.yaml
-#
 
 
 # For location:
