@@ -42,15 +42,15 @@ class ServerTest < Test::Unit::TestCase
   # (trailing slash).
 
   def test_application_as_file_url
-    get "/directory/component"
+    get "/directory/component.vwf"
     assert last_response.redirection?
-    assert_match %r{/directory/component/$}, last_response.location
+    assert_match %r{/directory/component.vwf/$}, last_response.location
   end
 
   # Redirects an application to a new session for that application.
 
   def test_application_as_directory_url
-    get "/directory/component/"
+    get "/directory/component.vwf/"
     assert last_response.redirection?
     assert_match %r{/0000000000000000/$}, last_response.location
   end
@@ -59,29 +59,29 @@ class ServerTest < Test::Unit::TestCase
   # directory URL (trailing slash).
 
   def test_application_session_as_file
-    get "/directory/component/0000000000000000"
+    get "/directory/component.vwf/0000000000000000"
     assert last_response.redirection?
-    assert_match %r{/directory/component/0000000000000000/$}, last_response.location
+    assert_match %r{/directory/component.vwf/0000000000000000/$}, last_response.location
   end
 
   # Successfully loads an application session.
 
   def test_application_session_as_directory
-    get "/directory/component/0000000000000000/"
+    get "/directory/component.vwf/0000000000000000/"
     assert last_response.ok?
   end
 
   # Connects to an application session's socket.
 
   def test_application_session_socket
-    # get "/directory/component/0000000000000000/socket"  # TODO: this causes an error in websocket-rack
+    # get "/directory/component.vwf/0000000000000000/socket"  # TODO: this causes an error in websocket-rack
     # assert ???
   end
 
   # Serves a client index file from an application session when an implicit index is not provided.
 
   def test_application_session_client_default_index
-    get "/directory/component/0000000000000000/"
+    get "/directory/component.vwf/0000000000000000/"
     assert last_response.ok?
     assert last_response.body.include?( "vwf.initialize" )
   end
@@ -89,7 +89,7 @@ class ServerTest < Test::Unit::TestCase
   # Serves a client file from an application session.
 
   def test_application_session_client_explicit_index
-    get "/directory/component/0000000000000000/index.html"
+    get "/directory/component.vwf/0000000000000000/index.html"
     assert last_response.ok?
     assert last_response.body.include?( "vwf.initialize" )
   end
@@ -97,7 +97,7 @@ class ServerTest < Test::Unit::TestCase
   # Serves the socket.io client from an application session.
 
   def test_application_session_socketio_client
-    get "/directory/component/0000000000000000/socket.io/socket.io.js"
+    get "/directory/component.vwf/0000000000000000/socket.io/socket.io.js"
     assert last_response.ok?
   end
 

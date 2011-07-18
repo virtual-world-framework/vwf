@@ -26,8 +26,8 @@ class Server < Sinatra::Base
   end
 
   configure :development do
-    use Rack::Logger, ::Logger::DEBUG  # TODO: remove after Sinatra 1.3
-    set :logging, ::Logger::DEBUG
+    use Rack::Logger, ::Logger::INFO  # TODO: remove after Sinatra 1.3
+    set :logging, ::Logger::INFO
   end
 
   configure :test do
@@ -38,8 +38,8 @@ class Server < Sinatra::Base
 
     MOCK_FILESYSTEM =
     {
-      "/" =>                    [ "index", "component" ],
-      "/directory" =>           [ "index", "component" ]
+      "/" =>                    [ "index.vwf", "component.vwf" ],
+      "/directory" =>           [ "index.vwf", "component.vwf" ]
     }
 
     set :mock_filesystem, MOCK_FILESYSTEM
@@ -65,30 +65,52 @@ class Server < Sinatra::Base
 # websocket[/sessionid]
 
 
-  get ApplicationPattern.new do |application_path, application, session, socket, public_path|
+  get ApplicationPattern.new do |public_path, application, session, private_path|
 
-    logger.debug "Server#get ApplicationPattern #{application_path} #{application} #{session} #{socket} #{public_path}"
+# redirect file to directory for wants-html, not for wants-javascript
+#~ remove application_path, replace with public_path
+#* change public_path to private_path
+#* remove socket, show in private_path
+#* allow application to be not nil when file (not directory); test path here
+
+# request.route
+# @route ||= Rack::Utils.unescape(path_info)
+
+
+    logger.debug "Server#get ApplicationPattern #{public_path} #{application} #{session} #{private_path}"
+
+    # if application.nil?
+    #   redirect to( ApplicationPattern.assemble application_path, "dummy", session, socket, public_path )
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
     # to "/path/to/application/session/".
 
-    if application.nil?
-      redirect to( ApplicationPattern.assemble application_path, "dummy", session, socket, public_path )
+    if private_path.nil? && request.route[-1,1] != "/"
+      redirect to request.route + "/"
 
     # For "/path/to/application/", create a session and redirect to "/path/to/application/session/".
 
-    elsif session.nil?
-      redirect to( ApplicationPattern.assemble application_path, application, "0000000000000000", socket, public_path )  # TODO: create session
+    # elsif session.nil?
+    #   redirect to( ApplicationPattern.assemble application_path, public_path, application, "0000000000000000", private_path )  # TODO: create session
+
+    elsif private_path.nil? && session.nil?
+      redirect to request.route + "0000000000000000/"
 
     # Delegate session socket connections to the reflector.
 
-    elsif socket
-      Socketsss.new.call env  # TODO: path?
+    elsif private_path =~ %r{^(socket|websocket)(/|$)}
+      Socketsss.new.call env.merge( "vwf.application" => application )  # TODO: path?
 
     # Delegate everything else to the static file server on the client files directory.
 
     else
-      Rack::File.new( settings.client ).call env.merge( "PATH_INFO" => "/#{ public_path || "index.html" }" )
+s=  Rack::File.new( settings.applications ).call env.merge( "PATH_INFO" => "#{ public_path }/#{ private_path || "index.html" }" )
+puts "#{settings.applications} #{public_path} #{private_path} #{s[0]}"
+
+if s[0] != 200
+s=      Rack::File.new( settings.client ).call env.merge( "PATH_INFO" => "/#{ private_path || "index.html" }" )
+end
+s
 
     end
 
@@ -121,6 +143,106 @@ class Server < Sinatra::Base
   end
 
 end
+
+
+# Filesystem
+
+# .../client/index.html                                       HTML for VWF client
+# .../client/index.css                                        CSS for VWF client
+# .../client/vwf.js                                           Script for VWF client
+
+# .../public/path/to/component/                               Directory containing component and dependent files
+# .../public/path/to/component/index.vwf                      VWF component, native?
+# .../public/path/to/component/index.vwf.json                 or, VWF component, JSON-encoded
+# .../public/path/to/component/index.vwf.yaml                 or, VWF component, YAML-encoded
+# .../public/path/to/component/model.dae                      Model referenced by index.vwf as: model.dae
+# .../public/path/to/component/texture.png                    Texture referenced by model.dae as: texture.png
+
+# .../public/path/to/component.vwf                            VWF component, native?
+# .../public/path/to/component.vwf.json                       or, VWF component, JSON-encoded
+# .../public/path/to/component.vwf.yaml                       or, VWF component, YAML-encoded
+# .../public/path/to/model.dae                                Model referenced by index.vwf as: model.dae
+# .../public/path/to/texture.png                              Texture referenced by model.dae as: texture.png
+
+
+
+# Locations
+
+# From static files:
+
+# http://vwf.example.com/path/to/component/                   Serves index.html to browser, index.vwf to VWF client
+
+# http://vwf.example.com/path/to/component/index.html         Served from ^/.../public/path/to/component/index.html if client copied into component directory
+# http://vwf.example.com/path/to/component/index.css          Served from ^/.../public/path/to/component/index.css if client copied into component directory
+# http://vwf.example.com/path/to/component/vwf.js             Served from ^/.../public/path/to/component/vwf.js if client copied into component directory
+
+# http://vwf.example.com/path/to/component/index.vwf          Served from ^/.../public/path/to/component/index.vwf as JSON only (not JSONP)
+# http://vwf.example.com/path/to/component/model.dae          Served from ^/.../public/path/to/component/model.dae
+# http://vwf.example.com/path/to/component/texture.png        Served from ^/.../public/path/to/component/texture.png
+
+
+# A: component/index.vwf
+
+# If serving JSON, YAML from templates or for JSONP:
+
+# http://vwf.example.com/path/to/component/index.html         Served from ^/.../client
+# http://vwf.example.com/path/to/component/index.css          Served from ^/.../client
+# http://vwf.example.com/path/to/component/vwf.js             Served from ^/.../client
+
+# http://vwf.example.com/path/to/component/index.vwf          Served from ^/.../public/path/to/component/index.vwf.json or .../index.vwf.yaml via template as JSON or JSONP
+# http://vwf.example.com/path/to/component/model.dae          Served from ^/.../public/path/to/component/model.dae as static file
+# http://vwf.example.com/path/to/component/texture.png        Served from ^/.../public/path/to/component/texture.png as static file
+
+# If running collaboration service:
+
+# http://vwf.example.com/path/to/component/socket             Socket to reflector for applications rooted at this component
+
+
+# With session:
+
+# http://vwf.example.com/path/to/component/session/
+
+# http://vwf.example.com/path/to/component/session/index.html Served from ^/.../client
+# http://vwf.example.com/path/to/component/session/index.css  Served from ^/.../client
+# http://vwf.example.com/path/to/component/session/vwf.js     Served from ^/.../client
+
+# http://vwf.example.com/path/to/component/session/index.vwf  Served from ^/.../public/path/to/component/index.vwf.json or .../index.vwf.yaml via template as JSON or JSONP
+# http://vwf.example.com/path/to/component/session/model.dae  Served from ^/.../public/path/to/component/model.dae as static file
+# http://vwf.example.com/path/to/component/session/texture.png Served from ^/.../public/path/to/component/texture.png as static file
+
+# http://vwf.example.com/path/to/component/session/socket     Socket to reflector for applications rooted at this component
+
+
+
+# B: component.vwf
+
+# http://vwf.example.com/path/to/component.vwf/               Serves index.html to browser, component.vwf to VWF client
+
+# http://vwf.example.com/path/to/component.vwf/               Served from ^/.../public/path/to/component.vwf or .../component.vwf.json or .../component.vwf.yaml
+# http://vwf.example.com/path/to/component.vwf/model.dae      Served from ^/.../public/path/to/model.dae as static file
+# http://vwf.example.com/path/to/component.vwf/texture.png    Served from ^/.../public/path/to/texture.png as static file
+
+# http://vwf.example.com/path/to/component.vwf/index.html     Served from ^/.../client
+# http://vwf.example.com/path/to/component.vwf/index.css      Served from ^/.../client
+# http://vwf.example.com/path/to/component.vwf/vwf.js         Served from ^/.../client
+
+# http://vwf.example.com/path/to/component.vwf/socket         Socket to reflector for applications rooted at this component
+
+# With session:
+
+# http://vwf.example.com/path/to/component.vwf/session/       Serves index.html to browser, component.vwf to VWF client
+
+# http://vwf.example.com/path/to/component.vwf/session/index.html Served from ^/.../client
+# http://vwf.example.com/path/to/component.vwf/session/index.css Served from ^/.../client
+# http://vwf.example.com/path/to/component.vwf/session/vwf.js Served from ^/.../client
+
+# http://vwf.example.com/path/to/component.vwf/session/       Served from ^/.../public/path/to/component.vwf or .../component.vwf.json or .../component.vwf.yaml
+# http://vwf.example.com/path/to/component.vwf/session/model.dae Served from ^/.../public/path/to/model.dae as static file
+# http://vwf.example.com/path/to/component.vwf/session/texture.png Served from ^/.../public/path/to/texture.png as static file
+
+# http://vwf.example.com/path/to/component.vwf/session/socket Socket to reflector for applications rooted at this component
+
+
 
 
 
