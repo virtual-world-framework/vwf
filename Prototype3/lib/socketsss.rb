@@ -5,17 +5,17 @@ class Socketsss < SocketIOApplication
 require "pp"
 
   def call env
-    if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}
+    if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}  # TODO: configuration parameter for paths accepted; "websocket/session" is for socket.io
       super
     else
-      [ 404, "no socket * #{env["PATH_INFO"]} * #{env["vwf.application"]}" ]
+      404
     end
   end
 
   def onconnect
     logger.info "SocketIOApplication#onconnect"
 
-    send "0 createNode index"
+    send "0 createNode index.vwf"
     schedule_tick
   end
   
