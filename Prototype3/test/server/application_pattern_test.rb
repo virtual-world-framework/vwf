@@ -5,64 +5,127 @@ class ServerTest
   class ApplicationPatternTest < Test::Unit::TestCase
     include Rack::Test::Methods
 
-    # MOCK_FILESYSTEM =
-    # {
-    #   "/" =>                [ "index.yaml", "component.yaml" ],
-    #   "/directory" =>       [ "index.yaml", "component.yaml" ]
-    # }
+    # Assume these directories, containing these files.
+
+    MOCK_FILESYSTEM =
+    {
+      "/" =>                [ "index", "component" ],
+      "/directory" =>       [ "index", "component" ]
+    }
 
     def setup
       @application_pattern = Server::ApplicationPattern.new
-      # @application_pattern.mock_filesystem = MOCK_FILESYSTEM
+      @application_pattern.mock_filesystem = MOCK_FILESYSTEM
     end
+
+    # Locates the index application at the root.
 
     def test_root_with_index
-      assert_equal [ "/", nil, "index.yaml", nil, nil ], @application_pattern.match( "/" ).captures
+      assert_pattern_match [ "/", "index", nil, nil, nil ], "/"
     end
+
+    # Locates a named application at the root.
 
     def test_root_file
-      assert_equal [ "/component", nil, "component.yaml", nil, nil ], @application_pattern.match( "/component" ).captures
+      assert_pattern_match [ "/component", "component", nil, nil, nil ], "/component/"
     end
+
+    # Locates the index application in a directory.
 
     def test_directory_with_index
-      assert_equal [ "/directory", nil, "index.yaml", nil, nil ], @application_pattern.match( "/directory" ).captures
+      assert_pattern_match [ "/directory", "index", nil, nil, nil ], "/directory/"
     end
     
+    # Locates a named application in a directory.
+
     def test_file
-      assert_equal [ "/directory/component", nil, "component.yaml", nil, nil ], @application_pattern.match( "/directory/component" ).captures
+      assert_pattern_match [ "/directory/component", "component", nil, nil, nil ], "/directory/component/"
     end
     
-    def test_root_with_session
-      assert_equal [ "/", "/session/something-else", "index.yaml", nil, nil ], @application_pattern.match( "/session/something-else" ).captures
+    # Locates no application for a non-directory URL (no trailing slash).
+
+    def test_application_as_file
+      assert_pattern_match [ "/component", nil, nil, nil, nil ], "/component"
+      assert_pattern_match [ "/directory", nil, nil, nil, nil ], "/directory"
+      assert_pattern_match [ "/directory/component", nil, nil, nil, nil ], "/directory/component"
     end
 
-    def test_applications_as_directories
-      assert_equal_paths [ "/", nil ], @application_pattern.match( "/" ).captures
-      assert_equal_paths [ "/component/", nil ], @application_pattern.match( "/component/" ).captures
-      assert_equal_paths [ "/directory/", nil ], @application_pattern.match( "/directory/" ).captures
-      assert_equal_paths [ "/directory/component/", nil ], @application_pattern.match( "/directory/component/" ).captures
+    # Locates the application when specified as a directory URL (with a trailing slash).
+
+    def test_application_as_directory
+      assert_pattern_match [ "/", "index", nil, nil, nil ], "/"
+      assert_pattern_match [ "/component", "component", nil, nil, nil ], "/component/"
+      assert_pattern_match [ "/directory", "index", nil, nil, nil ], "/directory/"
+      assert_pattern_match [ "/directory/component", "component", nil, nil, nil ], "/directory/component/"
     end
 
-    def test_applications_as_files
-      assert_equal_paths [ "/component", nil ], @application_pattern.match( "/component" ).captures
-      assert_equal_paths [ "/directory", nil ], @application_pattern.match( "/directory" ).captures
-      assert_equal_paths [ "/directory/component", nil ], @application_pattern.match( "/directory/component" ).captures
+    # Identifies the socket path.
+
+    def test_application_with_socket
+      assert_pattern_match [ "/", "index", nil, "socket", nil ], "/socket"
+      assert_pattern_match [ "/component", "component", nil, "socket", nil ], "/component/socket"
+      assert_pattern_match [ "/directory", "index", nil, "socket", nil ], "/directory/socket"
+      assert_pattern_match [ "/directory/component", "component", nil, "socket", nil ], "/directory/component/socket"
     end
 
-    def test_applications_with_publc_path
-      assert_equal_paths [ "/", "/file.ext" ], @application_pattern.match( "/file.ext" ).captures
-      assert_equal_paths [ "/component/", "/file.ext" ], @application_pattern.match( "/component/file.ext" ).captures
-      assert_equal_paths [ "/directory/", "/file.ext" ], @application_pattern.match( "/directory/file.ext" ).captures
-      assert_equal_paths [ "/directory/component/", "/file.ext" ], @application_pattern.match( "/directory/component/file.ext" ).captures
+    # Identifies the path segments following the application as a path to client files.
+
+    def test_application_with_public_path
+      assert_pattern_match [ "/", "index", nil, nil, "file.ext" ], "/file.ext"
+      assert_pattern_match [ "/component", "component", nil, nil, "file.ext" ], "/component/file.ext"
+      assert_pattern_match [ "/directory", "index", nil, nil, "file.ext" ], "/directory/file.ext"
+      assert_pattern_match [ "/directory/component", "component", nil, nil, "file.ext" ], "/directory/component/file.ext"
     end
 
-  private
+    # Locates no application for a non-directory URL (no trailing slash).
 
-    def assert_equal_paths expected_paths, captures
-      expected_application_path, expected_public_path = expected_paths
-      actual_application_path, actual_public_path = captures
-      assert_equal expected_application_path, actual_application_path
-      assert_equal expected_public_path, actual_public_path
+    def test_application_session_as_file
+      assert_pattern_match [ "/component", nil, "0000000000000000", nil, nil ], "/component/0000000000000000"
+      assert_pattern_match [ "/directory", nil, "0000000000000000", nil, nil ], "/directory/0000000000000000"
+      assert_pattern_match [ "/directory/component", nil, "0000000000000000", nil, nil ], "/directory/component/0000000000000000"
+    end
+
+    # Locates the application when specified as a directory URL (with a trailing slash).
+
+    def test_application_session_as_directory
+      assert_pattern_match [ "/", "index", "0000000000000000", nil, nil ], "/0000000000000000/"
+      assert_pattern_match [ "/component", "component", "0000000000000000", nil, nil ], "/component/0000000000000000/"
+      assert_pattern_match [ "/directory", "index", "0000000000000000", nil, nil ], "/directory/0000000000000000/"
+      assert_pattern_match [ "/directory/component", "component", "0000000000000000", nil, nil ], "/directory/component/0000000000000000/"
+    end
+
+    # Identifies the socket path.
+
+    def test_application_session_with_socket
+      assert_pattern_match [ "/", "index", "0000000000000000", "socket", nil ], "/0000000000000000/socket"
+      assert_pattern_match [ "/component", "component", "0000000000000000", "socket", nil ], "/component/0000000000000000/socket"
+      assert_pattern_match [ "/directory", "index", "0000000000000000", "socket", nil ], "/directory/0000000000000000/socket"
+      assert_pattern_match [ "/directory/component", "component", "0000000000000000", "socket", nil ], "/directory/component/0000000000000000/socket"
+    end
+
+    # Identifies the path segments following the application as a path to client files.
+
+    def test_application_session_with_public_path
+      assert_pattern_match [ "/", "index", "0000000000000000", nil, "file.ext" ], "/0000000000000000/file.ext"
+      assert_pattern_match [ "/component", "component", "0000000000000000", nil, "file.ext" ], "/component/0000000000000000/file.ext"
+      assert_pattern_match [ "/directory", "index", "0000000000000000", nil, "file.ext" ], "/directory/0000000000000000/file.ext"
+      assert_pattern_match [ "/directory/component", "component", "0000000000000000", nil, "file.ext" ], "/directory/component/0000000000000000/file.ext"
+    end
+    
+   private
+   
+    def assert_pattern_match captures, path
+
+      # Crack the path into its attributes and compare with the expected values.
+    
+      actual_captures = @application_pattern.match( path ).captures
+      assert_equal captures, actual_captures
+
+      # Reassemble the attributes into a path and compare with the original.
+
+      actual_path = Server::ApplicationPattern.assemble( *actual_captures )
+      assert_equal path, actual_path
+
     end
 
   end

@@ -7,15 +7,6 @@ class ServerTest < Test::Unit::TestCase
     Server
   end
 
-  def test_serves_client_files
-
-    get "/index.html"
-    assert last_response.ok?
-    
-    assert last_response.body.include?( "vwf.initialize" )
-
-  end
-
   def test_serves_types_as_json
 
     get "/types/abc"
@@ -25,7 +16,7 @@ class ServerTest < Test::Unit::TestCase
     assert_not_nil component["extends"]
     assert_not_nil component["properties"]
     assert_not_nil component["properties"]["abc"]
-
+    
   end
 
   def test_serves_types_as_jsonp
@@ -38,6 +29,80 @@ class ServerTest < Test::Unit::TestCase
     assert_match /^#{callback}\(.*\)$/, last_response.body
 
   end
+
+  # Redirects the application at the root to a new session for that application.
+
+  def test_root
+    get "/"
+    assert last_response.redirection?
+    assert_match %r{/0000000000000000/$}, last_response.location
+  end
+
+  # Redirects an application specified using a file URL (no trailing slash) to its directory URL
+  # (trailing slash).
+
+  def test_application_as_file_url
+    get "/directory/component"
+    assert last_response.redirection?
+    assert_match %r{/directory/component/$}, last_response.location
+  end
+
+  # Redirects an application to a new session for that application.
+
+  def test_application_as_directory_url
+    get "/directory/component/"
+    assert last_response.redirection?
+    assert_match %r{/0000000000000000/$}, last_response.location
+  end
+
+  # Redirects an application session specified using a file URL (no trailing slash) to its
+  # directory URL (trailing slash).
+
+  def test_application_session_as_file
+    get "/directory/component/0000000000000000"
+    assert last_response.redirection?
+    assert_match %r{/directory/component/0000000000000000/$}, last_response.location
+  end
+
+  # Successfully loads an application session.
+
+  def test_application_session_as_directory
+    get "/directory/component/0000000000000000/"
+    assert last_response.ok?
+  end
+
+  # Connects to an application session's socket.
+
+  def test_application_session_socket
+    # get "/directory/component/0000000000000000/socket"  # TODO: this causes an error in websocket-rack
+    # assert ???
+  end
+
+  # Serves a client index file from an application session when an implicit index is not provided.
+
+  def test_application_session_client_default_index
+    get "/directory/component/0000000000000000/"
+    assert last_response.ok?
+    assert last_response.body.include?( "vwf.initialize" )
+  end
+
+  # Serves a client file from an application session.
+
+  def test_application_session_client_explicit_index
+    get "/directory/component/0000000000000000/index.html"
+    assert last_response.ok?
+    assert last_response.body.include?( "vwf.initialize" )
+  end
+
+
+
+
+
+
+
+
+
+
 
 
   # / => /index.html for application "index"
