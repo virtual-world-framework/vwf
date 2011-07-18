@@ -3,7 +3,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   attr_reader :env
  
   def call env
-    @env = env
+    @env = env  # TODO: threading problem? use dup with call, or don't save instance variable? only needed for logger call; do another way?
     super
   end
 

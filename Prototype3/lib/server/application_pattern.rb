@@ -6,8 +6,6 @@ class Server::ApplicationPattern
 
   def initialize
 
-    @applications = Server.settings.applications
-
     @template_extensions = Server.settings.component_template_types.map do |template_type|
       "." + template_type.to_s
     end .unshift ""
@@ -83,7 +81,7 @@ private
         path == directory
       end
     else
-      File.directory? File.join( @applications, path )
+      File.directory? File.join( Server.settings.public, path )
     end
   end
 
@@ -95,7 +93,7 @@ private
         end
       end
     else
-      File.file? File.join( @applications, path )
+      File.file? File.join( Server.settings.public, path )
     end
   end
 

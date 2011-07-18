@@ -8,8 +8,8 @@ class Server < Sinatra::Base
 
     set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
 
-    set :client, lambda { File.join( settings.root, "public", "client" ) }
-    set :applications, lambda { File.join( settings.root, "public", "applications" ) }  # TODO: better name
+    set :client, lambda { File.join( settings.root, "support", "client" ) }
+    # set :applications, lambda { File.join( settings.root, "public", "applications" ) }  # TODO: better name
 
     set :component_template_types, [ :json, :yaml ]
 
@@ -62,6 +62,8 @@ class Server < Sinatra::Base
     end
   end
 
+# require "debug_cascade"
+
   get ApplicationPattern.new do |public_path, application, session, private_path|
 
 # redirect file to directory for wants-html, not for wants-javascript
@@ -85,19 +87,17 @@ class Server < Sinatra::Base
 
     # Delegate session socket connections to the reflector.
 
-    elsif private_path =~ %r{^(socket|websocket)(/|$)}
-      Socketsss.new.call env.merge( "vwf.application" => application )  # TODO: path?
+#    elsif private_path =~ %r{^(socket|websocket)(/|$)}
+#      Socketsss.new.call env.merge( "vwf.application" => application )  # TODO: path?
 
     # Delegate everything else to the static file server on the client files directory.
 
     else
-s=  Rack::File.new( settings.applications ).call env.merge( "PATH_INFO" => "#{ public_path }/#{ private_path || "index.html" }" )
-# puts "#{settings.applications} #{public_path} #{private_path} #{s[0]}"
-
-if s[0] != 200
-s=      Rack::File.new( settings.client ).call env.merge( "PATH_INFO" => "/#{ private_path || "index.html" }" )
-end
-s
+		  Rack::Cascade.new( [
+        Rack::File.new( settings.client ),
+        Rack::File.new( File.join settings.public, public_path ),
+        Socketsss.new
+      ] ).call env.merge( "vwf.application" => application, "PATH_INFO" => "/#{ private_path || "index.html" }" )  # TODO: index.html?  # TODO: path for socket?
 
     end
 

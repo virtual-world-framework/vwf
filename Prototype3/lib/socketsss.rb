@@ -2,6 +2,16 @@ require "socketioapplication"
 
 class Socketsss < SocketIOApplication
 
+require "pp"
+
+  def call env
+    if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}
+      super
+    else
+      [ 404, "no socket * #{env["PATH_INFO"]} * #{env["vwf.application"]}" ]
+    end
+  end
+
   def onconnect
     logger.info "SocketIOApplication#onconnect"
 
