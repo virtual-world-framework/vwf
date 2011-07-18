@@ -15,7 +15,8 @@
         // ws = new WebSocket("ws://localhost:3000/ws");
         // ws = new WebSocket("ws://localhost:3000/test/socket");
         // ws = new WebSocket("ws://localhost:3000/0000000000000000/socket");
-        ws = new WebSocket( "ws://" + location.host + location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
+        // ws = new WebSocket( "ws://" + location.host + location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
+        ws = new WebSocket( "ws://" + location.host + location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/websocket" );
         ws.onmessage = function(evt) { debug("Message: " + evt.data); };
         ws.onclose = function() { debug("socket closed"); };
         ws.onopen = function() {

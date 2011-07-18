@@ -23,13 +23,13 @@ class Server::ApplicationPattern
   # /path/to/application                                "/path/to/application"  nil             nil             nil             nil                     
   # /path/to/application/                               "/path/to/application"  "index"         nil             nil             nil                     
 
-  # /path/to/application/socket                         "/path/to/application"  "index"         nil             "socket"        nil                     
+  # /path/to/application/socket/path                    "/path/to/application"  "index"         nil             "socket/path"   nil                     
   # /path/to/application/path/to/client/file            "/path/to/application"  "index"         nil             nil             "path/to/client/file"  
 
   # /path/to/application/session                        "/path/to/application"  nil             "session"       nil             nil                     
   # /path/to/application/session/                       "/path/to/application"  "index"         "session"       nil             nil                     
 
-  # /path/to/application/session/socket                 "/path/to/application"  "index"         "session"       "socket"        nil                     
+  # /path/to/application/session/socket/path            "/path/to/application"  "index"         "session"       "socket/path"   nil                     
   # /path/to/application/session/path/to/client/file    "/path/to/application"  "index"         "session"       nil             "path/to/client/file"  
 
   def match path
@@ -54,10 +54,10 @@ class Server::ApplicationPattern
 
     if extension
 
-      session = segments.shift if segments.first && session?( segments.first )
+      session = segments.shift if session?( segments.first )
       application = nil if segments.empty? && file_url
-      socket = segments.shift if segments.first && socket?( segments.first )
-      public_path = File.join segments unless segments.empty?
+      socket = File.join( segments.shift segments.length ) if socket?( segments.first )
+      public_path = File.join( segments.shift segments.length ) unless segments.empty?
 
       Match.new [ application_path, application, session, socket, public_path ]
 
@@ -110,7 +110,7 @@ private
   end
 
   def socket? segment
-    segment == "socket"
+    segment == "socket" || segment == "websocket"
   end
 
 end

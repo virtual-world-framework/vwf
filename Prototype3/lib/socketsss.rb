@@ -1,32 +1,17 @@
-class Socketsss < Rack::WebSocket::Application
+require "socketioapplication"
 
-  def on_open env
-    puts "client connected"
+class Socketsss < SocketIOApplication
 
-    puts "client " + env["async.connection"].object_id.to_s
-    EM.add_timer 5 do
-      send_data "This message should show-up 5 secs later"
-    end
-
-    EM.add_timer 15 do
-      send_data "This message should show-up 15 secs later"
-    end
-
+  def onconnect
+    logger.info "SocketIOApplication#onconnect"
   end
-
-  def on_message env, msg
-
-    puts "client " + env["async.connection"].object_id.to_s
-    puts "message received: " + msg
-    send_data "Message: #{msg}"
-
+  
+  def onmessage message
+    logger.info "SocketIOApplication#onmessage #{message}"
   end
-
-  def on_close env
-
-    puts "client " + env["async.connection"].object_id.to_s
-    puts "client disconnected"
-
+  
+  def ondisconnect
+    logger.info "SocketIOApplication#ondisconnect"
   end
-
+  
 end

@@ -178,6 +178,9 @@ this.typeURIs = {}; // maps id => URI
 
                 socket = new io.Socket( undefined, {
 
+resource: window.location.pathname.slice(1,-1),
+transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling' */ ],
+
                     // Increase the timeout due to starvation while loading the scene. The server
                     // timeout must also be increased.
 
@@ -193,17 +196,6 @@ this.typeURIs = {}; // maps id => URI
     			} );
 
             } catch ( e ) {
-
-
-        ws = new WebSocket( "ws://" + location.host + location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
-        ws.onmessage = function(evt) { console.info("Message: " + evt.data); };
-        ws.onclose = function() { console.info("socket closed"); };
-        ws.onopen = function() {
-          console.info("connected...");
-          ws.send("hello server");
-          ws.send("hello again");
-        };
-
 
                 // If a connection to the conference server is not available, then run in single-
                 // user mode. Messages intended for the conference server will loop directly back to
@@ -260,8 +252,33 @@ this.typeURIs = {}; // maps id => URI
 
                 // Start communication with the conference server. 
 
-                // socket.connect( "socket" );
-                socket.connect( location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
+                socket.connect();
+
+            } else {
+
+                // socket.io: socket.connect( location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
+                ws = new WebSocket( "ws://" + location.host + location.pathname.substring( 0, location.pathname.lastIndexOf("/") ) + "/socket" );
+
+                ws.onopen = function() {
+                  console.info("connected...");
+                  ws.send("hello server");
+                  ws.send("hello again");
+                };
+
+                ws.onmessage = function(evt) {
+                  console.info("Message: " + evt.data);
+                  jQuery( "#vwf-listing" ).append(
+                        "<div class='vwf-property'>" +
+                            "<p class='vwf-label'>" + evt.data + "</p>" +
+                        "</div>"
+                    ).children( ":last" );
+                };
+
+                ws.onclose = function() { console.info("socket closed"); };
+
+
+
+
 
             }
 
