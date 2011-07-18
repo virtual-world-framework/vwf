@@ -74,11 +74,15 @@ class ServerTest < Test::Unit::TestCase
   # Connects to an application session's socket.
 
   def test_application_session_socket
-    # get "/directory/component.vwf/0000000000000000/socket"  # TODO: this causes an error in websocket-rack
-    # assert ???
+    # Rack::Test doesn't support WebSockets, but this exception from Rack::WebSocket at least tells
+    # us we got that far.
+    exception = assert_raises RuntimeError do
+      get "/directory/component.vwf/0000000000000000/socket", {}, "SERVER_SOFTWARE" => ""  # Rack::WebSocket::Handler requires SERVER_SOFTWARE to be non-nil
+    end
+    assert_match /unknown handler/i, exception.message
   end
 
-  # Serves a client index file from an application session when an implicit index is not provided.
+  # Serves a client index file from an application session when an explicit index is not provided.
 
   def test_application_session_client_default_index
     get "/directory/component.vwf/0000000000000000/"
