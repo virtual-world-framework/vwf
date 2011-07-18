@@ -62,25 +62,15 @@ class Server < Sinatra::Base
     end
   end
 
-# websocket[/sessionid]
-
-
   get ApplicationPattern.new do |public_path, application, session, private_path|
 
 # redirect file to directory for wants-html, not for wants-javascript
-#~ remove application_path, replace with public_path
+#* remove application_path, replace with public_path
 #* change public_path to private_path
 #* remove socket, show in private_path
 #* allow application to be not nil when file (not directory); test path here
 
-# request.route
-# @route ||= Rack::Utils.unescape(path_info)
-
-
     logger.debug "Server#get ApplicationPattern #{public_path} #{application} #{session} #{private_path}"
-
-    # if application.nil?
-    #   redirect to( ApplicationPattern.assemble application_path, "dummy", session, socket, public_path )
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
     # to "/path/to/application/session/".
@@ -89,9 +79,6 @@ class Server < Sinatra::Base
       redirect to request.route + "/"
 
     # For "/path/to/application/", create a session and redirect to "/path/to/application/session/".
-
-    # elsif session.nil?
-    #   redirect to( ApplicationPattern.assemble application_path, public_path, application, "0000000000000000", private_path )  # TODO: create session
 
     elsif private_path.nil? && session.nil?
       redirect to request.route + "0000000000000000/"
@@ -105,7 +92,7 @@ class Server < Sinatra::Base
 
     else
 s=  Rack::File.new( settings.applications ).call env.merge( "PATH_INFO" => "#{ public_path }/#{ private_path || "index.html" }" )
-puts "#{settings.applications} #{public_path} #{private_path} #{s[0]}"
+# puts "#{settings.applications} #{public_path} #{private_path} #{s[0]}"
 
 if s[0] != 200
 s=      Rack::File.new( settings.client ).call env.merge( "PATH_INFO" => "/#{ private_path || "index.html" }" )
