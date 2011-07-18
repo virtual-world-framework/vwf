@@ -1,6 +1,6 @@
 require "socketio_application"
 
-class Socketsss < SocketIOApplication
+class Reflector < SocketIOApplication
 
   def call env
     if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}  # TODO: configuration parameter for paths accepted; "websocket/session" is for socket.io
@@ -13,7 +13,7 @@ class Socketsss < SocketIOApplication
   def onconnect
     logger.info "SocketIOApplication#onconnect"
 
-    send "0 createNode index.vwf"
+    send "0 createNode index.vwf"  # TODO
     schedule_tick
   end
   
