@@ -9,12 +9,9 @@ class Server < Sinatra::Base
     set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
     set :client, lambda { File.join( settings.root, "support", "client" ) }
 
-    set :component_template_types, [ :json, :yaml ]
+    set :component_template_types, [ :json, :yaml ]  # get from Component?
 
     set :mock_filesystem, nil
-
-    #mime_type :json, "application/json"  # TODO: already in Rack::Mime.MIME_TYPES?
-    #mime_type :jsonp, "application/javascript"
 
   end
 
@@ -43,14 +40,6 @@ class Server < Sinatra::Base
     set :mock_filesystem, MOCK_FILESYSTEM
 
   end
-
-  #get %r{/types/(.*)} do |path|  # TODO: "/types"?
-  #  begin
-  #    json path.to_sym
-  #  rescue Errno::ENOENT  # TODO: there must be a better way to do this
-  #    yaml path.to_sym
-  #  end
-  #end
 
   get ApplicationPattern.new do |public_path, application, session, private_path|
 
@@ -81,7 +70,7 @@ class Server < Sinatra::Base
         Rack::File.new( settings.client ),      # Client files from ^/support/client
         Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public
         Component.new( File.join settings.public, public_path ),  # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
-        Socketsss.new                           # The WebSocket reflector
+        Reflector.new                           # The WebSocket reflector
       ] ).call delegated_env
 
     end
@@ -90,27 +79,9 @@ class Server < Sinatra::Base
 
   helpers do
 
-    #def json template, options = {}, locals = {}
-    #  render :json, template, options.merge( component_options ), locals
-    #end
-    #
-    #def yaml template, options = {}, locals = {}
-    #  render :yaml, template, options.merge( component_options ), locals
-    #end
-
     def logger  # TODO: remove after Sinatra 1.3
       request.logger
     end
-
-  private
-
-    #def component_options
-    #  if callback = params["callback"]
-    #    { :layout => false, :views => "./types", :default_content_type => :jsonp, :callback => callback }
-    #  else
-    #    { :layout => false, :views => "./types", :default_content_type => :json }
-    #  end
-    #end
 
   end
 
