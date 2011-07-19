@@ -9,7 +9,7 @@ class ServerTest < Test::Unit::TestCase
 
   def test_serves_types_as_json
 
-    get "/types/abc"
+    get "/types/abc.vwf"
     assert last_response.ok?
 
     component = JSON.parse last_response.body
@@ -23,7 +23,7 @@ class ServerTest < Test::Unit::TestCase
 
     callback = "test_callback_function_name"
 
-    get "/types/abc?callback=#{callback}"
+    get "/types/abc.vwf?callback=#{callback}"
     assert last_response.ok?
 
     assert_match /^#{callback}\(.*\)$/, last_response.body
@@ -33,7 +33,7 @@ class ServerTest < Test::Unit::TestCase
   # Redirects the application at the root to a new session for that application.
 
   def test_root
-    get "/", {}, "HTTP_ACCEPT" => "text/html"
+    get "/"
     assert last_response.redirection?
     assert_match %r{/0000000000000000/$}, last_response.location
   end
@@ -56,8 +56,8 @@ class ServerTest < Test::Unit::TestCase
 
   # Redirects an application to a new session for that application.
 
-  def test_application_as_directory_ulr 
-    get "/directory/component.vwf/", {}, "HTTP_ACCEPT" => "text/html"
+  def test_application_as_directory_url
+    get "/directory/component.vwf/"
     assert last_response.redirection?
     assert_match %r{/0000000000000000/$}, last_response.location
   end
@@ -66,7 +66,7 @@ class ServerTest < Test::Unit::TestCase
   # directory URL (trailing slash).
 
   def test_application_session_as_file
-    get "/directory/component.vwf/0000000000000000", {}, "HTTP_ACCEPT" => "text/html"
+    get "/directory/component.vwf/0000000000000000"
     assert last_response.redirection?
     assert_match %r{/directory/component.vwf/0000000000000000/$}, last_response.location
   end
