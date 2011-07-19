@@ -12,11 +12,15 @@ class Component < Sinatra::Base
     mime_type :jsonp, "application/javascript"
   end
 
-  get %r{/([\w]+\.vwf)$} do |path|  # TODO: \w+ is shown in the Sinatra readme; is this the best wildcard for non-/ path characters?
+  get /\.vwf$/ do
     begin
-      json path.to_sym
+      json request.path_info.to_sym  # TODO: path_info is escaped; used route instead?
     rescue Errno::ENOENT  # TODO: there must be a better way to do this
-      yaml path.to_sym
+      begin
+        yaml request.path_info.to_sym  # TODO: path_info is escaped; used route instead?
+      rescue Errno::ENOENT  # TODO: there must be a better way to do this
+        404
+      end
     end
   end
 

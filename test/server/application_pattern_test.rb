@@ -10,7 +10,8 @@ class ServerTest
     MOCK_FILESYSTEM =
     {
       "/" =>                [ "index.vwf", "component.vwf" ],
-      "/directory" =>       [ "index.vwf", "component.vwf" ]
+      "/directory" =>       [ "index.vwf", "component.vwf" ],
+      "/types" =>           [ "abc.vwf" ]
     }
 
     def setup

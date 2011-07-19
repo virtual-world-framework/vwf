@@ -1,5 +1,3 @@
-# require "component_templates"
-
 class Server < Sinatra::Base
 
   require "server/application_pattern"
@@ -34,7 +32,8 @@ class Server < Sinatra::Base
     MOCK_FILESYSTEM =
     {
       "/" =>                    [ "index.vwf", "component.vwf" ],
-      "/directory" =>           [ "index.vwf", "component.vwf" ]
+      "/directory" =>           [ "index.vwf", "component.vwf" ],
+      "/types" =>               [ "abc.vwf" ]
     }
 
     set :mock_filesystem, MOCK_FILESYSTEM
@@ -46,35 +45,58 @@ class Server < Sinatra::Base
     logger.debug "Server#get ApplicationPattern #{public_path} #{application} #{session} #{private_path}"
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
-    # to "/path/to/application/session/".
+    # to "/path/to/application/session/". But XHR calls to "/path/to/application" get the component
+    # data.
 
-    if private_path.nil? && request.route[-1,1] != "/" && request.accept.include?( mime_type :html )
-      redirect to request.route + "/"
+    if request.route[-1,1] != "/" && private_path.nil?
+
+      if session.nil? && ! request.accept.include?( mime_type :html )
+        Component.new( settings.public ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
+      else
+        redirect to request.route + "/"
+      end
 
     # For "/path/to/application/", create a session and redirect to "/path/to/application/session/".
 
-    elsif private_path.nil? && session.nil? && request.accept.include?( mime_type :html )
+    elsif session.nil? && private_path.nil?
+
       redirect to request.route + "0000000000000000/"
 
     # Delegate everything else based on the private_path.
 
     else
 
-      delegated_env = env.merge(
-        "vwf.application" => application,  # TODO: needed? path for socket?
-        "PATH_INFO" => "/#{ private_path || "index.html" }"
-        # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
-      )
+      if private_path.nil?
+      
+        delegated_env = env.merge(
+          "SCRIPT_NAME" => public_path,  # TODO: + sometimes application minus extension
+          "PATH_INFO" => "/index.html"
+          # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
+        )
 
-		  Rack::Cascade.new( [
-        Rack::File.new( settings.client ),      # Client files from ^/support/client
-        Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public
-        Component.new( File.join settings.public, public_path ),  # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
-        Reflector.new                           # The WebSocket reflector
-      ] ).call delegated_env
+        Rack::Cascade.new( [
+          Rack::File.new( settings.client ),      # Client files from ^/support/client
+        ] ).call delegated_env
+
+      else
+      
+        delegated_env = env.merge(
+          "SCRIPT_NAME" => public_path,  # TODO: + sometimes application minus extension
+          "PATH_INFO" => "/#{ private_path }"  # TODO: escaped properly for PATH_INFO?
+          # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
+        )
+
+        Rack::Cascade.new( [
+          Rack::File.new( settings.client ),      # Client files from ^/support/client
+          Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public  # TODO: will match public_path/index.html which we don't really want
+          Component.new( File.join settings.public, public_path ),  # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
+          Reflector.new                           # The WebSocket reflector  # TODO: not for session==nil
+        ] ).call delegated_env
+
+      end
 
     end
-
+    
   end
 
   helpers do
