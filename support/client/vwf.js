@@ -880,7 +880,7 @@ this.typeURIs[id] = uri;
                 var document_base = document_uri.substring( 0, document_uri.lastIndexOf( "/" ) );
 
                 uri = document_base + "/types/" + match[1]; // + ".js";
-uri = document_base + "/" + match[1] + ".vwf";
+uri = window.location.protocol + "//" + window.location.host + "/types/" + match[1] + ".vwf";
             }
 
             return uri;
