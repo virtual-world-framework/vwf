@@ -1,0 +1,4 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: radio.xml
+type: model/x-glge
