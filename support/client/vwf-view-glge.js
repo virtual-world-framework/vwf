@@ -448,83 +448,150 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         "8": { "position": [ 165, -70, 98 ], "rotation": [ 1.56, 2.0, 0 ], },
     };
 
-    var checkKeys = function (nodeID, view, now, lasttime) {
+    var orbitYaw = 0;
+    var orbitPitch = 0;
+    var orbitInc = 6.0;
+    var objectCenter = {};
 
+    var centerGroup = undefined;
+
+    var checkKeys = function (nodeID, view, now, lasttime) {
         var scene = view.scenes[nodeID], child;
         if (scene && scene.glgeScene) {
             var camera = scene.glgeScene.camera;
             if (camera) {
-                var yinc = 0;
-                var xinc = 0;
-                var zinc = 0;
+                var bOrbit = false;
+
+                if ( !centerGroup )
+                    centerGroup = new GLGE.Group();
+
                 camerapos = camera.getPosition();
                 camerarot = camera.getRotation();
                 var mat = camera.getRotMatrix();
                 var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
                 var mag = Math.pow(Math.pow(trans[0], 2) + Math.pow(trans[1], 2), 0.5);
-                trans[0] = trans[0] / mag;
-                trans[1] = trans[1] / mag;
 
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
-                    yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
-                }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
-                    yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
-                }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
-                    yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
-                }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_E)) {
-                    yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
-                }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
-                    console.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
-                    console.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
-                }
-                if (view.smokeID && scene.glgeKeys.isKeyPressed(GLGE.KI_P)) {
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_SHIFT)) {
-                        view.setProperty( view.smokeID, "looping", false );
-                    } else {
-                        view.setProperty( view.smokeID, "looping", true );
+                if ( bOrbit ) {
+                    var x, y, z = 0;
+                    var dx, dy, dz = 0;
+                    var radius = 10.0;
+                    objectCenter.x = 0;
+                    objectCenter.y = -15;
+                    objectCenter.z = 0;
+
+                    dx = objectCenter.x - camerapos.x;
+                    dy = objectCenter.y - camerapos.y;
+                    dz = objectCenter.z - camerapos.z;
+
+                    radius = Math.sqrt( dx*dx + dy*dy + dz*dz );
+
+                    centerGroup.setLocX( objectCenter.x );
+                    centerGroup.setLocY( objectCenter.y );
+                    centerGroup.setLocZ( objectCenter.z );
+                    
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+                        // orbit up
+                         orbitYaw += orbitInc;
                     }
-                }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+                        // orbit down
+                        orbitYaw -= orbitInc;
+                    }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_A)) {
+                        // orbit left
+                        orbitPitch += orbitInc;
+                    }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_D)) {
+                        // orbit right  
+                       orbitPitch -= orbitInc;
+                    }  
+                     
+                    if ( orbitYaw > 90 )
+                        orbitYaw = 90.0;
+                    if ( orbitYaw < -90 )
+                        orbitYaw = -90.0;
+                    if ( orbitPitch > 360 )
+                        orbitPitch -= 360;
+                    if ( orbitPitch < -360 )
+                        orbitPitch += 360.0;
 
-                var cp = "";
-                if (scene.glgeKeys.isKeyPressed(GLGE.KI_1)) cp = "1";
-                else if (scene.glgeKeys.isKeyPressed(GLGE.KI_2)) cp = "2";
-                else if (scene.glgeKeys.isKeyPressed(GLGE.KI_3)) cp = "3";
-                else if (scene.glgeKeys.isKeyPressed(GLGE.KI_4)) cp = "4";
-                else if (scene.glgeKeys.isKeyPressed(GLGE.KI_5)) cp = "5";
-                else if (scene.glgeKeys.isKeyPressed(GLGE.KI_6)) cp = "6";
-                else if (scene.glgeKeys.isKeyPressed(GLGE.KI_7)) cp = "7";
-                else if (scene.glgeKeys.isKeyPressed(GLGE.KI_8)) cp = "8";
+                    x = objectCenter.x + radius * Math.sin( orbitYaw ) * Math.cos( orbitPitch );
+                    y = objectCenter.y + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );
+                    z = objectCenter.z + radius * Math.cos( orbitYaw );
 
-                if ( cp != "" ) {
-                    var pos = cameraPositions[cp]["position"];
-                    var rot = cameraPositions[cp]["rotation"];
-                    camera.setLocX(pos[0]);
-                    camera.setLocY(pos[1]);
-                    camera.setLocZ(pos[2]);
-                    camera.setRotX(rot[0]);
-                    camera.setRotY(rot[1]);
-                    camera.setRotZ(rot[2]);
-                }
+                    camera.setLocX( x );
+                    camera.setLocY( y );
+                    camera.setLocZ( z );
+                    camera.setLookat( centerGroup );
+                                
+                } else { 
+                    var yinc = 0;
+                    var xinc = 0;
+                    var zinc = 0;
+                    trans[0] = trans[0] / mag;
+                    trans[1] = trans[1] / mag;
 
-                //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) xinc = 0;
-                //if (levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) yinc = 0;
-                //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) { 
-                //    yinc = 0; xinc = 0; }
-                //else {
-                //    camera.setLocZ(levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
-                //}
-                if (xinc != 0 || yinc != 0 || zinc != 0) {
-                    camera.setLocY(camerapos.y + yinc * 0.05 * (now - lasttime));
-                    camera.setLocX(camerapos.x + xinc * 0.05 * (now - lasttime));
-                    camera.setLocZ(camerapos.z + zinc);
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+                        yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
+                    }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+                        yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
+                    }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
+                        yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
+                    }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_E)) {
+                        yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
+                    }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
+                        console.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
+                        console.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
+                    }
+                    if (view.smokeID && scene.glgeKeys.isKeyPressed(GLGE.KI_P)) {
+                        if (scene.glgeKeys.isKeyPressed(GLGE.KI_SHIFT)) {
+                            view.setProperty( view.smokeID, "looping", false );
+                        } else {
+                            view.setProperty( view.smokeID, "looping", true );
+                        }
+                    }
+
+                    var cp = "";
+                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_1)) cp = "1";
+                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_2)) cp = "2";
+                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_3)) cp = "3";
+                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_4)) cp = "4";
+                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_5)) cp = "5";
+                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_6)) cp = "6";
+                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_7)) cp = "7";
+                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_8)) cp = "8";
+
+                    if ( cp != "" ) {
+                        var pos = cameraPositions[cp]["position"];
+                        var rot = cameraPositions[cp]["rotation"];
+                        camera.setLocX(pos[0]);
+                        camera.setLocY(pos[1]);
+                        camera.setLocZ(pos[2]);
+                        camera.setRotX(rot[0]);
+                        camera.setRotY(rot[1]);
+                        camera.setRotZ(rot[2]);
+                    }
+
+                    //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y) > 30) xinc = 0;
+                    //if (levelmap.getHeightAt(camerapos.x, camerapos.y + yinc) > 30) yinc = 0;
+                    //if (levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) > 30) { 
+                    //    yinc = 0; xinc = 0; }
+                    //else {
+                    //    camera.setLocZ(levelmap.getHeightAt(camerapos.x + xinc, camerapos.y + yinc) + 8);
+                    //}
+                    if (xinc != 0 || yinc != 0 || zinc != 0) {
+                        camera.setLocY(camerapos.y + yinc * 0.05 * (now - lasttime));
+                        camera.setLocX(camerapos.x + xinc * 0.05 * (now - lasttime));
+                        camera.setLocZ(camerapos.z + zinc);
+                    }
                 }
             }
         }
@@ -540,17 +607,22 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         var mouseDownObjectID = undefined;
         var mouseOverObjectID = undefined;
 
+        var lastXPos = -1;
+        var lastYPos = -1;
+
         canvas.onmousedown = function (e) {
             mouseDown = true;
-            mouseDownObjectID = mousePick(e, scene, sceneView, true);
+            mouseDownObjectID = getObjectID( mousePick(e, scene, sceneView), true );
 
             //console.info("CANVAS mouseDown: " + mouseDownObjectID);
             //this.throwEvent( "onMouseDown", mouseDownObjectID);
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
 
         }
 
         canvas.onmouseup = function (e) {
-            var mouseUpObjectID = mousePick(e, scene, sceneView, false);
+            var mouseUpObjectID = getObjectID( mousePick( e, scene, sceneView ), false );
             // check for time??
             if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
                 console.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
@@ -563,13 +635,30 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
             mouseDownObjectID = undefined;
             mouseDown = false;
+
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
         }
 
         canvas.onmouseover = function (e) {
             mouseOverCanvas = true;
+
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
         }
 
         canvas.onmousemove = function (e) {
+            var pickInfo = mousePick( e, scene, sceneView );
+            var mouseOverID = getObjectID( pickInfo, false );
+            var mouseInfo = { 
+                              "lastX": lastXPos,
+                              "lastY": lastYPos,
+                              "X" : mouseXPos(e),
+                              "Y" : mouseYPos(e),
+                              "mouseDownID" : mouseDownObjectID,
+                              "mouseOverID" : mouseOverID,
+                              "pickInfo" : pickInfo,
+                            };
 
             if (mouseDown) {
                 if (mouseDownObjectID) {
@@ -577,17 +666,18 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     //console.info("CANVAS onMouseMove: " + mouseDownObjectID);
                     //this.throwEvent( "onMouseMove", mouseDownObjectID);
                 }
+
+                view.callMethod( mouseInfo, "onMouseMove" );
             }
             else {
-                var objectOver = mousePick(e, scene, sceneView, false);
-                if (objectOver) {
+                if (mouseOverID) {
                     if (mouseOverObjectID) {
-                        if (objectOver != mouseOverObjectID) {
+                        if (mouseOverID != mouseOverObjectID) {
 
                             //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseLeave", mouseOverObjectID);
 
-                            mouseOverObjectID = objectOver;
+                            mouseOverObjectID = mouseOverID;
 
                             //console.info("CANVAS onMouseEnter: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseEnter", mouseOverObjectID);
@@ -599,7 +689,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                         }
                     }
                     else {
-                        mouseOverObjectID = objectOver;
+                        mouseOverObjectID = mouseOverID;
 
                         //console.info("CANVAS onMouseEnter: " + mouseOverObjectID);
                         //this.throwEvent( "onMouseEnter", mouseOverObjectID);
@@ -616,6 +706,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 }
             }
 
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
 
             //this.mouseOverCanvas = true; 
         }
@@ -652,30 +744,46 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         return sOut;
     }
 
-    var mousePick = function (e, scene, view, debug) {
-        if (scene && scene.glgeScene) {
-            var x = e.clientX - e.currentTarget.offsetLeft + window.scrollX;
-            var y = e.clientY - e.currentTarget.offsetTop + window.scrollY;
+    var mouseXPos = function(e) {
+        return e.clientX - e.currentTarget.offsetLeft + window.scrollX;
+    }
 
-            var pickInfo = scene.glgeScene.pick(x, y);
-            if (pickInfo && pickInfo.object) {
-                var objectIDFound = -1;
-                var objectToLookFor = pickInfo.object;
+    var mouseYPos = function(e) {
+        return e.clientY - e.currentTarget.offsetTop + window.scrollY;
+    }
 
-                while (objectIDFound == -1 && objectToLookFor) {
-                    if ( debug ) 
-                        console.info("vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
-                    objects = jQuery.each(view.nodes, function (nodeID, node) {
-                        if (node.glgeObject == objectToLookFor) {
-                            //console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
-                            objectIDFound = nodeID;
-                        }
-                    });
-                    objectToLookFor = objectToLookFor.parent;
-                }
-                if (objectIDFound != -1)
-                    return objectIDFound;
+    var getObjectID = function( pickInfo, debug ) {
+        if (pickInfo && pickInfo.object) {
+            var objectIDFound = -1;
+            var objectToLookFor = pickInfo.object;
+
+            while (objectIDFound == -1 && objectToLookFor) {
+                if ( debug ) 
+                    console.info("vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
+                objects = jQuery.each(view.nodes, function (nodeID, node) {
+                    if (node.glgeObject == objectToLookFor) {
+                        //console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
+                        objectIDFound = nodeID;
+                    }
+                });
+                objectToLookFor = objectToLookFor.parent;
             }
+            if (objectIDFound != -1)
+                return objectIDFound;
+        }
+        return undefined;
+    }
+
+
+    var mousePick = function (e, scene, view ) {
+        if (scene && scene.glgeScene) {
+            var objectIDFound = -1;
+            var x = mouseXPos( e );
+            var y = mouseYPos( e );
+
+            return scene.glgeScene.pick(x, y);
+            //return pickInfo;
+
         }
         return undefined;
     };
