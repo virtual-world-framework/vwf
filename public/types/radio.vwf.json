@@ -13,6 +13,13 @@
         "radio.dae": {
             extends: "http://vwf.example.com/types/node3",
 
+        properties: { angle: 0, playing: true },
+
+        scripts: [ {
+            text: "this.pointerClick = function() { this.playing = !this.playing }",
+            type: "application/javascript"
+        }, ],
+
         children: {
             "undefined": {
                extends: "http://localhost:8001/node3.js",

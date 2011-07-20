@@ -462,22 +462,23 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if (camera) {
                 var bOrbit = false;
 
-                if ( !centerGroup )
+                if ( !centerGroup ) {
                     centerGroup = new GLGE.Group();
+                    objectCenter.x = 0;
+                    objectCenter.y = 2;
+                    objectCenter.z = 0;
+                }
 
                 camerapos = camera.getPosition();
                 camerarot = camera.getRotation();
                 var mat = camera.getRotMatrix();
                 var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
-                var mag = Math.pow(Math.pow(trans[0], 2) + Math.pow(trans[1], 2), 0.5);
+                var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
 
                 if ( bOrbit ) {
                     var x, y, z = 0;
                     var dx, dy, dz = 0;
                     var radius = 10.0;
-                    objectCenter.x = 0;
-                    objectCenter.y = -15;
-                    objectCenter.z = 0;
 
                     dx = objectCenter.x - camerapos.x;
                     dy = objectCenter.y - camerapos.y;
@@ -489,40 +490,47 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     centerGroup.setLocY( objectCenter.y );
                     centerGroup.setLocZ( objectCenter.z );
                     
+                    var bKeyDown = false;
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
                         // orbit up
                          orbitYaw += orbitInc;
+                         bKeyDown = true;
                     }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
                         // orbit down
                         orbitYaw -= orbitInc;
+                          bKeyDown = true;
                     }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_A)) {
                         // orbit left
                         orbitPitch += orbitInc;
+                        bKeyDown = true;
                     }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_D)) {
                         // orbit right  
                        orbitPitch -= orbitInc;
+                       bKeyDown = true;
                     }  
                      
-                    if ( orbitYaw > 90 )
-                        orbitYaw = 90.0;
-                    if ( orbitYaw < -90 )
-                        orbitYaw = -90.0;
-                    if ( orbitPitch > 360 )
-                        orbitPitch -= 360;
-                    if ( orbitPitch < -360 )
-                        orbitPitch += 360.0;
+                    if ( bKeyDown ) {
+                        if ( orbitYaw > 90 )
+                            orbitYaw = 90.0;
+                        if ( orbitYaw < -90 )
+                            orbitYaw = -90.0;
+                        if ( orbitPitch > 360 )
+                            orbitPitch -= 360;
+                        if ( orbitPitch < -360 )
+                            orbitPitch += 360.0;
 
-                    x = objectCenter.x + radius * Math.sin( orbitYaw ) * Math.cos( orbitPitch );
-                    y = objectCenter.y + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );
-                    z = objectCenter.z + radius * Math.cos( orbitYaw );
+                        x = objectCenter.x + radius * Math.sin( orbitYaw ) * Math.cos( orbitPitch );
+                        y = objectCenter.y + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );
+                        z = objectCenter.z + radius * Math.cos( orbitYaw );
 
-                    camera.setLocX( x );
-                    camera.setLocY( y );
-                    camera.setLocZ( z );
-                    camera.setLookat( centerGroup );
+                        camera.setLocX( x );
+                        camera.setLocY( y );
+                        camera.setLocZ( z );
+                        camera.setLookat( centerGroup );
+                    }
                                 
                 } else { 
                     var yinc = 0;
@@ -612,7 +620,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         canvas.onmousedown = function (e) {
             mouseDown = true;
-            mouseDownObjectID = getObjectID( mousePick(e, scene, sceneView), true );
+            mouseDownObjectID = getObjectID( mousePick(e, scene ), sceneView, true );
 
             //console.info("CANVAS mouseDown: " + mouseDownObjectID);
             //this.throwEvent( "onMouseDown", mouseDownObjectID);
@@ -622,7 +630,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         canvas.onmouseup = function (e) {
-            var mouseUpObjectID = getObjectID( mousePick( e, scene, sceneView ), false );
+            var mouseUpObjectID = getObjectID( mousePick( e, scene ), sceneView, false );
             // check for time??
             if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
                 console.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
@@ -648,8 +656,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         canvas.onmousemove = function (e) {
-            var pickInfo = mousePick( e, scene, sceneView );
-            var mouseOverID = getObjectID( pickInfo, false );
+            var pickInfo = mousePick( e, scene );
+            var mouseOverID = getObjectID( pickInfo, sceneView, false );
             var mouseInfo = { 
                               "lastX": lastXPos,
                               "lastY": lastYPos,
@@ -752,7 +760,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         return e.clientY - e.currentTarget.offsetTop + window.scrollY;
     }
 
-    var getObjectID = function( pickInfo, debug ) {
+    var getObjectID = function( pickInfo, view, debug ) {
         if (pickInfo && pickInfo.object) {
             var objectIDFound = -1;
             var objectToLookFor = pickInfo.object;
@@ -775,7 +783,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     }
 
 
-    var mousePick = function (e, scene, view ) {
+    var mousePick = function ( e, scene ) {
         if (scene && scene.glgeScene) {
             var objectIDFound = -1;
             var x = mouseXPos( e );
