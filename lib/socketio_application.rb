@@ -12,7 +12,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def onmessage message
-    logger.debug "SocketIOApplication#onmessage"
+    logger.debug "SocketIOApplication#onmessage #{ message_for_log message }"
   end
 
   def ondisconnect
@@ -20,7 +20,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def send message
-    logger.debug "SocketIOApplication#send #{message}"
+    logger.debug "SocketIOApplication#send #{ message_for_log message }"
     # unless connected
     #   queue message  # TODO
     # else
@@ -33,7 +33,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
   
   def broadcast message
-    logger.info "SocketIOApplication#broadcast #{message}"
+    logger.info "SocketIOApplication#broadcast #{ message_for_log message }"
     send message  # TODO
   end
 
@@ -48,7 +48,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def on_heartbeat message
-    logger.debug "SocketIOApplication#on_heartbeat #{message}"
+    logger.debug "SocketIOApplication#on_heartbeat #{ message_for_log message }"
     if message.to_i == @heartbeats
       @heartbeat_timeout.cancel
       schedule_heartbeat
@@ -56,7 +56,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def send_heartbeat message
-    logger.debug "SocketIOApplication#send_heartbeat #{message}"
+    logger.debug "SocketIOApplication#send_heartbeat #{ message_for_log message }"
     send_serialization "~h~" + message
   end
 
@@ -116,6 +116,13 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
 private
+
+  MESSAGE_LOG_LENGTH = 100
+
+  def message_for_log message
+    message = message.to_s
+    message.length > MESSAGE_LOG_LENGTH ? message[0,MESSAGE_LOG_LENGTH-3] + "..." : message
+  end
 
   def logger
     @env["rack.logger"] || Object.new

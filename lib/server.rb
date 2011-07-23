@@ -42,7 +42,7 @@ class Server < Sinatra::Base
 
   get ApplicationPattern.new do |public_path, application, session, private_path|
 
-    logger.debug "Server#get ApplicationPattern #{public_path} #{application} #{session} #{private_path}"
+    logger.debug "Server#get ApplicationPattern #{public_path} - #{application} - #{session} - #{private_path}"
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
     # to "/path/to/application/session/". But XHR calls to "/path/to/application" get the component
