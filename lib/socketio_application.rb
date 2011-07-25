@@ -1,26 +1,43 @@
 class SocketIOApplication < Rack::WebSocket::Application
 
   attr_reader :env
- 
-  def call env
-    @env = env  # TODO: threading problem? use dup with call, or don't save instance variable? only needed for logger call; do another way?
+  
+  @@sessions = {}  # TODO: threading issues? use mutex on access?
+
+  def _call env
+    @env = env  # TODO: env only needed for logger call; do another way & omit this override?
     super
   end
 
   def onconnect
+
     logger.info "SocketIOApplication#onconnect"
+
+    @endpoint = File.join env["SCRIPT_NAME"] || "", env["PATH_INFO"] || ""  # TODO: set to nil after dup?
+
+    @@sessions[@endpoint] ||= { :clients => [], :session => {} }
+    @@sessions[@endpoint][:clients] << self
+
+puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array === ov ? ov.map { |v| v.to_s } : ov.to_s } }
+
   end
 
   def onmessage message
+
     logger.debug "SocketIOApplication#onmessage #{ message_for_log message }"
+
   end
 
   def ondisconnect
+
     logger.info "SocketIOApplication#ondisconnect"
+
   end
 
   def send message
+
     logger.debug "SocketIOApplication#send #{ message_for_log message }"
+
     # unless connected
     #   queue message  # TODO
     # else
@@ -30,25 +47,31 @@ class SocketIOApplication < Rack::WebSocket::Application
         send_serialization message.to_s
       end
     # end
+
   end
   
   def broadcast message
-    logger.info "SocketIOApplication#broadcast #{ message_for_log message }"
-    send message  # TODO
+
+    logger.debug "SocketIOApplication#broadcast #{ message_for_log message }"
+
+    clients.each do |client|
+      client.send message
+    end
+
   end
 
   def schedule_heartbeat
-    @heartbeat_interval = EventMachine::Timer.new 10 do  # TODO: options.heartbeatInterval
+    @heartbeat_interval = EventMachine::Timer.new 10 do  # TODO: options.heartbeat_interval
       send_heartbeat ( @heartbeats += 1 ).to_s
       @heartbeat_timeout = EventMachine::Timer.new 8 do  # TODO: options.timeout
-        logger.debug"SocketIOApplication#schedule_heartbeat timeout #{@heartbeats}"
+        # logger.debug "SocketIOApplication#schedule_heartbeat timeout #{@heartbeats}"
         # TODO: close
       end
     end
   end
 
   def on_heartbeat message
-    logger.debug "SocketIOApplication#on_heartbeat #{ message_for_log message }"
+    # logger.debug "SocketIOApplication#on_heartbeat #{ message_for_log message }"
     if message.to_i == @heartbeats
       @heartbeat_timeout.cancel
       schedule_heartbeat
@@ -56,7 +79,7 @@ class SocketIOApplication < Rack::WebSocket::Application
   end
 
   def send_heartbeat message
-    logger.debug "SocketIOApplication#send_heartbeat #{ message_for_log message }"
+    # logger.debug "SocketIOApplication#send_heartbeat #{ message_for_log message }"
     send_serialization "~h~" + message
   end
 
@@ -72,7 +95,7 @@ class SocketIOApplication < Rack::WebSocket::Application
           # TODO: error
         end
       else
-        onmessage serialization[3..-1]
+        onmessage serialization
     end
   end
 
@@ -127,5 +150,13 @@ private
   def logger
     @env["rack.logger"] || Object.new
   end
+
+  def clients
+    @endpoint and @@sessions[@endpoint][:clients]
+  end
   
+  def session
+    @endpoint and @@sessions[@endpoint][:session]
+  end
+
 end
