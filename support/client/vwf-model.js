@@ -131,7 +131,7 @@
     // -- execute ----------------------------------------------------------------------------------
 
     module.prototype.execute = function( nodeID, scriptText, scriptType ) {
-        console.info( "vwf.model.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+        console.info( "vwf.model.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
         return this.vwf.execute( nodeID, scriptText, scriptType );
     };
 
@@ -228,7 +228,7 @@
     // -- executing --------------------------------------------------------------------------------
 
     module.prototype.executing = function( nodeID, scriptText, scriptType ) {
-        console.info( "vwf.model.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+        console.info( "vwf.model.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
     };
 
 } ) ( window.vwf.modules );

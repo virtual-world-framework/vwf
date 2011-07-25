@@ -44,7 +44,7 @@
         console.info("vwf.view.glge.createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
-        if (vwf.typeURIs[nodeExtendsID] == "http://vwf.example.com/types/glge") {
+        if (nodeExtendsID == "http://vwf.example.com/types/glge") {
 
             // jQuery(this.rootSelector).append(
             //     "<h2>Scene</h2>"
@@ -132,7 +132,7 @@
 
         }
         
-        else if (vwf.typeURIs[nodeExtendsID] == "http://vwf.example.com/types/node3") {
+        else if (nodeExtendsID == "http://vwf.example.com/types/node3") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,  // TODO: needed?
@@ -141,7 +141,7 @@
 
         }
 
-        else if (vwf.typeURIs[nodeExtendsID] == "http://vwf.example.com/types/camera") {
+        else if (nodeExtendsID == "http://vwf.example.com/types/camera") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
