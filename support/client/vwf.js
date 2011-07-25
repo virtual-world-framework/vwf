@@ -223,7 +223,7 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
                 socket.on( "message", function( message ) {
 
-                    console.info( "vwf.socket message " + message );
+                    // console.info( "vwf.socket message " + message );
 
                     // Unpack the arguments.
 
@@ -375,7 +375,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( component_uri_or_object, callback ) {
+        this.createNode = function( component_uri_or_object, callback, childName /* TODO: hack */ ) {
 
             console.info( "vwf.createNode " + component_uri_or_object );
 
@@ -393,7 +393,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; wishfulComponentHash() is a gross hack.
 
-            var nodeID = wishfulComponentHash( component );
+            var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName; // TODO: was wishfulComponentHash( component );
 
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
@@ -787,7 +787,8 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
             component.children && jQuery.each( component.children, function( childName, child_uri_or_object ) {
                 vwf.createNode( child_uri_or_object, function( childID, childTypeID ) {
                     vwf.addChild( nodeID, childID, childName );
-                } );
+                },
+childName /* TODO: hack */ );
             } );
 
             // Attach the scripts. For each script, load the network resource if the script is
