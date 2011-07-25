@@ -66,10 +66,14 @@ class Server < Sinatra::Base
 
     else
 
+      application_session = session ?
+          File.join( public_path, application, session ) :
+          File.join( public_path, application )
+
       if private_path.nil?
       
         delegated_env = env.merge(
-          "SCRIPT_NAME" => public_path,  # TODO: + sometimes application minus extension
+          "SCRIPT_NAME" => application_session,
           "PATH_INFO" => "/index.html"
           # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
         )
@@ -81,8 +85,10 @@ class Server < Sinatra::Base
       else
       
         delegated_env = env.merge(
-          "SCRIPT_NAME" => public_path,  # TODO: + sometimes application minus extension
-          "PATH_INFO" => "/#{ private_path }"  # TODO: escaped properly for PATH_INFO?
+          "SCRIPT_NAME" => application_session,
+          "PATH_INFO" => "/#{ private_path }",  # TODO: escaped properly for PATH_INFO?
+          "vwf.base_path" => public_path,
+          "vwf.application" => application
           # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
         )
 

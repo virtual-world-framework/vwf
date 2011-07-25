@@ -11,25 +11,28 @@ class Reflector < SocketIOApplication
   end
 
   def onconnect
-    logger.info "SocketIOApplication#onconnect"
 
-    send "0 createNode index.vwf"  # TODO
+    super
+
+    send "0 createNode #{ env["vwf.application"] }"
     schedule_tick
+
   end
   
   def onmessage message
-    logger.info "SocketIOApplication#onmessage #{message}"
+    super
+    broadcast message
   end
   
   def ondisconnect
-    logger.info "SocketIOApplication#ondisconnect"
+    super
   end
 
 private
 
   def schedule_tick
-    @tick_timer = EventMachine::PeriodicTimer.new 2 do
-      send Time.now.to_f  # TODO: play/pause/stop, start at 0
+    session[:tick_timer] ||= EventMachine::PeriodicTimer.new 2 do
+      broadcast Time.now.to_f  # TODO: play/pause/stop, start at 0
     end
   end
   

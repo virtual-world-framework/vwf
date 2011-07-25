@@ -54,10 +54,10 @@ class Server::ApplicationPattern
     end
 
     if segment = segments.first and extension = component?( File.join( public_path, segment ) )
-      application = segment + extension
+      application = segment
       segments.shift
     elsif extension = component?( File.join( public_path, "index.vwf" ) )  # TODO: configuration parameter for default application name
-      application = "index.vwf" + extension  # TODO: configuration parameter for default application name
+      application = "index.vwf"  # TODO: configuration parameter for default application name
     end
 
     if extension
