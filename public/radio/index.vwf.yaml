@@ -2,3 +2,86 @@
 extends: http://vwf.example.com/types/glge
 source: radio.xml
 type: model/x-glge
+children: 
+  radio.dae: 
+    extends: http://vwf.example.com/types/node3
+    children:
+      "":
+        extends: http://vwf.example.com/types/node3
+        children:
+          bone1:
+            extends: http://vwf.example.com/types/node3
+            children:
+              MaxScene:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  EnvironmentAmbientLight:
+                    extends: http://vwf.example.com/types/node3
+                  Radio:
+                    extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40_MicrophonePort:
+                        extends: http://vwf.example.com/types/node3
+                      ic40_SpeakerPort:
+                        extends: http://vwf.example.com/types/node3
+                      ic40Channel:
+                        extends: http://vwf.example.com/types/node3
+                      ic40Down:
+                        extends: http://vwf.example.com/types/node3
+                      ic40Monitor:
+                        extends: http://vwf.example.com/types/node3
+                      ic40P0:
+                        extends: http://vwf.example.com/types/node3
+                      ic40P1:
+                        extends: http://vwf.example.com/types/node3
+                      ic40P2:
+                        extends: http://vwf.example.com/types/node3
+                      ic40P3:
+                        extends: http://vwf.example.com/types/node3
+                      ic40PTT:
+                        extends: http://vwf.example.com/types/node3
+                      ic40Radio:
+                        extends: http://vwf.example.com/types/node3
+                      ic40Red:
+                        extends: http://vwf.example.com/types/node3
+                      ic40Up:
+                        extends: http://vwf.example.com/types/node3
+                      ic40Volume:
+                        extends: http://vwf.example.com/types/node3
+                      LCD:
+                        extends: http://vwf.example.com/types/node3
+                      LCD_Back:
+                        extends: http://vwf.example.com/types/node3
+                      Antennae:
+                        extends: http://vwf.example.com/types/node3
+                      Battery:
+                        extends: http://vwf.example.com/types/node3
+                      BatteryLatch:
+                        extends: http://vwf.example.com/types/node3
+                  Cam_Left:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_Top:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_Front:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_Right:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_Battery:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_BeltClip:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_Antennae:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_ID:
+                    extends: http://vwf.example.com/types/node3
+                  Cam_MainView:
+                    extends: http://vwf.example.com/types/node3
+                  Omni01:
+                    extends: http://vwf.example.com/types/node3
+                  Omni02:
+                    extends: http://vwf.example.com/types/node3
+                  Omni03:
+                    extends: http://vwf.example.com/types/node3
+                  Omni04:
+                    extends: http://vwf.example.com/types/node3
+  
