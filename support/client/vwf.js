@@ -39,11 +39,12 @@
         // that we can find it if it is reused. Components specified internally as object literals
         // are anonymous and are not indexed here.
 
-        var types = this.private.types = {}; // maps URI => id
+        var types = this.private.types = {}; // maps URI => component specification
 
-// TODO: keep these public like this and replace "var types", or provide accessors?
-this.typeIDs = {}; // maps URI => id
-this.typeURIs = {}; // maps id => URI
+        // The proto-prototype of all nodes is "node", identified by this URI. This type is
+        // intrinsic to the system and nothing is loaded from the URI.
+
+        var nodeTypeURI = "http://vwf.example.com/types/node";
 
         // Control messages from the conference server are stored here in a priority queue, ordered
         // by execution time.
@@ -56,18 +57,13 @@ this.typeURIs = {}; // maps id => URI
 
         var socket = undefined;
 
-        // The proto-prototype of all nodes is "node", identified by this URI. This type is
-        // intrinsic to the system and nothing is loaded from the URI.
-
-        var nodeTypeURI = "http://vwf.example.com/types/node";
-
         // Each node is assigned an ID as it is created. This is the most recent ID assigned.
 
         // Communication between the manager and the models and views uses these IDs to refer to the
         // nodes. The manager doesn't maintain any particular state for the nodes and knows them
         // only as their IDs. The models work in federation to provide the meaning to each node.
 
-        var lastID = 0;
+        // var lastID = 0;
 
         // Callback functions defined in this scope use this local "vwf" to locate the manager.
 
@@ -98,7 +94,7 @@ this.typeURIs = {}; // maps id => URI
         // attached to the simulation and provides their configuration parameters. Each argument set
         // is specified as an object (hash) in which each key is the name of a model or view to
         // construct, and the value is the set of arguments to pass to the constructor. The
-        // arguments may be specified as an array of values [4], or as a single value is there is
+        // arguments may be specified as an array of values [4], or as a single value if there is
         // only one [5].
         // 
         //     [4] vwf.initialize( ..., { scenejs: "#scene" }, { ... } )
@@ -313,7 +309,7 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
             var time = Number( fields.shift() );
 if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_uri_or_object" correctly
-            var nodeID = Number( fields.shift() );
+            var nodeID = fields.shift();
             var actionName = fields.shift();
 
             // Look up the action handler and invoke it with the remaining parameters.
@@ -322,8 +318,7 @@ if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_
             // handler.
 
 if ( actionName != "createNode" )
-            this[actionName] && this[actionName].apply( this, [ nodeID ] + fields );
-            // this[actionName] && this[actionName].call( this, nodeID, fields[0], fields[1] );
+            this[actionName] && this[actionName].apply( this, [ nodeID ].concat( fields ) );
 else
 this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to parse "t createNode component_uri_or_object" correctly
             
@@ -388,34 +383,24 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
             // resource containing the specification or as an object literal that provides the data
             // directly.
 
-            // We must resolve a URI to an object before we can create the component. If the
-            // specification parameter is a string, treat it as a URI and load the document at that
-            // location. Call construct() with the specification once it has loaded.
-
             if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
-
-                var component = {};
-
+                var component = { "extends": component_uri_or_object };
                 console.log( "vwf.createNode: creating node of type " + component_uri_or_object );
-
-                this.getType( component_uri_or_object, function( prototypeID ) {
-                    construct.call( this, component, prototypeID, callback );
-                } );
-
-            // If a component literal was provided, call getType() to locate or load the prototype
-            // node, then pass the prototype and the component specification to construct().
-
             } else {
-
                 var component = component_uri_or_object;
-
                 console.log( "vwf.createNode: creating " + ( component["extends"] || nodeTypeURI ) + " literal" );
-
-                this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) {
-                    construct.call( this, component, prototypeID, callback );
-                } );
-
             }
+
+            // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; wishfulComponentHash() is a gross hack.
+
+            var nodeID = wishfulComponentHash( component );
+
+            // Call getType() to locate or load the prototype node, then pass the prototype and the
+            // component specification to construct().
+
+            this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) {
+                construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
+            } );
 
         };
 
@@ -429,18 +414,18 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.getType = function( uri, callback ) {
 
-            var id = types[uri];
+            var nodeID = uri; // TODO: hash uri => nodeID to shorten for faster lookups?
 
-            // If we found the URI in the database, invoke the callback with the ID of the
-            // previously-loaded prototype node.
+            // If the URI is in the database, invoke the callback with the ID of the previously-
+            // loaded prototype node.
             
-            if ( id ) {
+            if ( types[uri] ) {
 
-                callback && callback.call( this, id );
+                callback && callback.call( this, nodeID );
 
-            // If the type has not been loaded but is identified with a URI, call createNode() to
-            // make the node that we will use as the prototype. When it loads, save the ID in the
-            // types database and invoke the callback with the new prototype node's ID.
+            // If the type has not been loaded, call createNode() to make the node that we will use
+            // as the prototype. When it loads, save the ID in the types database and invoke the
+            // callback with the new prototype node's ID.
 
             // nodeTypeURI is a special URI identifying the base "node" component that is the
             // ultimate prototype of all other components. Its specification is known
@@ -455,11 +440,9 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
                 console.log( "vwf.getType: creating " + uri + " prototype" );
 
-                construct.call( this, component, prototypeID, function( id, prototypeID ) {
-                    types[uri] = id;
-this.typeIDs[uri] = id;
-this.typeURIs[id] = uri;
-                    callback && callback.call( this, id );
+                construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
+                    types[uri] = component;
+                    callback && callback.call( this, nodeID );
                 } );
 
             // For any other URI, load the document. Once it loads, call getType() to locate or
@@ -473,19 +456,15 @@ this.typeURIs[id] = uri;
                 jQuery.ajax( {
                     url: remappedURI( uri ),
                     dataType: "jsonp",
-                    // jsonpCallback: "cb",
                     success: function( component ) {
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
                             if ( ! types[uri] ) {
-                                construct.call( this, component, prototypeID, function( id, prototypeID ) {
-                                    types[uri] = id;
-this.typeIDs[uri] = id;
-this.typeURIs[id] = uri;
-                                    callback && callback.call( this, id );
+                                construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
+                                    types[uri] = component;
+                                    callback && callback.call( this, nodeID );
                                 } );
                             } else { // TODO: handle multiple loads of same type better
-                                id = types[uri];
-                                callback && callback.call( this, id );
+                                callback && callback.call( this, nodeID );
                             }
                         } )
                     },
@@ -720,7 +699,7 @@ this.typeURIs[id] = uri;
 
         this.execute = function( nodeID, scriptText, scriptType ) {
 
-            console.info( "vwf.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+            console.info( "vwf.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
 
             // Call executing() on each model. The script is considered executed after each model
             // has run.
@@ -757,11 +736,7 @@ this.typeURIs[id] = uri;
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( component, prototypeID, callback ) {
-
-            // Allocate an ID for the node. We just use an incrementing counter.
-
-            var nodeID = ++lastID;
+        var construct = function( component, nodeID, prototypeID, callback ) {
 
             console.info( "vwf.createNode " + nodeID + " " + component.source + " " + component.type );
 
@@ -862,6 +837,46 @@ this.typeURIs[id] = uri;
             }
             
             return isComponent; 
+        };
+
+        // -- wishfulComponentHash -----------------------------------------------------------------
+
+        // Generate a hash of sort from a component specification. This is part of a wild hack to
+        // assign consistent, unique IDs to nodes, regardless of the load order. This does not
+        // produce a reliable, or even a short, hash and only partially addresses the main problem.
+
+        var wishfulComponentHash = function( component ) {
+
+            var hash = "";
+
+            if ( component.extends ) hash += component.extends + ".";
+            if ( component.source ) hash += component.source + ".";
+            // if ( component.type ) hash += component.type + "."; // just adds verbosity
+
+            component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
+                hash += propertyName + ".";
+            } );
+
+            component.methods && jQuery.each( component.methods, function( methodName ) {
+                hash += methodName + ".";
+            } );
+
+            component.events && jQuery.each( component.events, function( eventName ) {
+                hash += eventName + ".";
+            } );
+
+            component.children && jQuery.each( component.children, function( childName, child_uri_or_object ) {
+                hash += childName + ".";
+            } );
+
+            component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
+                if ( script.text ) hash += script.text.length + ".";
+                if ( script.source ) hash += script.source + ".";
+                // if ( script.type ) hash += script.type + "."; // redundant and verbose for now
+            } );
+
+            return hash.slice( 0, -1 );
+
         };
 
         // -- remappedURI --------------------------------------------------------------------------

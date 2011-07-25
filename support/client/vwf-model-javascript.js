@@ -238,7 +238,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.executing = function( nodeID, scriptText, scriptType ) {
 
-        console.info( "vwf.model.javascript.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 16 ) + " " + scriptType );
+        console.info( "vwf.model.javascript.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
 
         var node = this.nodes[nodeID];
         var value;
