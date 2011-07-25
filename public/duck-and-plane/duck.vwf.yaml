@@ -1,0 +1,17 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: duck.xml
+type: model/x-glge
+children: 
+  maincamera: 
+    extends: http://vwf.example.com/types/camera
+  wallobject: 
+    extends: http://vwf.example.com/types/node3
+  duck.dae: 
+    extends: http://vwf.example.com/types/node3
+    properties: 
+      angle: 0
+      playing: false
+    scripts: 
+    - text: this.pointerClick = function() { this.playing = !this.playing }
+      type: application/javascript
