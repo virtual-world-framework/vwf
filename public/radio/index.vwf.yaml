@@ -26,6 +26,10 @@ children:
                         extends: http://vwf.example.com/types/node3
                       ic40Channel:
                         extends: http://vwf.example.com/types/node3
+                        properties:
+                          rotX: 0
+                          rotY: 0
+                          rotZ: 0
                       ic40Down:
                         extends: http://vwf.example.com/types/node3
                       ic40Monitor:

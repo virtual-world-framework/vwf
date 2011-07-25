@@ -287,6 +287,22 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         break;
                 }
             }
+
+            switch ( propertyName ) {
+
+                case "rotX":
+                    value = glgeObject.setRotX( Number( propertyValue ) );
+                    break;
+
+                case "rotY":
+                    value = glgeObject.setRotY( Number( propertyValue ) );
+                    break;
+
+                case "rotZ":
+                    value = glgeObject.setRotZ( Number( propertyValue ) );
+                    break;
+            }
+
         }
 
         return value;
@@ -325,6 +341,22 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                         break;
                 }
             }
+
+            switch ( propertyName ) {
+
+                case "rotX":
+                    value = glgeObject.getRotX();
+                    break;
+
+                case "rotY":
+                    value = glgeObject.getRotY();
+                    break;
+
+                case "rotZ":
+                    value = glgeObject.getRotZ();
+                    break;
+            }
+
         }
 
         return value;
