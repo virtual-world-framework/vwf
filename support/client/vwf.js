@@ -211,7 +211,7 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
             if ( socket ) {
 
-                socket.on( "connect", function() { console.info( "vwf.socket connected" ) } );
+                socket.on( "connect", function() { vwf.logger.info( "vwf.socket connected" ) } );
 
                 // Configure a handler to receive messages from the server.
                 
@@ -223,7 +223,7 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
                 socket.on( "message", function( message ) {
 
-                    // console.info( "vwf.socket message " + message );
+                    // this.logger.info( "vwf.socket message " + message );
 
                     // Unpack the arguments.
 
@@ -247,7 +247,7 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
                 } );
 
-                socket.on( "disconnect", function() { console.log( "vwf.socket disconnected" ) } );
+                socket.on( "disconnect", function() { vwf.logger.info( "vwf.socket disconnected" ) } );
 
                 // Start communication with the conference server. 
 
@@ -377,7 +377,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.createNode = function( component_uri_or_object, callback, childName /* TODO: hack */ ) {
 
-            console.info( "vwf.createNode " + component_uri_or_object );
+            this.logger.group( "vwf.createNode " + component_uri_or_object );
 
             // Any component specification may be provided as either a URI identifying a network
             // resource containing the specification or as an object literal that provides the data
@@ -385,10 +385,10 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
             if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
                 var component = { "extends": component_uri_or_object };
-                console.log( "vwf.createNode: creating node of type " + component_uri_or_object );
+                this.logger.info( "vwf.createNode: creating node of type " + component_uri_or_object );
             } else {
                 var component = component_uri_or_object;
-                console.log( "vwf.createNode: creating " + ( component["extends"] || nodeTypeURI ) + " literal" );
+                this.logger.info( "vwf.createNode: creating " + ( component["extends"] || nodeTypeURI ) + " literal" );
             }
 
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; wishfulComponentHash() is a gross hack.
@@ -402,6 +402,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + component_uri_or_object ); /* must log something for group level to reset in WebKit */
         };
 
         // -- getType ------------------------------------------------------------------------------
@@ -438,7 +439,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 var component = {};
                 var prototypeID = undefined;
 
-                console.log( "vwf.getType: creating " + uri + " prototype" );
+                this.logger.info( "vwf.getType: creating " + uri + " prototype" );
 
                 construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
                     types[uri] = component;
@@ -451,7 +452,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
             } else {
 
-                console.log( "vwf.getType: creating " + uri + " prototype" );
+                this.logger.info( "vwf.getType: creating " + uri + " prototype" );
 
                 jQuery.ajax( {
                     url: remappedURI( uri ),
@@ -479,7 +480,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.addChild = function( nodeID, childID, childName ) {
 
-            console.info( "vwf.addChild " + nodeID + " " + childID + " " + childName );
+            this.logger.group( "vwf.addChild " + nodeID + " " + childID + " " + childName );
 
             // Call addingChild() on each model. The child is considered added after each model has
             // run.
@@ -495,13 +496,14 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.addChild complete " + nodeID + " " + childID + " " + childName ); /* must log something for group level to reset in WebKit */
         };
 
         // -- removeChild --------------------------------------------------------------------------
 
         this.removeChild = function( nodeID, childID ) {
 
-            console.info( "vwf.removeChild " + nodeID + " " + childID );
+            this.logger.group( "vwf.removeChild " + nodeID + " " + childID );
 
             // Call removingChild() on each model. The child is considered removed after each model
             // has run.
@@ -517,6 +519,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.removeChild complete " + nodeID + " " + childID ); /* must log something for group level to reset in WebKit */
         };
 
         // -- parent -------------------------------------------------------------------------------
@@ -540,7 +543,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.children = function( nodeID ) {
 
-            console.info( "vwf.children " + nodeID );
+            this.logger.group( "vwf.children " + nodeID );
 
             // Call childrening() on each model. The return value is the union of the non-undefined
             // results.
@@ -551,6 +554,8 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 var modelChildren = model.childrening && model.childrening( nodeID ) || [];
                 Array.prototype.push.apply( children, modelChildren );
             } );
+
+            this.logger.groupEnd(); this.logger.debug( "vwf.children complete " + nodeID ); /* must log something for group level to reset in WebKit */
 
             return children; // TODO: remove duplicates, hopefully without re-ordering.
         };
@@ -578,7 +583,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.createProperty = function( nodeID, propertyName, propertyValue ) {
 
-            console.info( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
@@ -594,6 +599,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue );
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -602,7 +608,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
-            console.info( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
             // Call settingProperty() on each model. The property is considered set after each model
             // has run.
@@ -618,6 +624,8 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.setProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */
+
             return propertyValue;
         };
 
@@ -627,7 +635,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.getProperty = function( nodeID, propertyName ) {
 
-            console.info( "vwf.getProperty " + nodeID + " " + propertyName );
+            this.logger.group( "vwf.getProperty " + nodeID + " " + propertyName );
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -645,6 +653,8 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.getProperty complete " + nodeID + " " + propertyName ); /* must log something for group level to reset in WebKit */
+
             return propertyValue;
         };
 
@@ -652,7 +662,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.createMethod = function ( nodeID, methodName ) {
 
-            console.info( "vwf.createMethod " + nodeID + " " + methodName );
+            this.logger.group( "vwf.createMethod " + nodeID + " " + methodName );
 
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
@@ -668,13 +678,14 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.createdMethod && view.createdMethod( nodeID, methodName );
             });
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.createMethod complete " + nodeID + " " + methodName ); /* must log something for group level to reset in WebKit */
         };
 
         // -- callMethod ---------------------------------------------------------------------------
 
         this.callMethod = function( nodeID, methodName ) { // TODO: parameters
 
-            console.info( "vwf.callMethod " + nodeID + " " + methodName ); // TODO: parameters
+            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName ); // TODO: parameters
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -692,6 +703,8 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.calledMethod && view.calledMethod( nodeID, methodName ); // TODO: parameters
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.callMethod complete " + nodeID + " " + methodName ); /* must log something for group level to reset in WebKit */
+
             return methodValue;
         };
 
@@ -699,7 +712,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.execute = function( nodeID, scriptText, scriptType ) {
 
-            console.info( "vwf.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
+            this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
 
             // Call executing() on each model. The script is considered executed after each model
             // has run.
@@ -718,7 +731,24 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.execute complete " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType ); /* must log something for group level to reset in WebKit */
+
             return scriptValue;
+        };
+
+        // -- logging ------------------------------------------------------------------------------
+
+        this.logger = {
+
+            log: function() { console.log.apply( console, arguments ) },
+            debug: function() { console.debug.apply( console, arguments ) },
+            info: function() { console.info.apply( console, arguments ) },
+            warn: function() { console.warn.apply( console, arguments ) },
+            error: function() { console.error.apply( console, arguments ) },
+            group: function() { console.group.apply( console, arguments ) },
+            groupCollapsed: function() { console.groupCollapsed.apply( console, arguments ) },
+            groupEnd: function() { console.groupEnd.apply( console, arguments ) },
+
         };
 
         // == Private functions ====================================================================
@@ -738,7 +768,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         var construct = function( component, nodeID, prototypeID, callback ) {
 
-            console.info( "vwf.createNode " + nodeID + " " + component.source + " " + component.type );
+            this.logger.group( "vwf.construct " + nodeID + " " + component.source + " " + component.type );
 
             // Call creatingNode() on each model. The node is considered to be constructed after
             // each model has run.
@@ -806,6 +836,7 @@ childName /* TODO: hack */ );
             // This is placeholder for a call into the object to invoke its initialize() method
             // if it has a script attached that provides one.
 
+            this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + component.source + " " + component.type ); /* must log something for group level to reset in WebKit */
         }
 
         // -- objectIsComponent --------------------------------------------------------------------
