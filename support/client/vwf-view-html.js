@@ -9,7 +9,7 @@
     // vwf-view-html is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
     // It attaches to the vwf modules list as vwf.modules.html.
 
-    var module = modules.html = function( vwf, rootSelector ) {
+    modules.html = function( vwf, rootSelector ) {
 
         if ( ! vwf ) return;
 
@@ -23,8 +23,9 @@
         jQuery( rootSelector ).append( "<div class='vwf-orphanage'></div>" )
         this.rootSelector = rootSelector;
 
-        return this;
     };
+
+    var module = modules.html;
 
     // Delegate any unimplemented functions to vwf-view.
 

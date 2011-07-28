@@ -7,7 +7,7 @@
     // vwf-view-glge is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
     // It attaches to the vwf modules list as vwf.modules.glge.
 
-    var module = modules.glge = function (vwf, rootSelector) {
+    modules.glge = function (vwf, rootSelector) {
 
         if (!vwf) return;
 
@@ -25,8 +25,9 @@
 
         this.glgeColladaObjects = new Array();
 
-        return this;
     };
+
+    var module = modules.glge;
 
     // Delegate any unimplemented functions to vwf-view.
 

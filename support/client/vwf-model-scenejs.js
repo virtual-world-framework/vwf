@@ -7,7 +7,7 @@
     // vwf-model is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It
     // attaches to the vwf modules list as vwf.modules.scenejs.
 
-    var module = modules.scenejs = function( vwf ) {
+    modules.scenejs = function( vwf ) {
 
         if ( ! vwf ) return;
 
@@ -15,8 +15,9 @@
 
         modules.model.call( this, vwf );
 
-        return this;
     };
+
+    var module = modules.scenejs;
 
     // Delegate any unimplemented functions to vwf-model.
 

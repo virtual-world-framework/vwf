@@ -21,7 +21,7 @@
     // (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It attaches to the vwf modules list
     // as vwf.modules.model.
 
-    var module = modules.model = function( vwf ) {
+    modules.model = function( vwf ) {
 
         if ( ! vwf ) return;
 
@@ -29,8 +29,9 @@
 
         this.vwf = vwf;
 
-        return this;
     };
+
+    var module = modules.model;
 
     // == Stimulus API =============================================================================
 
