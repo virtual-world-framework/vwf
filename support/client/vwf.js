@@ -143,15 +143,29 @@
                 // Create and attach each configured model.
 
                 jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
+
                     var model = vwf.modules[modelName];
-                    model && vwf.models.push( model.apply( new model(), [ vwf ].concat( modelArguments || [] ) ) );
+
+                    if ( model ) {
+                        var instance = new model();
+                        model.apply( instance, [ vwf ].concat( modelArguments || [] ) );
+                        vwf.models.push( instance );
+                    }
+
                 } );
 
                 // Create and attach each configured view.
 
                 jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
+
                     var view = vwf.modules[viewName];
-                    view && vwf.views.push( view.apply( new view(), [ vwf ].concat( viewArguments || [] ) ) );
+
+                    if ( view ) {
+                        var instance = new view();
+                        view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
+                        vwf.views.push( instance );
+                    }
+
                 } );
 
                 // Load the world.

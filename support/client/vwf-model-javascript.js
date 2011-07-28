@@ -8,7 +8,7 @@
     // vwf-model is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It
     // attaches to the vwf modules list as vwf.modules.javascript.
 
-    var module = modules.javascript = function( vwf ) {
+    modules.javascript = function( vwf ) {
 
         if ( ! vwf ) return;
 
@@ -21,8 +21,9 @@
         this.root = undefined;
         this.nodes = {}; // maps id => new type()
 
-        return this;
     };
+
+    var module = modules.javascript;
 
     // Delegate any unimplemented functions to vwf-model.
 
