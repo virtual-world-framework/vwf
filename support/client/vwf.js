@@ -408,6 +408,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; wishfulComponentHash() is a gross hack.
 
             var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName; // TODO: was wishfulComponentHash( component );
+nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" );
 
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
@@ -430,6 +431,7 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
         this.getType = function( uri, callback ) {
 
             var nodeID = uri; // TODO: hash uri => nodeID to shorten for faster lookups?
+nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" );
 
             // If the URI is in the database, invoke the callback with the ID of the previously-
             // loaded prototype node.
