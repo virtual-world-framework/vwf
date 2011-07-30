@@ -5,6 +5,8 @@ class Server < Sinatra::Base
   configure do
 
     set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
+    set :static, false # we serve out of :public, but it's part of the Cascade
+
     set :client, lambda { File.join( settings.root, "support", "client" ) }
 
     set :component_template_types, [ :json, :yaml ]  # get from Component?
