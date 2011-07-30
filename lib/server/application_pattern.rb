@@ -58,6 +58,10 @@ class Server::ApplicationPattern
       segments.shift
     elsif extension = component?( File.join( public_path, "index.vwf" ) )  # TODO: configuration parameter for default application name
       application = "index.vwf"  # TODO: configuration parameter for default application name
+    elsif extension = component?( File.join( public_path, "index.dae" ) )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
+      application = "index.dae"  # TODO: configuration parameter for default application name
+    elsif extension = component?( File.join( public_path, "index.unity3d" ) )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
+      application = "index.unity3d"  # TODO: configuration parameter for default application name
     end
 
     if extension
@@ -98,9 +102,15 @@ private
   end
 
   def component? path
-    path =~ /\.vwf$/ && @template_extensions.any? do |template_extension|
-      if file? path + template_extension
-        break template_extension
+    if path =~ /\.vwf$/
+      @template_extensions.any? do |template_extension|
+        if file? path + template_extension
+          break template_extension
+        end
+      end
+    elsif path =~ /\.(dae|unity3d)$/  # TODO: test  # TODO: or any other data type with automatic mapping from data type to component type  # TODO: sync with server mime types and mappings in vwf.js normalizedComponent()
+      if file? path
+        ""
       end
     end
   end
