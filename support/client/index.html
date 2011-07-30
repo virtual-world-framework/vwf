@@ -14,6 +14,10 @@
     <!-- The Virtual World Framework makes use of the jQuery library.                            -->
 
     <script type="text/javascript" src="jquery-1.4.4.js"></script>
+	<script src="ui/development-bundle/ui/jquery.ui.core.js"></script> 
+	<script src="ui/development-bundle/ui/jquery.ui.widget.js"></script> 
+	<script src="ui/development-bundle/ui/jquery.ui.mouse.js"></script> 
+	<script src="ui/development-bundle/ui/jquery.ui.slider.js"></script> 
 
     <script type="text/javascript" src="socket.io/socket.io.js"></script>
 
@@ -115,7 +119,7 @@
 
             {
                 glge: "#vwf-root",      // invokes: new vwf.modules.glge( vwf, "#vwf-root" )
-                // html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
+                html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
             }
 
         );
@@ -145,6 +149,7 @@
     </script>
 
     <link rel="stylesheet" href="index.css" type="text/css" />
+	<link rel="stylesheet" href="ui/development-bundle/themes/base/jquery.ui.all.css"> 
 
   </head>
 
@@ -155,8 +160,6 @@
     <!-- instructed where to attach their content.                                               -->
 
     <h1>Virtual World Framework</h1>
-
-
 
     <!-- TODO: temporarily patched in from Unity's publish-to-html source; should be generated on load by vwf-model-unity.js -->
 
