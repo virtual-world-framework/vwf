@@ -124,27 +124,27 @@
 
         );
 
-        jQuery( window.document ).ready( function() {
-
-            if ( window.location.search ) {
-
-                jQuery( "#world-selection" ).hide();
-
-            } else {
-
-                $( ".world-option" ).change( function() {
-                    jQuery( "#world-choice" ).val( jQuery( this ).val() );
-                } );
-
-                $( "#world-selection" ).submit( function () {
-                    window.location.href = window.location.protocol + "//" + window.location.host +
-                        window.location.pathname + "?world=" + jQuery( "#world-choice" ).val();
-                    return false;
-                } );
-
-            }
-
-        } );
+        // jQuery( window.document ).ready( function() {
+        // 
+        //     if ( window.location.search ) {
+        // 
+        //         jQuery( "#world-selection" ).hide();
+        // 
+        //     } else {
+        // 
+        //         $( ".world-option" ).change( function() {
+        //             jQuery( "#world-choice" ).val( jQuery( this ).val() );
+        //         } );
+        // 
+        //         $( "#world-selection" ).submit( function () {
+        //             window.location.href = window.location.protocol + "//" + window.location.host +
+        //                 window.location.pathname + "?world=" + jQuery( "#world-choice" ).val();
+        //             return false;
+        //         } );
+        // 
+        //     }
+        // 
+        // } );
 
     </script>
 
@@ -180,7 +180,7 @@
     <!-- Show a world selection form. The form is hidden if window.location contains a world     -->
     <!-- specification.                                                                          -->
 
-    <form id="world-selection">
+    <!-- form id="world-selection">
 
         <table>
             <tr>
@@ -201,7 +201,7 @@
             </tr>
         </table>
 
-    </form>
+    </form -->
 
     <!-- The "html" view has been configured to render to "#vwf-listing".                        -->
 
