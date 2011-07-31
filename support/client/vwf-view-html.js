@@ -17,10 +17,11 @@
 
         modules.view.call(this, vwf);
 
-        jQuery(rootSelector).append("<h2>Globals</h2>")
-        jQuery(rootSelector).append("<div class='vwf-root'></div>")
-        jQuery(rootSelector).append("<h2>Types</h2>")
-        jQuery(rootSelector).append("<div class='vwf-orphanage'></div>")
+        jQuery(rootSelector).append("<h2>Globals</h2>");
+        jQuery(rootSelector).append("<div class='vwf-root'></div>");
+        jQuery(rootSelector).append("<h2>Types</h2>");
+        jQuery(rootSelector).append("<div class='vwf-orphanage'></div>");
+
         this.rootSelector = rootSelector;
 
     };
