@@ -39,47 +39,22 @@
     <!-- simulation to a WebGL scene manager.                                                    -->
 
     <script type="text/javascript" src="vwf-model.js"></script>
+
     <script type="text/javascript" src="vwf-model-javascript.js"></script>
     <script type="text/javascript" src="vwf-model-scenejs.js"></script>
+
     <script type="text/javascript" src="vwf-model-unity.js"></script>
+    <script type="text/javascript" src="http://webplayer.unity3d.com/download_webplayer-3.x/3.0/uo/UnityObject.js"></script>
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
 
     <script type="text/javascript" src="vwf-view.js"></script>
-    <script type="text/javascript" src="vwf-view-glge.js"></script>
-    <script type="text/javascript" src="vwf-view-html.js"></script>
 
+    <script type="text/javascript" src="vwf-view-glge.js"></script>
     <script type="text/javascript" src="vwf-view-glge/glge-compiled.js"></script> 
 
-
-
-    <!-- TODO: temporarily patched in from Unity's publish-to-html source; should be generated on load by vwf-model-unity.js -->
-
-    <script type="text/javascript" src="http://webplayer.unity3d.com/download_webplayer-3.x/3.0/uo/UnityObject.js"></script>
-
-    <script type="text/javascript">
-
-    function GetUnity() {
-        if (typeof unityObject != "undefined") {
-            return unityObject.getObjectById("unityPlayer");
-        }
-        return null;
-    }
-
-    if (typeof unityObject != "undefined") {
-        unityObject.embedUnity("unityPlayer", "WebPlayer.unity3d", 600, 450);
-            
-    }
-
-    </script>
-
-
-
-
-
-
-
+    <script type="text/javascript" src="vwf-view-html.js"></script>
 
     <!-- With the scripts loaded, we must initialize the framework. vwf.initialize() accepts     -->
     <!-- three parameters: a world specification, model configuration parameters, and view       -->
@@ -111,7 +86,7 @@
 
             {
                 javascript: [],         // invokes: new vwf.modules.javascript( vwf )
-                unity: GetUnity(),      // invokes: new vwf.modules.unity( vwf, GetUnity() )  // TODO: resolve after ready()
+                unity: "#vwf-root",     // invokes: new vwf.modules.unity( vwf, "#vwf-root" )  // TODO: resolve after ready()
             },
 
             // These are the view configurations. They use the same format as the model
@@ -160,18 +135,6 @@
     <!-- instructed where to attach their content.                                               -->
 
     <h1>Virtual World Framework</h1>
-
-    <!-- TODO: temporarily patched in from Unity's publish-to-html source; should be generated on load by vwf-model-unity.js -->
-
-    <div id="unityPlayer">
-        <div class="missing">
-            <a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now!">
-                <img alt="Unity Web Player. Install now!" src="http://webplayer.unity3d.com/installation/getunity.png" width="193" height="63" />
-            </a>
-        </div>
-    </div>
-
-
 
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
