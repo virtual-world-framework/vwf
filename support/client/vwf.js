@@ -400,7 +400,10 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
         this.createNode = function( component_uri_or_object, callback, childName /* TODO: hack */ ) {
 
-            this.logger.group( "vwf.createNode " + component_uri_or_object );
+            this.logger.group( "vwf.createNode " + (
+                typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ?
+                    component_uri_or_object : JSON.stringify( component_uri_or_object )
+            ) );
 
             // Any component specification may be provided as either a URI identifying a network
             // resource containing the specification or as an object literal that provides the data
@@ -408,16 +411,16 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
 
             if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
                 var component = { "extends": component_uri_or_object };
-                this.logger.info( "vwf.createNode: creating node of type " + component_uri_or_object );
             } else {
                 var component = component_uri_or_object;
-                this.logger.info( "vwf.createNode: creating " + ( component["extends"] || nodeTypeURI ) + " literal" );
             }
 
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; wishfulComponentHash() is a gross hack.
 
             var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName; // TODO: was wishfulComponentHash( component );
 nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" );
+
+            this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + nodeID );
 
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
@@ -464,7 +467,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" );
                 var component = {};
                 var prototypeID = undefined;
 
-                this.logger.info( "vwf.getType: creating " + uri + " prototype" );
+                this.logger.info( "vwf.getType: creating type " + uri );
 
                 construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
                     types[uri] = component;
@@ -477,7 +480,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" );
 
             } else {
 
-                this.logger.info( "vwf.getType: creating " + uri + " prototype" );
+                this.logger.info( "vwf.getType: creating type " + uri );
 
                 jQuery.ajax( {
                     url: remappedURI( uri ),
