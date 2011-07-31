@@ -113,16 +113,14 @@
             // world specification object if it's valid JSON, otherwise keep the query string and
             // assume it's a URI.
 
-            var world = jQuery.getQueryString( "world" );
-
-            try { world = jQuery.parseJSON( world ) || world || {}; } catch( e ) { }
+            var application = getQueryString( "application" ) || getQueryString( "world" ); // TODO: "world" is old; remove eventually
 
             // Parse the function parameters. If the first parameter is a string or contains
             // component properties, then treat it as the world specification. Otherwise, fall back
-            // to the "world" parameter in the query string.
+            // to the "application" parameter in the query string.
 
             if ( typeof args[0] == "string" || args[0] instanceof String || objectIsComponent( args[0] ) ) {
-                world = args.shift();
+                application = args.shift();
             }
 
             // Shift off the parameter containing the model argument lists.
@@ -174,7 +172,7 @@
 
                 // Load the world.
 
-                vwf.ready( world );
+                vwf.ready( application );
 
             } );
 
@@ -182,7 +180,7 @@
 
         // -- ready --------------------------------------------------------------------------------
 
-        this.ready = function( component_uri_or_object ) {
+        this.ready = function( component_uri_or_json_or_object ) {
 
             // Connect to the conference server. This implementation uses the socket.io library,
             // which communicates using a channel back to the server that provided the client
@@ -278,9 +276,9 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
                 // and its children, and their prototypes and children, flesh out the entire world.
 
                 // TODO: add note that this is only for a self-determined world; with socket, wait for reflection server to tell us.
-                // TODO: maybe depends on component_uri_or_object too; when to override and not connect to reflection server?
+                // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
-                this.createNode( component_uri_or_object, function( rootID, rootTypeID ) {
+                this.createNode( component_uri_or_json_or_object, function( rootID, rootTypeID ) {
                     vwf.addChild( 0, rootID, undefined );
                 } );
 
@@ -331,7 +329,7 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 // TODO: delegate parsing and validation to each action.
 
             var time = Number( fields.shift() );
-if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_uri_or_object" correctly
+if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_uri_or_json_or_object" correctly
             var nodeID = fields.shift();
             var actionName = fields.shift();
 
@@ -343,7 +341,7 @@ if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_
 if ( actionName != "createNode" )
             this[actionName] && this[actionName].apply( this, [ nodeID ].concat( fields ) );
 else
-this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to parse "t createNode component_uri_or_object" correctly
+this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to parse "t createNode component_uri_or_json_or_object" correctly
             
         };
 
@@ -398,22 +396,18 @@ this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to par
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( component_uri_or_object, callback, childName /* TODO: hack */ ) {
+        this.createNode = function( component_uri_or_json_or_object, callback, childName /* TODO: hack */ ) {
 
             this.logger.group( "vwf.createNode " + (
-                typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ?
-                    component_uri_or_object : JSON.stringify( component_uri_or_object )
+                typeof component_uri_or_json_or_object == "string" || component_uri_or_json_or_object instanceof String ?
+                    component_uri_or_json_or_object : JSON.stringify( component_uri_or_json_or_object )
             ) );
 
             // Any component specification may be provided as either a URI identifying a network
             // resource containing the specification or as an object literal that provides the data
             // directly.
 
-            if ( typeof component_uri_or_object == "string" || component_uri_or_object instanceof String ) {
-                var component = { "extends": component_uri_or_object };
-            } else {
-                var component = component_uri_or_object;
-            }
+            var component = normalizedComponent( component_uri_or_json_or_object );
 
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; wishfulComponentHash() is a gross hack.
 
@@ -435,7 +429,7 @@ if ( ! callback ) { // TODO: this is a hack to get the multiuser application cre
                 construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + component_uri_or_object ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + component_uri_or_json_or_object ); /* must log something for group level to reset in WebKit */
         };
 
         // -- getType ------------------------------------------------------------------------------
@@ -848,8 +842,8 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             // child's component specification, then once loaded, call addChild() to attach the
             // new node as a child. addChild() delegates to the models and views as before.
 
-            component.children && jQuery.each( component.children, function( childName, child_uri_or_object ) {
-                vwf.createNode( child_uri_or_object, function( childID, childTypeID ) {
+            component.children && jQuery.each( component.children, function( childName, child_uri_or_json_or_object ) {
+                vwf.createNode( child_uri_or_json_or_object, function( childID, childTypeID ) {
                     vwf.addChild( nodeID, childID, childName );
                 },
 childName /* TODO: hack */ );
@@ -931,7 +925,7 @@ childName /* TODO: hack */ );
                 hash += eventName + ".";
             } );
 
-            component.children && jQuery.each( component.children, function( childName, child_uri_or_object ) {
+            component.children && jQuery.each( component.children, function( childName, child_uri_or_json_or_object ) {
                 hash += childName + ".";
             } );
 
@@ -943,6 +937,58 @@ childName /* TODO: hack */ );
 
             return hash.slice( 0, -1 );
 
+        };
+
+        // -- normalizedComponent ------------------------------------------------------------------
+
+        var normalizedComponent = function( component ) {
+
+            // Decode if JSON.
+
+            if ( typeof component == "string" || component instanceof String ) {
+                try { component = JSON.parse( component ) } catch( e ) { }
+            }
+
+            // Convert a component URI to an instance of that type. Convert an asset reference to
+            // an untyped reference to that asset.
+
+            if ( typeof component == "string" || component instanceof String ) { // TODO: validate URI
+                component = component.match( /\.vwf$/ ) ? { "extends": component } : { source: component }; // TODO: detect component from mime-type instead of extension?
+            }
+
+            // Fill in the mime type from the source specification if not provided.
+
+            if ( component.source && ! component.type ) { // TODO: validate component
+
+                var match = component.source.match( /\.([^.]*)$/ ); // TODO: get type from mime-type (from server if remote, from os if local, or (?) from this internal table otherwise)
+
+                switch ( match[1] ) {
+                    case "unity3d":
+                        component.type = "application/vnd.unity";
+                        break;
+                    case "dae":
+                        component.type = "model/vnd.collada+xml";
+                        break;
+                }
+
+            }
+
+            // Fill in the component type from the mime type if not provided.
+
+            if ( component.type && ! component.extends ) { // TODO: load from a server configuration file
+
+                switch ( component.type ) {
+                    case "application/vnd.unity":
+                        component.extends = "http://vwf.example.com/types/scene";
+                        break;
+                    case "model/vnd.collada+xml":
+                        component.extends = "http://vwf.example.com/types/glge";
+                        break;
+                }
+
+            }
+
+            return component;
         };
 
         // -- remappedURI --------------------------------------------------------------------------
