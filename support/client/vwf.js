@@ -271,15 +271,20 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 
                 socket.connect();
 
+            } else {
+
+                // Load the world. The world is a rooted in a single node constructed here as an
+                // instance of the component passed to initialize(). That component, its prototype(s),
+                // and its children, and their prototypes and children, flesh out the entire world.
+
+                // TODO: add note that this is only for a self-determined world; with socket, wait for reflection server to tell us.
+                // TODO: maybe depends on component_uri_or_object too; when to override and not connect to reflection server?
+
+                this.createNode( component_uri_or_object, function( rootID, rootTypeID ) {
+                    vwf.addChild( 0, rootID, undefined );
+                } );
+
             }
-
-            // Load the world. The world is a rooted in a single node constructed here as an
-            // instance of the component passed to initialize(). That component, its prototype(s),
-            // and its children, and their prototypes and children, flesh out the entire world.
-
-            this.createNode( component_uri_or_object, function( rootID, rootTypeID ) {
-                vwf.addChild( 0, rootID, undefined );
-            } );
 
         };
 
