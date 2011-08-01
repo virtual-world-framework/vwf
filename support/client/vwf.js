@@ -962,13 +962,17 @@ childName /* TODO: hack */ );
 
                 var match = component.source.match( /\.([^.]*)$/ ); // TODO: get type from mime-type (from server if remote, from os if local, or (?) from this internal table otherwise)
 
-                switch ( match[1] ) {
-                    case "unity3d":
-                        component.type = "application/vnd.unity";
-                        break;
-                    case "dae":
-                        component.type = "model/vnd.collada+xml";
-                        break;
+                if ( match ) {
+
+                    switch ( match[1] ) {
+                        case "unity3d":
+                            component.type = "application/vnd.unity";
+                            break;
+                        case "dae":
+                            component.type = "model/vnd.collada+xml";
+                            break;
+                    }
+
                 }
 
             }
