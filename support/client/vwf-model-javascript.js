@@ -1,6 +1,6 @@
-( function( modules ) {
+( function( modules, namespace ) {
 
-    console.info( "loading vwf.model.javascript" );
+    console.info( "loading " + namespace );
 
     // vwf-model-javascript.js is a placeholder for the JavaScript object interface to the
     // simulation.
@@ -8,13 +8,14 @@
     // vwf-model is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It
     // attaches to the vwf modules list as vwf.modules.javascript.
 
-    modules.javascript = function( vwf ) {
+    var module = modules[namespace.split(".").pop()] = function( vwf ) {
 
         if ( ! vwf ) return;
 
-        console.info( "creating vwf.model.javascript" );
+        console.info( "creating " + namespace );
 
         modules.model.call( this, vwf );
+        this.namespace = namespace;
 
         this.types = {}; // maps id => function() { }
 
@@ -22,8 +23,6 @@
         this.nodes = {}; // maps id => new type()
 
     };
-
-    var module = modules.javascript;
 
     // Delegate any unimplemented functions to vwf-model.
 
@@ -54,7 +53,7 @@
 
     module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
 
-        console.info( "vwf.model.javascript.creatingNode " + nodeID + " " +
+        console.info( namespace + ".creatingNode " + nodeID + " " +
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
 
         var type = nodeExtendsID ? this.types[nodeExtendsID] : Object;
@@ -90,7 +89,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.addingChild = function( nodeID, childID, childName ) {
 
-        console.info( "vwf.model.javascript.addingChild " + nodeID + " " + childID + " " + childName );
+        console.info( namespace + ".addingChild " + nodeID + " " + childID + " " + childName );
 
         var node = this.nodes[nodeID];
         var child = this.nodes[childID];
@@ -111,7 +110,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.parenting = function( nodeID ) {  // TODO: move to a backstop model
 
-        console.info( "vwf.model.javascript.parenting " + nodeID );
+        console.info( namespace + ".parenting " + nodeID );
 
         var node = this.nodes[nodeID];
 
@@ -122,7 +121,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.childrening = function( nodeID ) {  // TODO: move to a backstop model
 
-        console.info( "vwf.model.javascript.childrening " + nodeID );
+        console.info( namespace + ".childrening " + nodeID );
 
         var node = this.nodes[nodeID];
 
@@ -135,7 +134,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.naming = function( nodeID ) {  // TODO: move to a backstop model
 
-        console.info( "vwf.model.javascript.naming " + nodeID );
+        console.info( namespace + ".naming " + nodeID );
 
         var node = this.nodes[nodeID];
 
@@ -146,7 +145,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
 
-        console.info( "vwf.model.javascript.creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        console.info( namespace + ".creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
 
@@ -180,7 +179,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
 
-        console.info( "vwf.model.javascript.settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        console.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
         var property = node.properties[propertyName]; // TODO: search recursively through prototypes and copy on write.
@@ -201,7 +200,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.gettingProperty = function( nodeID, propertyName, propertyValue ) {
 
-        console.info( "vwf.model.javascript.gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        console.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
         var property = node.properties[propertyName] || ( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] ); // TODO: search recursively through prototypes.
@@ -224,7 +223,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.callingMethod = function( nodeID, methodName ) { // TODO: parameters
 
-        console.info( "vwf.model.javascript.callingMethod " + nodeID + " " + methodName ); // TODO: parameters
+        console.info( namespace + ".callingMethod " + nodeID + " " + methodName ); // TODO: parameters
 
         var node = this.nodes[nodeID];
         // var method = ... verify it's in node.methods[], search prototypes, etc.
@@ -239,7 +238,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
     module.prototype.executing = function( nodeID, scriptText, scriptType ) {
 
-        console.info( "vwf.model.javascript.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
+        console.info( namespace + ".executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
 
         var node = this.nodes[nodeID];
         var value;
@@ -288,4 +287,4 @@ node.id = nodeID; // TODO: move to a backstop model
 
     };
 
-} ) ( window.vwf.modules );
+} ) ( window.vwf.modules, "vwf.model.javascript" );
