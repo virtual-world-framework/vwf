@@ -1,23 +1,22 @@
-( function( modules ) {
+( function( modules, namespace ) {
 
-    console.info( "loading vwf.model.scenejs" );
+    console.info( "loading " + namespace );
 
     // vwf-model-scenejs.js is a placeholder for a 3-D scene manager.
     //
     // vwf-model is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It
     // attaches to the vwf modules list as vwf.modules.scenejs.
 
-    modules.scenejs = function( vwf ) {
+    var module = modules[namespace.split(".").pop()] = function( vwf ) {
 
         if ( ! vwf ) return;
 
-        console.info( "creating vwf.model.scenejs" );
+        console.info( "creating " + namespace );
 
         modules.model.call( this, vwf );
+        this.namespace = namespace;
 
     };
-
-    var module = modules.scenejs;
 
     // Delegate any unimplemented functions to vwf-model.
 
@@ -30,20 +29,20 @@
     // -- creatingNode -----------------------------------------------------------------------------
 
     module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
-        console.info( "vwf.model.scenejs.creatingNode " + nodeID + " " + 
+        console.info( namespace + ".creatingNode " + nodeID + " " + 
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
     };
 
     // -- settingProperty --------------------------------------------------------------------------
 
     module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.scenejs.settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        console.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
     // -- gettingProperty --------------------------------------------------------------------------
 
     module.prototype.gettingProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.scenejs.gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        console.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
-} ) ( window.vwf.modules );
+} ) ( window.vwf.modules, "vwf.model.scenejs" );

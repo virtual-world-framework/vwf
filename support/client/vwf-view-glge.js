@@ -1,19 +1,20 @@
-(function (modules) {
+(function (modules, namespace) {
 
-    console.info("loading vwf.view.glge");
+    console.info("loading " + namespace);
 
     // vwf-view-glge.js is a placeholder for an GLGE WebGL view of the scene.
     //
     // vwf-view-glge is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
     // It attaches to the vwf modules list as vwf.modules.glge.
 
-    modules.glge = function (vwf, rootSelector) {
+    var module = modules[namespace.split(".").pop()] = function(vwf, rootSelector) {
 
         if (!vwf) return;
 
-        console.info("creating vwf.view.glge");
+        console.info("creating " + namespace);
 
         modules.view.call(this, vwf);
+        this.namespace = namespace;
 
         this.rootSelector = rootSelector;
 
@@ -26,8 +27,6 @@
         this.glgeColladaObjects = new Array();
 
     };
-
-    var module = modules.glge;
 
     // Delegate any unimplemented functions to vwf-view.
 
@@ -42,7 +41,7 @@
 
     module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
-        console.info("vwf.view.glge.createdNode " + nodeID + " " +
+        console.info(namespace + ".createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
         if (nodeExtendsID == "http://vwf.example.com/types/glge") {
@@ -200,7 +199,7 @@
 
     module.prototype.addedChild = function (nodeID, childID, childName) {
 
-        console.info("vwf.view.glge.addedChild " + nodeID + " " + childID + " " + childName);
+        console.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
         var child = this.nodes[childID];
 
@@ -214,7 +213,7 @@
 
     module.prototype.removedChild = function (nodeID, childID) {
 
-        console.info("vwf.view.glge.removedChild " + nodeID + " " + childID);
+        console.info(namespace + ".removedChild " + nodeID + " " + childID);
 
     };
 
@@ -222,7 +221,7 @@
 
     module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.glge.createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        console.info(namespace + ".createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
     };
 
@@ -232,7 +231,7 @@
 
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.glge.satProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        console.info(namespace + ".satProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
@@ -313,7 +312,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 
     module.prototype.gotProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.glge.gotProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        console.info(namespace + ".gotProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value;
@@ -830,4 +829,4 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     };
 
 
-})(window.vwf.modules);
+})(window.vwf.modules, "vwf.view.glge");

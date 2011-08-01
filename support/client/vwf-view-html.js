@@ -1,6 +1,6 @@
-(function (modules) {
+(function (modules, namespace) {
 
-    console.info("loading vwf.view.html");
+    console.info("loading " + namespace);
 
     // vwf-view-html.js is a placeholder for an HTML view of the simulation state. It is a stand-in
     // for any number of potential UI elements, including WebGL renderings, traditional UI controls,
@@ -9,13 +9,14 @@
     // vwf-view-html is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
     // It attaches to the vwf modules list as vwf.modules.html.
 
-    modules.html = function (vwf, rootSelector) {
+    var module = modules[namespace.split(".").pop()] = function(vwf, rootSelector) {
 
         if (!vwf) return;
 
-        console.info("creating vwf.view.html");
+        console.info("creating " + namespace);
 
         modules.view.call(this, vwf);
+        this.namespace = namespace;
 
         jQuery(rootSelector).append("<h2>Globals</h2>");
         jQuery(rootSelector).append("<div class='vwf-root'></div>");
@@ -25,8 +26,6 @@
         this.rootSelector = rootSelector;
 
     };
-
-    var module = modules.html;
 
     // Delegate any unimplemented functions to vwf-view.
 
@@ -42,7 +41,7 @@
 
     module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
-        console.info("vwf.view.html.createdNode " + nodeID + " " +
+        console.info(namespace + ".createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
         var nodeQuery = jQuery(".vwf-orphanage").append(
@@ -68,7 +67,7 @@
 
     module.prototype.addedChild = function (nodeID, childID, childName) {
 
-        console.info("vwf.view.html.addedChild " + nodeID + " " + childID + " " + childName);
+        console.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
         var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: const for root id
         var containerQuery = nodeID == 0 ? nodeQuery : nodeQuery.children(".vwf-children");
@@ -97,7 +96,7 @@
 
     module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.html.createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        console.info(namespace + ".createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: const for root id
         var containerQuery = nodeQuery.children(".vwf-properties");
@@ -190,7 +189,7 @@
 
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.html.satProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        console.info(namespace + ".satProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: symbol for global id
         var propertyQuery = nodeQuery.children(".vwf-properties").children("#view-html-" + nodeID + "-" + propertyName);
@@ -208,7 +207,7 @@
 
     };
 
-})(window.vwf.modules);
+})(window.vwf.modules, "vwf.view.html");
 
 
 
