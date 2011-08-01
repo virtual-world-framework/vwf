@@ -9,7 +9,7 @@
     // vwf-view-html is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
     // It attaches to the vwf modules list as vwf.modules.html.
 
-    var module = modules[namespace.split(".").pop()] = function(vwf, rootSelector) {
+    var module = modules[namespace.split(".").pop()] = function (vwf, rootSelector) {
 
         if (!vwf) return;
 
@@ -114,19 +114,21 @@
 
         }
 
+
+
         var propertyQuery = containerQuery.append(
             "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
                 "<p class='vwf-label'>" + propertyName + ": " +
                     "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
-                    // Demo hack 2
-                    // "<input type='text' class='vwf-control'></input>" +
+        // Demo hack 2
+        // "<input type='text' class='vwf-control'></input>" +
                 "</p>" +
-                // Demo hack 3
+        // Demo hack 3
                 "<div class='vwf-control-slider'></div>" +
             "</div>"
         ).children(":last");
 
-var view = this;
+        var view = this;
 
         // Demo hack 1: increment by 1 on click
 
@@ -153,11 +155,18 @@ var view = this;
 
         // Demo hack 3: attach a slider
 
-        propertyQuery.find( ".vwf-control-slider" ).slider( {
-            slide: function( event, ui ) {
-                view.setProperty( nodeID, propertyName, Number( ui.value ) );
-            }
-        } );
+        if (propertyName == "angle") {
+            propertyQuery.find(".vwf-control-slider").slider({
+                range: "min",
+                value: 0,
+                min: 0,
+                max: 360,                
+                slide: function (event, ui) {
+                    console.info("setProperty " + nodeID + "  " + propertyName);
+                    view.setProperty(nodeID, propertyName, Number(ui.value));
+                }
+            });
+        }
 
     };
 
@@ -183,7 +192,9 @@ var view = this;
 
         // Demo hack 3
 
-        propertyQuery.find( ".vwf-control-slider" ).slider( "value", Number( propertyValue ) );
+        if (propertyName == "angle") {
+            propertyQuery.find(".vwf-control-slider").slider("value", Number(propertyValue));
+        }
 
     };
 
