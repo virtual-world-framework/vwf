@@ -30,7 +30,6 @@
     // Delegate any unimplemented functions to vwf-view.
 
     module.prototype = new modules.view();
-    var sliderIndex = 1;
 
     // == Response API =============================================================================
 
@@ -115,50 +114,19 @@
 
         }
 
-        var view = this;
-        var propertyQuery;
+        var propertyQuery = containerQuery.append(
+            "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                "<p class='vwf-label'>" + propertyName + ": " +
+                    "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
+                    // Demo hack 2
+                    // "<input type='text' class='vwf-control'></input>" +
+                "</p>" +
+                // Demo hack 3
+                "<div class='vwf-control-slider'></div>" +
+            "</div>"
+        ).children(":last");
 
-        if (propertyName == "angle") {
-            var sliderId = "slider-range-min" + sliderIndex;
-            propertyQuery = containerQuery.append(
-                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
-                    "<p class='vwf-label'>" + propertyName + ": " +
-                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
-                        "<style>" +
-                        "#demo-frame > div.demo { padding: 10px !important; } " +
-                        "</style>" +
-                        "<script>" +
-                        "$(function() {" +
-                            "$( '#" + sliderId + "').slider({" +
-                                "range: 'min'," +
-                                "value:" + JSON.stringify(propertyValue) + "," +
-                                "min: 1," +
-                                "max: 360," +
-                                "slide: function( event, ui ) { " +
-                                "   $( '#amount' ).val( '$' + ui.value ); " +
-            //                    "   var nodeID = Number(jQuery(this).parents('.vwf-node')[0].id.split('-').pop()) || 0; " +
-            //                    "   view.setProperty(nodeID, propertyName, Number( ui.value ) ); " +
-                                "}" +
-                            "});" +
-                            "$( '#amount' ).val( '$' + $( '#" + sliderId + "' ).slider( 'value' ) ); " +
-                        "});" +
-                        "</script>" +
-                    "</p>" +
-                    "<div id='" + sliderId + "' style='width:800px; margin:10px;'></div>" +
-                "</div>"
-            ).children(":last");
-            sliderIndex++;
-        } else {
-            propertyQuery = containerQuery.append(
-                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
-                    "<p class='vwf-label'>" + propertyName + ": " +
-                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
-            // Demo hack 2
-            // "<input type='text' class='vwf-control'></input>" +
-                    "</p>" +
-                "</div>"
-            ).children(":last");
-        }
+var view = this;
 
         // Demo hack 1: increment by 1 on click
 
@@ -183,6 +151,14 @@
         //     view.setProperty( nodeID, propertyName, jQuery(this).val() ); // TODO: json exceptions?
         // } );
 
+        // Demo hack 3: attach a slider
+
+        propertyQuery.find( ".vwf-control-slider" ).slider( {
+            slide: function( event, ui ) {
+                view.setProperty( nodeID, propertyName, Number( ui.value ) );
+            }
+        } );
+
     };
 
     // -- satProperty ------------------------------------------------------------------------------
@@ -204,6 +180,10 @@
 
         // controlQuery.val() == propertyValue && typeof controlQuery.val() == typeof propertyValue ||
         //     controlQuery.val( propertyValue );
+
+        // Demo hack 3
+
+        propertyQuery.find( ".vwf-control-slider" ).slider( "value", Number( propertyValue ) );
 
     };
 
