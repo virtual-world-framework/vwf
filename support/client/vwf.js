@@ -1,6 +1,6 @@
 ( function( window ) {
 
-    console.info( "loading vwf" );
+    window.console && console.info && console.info( "loading vwf" );
 
     // vwf.js is the main Virtual World Framework manager. It is constructed as a JavaScript module
     // (http://www.yuiblog.com/blog/2007/06/12/module-pattern) to isolate it from the rest of the
@@ -10,7 +10,7 @@
 
     window.vwf = new function() {
 
-        console.info( "creating vwf" );
+        window.console && console.info && console.info( "creating vwf" );
 
         // == Public variables =====================================================================
 
@@ -768,14 +768,14 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
         this.logger = {
 
-            log: function() { console.log.apply( console, arguments ) },
-            debug: function() { console.debug.apply( console, arguments ) },
-            info: function() { console.info.apply( console, arguments ) },
-            warn: function() { console.warn.apply( console, arguments ) },
-            error: function() { console.error.apply( console, arguments ) },
-            group: function() { console.group.apply( console, arguments ) },
-            groupCollapsed: function() { console.groupCollapsed.apply( console, arguments ) },
-            groupEnd: function() { console.groupEnd.apply( console, arguments ) },
+            log: function() { window.console && console.log && console.log.apply( console, arguments ) },
+            debug: function() { window.console && console.debug && console.debug.apply( console, arguments ) },
+            info: function() { window.console && console.info && console.info.apply( console, arguments ) },
+            warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
+            error: function() { window.console && console.error && console.error.apply( console, arguments ) },
+            group: function() { window.console && console.group && console.group.apply( console, arguments ) },
+            groupCollapsed: function() { window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) },
+            groupEnd: function() { window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) },
 
         };
 
