@@ -1,6 +1,6 @@
 (function (modules, namespace) {
 
-    console.info("loading " + namespace);
+    window.console && console.info && console.info("loading " + namespace);
 
     // vwf-view-html.js is a placeholder for an HTML view of the simulation state. It is a stand-in
     // for any number of potential UI elements, including WebGL renderings, traditional UI controls,
@@ -13,7 +13,7 @@
 
         if (!vwf) return;
 
-        console.info("creating " + namespace);
+        vwf.logger.info("creating " + namespace);
 
         modules.view.call(this, vwf);
         this.namespace = namespace;
@@ -40,7 +40,7 @@
 
     module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
-        console.info(namespace + ".createdNode " + nodeID + " " +
+        vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
         var nodeQuery = jQuery(".vwf-orphanage").append(
@@ -66,7 +66,7 @@
 
     module.prototype.addedChild = function (nodeID, childID, childName) {
 
-        console.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
+        vwf.logger.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
         var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: const for root id
         var containerQuery = nodeID == 0 ? nodeQuery : nodeQuery.children(".vwf-children");
@@ -95,7 +95,7 @@
 
     module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info(namespace + ".createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        vwf.logger.info(namespace + ".createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: const for root id
         var containerQuery = nodeQuery.children(".vwf-properties");
@@ -162,7 +162,7 @@
                 min: 0,
                 max: 360,                
                 slide: function (event, ui) {
-                    console.info("setProperty " + nodeID + "  " + propertyName);
+                    vwf.logger.info("setProperty " + nodeID + "  " + propertyName);
                     view.setProperty(nodeID, propertyName, Number(ui.value));
                 }
             });
@@ -174,7 +174,7 @@
 
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info(namespace + ".satProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        vwf.logger.info(namespace + ".satProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: symbol for global id
         var propertyQuery = nodeQuery.children(".vwf-properties").children("#view-html-" + nodeID + "-" + propertyName);

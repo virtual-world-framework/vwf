@@ -1,6 +1,6 @@
 ( function( modules, namespace ) {
 
-    console.info( "loading " + namespace );
+    window.console && console.info && console.info( "loading " + namespace );
 
     // vwf-model-scenejs.js is a placeholder for a 3-D scene manager.
     //
@@ -11,7 +11,7 @@
 
         if ( ! vwf ) return;
 
-        console.info( "creating " + namespace );
+        vwf.logger.info( "creating " + namespace );
 
         modules.model.call( this, vwf );
         this.namespace = namespace;
@@ -29,20 +29,20 @@
     // -- creatingNode -----------------------------------------------------------------------------
 
     module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
-        console.info( namespace + ".creatingNode " + nodeID + " " + 
+        vwf.logger.info( namespace + ".creatingNode " + nodeID + " " + 
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
     };
 
     // -- settingProperty --------------------------------------------------------------------------
 
     module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        vwf.logger.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
     // -- gettingProperty --------------------------------------------------------------------------
 
     module.prototype.gettingProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        vwf.logger.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
 } ) ( window.vwf.modules, "vwf.model.scenejs" );
