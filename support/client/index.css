@@ -165,3 +165,8 @@ input {
 .vwf-node {
   padding: 10px;
 }
+
+#vwf-root>div {
+  margin-left: auto;
+  margin-right: auto;
+}

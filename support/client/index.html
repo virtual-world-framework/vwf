@@ -13,8 +13,10 @@
 
     <!-- The Virtual World Framework makes use of the jQuery library.                            -->
 
-    <script type="text/javascript" src="jquery-1.4.4.js"></script>
+    <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="jquery-ui-1.8.14.custom.min.js"></script>
 
+    <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
     <script type="text/javascript" src="socket.io/socket.io.js"></script>
 
     <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
@@ -35,17 +37,22 @@
     <!-- simulation to a WebGL scene manager.                                                    -->
 
     <script type="text/javascript" src="vwf-model.js"></script>
+
     <script type="text/javascript" src="vwf-model-javascript.js"></script>
     <script type="text/javascript" src="vwf-model-scenejs.js"></script>
+
+    <script type="text/javascript" src="vwf-model-unity.js"></script>
+    <script type="text/javascript" src="vwf-model-unity/UnityObject.js"></script>
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
 
     <script type="text/javascript" src="vwf-view.js"></script>
-    <script type="text/javascript" src="vwf-view-glge.js"></script>
-    <script type="text/javascript" src="vwf-view-html.js"></script>
 
+    <script type="text/javascript" src="vwf-view-glge.js"></script>
     <script type="text/javascript" src="vwf-view-glge/glge-compiled.js"></script> 
+
+    <script type="text/javascript" src="vwf-view-html.js"></script>
 
     <!-- With the scripts loaded, we must initialize the framework. vwf.initialize() accepts     -->
     <!-- three parameters: a world specification, model configuration parameters, and view       -->
@@ -77,6 +84,7 @@
 
             {
                 javascript: [],         // invokes: new vwf.modules.javascript( vwf )
+                unity: "#vwf-root",     // invokes: new vwf.modules.unity( vwf, "#vwf-root" )  // TODO: resolve after ready()
             },
 
             // These are the view configurations. They use the same format as the model
@@ -84,36 +92,37 @@
 
             {
                 glge: "#vwf-root",      // invokes: new vwf.modules.glge( vwf, "#vwf-root" )
-                // html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
+                html: "#vwf-listing",   // invokes: new vwf.modules.html( vwf, "#vwf-listing" )
             }
 
         );
 
-        jQuery( window.document ).ready( function() {
-
-            if ( window.location.search ) {
-
-                jQuery( "#world-selection" ).hide();
-
-            } else {
-
-                $( ".world-option" ).change( function() {
-                    jQuery( "#world-choice" ).val( jQuery( this ).val() );
-                } );
-
-                $( "#world-selection" ).submit( function () {
-                    window.location.href = window.location.protocol + "//" + window.location.host +
-                        window.location.pathname + "?world=" + jQuery( "#world-choice" ).val();
-                    return false;
-                } );
-
-            }
-
-        } );
+        // jQuery( window.document ).ready( function() {
+        // 
+        //     if ( window.location.search ) {
+        // 
+        //         jQuery( "#world-selection" ).hide();
+        // 
+        //     } else {
+        // 
+        //         $( ".world-option" ).change( function() {
+        //             jQuery( "#world-choice" ).val( jQuery( this ).val() );
+        //         } );
+        // 
+        //         $( "#world-selection" ).submit( function () {
+        //             window.location.href = window.location.protocol + "//" + window.location.host +
+        //                 window.location.pathname + "?world=" + jQuery( "#world-choice" ).val();
+        //             return false;
+        //         } );
+        // 
+        //     }
+        // 
+        // } );
 
     </script>
 
-    <link rel="stylesheet" href="index.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.14.custom.css" />
 
   </head>
 
@@ -132,7 +141,7 @@
     <!-- Show a world selection form. The form is hidden if window.location contains a world     -->
     <!-- specification.                                                                          -->
 
-    <form id="world-selection">
+    <!-- form id="world-selection">
 
         <table>
             <tr>
@@ -153,7 +162,7 @@
             </tr>
         </table>
 
-    </form>
+    </form -->
 
     <!-- The "html" view has been configured to render to "#vwf-listing".                        -->
 

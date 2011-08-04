@@ -1,19 +1,20 @@
-(function (modules) {
+(function (modules, namespace) {
 
-    console.info("loading vwf.view.glge");
+    window.console && console.info && console.info("loading " + namespace);
 
     // vwf-view-glge.js is a placeholder for an GLGE WebGL view of the scene.
     //
     // vwf-view-glge is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
     // It attaches to the vwf modules list as vwf.modules.glge.
 
-    var module = modules.glge = function (vwf, rootSelector) {
+    var module = modules[namespace.split(".").pop()] = function(vwf, rootSelector) {
 
         if (!vwf) return;
 
-        console.info("creating vwf.view.glge");
+        vwf.logger.info("creating " + namespace);
 
         modules.view.call(this, vwf);
+        this.namespace = namespace;
 
         this.rootSelector = rootSelector;
 
@@ -25,7 +26,6 @@
 
         this.glgeColladaObjects = new Array();
 
-        return this;
     };
 
     // Delegate any unimplemented functions to vwf-view.
@@ -41,7 +41,7 @@
 
     module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
-        console.info("vwf.view.glge.createdNode " + nodeID + " " +
+        vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
         if (nodeExtendsID == "http://vwf.example.com/types/glge") {
@@ -199,7 +199,7 @@
 
     module.prototype.addedChild = function (nodeID, childID, childName) {
 
-        console.info("vwf.view.glge.addedChild " + nodeID + " " + childID + " " + childName);
+        vwf.logger.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
         var child = this.nodes[childID];
 
@@ -213,7 +213,7 @@
 
     module.prototype.removedChild = function (nodeID, childID) {
 
-        console.info("vwf.view.glge.removedChild " + nodeID + " " + childID);
+        vwf.logger.info(namespace + ".removedChild " + nodeID + " " + childID);
 
     };
 
@@ -221,7 +221,7 @@
 
     module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.glge.createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        vwf.logger.info(namespace + ".createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
     };
 
@@ -231,7 +231,7 @@
 
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.glge.satProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        vwf.logger.info(namespace + ".satProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
@@ -312,7 +312,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 
     module.prototype.gotProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info("vwf.view.glge.gotProperty " + nodeID + " " + propertyName + " " + propertyValue);
+        vwf.logger.info(namespace + ".gotProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value;
@@ -366,7 +366,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindSceneChildren = function (view, nodeID) {
 
-        //console.info("      bindSceneChildren: " + nodeID);
+        //vwf.logger.info("      bindSceneChildren: " + nodeID);
         var scene = view.scenes[nodeID];
         var child;
 
@@ -382,7 +382,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindNodeChildren = function (view, nodeID) {
 
-        //console.info("      bindNodeChildren: " + nodeID);
+        //vwf.logger.info("      bindNodeChildren: " + nodeID);
         var node = view.nodes[nodeID];
         var child;
 
@@ -398,7 +398,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindChild = function (view, scene, node, child, childName, childID) {
 
-        //console.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
+        //vwf.logger.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
         if (scene && !child.glgeObject) {
             child.name = childName;
             child.glgeObject = scene.glgeScene && glgeSceneChild(scene.glgeScene, childName);
@@ -426,13 +426,13 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         var success = Boolean(child.glgeObject);
 
         if ( !success ) {
-            console.info( "     unable to bind: " + childName );
+            vwf.logger.info( "     unable to bind: " + childName );
         }
 
         return success;
 
-        //console.info( "scene: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
-        //console.info( "node: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
+        //vwf.logger.info( "scene: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
+        //vwf.logger.info( "node: " + nodeID + " " + childID + " " + childName + " " + this.nodes[childID].glgeObject );
     };
 
     // Search a GLGE.Scene for a child with the given name.
@@ -443,7 +443,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             return (glgeChild.name || glgeChild.id || glgeChild.sourceURL || "") == childName;
         }).shift();
 
-        //console.info("      glgeSceneChild( " + childName + " ) returns " + childToReturn);
+        //vwf.logger.info("      glgeSceneChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
 
     };
@@ -456,7 +456,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
         }).shift();
 
-        //console.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
+        //vwf.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
 
     };
@@ -590,8 +590,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
-                        console.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
-                        console.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
+                        vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
+                        vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
                     }
                     if (view.smokeID && scene.glgeKeys.isKeyPressed(GLGE.KI_P)) {
                         if (scene.glgeKeys.isKeyPressed(GLGE.KI_SHIFT)) {
@@ -656,7 +656,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             mouseDown = true;
             mouseDownObjectID = getObjectID( mousePick(e, scene ), sceneView, true );
 
-            //console.info("CANVAS mouseDown: " + mouseDownObjectID);
+            //vwf.logger.info("CANVAS mouseDown: " + mouseDownObjectID);
             //this.throwEvent( "onMouseDown", mouseDownObjectID);
             lastXPos = mouseXPos( e );
             lastYPos = mouseYPos( e );
@@ -667,12 +667,12 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             var mouseUpObjectID = getObjectID( mousePick( e, scene ), sceneView, false );
             // check for time??
             if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
-                console.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
+                vwf.logger.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
                 //this.throwEvent( "onMouseClick", mouseDownObjectID);
                 view.callMethod( mouseUpObjectID, "pointerClick" );
             }
 
-            //console.info("CANVAS onMouseUp: " + mouseDownObjectID);
+            //vwf.logger.info("CANVAS onMouseUp: " + mouseDownObjectID);
             //this.throwEvent( "onMouseUp", mouseDownObjectID);
 
             mouseDownObjectID = undefined;
@@ -705,7 +705,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if (mouseDown) {
                 if (mouseDownObjectID) {
 
-                    //console.info("CANVAS onMouseMove: " + mouseDownObjectID);
+                    //vwf.logger.info("CANVAS onMouseMove: " + mouseDownObjectID);
                     //this.throwEvent( "onMouseMove", mouseDownObjectID);
                 }
 
@@ -716,16 +716,16 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     if (mouseOverObjectID) {
                         if (mouseOverID != mouseOverObjectID) {
 
-                            //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                            //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseLeave", mouseOverObjectID);
 
                             mouseOverObjectID = mouseOverID;
 
-                            //console.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+                            //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseEnter", mouseOverObjectID);
                         }
                         else {
-                            //console.info("CANVAS onMouseHover: " + mouseOverObjectID);
+                            //vwf.logger.info("CANVAS onMouseHover: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseHover", mouseOverObjectID);
 
                         }
@@ -733,14 +733,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     else {
                         mouseOverObjectID = mouseOverID;
 
-                        //console.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+                        //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
                         //this.throwEvent( "onMouseEnter", mouseOverObjectID);
                     }
 
                 }
                 else {
                     if (mouseOverObjectID) {
-                        //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                        //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
                         //this.throwEvent( "onMouseLeave", mouseOverObjectID);
                         mouseOverObjectID = undefined;
 
@@ -756,7 +756,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         canvas.onmouseout = function (e) {
             if (mouseOverObjectID) {
-                //console.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
                 //this.throwEvent( "onMouseLeave", mouseOverObjectID);
                 mouseOverObjectID = undefined;
             }
@@ -801,10 +801,10 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
             while (objectIDFound == -1 && objectToLookFor) {
                 if ( debug ) 
-                    console.info("vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
+                    vwf.logger.info("vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
                 objects = jQuery.each(view.nodes, function (nodeID, node) {
                     if (node.glgeObject == objectToLookFor) {
-                        //console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
+                        //vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
                         objectIDFound = nodeID;
                     }
                 });
@@ -831,4 +831,4 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     };
 
 
-})(window.vwf.modules);
+})(window.vwf.modules, "vwf.view.glge");

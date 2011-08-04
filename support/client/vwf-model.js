@@ -1,6 +1,6 @@
-( function( modules ) {
+( function( modules, namespace ) {
 
-    console.info( "loading vwf.model" );
+    window.console && console.info && console.info( "loading " + namespace );
 
     // vwf-model.js is the common implementation of all Virtual World Framework models. Each model
     // is part of a federation with other models attached to the simulation that implements part of
@@ -21,15 +21,15 @@
     // (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It attaches to the vwf modules list
     // as vwf.modules.model.
 
-    var module = modules.model = function( vwf ) {
+    var module = modules[namespace.split(".").pop()] = function( vwf ) {
 
         if ( ! vwf ) return;
 
-        console.info( "creating vwf.model" );
+        vwf.logger.info( "creating " + namespace );
 
         this.vwf = vwf;
+        this.namespace = namespace;
 
-        return this;
     };
 
     // == Stimulus API =============================================================================
@@ -46,52 +46,52 @@
     // -- createNode -------------------------------------------------------------------------------
 
     module.prototype.createNode = function( component_uri_or_object, callback ) {
-        console.info( "vwf.model.createNode " + component_uri_or_object )
-        return this.vwf.createNode( component_uri_or_object, callback );
+        vwf.logger.info( namespace + ".createNode " + component_uri_or_object )
+        return vwf.createNode( component_uri_or_object, callback );
     };
 
     // TODO: deleteNode
 
     // -- addChild ---------------------------------------------------------------------------------
 
-    module.prototype.addChild = function( nodeID, childID, childName) {
-        console.info( "vwf.model.addChild " + nodeID + " " + childID + " " + childName );
-        return this.vwf.addChild( nodeID, childID, childName );
+    module.prototype.addChild = function( nodeID, childID, childName ) {
+        vwf.logger.info( namespace + ".addChild " + nodeID + " " + childID + " " + childName );
+        return vwf.addChild( nodeID, childID, childName );
     };
 
     // -- removeChild ------------------------------------------------------------------------------
 
     module.prototype.removeChild = function( nodeID, childID ) {
-        console.info( "vwf.model.removeChild " + nodeID + " " + childID );
-        return this.vwf.removeChild( nodeID, childID );
+        vwf.logger.info( namespace + ".removeChild " + nodeID + " " + childID );
+        return vwf.removeChild( nodeID, childID );
     };
 
     // -- parent -----------------------------------------------------------------------------------
 
     module.prototype.parent = function( nodeID ) {
-        console.info( "vwf.model.parent " + nodeID );
-        return this.vwf.parent( nodeID );
+        vwf.logger.info( namespace + ".parent " + nodeID );
+        return vwf.parent( nodeID );
     };
 
     // -- children ---------------------------------------------------------------------------------
 
     module.prototype.children = function( nodeID ) {
-        console.info( "vwf.model.children " + nodeID );
-        return this.vwf.children( nodeID );
+        vwf.logger.info( namespace + ".children " + nodeID );
+        return vwf.children( nodeID );
     };
 
     // -- name  ------------------------------------------------------------------------------------
 
     module.prototype.name = function( nodeID ) {
-        console.info( "vwf.model.name " + nodeID );
-        return this.vwf.name( nodeID );
+        vwf.logger.info( namespace + ".name " + nodeID );
+        return vwf.name( nodeID );
     };
 
     // -- createProperty ---------------------------------------------------------------------------
 
     module.prototype.createProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.createProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        return this.vwf.createProperty( nodeID, propertyName, propertyValue );
+        vwf.logger.info( namespace + ".createProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        return vwf.createProperty( nodeID, propertyName, propertyValue );
     };
 
     // TODO: deleteProperty
@@ -99,22 +99,22 @@
     // -- setProperty ------------------------------------------------------------------------------
 
     module.prototype.setProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        return this.vwf.setProperty( nodeID, propertyName, propertyValue );
+        vwf.logger.info( namespace + ".setProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        return vwf.setProperty( nodeID, propertyName, propertyValue );
     };
 
     // -- getProperty ------------------------------------------------------------------------------
 
     module.prototype.getProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.getProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        return this.vwf.getProperty( nodeID, propertyName, propertyValue );
+        vwf.logger.info( namespace + ".getProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        return vwf.getProperty( nodeID, propertyName, propertyValue );
     };
 
     // -- createMethod -----------------------------------------------------------------------------
 
     module.prototype.createMethod = function( nodeID, methodName ) {
-        console.info( "vwf.model.createMethod " + nodeID + " " + methodName );
-        return this.vwf.createMethod( nodeID, methodName );
+        vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName );
+        return vwf.createMethod( nodeID, methodName );
     };
 
     // TODO: deleteMethod
@@ -122,8 +122,8 @@
     // -- callMethod -------------------------------------------------------------------------------
 
     module.prototype.callMethod = function( nodeID, methodName ) { // TODO: parameters
-        console.info( "vwf.model.callMethod " + nodeID + " " + methodName ); // TODO: parameters
-        return this.vwf.callMethod( nodeID, methodName ); // TODO: parameters
+        vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName ); // TODO: parameters
+        return vwf.callMethod( nodeID, methodName ); // TODO: parameters
     };
     
     // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
@@ -131,8 +131,8 @@
     // -- execute ----------------------------------------------------------------------------------
 
     module.prototype.execute = function( nodeID, scriptText, scriptType ) {
-        console.info( "vwf.model.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
-        return this.vwf.execute( nodeID, scriptText, scriptType );
+        vwf.logger.info( namespace + ".execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
+        return vwf.execute( nodeID, scriptText, scriptType );
     };
 
     // TODO: time
@@ -153,7 +153,7 @@
     // -- creatingNode -----------------------------------------------------------------------------
 
     module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
-        console.info( "vwf.model.creatingNode " + nodeID + " " + 
+        vwf.logger.info( namespace + ".creatingNode " + nodeID + " " + 
             nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
     };
 
@@ -162,37 +162,37 @@
     // -- addingChild ------------------------------------------------------------------------------
 
     module.prototype.addingChild = function( nodeID, childID, childName ) {
-        console.info( "vwf.model.addingChild " + nodeID + " " + childID + " " + childName );
+        vwf.logger.info( namespace + ".addingChild " + nodeID + " " + childID + " " + childName );
     };
 
     // -- removingChild ----------------------------------------------------------------------------
 
     module.prototype.removingChild = function( nodeID, childID ) {
-        console.info( "vwf.model.removingChild " + nodeID + " " + childID );
+        vwf.logger.info( namespace + ".removingChild " + nodeID + " " + childID );
     };
 
     // -- parenting --------------------------------------------------------------------------------
 
     module.prototype.parenting = function( nodeID ) {
-        console.info( "vwf.model.parenting " + nodeID );
+        vwf.logger.info( namespace + ".parenting " + nodeID );
     };
 
     // -- childrening ------------------------------------------------------------------------------
 
     module.prototype.childrening = function( nodeID ) {
-        console.info( "vwf.model.childrening " + nodeID );
+        vwf.logger.info( namespace + ".childrening " + nodeID );
     };
 
     // -- naming -----------------------------------------------------------------------------------
 
     module.prototype.naming = function( nodeID ) {
-        console.info( "vwf.model.naming " + nodeID );
+        vwf.logger.info( namespace + ".naming " + nodeID );
     };
 
     // -- creatingProperty -------------------------------------------------------------------------
 
     module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        vwf.logger.info( namespace + ".creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
     // TODO: deletingProperty
@@ -200,19 +200,19 @@
     // -- settingProperty --------------------------------------------------------------------------
 
     module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        vwf.logger.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
     // -- gettingProperty --------------------------------------------------------------------------
 
     module.prototype.gettingProperty = function( nodeID, propertyName, propertyValue ) {
-        console.info( "vwf.model.gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        vwf.logger.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
     // -- creatingMethod ---------------------------------------------------------------------------
 
     module.prototype.creatingMethod = function( nodeID, methodName ) {
-        console.info( "vwf.model.creatingMethod " + nodeID + " " + methodName );
+        vwf.logger.info( namespace + ".creatingMethod " + nodeID + " " + methodName );
     };
 
     // TODO: deletingMethod
@@ -220,7 +220,7 @@
     // -- callingMethod ----------------------------------------------------------------------------
 
     module.prototype.callingMethod = function( nodeID, methodName ) { // TODO: parameters
-        console.info( "vwf.model.callingMethod " + nodeID + " " + methodName ); // TODO: parameters
+        vwf.logger.info( namespace + ".callingMethod " + nodeID + " " + methodName ); // TODO: parameters
     };
 
     // TODO: creatingEvent, deltetingEvent, firingEvent
@@ -228,7 +228,7 @@
     // -- executing --------------------------------------------------------------------------------
 
     module.prototype.executing = function( nodeID, scriptText, scriptType ) {
-        console.info( "vwf.model.executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
+        vwf.logger.info( namespace + ".executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
     };
 
-} ) ( window.vwf.modules );
+} ) ( window.vwf.modules, "vwf.model" );
