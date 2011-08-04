@@ -94,7 +94,7 @@
                 var now;
                 function renderScene() {
                     now = parseInt(new Date().getTime());
-                    scene.glgeRenderer.render();
+                    scene.glgeRenderer.render( now );
                     checkKeys(nodeID, view, now, lasttime);
                     lasttime = now;
                 };
@@ -555,8 +555,10 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                             orbitPitch += 360.0;
 
                         x = objectCenter.x + radius * Math.sin( orbitYaw ) * Math.cos( orbitPitch );
-                        y = objectCenter.y + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );
-                        z = objectCenter.z + radius * Math.cos( orbitYaw );
+//                        y = objectCenter.y + radius * Math.sin( orbitPitch ) * Math.sin( orbitYaw );
+//                        z = objectCenter.z + radius * Math.cos( orbitPitch );
+                        y = objectCenter.y + radius * Math.cos( orbitYaw );
+                        z = objectCenter.z + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );
 
                         camera.setLocX( x );
                         camera.setLocY( y );
