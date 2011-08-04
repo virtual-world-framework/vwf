@@ -126,7 +126,7 @@
                     "<div class='vwf-control-slider'></div>" +
                 "</div>"
             ).children(":last");
-        } else if (propertyName == "eulers") {
+        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
             var propValue = JSON.stringify(propertyValue);
             var values = propValue.replace("[", "");
             values = values.replace("]", "");
@@ -137,27 +137,56 @@
                         "<span class='vwf-value'>" + propValue + "</span>" +
                     "</p>" +
 
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Roll' class='vwf-property'>" +
                         "<p class='vwf-label'>Roll: " +
-                            "<span class='vwf-value'>" + values[0] + "</span>" +
+                            "<span class='vwf-roll-value'>" + values[0] + "</span>" +
                         "</p>" +
                     "<div class='vwf-control-roll-slider' id='slider-roll'></div>" +
 
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Pitch' class='vwf-property'>" +
                         "<p class='vwf-label'>Pitch: " +
-                            "<span class='vwf-value'>" + values[1] + "</span>" +
+                            "<span class='vwf-pitch-value'>" + values[1] + "</span>" +
                         "</p>" +
                     "<div class='vwf-control-pitch-slider' id='slider-pitch'></div>" +
 
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Yaw' class='vwf-property'>" +
                         "<p class='vwf-label'>Yaw: " +
-                            "<span class='vwf-value'>" + values[2] + "</span>" +
+                            "<span class='vwf-yaw-value'>" + values[2] + "</span>" +
                         "</p>" +
                     "<div class='vwf-control-yaw-slider' id='slider-yaw'></div>" +
                 "</div>"
             ).children(":last");
-        }
-        else {
+        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+            var propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + propValue + "</span>" +
+                    "</p>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "X' class='vwf-property'>" +
+                        "<p class='vwf-label'>X: " +
+                            "<span class='vwf-x-value'>" + values[0] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-x-slider' id='slider-x'></div>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Y' class='vwf-property'>" +
+                        "<p class='vwf-label'>Y: " +
+                            "<span class='vwf-y-value'>" + values[1] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-y-slider' id='slider-y'></div>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Z' class='vwf-property'>" +
+                        "<p class='vwf-label'>Z: " +
+                            "<span class='vwf-z-value'>" + values[2] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-z-slider' id='slider-z'></div>" +
+                "</div>"
+            ).children(":last");
+        } else {
             propertyQuery = containerQuery.append(
                 "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
                     "<p class='vwf-label'>" + propertyName + ": " +
@@ -207,8 +236,7 @@
                     view.setProperty(nodeID, propertyName, Number(ui.value));
                 }
             });
-        }
-        else if (propertyName == "eulers") {
+        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
             propertyQuery.find(".vwf-control-roll-slider").slider({
                 range: "min",
                 value: 0,
@@ -257,17 +285,69 @@
                     view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
                 }
             });
+        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+            propertyQuery.find(".vwf-control-x-slider").slider({
+                range: "min",
+                value: 0,
+                min: -200,
+                max: 200,
+                slide: function (event, ui) {
+                    var y = $("#slider-y").slider("value");
+                    var z = $("#slider-z").slider("value");
+                    if (!y) y = 0;
+                    if (!z) z = 0;
+                    var propertyValue = [Number(ui.value), Number(y), Number(z)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+            propertyQuery.find(".vwf-control-y-slider").slider({
+                range: "min",
+                value: 0,
+                min: -200,
+                max: 200,
+                slide: function (event, ui) {
+                    var x = $("#slider-x").slider("value");
+                    var z = $("#slider-z").slider("value");
+                    if (!x) x = 0;
+                    if (!z) z = 0;
+                    var propertyValue = [Number(x), Number(ui.value), Number(z)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+            propertyQuery.find(".vwf-control-z-slider").slider({
+                range: "min",
+                value: 0,
+                min: -200,
+                max: 200,
+                slide: function (event, ui) {
+                    var x = $("#slider-x").slider("value");
+                    var y = $("#slider-y").slider("value");
+                    if (!x) x = 0;
+                    if (!y) y = 0;
+                    var propertyValue = [Number(x), Number(y), Number(ui.value)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
         }
-
-
     };
 
     // -- satProperty ------------------------------------------------------------------------------
 
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
-        if (propertyName == "eulers" && propertyValue.constructor != Array)
+        var isVectorProp = false;
+        if (propertyName == "eulers" || propertyName == "worldEulers" || propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale")
+            isVectorProp = true;
+
+        if (isVectorProp && propertyValue.constructor != Array)
             propertyValue = JSON.parse(propertyValue);
+
         vwf.logger.info(namespace + ".satProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
         var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: symbol for global id
@@ -288,7 +368,7 @@
 
         if (propertyName == "angle") {
             propertyQuery.find(".vwf-control-slider").slider("value", Number(propertyValue));
-        } else if (propertyName == "eulers") {
+        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
             var propValue = JSON.stringify(propertyValue);
             var values = propValue.replace("[", "");
             values = values.replace("]", "");
@@ -296,7 +376,20 @@
             propertyQuery.find(".vwf-control-roll-slider").slider("value", Number(values[0]));
             propertyQuery.find(".vwf-control-pitch-slider").slider("value", Number(values[1]));
             propertyQuery.find(".vwf-control-yaw-slider").slider("value", Number(values[2]));
-
+            propertyQuery.find(".vwf-roll-value").text(values[0]);
+            propertyQuery.find(".vwf-pitch-value").text(values[1]);
+            propertyQuery.find(".vwf-yaw-value").text(values[2]);
+        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+            var propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            propertyQuery.find(".vwf-control-x-slider").slider("value", Number(values[0]));
+            propertyQuery.find(".vwf-control-y-slider").slider("value", Number(values[1]));
+            propertyQuery.find(".vwf-control-z-slider").slider("value", Number(values[2]));
+            propertyQuery.find(".vwf-x-value").text(values[0]);
+            propertyQuery.find(".vwf-y-value").text(values[1]);
+            propertyQuery.find(".vwf-z-value").text(values[2]);
         }
 
     };
