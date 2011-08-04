@@ -1,6 +1,6 @@
-( function( modules ) {
+(function (modules, namespace) {
 
-    console.info( "loading vwf.view.html" );
+    window.console && console.info && console.info("loading " + namespace);
 
     // vwf-view-html.js is a placeholder for an HTML view of the simulation state. It is a stand-in
     // for any number of potential UI elements, including WebGL renderings, traditional UI controls,
@@ -9,21 +9,22 @@
     // vwf-view-html is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
     // It attaches to the vwf modules list as vwf.modules.html.
 
-    var module = modules.html = function( vwf, rootSelector ) {
+    var module = modules[namespace.split(".").pop()] = function (vwf, rootSelector) {
 
-        if ( ! vwf ) return;
+        if (!vwf) return;
 
-        console.info( "creating vwf.view.html" );
+        vwf.logger.info("creating " + namespace);
 
-        modules.view.call( this, vwf );
+        modules.view.call(this, vwf);
+        this.namespace = namespace;
 
-        jQuery( rootSelector ).append( "<h2>Globals</h2>" )
-        jQuery( rootSelector ).append( "<div class='vwf-root'></div>" )
-        jQuery( rootSelector ).append( "<h2>Types</h2>" )
-        jQuery( rootSelector ).append( "<div class='vwf-orphanage'></div>" )
+        jQuery(rootSelector).append("<h2>Globals</h2>");
+        jQuery(rootSelector).append("<div class='vwf-root'></div>");
+        jQuery(rootSelector).append("<h2>Types</h2>");
+        jQuery(rootSelector).append("<div class='vwf-orphanage'></div>");
+
         this.rootSelector = rootSelector;
 
-        return this;
     };
 
     // Delegate any unimplemented functions to vwf-view.
@@ -37,102 +38,176 @@
 
     // -- createdNode ------------------------------------------------------------------------------
 
-    module.prototype.createdNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+    module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
-        console.info( "vwf.view.html.createdNode " + nodeID + " " +
-            nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
+        vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
+            nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
-        var nodeQuery = jQuery( ".vwf-orphanage" ).append(
+        var nodeQuery = jQuery(".vwf-orphanage").append(
             "<div id='view-html-" + nodeID + "' class='vwf-node'>" +
                 "<p class='vwf-label'>" +
                     nodeID + " " + "<span class='vwf-name'/>" +
-                        ( nodeExtendsID || ( nodeImplementsIDs && nodeImplementsIDs.length ) ? ", type: " : "" ) +
+                        (nodeExtendsID || (nodeImplementsIDs && nodeImplementsIDs.length) ? ", type: " : "") +
                     "<span class='vwf-attribute'>" +
-                        ( [ nodeExtendsID ].concat( nodeImplementsIDs || [] ).join( ", " ) ) +
+                        ([nodeExtendsID].concat(nodeImplementsIDs || []).join(", ")) +
                     "</span>" +
-                    ( nodeSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
-                        "source=\"" + nodeSource + "\" type=\"" + ( nodeType || "" ) + "\"" +
-                    "</span>" : "" ) +
+                    (nodeSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
+                        "source=\"" + nodeSource + "\" type=\"" + (nodeType || "") + "\"" +
+                    "</span>" : "") +
                 "</p>" +
             "</div>"
-        ). children( ":last" );
+        ).children(":last");
 
-        nodeQuery.children( ".vwf-label" ).click( function() {
-            jQuery(this).siblings( ".vwf-properties, .vwf-methods, .vwf-events, .vwf-children, .vwf-scripts" ).toggle();
-        } );
+        nodeQuery.children(".vwf-label").click(function () {
+            jQuery(this).siblings(".vwf-properties, .vwf-methods, .vwf-events, .vwf-children, .vwf-scripts").toggle();
+        });
 
     };
 
-    module.prototype.addedChild = function( nodeID, childID, childName ) {
+    module.prototype.addedChild = function (nodeID, childID, childName) {
 
-        console.info( "vwf.view.html.addedChild " + nodeID + " " + childID + " " + childName );
+        vwf.logger.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
-        var nodeQuery = jQuery( nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID ); // TODO: const for root id
-        var containerQuery = nodeID == 0 ? nodeQuery : nodeQuery.children( ".vwf-children" );
+        var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: const for root id
+        var containerQuery = nodeID == 0 ? nodeQuery : nodeQuery.children(".vwf-children");
 
-        if ( containerQuery.length == 0 ) {
+        if (containerQuery.length == 0) {
 
             containerQuery = nodeQuery.append(
                 "<div class='vwf-children'>" +
                     "<p class='vwf-label'>Children</p>" +
                 "</div>"
-            ).children( ":last" );
+            ).children(":last");
 
-            containerQuery.children( ".vwf-label" ).click( function() {
-                jQuery(this).siblings( ".vwf-node" ).toggle();
-            } );
+            containerQuery.children(".vwf-label").click(function () {
+                jQuery(this).siblings(".vwf-node").toggle();
+            });
 
         }
 
-        var childQuery = jQuery( "#view-html-" + childID );
-        childQuery.find( ".vwf-name" ).first().html( childName );
-        containerQuery.append( childQuery );
+        var childQuery = jQuery("#view-html-" + childID);
+        childQuery.find(".vwf-name").first().html(childName);
+        containerQuery.append(childQuery);
 
     };
 
     // -- createdProperty --------------------------------------------------------------------------
 
-    module.prototype.createdProperty = function( nodeID, propertyName, propertyValue ) {
+    module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info( "vwf.view.html.createdProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        vwf.logger.info(namespace + ".createdProperty " + nodeID + " " + propertyName + " " + propertyValue);
 
-        var nodeQuery = jQuery( nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID ); // TODO: const for root id
-        var containerQuery = nodeQuery.children( ".vwf-properties" );
+        var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: const for root id
+        var containerQuery = nodeQuery.children(".vwf-properties");
 
-        if ( containerQuery.length == 0 ) {
+        if (containerQuery.length == 0) {
 
             containerQuery = nodeQuery.append(
                 "<div class='vwf-properties'>" +
                     "<p class='vwf-label'>Properties</p>" +
                 "</div>"
-            ).children( ":last" );
+            ).children(":last");
 
-            containerQuery.children( ".vwf-label" ).click( function() {
-                jQuery(this).siblings( ".vwf-property" ).toggle();
-            } );
+            containerQuery.children(".vwf-label").click(function () {
+                jQuery(this).siblings(".vwf-property").toggle();
+            });
 
         }
 
-        var propertyQuery = containerQuery.append(
-            "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
-                "<p class='vwf-label'>" + propertyName + ": " +
-                    "<span class='vwf-value'>" + JSON.stringify( propertyValue ) + "</span>" +
-                    // Demo hack 2
-                    // "<input type='text' class='vwf-control'></input>" +
-                "</p>" +
-            "</div>"
-        ). children( ":last" );
-            
-        // Demo hack 1: increment by 1 on click
-            
-var view = this;
+        var propertyQuery;
 
-        propertyQuery.click( function() {
-            var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id.split("-").pop() ) || 0; // TODO: symbol for global id
-            var nodeQuery = jQuery( nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID );
-            var propertyQuery = nodeQuery.children( ".vwf-properties" ).children( "#view-html-" + nodeID + "-" + propertyName );
-            view.setProperty( nodeID, propertyName, Number( JSON.parse( propertyQuery.find( ".vwf-value" ).text() ) ) + 1 );
-        } );
+        if (propertyName == "angle") {
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
+                    "</p>" +
+            // Demo hack 3
+                    "<div class='vwf-control-slider'></div>" +
+                "</div>"
+            ).children(":last");
+        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
+            var propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + propValue + "</span>" +
+                    "</p>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Roll' class='vwf-property'>" +
+                        "<p class='vwf-label'>Roll: " +
+                            "<span class='vwf-roll-value'>" + values[0] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-roll-slider' id='slider-roll'></div>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Pitch' class='vwf-property'>" +
+                        "<p class='vwf-label'>Pitch: " +
+                            "<span class='vwf-pitch-value'>" + values[1] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-pitch-slider' id='slider-pitch'></div>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Yaw' class='vwf-property'>" +
+                        "<p class='vwf-label'>Yaw: " +
+                            "<span class='vwf-yaw-value'>" + values[2] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-yaw-slider' id='slider-yaw'></div>" +
+                "</div>"
+            ).children(":last");
+        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+            var propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + propValue + "</span>" +
+                    "</p>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "X' class='vwf-property'>" +
+                        "<p class='vwf-label'>X: " +
+                            "<span class='vwf-x-value'>" + values[0] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-x-slider' id='slider-x'></div>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Y' class='vwf-property'>" +
+                        "<p class='vwf-label'>Y: " +
+                            "<span class='vwf-y-value'>" + values[1] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-y-slider' id='slider-y'></div>" +
+
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "Z' class='vwf-property'>" +
+                        "<p class='vwf-label'>Z: " +
+                            "<span class='vwf-z-value'>" + values[2] + "</span>" +
+                        "</p>" +
+                    "<div class='vwf-control-z-slider' id='slider-z'></div>" +
+                "</div>"
+            ).children(":last");
+        } else {
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
+            // Demo hack 2
+            // "<input type='text' class='vwf-control'></input>" +
+                    "</p>" +
+                "</div>"
+            ).children(":last");
+        }
+
+        var view = this;
+
+        // Demo hack 1: increment by 1 on click
+
+        propertyQuery.click(function () {
+            var nodeID = Number(jQuery(this).parents(".vwf-node")[0].id.split("-").pop()) || 0; // TODO: symbol for global id
+            var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID);
+            var propertyQuery = nodeQuery.children(".vwf-properties").children("#view-html-" + nodeID + "-" + propertyName);
+            view.setProperty(nodeID, propertyName, Number(JSON.parse(propertyQuery.find(".vwf-value").text())) + 1);
+        });
 
         // Demo hack 2: show a text control and update character-by-character
 
@@ -147,21 +222,140 @@ var view = this;
         //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id.split("-").pop() ) || 0; // TODO: symbol for global id
         //     view.setProperty( nodeID, propertyName, jQuery(this).val() ); // TODO: json exceptions?
         // } );
-            
+
+        // Demo hack 3: attach a slider
+
+        if (propertyName == "angle") {
+            propertyQuery.find(".vwf-control-slider").slider({
+                range: "min",
+                value: 0,
+                min: 0,
+                max: 360,
+                slide: function (event, ui) {
+                    vwf.logger.info("setProperty " + nodeID + "  " + propertyName);
+                    view.setProperty(nodeID, propertyName, Number(ui.value));
+                }
+            });
+        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
+            propertyQuery.find(".vwf-control-roll-slider").slider({
+                range: "min",
+                value: 0,
+                min: 0,
+                max: 360,
+                slide: function (event, ui) {
+                    var pitch = $("#slider-pitch").slider("value");
+                    var yaw = $("#slider-yaw").slider("value");
+                    if (!pitch) pitch = 0;
+                    if (!yaw) yaw = 0;
+                    var propertyValue = [Number(ui.value), Number(pitch), Number(yaw)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+            propertyQuery.find(".vwf-control-pitch-slider").slider({
+                range: "min",
+                value: 0,
+                min: 0,
+                max: 360,
+                slide: function (event, ui) {
+                    var roll = $("#slider-roll").slider("value");
+                    var yaw = $("#slider-yaw").slider("value");
+                    if (!roll) roll = 0;
+                    if (!yaw) yaw = 0;
+                    var propertyValue = [Number(roll), Number(ui.value), Number(yaw)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+            propertyQuery.find(".vwf-control-yaw-slider").slider({
+                range: "min",
+                value: 0,
+                min: 0,
+                max: 360,
+                slide: function (event, ui) {
+                    var roll = $("#slider-roll").slider("value");
+                    var pitch = $("#slider-pitch").slider("value");
+                    if (!roll) roll = 0;
+                    if (!pitch) pitch = 0;
+                    var propertyValue = [Number(roll), Number(pitch), Number(ui.value)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+            propertyQuery.find(".vwf-control-x-slider").slider({
+                range: "min",
+                value: 0,
+                min: -200,
+                max: 200,
+                slide: function (event, ui) {
+                    var y = $("#slider-y").slider("value");
+                    var z = $("#slider-z").slider("value");
+                    if (!y) y = 0;
+                    if (!z) z = 0;
+                    var propertyValue = [Number(ui.value), Number(y), Number(z)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+            propertyQuery.find(".vwf-control-y-slider").slider({
+                range: "min",
+                value: 0,
+                min: -200,
+                max: 200,
+                slide: function (event, ui) {
+                    var x = $("#slider-x").slider("value");
+                    var z = $("#slider-z").slider("value");
+                    if (!x) x = 0;
+                    if (!z) z = 0;
+                    var propertyValue = [Number(x), Number(ui.value), Number(z)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+            propertyQuery.find(".vwf-control-z-slider").slider({
+                range: "min",
+                value: 0,
+                min: -200,
+                max: 200,
+                slide: function (event, ui) {
+                    var x = $("#slider-x").slider("value");
+                    var y = $("#slider-y").slider("value");
+                    if (!x) x = 0;
+                    if (!y) y = 0;
+                    var propertyValue = [Number(x), Number(y), Number(ui.value)];
+
+                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
+                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                }
+            });
+        }
     };
 
     // -- satProperty ------------------------------------------------------------------------------
 
-    module.prototype.satProperty = function( nodeID, propertyName, propertyValue ) {
+    module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
-        console.info( "vwf.view.html.satProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        var isVectorProp = false;
+        if (propertyName == "eulers" || propertyName == "worldEulers" || propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale")
+            isVectorProp = true;
 
-        var nodeQuery = jQuery( nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID ); // TODO: symbol for global id
-        var propertyQuery = nodeQuery.children( ".vwf-properties" ).children( "#view-html-" + nodeID + "-" + propertyName );
+        if (isVectorProp && propertyValue.constructor != Array)
+            propertyValue = JSON.parse(propertyValue);
+
+        vwf.logger.info(namespace + ".satProperty " + nodeID + " " + propertyName + " " + propertyValue);
+
+        var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID); // TODO: symbol for global id
+        var propertyQuery = nodeQuery.children(".vwf-properties").children("#view-html-" + nodeID + "-" + propertyName);
 
         // Demo hack 1
 
-        propertyQuery.find( ".vwf-value" ).text( JSON.stringify( propertyValue ) );
+        propertyQuery.find(".vwf-value").text(JSON.stringify(propertyValue));
 
         // Demo hack 2
 
@@ -170,9 +364,37 @@ var view = this;
         // controlQuery.val() == propertyValue && typeof controlQuery.val() == typeof propertyValue ||
         //     controlQuery.val( propertyValue );
 
+        // Demo hack 3
+
+        if (propertyName == "angle") {
+            propertyQuery.find(".vwf-control-slider").slider("value", Number(propertyValue));
+        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
+            var propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            propertyQuery.find(".vwf-control-roll-slider").slider("value", Number(values[0]));
+            propertyQuery.find(".vwf-control-pitch-slider").slider("value", Number(values[1]));
+            propertyQuery.find(".vwf-control-yaw-slider").slider("value", Number(values[2]));
+            propertyQuery.find(".vwf-roll-value").text(values[0]);
+            propertyQuery.find(".vwf-pitch-value").text(values[1]);
+            propertyQuery.find(".vwf-yaw-value").text(values[2]);
+        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+            var propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            propertyQuery.find(".vwf-control-x-slider").slider("value", Number(values[0]));
+            propertyQuery.find(".vwf-control-y-slider").slider("value", Number(values[1]));
+            propertyQuery.find(".vwf-control-z-slider").slider("value", Number(values[2]));
+            propertyQuery.find(".vwf-x-value").text(values[0]);
+            propertyQuery.find(".vwf-y-value").text(values[1]);
+            propertyQuery.find(".vwf-z-value").text(values[2]);
+        }
+
     };
 
-} ) ( window.vwf.modules );
+})(window.vwf.modules, "vwf.view.html");
 
 
 
