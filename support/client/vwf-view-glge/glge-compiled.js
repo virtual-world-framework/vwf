@@ -9357,13 +9357,13 @@ GLGE.Renderer.prototype.setScene=function(scene){
 /**
 * Renders the current scene to the canvas
 */
-GLGE.Renderer.prototype.render=function(){
+GLGE.Renderer.prototype.render=function(now){
 	if(this.cullFaces) this.gl.enable(this.gl.CULL_FACE);
 	if (this.scene)
-	this.scene.render(this.gl);
+	this.scene.render(this.gl,now);
 	//if this is the first ever pass then render twice to fill shadow buffers
 	if(!this.rendered&&this.scene){
-		this.scene.render(this.gl);
+		this.scene.render(this.gl,now);
 		this.rendered=true;
 	}
 };
@@ -10468,11 +10468,11 @@ GLGE.Scene.prototype.stateSort=function(a,b){
 * renders the scene
 * @private
 */
-GLGE.Scene.prototype.render=function(gl){
+GLGE.Scene.prototype.render=function(gl,now){
 	//if look at is set then look
 	if(this.camera.lookAt) this.camera.Lookat(this.camera.lookAt);	
 	
-	this.animate();
+	this.animate(now);
 	gl.lights=this.getLights();
 	
 	var lights=gl.lights;
