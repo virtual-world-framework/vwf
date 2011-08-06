@@ -190,20 +190,34 @@
 
                 socket = new io.Socket( undefined, {
 
-resource: window.location.pathname.slice(1,-1),
-transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling' */ ],
+                    // The socket is relative to the application path.
+
+                    resource: window.location.pathname.slice( 1,
+                        window.location.pathname.lastIndexOf("/") ),
+
+                    // The ruby socket.io server only supports WebSockets. Don't try the others.
+
+                    transports: [
+                        'websocket',
+                        // 'flashsocket',
+                        // 'htmlfile',
+                        // 'xhr-multipart',
+                        // 'xhr-polling',
+                        // 'jsonp-polling',
+                    ],
 
                     // Increase the timeout due to starvation while loading the scene. The server
                     // timeout must also be increased.
+                    // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
 
-                    transportOptions: {
-                        "websocket": { timeout: 90000 },
-                        "flashsocket": { timeout: 90000 },
-                        "htmlfile": { timeout: 90000 },
-                        "xhr-multipart": { timeout: 90000 },
-                        "xhr-polling": { timeout: 90000 },
-                        "jsonp-polling": { timeout: 90000 },
-    			    }
+                    // transportOptions: {
+                    //     "websocket": { timeout: 90000 },
+                        // "flashsocket": { timeout: 90000 },
+                        // "htmlfile": { timeout: 90000 },
+                        // "xhr-multipart": { timeout: 90000 },
+                        // "xhr-polling": { timeout: 90000 },
+                        // "jsonp-polling": { timeout: 90000 },
+                    // }
 
     			} );
 
@@ -329,7 +343,6 @@ transports: [ 'websocket' /* , 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-
 // TODO: delegate parsing and validation to each action.
 
             var time = Number( fields.shift() );
-if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_uri_or_json_or_object" correctly
             var nodeID = fields.shift();
             var actionName = fields.shift();
 
@@ -338,10 +351,8 @@ if ( fields[0] != "createNode" ) // TODO: hack to parse "t createNode component_
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-if ( actionName != "createNode" )
-            this[actionName] && this[actionName].apply( this, [ nodeID ].concat( fields ) );
-else
-this[actionName] && this[actionName].apply( this, fields ); // TODO: hack to parse "t createNode component_uri_or_json_or_object" correctly
+            var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields ) : fields;
+            this[actionName] && this[actionName].apply( this, args );
             
         };
 
@@ -1006,12 +1017,7 @@ childName /* TODO: hack */ );
             var match = uri.match( RegExp( "http://vwf.example.com/types/(.*)" ) );
 
             if ( match ) {
-
-                var document_uri = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                var document_base = document_uri.substring( 0, document_uri.lastIndexOf( "/" ) );
-
-                uri = document_base + "/types/" + match[1]; // + ".js";
-uri = window.location.protocol + "//" + window.location.host + "/types/" + match[1] + ".vwf";
+                uri = window.location.protocol + "//" + window.location.host + "/types/" + match[1] + ".vwf";
             }
 
             return uri;
