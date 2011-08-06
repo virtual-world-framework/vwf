@@ -1,4 +1,5 @@
 require "socketio_application"
+require "json"
 
 class Reflector < SocketIOApplication
 
@@ -14,7 +15,7 @@ class Reflector < SocketIOApplication
 
     super
 
-    send "0  createNode #{ env["vwf.application"] }" # two spaces between the time and action parameters to indicate a null nodeID
+    send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]
     schedule_tick
 
   end
@@ -32,7 +33,7 @@ private
 
   def schedule_tick
     session[:tick_timer] ||= EventMachine::PeriodicTimer.new 2 do
-      broadcast Time.now.to_f  # TODO: play/pause/stop, start at 0
+      broadcast JSON.generate :time => Time.now.to_f  # TODO: play/pause/stop, start at 0
     end
   end
   
