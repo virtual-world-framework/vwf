@@ -255,25 +255,34 @@
 
                     // this.logger.info( "vwf.socket message " + message );
 
-                    // Unpack the arguments.
+                    try {
 
-                    var fields = message.split( " " );
+                        // Unpack the arguments.
 
-                    // Add the message to the queue and keep it ordered by time.
+                        fields = JSON.parse( message )
 
-                    queue.push( fields );
-                    queue.sort( function( a, b ) { return Number( a[0] ) - Number( b[0] ) } );
+                        // Add the message to the queue and keep it ordered by time.
 
-                    // Each message from the server allows us to move time forward. Parse the
-                    // timestamp from the message and call dispatch() to execute all queued actions
-                    // through that time, including the message just received.
+                        queue.push( fields );
+                        queue.sort( function( a, b ) { return Number( a.time ) - Number( b.time ) } );
+
+                        // Each message from the server allows us to move time forward. Parse the
+                        // timestamp from the message and call dispatch() to execute all queued
+                        // actions through that time, including the message just received.
                     
-                    // The simulation may perform immediate actions at the current time or it may
-                    // post actions to the queue to be performed in the future. But we only move
-                    // time forward for items arriving in the queue from the conference server.
+                        // The simulation may perform immediate actions at the current time or it
+                        // may post actions to the queue to be performed in the future. But we only
+                        // move time forward for items arriving in the queue from the conference
+                        // server.
 
-                    var time = Number( fields[0] );
-                    vwf.dispatch( time );
+                        var time = Number( fields.time );
+                        vwf.dispatch( time );
+
+                    } catch( e ) {
+
+                        // Ignore invalid messages.
+
+                    }
 
                 } );
 
@@ -286,8 +295,9 @@
             } else {
 
                 // Load the world. The world is a rooted in a single node constructed here as an
-                // instance of the component passed to initialize(). That component, its prototype(s),
-                // and its children, and their prototypes and children, flesh out the entire world.
+                // instance of the component passed to initialize(). That component, its
+                // prototype(s), and its children, and their prototypes and children, flesh out the
+                // entire world.
 
                 // TODO: add note that this is only for a self-determined world; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
@@ -311,13 +321,18 @@
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
-            var fields = [ this.time ].concat( args );
+            var fields = {
+                time: this.time,
+                node: args.shift(),
+                action: args.shift(),
+                parameters: args
+            };
 
             if ( socket ) {
 
                 // Send the message if the connection is available.
 
-                var message = fields.join( " " );
+                var message = JSON.stringify( fields );
                 socket.send( message );
 
             } else {
@@ -325,7 +340,7 @@
                 // Otherwise, for single-user mode, loop it immediately back to the incoming queue.
 
                 queue.push( fields );
-                queue.sort( function( a, b ) { return Number( a[0] ) - Number( b[0] ) } );
+                queue.sort( function( a, b ) { return Number( a.time ) - Number( b.time ) } );
 
             }
 
@@ -342,16 +357,15 @@
 
 // TODO: delegate parsing and validation to each action.
 
-            var time = Number( fields.shift() );
-            var nodeID = fields.shift();
-            var actionName = fields.shift();
+            var nodeID = fields.node;
+            var actionName = fields.action;
 
             // Look up the action handler and invoke it with the remaining parameters.
 
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields ) : fields;
+            var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields.parameters ) : fields.parameters;
             this[actionName] && this[actionName].apply( this, args );
             
         };
@@ -366,12 +380,12 @@
 
             // Handle messages until we empty the queue or reach the new current time.
 
-            while ( queue.length > 0 && Number( queue[0][0] ) <= currentTime ) {
+            while ( queue.length > 0 && Number( queue[0].time ) <= currentTime ) {
 
                 // Set the simulation time to the message time, remove the message and perform the
                 // action.
 
-                this.time = Number( queue[0][0] );
+                this.time = Number( queue[0].time );
                 this.receive( queue.shift() );
 
             }
