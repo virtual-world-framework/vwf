@@ -14,7 +14,7 @@ class Reflector < SocketIOApplication
 
     super
 
-    send "0 createNode #{ env["vwf.application"] }"
+    send "0  createNode #{ env["vwf.application"] }" # two spaces between the time and action parameters to indicate a null nodeID
     schedule_tick
 
   end
