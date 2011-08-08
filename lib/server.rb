@@ -62,7 +62,7 @@ class Server < Sinatra::Base
 
     elsif session.nil? && private_path.nil?
 
-      redirect to request.route + "0000000000000000/"
+      redirect to request.route + random_session_id + "/"
 
     # Delegate everything else based on the private_path.
 
@@ -99,6 +99,7 @@ class Server < Sinatra::Base
           Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public  # TODO: will match public_path/index.html which we don't really want
           Component.new( File.join settings.public, public_path ),  # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
           Reflector.new                           # The WebSocket reflector  # TODO: not for session==nil
+          # Reflector.new( :debug => true, :backend => { :debug => true } )                           # The WebSocket reflector  # TODO: not for session==nil
         ] ).call delegated_env
 
       end
@@ -108,6 +109,12 @@ class Server < Sinatra::Base
   end
 
   helpers do
+
+    # Generate a random string to be used as a session id.
+
+    def random_session_id  # TODO: don't count on this for security; migrate to a proper session id, in a cookie, at least twice as long, and with verified randomness
+      "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
+    end
 
     def logger  # TODO: remove after Sinatra 1.3
       request.logger
