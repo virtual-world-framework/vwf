@@ -81,7 +81,7 @@ class Server < Sinatra::Base
         )
 
         Rack::Cascade.new( [
-          Rack::File.new( settings.client ),      # Client files from ^/support/client
+          Rack::File.new( settings.client ),      # index.html from ^/support/client
         ] ).call delegated_env
 
       else
@@ -95,6 +95,7 @@ class Server < Sinatra::Base
         )
 
         Rack::Cascade.new( [
+          Admin.new,
           Rack::File.new( settings.client ),      # Client files from ^/support/client
           Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public  # TODO: will match public_path/index.html which we don't really want
           Component.new( File.join settings.public, public_path ),  # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?

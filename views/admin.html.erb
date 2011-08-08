@@ -1,0 +1,209 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+
+		<title>Admin</title>
+
+        <script type="text/javascript" src="jquery-1.5.1.js"></script>
+
+        <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
+        <script type="text/javascript" src="socket.io/socket.io.js"></script>
+
+		<script type="text/javascript">
+
+            jQuery( window.document ).ready( function() {
+
+                try {
+                    socket = new io.Socket( undefined, {
+                        resource: window.location.pathname.slice( 1, window.location.pathname.lastIndexOf("/") ),
+                        transports: [ 'websocket' ],
+    			    } );
+                } catch ( e ) {
+                }
+
+                if ( socket ) {
+
+                    socket.on( "connect", function() {
+                        console.info( "admin socket connected" )
+                    } );
+
+                    socket.on( "message", function( message ) {
+
+                        var fields = JSON.parse( message );
+
+                        if ( fields.action ) {
+
+                            var now$ = jQuery( ".log .now" );
+                            var action$ = now$.clone().removeClass( "now" );
+
+                            action$.children().each( function( index ) {
+
+                                switch( index ) {
+                                    case 0: jQuery( this ).text( Number( fields.time ).toFixed( 3 ) ); break;
+                                    case 1: jQuery( this ).text( command_from_fields( fields ) ); break;
+                                }
+
+                            } );
+
+                            var body$ = $("body"); // may need to be $("html") in other browsers, or maybe even $(document)
+                            body$.stop( true, true );
+
+                            // Window bottom in document coordinates.
+
+                            var window_bottom = body$.scrollTop() + $(window).height();
+
+                            // tr.now top, middle, and bottom in document coordinates.
+
+                            var now_top_before = now$.offset().top;
+                            var now_middle_before = now_top_before + now$.outerHeight() / 2;
+                            var now_bottom_before = now_top_before + now$.outerHeight();
+
+                            // Insert the new row.
+
+                            now$.before( action$ );
+
+                            // tr.now top, middle, and bottom in document coordinates.
+
+                            var now_top_after = now$.offset().top;
+                            var now_middle_after = now_top_after + now$.outerHeight() / 2;
+                            var now_bottom_after = now_top_after + now$.outerHeight();
+
+                            // Scroll to reveal now$ if it was visible before the new row was
+                            // inserted.
+
+                            if ( now_middle_before <= window_bottom ) {
+                                if ( now_bottom_before >= window_bottom ) {
+                                    body$.animate( { scrollTop: now_top_after + now$.outerHeight() - $(window).height() }, "fast" );
+                                } else if ( now_bottom_after >= window_bottom ) {
+                                    body$.animate( { scrollTop: body$.scrollTop() + now_top_after - now_top_before }, "fast" );
+                                }
+                            }
+
+                        } else {
+
+                            // Update now$ with the most recent time.
+
+                            var now$ = jQuery( ".log .now" );
+                            now$.children().first().text( Number( fields.time ).toFixed( 3 ) );
+
+                        }
+
+                    } );
+
+                    socket.on( "disconnect", function() {
+                        console.info( "admin socket disconnected" )
+                    } );
+
+                    // Start communication with the conference server. 
+
+                    socket.connect();
+
+                }
+
+                // Create a JavaScript-like statement that describes the action.
+
+                function command_from_fields( fields ) {
+
+                    var command = "";
+
+                    if ( fields.node || fields.node === 0 ) {
+                        command += "@" + safe_identifier( fields.node ) + ".";
+                    }
+
+                    if ( fields.action == "createNode" ) {
+
+                        command += "@" + safe_identifier( fields.parameters.shift() ) + ".new"
+                        command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
+
+                    } else if ( fields.action == "setProperty" ) {
+
+                        command += safe_identifier( fields.parameters.shift() ) + " = " +
+                            fields.parameters.shift();
+
+                    } else if ( fields.action == "callMethod" ) {
+
+                        command += safe_identifier( fields.parameters.shift() );
+                        command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
+
+                    }
+
+                    return command;
+
+                }
+
+                // Return *identifier* unchanged if it's a valid identifier in the common form of an
+                // alphabetic character or underscore followed by zero or more digits, alphabetic
+                // characters or underscores. Otherwise, return *identifier* string-quoted.
+
+                function safe_identifier( identifier ) {
+                    identifier = identifier.toString();
+                    return identifier.search( /^[A-Za-z_][0-9A-Za-z_]*$/ ) >= 0 ? identifier : JSON.stringify( identifier );
+                }
+
+                function parameter_list( parameters ) {
+                    return parameters.join( ", " );
+                }
+
+            } );
+
+        </script>
+
+        <link rel="stylesheet" type="text/css" href="index.css" />
+
+        <style>
+
+            body {
+                background-color: white;
+                background-image: url(vwl800.jpg);                background-position: center top;                background-repeat: repeat-y;                background-attachment: scroll;            }
+            .log > * {
+                margin: 0;
+                font-family: "Bitstream Vera Sans Mono", "Courier New", monospace;
+            }
+
+            .log > :nth-child(even) {
+                background-color: #ffffff;
+            }
+
+            .log > :nth-child(odd) {
+                background-color: #f8f8f8;
+            }
+
+            span.time {
+                display: inline-block;
+                padding: 5px;
+            }
+
+            span.action {
+                display: inline-block;
+                padding: 5px;
+            }
+
+            .time {
+                width: 10em;
+                text-align: right;
+                padding-right: 1ex;
+            }
+
+            .action {
+                text-align: left;
+                padding-left: 1ex;
+            }
+
+        </style>
+
+
+	</head>
+
+	<body>
+		<h1>Admin</h1>
+
+        <div class="log">
+            <p class="now">
+                <span class="time"></span>
+                <span class="action"></span>
+            </p>
+        </div>
+
+	</body>
+
+</html>
