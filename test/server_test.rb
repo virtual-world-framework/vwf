@@ -35,7 +35,7 @@ class ServerTest < Test::Unit::TestCase
   def test_root
     get "/"
     assert last_response.redirection?
-    assert_match %r{/0000000000000000/$}, last_response.location
+    assert_match %r{/[[:xdigit:]]{16}/$}, last_response.location
   end
 
   # Redirects an application specified using a file URL (no trailing slash) to its directory URL
@@ -59,7 +59,7 @@ class ServerTest < Test::Unit::TestCase
   def test_application_as_directory_url
     get "/directory/component.vwf/"
     assert last_response.redirection?
-    assert_match %r{/0000000000000000/$}, last_response.location
+    assert_match %r{/[[:xdigit:]]{16}/$}, last_response.location
   end
 
   # Redirects an application session specified using a file URL (no trailing slash) to its
