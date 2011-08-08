@@ -294,15 +294,15 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
             switch ( propertyName ) {
 
                 case "rotX":
-                    value = glgeObject.setRotX( Number( propertyValue ) );
+                    value = glgeObject.setRotX( Number( propertyValue ) * ( 3.14159/180.0 ) );
                     break;
 
                 case "rotY":
-                    value = glgeObject.setRotY( Number( propertyValue ) );
+                    value = glgeObject.setRotY( Number( propertyValue ) * ( 3.14159/180.0 ) );
                     break;
 
                 case "rotZ":
-                    value = glgeObject.setRotZ( Number( propertyValue ) );
+                    value = glgeObject.setRotZ( Number( propertyValue ) * ( 3.14159/180.0 ) );
                     break;
 
                 case "eulers":
@@ -325,13 +325,13 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         switch ( propertyName )
                         {
                             case "eulers":
-                                value = glgeObject.setRot( Number( values[0] ) * ( 3.14/180.0 ) , Number( values[1] )* ( 3.14/180.0 ), Number( values[2] ) * ( 3.14/180.0 ) );
+                                value = glgeObject.setRot( Number( values[0] ) * ( 3.14159/180.0 ) , Number( values[1] )* ( 3.14159/180.0 ), Number( values[2] ) * ( 3.14159/180.0 ) );
                                 break;
                             case "position":
                                 value = glgeObject.setLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
                                 break;
                             case "worldEulers":
-                                value = glgeObject.setDRot( Number( values[0] )* ( 3.14/180.0 ), Number( values[1] )* ( 3.14/180.0 ), Number( values[2] )* ( 3.14/180.0 ) );
+                                value = glgeObject.setDRot( Number( values[0] )* ( 3.14159/180.0 ), Number( values[1] )* ( 3.14159/180.0 ), Number( values[2] )* ( 3.14159/180.0 ) );
                                 break;
                             case "worldPosition":
                                 value = glgeObject.setDLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
@@ -387,20 +387,20 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             switch ( propertyName ) {
 
                 case "rotX":
-                    value = glgeObject.getRotX();
+                    value = glgeObject.getRotX() * ( 180.0/3.14159 );
                     break;
 
                 case "rotY":
-                    value = glgeObject.getRotY();
+                    value = glgeObject.getRotY() * ( 180.0/3.14159 );
                     break;
 
                 case "rotZ":
-                    value = glgeObject.getRotZ();
+                    value = glgeObject.getRotZ() * ( 180.0/3.14159 );
                     break;
 
                 case "eulers":
                     value = new Array;
-                    value.push( glgeObject.getRotX() * ( 180.0/3.14 ), glgeObject.getRotY()* ( 180.0/3.14 ), glgeObject.getRotZ()* ( 180.0/3.14 ) );
+                    value.push( glgeObject.getRotX() * ( 180.0/3.14159 ), glgeObject.getRotY()* ( 180.0/3.14159 ), glgeObject.getRotZ()* ( 180.0/3.14159 ) );
                     break;
                 case "position":
                     value = new Array;
@@ -408,7 +408,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     break;
                 case "worldEulers":
                     value = new Array;
-                    value.push( glgeObject.getDRotX()* ( 180.0/3.14 ), glgeObject.getDRotY()* ( 180.0/3.14 ), glgeObject.getDRotZ()* ( 180.0/3.14 ) );
+                    value.push( glgeObject.getDRotX()* ( 180.0/3.14159 ), glgeObject.getDRotY()* ( 180.0/3.14159 ), glgeObject.getDRotZ()* ( 180.0/3.14159 ) );
                     break;
                 case "worldPosition":
                     value = new Array;

@@ -116,7 +116,7 @@
 
         var propertyQuery;
 
-        if (propertyName == "angle") {
+        if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
             propertyQuery = containerQuery.append(
                 "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
                     "<p class='vwf-label'>" + propertyName + ": " +
@@ -225,7 +225,7 @@
 
         // Demo hack 3: attach a slider
 
-        if (propertyName == "angle") {
+        if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
             propertyQuery.find(".vwf-control-slider").slider({
                 range: "min",
                 value: 0,
@@ -366,7 +366,7 @@
 
         // Demo hack 3
 
-        if (propertyName == "angle") {
+        if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
             propertyQuery.find(".vwf-control-slider").slider("value", Number(propertyValue));
         } else if (propertyName == "eulers" || propertyName == "worldEulers") {
             var propValue = JSON.stringify(propertyValue);
