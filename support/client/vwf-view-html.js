@@ -206,7 +206,7 @@
             var nodeID = Number(jQuery(this).parents(".vwf-node")[0].id.split("-").pop()) || 0; // TODO: symbol for global id
             var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID);
             var propertyQuery = nodeQuery.children(".vwf-properties").children("#view-html-" + nodeID + "-" + propertyName);
-            view.setProperty(nodeID, propertyName, Number(JSON.parse(propertyQuery.find(".vwf-value").text())) + 1);
+            //view.setProperty(nodeID, propertyName, Number(JSON.parse(propertyQuery.find(".vwf-value").text())) + 1);
         });
 
         // Demo hack 2: show a text control and update character-by-character
@@ -236,7 +236,7 @@
                     view.setProperty(nodeID, propertyName, Number(ui.value));
                 }
             });
-        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
+        } else if (propertyName == "eulers" || propertyName == "worldEulers" ) {
             propertyQuery.find(".vwf-control-roll-slider").slider({
                 range: "min",
                 value: 0,
