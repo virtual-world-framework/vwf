@@ -244,7 +244,7 @@ isAnimatable = isAnimatable && glgeObject.animation || propertyName == "looping"
 isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a hack to prevent disabling the animation that keeps the world upright
 
 
-            vwf.logger.info( namespace + ".satProperty " + path( glgeObject ) + " " + propertyName + " " + propertyValue);
+//            vwf.logger.info( namespace + ".satProperty " + path( glgeObject ) + " " + propertyName + " " + propertyValue);
 
             if ( isAnimatable ) {
 
@@ -778,7 +778,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     //this.throwEvent( "onMouseMove", mouseDownObjectID);
                 }
 
-                view.callMethod( mouseInfo, "onMouseMove" );
+                //view.callMethod( mouseDownObjectID, "onMouseMove" );
             } else {
                 if (mouseOverID) {
                     if (mouseOverObjectID) {
