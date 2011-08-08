@@ -51,7 +51,7 @@
             // );
 
             var canvasQuery = jQuery(this.rootSelector).append(
-                "<canvas id='" + nodeID + "' class='vwf-scene' width='1200' height='600'/>"
+                "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='600'/>"
             ).children(":last");
 
             var scene = this.scenes[nodeID] = {
@@ -243,6 +243,9 @@
 isAnimatable = isAnimatable && glgeObject.animation || propertyName == "looping" && glgeObject.constructor == GLGE.ParticleSystem; // has an animation?
 isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a hack to prevent disabling the animation that keeps the world upright
 
+
+            vwf.logger.info( namespace + ".satProperty " + path( glgeObject ) + " " + propertyName + " " + propertyValue);
+
             if ( isAnimatable ) {
 
                 switch ( propertyName ) {
@@ -301,6 +304,45 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                 case "rotZ":
                     value = glgeObject.setRotZ( Number( propertyValue ) );
                     break;
+
+                case "eulers":
+                case "position":
+                case "worldEulers":
+                case "worldPosition":
+                case "scale":
+                    {
+                        var values;
+                        var propValue;
+                       
+                        if ( propertyValue.constructor != String )
+                            propValue = JSON.stringify(propertyValue);
+                        else
+                            propValue = propertyValue;
+
+                        values = propValue.replace("[", "");
+                        values = values.replace("]", "");
+                        values = values.split(',');
+                        switch ( propertyName )
+                        {
+                            case "eulers":
+                                value = glgeObject.setRot( Number( values[0] ) * ( 3.14/180.0 ) , Number( values[1] )* ( 3.14/180.0 ), Number( values[2] ) * ( 3.14/180.0 ) );
+                                break;
+                            case "position":
+                                value = glgeObject.setLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
+                                break;
+                            case "worldEulers":
+                                value = glgeObject.setDRot( Number( values[0] )* ( 3.14/180.0 ), Number( values[1] )* ( 3.14/180.0 ), Number( values[2] )* ( 3.14/180.0 ) );
+                                break;
+                            case "worldPosition":
+                                value = glgeObject.setDLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
+                                break;
+                            case "scale":                            
+                                value = glgeObject.setScale( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
+                                break;
+                        }
+                    }
+                    break;
+
             }
 
         }
@@ -355,6 +397,32 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 case "rotZ":
                     value = glgeObject.getRotZ();
                     break;
+
+                case "eulers":
+                    value = new Array;
+                    value.push( glgeObject.getRotX() * ( 180.0/3.14 ), glgeObject.getRotY()* ( 180.0/3.14 ), glgeObject.getRotZ()* ( 180.0/3.14 ) );
+                    break;
+                case "position":
+                    value = new Array;
+                    value.push( glgeObject.getLocX(), glgeObject.getLocY(), glgeObject.getLocZ() );
+                    break;
+                case "worldEulers":
+                    value = new Array;
+                    value.push( glgeObject.getDRotX()* ( 180.0/3.14 ), glgeObject.getDRotY()* ( 180.0/3.14 ), glgeObject.getDRotZ()* ( 180.0/3.14 ) );
+                    break;
+                case "worldPosition":
+                    value = new Array;
+                    value.push( glgeObject.getDLocX(), glgeObject.getDLocY(), glgeObject.getDLocZ() );
+                    break;
+                case "scale":
+                    value = new Array;                            
+                    value.push( glgeObject.getScaleX(), glgeObject.getScaleY(), glgeObject.getScaleZ() );
+                    break;
+
+                case "visible":
+                    //glgeObject.    
+                    break;
+
             }
 
         }
@@ -482,7 +550,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var orbitYaw = 0;
     var orbitPitch = 0;
-    var orbitInc = 6.0;
+    var orbitInc = 2.0;
     var objectCenter = {};
 
     var centerGroup = undefined;
@@ -496,9 +564,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
                 if ( !centerGroup ) {
                     centerGroup = new GLGE.Group();
-                    objectCenter.x = 0;
-                    objectCenter.y = 2;
-                    objectCenter.z = 0;
+                    objectCenter.x = 0.15;
+                    objectCenter.y = 0;
+                    objectCenter.z = -0.3;
                 }
 
                 camerapos = camera.getPosition();
@@ -525,22 +593,22 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     var bKeyDown = false;
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
                         // orbit up
-                         orbitYaw += orbitInc;
+                         orbitPitch += orbitInc;
                          bKeyDown = true;
                     }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
                         // orbit down
-                        orbitYaw -= orbitInc;
+                        orbitPitch -= orbitInc;
                           bKeyDown = true;
                     }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_A)) {
                         // orbit left
-                        orbitPitch += orbitInc;
+                        orbitYaw += orbitInc;
                         bKeyDown = true;
                     }
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_D)) {
                         // orbit right  
-                       orbitPitch -= orbitInc;
+                       orbitYaw -= orbitInc;
                        bKeyDown = true;
                     }  
                      
@@ -560,6 +628,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                         y = objectCenter.y + radius * Math.cos( orbitYaw );
                         z = objectCenter.z + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );
 
+                        console.info( " Setting camera position to: [ " + x + ", " + y + ", " + z + " ]" );
                         camera.setLocX( x );
                         camera.setLocY( y );
                         camera.setLocZ( z );
@@ -710,8 +779,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 }
 
                 view.callMethod( mouseInfo, "onMouseMove" );
-            }
-            else {
+            } else {
                 if (mouseOverID) {
                     if (mouseOverObjectID) {
                         if (mouseOverID != mouseOverObjectID) {
@@ -723,22 +791,19 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
                             //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                        }
-                        else {
+                        } else {
                             //vwf.logger.info("CANVAS onMouseHover: " + mouseOverObjectID);
                             //this.throwEvent( "onMouseHover", mouseOverObjectID);
 
                         }
-                    }
-                    else {
+                    } else {
                         mouseOverObjectID = mouseOverID;
 
                         //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
                         //this.throwEvent( "onMouseEnter", mouseOverObjectID);
                     }
 
-                }
-                else {
+                } else {
                     if (mouseOverObjectID) {
                         //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
                         //this.throwEvent( "onMouseLeave", mouseOverObjectID);
