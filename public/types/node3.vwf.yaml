@@ -1,0 +1,22 @@
+--- 
+methods: 
+  pointerClick: 
+extends: http://vwf.example.com/types/node
+properties: 
+  looping: false
+  transform: 
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  - 0
+  - 0
+  - 0
+  enabled: true
+  speed: 1
+  playing: false
