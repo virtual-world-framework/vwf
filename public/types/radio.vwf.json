@@ -2,7 +2,7 @@
 
 	"extends": "http://vwf.example.com/types/glge",
 
-	"source": "vwf-view-glge/radio/radio.xml",
+	"source": "radio.xml",
 	"type": "model/x-glge",
 
 	"children": {
