@@ -833,7 +833,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     };
 
     function name(obj) {
-        return obj.colladaName || obj.colladaId || obj.name || obj.id || "";
+        var sName = obj.colladaName || obj.colladaId || obj.name || obj.id || "";
+        //vwf.logger.info("  glgeObject is named: " + sName );
+        return sName;
     }
 
 
