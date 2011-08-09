@@ -1,5 +1,6 @@
 --- 
 extends: http://vwf.example.com/types/glge
+source: level.xml
 type: model/x-glge
 children: 
   seymourplane_triangulate.dae: 
@@ -21,11 +22,10 @@ children:
   duck.dae: 
     extends: http://vwf.example.com/types/node3
     scripts: 
-    - text: this.properties.angle.setter = function( value ) { this.parent['http://localhost:8080/vwf-view-glge/collada/seymourplane_triangulate.dae'].angle = value + 1; }
+    - text: this.properties.angle.setter = function( value ) { this.parent['http://localhost:8080/seymourplane_triangulate.dae'].angle = value + 1; }
       type: application/javascript
     - text: this.pointerClick = function() { this.playing = !this.playing }
       type: application/javascript
     properties: 
       angle: 0
       playing: false
-source: vwf-view-glge/collada/level.xml

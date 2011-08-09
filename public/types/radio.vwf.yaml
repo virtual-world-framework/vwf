@@ -1,5 +1,6 @@
 --- 
 extends: http://vwf.example.com/types/glge
+source: radio.xml
 type: model/x-glge
 children: 
   radio.dae: 
@@ -136,4 +137,3 @@ children:
       playing: true
   maincamera: 
     extends: http://vwf.example.com/types/camera
-source: vwf-view-glge/radio/radio.xml

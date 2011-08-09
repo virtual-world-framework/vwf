@@ -2,7 +2,7 @@
 
     "extends": "http://vwf.example.com/types/glge",
 
-    "source": "vwf-view-glge/collada/level.xml",
+    "source": "level.xml",
     "type": "model/x-glge",
 
     "children":
@@ -21,7 +21,7 @@
             "properties": { "angle": 0, "playing": false },
 
             "scripts": [ {
-                "text": "this.properties.angle.setter = function( value ) { this.parent['http://localhost:8080/vwf-view-glge/collada/seymourplane_triangulate.dae'].angle = value + 1; }",
+                "text": "this.properties.angle.setter = function( value ) { this.parent['http://localhost:8080/seymourplane_triangulate.dae'].angle = value + 1; }",
                 "type": "application/javascript"
             }, {
                 "text": "this.pointerClick = function() { this.playing = !this.playing }",
