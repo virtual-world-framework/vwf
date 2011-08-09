@@ -22,8 +22,14 @@ children:
                 children:
                   ic40_MicrophonePort:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      bone6:
+                        extends: http://vwf.example.com/types/node3
                   ic40_SpeakerPort:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      bone8:
+                        extends: http://vwf.example.com/types/node3
                   ic40Channel:
                     extends: http://vwf.example.com/types/node3
                     properties:
@@ -42,8 +48,9 @@ children:
                     extends: http://vwf.example.com/types/node3
                   ic40PTT:
                     extends: http://vwf.example.com/types/node3
-                  ic40Radio:
-                    extends: http://vwf.example.com/types/node3
+                    children:
+                      bone17:
+                        extends: http://vwf.example.com/types/node3
                   ic40Red:
                     extends: http://vwf.example.com/types/node3
                   ic40Up:
@@ -56,30 +63,45 @@ children:
                     extends: http://vwf.example.com/types/node3
                   LCD_Back:
                     extends: http://vwf.example.com/types/node3
-                  Antennae:
+                  BeltClip_1:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      BeltClip:
+                        extends: http://vwf.example.com/types/node3
+                        children:
+                          bone25:
+                            extends: http://vwf.example.com/types/node3
+                      BeltClipBase:
+                        extends: http://vwf.example.com/types/node3
+                        children:
+                          BeltClipTab:
+                            extends: http://vwf.example.com/types/node3
+                      BeltClip_Latch:
+                        extends: http://vwf.example.com/types/node3
+                        children:
+                          bone29:
+                            extends: http://vwf.example.com/types/node3
+                            children:
+                              bone30:
+                                extends: http://vwf.example.com/types/node3
                   Battery:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40Battery:
+                        extends: http://vwf.example.com/types/node3
+                        children:
+                          bone33:
+                            extends: http://vwf.example.com/types/node3
                   BatteryLatch:
                     extends: http://vwf.example.com/types/node3
-              Cam_Left:
-                extends: http://vwf.example.com/types/node3
-              Cam_Top:
-                extends: http://vwf.example.com/types/node3
-              Cam_Front:
-                extends: http://vwf.example.com/types/node3
-              Cam_Right:
-                extends: http://vwf.example.com/types/node3
-              Cam_Battery:
-                extends: http://vwf.example.com/types/node3
-              Cam_BeltClip:
-                extends: http://vwf.example.com/types/node3
-              Cam_Antennae:
-                extends: http://vwf.example.com/types/node3
-              Cam_ID:
-                extends: http://vwf.example.com/types/node3
-              Cam_MainView:
-                extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40BatteryLatch:
+                        extends: http://vwf.example.com/types/node3
+                  ic40Radio:
+                    extends: http://vwf.example.com/types/node3
+                    children:
+                      bone37:
+                        extends: http://vwf.example.com/types/node3
               Omni01:
                 extends: http://vwf.example.com/types/node3
               Omni02:
@@ -88,4 +110,5 @@ children:
                 extends: http://vwf.example.com/types/node3
               Omni04:
                 extends: http://vwf.example.com/types/node3
-  
+              ic40Antennae:
+                extends: http://vwf.example.com/types/node3
