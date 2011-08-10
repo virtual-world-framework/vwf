@@ -117,17 +117,23 @@
         var propertyQuery;
 
         if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
+
             propertyQuery = containerQuery.append(
                 "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
                     "<p class='vwf-label'>" + propertyName + ": " +
                         "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
                     "</p>" +
-            // Demo hack 3
                     "<div class='vwf-control-slider'></div>" +
                 "</div>"
             ).children(":last");
+
         } else if (propertyName == "eulers" || propertyName == "worldEulers") {
-            var propValue = JSON.stringify(propertyValue);
+
+            var propValue;
+            if (typeof propertyValue == "String" || typeof propertyValue == "string" || propertyValue instanceof String)
+                propValue = propertyValue;
+            else
+                propValue = JSON.stringify(propertyValue);
             var values = propValue.replace("[", "");
             values = values.replace("]", "");
             values = values.split(',');
@@ -156,8 +162,14 @@
                     "<div class='vwf-control-yaw-slider' id='slider-yaw'></div>" +
                 "</div>"
             ).children(":last");
+
         } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
-            var propValue = JSON.stringify(propertyValue);
+
+            var propValue;
+            if (typeof propertyValue == "String" || typeof propertyValue == "string" || propertyValue instanceof String)
+                propValue = propertyValue;
+            else
+                propValue = JSON.stringify(propertyValue);
             var values = propValue.replace("[", "");
             values = values.replace("]", "");
             values = values.split(',');
@@ -186,46 +198,65 @@
                     "<div class='vwf-control-z-slider' id='slider-z'></div>" +
                 "</div>"
             ).children(":last");
-        } else {
+
+        } else if (typeof propertyValue == "Boolean" || typeof propertyValue == "boolean" || propertyValue instanceof Boolean) {
+
             propertyQuery = containerQuery.append(
                 "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
                     "<p class='vwf-label'>" + propertyName + ": " +
                         "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
-            // Demo hack 2
-            // "<input type='text' class='vwf-control'></input>" +
+	                    "<div class='vwf-" + propertyName + "-bool-control' id='bool-control'>" +
+		                    "<input type='radio' class='vwf-" + propertyName + "-bool-control-true' id='" + nodeID + "-" + propertyName + "-true' name='" + nodeID + " - " + propertyName + "-radio' /><label for='bool-" + propertyName + "-true'>true</label>" +
+		                    "<input type='radio' class='vwf-" + propertyName + "-bool-control-false' id='" + nodeID + "-" + propertyName + "-false' name='" + nodeID + " - " + propertyName + "-radio' checked='checked' /><label for='bool-" + propertyName + "-false'>false</label>" +
+	                    "</div>" +
                     "</p>" +
                 "</div>"
             ).children(":last");
+
+        } else if (typeof propertyValue == "Number" || typeof propertyValue == "number" || propertyValue instanceof Number) {
+
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
+                        "<div class='vwf-" + propertyName + "-numeric-input' id='" + propertyName + "-numeric-input'>" +
+	                        "<label for='tags'>Value: </label>" +
+	                        "<input id='tags' />" +
+                        "</div>" +
+                    "</p>" +
+                "</div>"
+            ).children(":last");
+
+        } else if (typeof propertyValue == "String" || typeof propertyValue == "string" || propertyValue instanceof String) {
+
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
+                        "<div class='vwf-" + propertyName + "-string-input' id='" + propertyName + "-string-input'>" +
+	                        "<label for='tags'>Value: </label>" +
+	                        "<input id='tags' />" +
+                        "</div>" +
+                    "</p>" +
+                "</div>"
+            ).children(":last");
+
+        } else {
+
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
+                    "</p>" +
+                "</div>"
+            ).children(":last");
+
         }
 
         var view = this;
 
-        // Demo hack 1: increment by 1 on click
-
-        propertyQuery.click(function () {
-            var nodeID = Number(jQuery(this).parents(".vwf-node")[0].id.split("-").pop()) || 0; // TODO: symbol for global id
-            var nodeQuery = jQuery(nodeID == 0 ? ".vwf-root" : "#view-html-" + nodeID);
-            var propertyQuery = nodeQuery.children(".vwf-properties").children("#view-html-" + nodeID + "-" + propertyName);
-            //view.setProperty(nodeID, propertyName, Number(JSON.parse(propertyQuery.find(".vwf-value").text())) + 1);
-        });
-
-        // Demo hack 2: show a text control and update character-by-character
-
-        // var controlQuery = propertyQuery.find( ".vwf-control" );
-
-        // controlQuery.keyup( function() {
-        //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id.split("-").pop() ) || 0; // TODO: symbol for global id
-        //     view.setProperty( nodeID, propertyName, jQuery(this).val() );
-        // } );
-
-        // controlQuery.change( function() {
-        //     var nodeID = Number( jQuery(this).parents( ".vwf-node" )[0].id.split("-").pop() ) || 0; // TODO: symbol for global id
-        //     view.setProperty( nodeID, propertyName, jQuery(this).val() ); // TODO: json exceptions?
-        // } );
-
-        // Demo hack 3: attach a slider
-
         if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
+
             propertyQuery.find(".vwf-control-slider").slider({
                 range: "min",
                 value: 0,
@@ -236,7 +267,9 @@
                     view.setProperty(nodeID, propertyName, Number(ui.value));
                 }
             });
-        } else if (propertyName == "eulers" || propertyName == "worldEulers" ) {
+
+        } else if (propertyName == "eulers" || propertyName == "worldEulers") {
+
             propertyQuery.find(".vwf-control-roll-slider").slider({
                 range: "min",
                 value: 0,
@@ -285,7 +318,9 @@
                     view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
                 }
             });
+
         } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+
             propertyQuery.find(".vwf-control-x-slider").slider({
                 range: "min",
                 value: 0,
@@ -334,6 +369,55 @@
                     view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
                 }
             });
+
+        } else if (typeof propertyValue == "Boolean" || typeof propertyValue == "boolean" || propertyValue instanceof Boolean) {
+
+            var trueRadio = propertyQuery.find(".vwf-" + propertyName + "-bool-control-true");
+            var falseRadio = propertyQuery.find(".vwf-" + propertyName + "-bool-control-false");
+
+            if (propertyValue) trueRadio[0].checked = true;
+            else falseRadio[0].checked = true;
+
+            trueRadio.click(function () {
+                view.setProperty(nodeID, propertyName, true);
+            });
+            falseRadio.click(function () {
+                view.setProperty(nodeID, propertyName, false);
+            });
+
+        } else if (typeof propertyValue == "Number" || typeof propertyValue == "number" || propertyValue instanceof Number) {
+
+            var numericInput = propertyQuery.find(".vwf-" + propertyName + "-numeric-input");
+            numericInput[0].lastChild.value = propertyValue;
+            numericInput.keydown(function (event) {
+                // Prevent shift key since its not needed
+                if (event.shiftKey == true) {
+                    event.preventDefault();
+                }
+                // Allow Only: keyboard 0-9, numpad 0-9, backspace, tab, left arrow, right arrow, delete
+                if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105) || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 39 || event.keyCode == 46) {
+                    // Allow normal operation
+                } else {
+                    // Prevent the rest
+                    event.preventDefault();
+                }
+            });
+
+            numericInput.keyup(function (event) {
+                if (event.target && event.target.value && event.target.value != "")
+                    view.setProperty(nodeID, propertyName, Number(event.target.value));
+            });
+
+        } else if (typeof propertyValue == "String" || typeof propertyValue == "string" || propertyValue instanceof String) {
+
+            var stringInput = propertyQuery.find(".vwf-" + propertyName + "-string-input");
+
+            stringInput[0].lastChild.value = propertyValue;
+            stringInput.keyup(function (event) {
+                if (event.target && event.target.value && event.target.value != "")
+                    view.setProperty(nodeID, propertyName, Number(event.target.value));
+            });
+
         }
     };
 
@@ -367,8 +451,11 @@
         // Demo hack 3
 
         if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
+
             propertyQuery.find(".vwf-control-slider").slider("value", Number(propertyValue));
+
         } else if (propertyName == "eulers" || propertyName == "worldEulers") {
+
             var propValue = JSON.stringify(propertyValue);
             var values = propValue.replace("[", "");
             values = values.replace("]", "");
@@ -379,7 +466,9 @@
             propertyQuery.find(".vwf-roll-value").text(values[0]);
             propertyQuery.find(".vwf-pitch-value").text(values[1]);
             propertyQuery.find(".vwf-yaw-value").text(values[2]);
+
         } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+
             var propValue = JSON.stringify(propertyValue);
             var values = propValue.replace("[", "");
             values = values.replace("]", "");
@@ -390,7 +479,26 @@
             propertyQuery.find(".vwf-x-value").text(values[0]);
             propertyQuery.find(".vwf-y-value").text(values[1]);
             propertyQuery.find(".vwf-z-value").text(values[2]);
+
+        } else if (typeof propertyValue == "Boolean" || typeof propertyValue == "boolean" || propertyValue instanceof Boolean) {
+
+            var trueRadio = propertyQuery.find(".vwf-" + propertyName + "-bool-control-true");
+            var falseRadio = propertyQuery.find(".vwf-" + propertyName + "-bool-control-false");
+            if (propertyValue) trueRadio[0].checked = true;
+            else falseRadio[0].checked = true;
+
+        } else if (typeof propertyValue == "Number" || typeof propertyValue == "number" || propertyValue instanceof Number) {
+
+            var numericInput = propertyQuery.find(".vwf-" + propertyName + "-numeric-input");
+            numericInput[0].lastChild.value = propertyValue;
+
+        } else if (typeof propertyValue == "String" || typeof propertyValue == "string" || propertyValue instanceof String) {
+
+            var stringInput = propertyQuery.find(".vwf-" + propertyName + "-string-input");
+            stringInput[0].lastChild.value = propertyValue;
+
         }
+
 
     };
 

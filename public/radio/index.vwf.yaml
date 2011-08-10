@@ -19,6 +19,13 @@ children:
                 extends: http://vwf.example.com/types/node3
               Radio:
                 extends: http://vwf.example.com/types/node3
+                properties: 
+                  playing: false
+                  looping: false
+                  speed: 1
+                scripts:
+                - text: this.pointerClick = function() { console.info("ic40Antenne.pointerClick()"); this.playing = !this.playing }
+                  type: application/javascript 
                 children:
                   ic40_MicrophonePort:
                     extends: http://vwf.example.com/types/node3
@@ -65,6 +72,13 @@ children:
                     extends: http://vwf.example.com/types/node3
                   BeltClip_1:
                     extends: http://vwf.example.com/types/node3
+                    properties: 
+                      playing: false
+                      looping: false
+                      speed: 1
+                    scripts:
+                    - text: this.pointerClick = function() { console.info("BeltClip_1.pointerClick()"); this.playing = !this.playing }
+                      type: application/javascript
                     children:
                       BeltClip:
                         extends: http://vwf.example.com/types/node3
@@ -78,6 +92,13 @@ children:
                             extends: http://vwf.example.com/types/node3
                       BeltClip_Latch:
                         extends: http://vwf.example.com/types/node3
+                        properties: 
+                          playing: false
+                          looping: false
+                          speed: 1
+                        scripts:
+                        - text: this.pointerClick = function() { console.info("BeltClip_Latch.pointerClick()"); this.playing = !this.playing }
+                          type: application/javascript
                         children:
                           bone29:
                             extends: http://vwf.example.com/types/node3
@@ -86,6 +107,13 @@ children:
                                 extends: http://vwf.example.com/types/node3
                   Battery:
                     extends: http://vwf.example.com/types/node3
+                    properties: 
+                      playing: false
+                      looping: false
+                      speed: 1
+                    scripts:
+                    - text: this.pointerClick = function() { console.info("Battery.pointerClick()"); this.playing = !this.playing }
+                      type: application/javascript 
                     children:
                       ic40Battery:
                         extends: http://vwf.example.com/types/node3
@@ -94,6 +122,13 @@ children:
                             extends: http://vwf.example.com/types/node3
                   BatteryLatch:
                     extends: http://vwf.example.com/types/node3
+                    properties: 
+                      playing: false
+                      looping: false
+                      speed: 1
+                    scripts:
+                    - text: this.pointerClick = function() { console.info("BatteryLatch.pointerClick()"); this.playing = !this.playing }
+                      type: application/javascript
                     children:
                       ic40BatteryLatch:
                         extends: http://vwf.example.com/types/node3
@@ -111,4 +146,4 @@ children:
               Omni04:
                 extends: http://vwf.example.com/types/node3
               ic40Antennae:
-                extends: http://vwf.example.com/types/node3
+                extends: http://vwf.example.com/types/node3  

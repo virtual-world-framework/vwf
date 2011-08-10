@@ -495,6 +495,10 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         if ( !success ) {
             vwf.logger.info( "     unable to bind: " + childName );
+        } else {
+            if ( child.glgeObject.animate && child.glgeObject.animation ) {
+               vwf.logger.info( "$$$$$     child id " + childID + " with name " + childName ); 
+            }
         }
 
         return success;
@@ -670,6 +674,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                         }
                     }
 
+                    var allowCameraPositions = false;
                     var cp = "";
                     if (scene.glgeKeys.isKeyPressed(GLGE.KI_1)) cp = "1";
                     else if (scene.glgeKeys.isKeyPressed(GLGE.KI_2)) cp = "2";
@@ -680,7 +685,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     else if (scene.glgeKeys.isKeyPressed(GLGE.KI_7)) cp = "7";
                     else if (scene.glgeKeys.isKeyPressed(GLGE.KI_8)) cp = "8";
 
-                    if ( cp != "" ) {
+                    if ( allowCameraPositions && cp != "" ) {
                         var pos = cameraPositions[cp]["position"];
                         var rot = cameraPositions[cp]["rotation"];
                         camera.setLocX(pos[0]);
