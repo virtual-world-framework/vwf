@@ -15,7 +15,7 @@ class Reflector < SocketIOApplication
 
     super
 
-    send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]
+    send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
     schedule_tick
 
   end
@@ -32,9 +32,20 @@ class Reflector < SocketIOApplication
 private
 
   def schedule_tick
-    session[:tick_timer] ||= EventMachine::PeriodicTimer.new 2 do
-      broadcast JSON.generate :time => Time.now.to_f  # TODO: play/pause/stop, start at 0
-    end
+
+    session[:time] ||= {
+
+      :start_time => Time.now,  # TODO: initialize using a play method on a simulation object
+      :pause_time => nil,
+
+      :timer => EventMachine::PeriodicTimer.new( 0.1 ) do  # TODO: configuration parameter for update rate
+        if session[:time][:start_time] && !session[:time][:pause_time]
+          broadcast JSON.generate :time => Time.now - session[:time][:start_time]
+        end
+      end
+
+    }
+
   end
   
 end
