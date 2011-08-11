@@ -63,6 +63,12 @@
 
             var view = this;
 
+            // Connect GLGE to the VWF timeline.
+
+            GLGE.now = function() {
+                return vwf.time() * 1000;
+            };
+
             scene.glgeDocument.onLoad = function () {
                 var canvas = canvasQuery.get(0);
                 scene.glgeRenderer = new GLGE.Renderer(canvas);
@@ -94,7 +100,7 @@
                 var now;
                 function renderScene() {
                     now = parseInt(new Date().getTime());
-                    scene.glgeRenderer.render( now );
+                    scene.glgeRenderer.render();
                     checkKeys(nodeID, view, now, lasttime);
                     lasttime = now;
                 };
