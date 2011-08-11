@@ -135,7 +135,12 @@
         return vwf.execute( nodeID, scriptText, scriptType );
     };
 
-    // TODO: time
+    // -- time -------------------------------------------------------------------------------------
+
+    module.prototype.time = function() {
+        // vwf.logger.debug( namespace + ".time" );
+        return vwf.time();
+    };
 
     // == Response API =============================================================================
 

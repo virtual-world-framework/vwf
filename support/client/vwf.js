@@ -27,7 +27,7 @@
         // This is the simulation clock, which contains the current time in milliseconds. Time is
         // controlled by the conference server and updates here as we receive control messages.
 
-        this.time = 0;
+        this.now = 0;
 
         // == Private variables ====================================================================
 
@@ -231,10 +231,7 @@
                 this.dispatch( 0 );
 
                 setInterval( function() {
-
-                    vwf.time += 10;
-                    vwf.dispatch( vwf.time );
-
+                    vwf.dispatch( vwf.now + 10 ); // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/resume/stop and different playback rates as with connected mode.
                 }, 10 );
 
             }
@@ -259,12 +256,14 @@
 
                         // Unpack the arguments.
 
-                        fields = JSON.parse( message )
+                        fields = JSON.parse( message );
+                        fields.time = Number( fields.time );
+                        // TODO: other message validation (check node id, others?)
 
                         // Add the message to the queue and keep it ordered by time.
 
                         queue.push( fields );
-                        queue.sort( function( a, b ) { return Number( a.time ) - Number( b.time ) } );
+                        queue.sort( function( a, b ) { return a.time - b.time } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -275,8 +274,7 @@
                         // move time forward for items arriving in the queue from the conference
                         // server.
 
-                        var time = Number( fields.time );
-                        vwf.dispatch( time );
+                        vwf.dispatch( fields.time );
 
                     } catch( e ) {
 
@@ -322,7 +320,7 @@
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
-                time: this.time,
+                time: this.now,
                 node: args.shift(),
                 action: args.shift(),
                 parameters: args
@@ -340,7 +338,7 @@
                 // Otherwise, for single-user mode, loop it immediately back to the incoming queue.
 
                 queue.push( fields );
-                queue.sort( function( a, b ) { return Number( a.time ) - Number( b.time ) } );
+                queue.sort( function( a, b ) { return a.time - b.time } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive
 
             }
 
@@ -352,13 +350,14 @@
 
         this.receive = function( fields ) {
 
-            // Shift off the now-unneeded time parameter (dispatch() has already advanced the time)
-            // and locate the node ID and action name.
+            // Advance the time and locate the node ID and action name.
 
-// TODO: delegate parsing and validation to each action.
+            this.now = fields.time;
 
             var nodeID = fields.node;
             var actionName = fields.action;
+
+// TODO: delegate parsing and validation to each action.
 
             // Look up the action handler and invoke it with the remaining parameters.
 
@@ -378,21 +377,17 @@
 
         this.dispatch = function( currentTime ) {
 
-            // Handle messages until we empty the queue or reach the new current time.
+            // Handle messages until we empty the queue or reach the new current time. For each,
+            // remove the message and perform the action. The simulation time is advanced to the
+            // message time as each one is processed.
 
-            while ( queue.length > 0 && Number( queue[0].time ) <= currentTime ) {
-
-                // Set the simulation time to the message time, remove the message and perform the
-                // action.
-
-                this.time = Number( queue[0].time );
+            while ( queue.length > 0 && queue[0].time <= currentTime ) {
                 this.receive( queue.shift() );
-
             }
 
             // Set the simulation time to the new current time.
 
-            this.time = currentTime;
+            this.now = currentTime;
             
         };
 
@@ -788,6 +783,17 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
             return scriptValue;
         };
+
+        // -- time ---------------------------------------------------------------------------------
+
+        // Return the current simulation time;
+
+        this.time = function() {
+
+            // this.logger.debug( "vwf.time" );
+
+            return this.now;
+        }
 
         // -- logging ------------------------------------------------------------------------------
 
