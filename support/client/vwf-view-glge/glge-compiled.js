@@ -1298,6 +1298,10 @@ GLGE.New=function(createclass){
 	}
 }
 
+GLGE.now = function(){
+    return parseInt(new Date().getTime());
+};
+
 /**
 * @constant 
 * @description Enumeration for TRUE
@@ -2053,7 +2057,7 @@ GLGE.Animatable.prototype.getName=function(){
 	if(!this.startFrame) this.startFrame=this.animation.startFrame;
 	if(!this.animFrames) this.animFrames=this.animation.frames;
 	var frame;
-	if(!now) now=parseInt(new Date().getTime());
+	if(!now) now=GLGE.now();
 	if(this.animFrames>1){
 		if(this.loop){
 			frame=((parseFloat(now)-parseFloat(this.animationStart))/1000*this.frameRate)%(this.animFrames-1)+1+this.startFrame; 
@@ -2076,7 +2080,7 @@ GLGE.Animatable.prototype.getName=function(){
 */
  GLGE.Animatable.prototype.setStartFrame=function(startFrame,blendTime,loop){
 	this.loop=loop;
-	var starttime=parseInt(new Date().getTime());
+	var starttime=GLGE.now();
 	if(!blendTime) blendTime=0;
 	if(blendTime>0){
 		if(this.animation){
@@ -2141,7 +2145,7 @@ GLGE.Animatable.prototype.getName=function(){
 */
 GLGE.Animatable.prototype.animate=function(now,nocache){
 	if(!this.paused && this.animation){
-		if(!now) now=parseInt(new Date().getTime());
+		if(!now) now=GLGE.now();
 		var frame=this.getFrameNumber(now);
 		
 		if(!this.animation.animationCache) this.animation.animationCache={};
@@ -2246,7 +2250,7 @@ GLGE.Animatable.prototype.animate=function(now,nocache){
 * @param {number} starttime [Optional] the starting time of the animation
 */
 GLGE.Animatable.prototype.setAnimation=function(animationVector,blendDuration,starttime){
-	if(starttime==null) starttime=parseInt(new Date().getTime());
+	if(starttime==null) starttime=GLGE.now();
 	if(!blendDuration) blendDuration=0;
 	if(blendDuration>0){
 		this.blendInitValues=this.getInitialValues(animationVector,starttime);
@@ -2307,8 +2311,8 @@ GLGE.Animatable.prototype.isLooping=GLGE.Animatable.prototype.getLoop;
 * @param  {boolean} value 
 */
 GLGE.Animatable.prototype.setPaused=function(value){
-	if(value) this.pauseTime=parseInt(new Date().getTime());
-		else this.animationStart=this.animationStart+(parseInt(new Date().getTime())-this.pauseTime);
+	if(value) this.pauseTime=GLGE.now();
+		else this.animationStart=this.animationStart+(GLGE.now()-this.pauseTime);
 	this.paused=value;
 	return this;
 }
@@ -3952,7 +3956,7 @@ GLGE.Action.prototype.start=function(blendTime,loop,names){
 	if(!loop) loop=false;
 	if(!blendTime) blendTime=0;
 	var channels=this.channels;
-	var start=(new Date()).getTime();
+	var start=GLGE.now();
 	this.animFinished=false;
 	
 	for(var i=0;i<channels.length;i++){
@@ -10813,7 +10817,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * @augments GLGE.Animatable
 */
 GLGE.ParticleSystem=function(uid){
-	this.startTime=(new Date()).getTime();
+	this.startTime=GLGE.now();
 	this.texture={};
 	this.startMaxVelocity={x:0,y:0,z:0};
 	this.startMinVelocity={x:0,y:0,z:0};
@@ -11381,7 +11385,7 @@ GLGE.ParticleSystem.prototype.setLoop=function(value){
 * Resets the particle system
 */
 GLGE.ParticleSystem.prototype.reset=function(){
-	this.startTime=(new Date()).getTime();
+	this.startTime=GLGE.now();
 }
 
 /**
@@ -11499,7 +11503,7 @@ GLGE.ParticleSystem.prototype.setUniforms=function(gl){
 			else GLGE.mat4gl(gl.scene.camera.getProjectionMatrix(),program.glarrays.pMatrix);	
 	gl.uniformMatrix4fv(pUniform, true, program.glarrays.pMatrix);
 
-	gl.uniform1f(GLGE.getUniformLocation(gl,program, "time"), ((new Date()).getTime()-this.startTime));
+	gl.uniform1f(GLGE.getUniformLocation(gl,program, "time"), (GLGE.now()-this.startTime));
 	gl.uniform1i(GLGE.getUniformLocation(gl,program, "loop"), this.loop);
 	
 	
