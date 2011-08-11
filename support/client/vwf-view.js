@@ -106,7 +106,14 @@
         vwf.send( nodeID, "execute", scriptText, scriptType );
     };
 
-    // TODO: time
+    // -- time -------------------------------------------------------------------------------------
+
+    module.prototype.time = function() {
+        // vwf.logger.debug( namespace + ".time " );
+        return vwf.time(); 
+    };
+
+// TODO: implement two paths for stimulus functions: if callback provided, send and serialize onto queue and return value via callback when complete; otherwise, for read functions only, make direct call to vwf to get current state (which will be in past wrt serialized calls); time() does only the second case; the others only do the first case but don't return the result.
 
     // == Response API =============================================================================
 
