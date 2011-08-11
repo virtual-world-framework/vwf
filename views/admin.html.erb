@@ -144,6 +144,22 @@
                     return parameters.join( ", " );
                 }
 
+                jQuery( "#play" ).click( function() {
+                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/play" );
+                } );
+
+                jQuery( "#pause" ).click( function() {
+                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/pause" );
+                } );
+
+                jQuery( "#resume" ).click( function() {
+                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/resume" );
+                } );
+
+                jQuery( "#stop" ).click( function() {
+                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/stop" );
+                } );
+
             } );
 
         </script>
@@ -196,6 +212,13 @@
 
 	<body>
 		<h1>Admin</h1>
+
+        <p>
+            <span id="play">Play</span>
+            <span id="pause">Pause</span>
+            <span id="resume">Resume</span>
+            <span id="stop">Stop</span>
+        </p>
 
         <div class="log">
             <p class="now">

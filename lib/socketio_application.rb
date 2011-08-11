@@ -2,6 +2,7 @@ class SocketIOApplication < Rack::WebSocket::Application
 
   attr_reader :env
   
+  @@clients = {}  # TODO: threading issues? use mutex on access?
   @@sessions = {}  # TODO: threading issues? use mutex on access?
 
   def _call env
@@ -13,10 +14,10 @@ class SocketIOApplication < Rack::WebSocket::Application
 
     logger.info "SocketIOApplication#onconnect"
 
-    @endpoint = File.join env["SCRIPT_NAME"] || "", env["PATH_INFO"] || ""  # TODO: set to nil after dup?
+    @@clients[resource] ||= []
+    @@clients[resource] << self
 
-    @@sessions[@endpoint] ||= { :clients => [], :session => {} }
-    @@sessions[@endpoint][:clients] << self
+    @@sessions[resource] ||= {}
 
 puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array === ov ? ov.map { |v| v.to_s } : ov.to_s } }
 
@@ -138,8 +139,32 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
     # logger.debug "SocketIOApplication#on_error #{err}"
   end
 
+  # The session data for the given resource, or nil if no session for that resource exists.
+
+  def self.session resource
+    @@sessions[resource]
+  end
+
+  # The session data for the resource that this instance connects to.
+
+  def session
+    @@sessions[resource]
+  end
+
 private
 
+  # The clients connected to the given resource, or nil if no session for that resource exists.
+
+  def self.clients resource
+    @@clients[resource]
+  end
+
+  # The clients connected to the resource that this instance connects to.
+
+  def clients
+    @@clients[resource]
+  end
+  
   MESSAGE_LOG_LENGTH = 100
 
   def message_for_log message
@@ -151,12 +176,9 @@ private
     @env["rack.logger"] || Object.new
   end
 
-  def clients
-    @endpoint and @@sessions[@endpoint][:clients]
-  end
+  # The socket.io resource this instance connects to.
   
-  def session
-    @endpoint and @@sessions[@endpoint][:session]
+  def resource
+    env["SCRIPT_NAME"] || "/"
   end
-
 end
