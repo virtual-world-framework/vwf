@@ -1,15 +1,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
-	<head>
+    <head>
 
-		<title>Admin</title>
+        <title>Admin</title>
 
         <script type="text/javascript" src="jquery-1.5.1.js"></script>
+        <script type="text/javascript" src="jquery-ui-1.8.14.custom.js"></script>
 
         <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
         <script type="text/javascript" src="socket.io/socket.io.js"></script>
 
-		<script type="text/javascript">
+        <script type="text/javascript">
 
             jQuery( window.document ).ready( function() {
 
@@ -17,7 +18,7 @@
                     socket = new io.Socket( undefined, {
                         resource: window.location.pathname.slice( 1, window.location.pathname.lastIndexOf("/") ),
                         transports: [ 'websocket' ],
-    			    } );
+                    } );
                 } catch ( e ) {
                 }
 
@@ -144,20 +145,44 @@
                     return parameters.join( ", " );
                 }
 
-                jQuery( "#play" ).click( function() {
-                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/play" );
+                var stopped = false;
+                var paused = false;
+
+                var options = {};
+
+                [ "play", "pause", "stop" ].forEach( function( state ) {
+                    options[state] = {
+                        icons: { primary: "ui-icon-" + state },
+                        label: state,
+                        text: false
+                    };
                 } );
 
-                jQuery( "#pause" ).click( function() {
-                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/pause" );
+                jQuery( "button.play" ).button(
+                    options.pause
+                ). click( function() {
+                    if ( stopped ) {
+                        jQuery.get( "play" );
+                        jQuery(this).button( "option", options.pause );
+                        stopped = false;
+                    } else if ( paused ) {
+                        jQuery.get( "resume" );
+                        jQuery(this).button( "option", options.pause );
+                        paused = false;
+                    } else {
+                        jQuery.get( "pause" );
+                        jQuery(this).button( "option", options.play );
+                        paused = true;
+                    }
                 } );
 
-                jQuery( "#resume" ).click( function() {
-                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/resume" );
-                } );
-
-                jQuery( "#stop" ).click( function() {
-                    jQuery.get( window.location.pathname.slice( 0, window.location.pathname.lastIndexOf("/") ) + "/stop" );
+                jQuery( "button.stop" ).button(
+                    options.stop
+                ). click( function() {
+                    jQuery.get( "stop" );
+                    jQuery("button.play").button( "option", options.play );
+                    stopped = true;
+                    paused = false;
                 } );
 
             } );
@@ -165,6 +190,7 @@
         </script>
 
         <link rel="stylesheet" type="text/css" href="index.css" />
+        <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.14.custom.css" />
 
         <style>
 
@@ -208,16 +234,16 @@
         </style>
 
 
-	</head>
+    </head>
 
-	<body>
-		<h1>Admin</h1>
+    <body>
+        <h1>Admin</h1>
 
         <p>
-            <span id="play">Play</span>
-            <span id="pause">Pause</span>
-            <span id="resume">Resume</span>
-            <span id="stop">Stop</span>
+            <span class="time">
+                <button id="play" class="play"></button>
+                <button id="stop" class="stop"></button>
+            </span>
         </p>
 
         <div class="log">
@@ -227,6 +253,6 @@
             </p>
         </div>
 
-	</body>
+    </body>
 
 </html>
