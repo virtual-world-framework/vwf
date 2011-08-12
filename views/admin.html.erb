@@ -145,45 +145,66 @@
                     return parameters.join( ", " );
                 }
 
-                var stopped = false;
-                var paused = false;
+                // ---------------------------------------------------------------------------------
 
                 var options = {};
 
                 [ "play", "pause", "stop" ].forEach( function( state ) {
-                    options[state] = {
-                        icons: { primary: "ui-icon-" + state },
-                        label: state,
-                        text: false
-                    };
+                    options[state] = { icons: { primary: "ui-icon-" + state }, label: state, text: false };
                 } );
 
-                jQuery( "button.play" ).button(
+                options.rate = { value: 0, min: -2, max: 2, step: 0.1, };
+
+                var state = {};
+
+                jQuery.get( "state", undefined, update, "json" );
+
+                jQuery( "button#play" ).button(
                     options.pause
                 ). click( function() {
-                    if ( stopped ) {
-                        jQuery.get( "play" );
-                        jQuery(this).button( "option", options.pause );
-                        stopped = false;
-                    } else if ( paused ) {
-                        jQuery.get( "play" );
-                        jQuery(this).button( "option", options.pause );
-                        paused = false;
-                    } else {
-                        jQuery.get( "pause" );
-                        jQuery(this).button( "option", options.play );
-                        paused = true;
-                    }
+                    jQuery.get( state.playing ? "pause" : "play", undefined, update, "json" );
                 } );
 
-                jQuery( "button.stop" ).button(
+                jQuery( "button#stop" ).button(
                     options.stop
                 ). click( function() {
-                    jQuery.get( "stop" );
-                    jQuery("button.play").button( "option", options.play );
-                    stopped = true;
-                    paused = false;
+                    jQuery.get( "stop", undefined, update, "json" );
                 } );
+
+                jQuery( ".rate.slider" ).slider(
+                    options.rate
+                ) .bind( "slide", function( event, ui ) {
+                    jQuery.get( "state?rate=" + Math.pow( 10, Number(ui.value) ), undefined, update, "json" );
+                } );
+
+                function update( data ) {
+
+                    state = data;
+
+                    jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                    jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+
+
+                    jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+
+
+                    if ( state.rate < 1.0 ) {
+                        var label_rate = 1.0 / state.rate;
+                    } else {
+                        var label_rate = state.rate;
+                    }
+
+                    var label = label_rate.toFixed(2).toString().replace( /(\.\d*?)0+$/, "$1" ).replace( /\.$/, "" );
+
+                    if ( state.rate < 1.0 ) {
+                        label = "&#x2215; " + label;
+                    } else {
+                        label = label + " &times;";
+                    }
+
+                    jQuery( ".rate.vwf-label" ).html( label );
+
+                }
 
             } );
 
@@ -231,6 +252,11 @@
                 padding-left: 1ex;
             }
 
+            .rate.slider {
+                display: inline-block;
+                width: 10em;
+            }
+
         </style>
 
 
@@ -241,8 +267,12 @@
 
         <p>
             <span class="time">
-                <button id="play" class="play"></button>
-                <button id="stop" class="stop"></button>
+                <button id="play"></button>
+                <button id="stop"></button>
+            </span>
+            <span class="action">
+                <span class="rate slider"></span>&nbsp;
+                <span class="rate vwf-label" style="display: inline-block; width:8ex"></span>
             </span>
         </p>
 
