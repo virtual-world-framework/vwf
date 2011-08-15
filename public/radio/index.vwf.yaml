@@ -17,6 +17,9 @@ children:
       battery: true
       batteryCover: true 
       beltClip: true
+    scripts: 
+    - text: this.properties.power.setter = function( value ) { if ( value == "on" ) { this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD_Overall_Glow_On.png" } else { this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD.png"} }
+      type: application/javascript
     children:
       bone1:
         extends: http://vwf.example.com/types/node3
@@ -131,6 +134,9 @@ children:
                     extends: http://vwf.example.com/types/node3
                     properties:
                       rotZ: 0
+                    scripts:  
+                    - text: this.pointerClick = function( value ) { this.parent.parent.parent.parent.power = "on" }
+                      type: application/javascript
                     children:
                       ic40VolumeMaterial1:
                         extends: http://vwf.example.com/types/material

@@ -806,8 +806,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         canvas.onmouseup = function (e) {
             var mouseUpObjectID = getObjectID( mousePick( e, scene ), sceneView, false );
             // check for time??
-            if (mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID) {
-                vwf.logger.info("CANVAS onMouseClick: id:" + mouseDownObjectID + "   name: " + name(view.nodes[mouseDownObjectID].glgeObject) );
+            if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
+                vwf.logger.info("pointerClick: id:" + mouseDownObjectID + "   name: " + name( view.nodes[mouseDownObjectID].glgeObject ) );
                 //this.throwEvent( "onMouseClick", mouseDownObjectID);
                 view.callMethod( mouseUpObjectID, "pointerClick" );
             }
@@ -945,9 +945,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
             while (objectIDFound == -1 && objectToLookFor) {
                 if ( debug ) 
-                    vwf.logger.info("vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
+                    vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
                 objects = jQuery.each(view.nodes, function (nodeID, node) {
-                    if (node.glgeObject == objectToLookFor) {
+                    if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
                         //vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
                         objectIDFound = nodeID;
                     }
