@@ -8,6 +8,15 @@ children:
     properties:
       position: [0, 0, 0]
       eulers: [0, 0, 0]
+      power: "off"
+      volume: 1
+      speak: "up"
+      channel: 1
+      headphones: false
+      anteanna: true
+      battery: true
+      batteryCover: true 
+      beltClip: true
     children:
       bone1:
         extends: http://vwf.example.com/types/node3
@@ -32,44 +41,121 @@ children:
                     children:
                       bone6:
                         extends: http://vwf.example.com/types/node3
+                        children:
+                          bone6Material1:
+                            extends: http://vwf.example.com/types/material
                   ic40_SpeakerPort:
                     extends: http://vwf.example.com/types/node3
                     children:
                       bone8:
                         extends: http://vwf.example.com/types/node3
+                        children:
+                          bone8Material1:
+                            extends: http://vwf.example.com/types/material
                   ic40Channel:
                     extends: http://vwf.example.com/types/node3
                     properties:
                       rotZ: 0
+                    children:
+                      ic40ChannelMaterial1:
+                        extends: http://vwf.example.com/types/material
+                      ic40ChannelMaterial2:
+                        extends: http://vwf.example.com/types/material
                   ic40Down:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40DownMaterial1:
+                        extends: http://vwf.example.com/types/material
+                      ic40DownMaterial2:
+                        extends: http://vwf.example.com/types/material
                   ic40Monitor:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40MonitorMaterial1:
+                        extends: http://vwf.example.com/types/material
+                      ic40MonitorMaterial2:
+                        extends: http://vwf.example.com/types/material
                   ic40P0:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40P0Material1:
+                        extends: http://vwf.example.com/types/material
+                      ic40P0Material2:
+                        extends: http://vwf.example.com/types/material
                   ic40P1:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40P1Material1:
+                        extends: http://vwf.example.com/types/material
+                      ic40P1Material2:
+                        extends: http://vwf.example.com/types/material
                   ic40P2:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40P2Material1:
+                        extends: http://vwf.example.com/types/material
+                      ic40P2Material2:
+                        extends: http://vwf.example.com/types/material
                   ic40P3:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40P3Material1:
+                        extends: http://vwf.example.com/types/material
+                      ic40P3Material2:
+                        extends: http://vwf.example.com/types/material
                   ic40PTT:
                     extends: http://vwf.example.com/types/node3
                     children:
                       bone17:
                         extends: http://vwf.example.com/types/node3
+                        children:
+                          bone17Material1:
+                            extends: http://vwf.example.com/types/material
+                          bone17Material2:
+                            extends: http://vwf.example.com/types/material
                   ic40Red:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40RedMaterial1:
+                        extends: http://vwf.example.com/types/material
+                        properties:
+                          texture: ""
                   ic40Up:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      ic40UpMaterial1:
+                        extends: http://vwf.example.com/types/material
+                      ic40UpMaterial2:
+                        extends: http://vwf.example.com/types/material
                   ic40Volume:
                     extends: http://vwf.example.com/types/node3
                     properties:
                       rotZ: 0
+                    children:
+                      ic40VolumeMaterial1:
+                        extends: http://vwf.example.com/types/material
+                        properties:
+                          texture: ""
+                      ic40VolumeMaterial2:
+                        extends: http://vwf.example.com/types/material
+                        properties:
+                          texture: ""
                   LCD:
                     extends: http://vwf.example.com/types/node3
+                    properties:
+                      position: [0, 0, 0]
+                    children:
+                      LCDMaterial1:
+                        extends: http://vwf.example.com/types/material
+                        properties:
+                          texture: ""
                   LCD_Back:
                     extends: http://vwf.example.com/types/node3
+                    children:
+                      LCD_BackMaterial1:
+                        extends: http://vwf.example.com/types/material
+                        properties:
+                          texture: ""
                   BeltClip_1:
                     extends: http://vwf.example.com/types/node3
                     properties: 
@@ -77,7 +163,7 @@ children:
                       looping: false
                       speed: 1
                     scripts:
-                    - text: this.pointerClick = function() { console.info("BeltClip_1.pointerClick()"); this.playing = !this.playing }
+                    - text: this.pointerClick = function() { console.info("Battery.pointerClick()"); this.playing = !this.playing }
                       type: application/javascript
                     children:
                       BeltClip:
@@ -85,11 +171,19 @@ children:
                         children:
                           bone25:
                             extends: http://vwf.example.com/types/node3
+                            children:
+                              bone25Material1:
+                                extends: http://vwf.example.com/types/material
+                              bone25Material2:
+                                extends: http://vwf.example.com/types/material
                       BeltClipBase:
                         extends: http://vwf.example.com/types/node3
                         children:
-                          BeltClipTab:
+                          bone27:
                             extends: http://vwf.example.com/types/node3
+                            children:
+                              bone27Material1:
+                                extends: http://vwf.example.com/types/material
                       BeltClip_Latch:
                         extends: http://vwf.example.com/types/node3
                         properties: 
@@ -97,14 +191,17 @@ children:
                           looping: false
                           speed: 1
                         scripts:
-                        - text: this.pointerClick = function() { console.info("BeltClip_Latch.pointerClick()"); this.playing = !this.playing }
-                          type: application/javascript
+                        - text: this.pointerClick = function() { console.info("Battery.pointerClick()"); this.playing = !this.playing }
+                          type: application/javascript 
                         children:
-                          bone29:
+                          BeltClipTab:
                             extends: http://vwf.example.com/types/node3
                             children:
                               bone30:
                                 extends: http://vwf.example.com/types/node3
+                                children:
+                                  bone30Material1:
+                                    extends: http://vwf.example.com/types/material
                   Battery:
                     extends: http://vwf.example.com/types/node3
                     properties: 
@@ -120,6 +217,19 @@ children:
                         children:
                           bone33:
                             extends: http://vwf.example.com/types/node3
+                            children:
+                              bone33Material1:
+                                extends: http://vwf.example.com/types/material
+                              bone33Material2:
+                                extends: http://vwf.example.com/types/material
+                              bone33Material3:
+                                extends: http://vwf.example.com/types/material
+                              bone33Material4:
+                                extends: http://vwf.example.com/types/material
+                              bone33Material5:
+                                extends: http://vwf.example.com/types/material
+                              bone33Material6:
+                                extends: http://vwf.example.com/types/material
                   BatteryLatch:
                     extends: http://vwf.example.com/types/node3
                     properties: 
@@ -132,11 +242,45 @@ children:
                     children:
                       ic40BatteryLatch:
                         extends: http://vwf.example.com/types/node3
+                        children:
+                          ic40BatteryLatchMaterial1:
+                            extends: http://vwf.example.com/types/material
+                          ic40BatteryLatchMaterial2:
+                            extends: http://vwf.example.com/types/material
                   ic40Radio:
                     extends: http://vwf.example.com/types/node3
                     children:
                       bone37:
                         extends: http://vwf.example.com/types/node3
+                        children:
+                          bone37Material1:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material2:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material3:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material4:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material5:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material6:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material7:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material8:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material9:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material10:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material11:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material12:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material13:
+                            extends: http://vwf.example.com/types/material
+                          bone37Material14:
+                            extends: http://vwf.example.com/types/material
               Omni01:
                 extends: http://vwf.example.com/types/node3
               Omni02:
@@ -146,4 +290,13 @@ children:
               Omni04:
                 extends: http://vwf.example.com/types/node3
               ic40Antennae:
-                extends: http://vwf.example.com/types/node3  
+                extends: http://vwf.example.com/types/node3
+                children:
+                  ic40AntennaeMaterial1:
+                    extends: http://vwf.example.com/types/material
+                  ic40AntennaeMaterial2:
+                    extends: http://vwf.example.com/types/material
+                  ic40AntennaeMaterial3:
+                    extends: http://vwf.example.com/types/material
+                  ic40AntennaeMaterial4:
+                    extends: http://vwf.example.com/types/material

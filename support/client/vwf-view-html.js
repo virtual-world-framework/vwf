@@ -414,8 +414,8 @@
 
             stringInput[0].lastChild.value = propertyValue;
             stringInput.keyup(function (event) {
-                if (event.target && event.target.value && event.target.value != "")
-                    view.setProperty(nodeID, propertyName, Number(event.target.value));
+                if ( event.keyCode == 13 && event.target && event.target.value && event.target.value != "")
+                    view.setProperty(nodeID, propertyName, event.target.value );
             });
 
         }
@@ -498,7 +498,6 @@
             stringInput[0].lastChild.value = propertyValue;
 
         }
-
 
     };
 

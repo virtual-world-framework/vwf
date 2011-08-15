@@ -6,8 +6,8 @@
       <authoring_tool>OpenCOLLADA for 3ds Max;  Version: 1.3.0;  Revision: 788M;  Platform: Win32;  Configuration: Release_Max2009_static</authoring_tool>
       <source_data>file:///E:/radio/radio01.max</source_data>
     </contributor>
-    <created>2011-08-09T13:12:46</created>
-    <modified>2011-08-09T13:12:46</modified>
+    <created>2011-08-15T15:23:48</created>
+    <modified>2011-08-15T15:23:48</modified>
     <unit name="inch" meter="0.0254"/>
     <up_axis>Y_UP</up_axis>
   </asset>
@@ -1656,24 +1656,34 @@
         </technique>
       </extra>
     </effect>
-    <effect id="LCD_Overall">
+    <effect id="Material__587">
       <profile_COMMON>
+        <newparam sid="lcd_png-surface">
+          <surface type="2D">
+            <init_from>lcd_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="lcd_png-sampler">
+          <sampler2D>
+            <source>lcd_png-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
-          <phong>
+          <blinn>
             <emission>
               <color>0 0 0 1</color>
             </emission>
             <ambient>
-              <color>0.588 0.588 0.588 1</color>
+              <color>0.5882353 0.5882353 0.5882353 1</color>
             </ambient>
             <diffuse>
-              <color>0.588 0.588 0.588 1</color>
+              <texture texture="lcd_png-sampler" texcoord="CHANNEL1"/>
             </diffuse>
             <specular>
-              <color>0.9 0.9 0.9 1</color>
+              <color>0.8980393 0.8980393 0.8980393 1</color>
             </specular>
             <shininess>
-              <float>10</float>
+              <float>9.999999</float>
             </shininess>
             <reflective>
               <color>0 0 0 1</color>
@@ -1684,7 +1694,7 @@
             <transparency>
               <float>1</float>
             </transparency>
-          </phong>
+          </blinn>
         </technique>
       </profile_COMMON>
       <extra>
@@ -3446,8 +3456,8 @@
     <material id="icomGrey-material" name="icomGrey">
       <instance_effect url="#icomGrey"/>
     </material>
-    <material id="LCD_Overall-material" name="LCD_Overall">
-      <instance_effect url="#LCD_Overall"/>
+    <material id="Material__587-material" name="Material__587">
+      <instance_effect url="#Material__587"/>
     </material>
     <material id="LCD_Back-material" name="LCD_Back">
       <instance_effect url="#LCD_Back"/>
@@ -4186,7 +4196,7 @@
         <vertices id="geom-LCD-vertices">
           <input semantic="POSITION" source="#geom-LCD-positions"/>
         </vertices>
-        <triangles material="LCD_Overall" count="49">
+        <triangles material="Material__587_1" count="49">
           <input semantic="VERTEX" source="#geom-LCD-vertices" offset="0"/>
           <input semantic="NORMAL" source="#geom-LCD-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#geom-LCD-map1" offset="2" set="0"/>
@@ -4893,6 +4903,9 @@
     <image id="icomradioclip_png">
       <init_from>./images/icomradioclip.png</init_from>
     </image>
+    <image id="lcd_png">
+      <init_from>./images/lcd.png</init_from>
+    </image>
   </library_images>
   <library_visual_scenes>
     <visual_scene id="MaxScene">
@@ -5145,7 +5158,9 @@
           <instance_geometry url="#geom-LCD">
             <bind_material>
               <technique_common>
-                <instance_material symbol="LCD_Overall" target="#LCD_Overall-material"/>
+                <instance_material symbol="Material__587_1" target="#Material__587-material">
+                  <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
+                </instance_material>
               </technique_common>
             </bind_material>
           </instance_geometry>
@@ -5248,17 +5263,17 @@
                     <instance_material symbol="icomBatterySides" target="#icomBatterySides-material">
                       <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                     </instance_material>
+                    <instance_material symbol="icomBlackPlastic" target="#icomBlackPlastic-material"/>
                     <instance_material symbol="icomBatteryTop" target="#icomBatteryTop-material">
                       <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                     </instance_material>
                     <instance_material symbol="icomBatteryLabel" target="#icomBatteryLabel-material">
                       <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                     </instance_material>
-                    <instance_material symbol="icomBlackPlastic" target="#icomBlackPlastic-material"/>
-                    <instance_material symbol="icomRadioBottom" target="#icomRadioBottom-material">
+                    <instance_material symbol="icomRadioBack" target="#icomRadioBack-material">
                       <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                     </instance_material>
-                    <instance_material symbol="icomRadioBack" target="#icomRadioBack-material">
+                    <instance_material symbol="icomRadioBottom" target="#icomRadioBottom-material">
                       <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                     </instance_material>
                   </technique_common>
@@ -5301,16 +5316,31 @@
             <instance_geometry url="#geom-ic40Radio">
               <bind_material>
                 <technique_common>
-                  <instance_material symbol="icomRadioBack" target="#icomRadioBack_1-material">
+                  <instance_material symbol="icomRadioMetal" target="#icomRadioMetal_1-material">
+                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
+                  </instance_material>
+                  <instance_material symbol="icomRadioInside2" target="#icomRadioInside2_1-material">
+                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
+                  </instance_material>
+                  <instance_material symbol="icomRadioMetalTab" target="#icomRadioMetalTab_1-material">
+                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
+                  </instance_material>
+                  <instance_material symbol="orig_Material__580_1" target="#orig_Material__580-material">
+                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
+                  </instance_material>
+                  <instance_material symbol="icomRadioInside1" target="#icomRadioInside1_1-material">
                     <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                   </instance_material>
                   <instance_material symbol="icomRadioFront" target="#icomRadioFront_1-material">
                     <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                   </instance_material>
-                  <instance_material symbol="icomRadioBottom" target="#icomRadioBottom_1-material">
+                  <instance_material symbol="icomRadioBack" target="#icomRadioBack_1-material">
                     <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                   </instance_material>
                   <instance_material symbol="icomRadioTop" target="#icomRadioTop_1-material">
+                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
+                  </instance_material>
+                  <instance_material symbol="icomRadioBottom" target="#icomRadioBottom_1-material">
                     <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                   </instance_material>
                   <instance_material symbol="icomRadioLeft" target="#icomRadioLeft_1-material">
@@ -5324,21 +5354,6 @@
                     <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                   </instance_material>
                   <instance_material symbol="icomRadioInnerThreads" target="#icomRadioInnerThreads_1-material">
-                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                  </instance_material>
-                  <instance_material symbol="icomRadioInside1" target="#icomRadioInside1_1-material">
-                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                  </instance_material>
-                  <instance_material symbol="icomRadioMetal" target="#icomRadioMetal_1-material">
-                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                  </instance_material>
-                  <instance_material symbol="icomRadioInside2" target="#icomRadioInside2_1-material">
-                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                  </instance_material>
-                  <instance_material symbol="icomRadioMetalTab" target="#icomRadioMetalTab_1-material">
-                    <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
-                  </instance_material>
-                  <instance_material symbol="orig_Material__580_1" target="#orig_Material__580-material">
                     <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
                   </instance_material>
                 </technique_common>
@@ -5374,10 +5389,10 @@
               <instance_material symbol="icomBlack" target="#icomBlack-material">
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
+              <instance_material symbol="icomYellow" target="#icomYellow-material"/>
               <instance_material symbol="icomRadioInnerThreads" target="#icomRadioInnerThreads-material">
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
-              <instance_material symbol="icomYellow" target="#icomYellow-material"/>
               <instance_material symbol="icomRadioTop" target="#icomRadioTop-material">
                 <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>

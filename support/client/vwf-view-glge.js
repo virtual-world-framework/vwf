@@ -158,6 +158,15 @@
             this.cameraID = nodeID;
         }
 
+        else if (nodeExtendsID == "http-vwf-example-com-types-material") {
+
+            var node = this.nodes[nodeID] = {
+                name: undefined,
+                glgeObject: undefined,
+                glgeMaterial: true
+            };
+
+        }
     };
 
     module.prototype.findCollada = function ( grp, view, nodeID ) {
@@ -348,6 +357,26 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         }
                     }
                     break;
+                case "texture":
+                    {
+                        var txtr;
+                        var mat;
+                        if ( node.glgeMaterial && node.glgeMaterial.textures ) {
+                            mat = node.glgeMaterial;
+                            txtr = node.glgeMaterial.textures[0];
+                        } else if ( node.glgeObject && node.glgeObject.material ) {
+                            mat = node.glgeObject.material; 
+                            txtr = node.glgeObject.material.textures[0];
+                        }
+
+                        if ( txtr ) {
+                            txtr.setSrc( propertyValue );
+                        } else if ( mat ) {
+                            mat.addTexture( propertyValue );
+                        }
+
+                    }
+                    break;
 
             }
 
@@ -440,7 +469,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindSceneChildren = function (view, nodeID) {
 
-        //vwf.logger.info("      bindSceneChildren: " + nodeID);
+        vwf.logger.info("      bindSceneChildren: " + nodeID);
         var scene = view.scenes[nodeID];
         var child;
 
@@ -456,7 +485,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindNodeChildren = function (view, nodeID) {
 
-        //vwf.logger.info("      bindNodeChildren: " + nodeID);
+        vwf.logger.info("      bindNodeChildren: " + nodeID);
         var node = view.nodes[nodeID];
         var child;
 
@@ -472,7 +501,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindChild = function (view, scene, node, child, childName, childID) {
 
-        //vwf.logger.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
+        vwf.logger.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
         if (scene && !child.glgeObject) {
             child.name = childName;
             child.glgeObject = scene.glgeScene && glgeSceneChild(scene.glgeScene, childName);
@@ -480,17 +509,21 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
                 child.initialized = true;
             }
-        }
+       }
 
         else if (node && !child.glgeObject) {
             child.name = childName;
-            child.glgeObject = node.glgeObject && glgeObjectChild(node.glgeObject, childName);
-            if (child.glgeObject) {
-                glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+            if ( view.nodes[ childID ] && view.nodes[ childID ].glgeMaterial ) {
+                bindMaterial( view, childID, childName, node );
                 child.initialized = true;
+            } else {
+                child.glgeObject = node.glgeObject && glgeObjectChild(node.glgeObject, childName);
+                if (child.glgeObject) {
+                    glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+                    child.initialized = true;
+                }
             }
         }
-
 
         if (child.glgeObject && child.glgeObject.constructor == GLGE.ParticleSystem && child.name == "smoke") {
             view.smoke = child;
@@ -539,6 +572,30 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     };
 
+    var bindMaterial = function( view, childID, childName, node ) {
+
+        if ( node && node.glgeObject && view.nodes[childID] ) {
+            if ( node.glgeObject.children.length == 1 && node.glgeObject.children[0].constructor == GLGE.Object ) {
+                var childNode = view.nodes[childID];
+                var glgeChild = node.glgeObject.children[0];
+                var materialStringIndex = childName.lastIndexOf( "Material" );
+                var materialIndex = Number( childName.substr( materialStringIndex + 8 ) ) - 1;
+
+                childNode.glgeObject = glgeChild;
+                childNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
+                
+                if ( !( childNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
+                    childNode.glgeMaterial = childNode.glgeObject.material;
+                }
+
+                if ( childNode.glgeMaterial === childNode.glgeObject.material ) {
+                    console.info( " materials are the same object!!!!! " );
+                }
+            }
+        }
+
+    };
+
     var glgeObjectInitializeFromProperties = function( view, nodeID, glgeObject ) {
 
         view.satProperty( nodeID, "playing", vwf.getProperty( nodeID, "playing" ) );
@@ -566,6 +623,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     var centerGroup = undefined;
 
     var checkKeys = function (nodeID, view, now, lasttime) {
+
         var scene = view.scenes[nodeID], child;
         if (scene && scene.glgeScene) {
             var camera = scene.glgeScene.camera;
@@ -717,9 +775,11 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 }
             }
         }
+
     }
 
     var initMouseEvents = function (canvas, nodeID, view) {
+
         var scene = view.scenes[nodeID], child;
         var sceneID = nodeID;
         var sceneView = view;
@@ -841,16 +901,20 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         canvas.onmousewheel = function (e) {
         }
+
     };
 
     function name(obj) {
+
         var sName = obj.colladaName || obj.colladaId || obj.name || obj.id || "";
         //vwf.logger.info("  glgeObject is named: " + sName );
         return sName;
+
     }
 
 
     function path(obj) {
+
         var sOut = "";
         var sName = "";
 
@@ -862,6 +926,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             obj = obj.parent;
         }
         return sOut;
+
     }
 
     var mouseXPos = function(e) {
@@ -873,6 +938,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     }
 
     var getObjectID = function( pickInfo, view, debug ) {
+
         if (pickInfo && pickInfo.object) {
             var objectIDFound = -1;
             var objectToLookFor = pickInfo.object;
@@ -892,20 +958,20 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 return objectIDFound;
         }
         return undefined;
+
     }
 
-
     var mousePick = function ( e, scene ) {
+
         if (scene && scene.glgeScene) {
             var objectIDFound = -1;
             var x = mouseXPos( e );
             var y = mouseYPos( e );
 
             return scene.glgeScene.pick(x, y);
-            //return pickInfo;
-
         }
         return undefined;
+
     };
 
 
