@@ -25,7 +25,13 @@ children:
       angle: 0
       playing: false
     scripts: 
-    - text: this.properties.angle.setter = function( value ) { this.parent['http://localhost:8080/seymourplane_triangulate.dae'].angle = value + 1; }
+    - text: |
+        this.properties.angle.setter = function( value ) {
+          this.parent['seymourplane_triangulate.dae'].angle = value + 1;
+        }
       type: application/javascript
-    - text: this.pointerClick = function() { this.playing = !this.playing }
+    - text: |
+        this.pointerClick = function() {
+          this.playing = !this.playing
+        }
       type: application/javascript
