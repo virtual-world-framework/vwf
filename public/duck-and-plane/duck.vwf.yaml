@@ -13,5 +13,8 @@ children:
       angle: 0
       playing: false
     scripts: 
-    - text: this.pointerClick = function() { this.playing = !this.playing }
+    - text: |
+        this.pointerClick = function() {
+          this.playing = !this.playing
+        }
       type: application/javascript
