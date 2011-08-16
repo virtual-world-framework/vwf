@@ -5,7 +5,8 @@ Bundler.require
 
 $LOAD_PATH << File.expand_path( File.join( File.dirname(__FILE__), "lib" ) )
 
-require "server"
-require "component"
-require "reflector"
-require "admin"
+require "vwf"
+require "vwf/application"
+require "vwf/application/component"
+require "vwf/application/reflector"
+require "vwf/application/admin"

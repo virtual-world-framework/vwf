@@ -4,11 +4,11 @@
 
         <title>Admin</title>
 
-        <script type="text/javascript" src="jquery-1.5.1.js"></script>
-        <script type="text/javascript" src="jquery-ui-1.8.14.custom.js"></script>
+        <script type="text/javascript" src="../jquery-1.5.1.js"></script>
+        <script type="text/javascript" src="../jquery-ui-1.8.14.custom.js"></script>
 
         <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
-        <script type="text/javascript" src="socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="../socket.io/socket.io.js"></script>
 
         <script type="text/javascript">
 
@@ -157,24 +157,24 @@
 
                 var state = {};
 
-                jQuery.get( "state", undefined, update, "json" );
+                jQuery.get( "admin/state", undefined, update, "json" );
 
                 jQuery( "button#play" ).button(
                     options.pause
                 ). click( function() {
-                    jQuery.get( state.playing ? "pause" : "play", undefined, update, "json" );
+                    jQuery.get( state.playing ? "admin/pause" : "admin/play", undefined, update, "json" );
                 } );
 
                 jQuery( "button#stop" ).button(
                     options.stop
                 ). click( function() {
-                    jQuery.get( "stop", undefined, update, "json" );
+                    jQuery.get( "admin/stop", undefined, update, "json" );
                 } );
 
                 jQuery( ".rate.slider" ).slider(
                     options.rate
                 ) .bind( "slide", function( event, ui ) {
-                    jQuery.get( "state?rate=" + Math.pow( 10, Number(ui.value) ), undefined, update, "json" );
+                    jQuery.get( "admin/state?rate=" + Math.pow( 10, Number(ui.value) ), undefined, update, "json" );
                 } );
 
                 function update( data ) {

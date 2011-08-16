@@ -1,14 +1,18 @@
 require "erb"
 
-class Admin < Sinatra::Base
+class VWF::Application::Admin < Sinatra::Base
 
-  get "/admin" do
+  configure do
+    set :app_file, VWF.settings.app_file
+  end
+
+  get "/" do
     erb :"admin.html"
   end
 
   get "/state" do  # TODO: should be post but server.rb isn't handling post and delegating down
 
-    if transport = SocketIOApplication.session( env["SCRIPT_NAME"] )[:transport]
+    if transport = Rack::SocketIO::Application.session( env )[:transport]
       state = Rack::Utils.parse_query request.query_string
       state[:rate] = state["rate"].to_f unless state["rate"].nil? || state["rate"].empty?
       transport.rate = state[:rate] unless state[:rate].nil? || state[:rate] == 0
@@ -26,7 +30,7 @@ class Admin < Sinatra::Base
 
   post "/rate" do
 
-    if transport = SocketIOApplication.session( env["SCRIPT_NAME"] )[:transport]
+    if transport = Rack::SocketIO::Application.session( env )[:transport]
       body = request.body.read
       rate = body.to_f unless body.empty?
       transport.rate = rate unless rate.nil? || rate == 0
@@ -37,7 +41,7 @@ class Admin < Sinatra::Base
 
   get "/play" do  # TODO: should be post but server.rb isn't handling post and delegating down
 
-    if transport = SocketIOApplication.session( env["SCRIPT_NAME"] )[:transport]
+    if transport = Rack::SocketIO::Application.session( env )[:transport]
       transport.play
       transport.state.to_json
     end
@@ -46,7 +50,7 @@ class Admin < Sinatra::Base
 
   get "/pause" do  # TODO: should be post but server.rb isn't handling post and delegating down
 
-    if transport = SocketIOApplication.session( env["SCRIPT_NAME"] )[:transport]
+    if transport = Rack::SocketIO::Application.session( env )[:transport]
       transport.pause
       transport.state.to_json
     end
@@ -55,7 +59,7 @@ class Admin < Sinatra::Base
 
   get "/stop" do  # TODO: should be post but server.rb isn't handling post and delegating down
 
-    if transport = SocketIOApplication.session( env["SCRIPT_NAME"] )[:transport]
+    if transport = Rack::SocketIO::Application.session( env )[:transport]
       transport.stop
       transport.state.to_json
     end

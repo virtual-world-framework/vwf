@@ -1,13 +1,13 @@
-require "socketio_application"
+require "rack/socket-io/application"
 require "json"
 
-class Reflector < SocketIOApplication
+class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def call env
     if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}  # TODO: configuration parameter for paths accepted; "websocket/session" is for socket.io
       super
     else
-      404
+      [ 404, {}, [] ]
     end
   end
 

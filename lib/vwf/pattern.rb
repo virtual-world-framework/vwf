@@ -1,4 +1,4 @@
-class Server::ApplicationPattern
+class VWF::Pattern
 
   Match = Struct.new :captures
 
@@ -6,13 +6,13 @@ class Server::ApplicationPattern
 
   def initialize
 
-    @template_extensions = Server.settings.component_template_types.map do |template_type|
+    @template_extensions = VWF.settings.component_template_types.map do |template_type|
       "." + template_type.to_s
     end .unshift ""
 
     @captures = Match.new []
 
-    @mock_filesystem = Server.settings.mock_filesystem
+    @mock_filesystem = VWF.settings.mock_filesystem
 
   end
 
@@ -85,7 +85,7 @@ private
         path == directory
       end
     else
-      File.directory? File.join( Server.settings.public, path )
+      File.directory? File.join( VWF.settings.public, path )
     end
   end
 
@@ -97,7 +97,7 @@ private
         end
       end
     else
-      File.file? File.join( Server.settings.public, path )
+      File.file? File.join( VWF.settings.public, path )
     end
   end
 

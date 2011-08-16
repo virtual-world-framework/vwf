@@ -1,5 +1,5 @@
 require "init"
 
 map "/" do
-  run Server
+  run VWF
 end
