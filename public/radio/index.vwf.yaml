@@ -8,8 +8,8 @@ children:
     properties:
       position: [0, 0, 0]
       eulers: [0, 0, 0]
-      power: "off"
-      volume: 1
+      powerOn: false
+      volume: 0
       speak: "up"
       channel: 1
       headphones: false
@@ -17,8 +17,316 @@ children:
       battery: true
       batteryCover: true 
       beltClip: true
+      menuMode: "none"
+      backLightMode: "auto"
+      beepOn: false
+      squelch: 20
+      encryptionOn: false
+      transmitPower: 4
+      keysLocked: false
     scripts: 
-    - text: this.properties.power.setter = function( value ) { if ( value == "on" ) { this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD_Overall_Glow_On.png" } else { this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD.png"} }
+    - text: |
+        var radio = this;
+        this.configSave = function(){
+        }
+        this.red = function() {
+          console.info( "=====||====== radio.dae.red()" );
+          console.info( "              radio = " + radio );
+          console.info( "              radio.menuMode = " + radio.menuMode );
+          switch( radio.menuMode ) {
+            case "channel":
+              radio.menuMode = "backLight";
+              break;
+            case "backLight":
+              radio.menuMode = "squelch";
+              break;
+            case "squelch":
+              radio.menuMode = "beep";
+              break;
+            case "beep":
+              radio.configSave();
+              radio.menuMode = "channel";
+              break;
+          }
+          
+        }
+        this.up = function() {
+          switch( radio.menuMode ) {
+            case "backLight":
+              if ( radio.backLightMode == "on" )
+                radio.backLightMode = "auto";
+              else if ( radio.backLightMode == "auto")
+                radio.backLightMode = "off";
+              else
+                radio.backLightMode = "on";
+              break;
+            case "squelch":
+              if ( radio.squelch <= 100 )
+                radio.squelch = radio.squelch + 10;
+              break;
+            case "beep":
+              radio.beepOn = !radio.beepOn;
+              break;
+          }
+        }
+        this.down = function() {
+          switch( radio.menuMode ) {
+            case "backLight":
+              if ( radio.backLightMode == "on" )
+                radio.backLightMode = "auto";
+              else 
+                radio.backLightMode = "on";
+              break;
+            case "squelch":
+              if ( radio.squelch >= 30 )
+                radio.squelch = radio.squelch - 10;
+              break;
+            case "beep":
+              radio.beepOn = !radio.beepOn;
+              break;
+          }
+        }
+        this.p0 = function() {
+          switch( radio.menuMode ){
+            case "channel":
+              radio.encryptionOn = !radio.encryptionOn;
+              break;
+          }
+        }
+        this.p1 = function() {
+        }
+        this.p2 = function() {
+          if ( radio.menuMode == "channel" ){
+            if ( !radio.settingTransmitPower ){
+              radio.settingTransmitPower = true;
+            } else {
+              switch ( radio.transmitPower ){
+                case 4:
+                  radio.transmitPower = 2;
+                  break;
+                case 2:
+                  radio.transmitPower = 1;
+                  break;
+                case 1:
+                  radio.transmitPower = 4;
+                  break;
+              }
+            }
+          }
+        }
+        this.p3 = function() {
+          radio.keysLocked = !radio.keysLocked;
+        }
+        this.ptt = function() {
+        }
+        this.properties.powerOn.setter = function( value ) {
+          if ( value ) {
+            this.menuMode = "channel";
+          } else { 
+            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD.png";
+          } 
+          this.powerOn = value;
+        }
+        this.properties.volume.setter = function( value ) {
+          if ( value >= 0 ){
+            if ( this.volume == 0 && value != 0 ) {
+              this.powerOn = true;
+            } else if ( this.volume != 0 && value == 0 ) {
+              this.powerOn = false;
+            }
+            this.volume = value;
+          }
+        }
+        this.properties.anteanna.setter = function( value ) {
+          if ( value ) {
+            this.bone1.MaxScene.Radio.playing = !value;
+          } else {
+            console.info( "replace the anteanna" );
+          }
+        }
+        this.properties.menuMode.setter = function( value ) {
+          switch( value ) {
+            case "channel":
+              this.channel = this.channel;
+              this.menuMode = value;
+              break;
+            case "backLight":
+              this.backLightMode = this.backLightMode;
+              this.menuMode = value;
+              break;
+            case "squelch":
+              this.squelch = this.squelch;
+              this.menuMode = value;
+              break;
+            case "beep":
+              this.beepOn = this.beepOn;
+              this.menuMode = value;
+              break;
+          }
+        }
+        this.properties.backLightMode.setter = function( value ) {
+          switch(value) {
+            case "auto":
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_AUTO_Gon_Von.png";
+              this.backLightMode = value;
+              break;
+            case "off":
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_OFF_Gon_Von.png";
+              this.backLightMode = value;
+              break;
+            case "on":
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_ON_Gon_Von.png";
+              this.backLightMode = value;
+              break;
+          }
+        }
+        this.properties.beepOn.setter = function( value ) {
+          if ( value ) {
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_BEEP_ON_Gon_Von.png";
+              this.beepOn = value;
+          } else {
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_BEEP_OFF_Gon_Von.png";
+              this.beepOn = value;
+          }
+        }
+        this.properties.squelch.setter = function( value ) {
+          switch(value) {
+            case 20:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL20_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 30:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL30_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 40:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL40_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 50:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL50_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 60:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL60_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 70:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL70_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 80:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL80_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 90:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL90_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 100:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL100_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 110:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL110_Gon_Von.png";
+              this.squelch = value;
+              break;
+          }
+        }
+        this.properties.channel.setter = function( value ) {
+          switch( value ) {
+            case 1:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan1_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 2:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan2_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 3:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan3_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 4:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan4_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 5:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan5_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 6:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan6_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 7:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan7_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 8:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan8_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 9:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan9_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 10:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan10_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 11:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan11_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 12:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan12_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 13:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan13_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 14:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan14_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 15:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan15_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 16:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan16_Gon_Von.png";
+              this.channel = value;
+              break;
+          }
+        }
+        this.properties.encryptionOn.setter = function( value ) {
+          if ( value ) {
+            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD7_Scrambler_Gon_Von.png";
+              this.encryptionOn = value;
+          } else { 
+            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD7_Scrambler_Gon_Voff.png";
+              this.encryptionOn = value;
+          } 
+          this.encryptionOn = value;
+        }
+        this.properties.transmitPower.setter = function( value ) {
+          switch ( value ){
+            case 4:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Blank_Gon_Voff.png";
+              this.transmitPower = value;
+              break;
+            case 2:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Low2_Gon_Von.png";
+              this.transmitPower = value;
+              break;
+            case 1:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Low1_Gon_Von.png";
+              this.transmitPower = value;
+              break;
+          }
+        }
       type: application/javascript
     children:
       bone1:
@@ -35,9 +343,6 @@ children:
                   playing: false
                   looping: false
                   speed: 1
-                scripts:
-                - text: this.pointerClick = function() { console.info("ic40Antenne.pointerClick()"); this.playing = !this.playing }
-                  type: application/javascript 
                 children:
                   ic40_MicrophonePort:
                     extends: http://vwf.example.com/types/node3
@@ -57,6 +362,18 @@ children:
                             extends: http://vwf.example.com/types/material
                   ic40Channel:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function()  {
+                          if ( this.rotZ == 0 ) {
+                            this.parent.parent.parent.parent.channel = 2;
+                            this.rotZ = 340;
+                          } else {
+                            this.parent.parent.parent.parent.channel = 1;
+                            this.rotZ = 0;
+                          }
+                        }
+                      type: application/javascript
                     properties:
                       rotZ: 0
                     children:
@@ -66,6 +383,13 @@ children:
                         extends: http://vwf.example.com/types/material
                   ic40Down:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          console.info( "=====||====== ic40Down.pointerClick()" );
+                          this.parent.parent.parent.parent.down();
+                        }
+                      type: application/javascript
                     children:
                       ic40DownMaterial1:
                         extends: http://vwf.example.com/types/material
@@ -80,6 +404,12 @@ children:
                         extends: http://vwf.example.com/types/material
                   ic40P0:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          this.parent.parent.parent.parent.p0();
+                        }
+                      type: application/javascript
                     children:
                       ic40P0Material1:
                         extends: http://vwf.example.com/types/material
@@ -87,6 +417,12 @@ children:
                         extends: http://vwf.example.com/types/material
                   ic40P1:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          this.parent.parent.parent.parent.p1();
+                        }
+                      type: application/javascript
                     children:
                       ic40P1Material1:
                         extends: http://vwf.example.com/types/material
@@ -94,6 +430,12 @@ children:
                         extends: http://vwf.example.com/types/material
                   ic40P2:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          this.parent.parent.parent.parent.p2();
+                        }
+                      type: application/javascript
                     children:
                       ic40P2Material1:
                         extends: http://vwf.example.com/types/material
@@ -101,6 +443,12 @@ children:
                         extends: http://vwf.example.com/types/material
                   ic40P3:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          this.parent.parent.parent.parent.p3();
+                        }
+                      type: application/javascript
                     children:
                       ic40P3Material1:
                         extends: http://vwf.example.com/types/material
@@ -108,6 +456,12 @@ children:
                         extends: http://vwf.example.com/types/material
                   ic40PTT:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          this.parent.parent.parent.parent.ptt();
+                        }
+                      type: application/javascript
                     children:
                       bone17:
                         extends: http://vwf.example.com/types/node3
@@ -118,6 +472,13 @@ children:
                             extends: http://vwf.example.com/types/material
                   ic40Red:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          console.info( "=====||====== ic40Red.pointerClick()" );
+                          this.parent.parent.parent.parent.red();
+                        }
+                      type: application/javascript
                     children:
                       ic40RedMaterial1:
                         extends: http://vwf.example.com/types/material
@@ -125,6 +486,13 @@ children:
                           texture: ""
                   ic40Up:
                     extends: http://vwf.example.com/types/node3
+                    scripts:
+                    - text: |
+                        this.pointerClick = function() {
+                          console.info( "=====||====== ic40Up.pointerClick()" );
+                          this.parent.parent.parent.parent.up();
+                        }
+                      type: application/javascript
                     children:
                       ic40UpMaterial1:
                         extends: http://vwf.example.com/types/material
@@ -135,7 +503,16 @@ children:
                     properties:
                       rotZ: 0
                     scripts:  
-                    - text: this.pointerClick = function( value ) { this.parent.parent.parent.parent.power = "on" }
+                    - text: | 
+                        this.pointerClick = function()  {
+                          if ( this.rotZ == 0 ) {
+                            this.parent.parent.parent.parent.volume = 10;
+                            this.rotZ = 60;
+                          } else {
+                            this.parent.parent.parent.parent.volume = 0;
+                            this.rotZ = 0;
+                          }
+                        }
                       type: application/javascript
                     children:
                       ic40VolumeMaterial1:
@@ -169,7 +546,11 @@ children:
                       looping: false
                       speed: 1
                     scripts:
-                    - text: this.pointerClick = function() { console.info("Battery.pointerClick()"); this.playing = !this.playing }
+                    - text: |
+                        this.pointerClick = function() {
+                          console.info("Battery.pointerClick()"); 
+                          this.playing = !this.playing 
+                        }
                       type: application/javascript
                     children:
                       BeltClip:
@@ -197,7 +578,11 @@ children:
                           looping: false
                           speed: 1
                         scripts:
-                        - text: this.pointerClick = function() { console.info("Battery.pointerClick()"); this.playing = !this.playing }
+                        - text: |
+                            this.pointerClick = function() {
+                              console.info("Battery.pointerClick()");
+                              this.playing = !this.playing 
+                            }
                           type: application/javascript 
                         children:
                           BeltClipTab:
@@ -215,7 +600,11 @@ children:
                       looping: false
                       speed: 1
                     scripts:
-                    - text: this.pointerClick = function() { console.info("Battery.pointerClick()"); this.playing = !this.playing }
+                    - text: |
+                        this.pointerClick = function() {
+                          console.info("Battery.pointerClick()"); 
+                          this.playing = !this.playing 
+                        }
                       type: application/javascript 
                     children:
                       ic40Battery:
@@ -243,7 +632,11 @@ children:
                       looping: false
                       speed: 1
                     scripts:
-                    - text: this.pointerClick = function() { console.info("BatteryLatch.pointerClick()"); this.playing = !this.playing }
+                    - text: |
+                        this.pointerClick = function() {
+                          console.info("BatteryLatch.pointerClick()"); 
+                          this.playing = !this.playing 
+                        }
                       type: application/javascript
                     children:
                       ic40BatteryLatch:
@@ -297,6 +690,13 @@ children:
                 extends: http://vwf.example.com/types/node3
               ic40Antennae:
                 extends: http://vwf.example.com/types/node3
+                scripts:
+                - text: |
+                    this.ic40Antennae = function() {
+                      console.info("ic40Antennae.pointerClick()"); 
+                      this.parent.parent.parent.parent.anteanna = !this.parent.parent.parent.parent.anteanna; 
+                    }
+                  type: application/javascript 
                 children:
                   ic40AntennaeMaterial1:
                     extends: http://vwf.example.com/types/material
