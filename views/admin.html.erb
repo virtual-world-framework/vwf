@@ -162,19 +162,19 @@
                 jQuery( "button#play" ).button(
                     options.pause
                 ). click( function() {
-                    jQuery.get( state.playing ? "admin/pause" : "admin/play", undefined, update, "json" );
+                    jQuery.post( state.playing ? "admin/pause" : "admin/play", undefined, update, "json" );
                 } );
 
                 jQuery( "button#stop" ).button(
                     options.stop
                 ). click( function() {
-                    jQuery.get( "admin/stop", undefined, update, "json" );
+                    jQuery.post( "admin/stop", undefined, update, "json" );
                 } );
 
                 jQuery( ".rate.slider" ).slider(
                     options.rate
                 ) .bind( "slide", function( event, ui ) {
-                    jQuery.get( "admin/state?rate=" + Math.pow( 10, Number(ui.value) ), undefined, update, "json" );
+                    jQuery.get( "admin/state", { "rate": Math.pow( 10, Number(ui.value) ) }, update, "json" );
                 } );
 
                 function update( data ) {

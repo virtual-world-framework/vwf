@@ -10,7 +10,15 @@ class VWF::Application::Admin < Sinatra::Base
     erb :"admin.html"
   end
 
-  get "/state" do  # TODO: should be post but server.rb isn't handling post and delegating down
+  # get "/state" do
+  # 
+  #   if transport = Rack::SocketIO::Application.session( env )[:transport]
+  #     transport.state.to_json
+  #   end
+  # 
+  # end
+
+  get "/state" do  # TODO: switch to post; find substitute for query_string to parse
 
     if transport = Rack::SocketIO::Application.session( env )[:transport]
       state = Rack::Utils.parse_query request.query_string
@@ -39,7 +47,7 @@ class VWF::Application::Admin < Sinatra::Base
 
   end
 
-  get "/play" do  # TODO: should be post but server.rb isn't handling post and delegating down
+  post "/play" do
 
     if transport = Rack::SocketIO::Application.session( env )[:transport]
       transport.play
@@ -48,7 +56,7 @@ class VWF::Application::Admin < Sinatra::Base
 
   end
 
-  get "/pause" do  # TODO: should be post but server.rb isn't handling post and delegating down
+  post "/pause" do
 
     if transport = Rack::SocketIO::Application.session( env )[:transport]
       transport.pause
@@ -57,7 +65,7 @@ class VWF::Application::Admin < Sinatra::Base
 
   end
 
-  get "/stop" do  # TODO: should be post but server.rb isn't handling post and delegating down
+  post "/stop" do
 
     if transport = Rack::SocketIO::Application.session( env )[:transport]
       transport.stop
