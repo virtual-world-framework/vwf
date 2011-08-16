@@ -1,0 +1,22 @@
+﻿{
+  "extends": "http://vwf.example.com/types/node", 
+  "properties": {
+    "shine": 10, 
+    "specColor": {
+      "r": 1, 
+      "b": 1, 
+      "g": 1
+    }, 
+    "color": {
+      "a": 1, 
+      "r": 1, 
+      "b": 1, 
+      "g": 1
+    }, 
+    "texture": "", 
+    "reflect": 0.80000000000000004, 
+    "specular": 1, 
+    "alpha": 1, 
+    "emit": 0
+  }
+}
