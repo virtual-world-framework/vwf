@@ -1,0 +1,4 @@
+﻿--- 
+extends: http://vwf.example.com/types/node
+properties: 
+  success: false

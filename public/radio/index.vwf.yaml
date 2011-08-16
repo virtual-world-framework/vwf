@@ -19,7 +19,7 @@ children:
       beltClip: true
       menuMode: "none"
       backLightMode: "auto"
-      beepOn: false
+      beepOn: true
       squelch: 20
       encryptionOn: false
       transmitPower: 4
@@ -31,8 +31,7 @@ children:
         }
         this.red = function() {
           console.info( "=====||====== radio.dae.red()" );
-          console.info( "              radio = " + radio );
-          console.info( "              radio.menuMode = " + radio.menuMode );
+          if ( radio.keysLocked ) return;
           switch( radio.menuMode ) {
             case "channel":
               radio.menuMode = "backLight";
@@ -87,6 +86,7 @@ children:
           }
         }
         this.p0 = function() {
+          if ( radio.keysLocked ) return;
           switch( radio.menuMode ){
             case "channel":
               radio.encryptionOn = !radio.encryptionOn;
@@ -94,8 +94,10 @@ children:
           }
         }
         this.p1 = function() {
+          if ( radio.keysLocked ) return;
         }
         this.p2 = function() {
+          if ( radio.keysLocked ) return;
           if ( radio.menuMode == "channel" ){
             if ( !radio.settingTransmitPower ){
               radio.settingTransmitPower = true;
@@ -118,14 +120,15 @@ children:
           radio.keysLocked = !radio.keysLocked;
         }
         this.ptt = function() {
+          if ( radio.keysLocked ) return;
         }
         this.properties.powerOn.setter = function( value ) {
+          this.powerOn = value;
           if ( value ) {
             this.menuMode = "channel";
           } else { 
             this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD.png";
           } 
-          this.powerOn = value;
         }
         this.properties.volume.setter = function( value ) {
           if ( value >= 0 ){
@@ -143,8 +146,10 @@ children:
           } else {
             console.info( "replace the anteanna" );
           }
+          this.anteanna = value;
         }
         this.properties.menuMode.setter = function( value ) {
+          if ( !this.powerOn ) return;
           switch( value ) {
             case "channel":
               this.channel = this.channel;
@@ -165,6 +170,7 @@ children:
           }
         }
         this.properties.backLightMode.setter = function( value ) {
+          if ( !this.powerOn ) return;
           switch(value) {
             case "auto":
               this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_AUTO_Gon_Von.png";
@@ -181,6 +187,7 @@ children:
           }
         }
         this.properties.beepOn.setter = function( value ) {
+          if ( !this.powerOn ) return;
           if ( value ) {
               this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_BEEP_ON_Gon_Von.png";
               this.beepOn = value;
@@ -190,6 +197,7 @@ children:
           }
         }
         this.properties.squelch.setter = function( value ) {
+          if ( !this.powerOn ) return;
           switch(value) {
             case 20:
               this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL20_Gon_Von.png";
@@ -234,6 +242,7 @@ children:
           }
         }
         this.properties.channel.setter = function( value ) {
+          if ( !this.powerOn ) return;
           switch( value ) {
             case 1:
               this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan1_Gon_Von.png";
@@ -302,6 +311,7 @@ children:
           }
         }
         this.properties.encryptionOn.setter = function( value ) {
+          if ( !this.powerOn ) return;
           if ( value ) {
             this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD7_Scrambler_Gon_Von.png";
               this.encryptionOn = value;
@@ -312,6 +322,7 @@ children:
           this.encryptionOn = value;
         }
         this.properties.transmitPower.setter = function( value ) {
+          if ( !this.powerOn ) return;
           switch ( value ){
             case 4:
               this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Blank_Gon_Voff.png";
@@ -364,13 +375,20 @@ children:
                     extends: http://vwf.example.com/types/node3
                     scripts:
                     - text: |
+                        this.channelDirectionUp = true; 
                         this.pointerClick = function()  {
-                          if ( this.rotZ == 0 ) {
-                            this.parent.parent.parent.parent.channel = 2;
-                            this.rotZ = 340;
+                          console.info( "=====||====== ic40Channel.pointerClick()" );
+                          var currentChannel = this.parent.parent.parent.parent.channel;
+                          if ( this.channelDirectionUp && currentChannel < 16 ) {
+                            this.parent.parent.parent.parent.channel = currentChannel + 1;
+                            this.rotZ = this.rotZ - 10;
+                            if ( this.parent.parent.parent.parent.channel == 16 )
+                              channelDirectionUp = false;
                           } else {
-                            this.parent.parent.parent.parent.channel = 1;
-                            this.rotZ = 0;
+                            this.parent.parent.parent.parent.channel = currentChannel - 1;
+                            this.rotZ = this.rotZ + 10;
+                            if ( this.parent.parent.parent.parent.channel == 1 )
+                              channelDirectionUp = true;
                           }
                         }
                       type: application/javascript
@@ -407,6 +425,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P0.pointerClick()" );
                           this.parent.parent.parent.parent.p0();
                         }
                       type: application/javascript
@@ -420,6 +439,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P1.pointerClick()" );
                           this.parent.parent.parent.parent.p1();
                         }
                       type: application/javascript
@@ -433,6 +453,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P2.pointerClick()" );
                           this.parent.parent.parent.parent.p2();
                         }
                       type: application/javascript
@@ -446,6 +467,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P3.pointerClick()" );
                           this.parent.parent.parent.parent.p3();
                         }
                       type: application/javascript
@@ -459,6 +481,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40PTT.pointerClick()" );
                           this.parent.parent.parent.parent.ptt();
                         }
                       type: application/javascript
@@ -505,9 +528,10 @@ children:
                     scripts:  
                     - text: | 
                         this.pointerClick = function()  {
+                          console.info( "=====||====== ic40Volume.pointerClick()" );
                           if ( this.rotZ == 0 ) {
                             this.parent.parent.parent.parent.volume = 10;
-                            this.rotZ = 60;
+                            this.rotZ = 120;
                           } else {
                             this.parent.parent.parent.parent.volume = 0;
                             this.rotZ = 0;
@@ -548,7 +572,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
-                          console.info("Battery.pointerClick()"); 
+                          console.info("=====||====== BeltClip_1.pointerClick()"); 
                           this.playing = !this.playing 
                         }
                       type: application/javascript
@@ -580,7 +604,7 @@ children:
                         scripts:
                         - text: |
                             this.pointerClick = function() {
-                              console.info("Battery.pointerClick()");
+                              console.info("=====||====== BeltClip_Latch.pointerClick()");
                               this.playing = !this.playing 
                             }
                           type: application/javascript 
@@ -602,7 +626,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
-                          console.info("Battery.pointerClick()"); 
+                          console.info("=====||====== Battery.pointerClick()"); 
                           this.playing = !this.playing 
                         }
                       type: application/javascript 
@@ -634,7 +658,7 @@ children:
                     scripts:
                     - text: |
                         this.pointerClick = function() {
-                          console.info("BatteryLatch.pointerClick()"); 
+                          console.info( "=====||====== BatteryLatch.pointerClick()" );
                           this.playing = !this.playing 
                         }
                       type: application/javascript
@@ -693,7 +717,7 @@ children:
                 scripts:
                 - text: |
                     this.ic40Antennae = function() {
-                      console.info("ic40Antennae.pointerClick()"); 
+                      console.info( "=====||====== ic40Antennae.pointerClick()" );
                       this.parent.parent.parent.parent.anteanna = !this.parent.parent.parent.parent.anteanna; 
                     }
                   type: application/javascript 
