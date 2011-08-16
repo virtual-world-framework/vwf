@@ -187,7 +187,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
         if ( property.setter && !property.setting ) {
             property.setting = true;
-            value = property.setter.call( node, propertyValue );
+            try { value = property.setter.call( node, propertyValue ) || property.internal } catch( e ) { } // TODO: log errors
             property.setting = false;
         } else {
             value = property.internal = propertyValue;
@@ -208,7 +208,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
         if ( property.getter && !property.getting ) {
             property.getting = true;
-            value = property.getter.call( node );
+            try { value = property.getter.call( node ) || property.internal } catch( e ) { } // TODO: log errors
             property.getting = false;
         } else {
             value = property.internal;
@@ -244,7 +244,7 @@ node.id = nodeID; // TODO: move to a backstop model
         var value;
 
         if ( scriptType == "application/javascript" ) { // TODO: or others
-            value = ( function( scriptText ) { eval( scriptText ) } ).call( node, scriptText ); // TODO: return result?
+            try { value = ( function( scriptText ) { eval( scriptText ) } ).call( node, scriptText ) } catch( e ) { } // TODO: log errors // TODO: return result?
         }
 
         return value;
