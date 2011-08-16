@@ -1,10 +1,10 @@
 require "helper"
 
-class ServerTest < Test::Unit::TestCase
+class VWFTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    Server
+    VWF
   end
 
   def test_serves_types_as_json

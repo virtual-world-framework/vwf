@@ -1,6 +1,6 @@
-require "component_templates"
+require "tilt/vwf"
 
-class Component < Sinatra::Base
+class VWF::Application::Component < Sinatra::Base
 
   def initialize root
     super nil

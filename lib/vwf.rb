@@ -1,17 +1,17 @@
-class Server < Sinatra::Base
+class VWF < Sinatra::Base
 
-  require "server/application_pattern"
+  require "vwf/pattern"
 
   configure do
 
     set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
-    set :static, false # we serve out of :public, but it's part of the Cascade
+    set :static, false # we serve out of :public, but only relative to vwf applications
 
-    set :client, lambda { File.join( settings.root, "support", "client" ) }
+    set :support, lambda { File.join( settings.root, "support" ) }
+    set :client, lambda { File.join( settings.support, "client" ) }
 
-    set :component_template_types, [ :json, :yaml ]  # get from Component?
-
-    set :mock_filesystem, nil
+set :component_template_types, [ :json, :yaml ]  # get from Component?
+set :mock_filesystem, nil
 
   end
 
@@ -42,9 +42,9 @@ class Server < Sinatra::Base
 
   end
 
-  get ApplicationPattern.new do |public_path, application, session, private_path|
+  get Pattern.new do |public_path, application, session, private_path|
 
-    logger.debug "Server#get ApplicationPattern #{public_path} - #{application} - #{session} - #{private_path}"
+    logger.debug "VWF#get #{public_path} - #{application} - #{session} - #{private_path}"
 
     # Redirect "/path/to/application" to "/path/to/application/", and "/path/to/application/session"
     # to "/path/to/application/session/". But XHR calls to "/path/to/application" get the component
@@ -52,8 +52,8 @@ class Server < Sinatra::Base
 
     if request.route[-1,1] != "/" && private_path.nil?
 
-      if session.nil? && ! request.accept.include?( mime_type :html )
-        Component.new( settings.public ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
+      if session.nil? && ! request.accept.include?( mime_type :html )  # TODO: pass component request through to normal delegation below?
+        Application::Component.new( settings.public ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
       else
         redirect to request.route + "/"
       end
@@ -64,52 +64,45 @@ class Server < Sinatra::Base
 
       redirect to request.route + random_session_id + "/"
 
-    # Delegate everything else based on the private_path.
+    # Delegate everything else to the application.
 
     else
+
+      delegate_to_application public_path, application, session, private_path
+
+    end
+
+  end
+
+  # Delegate all posts to the application.
+
+  post Pattern.new do |public_path, application, session, private_path|
+
+    logger.debug "VWF#post #{public_path} - #{application} - #{session} - #{private_path}"
+
+    delegate_to_application public_path, application, session, private_path
+
+  end
+
+  helpers do
+
+    def delegate_to_application public_path, application, session, private_path
 
       application_session = session ?
           File.join( public_path, application, session ) :
           File.join( public_path, application )
 
-      if private_path.nil?
-      
-        delegated_env = env.merge(
-          "SCRIPT_NAME" => application_session,
-          "PATH_INFO" => "/index.html"
-          # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
-        )
+      delegated_env = env.merge(
+        "SCRIPT_NAME" => application_session,
+        "PATH_INFO" => "/" + ( private_path || "index.html" ),  # TODO: do index.* default elsewhere  # TODO: escaped properly for PATH_INFO?
+        "vwf.root" => public_path,
+        "vwf.application" => application,
+        "vwf.session" => session
+      )
 
-        Rack::Cascade.new( [
-          Rack::File.new( settings.client ),      # index.html from ^/support/client
-        ] ).call delegated_env
-
-      else
-      
-        delegated_env = env.merge(
-          "SCRIPT_NAME" => application_session,
-          "PATH_INFO" => "/#{ private_path }",  # TODO: escaped properly for PATH_INFO?
-          "vwf.base_path" => public_path,
-          "vwf.application" => application
-          # TODO: what about REQUEST_PATH, REQUEST_URI, others? any better way to forward env? also SCRIPT_NAME?
-        )
-
-        Rack::Cascade.new( [
-          Admin.new,
-          Rack::File.new( settings.client ),      # Client files from ^/support/client
-          Rack::File.new( File.join settings.public, public_path ), # Public content from ^/public  # TODO: will match public_path/index.html which we don't really want
-          Component.new( File.join settings.public, public_path ),  # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
-          Reflector.new                           # The WebSocket reflector  # TODO: not for session==nil
-          # Reflector.new( :debug => true, :backend => { :debug => true } )                           # The WebSocket reflector  # TODO: not for session==nil
-        ] ).call delegated_env
-
-      end
+      Application.new( delegated_env["vwf.root"] ).call delegated_env
 
     end
-    
-  end
-
-  helpers do
 
     # Generate a random string to be used as a session id.
 
