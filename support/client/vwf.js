@@ -662,7 +662,8 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             // has run.
 
             jQuery.each( vwf.models, function( index, model ) {
-                model.settingProperty && model.settingProperty( nodeID, propertyName, propertyValue );
+                var value = model.settingProperty && model.settingProperty( nodeID, propertyName, propertyValue );
+                propertyValue = value !== undefined ? value : propertyValue;
             } );
 
             // Call satProperty() on each view. The view is being notified that a property has been
