@@ -420,7 +420,7 @@
 
             this.logger.group( "vwf.createNode " + (
                 typeof component_uri_or_json_or_object == "string" || component_uri_or_json_or_object instanceof String ?
-                    component_uri_or_json_or_object : JSON.stringify( component_uri_or_json_or_object )
+                    component_uri_or_json_or_object : JSON.stringify( loggableComponent( component_uri_or_json_or_object ) )
             ) );
 
             // Any component specification may be provided as either a URI identifying a network
@@ -1025,6 +1025,59 @@ childName /* TODO: hack */ );
             }
 
             return component;
+        };
+
+        // -- loggableComponent --------------------------------------------------------------------
+
+        // Return a copy of a component with the verbose bits truncated so that it may be written to
+        // a log.
+
+        var loggableComponent = function( component ) {
+
+            var loggable = {};
+
+            for ( var name in component ) {
+
+                switch ( name ) {
+
+                    case "children":
+
+                        loggable.children = {};
+
+                        for ( var name in component.children ) {
+                            loggable.children[name] = {};
+                        }
+
+                        break;
+
+                    case "scripts":
+
+                        loggable.scripts = [];
+
+                        component.scripts.forEach( function( script ) {
+
+                            var loggableScript = {};
+
+                            for ( var name in script ) {
+                                loggableScript[name] = name == "text" ? "" : script[name];
+                            }
+
+                            loggable.scripts.push( loggableScript );
+
+                        } );
+
+                        break;
+
+                    default:
+
+                        loggable[name] = component[name];
+
+                        break;
+                }
+
+            }
+
+            return loggable;
         };
 
         // -- remappedURI --------------------------------------------------------------------------
