@@ -51,7 +51,7 @@
             // );
 
             var canvasQuery = jQuery(this.rootSelector).append(
-                "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='600'/>"
+                "<canvas id='" + nodeID + "' class='vwf-scene' width='640' height='480'/>"
             ).children(":last");
 
             var scene = this.scenes[nodeID] = {
