@@ -1,4 +1,131 @@
 --- 
 extends: http://vwf.example.com/types/node3
 properties: 
-  allowMouseNav: true
+  allowMouseNav: false
+  walkMode: "walk"
+  orbitPoint: [ 0, 0, 0 ]
+  far: 1000.0
+  near: 0.1
+  fovy: 35
+  aspect: 1.0
+  orthoscale: 5
+  type: "perspective"
+scripts:
+- text: |
+    this.properties.walkMode.setter = function( value ) {
+      switch ( value ) {
+        case "orbit":
+        case "walk":
+          this.properties.walkMode = value;
+          break;
+      }
+    }
+    this.properties.type.setter = function( value ) {
+      switch ( value ) {
+        case "perspective":
+        case "orthographic":
+          this.properties.type = value;
+          break;
+      }
+    }    
+    this.properties.far.setter = function( value ) { 
+      if ( value > 0 && value > this.near ) {
+        this.properties.far = value;
+      }
+    }
+    this.properties.near.setter = function( value ) {
+      if ( value > 0 && value < this.far ) {
+        this.properties.near = value;
+    }
+    }
+    this.properties.fovy.setter = function( value ) {
+      if ( value > 0 ) {
+        this.properties.fovy = value;
+      }
+    }
+    this.properties.apsect.setter = function( value ) {
+      this.properties.aspcet = value;
+    }
+    this.properties.orthoscale.setter = function( value ) {
+      this.properties.orthoscale = value;
+    }
+    this.handleKeyEvents = function( keysDown, now, lastime, mat, trans, mag ) {
+      var camerapos = this.position;
+      var camerarot = this.rotation;
+      if ( walkMode == "walk" ) {
+        var yinc = 0;
+        var xinc = 0;
+        var zinc = 0;
+        trans[0] = trans[0] / mag;
+        trans[1] = trans[1] / mag;
+        if ( keysDown[87] || keysDown[38] ) {
+          yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
+        }
+        if ( keysDown[83] || keysDown[40] ) {
+          yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
+        }
+        if ( keysDown[37] || keysDown[81] ) {
+          yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
+        }
+        if ( keysDown[39] || keysDown[69] ) {
+          yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
+        }
+        if ( keysDown[82] ) { zinc = zinc + 1.0 }
+        if ( keysDown[67] ) { zinc = zinc - 1.0 }
+        if ( keysDown[65] ) { this.rotation = [ camerarot[0], camerarot[1] + 0.04, camerarot[2] ); }
+        if ( keysDown[68] ) { this.rotation = [ camerarot[0], camerarot[1] - 0.04, camerarot[2] ); }
+        if ( keysDown[90] ) {
+            vwf.logger.info("   camerapos = " + camerapos[0] + ", " + camerapos[1] + ", " + camerapos[2]);
+            vwf.logger.info("   camerarot = " + camerarot[0] + ", " + camerarot[1] + ", " + camerarot[2]);
+        }
+        if ( xinc != 0 || yinc != 0 || zinc != 0 ) {
+          var newCp = [ camerapos[0] + xinc * 0.05 * (now - lasttime), camerapos[1] + yinc * 0.05 * (now - lasttime), camerapos[2] + zinc * 0.05 * (now - lasttime) ];
+          this.position = newCp;        
+        }
+      } else if ( walkMode == "orbit" ) { 
+        var x, y, z = 0;
+        var dx, dy, dz = 0;
+        var radius = 10.0;
+        dx = orbitPoint[0] - camerapos[0];
+        dy = orbitPoint[1] - camerapos[1];
+        dz = orbitPoint[2] - camerapos[2];
+        radius = Math.sqrt( dx*dx + dy*dy + dz*dz );
+        var bKeyDown = false;
+        if ( keysDown[87] || keysDown[38] ) {
+          // orbit up
+          orbitPitch += orbitInc;
+          bKeyDown = true;
+        }
+        if ( keysDown[83] || keysDown[40] ) {
+          // orbit down
+          orbitPitch -= orbitInc;
+          bKeyDown = true;
+        }
+        if ( keysDown[37] || keysDown[81] ) {
+          // orbit left
+          orbitYaw += orbitInc;
+          bKeyDown = true;
+        }
+        if ( keysDown[39] || keysDown[69] ) {
+          // orbit right  
+          orbitYaw -= orbitInc;
+          bKeyDown = true;
+        }  
+        if ( bKeyDown ) {
+          if ( orbitYaw > 90 )
+              orbitYaw = 90.0;
+          if ( orbitYaw < -90 )
+              orbitYaw = -90.0;
+          if ( orbitPitch > 360 )
+              orbitPitch -= 360;
+          if ( orbitPitch < -360 )
+              orbitPitch += 360.0;
+          x = orbitPoint[0] + radius * Math.sin( orbitYaw ) * Math.cos( orbitPitch );
+          y = orbitPoint[1] + radius * Math.cos( orbitYaw );
+          z = orbitPoint[2] + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );
+          this.position = [ x, y, z ];
+          //camera.setLookat( orbitPoint );
+        }
+      }
+    }
+  type: application/javascript

@@ -1,5 +1,6 @@
 ﻿{
-
-    "extends": "http://vwf.example.com/types/node2"
-
+  "extends": "http://vwf.example.com/types/node2", 
+  "properties": {
+    "activeCamera": "mainCamera"
+  }
 }
