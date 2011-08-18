@@ -10,9 +10,20 @@
         <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
         <script type="text/javascript" src="../socket.io/socket.io.js"></script>
 
+        <script type="text/javascript" src="vwf.js"></script>
+
+        <script type="text/javascript" src="vwf-view.js"></script>
+        <script type="text/javascript" src="vwf-view-html.js"></script>
+
         <script type="text/javascript">
 
+            vwf.initialize( {}, { html: "#listing" } );
+
             jQuery( window.document ).ready( function() {
+
+                $( "#tabs" ).tabs();
+
+                // ---------------------------------------------------------------------------------
 
                 try {
                     socket = new io.Socket( undefined, {
@@ -34,7 +45,7 @@
 
                         if ( fields.action ) {
 
-                            var now$ = jQuery( ".log .now" );
+                            var now$ = jQuery( "#log .now" );
                             var action$ = now$.clone().removeClass( "now" );
 
                             action$.children().each( function( index ) {
@@ -84,7 +95,7 @@
 
                             // Update now$ with the most recent time.
 
-                            var now$ = jQuery( ".log .now" );
+                            var now$ = jQuery( "#log .now" );
                             now$.children().first().text( Number( fields.time ).toFixed( 3 ) );
 
                         }
@@ -213,21 +224,26 @@
         <link rel="stylesheet" type="text/css" href="index.css" />
         <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.14.custom.css" />
 
-        <style>
+        <style type="text/css">
 
             body {
                 background-color: white;
-                background-image: url(vwl800.jpg);                background-position: center top;                background-repeat: repeat-y;                background-attachment: scroll;            }
-            .log > * {
+            }
+
+            #tabs {
+                min-height: 1024px;
+                background-image: url(vwl800.jpg);                background-position: center top;                background-repeat: repeat-y;                background-attachment: scroll;            }
+
+            #log > * {
                 margin: 0;
                 font-family: "Bitstream Vera Sans Mono", "Courier New", monospace;
             }
 
-            .log > :nth-child(even) {
+            #log > :nth-child(even) {
                 background-color: #ffffff;
             }
 
-            .log > :nth-child(odd) {
+            #log > :nth-child(odd) {
                 background-color: #f8f8f8;
             }
 
@@ -259,11 +275,11 @@
 
         </style>
 
-
     </head>
 
     <body>
-        <h1>Admin</h1>
+
+        <h1>Virtual World Framework Administration</h1>
 
         <p>
             <span class="time">
@@ -276,11 +292,23 @@
             </span>
         </p>
 
-        <div class="log">
-            <p class="now">
-                <span class="time"></span>
-                <span class="action"></span>
-            </p>
+        <div id="tabs">
+
+            <ul>
+                <li><a href="#listing">Listing</a></li>
+                <li><a href="#log">Log</a></li>
+            </ul>
+
+            <div id="listing">
+            </div>
+
+            <div id="log">
+                <p class="now">
+                    <span class="time"></span>
+                    <span class="action"></span>
+                </p>
+            </div>
+
         </div>
 
     </body>
