@@ -142,24 +142,15 @@
                     "<p class='vwf-label'>" + propertyName + ": " +
                         "<span class='vwf-value'>" + propValue + "</span>" +
                     "</p>" +
-
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "Roll' class='vwf-property'>" +
-                        "<p class='vwf-label'>Roll: " +
-                            "<span class='vwf-roll-value'>" + values[0] + "</span>" +
-                        "</p>" +
-                    "<div class='vwf-control-roll-slider' id='slider-roll'></div>" +
-
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "Pitch' class='vwf-property'>" +
-                        "<p class='vwf-label'>Pitch: " +
-                            "<span class='vwf-pitch-value'>" + values[1] + "</span>" +
-                        "</p>" +
-                    "<div class='vwf-control-pitch-slider' id='slider-pitch'></div>" +
-
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "Yaw' class='vwf-property'>" +
-                        "<p class='vwf-label'>Yaw: " +
-                            "<span class='vwf-yaw-value'>" + values[2] + "</span>" +
-                        "</p>" +
-                    "<div class='vwf-control-yaw-slider' id='slider-yaw'></div>" +
+                    "<p class='vwf-label'>roll: " +
+                        "<span class='vwf-control-roll-slider' id='slider-roll'></span>" +
+                    "</p>" +
+                    "<p class='vwf-label'>pitch: " +
+                        "<span class='vwf-control-pitch-slider' id='slider-pitch'></span>" +
+                    "</p>" +
+                    "<p class='vwf-label'>yaw: " +
+                        "<span class='vwf-control-yaw-slider' id='slider-yaw'></span>" +
+                    "</p>" +
                 "</div>"
             ).children(":last");
 
@@ -178,24 +169,15 @@
                     "<p class='vwf-label'>" + propertyName + ": " +
                         "<span class='vwf-value'>" + propValue + "</span>" +
                     "</p>" +
-
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "X' class='vwf-property'>" +
-                        "<p class='vwf-label'>X: " +
-                            "<span class='vwf-x-value'>" + values[0] + "</span>" +
-                        "</p>" +
-                    "<div class='vwf-control-x-slider' id='slider-x'></div>" +
-
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "Y' class='vwf-property'>" +
-                        "<p class='vwf-label'>Y: " +
-                            "<span class='vwf-y-value'>" + values[1] + "</span>" +
-                        "</p>" +
-                    "<div class='vwf-control-y-slider' id='slider-y'></div>" +
-
-                    "<div id='view-html-" + nodeID + "-" + propertyName + "Z' class='vwf-property'>" +
-                        "<p class='vwf-label'>Z: " +
-                            "<span class='vwf-z-value'>" + values[2] + "</span>" +
-                        "</p>" +
-                    "<div class='vwf-control-z-slider' id='slider-z'></div>" +
+                    "<p class='vwf-label'>x: " +
+                        "<span class='vwf-control-x-slider' id='slider-x'></span>" +
+                    "</p>" +
+                    "<p class='vwf-label'>y: " +
+                        "<span class='vwf-control-y-slider' id='slider-y'></span>" +
+                    "</p>" +
+                    "<p class='vwf-label'>z: " +
+                        "<span class='vwf-control-z-slider' id='slider-z'></span>" +
+                    "</p>" +
                 "</div>"
             ).children(":last");
 

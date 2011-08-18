@@ -166,7 +166,14 @@ input {
   padding: 10px;
 }
 
-#vwf-root>div {
+#vwf-root>div, #vwf-root>canvas {
   margin-left: auto;
   margin-right: auto;
+  display: block;
+}
+
+.vwf-control-slider, .vwf-control-roll-slider, .vwf-control-pitch-slider, .vwf-control-yaw-slider, .vwf-control-x-slider, .vwf-control-y-slider, .vwf-control-z-slider {
+    display: inline-block;
+    width: 15em;
+    margin-left: 1ex;
 }
