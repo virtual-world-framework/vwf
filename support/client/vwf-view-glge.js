@@ -25,6 +25,10 @@
         this.smokeID = undefined;
 
         this.glgeColladaObjects = new Array();
+        this.keysDown = {};
+
+        this.defaultCamera = undefined;
+        this.defaultCameraID = undefined;
 
     };
 
@@ -53,6 +57,14 @@
             var canvasQuery = jQuery(this.rootSelector).append(
                 "<canvas id='" + nodeID + "' class='vwf-scene' width='640' height='480'/>"
             ).children(":last");
+
+            canvasQuery.keydown( function( event ) {
+              view.keysDown[ event.keyCode ] = true;
+            });
+
+            canvasQuery.keyup( function( event ) {
+              view.keysDown[ event.keyCode ] = false;
+            });
 
             var scene = this.scenes[nodeID] = {
                 glgeDocument: new GLGE.Document(),
@@ -142,7 +154,8 @@
 
             var node = this.nodes[nodeID] = {
                 name: undefined,  // TODO: needed?
-                glgeObject: undefined
+                glgeObject: undefined,
+				type: nodeExtendsID
             };
 
         }
@@ -151,11 +164,30 @@
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
-                glgeObject: undefined
+                glgeObject: undefined,
+				type: nodeExtendsID
             };
 
-            this.camera = node;
-            this.cameraID = nodeID;
+			if ( this.defaultCamera ) {
+				this.defaultCamera = node;
+				this.defaultCameraID = nodeID;
+
+				node["name"] = "vwfDefaultCam";
+				node["glgeObject"] = new GLGE.Camera();
+			} else {
+				this.camera = node;
+				this.cameraID = nodeID;
+			}
+        }
+
+        else if (nodeExtendsID == "http-vwf-example-com-types-light") {
+
+            var node = this.nodes[nodeID] = {
+                name: undefined,
+                glgeObject: undefined,
+				type: nodeExtendsID
+            };
+
         }
 
         else if (nodeExtendsID == "http-vwf-example-com-types-material") {
@@ -163,7 +195,8 @@
             var node = this.nodes[nodeID] = {
                 name: undefined,
                 glgeObject: undefined,
-                glgeMaterial: true
+                glgeMaterial: true,
+				type: nodeExtendsID
             };
 
         }
@@ -378,8 +411,81 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                     }
                     break;
 
-            }
 
+
+				// light properties begin
+  				case "lightType":
+					switch ( propertyValue ) {
+						case "point":
+							node.glgeObject.setType( GLGE.L_POINT );
+							break;
+						case "directional":
+							node.glgeObject.setType( GLGE.L_DIR );
+							break;
+						case "spot":
+							node.glgeObject.setType( GLGE.L_SPOT );
+							break;
+					}
+					break;
+
+  				case "constantAttenuation":
+					node.glgeObject.setAttenuationConstant( propertyValue );
+ 					break;
+
+ 				case "linearAttenuation":
+					node.glgeObject.setAttenuationLinear( propertyValue );
+					break;
+
+  				case "quadraticAttenuation":
+					node.glgeObject.setAttenuationQuadratic( propertyValue );
+					break;
+
+  				case "spotCosCutOff":
+					node.glgeObject.setSpotCosCutOff( propertyValue );
+					break;
+
+  				case "spotExponent":
+					node.glgeObject.setSpotExponent( propertyValue );
+					break;
+
+  				case "diffuse":
+					node.glgeObject.setDiffuse( propertyValue );
+					break;
+
+  				case "specular":
+					node.glgeObject.setSpecular( propertyValue );
+					break;
+
+  				case "samples":
+					node.glgeObject.setShadowSamples( propertyValue );
+					break;
+
+  				case "softness":
+					node.glgeObject.setShadowSoftness( propertyValue );
+					break;
+
+  				case "bufferHeight":
+					node.glgeObject.setBufferHeight( propertyValue );
+					break;
+
+  				case "bufferWidth":
+					node.glgeObject.setBufferWidth( propertyValue );
+					break;
+
+  				case "shadowBias":
+					node.glgeObject.setShadowBias( propertyValue );
+					break;
+
+  				case "distance":
+					node.glgeObject.setDistance( propertyValue );
+					break;
+
+  				case "castShadows":
+					node.glgeObject.setCastShadows( propertyValue );
+					break;
+				// light properties end
+
+            }
         }
 
         return value;
@@ -458,8 +564,79 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     //glgeObject.    
                     break;
 
-            }
+				// light properties begin
+  				case "lightType":
+					switch ( node.glgeObject.getType() ) {
+						case GLGE.L_POINT:
+							value = "point";
+							break;
+						case GLGE.L_DIR:
+							value = "directional";
+							break;
+						case GLGE.L_SPOT:
+							value = "spot";
+							break;
+					}
+					break;
 
+  				case "constantAttenuation":
+					value = node.glgeObject.getAttenuationConstant();
+ 					break;
+
+ 				case "linearAttenuation":
+					value = node.glgeObject.getAttenuationLinear();
+					break;
+
+  				case "quadraticAttenuation":
+					value = node.glgeObject.getAttenuationQuadratic();
+					break;
+
+  				case "spotCosCutOff":
+					value = node.glgeObject.getSpotCosCutOff();
+					break;
+
+  				case "spotExponent":
+					value = node.glgeObject.getSpotExponent();
+					break;
+
+  				case "diffuse":
+					value = node.glgeObject.getDiffuse();
+					break;
+
+  				case "specular":
+					value = node.glgeObject.getSpecular();
+					break;
+
+  				case "samples":
+					value = node.glgeObject.getShadowSamples();
+					break;
+
+  				case "softness":
+					value = node.glgeObject.getShadowSoftness();
+					break;
+
+  				case "bufferHeight":
+					value = node.glgeObject.getBufferHeight();
+					break;
+
+  				case "bufferWidth":
+					value = node.glgeObject.getBufferWidth();
+					break;
+
+  				case "shadowBias":
+					value = node.glgeObject.getShadowBias();
+					break;
+
+  				case "distance":
+					value = node.glgeObject.getDistance();
+					break;
+
+  				case "castShadows":
+					value = node.glgeObject.getCastShadows();
+					break;
+				// light properties end
+
+            }
         }
 
         return value;
@@ -480,6 +657,11 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 }
             }
         });
+
+        this.defaultCamera = true;
+        vwf.createNode( "http://vwf.example.com/types/camera", dummy, "vwfDefaultCam" ); 
+
+		function dummy( nodeID, name ) {}
 
     };
 
@@ -508,7 +690,13 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if (child.glgeObject) {
                 glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
                 child.initialized = true;
-            }
+            } else {
+				var obj = GLGE.Assets.get(childName);
+				if ( obj ) {
+					child.glgeObject = obj;
+					child.initialized = true;
+				}
+			}
        }
 
         else if (node && !child.glgeObject) {
@@ -521,7 +709,23 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 if (child.glgeObject) {
                     glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
                     child.initialized = true;
-                }
+                } else {
+					switch( child["type"] ) {
+						case "http-vwf-example-com-types-light":
+							var obj = GLGE.Assets.get(childName);
+							if ( obj ) {
+								child.glgeObject = obj;
+								child.initialized = true;
+							} else {
+								obj = GLGE.Assets.get(childName+"-light");
+								if ( obj ) {
+									child.glgeObject = obj;
+									child.initialized = true;
+								}
+							}							
+							break;
+					}
+				}
             }
         }
 
@@ -621,11 +825,111 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     var objectCenter = {};
 
     var centerGroup = undefined;
+    //var keysDown = {};
 
     var checkKeys = function (nodeID, view, now, lasttime) {
-
+        
         var scene = view.scenes[nodeID], child;
         if (scene && scene.glgeScene) {
+            var camera = scene.glgeScene.camera;
+            if (camera && camera.handleKeyEvents) {
+  
+              var mat = camera.getRotMatrix();
+              var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
+              var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
+ 
+              // should only be sending the keysDown, now, lastime, but I'm going to
+              // inlcude the additional data for now to cut some corners
+              camera.handleKeyEvents( view.keysDown, now, lasttime, mat, trans, mag );
+            } else {
+                camerapos = camera.getPosition();
+                camerarot = camera.getRotation();
+                var mat = camera.getRotMatrix();
+                var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
+                var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
+
+				var yinc = 0;
+				var xinc = 0;
+				var zinc = 0;
+				trans[0] = trans[0] / mag;
+				trans[1] = trans[1] / mag;
+
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+					yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
+				}
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+					yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
+				}
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
+					yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
+				}
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_E)) {
+					yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
+				}
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
+				if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
+					vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
+					vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
+				}
+
+				if (xinc != 0 || yinc != 0 || zinc != 0) {
+					camera.setLocY(camerapos.y + yinc * 0.05 * (now - lasttime));
+					camera.setLocX(camerapos.x + xinc * 0.05 * (now - lasttime));
+					camera.setLocZ(camerapos.z + zinc);
+				}
+			}
+        }
+
+        /*var keysDown = {};
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_A) ) keysDown[GLGE.KI_A] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_B) ) keysDown[GLGE.KI_B] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_C) ) keysDown[GLGE.KI_C] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_D) ) keysDown[GLGE.KI_D] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_E) ) keysDown[GLGE.KI_E] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_F) ) keysDown[GLGE.KI_F] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_G) ) keysDown[GLGE.KI_G] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_H) ) keysDown[GLGE.KI_H] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_I) ) keysDown[GLGE.KI_I] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_J) ) keysDown[GLGE.KI_J] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_K) ) keysDown[GLGE.KI_K] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_L) ) keysDown[GLGE.KI_L] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_M) ) keysDown[GLGE.KI_M] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_N) ) keysDown[GLGE.KI_N] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_O) ) keysDown[GLGE.KI_O] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_P) ) keysDown[GLGE.KI_P] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_Q) ) keysDown[GLGE.KI_Q] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_R) ) keysDown[GLGE.KI_R] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_S) ) keysDown[GLGE.KI_S] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_T) ) keysDown[GLGE.KI_T] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_U) ) keysDown[GLGE.KI_U] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_V) ) keysDown[GLGE.KI_V] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_W) ) keysDown[GLGE.KI_W] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_X) ) keysDown[GLGE.KI_X] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_Y) ) keysDown[GLGE.KI_Y] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_Z) ) keysDown[GLGE.KI_Z] = true;
+
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_1) ) keysDown[GLGE.KI_1] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_2) ) keysDown[GLGE.KI_2] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_3) ) keysDown[GLGE.KI_3] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_4) ) keysDown[GLGE.KI_4] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_5) ) keysDown[GLGE.KI_5] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_6) ) keysDown[GLGE.KI_6] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_7) ) keysDown[GLGE.KI_7] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_8) ) keysDown[GLGE.KI_8] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_9) ) keysDown[GLGE.KI_9] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_0) ) keysDown[GLGE.KI_0] = true;
+
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) ) keysDown[GLGE.KI_LEFT_ARROW] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) ) keysDown[GLGE.KI_RIGHT_ARROW] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW) ) keysDown[GLGE.KI_UP_ARROW] = true;
+        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW) ) keysDown[GLGE.KI_DOWN_ARROW] = true;*/
+
+
+
+        /*if (scene && scene.glgeScene) {
             var camera = scene.glgeScene.camera;
             if (camera) {
                 var bOrbit = false;
@@ -774,7 +1078,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     }
                 }
             }
-        }
+        }*/
 
     }
 

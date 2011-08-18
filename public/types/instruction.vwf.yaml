@@ -2,3 +2,17 @@
 extends: http://vwf.example.com/types/node
 properties: 
   success: false
+  instructionText: ""
+  actionText: ""
+  active: false
+  cameraPosition: ""
+  number: 0
+scripts:
+- text: |
+    this.onEntry = function() {
+      if ( this.cameraPosition != "" ) {
+        console.info( "go to camera position: " + this.cameraPosition );
+      }
+      console.info( "update " )
+    }
+  type: application/javascript  

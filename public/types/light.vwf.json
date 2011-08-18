@@ -1,0 +1,26 @@
+﻿{
+  "extends": "http://vwf.example.com/types/node3", 
+  "properties": {
+    "distance": 100.0, 
+    "bufferWidth": 256, 
+    "spotCosCutOff": 0.94999999999999996, 
+    "quadraticAttenuation": 0.00080000000000000004, 
+    "bufferHeight": 256, 
+    "linearAttenuation": 0.002, 
+    "specular": true, 
+    "spotExponent": 10, 
+    "samples": 0, 
+    "shadowBias": 2.0, 
+    "softness": 0.01, 
+    "castShadows": false, 
+    "type": "point", 
+    "diffuse": true, 
+    "constantAttenuation": 1
+  }, 
+  "scripts": [
+    {
+      "text": "this.properties.type.setter = function( value ) {\n  switch( value ) {\n    case \"point\":\n    case \"directional\":\n    case \"spot\":\n      this.type = value;\n      break;\n  }\n}\nthis.properties.constantAttenuation.setter = function( value ) { this.constantAttenuation = value; }\nthis.properties.linearAttenuation.setter = function( value ) { this.linearAttenuation = value; }\nthis.properties.quadraticAttenuation.setter = function( value ) { this.quadraticAttenuation = value; }\nthis.properties.spotCosCutOff.setter = function( value ) { this.spotCosCutOff = value; }\nthis.properties.spotExponent.setter = function( value ) { this.spotExponent = value; }\nthis.properties.diffuse.setter = function( value ) { this.diffuse = value; }\nthis.properties.specular.setter = function( value ) { this.specular = value; }\nthis.properties.samples.setter = function( value ) { this.samples = value; }\nthis.properties.softness.setter = function( value ) { this.softness = value; }\nthis.properties.bufferHeight.setter = function( value ) { this.bufferHeight = value; }\nthis.properties.bufferWidth.setter = function( value ) { this.bufferWidth = value; }\nthis.properties.shadowBias.setter = function( value ) { this.shadowBias = value; }\nthis.properties.distance.setter = function( value ) { this.distance = value; }\nthis.properties.castShadows.setter = function( value ) { this.castShadows = value; }\n", 
+      "type": "application/javascript"
+    }
+  ]
+}

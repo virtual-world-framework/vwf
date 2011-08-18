@@ -6,8 +6,8 @@ children:
   radio.dae: 
     extends: http://vwf.example.com/types/node3
     properties:
-      position: [0, 0, 0]
-      eulers: [0, 0, 0]
+      position: [ 0, 4, 0 ]
+      eulers: [ 338, 0, 211 ]
       powerOn: false
       volume: 0
       speak: "up"
@@ -704,14 +704,6 @@ children:
                             extends: http://vwf.example.com/types/material
                           bone37Material14:
                             extends: http://vwf.example.com/types/material
-              Omni01:
-                extends: http://vwf.example.com/types/node3
-              Omni02:
-                extends: http://vwf.example.com/types/node3
-              Omni03:
-                extends: http://vwf.example.com/types/node3
-              Omni04:
-                extends: http://vwf.example.com/types/node3
               ic40Antennae:
                 extends: http://vwf.example.com/types/node3
                 scripts:
@@ -730,3 +722,30 @@ children:
                     extends: http://vwf.example.com/types/material
                   ic40AntennaeMaterial4:
                     extends: http://vwf.example.com/types/material
+  maincamera: 
+    extends: http://vwf.example.com/types/camera
+    properties: 
+      position: [ 0, 0, 0 ]
+      rotation: [ 0, 0, 0 ]
+  light1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      position: [ 0, 0, 0 ]
+      rotation: [ 0, 0, 0 ]
+      constantAttenuation: 1
+      linearAttenuation: 0.002
+      quadraticAttenuation: 0.0008
+      distance: 100.0
+      diffuse: true
+      specular: true
+  light2:
+    extends: http://vwf.example.com/types/light
+    properties:
+      position: [ 0, 0, 0 ]
+      rotation: [ 0, 0, 0 ]
+      constantAttenuation: 1
+      linearAttenuation: 0.002
+      quadraticAttenuation: 0.0008
+      distance: 100.0
+      diffuse: true
+      specular: true

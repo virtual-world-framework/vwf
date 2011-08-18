@@ -17,6 +17,14 @@ properties:
   - 0
   - 0
   - 0
+  position:
+  - 0
+  - 0
+  - 0
+  rotation:
+  - 0
+  - 0
+  - 0
   enabled: true
   speed: 1
   playing: false

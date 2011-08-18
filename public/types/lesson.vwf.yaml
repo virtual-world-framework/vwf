@@ -1,4 +1,30 @@
 ﻿--- 
-extends: http://vwf.example.com/types/node
+extends: http://vwf.example.com/types/instruction
 properties: 
-  success: false
+  activeInstruction: false
+  instructionIndex: 0
+scripts:
+- text: |
+    this.onEntry = function() {
+      if ( this.instructions && this.instructions.length ) {
+        this.instructionIndex = 0;
+        this.activeInstruction = this.instructions[this.instructionIndex];
+      }
+    }
+    this.nextInstruction(){
+      this.instructionIndex = this.instructionIndex + 1;
+    }
+    this.activateNext = function() {
+      this.activeInstruction = this.instructions[this.instructionIndex];
+      this.activeInstruction.onEntry();
+    }
+    this.instructionSuccess = function() {
+      this.activeInstruction.success = true;
+      this.nextInstruction();
+      if ( this.instructionIndex >= this.instructions.length ) {
+        this.success = true;
+      } else {
+        activateNext();
+      }
+    }
+  type: application/javascript
