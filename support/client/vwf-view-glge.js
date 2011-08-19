@@ -1250,7 +1250,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             while (objectIDFound == -1 && objectToLookFor) {
                 if ( debug ) 
                     vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
-                objects = jQuery.each(view.nodes, function (nodeID, node) {
+                jQuery.each(view.nodes, function (nodeID, node) {
                     if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
                         //vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
                         objectIDFound = nodeID;
