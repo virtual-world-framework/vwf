@@ -189,7 +189,7 @@
     // -- executed ---------------------------------------------------------------------------------
 
     module.prototype.executed = function( nodeID, scriptText, scriptType ) {
-        vwf.logger.info( namespace + ".executed " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
+        vwf.logger.info( namespace + ".executed " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
     };
 
 } ) ( window.vwf.modules, "vwf.view" );

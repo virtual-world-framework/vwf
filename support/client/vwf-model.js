@@ -233,7 +233,7 @@
     // -- executing --------------------------------------------------------------------------------
 
     module.prototype.executing = function( nodeID, scriptText, scriptType ) {
-        vwf.logger.info( namespace + ".executing " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
+        vwf.logger.info( namespace + ".executing " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
     };
 
 } ) ( window.vwf.modules, "vwf.model" );
