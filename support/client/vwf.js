@@ -761,7 +761,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
         this.execute = function( nodeID, scriptText, scriptType ) {
 
-            this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
+            this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
 
             // Call executing() on each model. The script is considered executed after each model
             // has run.
@@ -780,7 +780,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.execute complete " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.execute complete " + nodeID + " ... " + scriptType ); /* must log something for group level to reset in WebKit */
 
             return scriptValue;
         };
