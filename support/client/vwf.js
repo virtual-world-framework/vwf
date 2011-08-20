@@ -860,16 +860,6 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
                 vwf.createEvent( nodeID, eventName );
             } );
 
-            // The node is complete. Invoke the callback method and pass the new node ID and the
-            // ID of its prototype. If this was the root node for the world, the world is now
-            // fully initialized.
-
-            // TODO: this was moved up from the end so that for a => b => c, addChild( a, b ) occurs
-            // before addChild( b, c ) so that b can resolve to a before c attempts to resolve to b.
-            // But this isn't at the end anymore. Is that OK? The comment above is wrong.
-
-            callback && callback.call( this, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
-
             // Create and attach the children. For each child, call createNode() with the
             // child's component specification, then once loaded, call addChild() to attach the
             // new node as a child. addChild() delegates to the models and views as before.
@@ -895,6 +885,12 @@ childName /* TODO: hack */ );
 
             // This is placeholder for a call into the object to invoke its initialize() method
             // if it has a script attached that provides one.
+
+            // The node is complete. Invoke the callback method and pass the new node ID and the
+            // ID of its prototype. If this was the root node for the world, the world is now
+            // fully initialized.
+
+            callback && callback.call( this, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
 
             this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + component.source + " " + component.type ); /* must log something for group level to reset in WebKit */
         }
