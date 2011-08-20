@@ -749,3 +749,10 @@ children:
       distance: 100.0
       diffuse: true
       specular: true
+scripts:
+- text: |
+    this.initialize = function() {
+        this["radio.dae"].position = this["radio.dae"].position;
+        this["radio.dae"].eulers = this["radio.dae"].eulers;
+    }
+  type: application/javascript
