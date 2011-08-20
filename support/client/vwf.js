@@ -826,71 +826,111 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( component, nodeID, prototypeID, callback ) {
+        var construct = function( component, nodeID, prototypeID, callback_nodeID_prototypeID ) {
 
             this.logger.group( "vwf.construct " + nodeID + " " + component.source + " " + component.type );
 
-            // Call creatingNode() on each model. The node is considered to be constructed after
-            // each model has run.
+            async.series( [
 
-            jQuery.each( vwf.models, function( index, model ) {
-                model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
-            } );
+                function( callback_err_results ) {
 
-            // Call createdNode() on each view. The view is being notified of a node that has
-            // been constructed.
+                    // Call creatingNode() on each model. The node is considered to be constructed after
+                    // each model has run.
 
-            jQuery.each( vwf.views, function( index, view ) {
-                view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type );
-            } );
+                    jQuery.each( vwf.models, function( index, model ) {
+                        model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
+                    } );
 
-            // Create the properties, methods, and events. For each item in each set, invoke
-            // createProperty(), createMethod(), or createEvent() to create the field. Each
-            // delegates to the models and views as above.
+                    // Call createdNode() on each view. The view is being notified of a node that has
+                    // been constructed.
 
-            component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
-                vwf.createProperty( nodeID, propertyName, propertyValue );
-            } );
+                    jQuery.each( vwf.views, function( index, view ) {
+                        view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type );
+                    } );
 
-            component.methods && jQuery.each( component.methods, function( methodName ) {
-                vwf.createMethod( nodeID, methodName );
-            } );
-
-            component.events && jQuery.each( component.events, function( eventName ) {
-                vwf.createEvent( nodeID, eventName );
-            } );
-
-            // Create and attach the children. For each child, call createNode() with the
-            // child's component specification, then once loaded, call addChild() to attach the
-            // new node as a child. addChild() delegates to the models and views as before.
-
-            component.children && jQuery.each( component.children, function( childName, child_uri_or_json_or_object ) {
-                vwf.createNode( child_uri_or_json_or_object, function( childID, childTypeID ) {
-                    vwf.addChild( nodeID, childID, childName );
+                    callback_err_results( undefined, undefined );
                 },
+
+                function( callback_err_results ) {
+
+                    // Create the properties, methods, and events. For each item in each set, invoke
+                    // createProperty(), createMethod(), or createEvent() to create the field. Each
+                    // delegates to the models and views as above.
+
+                    component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
+                        vwf.createProperty( nodeID, propertyName, propertyValue );
+                    } );
+
+                    component.methods && jQuery.each( component.methods, function( methodName ) {
+                        vwf.createMethod( nodeID, methodName );
+                    } );
+
+                    component.events && jQuery.each( component.events, function( eventName ) {
+                        vwf.createEvent( nodeID, eventName );
+                    } );
+
+                    callback_err_results( undefined, undefined );
+                },
+
+                function( callback_err_results ) {
+
+                    // Create and attach the children. For each child, call createNode() with the
+                    // child's component specification, then once loaded, call addChild() to attach the
+                    // new node as a child. addChild() delegates to the models and views as before.
+
+                    async.parallel(
+
+                        Object.keys( component.children || {} ).map( function( childName ) {
+                            return function( callback_err_results2 ) {
+                                vwf.createNode( component.children[childName], function( childID, childTypeID ) {
+                                    vwf.addChild( nodeID, childID, childName ); // TODO: add in original order from component.children
+                                    callback_err_results2( undefined, undefined );
+                                },
 childName /* TODO: hack */ );
+                            };
+                        } ),
+
+                        function( err, results ) {
+                            callback_err_results( err, results );
+                        }
+
+                    );
+
+                },
+
+                function( callback_err_results ) {
+
+                    // Attach the scripts. For each script, load the network resource if the script is
+                    // specified as a URI, then once loaded, call execute() to direct any model that
+                    // manages scripts of this script's type to evaluate the script where it will
+                    // perform any immediate actions and retain any callbacks as appropriate for the
+                    // script type.
+
+                    component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
+                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                    } );
+
+                    callback_err_results( undefined, undefined );
+                },
+
+                function( callback_err_results ) {
+
+                    // Invoke an initialization method.
+
+                    vwf.execute( nodeID, "this.hasOwnProperty( 'initialize' ) && this.initialize()", "application/javascript" ); 
+
+                    callback_err_results( undefined, undefined );
+                },
+
+            ], function( err, results ) {
+
+                // The node is complete. Invoke the callback method and pass the new node ID and the
+                // ID of its prototype. If this was the root node for the world, the world is now
+                // fully initialized.
+
+                callback_nodeID_prototypeID &&
+                    callback_nodeID_prototypeID.call( vwf, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
             } );
-
-            // Attach the scripts. For each script, load the network resource if the script is
-            // specified as a URI, then once loaded, call execute() to direct any model that
-            // manages scripts of this script's type to evaluate the script where it will
-            // perform any immediate actions and retain any callbacks as appropriate for the
-            // script type.
-
-            component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
-                script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-            } );
-
-            // Invoke an initialization method.
-
-            // This is placeholder for a call into the object to invoke its initialize() method
-            // if it has a script attached that provides one.
-
-            // The node is complete. Invoke the callback method and pass the new node ID and the
-            // ID of its prototype. If this was the root node for the world, the world is now
-            // fully initialized.
-
-            callback && callback.call( this, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
 
             this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + component.source + " " + component.type ); /* must log something for group level to reset in WebKit */
         }
