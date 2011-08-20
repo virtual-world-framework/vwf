@@ -647,6 +647,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     }
                 }
             });
+        }
 
         this.defaultCamera = true;
         vwf.createNode( "http://vwf.example.com/types/camera", dummy, "vwfDefaultCam" ); 
