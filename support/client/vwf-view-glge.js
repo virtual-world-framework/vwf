@@ -92,20 +92,6 @@
                 // set up all of the mouse event handlers
                 initMouseEvents(canvas, nodeID, view);
 
-                // Resolve the mapping from VWF nodes to their corresponding GLGE objects for the
-                // objects just loaded.
-
-                //bindSceneChildren(view, nodeID);
-
-                // GLGE doesn't provide an onLoad() callback for any Collada documents referenced by
-                // the GLGE document. They may still be loaded after we receive onLoad(). As a work-
-                // around, click on an <h1/> element on the page to rebind.
-
-
-                jQuery( "h1" ).click( function() {
-                    bindSceneChildren( view, nodeID );
-                } )
-
                 // Schedule the renderer.
 
                 var lasttime = 0;
@@ -251,8 +237,11 @@
 
         var child = this.nodes[childID];
 
+
         if (child) {
-            bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID);
+            if (bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID)) {
+                bindNodeChildren(this, childID);
+            }
         }
 
     };
@@ -650,13 +639,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         var scene = view.scenes[nodeID];
         var child;
 
-        jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
-            if (child = view.nodes[childID]) {
-                if (bindChild(view, scene, undefined, child, vwf.name(childID), childID)) {
-                    bindNodeChildren(view, childID);
+        if ( scene.glgeScene ) {
+            jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
+                if (child = view.nodes[childID]) { // assignment is intentional
+                    if (bindChild(view, scene, undefined, child, vwf.name(childID), childID)) {
+                        bindNodeChildren(view, childID);
+                    }
                 }
-            }
-        });
+            });
 
         this.defaultCamera = true;
         vwf.createNode( "http://vwf.example.com/types/camera", dummy, "vwfDefaultCam" ); 
@@ -671,13 +661,15 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         var node = view.nodes[nodeID];
         var child;
 
-        jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
-            if (child = view.nodes[childID]) {
-                if (bindChild(view, undefined, node, child, vwf.name(childID), childID)) {
-                    bindNodeChildren(view, childID);
+        if ( node.glgeObject ) {
+            jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
+                if (child = view.nodes[childID]) { // assignment is intentional
+                    if (bindChild(view, undefined, node, child, vwf.name(childID), childID)) {
+                        bindNodeChildren(view, childID);
+                    }
                 }
-            }
-        });
+            });
+        }
 
     };
 
