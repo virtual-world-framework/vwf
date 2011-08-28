@@ -46,14 +46,6 @@ The `socket.io` client is basically a simple HTTP Socket interface implementatio
 - Easy to use! See [socket.io-node](http://github.com/LearnBoost/Socket.IO-node) for the server to connect to.
 
 ### How to use
-	
-The recommended way of including the Socket.IO client is through the Socket.IO CDN:
-
-In your &lt;head&gt;
-
-	<script src="http://cdn.socket.io/stable/socket.io.js"></script>
-
-Then, in your code
 
 	socket = new io.Socket('localhost');
 	socket.connect();
@@ -72,27 +64,25 @@ If you are serving you .swf from a other domain than socket.io.js you will need 
 
 The insecure version can be found [here](http://github.com/gimite/web-socket-js/blob/master/WebSocketMainInsecure.zip).
 
-IMPORTANT! When checking out the git repo, make sure to include the submodules. One way to do it is:
-
-	git clone [repo] --recursive
-  
-Another, once cloned
-
-	git submodule update --init --recursive
-
 ### Documentation 
 
 #### io.Socket
 
 	new io.Socket(host, [options]);
 
-Options:
+##### Options:
+
+- *secure*
+
+		false
+	
+	Use secure connections
 
 - *port*
 
 		Current port or 80
 	
-	The port `socket.io` server is attached to (defaults to the document.location port)
+	The port `socket.io` server is attached to (defaults to the document.location port).
 
 - *resource*
 
@@ -102,9 +92,9 @@ Options:
 
 - *transports*
 
-		['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']
+		['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling']
 
-	A list of the transports to attempt to utilize (in order of preference)
+	A list of the transports to attempt to utilize (in order of preference).
 	
 - *transportOptions*
 	
@@ -117,11 +107,48 @@ Options:
 				
 	An object containing (optional) options to pass to each transport.
 
-Properties:
+- *rememberTransport*
+
+		true
+	
+	A boolean indicating if the utilized transport should be remembered in a cookie.
+
+- *connectTimeout*
+
+		5000
+	
+	The amount of miliseconds a transport has to create a connection before we consider it timed out.
+	
+- *tryTransportsOnConnectTimeout*
+
+		true
+
+	A boolean indicating if we should try other transports when the  connectTimeout occurs.
+	
+- *reconnect*
+
+		true
+
+	A boolean indicating if we should automatically reconnect if a connection is disconnected. 
+  
+- *reconnectionDelay*
+
+		500
+
+	The amount of milliseconds before we try to connect to the server again. We are using a exponential back off algorithm for the following reconnections, on each reconnect attempt this value will get multiplied (500 > 1000 > 2000 > 4000 > 8000).
+  
+
+- *maxReconnectionAttempts*
+
+		10
+
+	The amount of attempts should we make using the current transport to connect to the server? After this we will do one final attempt, and re-try with all enabled transport methods before we give up.
+
+##### Properties:
 
 - *options*
 
-	The passed in options combined with the defaults
+	The passed in options combined with the defaults.
 
 - *connected*
 
@@ -130,16 +157,20 @@ Properties:
 - *connecting*
 
 	Whether the socket is connecting or not.
+
+- *reconnecting*
+
+	Whether we are reconnecting or not.
 	
 - *transport*	
 
 	The transport instance.
 
-Methods:
+##### Methods:
 	
-- *connect*
+- *connect(λ)*
 
-	Establishes a connection	
+	Establishes a connection. If λ is supplied as argument, it will be called once the connection is established.
 	
 - *send(message)*
 	
@@ -147,21 +178,36 @@ Methods:
 	
 - *disconnect*
 
-	Closes the connection
+	Closes the connection.
 	
 - *on(event, λ)*
 
-	Adds a listener for the event *event*
+	Adds a listener for the event *event*.
+
+- *once(event, λ)*
+
+	Adds a one time listener for the event *event*. The listener is removed after the first time the event is fired.
 	
 - *removeEvent(event, λ)*
 
-	Removes the listener λ for the event *event*
+	Removes the listener λ for the event *event*.
 	
-Events:
+##### Events:
 
 - *connect*
 
-	Fired when the connection is established and the handshake successful
+	Fired when the connection is established and the handshake successful.
+	
+- *connecting(transport_type)*
+
+    Fired when a connection is attempted, passing the transport name.
+	
+- *connect_failed*
+
+    Fired when the connection timeout occurs after the last connection attempt.
+	This only fires if the `connectTimeout` option is set.
+	If the `tryTransportsOnConnectTimeout` option is set, this only fires once all
+	possible transports have been tried.
 	
 - *message(message)*
 	
@@ -174,18 +220,24 @@ Events:
 - *disconnect*
 
 	Fired when the connection is considered disconnected.
+	
+- *reconnect(transport_type,reconnectionAttempts)*
 
-### Changelog
+	Fired when the connection has been re-established. This only fires if the `reconnect` option is set.
 
-2010 08 02 - **0.5.4** (9.95KB)
+- *reconnecting(reconnectionDelay,reconnectionAttempts)*
 
-* Added io.util.load as a reusable onload handler
-* Added io.util.ios which reports if the UA is running on iPhone or iPad
-* No more loading bar on iPhone: XHR-Polling now connects `onload` for the iOS WebKit, and waits 10 ms to launch the initial connection.
+	Fired when a reconnection is attempted, passing the next delay for the next reconnection.
 
-### Credits
+- *reconnect_failed*
+
+	Fired when all reconnection attempts have failed and we where unsuccessful in reconnecting to the server.  
+
+### Contributors
 
 Guillermo Rauch &lt;guillermo@learnboost.com&gt;
+
+Arnout Kazemier &lt;info@3rd-eden.com&gt;
 
 ### License 
 
