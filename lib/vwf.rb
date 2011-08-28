@@ -8,7 +8,6 @@ class VWF < Sinatra::Base
     set :static, false # we serve out of :public, but only relative to vwf applications
 
     set :support, lambda { File.join( settings.root, "support" ) }
-    set :client, lambda { File.join( settings.support, "client" ) }
 
 set :component_template_types, [ :json, :yaml ]  # get from Component?
 set :mock_filesystem, nil
