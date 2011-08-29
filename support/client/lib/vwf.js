@@ -88,11 +88,11 @@
         // 
         //     [1] vwf.initialize( "http://vwf.example.com/worlds/sample12345", ... )
         //
-        //     [2] vwf.initialize( { source: "model.dae", type: "model/x-collada",
+        //     [2] vwf.initialize( { source: "model.dae", type: "model/vnd.collada+xml",
         //             properties: { "p1": ... }, ... }, ... )
         //
         //     [3] vwf.initialize( { extends: "http://vwf.example.com/worlds/sample12345",
-        //             source: "alternate-model.dae", type: "model/x-collada" }, ... )
+        //             source: "alternate-model.dae", type: "model/vnd.collada+xml" }, ... )
         // 
         // modelArguments and viewArguments identify the model and view modules that should be
         // attached to the simulation and provides their configuration parameters. Each argument set
