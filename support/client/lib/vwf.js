@@ -1009,7 +1009,9 @@ childName /* TODO: hack */ );
 
         // -- normalizedComponent ------------------------------------------------------------------
 
-        var normalizedComponent = function( component ) {
+        var normalizedComponent = function( /* component */ ) {
+
+            var component = arguments[0]; // component is sometimes not writable when it is an argument?
 
             // Decode if JSON.
 
