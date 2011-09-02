@@ -1774,6 +1774,18 @@ GLGE.colorParse=function(color){
 		green=parseInt(colors[1])/255;
 		blue=parseInt(colors[2])/255;
 		alpha=parseInt(colors[3])/255;
+	} else if ( color.constructor == Array ) {
+		if ( color.length == 3 ) {
+			red = parseInt(color[0])/255;
+			green = parseInt(color[1])/255;
+			blue = parseInt(color[2])/255;
+			alpha = 1;
+		} else if ( color.length == 4 ) {
+			red = parseInt(color[0])/255;
+			green = parseInt(color[1])/255;
+			blue = parseInt(color[2])/255;
+			alpha = parseInt(color[3])/255;
+		}
 	}else{
 		red=0;
 		green=0;

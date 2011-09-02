@@ -115,8 +115,26 @@
         }
 
         var propertyQuery;
+        var colorWithAlpha = false;
 
-        if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
+        if (propertyName == "activeCamera") {
+
+            propertyQuery = containerQuery.append(
+                "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                    "<p class='vwf-label'>" + propertyName + ": " +
+                        "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
+                    "</p>" +
+                    "<button id='vwf-activeCamera-dropdown'>" + propertyValue + "</button>" +
+//                    "<div class='vwf-activeCamera-dropdown-menu' id='" + nodeID + "-activeCamera-dropdown-menu'>" +
+//                        "<ul>" +
+//                            "<li><a hef='#'>mainCamera</a></li>" +
+//                            "<li><a hef='#'>defaultCamera</a></li>" +
+//                        "</ul>" +
+//                    "</div>" +
+                "</div>"
+            ).children(":last");
+
+        } else if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ" || propertyName == "roll" || propertyName == "pitch" || propertyName == "yaw") {
 
             propertyQuery = containerQuery.append(
                 "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
@@ -143,18 +161,21 @@
                         "<span class='vwf-value'>" + propValue + "</span>" +
                     "</p>" +
                     "<p class='vwf-label'>roll: " +
+                        "<span class='vwf-roll-value' id='" + nodeID + "-roll-value-text'>" + values[0] + "</span>" +
                         "<span class='vwf-control-roll-slider' id='slider-roll'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>pitch: " +
+                        "<span class='vwf-pitch-value' id='" + nodeID + "-pitch-value-text'>" + values[1] + "</span>" +
                         "<span class='vwf-control-pitch-slider' id='slider-pitch'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>yaw: " +
+                        "<span class='vwf-yaw-value' id='" + nodeID + "-yaw-value-text'>" + values[2] + "</span>" +
                         "<span class='vwf-control-yaw-slider' id='slider-yaw'></span>" +
                     "</p>" +
                 "</div>"
             ).children(":last");
 
-        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+        } else if (propertyName == "position" || propertyName == "rotation" || propertyName == "worldPosition" || propertyName == "scale") {
 
             var propValue;
             if (typeof propertyValue == "String" || typeof propertyValue == "string" || propertyValue instanceof String)
@@ -170,16 +191,76 @@
                         "<span class='vwf-value'>" + propValue + "</span>" +
                     "</p>" +
                     "<p class='vwf-label'>x: " +
+                        "<span class='vwf-x-value' id='" + nodeID + "-x-value-text'>" + values[0] + "</span>" +
                         "<span class='vwf-control-x-slider' id='slider-x'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>y: " +
+                        "<span class='vwf-y-value' id='" + nodeID + "-y-value-text'>" + values[1] + "</span>" +
                         "<span class='vwf-control-y-slider' id='slider-y'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>z: " +
+                        "<span class='vwf-z-value' id='" + nodeID + "-z-value-text'>" + values[2] + "</span>" +
                         "<span class='vwf-control-z-slider' id='slider-z'></span>" +
                     "</p>" +
                 "</div>"
             ).children(":last");
+
+        } else if (propertyName == "ambientColor" || propertyName == "color") {
+
+            var propValue;
+            if (typeof propertyValue == "String" || typeof propertyValue == "string" || propertyValue instanceof String)
+                propValue = propertyValue;
+            else
+                propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            if (values.length == 3) {
+                propertyQuery = containerQuery.append(
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                        "<p class='vwf-label'>" + propertyName + ": " +
+                            "<span class='vwf-value'>" + propValue + "</span>" +
+                        "</p>" +
+                        "<p class='vwf-label'>r: " +
+                            "<span class='vwf-r-value' id='" + nodeID + "-r-value-text'>" + values[0] + "</span>" +
+                            "<span class='vwf-control-r-slider' id='slider-r'></span>" +
+                        "</p>" +
+                        "<p class='vwf-label'>g: " +
+                            "<span class='vwf-g-value' id='" + nodeID + "-g-value-text'>" + values[1] + "</span>" +
+                            "<span class='vwf-control-g-slider' id='slider-g'></span>" +
+                        "</p>" +
+                        "<p class='vwf-label'>b: " +
+                            "<span class='vwf-b-value' id='" + nodeID + "-b-value-text'>" + values[2] + "</span>" +
+                            "<span class='vwf-control-b-slider' id='slider-b'></span>" +
+                        "</p>" +
+                    "</div>"
+                ).children(":last");
+            } else if (values.length == 4) {
+                colorWithAlpha = true;
+                propertyQuery = containerQuery.append(
+                    "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
+                        "<p class='vwf-label'>" + propertyName + ": " +
+                            "<span class='vwf-value'>" + propValue + "</span>" +
+                        "</p>" +
+                        "<p class='vwf-label'>r: " +
+                            "<span class='vwf-r-value' id='" + nodeID + "-r-value-text'>" + values[0] + "</span>" +
+                            "<span class='vwf-control-r-slider' id='slider-r'></span>" +
+                        "</p>" +
+                        "<p class='vwf-label'>g: " +
+                            "<span class='vwf-g-value' id='" + nodeID + "-g-value-text'>" + values[1] + "</span>" +
+                            "<span class='vwf-control-g-slider' id='slider-g'></span>" +
+                        "</p>" +
+                        "<p class='vwf-label'>b: " +
+                            "<span class='vwf-b-value' id='" + nodeID + "-b-value-text'>" + values[2] + "</span>" +
+                            "<span class='vwf-control-b-slider' id='slider-b'></span>" +
+                        "</p>" +
+                        "<p class='vwf-label'>a: " +
+                            "<span class='vwf-a-value' id='" + nodeID + "-a-value-text'>" + values[3] + "</span>" +
+                            "<span class='vwf-control-a-slider' id='slider-a'></span>" +
+                        "</p>" +
+                    "</div>"
+                ).children(":last");
+            }
 
         } else if (typeof propertyValue == "Boolean" || typeof propertyValue == "boolean" || propertyValue instanceof Boolean) {
 
@@ -187,10 +268,10 @@
                 "<div id='view-html-" + nodeID + "-" + propertyName + "' class='vwf-property'>" +
                     "<p class='vwf-label'>" + propertyName + ": " +
                         "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
-	                    "<div class='vwf-" + propertyName + "-bool-control' id='bool-control'>" +
-		                    "<input type='radio' class='vwf-" + propertyName + "-bool-control-true' id='" + nodeID + "-" + propertyName + "-true' name='" + nodeID + " - " + propertyName + "-radio' /><label for='bool-" + propertyName + "-true'>true</label>" +
-		                    "<input type='radio' class='vwf-" + propertyName + "-bool-control-false' id='" + nodeID + "-" + propertyName + "-false' name='" + nodeID + " - " + propertyName + "-radio' checked='checked' /><label for='bool-" + propertyName + "-false'>false</label>" +
-	                    "</div>" +
+                        "<div class='vwf-" + propertyName + "-bool-control' id='bool-control'>" +
+                            "<input type='radio' class='vwf-" + propertyName + "-bool-control-true' id='" + nodeID + "-" + propertyName + "-true' name='" + nodeID + " - " + propertyName + "-radio' /><label for='bool-" + propertyName + "-true'>true</label>" +
+                            "<input type='radio' class='vwf-" + propertyName + "-bool-control-false' id='" + nodeID + "-" + propertyName + "-false' name='" + nodeID + " - " + propertyName + "-radio' checked='checked' /><label for='bool-" + propertyName + "-false'>false</label>" +
+                        "</div>" +
                     "</p>" +
                 "</div>"
             ).children(":last");
@@ -202,8 +283,8 @@
                     "<p class='vwf-label'>" + propertyName + ": " +
                         "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
                         "<div class='vwf-" + propertyName + "-numeric-input' id='" + propertyName + "-numeric-input'>" +
-	                        "<label for='tags'>Value: </label>" +
-	                        "<input id='tags' />" +
+                            "<label for='tags'>Value: </label>" +
+                            "<input id='tags' />" +
                         "</div>" +
                     "</p>" +
                 "</div>"
@@ -216,8 +297,8 @@
                     "<p class='vwf-label'>" + propertyName + ": " +
                         "<span class='vwf-value'>" + JSON.stringify(propertyValue) + "</span>" +
                         "<div class='vwf-" + propertyName + "-string-input' id='" + propertyName + "-string-input'>" +
-	                        "<label for='tags'>Value: </label>" +
-	                        "<input id='tags' />" +
+                            "<label for='tags'>Value: </label>" +
+                            "<input id='tags' />" +
                         "</div>" +
                     "</p>" +
                 "</div>"
@@ -237,7 +318,14 @@
 
         var view = this;
 
-        if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
+        if (propertyName == "activeCamera") {
+
+            propertyQuery.find(".vwf-activeCamera-dropdown").click(function () {
+                console.info("++++ vwf-activeCamera-dropdown.click() ++++");
+                $(nodeID + "-activeCamera-dropdown-menu").show();
+            });
+
+        } else if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ" || propertyName == "roll" || propertyName == "pitch" || propertyName == "yaw") {
 
             propertyQuery.find(".vwf-control-slider").slider({
                 range: "min",
@@ -245,7 +333,6 @@
                 min: 0,
                 max: 360,
                 slide: function (event, ui) {
-                    vwf.logger.info("setProperty " + nodeID + "  " + propertyName);
                     view.setProperty(nodeID, propertyName, Number(ui.value));
                 }
             });
@@ -258,14 +345,9 @@
                 min: 0,
                 max: 360,
                 slide: function (event, ui) {
-                    var pitch = $("#slider-pitch").slider("value");
-                    var yaw = $("#slider-yaw").slider("value");
-                    if (!pitch) pitch = 0;
-                    if (!yaw) yaw = 0;
-                    var propertyValue = [Number(ui.value), Number(pitch), Number(yaw)];
-
-                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
-                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                    var pitch = $("#" + nodeID + "-pitch-value-text").text();
+                    var yaw = $("#" + nodeID + "-yaw-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(ui.value), Number(pitch), Number(yaw)]);
                 }
             });
             propertyQuery.find(".vwf-control-pitch-slider").slider({
@@ -274,14 +356,9 @@
                 min: 0,
                 max: 360,
                 slide: function (event, ui) {
-                    var roll = $("#slider-roll").slider("value");
-                    var yaw = $("#slider-yaw").slider("value");
-                    if (!roll) roll = 0;
-                    if (!yaw) yaw = 0;
-                    var propertyValue = [Number(roll), Number(ui.value), Number(yaw)];
-
-                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
-                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                    var roll = $("#" + nodeID + "-roll-value-text").text();
+                    var yaw = $("#" + nodeID + "-yaw-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(roll), Number(ui.value), Number(yaw)]);
                 }
             });
             propertyQuery.find(".vwf-control-yaw-slider").slider({
@@ -290,18 +367,13 @@
                 min: 0,
                 max: 360,
                 slide: function (event, ui) {
-                    var roll = $("#slider-roll").slider("value");
-                    var pitch = $("#slider-pitch").slider("value");
-                    if (!roll) roll = 0;
-                    if (!pitch) pitch = 0;
-                    var propertyValue = [Number(roll), Number(pitch), Number(ui.value)];
-
-                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
-                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                    var roll = $("#" + nodeID + "-roll-value-text").text();
+                    var pitch = $("#" + nodeID + "-pitch-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(roll), Number(pitch), Number(ui.value)]);
                 }
             });
 
-        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+        } else if (propertyName == "position" || propertyName == "rotation" || propertyName == "worldPosition" || propertyName == "scale") {
 
             propertyQuery.find(".vwf-control-x-slider").slider({
                 range: "min",
@@ -309,14 +381,9 @@
                 min: -200,
                 max: 200,
                 slide: function (event, ui) {
-                    var y = $("#slider-y").slider("value");
-                    var z = $("#slider-z").slider("value");
-                    if (!y) y = 0;
-                    if (!z) z = 0;
-                    var propertyValue = [Number(ui.value), Number(y), Number(z)];
-
-                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
-                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                    var y = $("#" + nodeID + "-y-value-text").text();
+                    var z = $("#" + nodeID + "-z-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(ui.value), Number(y), Number(z)]);
                 }
             });
             propertyQuery.find(".vwf-control-y-slider").slider({
@@ -325,14 +392,9 @@
                 min: -200,
                 max: 200,
                 slide: function (event, ui) {
-                    var x = $("#slider-x").slider("value");
-                    var z = $("#slider-z").slider("value");
-                    if (!x) x = 0;
-                    if (!z) z = 0;
-                    var propertyValue = [Number(x), Number(ui.value), Number(z)];
-
-                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
-                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                    var x = $("#" + nodeID + "-x-value-text").text();
+                    var z = $("#" + nodeID + "-z-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(x), Number(ui.value), Number(z)]);
                 }
             });
             propertyQuery.find(".vwf-control-z-slider").slider({
@@ -341,16 +403,101 @@
                 min: -200,
                 max: 200,
                 slide: function (event, ui) {
-                    var x = $("#slider-x").slider("value");
-                    var y = $("#slider-y").slider("value");
-                    if (!x) x = 0;
-                    if (!y) y = 0;
-                    var propertyValue = [Number(x), Number(y), Number(ui.value)];
-
-                    vwf.logger.info("setProperty " + nodeID + "." + propertyName + " = " + propertyValue);
-                    view.setProperty(nodeID, propertyName, JSON.stringify(propertyValue));
+                    var x = $("#" + nodeID + "-x-value-text").text();
+                    var y = $("#" + nodeID + "-y-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(x), Number(y), Number(ui.value)]);
                 }
             });
+
+        } else if (propertyName == "ambientColor" || propertyName == "color") {
+
+            if (colorWithAlpha) {
+
+                propertyQuery.find(".vwf-control-r-slider").slider({
+                    range: "min",
+                    value: 183,
+                    min: 0,
+                    max: 255,
+                    slide: function (event, ui) {
+                        var g = $("#" + nodeID + "-g-value-text").text();
+                        var b = $("#" + nodeID + "-b-value-text").text();
+                        var a = $("#" + nodeID + "-a-value-text").text();
+                        view.setProperty(nodeID, propertyName, [Number(ui.value), Number(g), Number(b), Number(a)]);
+                    }
+                });
+                propertyQuery.find(".vwf-control-g-slider").slider({
+                    range: "min",
+                    value: 183,
+                    min: 0,
+                    max: 255,
+                    slide: function (event, ui) {
+                        var r = $("#" + nodeID + "-r-value-text").text();
+                        var b = $("#" + nodeID + "-b-value-text").text();
+                        var a = $("#" + nodeID + "-a-value-text").text();
+                        view.setProperty(nodeID, propertyName, [Number(r), Number(ui.value), Number(b), Number(a)]);
+                    }
+                });
+                propertyQuery.find(".vwf-control-b-slider").slider({
+                    range: "min",
+                    value: 183,
+                    min: 0,
+                    max: 255,
+                    slide: function (event, ui) {
+                        var r = $("#" + nodeID + "-r-value-text").text();
+                        var g = $("#" + nodeID + "-g-value-text").text();
+                        var a = $("#" + nodeID + "-a-value-text").text();
+                        view.setProperty(nodeID, propertyName, [Number(r), Number(g), Number(ui.value), Number(a)]);
+                    }
+                });
+
+                propertyQuery.find(".vwf-control-a-slider").slider({
+                    range: "min",
+                    value: 183,
+                    min: 0,
+                    max: 255,
+                    slide: function (event, ui) {
+                        var r = $("#" + nodeID + "-r-value-text").text();
+                        var g = $("#" + nodeID + "-g-value-text").text();
+                        var b = $("#" + nodeID + "-b-value-text").text();
+                        view.setProperty(nodeID, propertyName, [Number(r), Number(g), Number(b), Number(ui.value)]);
+                    }
+                });
+
+            } else {
+                propertyQuery.find(".vwf-control-r-slider").slider({
+                    range: "min",
+                    value: 183,
+                    min: 0,
+                    max: 255,
+                    slide: function (event, ui) {
+                        var g = $("#" + nodeID + "-g-value-text").text();
+                        var b = $("#" + nodeID + "-b-value-text").text();
+                        view.setProperty(nodeID, propertyName, [Number(ui.value), Number(g), Number(b)]);
+                    }
+                });
+                propertyQuery.find(".vwf-control-g-slider").slider({
+                    range: "min",
+                    value: 183,
+                    min: 0,
+                    max: 255,
+                    slide: function (event, ui) {
+                        var r = $("#" + nodeID + "-r-value-text").text();
+                        var b = $("#" + nodeID + "-b-value-text").text();
+                        view.setProperty(nodeID, propertyName, [Number(r), Number(ui.value), Number(b)]);
+                    }
+                });
+                propertyQuery.find(".vwf-control-b-slider").slider({
+                    range: "min",
+                    value: 183,
+                    min: 0,
+                    max: 255,
+                    slide: function (event, ui) {
+                        var r = $("#" + nodeID + "-r-value-text").text();
+                        var g = $("#" + nodeID + "-g-value-text").text();
+                        view.setProperty(nodeID, propertyName, [Number(r), Number(g), Number(ui.value)]);
+                    }
+                });
+            }
 
         } else if (typeof propertyValue == "Boolean" || typeof propertyValue == "boolean" || propertyValue instanceof Boolean) {
 
@@ -396,8 +543,8 @@
 
             stringInput[0].lastChild.value = propertyValue;
             stringInput.keyup(function (event) {
-                if ( event.keyCode == 13 && event.target && event.target.value && event.target.value != "")
-                    view.setProperty(nodeID, propertyName, event.target.value );
+                if (event.keyCode == 13 && event.target && event.target.value && event.target.value != "")
+                    view.setProperty(nodeID, propertyName, event.target.value);
             });
 
         }
@@ -408,7 +555,7 @@
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
         var isVectorProp = false;
-        if (propertyName == "eulers" || propertyName == "worldEulers" || propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale")
+        if (propertyName == "eulers" || propertyName == "worldEulers" || propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale" || propertyName == "ambientColor" || propertyName == "color")
             isVectorProp = true;
 
         if (isVectorProp && propertyValue.constructor != Array)
@@ -432,7 +579,7 @@
 
         // Demo hack 3
 
-        if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ") {
+        if (propertyName == "angle" || propertyName == "rotX" || propertyName == "rotY" || propertyName == "rotZ" || propertyName == "roll" || propertyName == "pitch" || propertyName == "yaw") {
 
             propertyQuery.find(".vwf-control-slider").slider("value", Number(propertyValue));
 
@@ -449,7 +596,7 @@
             propertyQuery.find(".vwf-pitch-value").text(values[1]);
             propertyQuery.find(".vwf-yaw-value").text(values[2]);
 
-        } else if (propertyName == "position" || propertyName == "worldPosition" || propertyName == "scale") {
+        } else if (propertyName == "position" || propertyName == "rotation" || propertyName == "worldPosition" || propertyName == "scale") {
 
             var propValue = JSON.stringify(propertyValue);
             var values = propValue.replace("[", "");
@@ -461,6 +608,19 @@
             propertyQuery.find(".vwf-x-value").text(values[0]);
             propertyQuery.find(".vwf-y-value").text(values[1]);
             propertyQuery.find(".vwf-z-value").text(values[2]);
+
+        } else if (propertyName == "ambientColor" || propertyName == "color") {
+
+            var propValue = JSON.stringify(propertyValue);
+            var values = propValue.replace("[", "");
+            values = values.replace("]", "");
+            values = values.split(',');
+            propertyQuery.find(".vwf-control-r-slider").slider("value", Number(values[0]));
+            propertyQuery.find(".vwf-control-g-slider").slider("value", Number(values[1]));
+            propertyQuery.find(".vwf-control-b-slider").slider("value", Number(values[2]));
+            propertyQuery.find(".vwf-r-value").text(values[0]);
+            propertyQuery.find(".vwf-g-value").text(values[1]);
+            propertyQuery.find(".vwf-b-value").text(values[2]);
 
         } else if (typeof propertyValue == "Boolean" || typeof propertyValue == "boolean" || propertyValue instanceof Boolean) {
 

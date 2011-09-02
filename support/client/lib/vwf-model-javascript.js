@@ -182,16 +182,23 @@ node.id = nodeID; // TODO: move to a backstop model
         vwf.logger.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
-        var property = node.properties[propertyName]; // TODO: search recursively through prototypes and copy on write.
         var value;
+		if ( node ) {
+			var property = node.properties[propertyName]; // TODO: search recursively through prototypes and copy on write.
 
-        if ( property.setter && !property.setting ) {
-            property.setting = true;
-            try { value = property.setter.call( node, propertyValue ) || property.internal } catch( e ) { } // TODO: log errors
-            property.setting = false;
-        } else {
-            value = property.internal = propertyValue;
-        }
+			if ( property.setter && !property.setting ) {
+				property.setting = true;
+				try { value = property.setter.call(node, propertyValue) || property.internal }
+				catch (e) {
+					vwf.logger.warn("WARNING: error( "+e.type +" ) setting property: "+ nodeID + " " + propertyName + " " + propertyValue); 
+				} 
+				property.setting = false;
+			} else {
+				value = property.internal = propertyValue;
+			}
+		} else {
+			vwf.logger.warn("WARNING: unable to find ID: " + nodeID + " while setting property: " + propertyName ); 
+		}
 
         return value;
     };
@@ -203,16 +210,23 @@ node.id = nodeID; // TODO: move to a backstop model
         vwf.logger.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
-        var property = node.properties[propertyName] || ( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] ); // TODO: search recursively through prototypes.
-        var value;
+		var value;
+		if ( node ) {
+			var property = node.properties[propertyName] || ( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] ); // TODO: search recursively through prototypes.
 
-        if ( property.getter && !property.getting ) {
-            property.getting = true;
-            try { value = property.getter.call( node ) || property.internal } catch( e ) { } // TODO: log errors
-            property.getting = false;
-        } else {
-            value = property.internal;
-        }
+			if ( property.getter && !property.getting ) {
+				property.getting = true;
+				try { value = property.getter.call(node) || property.internal }
+				catch (e) {
+					vwf.logger.warn("WARNING: error( " + e.type + " ) getting property: " + nodeID + " " + propertyName );
+				} 
+				property.getting = false;
+			} else {
+				value = property.internal;
+			}
+		} else {
+			vwf.logger.warn("WARNING: unable to find ID: " + nodeID + " while getting property: " + propertyName);
+		}
 
         return value;
     };
@@ -242,18 +256,20 @@ node.id = nodeID; // TODO: move to a backstop model
 
         var node = this.nodes[nodeID];
         var value;
+		if ( node ) {
 
-        if ( scriptType == "application/javascript" ) { // TODO: or others
-            try { value = ( function( scriptText ) { eval( scriptText ) } ).call( node, scriptText ) } catch( e ) { } // TODO: log errors // TODO: return result?
+			if ( scriptType == "application/javascript" ) { // TODO: or others
+        		try { value = (function (scriptText) { eval(scriptText) }).call(node, scriptText) }
+        		catch (e) {
+        			vwf.logger.error("Error( " + e.type + " ) evaling script: " + nodeID + " " + (scriptText || "").replace(/\s+/g, " ").substring(0, 100) + " " + scriptType);
+				} 
+			}
+        } else {
+        	vwf.logger.warn("WARNING: unable to find ID: " + nodeID + " while evaling script" );
         }
 
         return value;
     };
-
-
-
-
-
 
 
 

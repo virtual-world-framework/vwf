@@ -2,18 +2,31 @@
   "extends": "http://vwf.example.com/types/node3", 
   "properties": {
     "orbitPoint": [ 0, 0, 0 ], 
+    "rotX": 0, 
     "walkMode": "walk", 
+    "rotZ": 0, 
+    "attachNodeID": "", 
+    "cameraType": "perspective", 
     "far": 1000.0, 
-    "near": 0.10, 
-    "orthoscale": 5, 
+    "worldPosition": [ 0, 0, 0 ], 
+    "attachOffset": [ 0, 0, 0 ], 
     "aspect": 1.0, 
-    "allowMouseNav": false, 
-    "type": "perspective", 
-    "fovy": 35
+    "active": false, 
+    "eulers": [ 0, 0, 0 ], 
+    "rotation": [ 0, 0, 0 ], 
+    "speed": 2.0, 
+    "fovy": 35, 
+    "near": 0.10000000000000001, 
+    "orthoscale": 5, 
+    "worldEulers": [ 0, 0, 0 ], 
+    "rotY": 0, 
+    "position": [ 0, 0, 0 ],
+	"posRot": [ 0, 0, 0, 0, 0, 0 ],	
+    "allowMouseNav": false
   }, 
   "scripts": [
     {
-      "text": "this.properties.walkMode.setter = function( value ) {\n  switch ( value ) {\n    case \"orbit\":\n    case \"walk\":\n      this.properties.walkMode = value;\n      break;\n  }\n}\nthis.properties.type.setter = function( value ) {\n  switch ( value ) {\n    case \"perspective\":\n    case \"orthographic\":\n      this.properties.type = value;\n      break;\n  }\n}    \nthis.properties.far.setter = function( value ) { \n  if ( value > 0 && value > this.near ) {\n    this.properties.far = value;\n  }\n}\nthis.properties.near.setter = function( value ) {\n  if ( value > 0 && value < this.far ) {\n    this.properties.near = value;\n}\n}\nthis.properties.fovy.setter = function( value ) {\n  if ( value > 0 ) {\n    this.properties.fovy = value;\n  }\n}\nthis.properties.apsect.setter = function( value ) {\n  this.properties.aspcet = value;\n}\nthis.properties.orthoscale.setter = function( value ) {\n  this.properties.orthoscale = value;\n}\nthis.handleKeyEvents = function( keysDown, now, lastime, mat, trans, mag ) {\n  var camerapos = this.position;\n  var camerarot = this.rotation;\n  if ( walkMode == \"walk\" ) {\n    var yinc = 0;\n    var xinc = 0;\n    var zinc = 0;\n    trans[0] = trans[0] / mag;\n    trans[1] = trans[1] / mag;\n    if ( keysDown[87] || keysDown[38] ) {\n      yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);\n    }\n    if ( keysDown[83] || keysDown[40] ) {\n      yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);\n    }\n    if ( keysDown[37] || keysDown[81] ) {\n      yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); \n    }\n    if ( keysDown[39] || keysDown[69] ) {\n      yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); \n    }\n    if ( keysDown[82] ) { zinc = zinc + 1.0 }\n    if ( keysDown[67] ) { zinc = zinc - 1.0 }\n    if ( keysDown[65] ) { this.rotation = [ camerarot[0], camerarot[1] + 0.04, camerarot[2] ); }\n    if ( keysDown[68] ) { this.rotation = [ camerarot[0], camerarot[1] - 0.04, camerarot[2] ); }\n    if ( keysDown[90] ) {\n        vwf.logger.info(\"   camerapos = \" + camerapos[0] + \", \" + camerapos[1] + \", \" + camerapos[2]);\n        vwf.logger.info(\"   camerarot = \" + camerarot[0] + \", \" + camerarot[1] + \", \" + camerarot[2]);\n    }\n    if ( xinc != 0 || yinc != 0 || zinc != 0 ) {\n      var newCp = [ camerapos[0] + xinc * 0.05 * (now - lasttime), camerapos[1] + yinc * 0.05 * (now - lasttime), camerapos[2] + zinc * 0.05 * (now - lasttime) ];\n      this.position = newCp;        \n    }\n  } else if ( walkMode == \"orbit\" ) { \n    var x, y, z = 0;\n    var dx, dy, dz = 0;\n    var radius = 10.0;\n    dx = orbitPoint[0] - camerapos[0];\n    dy = orbitPoint[1] - camerapos[1];\n    dz = orbitPoint[2] - camerapos[2];\n    radius = Math.sqrt( dx*dx + dy*dy + dz*dz );\n    var bKeyDown = false;\n    if ( keysDown[87] || keysDown[38] ) {\n      // orbit up\n      orbitPitch += orbitInc;\n      bKeyDown = true;\n    }\n    if ( keysDown[83] || keysDown[40] ) {\n      // orbit down\n      orbitPitch -= orbitInc;\n      bKeyDown = true;\n    }\n    if ( keysDown[37] || keysDown[81] ) {\n      // orbit left\n      orbitYaw += orbitInc;\n      bKeyDown = true;\n    }\n    if ( keysDown[39] || keysDown[69] ) {\n      // orbit right  \n      orbitYaw -= orbitInc;\n      bKeyDown = true;\n    }  \n    if ( bKeyDown ) {\n      if ( orbitYaw > 90 )\n          orbitYaw = 90.0;\n      if ( orbitYaw < -90 )\n          orbitYaw = -90.0;\n      if ( orbitPitch > 360 )\n          orbitPitch -= 360;\n      if ( orbitPitch < -360 )\n          orbitPitch += 360.0;\n      x = orbitPoint[0] + radius * Math.sin( orbitYaw ) * Math.cos( orbitPitch );\n      y = orbitPoint[1] + radius * Math.cos( orbitYaw );\n      z = orbitPoint[2] + radius * Math.sin( orbitYaw ) * Math.sin( orbitPitch );\n      this.position = [ x, y, z ];\n      //camera.setLookat( orbitPoint );\n    }\n  }\n}\n", 
+      "text": "var cam = this;\nthis.properties.attachNodeID.setter = function( value ) {\n  console.info( '  camera.attachNodeID.setter = function( ' +value+ ' )' );\n  switch ( value ) {\n    case 'http-vwf-example-com-types-car-pick_up_truck02':\n      this.position = [ -52.29, -114.67, 100 ];\n      this.eulers = [ 90, 270, 0 ];\n      this.attachOffset = [ -60, 156, -6 ];\n      this.attachNodeID = value;\n      break;\n    case '':\n      this.attachNodeID = value;\n      break;\n  }\n}\nthis.properties.walkMode.setter = function( value ) {\n  console.info( '  camera.walkMode.setter = function( ' +value+ ' )' );\n  switch ( value ) {\n    case 'orbit':\n    case 'walk':\n      this.walkMode = value;\n      break;\n  }\n}\nthis.properties.cameraType.setter = function( value ) {\n  console.info( '  camera.cameraType.setter = function( ' +value+ ' )' );\n  switch ( value ) {\n    case 'perspective':\n    case 'orthographic':\n      this.cameraType = value;\n      break;\n  }\n}    \nthis.properties.far.setter = function( value ) { \n  console.info( '  camera.far.setter = function( ' +value+ ' )' );\n  if ( value > 0 && value > this.near ) {\n    this.far = value;\n  }\n}\nthis.properties.near.setter = function( value ) {\n  console.info( '  camera.near.setter = function( ' +value+ ' )' );\n  if ( value > 0 && value < this.far ) {\n    this.near = value;\n  }\n}\nthis.properties.fovy.setter = function( value ) {\n  console.info( '  camera.fovy.setter = function( ' +value+ ' )' );\n  if ( value > 0 ) {\n    this.fovy = value;\n  }\n}\nthis.properties.position.setter = function( value ) {\n  if ( this.attachNodeID != '' ) {\n    var newPos = [ 0, 0, 0 ];\n    var offset = this.attachOffset;\n    var wPos = this.position;\n    console.info( '===========  offset = ' + offset );\n    console.info( '===========  wPos = ' + wPos );\n    newPos[0] = wPos[0] + offset[0];\n    newPos[1] = wPos[1] + offset[1];\n    newPos[2] = wPos[2] + offset[2];\n    vwf.setProperty( this.attachNodeID, 'position', newPos );\n  }\n  this.position = value;\n}\nthis.properties.active.setter = function( value ) {\n  if ( value != this.active ) {\n    this.active = value;\n  }\n}\n", 
       "type": "application/javascript"
     }
   ]

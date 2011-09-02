@@ -73,6 +73,9 @@
 
         var vwf = this;
 
+//		this.classScripts = {};
+
+
         // == Public functions =====================================================================
 
         // -- initialize ---------------------------------------------------------------------------
@@ -445,12 +448,14 @@ if ( ! callback ) { // TODO: this is a hack to get the multiuser application cre
     };
 }
 
-            this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
-                construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
-            } );
+			this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
+				construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
+			} );
+
 
             this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + component_uri_or_json_or_object ); /* must log something for group level to reset in WebKit */
         };
+
 
         // -- getType ------------------------------------------------------------------------------
 
@@ -762,7 +767,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
         this.execute = function( nodeID, scriptText, scriptType ) {
 
             this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
-
+ 
             // Call executing() on each model. The script is considered executed after each model
             // has run.
 
@@ -798,6 +803,19 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
         // -- logging ------------------------------------------------------------------------------
 
+//        this.logger = {
+//
+//            log: function() { /*window.console && console.log && console.log.apply( console, arguments )*/ },
+//            debug: function() { /*window.console && console.debug && console.debug.apply( console, arguments )*/ },
+//            info: function() { /*window.console && console.info && console.info.apply( console, arguments )*/ },
+//            warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
+//            error: function() { window.console && console.error && console.error.apply( console, arguments ) },
+//            group: function() { /*window.console && console.group && console.group.apply( console, arguments )*/ },
+//            groupCollapsed: function() { /* window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) */ },
+//            groupEnd: function() { /* window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) */ },
+//
+//        };
+
         this.logger = {
 
             log: function() { window.console && console.log && console.log.apply( console, arguments ) },
@@ -806,8 +824,8 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
             error: function() { window.console && console.error && console.error.apply( console, arguments ) },
             group: function() { window.console && console.group && console.group.apply( console, arguments ) },
-            groupCollapsed: function() { window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) },
-            groupEnd: function() { window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) },
+            groupCollapsed: function() {  window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments )  },
+            groupEnd: function() {  window.console && console.groupEnd && console.groupEnd.apply( console, arguments )  },
 
         };
 
@@ -898,6 +916,7 @@ childName /* TODO: hack */ );
 
                 },
 
+				
                 function( callback_err_results ) {
 
                     // Attach the scripts. For each script, load the network resource if the script is
@@ -907,18 +926,40 @@ childName /* TODO: hack */ );
                     // script type.
 
                     component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
-                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+//						var nameRemovedID = nodeID.substring( 0, nodeID.lastIndexOf( '-' ) );
+//						
+//						if ( nameRemovedID == "http-vwf-example-com-types" ) {
+//							
+//							//console.info( "ADDING SCRIPT TO TYPE " + nodeID + " " + ( script.text || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + script.type );
+
+//							if ( script.text && vwf.classScripts ) {
+//								if ( !vwf.classScripts[nodeID] ) {
+//									vwf.classScripts[nodeID] = [ { 'text': script.text, 'type': script.type } ];
+//								} else { 
+//									vwf.classScripts[nodeID].add( { 'text': script.text, 'type': script.type } );
+//								}
+//							}
+//						}
+
+						script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                     } );
 
                     callback_err_results( undefined, undefined );
                 },
 
                 function( callback_err_results ) {
+//					var classID = nodeID.substring( 0, nodeID.lastIndexOf( '-' ) );
 
                     // Invoke an initialization method.
-
                     vwf.execute( nodeID, "this.hasOwnProperty( 'initialize' ) && this.initialize()", "application/javascript" ); 
-
+					
+//					if ( vwf.classScripts && vwf.classScripts[classID] ) {
+//						var scripts = vwf.classScripts[classID];
+//						for ( var i = 0; i < scripts.length; i++ ) {
+//							//console.info( "ADDING SCRIPT TO OBJECT " + nodeID + " " + ( scripts[i]['text'] || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) );
+//							vwf.execute( nodeID, scripts[i]['text'] , scripts[i]['type'] ); 						
+//						}
+//					}
                     callback_err_results( undefined, undefined );
                 },
 

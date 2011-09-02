@@ -2,3 +2,9 @@
 extends: http://vwf.example.com/types/node2
 properties:
   activeCamera: "mainCamera"
+  ambientColor: [ 183, 183, 183 ]
+scripts:
+- text: |
+    this.properties.activeCamera.setter = funtion( value ) {
+    }
+  type: application/javascript
