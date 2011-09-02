@@ -2,15 +2,8 @@
 extends: http://vwf.example.com/types/node
 properties:
   texture: ""
-  color:
-    r: 1
-    g: 1
-    b: 1
-    a: 1
-  specColor:
-    r: 1
-    g: 1
-    b: 1
+  color: [ 255, 255, 255, 255 ]
+  specColor: [ 255, 255, 255 ]
   reflect: 0.8
   shine: 10
   specular: 1

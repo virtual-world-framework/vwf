@@ -30,6 +30,8 @@
         this.defaultCamera = undefined;
         this.defaultCameraID = undefined;
 
+		this.cameras = {};
+
     };
 
     // Delegate any unimplemented functions to vwf-view.
@@ -55,16 +57,19 @@
             // );
 
             var canvasQuery = jQuery(this.rootSelector).append(
-                "<canvas id='" + nodeID + "' class='vwf-scene' width='640' height='480'/>"
+                "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='600'/>"
             ).children(":last");
 
-            canvasQuery.keydown( function( event ) {
-              view.keysDown[ event.keyCode ] = true;
-            });
+           
+			window.onkeydown = function( event ) {
+              //console.info( "keydown( " + event.keyCode + " )" );
+			  view.keysDown[ event.keyCode ] = true;
+            };
 
-            canvasQuery.keyup( function( event ) {
-              view.keysDown[ event.keyCode ] = false;
-            });
+			window.onkeyup = function( event ) {
+              //console.info( "keyup( " + event.keyCode + " )" );
+			  view.keysDown[ event.keyCode ] = true;
+            };
 
             var scene = this.scenes[nodeID] = {
                 glgeDocument: new GLGE.Document(),
@@ -122,35 +127,48 @@
                 }
             }
 
-            if (nodeSource && nodeType == "model/x-glge") {
-                scene.glgeDocument.load(nodeSource);
-            }
+			if ( nodeSource ) {
+				switch ( nodeType ) {
+					case "model/x-glge":
+						scene.glgeDocument.load(nodeSource);
+						break;
 
-            else if (nodeSource && nodeType == "model/vnd.collada+xml") {  // TODO: need to loadDocument() from somewhere first
-                var newCollada = new GLGE.Collada;
-                glgeColladaObjects.push( newCollada );
-                newCollada.loadedCallback = colladaLoaded;
-                newCollada.setDocument(nodeSource, window.location.href);
-                scene.glgeDocument.getElement("mainscene").addCollada(newCollada);
-            }
+				}
+			}
 
-        }
-        
-        else if (nodeExtendsID == "http-vwf-example-com-types-node3") {
+        }  else if (nodeExtendsID == "http-vwf-example-com-types-node3") {
 
-            var node = this.nodes[nodeID] = {
-                name: undefined,  // TODO: needed?
-                glgeObject: undefined,
-				type: nodeExtendsID
-            };
+			if ( nodeType == "model/vnd.collada+xml" ) {
+				var node = this.nodes[nodeID] = {
+					name: undefined,  
+					glgeObject: undefined,
+					type: nodeExtendsID,
+					source: nodeSource,
+					sourceType: nodeType 
+				};
+//				var newCollada = new GLGE.Collada;
+//				view.glgeColladaObjects.push( newCollada );
+//				newCollada.loadedCallback = colladaLoaded;
+//				newCollada.setDocument(nodeSource, window.location.href);
+//				scene.glgeDocument.getElement("mainscene").addCollada(newCollada);
+//				break;				
+							
+			} else {
 
-        }
+				var node = this.nodes[nodeID] = {
+					name: undefined,  // TODO: needed?
+					glgeObject: undefined,
+					type: nodeExtendsID
+				};
+			}
 
-        else if (nodeExtendsID == "http-vwf-example-com-types-camera") {
+        } else if (nodeExtendsID == "http-vwf-example-com-types-camera") {
 
+			var scene = this.scenes["index-vwf"];
             var node = this.nodes[nodeID] = {
                 name: undefined,
                 glgeObject: undefined,
+				glgeScene: scene ? scene.glgeScene : undefined,
 				type: nodeExtendsID
             };
 
@@ -160,13 +178,14 @@
 
 				node["name"] = "vwfDefaultCam";
 				node["glgeObject"] = new GLGE.Camera();
-			} else {
+				this.cameras["vwfDefaultCam"] = node;
+			} else if ( !this.camera ) {
 				this.camera = node;
 				this.cameraID = nodeID;
 			}
-        }
 
-        else if (nodeExtendsID == "http-vwf-example-com-types-light") {
+			
+        } else if (nodeExtendsID == "http-vwf-example-com-types-light") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
@@ -174,9 +193,7 @@
 				type: nodeExtendsID
             };
 
-        }
-
-        else if (nodeExtendsID == "http-vwf-example-com-types-material") {
+        }  else if (nodeExtendsID == "http-vwf-example-com-types-material") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
@@ -185,7 +202,27 @@
 				type: nodeExtendsID
             };
 
-        }
+        } else {
+
+			var node;
+			switch ( nodeExtendsID ) {
+				case "index-vwf":
+				case "http-vwf-example-com-types-node":
+				case "http-vwf-example-com-types-node2":
+				case "http-vwf-example-com-types-scene":
+				case "http-vwf-example-com-types-glge":
+				case undefined:
+					break;
+				default:
+					node = this.nodes[nodeID] = {
+						name: undefined,
+						glgeObject: undefined,
+						type: nodeExtendsID
+					};
+				break;	
+			}		
+		}
+
     };
 
     module.prototype.findCollada = function ( grp, view, nodeID ) {
@@ -235,8 +272,7 @@
 
         vwf.logger.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
-        var child = this.nodes[childID];
-
+        var child = this.nodes[ childID ];
 
         if (child) {
             if (bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID)) {
@@ -330,23 +366,38 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 
             switch ( propertyName ) {
 
-                case "rotX":
+                case "roll":
                     value = glgeObject.setRotX( Number( propertyValue ) * ( 3.14159/180.0 ) );
                     break;
 
-                case "rotY":
+                case "pitch":
                     value = glgeObject.setRotY( Number( propertyValue ) * ( 3.14159/180.0 ) );
                     break;
 
-                case "rotZ":
+                case "yaw":
                     value = glgeObject.setRotZ( Number( propertyValue ) * ( 3.14159/180.0 ) );
+                    break;
+
+                case "rotX":
+                    value = glgeObject.setRotX( Number( propertyValue ) );
+                    break;
+
+                case "rotY":
+                    value = glgeObject.setRotY( Number( propertyValue ) );
+                    break;
+
+                case "rotZ":
+                    value = glgeObject.setRotZ( Number( propertyValue ) );
                     break;
 
                 case "eulers":
                 case "position":
+				case "rotation":
                 case "worldEulers":
                 case "worldPosition":
                 case "scale":
+				case "tranform":
+				case "posRot":
                     {
                         var values;
                         var propValue;
@@ -364,8 +415,16 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                             case "eulers":
                                 value = glgeObject.setRot( Number( values[0] ) * ( 3.14159/180.0 ) , Number( values[1] )* ( 3.14159/180.0 ), Number( values[2] ) * ( 3.14159/180.0 ) );
                                 break;
+                            case "rotation":
+                                value = glgeObject.setRot( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
+                                break;
                             case "position":
                                 value = glgeObject.setLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
+                                break;
+                            case "posRot":
+								value = [];
+                                value.push( glgeObject.setLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) ) );
+                                value.push( glgeObject.setRot( Number( values[3] ), Number( values[4] ), Number( values[5] ) ) );
                                 break;
                             case "worldEulers":
                                 value = glgeObject.setDRot( Number( values[0] )* ( 3.14159/180.0 ), Number( values[1] )* ( 3.14159/180.0 ), Number( values[2] )* ( 3.14159/180.0 ) );
@@ -376,7 +435,9 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                             case "scale":                            
                                 value = glgeObject.setScale( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
                                 break;
-                        }
+							case "transform":
+								break;
+						}
                     }
                     break;
                 case "texture":
@@ -396,13 +457,99 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         } else if ( mat ) {
                             mat.addTexture( propertyValue );
                         }
-
                     }
                     break;
 
+                default:
+					switch ( node[ "type" ] ) {
+						case "http-vwf-example-com-types-light":
+							value = this.satLightProperty( nodeID, propertyName, propertyValue );
+							break;
+						case "http-vwf-example-com-types-camera":
+							value = this.satCameraProperty( nodeID, propertyName, propertyValue );
+							break;
+						case "http-vwf-example-com-types-glge":
+							value = this.satSceneProperty( nodeID, propertyName, propertyValue );
+							break;
+					}
+					break;
+            }
+        } else if ( this.scenes[nodeID] ) {
+			var scene = this.scenes[nodeID];
+			//switch ( node[ "type" ] ) {
+			//	case "http-vwf-example-com-types-glge":
+					value = this.satSceneProperty( scene, propertyName, propertyValue );
+			//		break;
+			//}
+		} 
 
+        return value;
+    };
 
-				// light properties begin
+	module.prototype.satSceneProperty = function( scene, propertyName, propertyValue ) {
+
+		if ( scene && scene.glgeScene ) {
+			var value = propertyValue;
+			switch ( propertyName ) {
+  				case "ambientColor":
+					var arrayPropValue = propertyValue;
+					if ( propertyValue.constructor != Array )
+						arrayPropValue = JSON.parse( propertyValue );
+					scene.glgeScene.setAmbientColor( arrayPropValue );
+					break;
+				case "activeCamera":
+					if ( view.cameras[propertyValue] ) {
+						camDef = view.cameras[propertyValue];
+						if ( camDef && camDef.glgeScene && camDef.glgeObject ) {
+							camDef.glgeScene.camera = camDef.glgeObject;
+						}
+					}
+					break;
+			}
+		}
+		return value;
+
+	};
+
+	module.prototype.satCameraProperty = function( nodeID, propertyName, propertyValue ) {
+
+		var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
+        var value = propertyValue;
+		switch ( propertyName ) {
+  			case "cameraType":
+				switch ( propertyValue ) {
+					case "perspective":
+						node.glgeObject.setType( GLGE.C_PERSPECTIVE );
+						break;
+					case "orthographic":
+						node.glgeObject.setType( GLGE.C_ORTHO );
+						break;
+				}
+				break;
+			case "far":
+				node.glgeObject.setFar( Number( propertyValue ) );
+			case "near":
+				node.glgeObject.setNear( Number( propertyValue ) );
+				break;
+			case "fovy":
+				node.glgeObject.setsetFovY( Number( propertyValue ) );
+				break;			
+			case "aspect":
+				node.glgeObject.setAspect( Number( propertyValue ) );
+				break;			
+			case "orthoscale":
+				node.glgeObject.setOrthoScale( Number( propertyValue ) );
+				break;
+		}
+		return value;
+
+	};
+
+	module.prototype.satLightProperty = function( nodeID, propertyName, propertyValue ) {
+		var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
+        var value = propertyValue;
+
+		switch ( propertyName ) {
   				case "lightType":
 					switch ( propertyValue ) {
 						case "point":
@@ -472,13 +619,10 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
   				case "castShadows":
 					node.glgeObject.setCastShadows( propertyValue );
 					break;
-				// light properties end
+		}
+		return value;
+	};
 
-            }
-        }
-
-        return value;
-    };
 
     // -- gotProperty ------------------------------------------------------------------------------
 
@@ -516,21 +660,37 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
             switch ( propertyName ) {
 
-                case "rotX":
+                case "roll":
                     value = glgeObject.getRotX() * ( 180.0/3.14159 );
                     break;
 
-                case "rotY":
+                case "pitch":
                     value = glgeObject.getRotY() * ( 180.0/3.14159 );
                     break;
 
-                case "rotZ":
+                case "yaw":
                     value = glgeObject.getRotZ() * ( 180.0/3.14159 );
+                    break;
+
+                case "rotX":
+                    value = glgeObject.getRotX();
+                    break;
+
+                case "rotY":
+                    value = glgeObject.getRotY();
+                    break;
+
+                case "rotZ":
+                    value = glgeObject.getRotZ();
                     break;
 
                 case "eulers":
                     value = new Array;
                     value.push( glgeObject.getRotX() * ( 180.0/3.14159 ), glgeObject.getRotY()* ( 180.0/3.14159 ), glgeObject.getRotZ()* ( 180.0/3.14159 ) );
+                    break;
+                case "rotation":
+                    value = new Array;
+                    value.push( glgeObject.getRotX(), glgeObject.getRotY(), glgeObject.getRotZ() );
                     break;
                 case "position":
                     value = new Array;
@@ -550,10 +710,57 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     break;
 
                 case "visible":
-                    //glgeObject.    
+                    value = glgeObject.getModelMatrix();   
                     break;
 
-				// light properties begin
+				case "transform":
+					break;
+
+				default:
+					switch ( node[ "type" ] ) {
+						case "http-vwf-example-com-types-light":
+							value = this.gotLightProperty( nodeID, propertyName, propertyValue );
+							break;
+						case "http-vwf-example-com-types-camera":
+							value = this.gotCameraProperty( nodeID, propertyName, propertyValue );
+							break;
+						case "http-vwf-example-com-types-scene":
+							value = this.gotSceneProperty( nodeID, propertyName, propertyValue );
+							break;
+					}
+					break;	
+
+            }
+        }
+
+        return value;
+    };
+
+	module.prototype.gotSceneProperty = function( nodeID, propertyName, propertyValue ) {
+
+		var scene = view.scenes[nodeID] // { name: childName, glgeObject: undefined }
+        var value = propertyValue;
+		switch ( propertyName ) {
+  			case "ambientColor":
+				var color = scene.glgeScene.getAmbientColor();
+				value = [ color['r'], color['g'], color['b'] ];
+				break;
+			case "activeCamera":
+				value = name( scene.glgeScene.camera );
+				break;
+
+		}
+		return value;
+
+	};
+
+    // -- gotLightProperty ------------------------------------------------------------------------------
+
+    module.prototype.gotLightProperty = function (nodeID, propertyName, propertyValue) {
+ 	        var value;
+
+			switch( propertyName ) {
+
   				case "lightType":
 					switch ( node.glgeObject.getType() ) {
 						case GLGE.L_POINT:
@@ -568,7 +775,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 					}
 					break;
 
-  				case "constantAttenuation":
+				case "constantAttenuation":
 					value = node.glgeObject.getAttenuationConstant();
  					break;
 
@@ -623,19 +830,53 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
   				case "castShadows":
 					value = node.glgeObject.getCastShadows();
 					break;
-				// light properties end
+			}
+			return value;	
+	
+	};
 
-            }
-        }
+    // -- gotCameraProperty ------------------------------------------------------------------------------
 
-        return value;
-    };
+    module.prototype.gotCameraProperty = function (nodeID, propertyName, propertyValue) {
+
+		var value;
+		switch( propertyName ) {
+  			case "cameraType":
+				switch ( node.glgeObject.getType() ) {
+					case GLGE.C_PERSPECTIVE:
+						value = "perspective";
+						break;
+					case GLGE.C_ORTHO:
+						value = "orthographic";
+						break;
+				}
+				break;
+			case "far":
+				value = node.glgeObject.getFar();
+			case "near":
+				value = node.glgeObject.getNear();
+				break;
+			case "fovy":
+				value = node.glgeObject.getsetFovY();
+				break;			
+			case "aspect":
+				value = node.glgeObject.getAspect();
+				break;			
+			case "orthoscale":
+				value = node.glgeObject.getOrthoScale();
+				break;
+		}
+		return value;
+
+	};
+
+
 
     // == Private functions ========================================================================
 
     var bindSceneChildren = function (view, nodeID) {
 
-        vwf.logger.info("      bindSceneChildren: " + nodeID);
+        vwf.logger.info("      bindSceneChildren: " + nodeID );
         var scene = view.scenes[nodeID];
         var child;
 
@@ -649,10 +890,26 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             });
         }
 
-        this.defaultCamera = true;
-        vwf.createNode( "http://vwf.example.com/types/camera", dummy, "vwfDefaultCam" ); 
+        if ( !view.defaultCamera ) {
+			view.defaultCamera = true;
+			vwf.createNode( "http://vwf.example.com/types/camera", undefined, "defaultCamera" ); 
+		}
+		
+    };
 
-		function dummy( nodeID, name ) {}
+    var bindColladaChildren = function (view, nodeID) {
+
+        vwf.logger.info("      bindColladaChildren: " + nodeID );
+        var colladaTopNode = view.nodes[nodeID];
+        var child;
+
+        jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
+            if ( child = view.nodes[childID] ) { // assignment is intentional
+                if (bindChild(view, colladaTopNode, undefined, child, vwf.name(childID), childID)) {
+                    bindNodeChildren(view, childID);
+                }
+            }
+        });
 
     };
 
@@ -677,50 +934,83 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     var bindChild = function (view, scene, node, child, childName, childID) {
 
         vwf.logger.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
-        if (scene && !child.glgeObject) {
-            child.name = childName;
-            child.glgeObject = scene.glgeScene && glgeSceneChild(scene.glgeScene, childName);
-            if (child.glgeObject) {
-                glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
-                child.initialized = true;
-            } else {
-				var obj = GLGE.Assets.get(childName);
-				if ( obj ) {
-					child.glgeObject = obj;
-					child.initialized = true;
-				}
+		if ( scene && child && child["type"] && child["type"] ==  "http-vwf-example-com-types-camera" && scene.glgeScene.camera  ) {
+			child.glgeObject = scene.glgeScene.camera;
+			child.name = childName;
+			child.initialized = true;
+			view.childID = childID;
+			view.cameras[childName] = node;
+			if ( scene.glgeScene.camera.id == childName ) {
+				scene.activeCamera = childName;
 			}
-       }
+		} else {
+			if ( child.source ) {
 
-        else if (node && !child.glgeObject) {
-            child.name = childName;
-            if ( view.nodes[ childID ] && view.nodes[ childID ].glgeMaterial ) {
-                bindMaterial( view, childID, childName, node );
-                child.initialized = true;
-            } else {
-                child.glgeObject = node.glgeObject && glgeObjectChild(node.glgeObject, childName);
-                if (child.glgeObject) {
-                    glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
-                    child.initialized = true;
-                } else {
-					switch( child["type"] ) {
-						case "http-vwf-example-com-types-light":
-							var obj = GLGE.Assets.get(childName);
-							if ( obj ) {
-								child.glgeObject = obj;
-								child.initialized = true;
-							} else {
-								obj = GLGE.Assets.get(childName+"-light");
+				function colladaLoaded( collada ) { 
+					var bRemoved = false;
+					for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
+						if ( view.glgeColladaObjects[j] == collada ){
+							view.glgeColladaObjects.splice( j, 1 );
+							bRemoved = true;
+						}
+					} 
+					if ( bRemoved )
+						bindColladaChildren( view, childID );
+				}
+
+				child.name = name;
+				child.glgeObject = new GLGE.Collada;
+				view.glgeColladaObjects.push( child.glgeObject );
+				child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
+				if ( node && node.glgeObject ) {
+					node.glgeObject.addCollada(child.glgeObject);
+				} else {
+					scene.glgeScene.addCollada(child.glgeObject);	
+				}
+							
+			} else if (scene && scene.glgeScene && !child.glgeObject) {
+				child.name = childName;
+				child.glgeObject = scene.glgeScene && glgeSceneChild(scene.glgeScene, childName);
+				if (child.glgeObject) {
+					glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+					child.initialized = true;
+				} else {
+					var obj = GLGE.Assets.get(childName);
+					if ( obj ) {
+						child.glgeObject = obj;
+						child.initialized = true;
+					}
+				}
+		   } else if (node && !child.glgeObject) {
+				child.name = childName;
+				if ( view.nodes[ childID ] && view.nodes[ childID ].glgeMaterial ) {
+					bindMaterial( view, childID, childName, node );
+					child.initialized = true;
+				} else {
+					child.glgeObject = node.glgeObject && glgeObjectChild(node.glgeObject, childName);
+					if (child.glgeObject) {
+						glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+						child.initialized = true;
+					} else {
+						switch( child["type"] ) {
+							case "http-vwf-example-com-types-light":
+								var obj = GLGE.Assets.get(childName);
 								if ( obj ) {
 									child.glgeObject = obj;
 									child.initialized = true;
-								}
-							}							
-							break;
+								} else {
+									obj = GLGE.Assets.get(childName+"-light");
+									if ( obj ) {
+										child.glgeObject = obj;
+										child.initialized = true;
+									}
+								}							
+								break;
+						}
 					}
 				}
-            }
-        }
+			}
+		}
 
         if (child.glgeObject && child.glgeObject.constructor == GLGE.ParticleSystem && child.name == "smoke") {
             view.smoke = child;
@@ -785,9 +1075,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     childNode.glgeMaterial = childNode.glgeObject.material;
                 }
 
-                if ( childNode.glgeMaterial === childNode.glgeObject.material ) {
-                    console.info( " materials are the same object!!!!! " );
-                }
+//                if ( childNode.glgeMaterial === childNode.glgeObject.material ) {
+//                    console.info( " materials are the same object!!!!! " );
+//                }
             }
         }
 
@@ -825,53 +1115,90 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         var scene = view.scenes[nodeID], child;
         if (scene && scene.glgeScene) {
             var camera = scene.glgeScene.camera;
-            if (camera && camera.handleKeyEvents) {
+			if ( camera ) {
+				var cameraComponent = view.camera;
+
+				if ( cameraComponent && false ) {
   
-              var mat = camera.getRotMatrix();
-              var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
-              var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
+				  var mat = camera.getRotMatrix();
+				  var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
+				  var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
  
-              // should only be sending the keysDown, now, lastime, but I'm going to
-              // inlcude the additional data for now to cut some corners
-              camera.handleKeyEvents( view.keysDown, now, lasttime, mat, trans, mag );
-            } else {
-                camerapos = camera.getPosition();
-                camerarot = camera.getRotation();
-                var mat = camera.getRotMatrix();
-                var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
-                var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
+				  // should only be sending the keysDown, now, lastime, but I'm going to
+				  // inlcude the additional data for now to cut some corners
+				  var strParams = JSON.stringify( [ view.keysDown, now, lasttime, mat, trans, mag ] );
+				  //view.callMethod( this.cameraID, "handleKeyEvents", strParams );
+				  vwf.execute( view.cameraID, "this.handleKeyEvents("+strParams+")", "application/javascript" );
+				} else {
+					camerapos = camera.getPosition();
+					camerarot = camera.getRotation();
+					var mat = camera.getRotMatrix();
+					var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
+					var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
 
-				var yinc = 0;
-				var xinc = 0;
-				var zinc = 0;
-				trans[0] = trans[0] / mag;
-				trans[1] = trans[1] / mag;
+					var yinc = 0;
+					var xinc = 0;
+					var zinc = 0;
+					var yRot = 0;
+					trans[0] = trans[0] / mag;
+					trans[1] = trans[1] / mag;
 
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
-					yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
-				}
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
-					yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
-				}
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
-					yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
-				}
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_E)) {
-					yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
-				}
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
-				if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
-					vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
-					vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
-				}
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+						yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
+					}
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+						yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
+					}
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
+						yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
+					}
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_E)) {
+						yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
+					}
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { yRot = 0.04; }
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { yRot = -0.04; }
+					if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
+						vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
+						vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
+					}
 
-				if (xinc != 0 || yinc != 0 || zinc != 0) {
-					camera.setLocY(camerapos.y + yinc * 0.05 * (now - lasttime));
-					camera.setLocX(camerapos.x + xinc * 0.05 * (now - lasttime));
-					camera.setLocZ(camerapos.z + zinc);
+					var speed = 2.0;
+					if ( cameraComponent && (yRot != 0 ) && (xinc != 0 || yinc != 0 || zinc != 0) ) {
+
+						var pr = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed, camerapos.z + zinc, camerarot.x, (camerarot.y + yRot),  camerarot.z ];
+						view.setProperty( view.cameraID, "posRot", pr );
+												
+					} else {
+						if (xinc != 0 || yinc != 0 || zinc != 0) {
+	//						var pos = [ camerapos.x + xinc * 0.05 * (now - lasttime), camerapos.y + yinc * 0.05 * (now - lasttime),  camerapos.z + zinc ];
+							if ( cameraComponent ) {
+								var pos = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed,  camerapos.z + zinc ];
+								view.setProperty( view.cameraID, "position", pos );
+							} else {
+								var pos = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed,  camerapos.z + zinc ];
+								camera.setLocY(pos[1]);
+								camera.setLocX(pos[0]);
+								camera.setLocZ(pos[2]);
+							}
+						}
+						if (yRot != 0 ) {
+							//var rot = [ camerarot.x, (camerarot.y + yRot),  camerarot.z];
+							if ( cameraComponent ) {
+								view.setProperty( view.cameraID, "rotY", (camerarot.y + yRot) );
+							} else {
+								camera.setRotY( camerarot.y + yRot );
+							}
+
+	//						var rot = [ camerarot.x * ( 180.0/3.14159 ), (camerarot.y + yRot) * ( 180.0/3.14159 ),  camerarot.z * ( 180.0/3.14159 ) ];
+	//						if ( cameraComponent ) {
+	//							view.setProperty( view.cameraID, "eulers", JSON.stringify(rot) );
+	//						} else {
+	//							camera.setRotY( camerarot.y + yRot );
+	//						}
+						}
+					}
 				}
 			}
         }
@@ -1241,13 +1568,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             var objectToLookFor = pickInfo.object;
 
             while (objectIDFound == -1 && objectToLookFor) {
-                if ( debug ) 
+                if ( debug ) {
                     vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
+				}
                 jQuery.each(view.nodes, function (nodeID, node) {
                     if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
                         //vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
                         objectIDFound = nodeID;
-                    }
+					}
                 });
                 objectToLookFor = objectToLookFor.parent;
             }

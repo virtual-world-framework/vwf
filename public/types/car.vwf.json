@@ -1,0 +1,22 @@
+{
+  "extends": "http://vwf.example.com/types/node3", 
+  "properties": {
+    "position": [
+      0, 
+      0, 
+      0
+    ], 
+    "attachedToCamera": false, 
+    "eulers": [
+      0, 
+      0, 
+      0
+    ]
+  }, 
+  "scripts": [
+    {
+      "text": "var car = this;\nthis.properties.attachedToCamera.setter = function( value ) {\n  console.info( ' Car.attachedToCamera.setter = ' + value );\n  console.info( '  STARTING ' );\n  if ( vwf ) {\n    console.info( ' using vwf' );\n    if ( value ) {\n      vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', 'http-vwf-example-com-types-car-pick_up_truck02' );\n    } else {\n      vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', '' );\n    }\n  }\n  console.info( '   setting property' );\n  car.attachedToCamera = value;\n  console.info( '   DONE setting property' );\n}\nthis.properties.position.setter = function( value ) {\n  console.info( '============  Car.position = ' + value );\n  this.position = value;\n}\nthis.pointerClick = function() {\n  this.attachedToCamera = !this.attachedToCamera;\n  console.info( '      this.attachedToCamera = ' + this.attachedToCamera );\n}\n", 
+      "type": "application/javascript"
+    }
+  ]
+}

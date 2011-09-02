@@ -1,6 +1,7 @@
 ﻿{
   "extends": "http://vwf.example.com/types/node2", 
   "properties": {
-    "activeCamera": "mainCamera"
+    "activeCamera": "mainCamera",
+	"ambientColor": [ 0, 0, 0 ]
   }
 }

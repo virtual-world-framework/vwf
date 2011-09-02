@@ -1,24 +1,26 @@
 ﻿{
-
-    "extends": "http://vwf.example.com/types/node",
-
-    "properties":
-    {
-        "enabled": true,
-
-        "transform": [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ],
-        "position": [ 0, 0, 0 ],
-        "rotation": [ 0, 0, 0 ],
-
-        "playing": false,
-        "looping": false,
-        "speed": 1
-
-    },
-
-    "methods":
-    {
-        "pointerClick": null
-    }
-
+  "extends": "http://vwf.example.com/types/node", 
+  "methods": {
+    "pointerClick": null
+  }, 
+  "properties": {
+    "looping": false, 
+    "enabled": true, 
+    "transform": [
+      1, 
+      0, 
+      0, 
+      0, 
+      1, 
+      0, 
+      0, 
+      0, 
+      1, 
+      0, 
+      0, 
+      0
+    ], 
+    "speed": 1, 
+    "playing": false
+  }
 }

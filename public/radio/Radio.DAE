@@ -5362,22 +5362,6 @@
           </node>
         </node>
       </node>
-      <node id="node-Omni01" name="Omni01">
-        <translate>16.37341 -18.1593 17.92877</translate>
-        <instance_light url="#Omni01-light"/>
-      </node>
-      <node id="node-Omni02" name="Omni02">
-        <translate>-13.87543 16.36255 -18.51299</translate>
-        <instance_light url="#Omni02-light"/>
-      </node>
-      <node id="node-Omni03" name="Omni03">
-        <translate>4.477905 16.0664 -13.47203</translate>
-        <instance_light url="#Omni03-light"/>
-      </node>
-      <node id="node-Omni04" name="Omni04">
-        <translate>-5.310547 -17.2605 14.88007</translate>
-        <instance_light url="#Omni04-light"/>
-      </node>
       <node id="node-ic40Antennae" name="ic40Antennae">
         <translate>-0.5629883 0.3085919 2.024589</translate>
         <rotate>0 0 1 0</rotate>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<glge>
+	<animation_vector id="spin" frames="200">
+		<animation_curve channel="RotY">
+			<linear_point x="1" y="0" />
+			<linear_point x="200" y="6.282" />
+		</animation_curve>
+	</animation_vector>
+
+	<camera id="maincamera" loc_y="20" loc_x="1" loc_z="8" rot_order="ROT_XZY" xtype="C_ORTHO" rot_z="0" rot_x="1.56" rot_y="3.141" />
+
+	<scene id="mainscene" camera="#maincamera" ambient_color="#B7B7B7" fog_type="FOG_NONE">
+		<light name="dir_duck_1" id="mainlight" loc_x="148.654" loc_y="183.672" loc_z="-292.179" rot_z="-0.22" rot_y="-3.34" rot_x="-0.79" attenuation_constant="1" type="L_DIR" />
+		<light name="dir_plane_1" id="mainlight" rot_z="0.279" rot_y="0.9539" rot_x="-0.08268" attenuation_constant="1" type="L_DIR" />
+	</scene>
+
+</glge>

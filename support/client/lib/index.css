@@ -172,8 +172,24 @@ input {
   display: block;
 }
 
-.vwf-control-slider, .vwf-control-roll-slider, .vwf-control-pitch-slider, .vwf-control-yaw-slider, .vwf-control-x-slider, .vwf-control-y-slider, .vwf-control-z-slider {
+.vwf-control-slider, .vwf-control-roll-slider, .vwf-control-pitch-slider, .vwf-control-yaw-slider, .vwf-control-x-slider, .vwf-control-y-slider, .vwf-control-z-slider, .vwf-control-r-slider, .vwf-control-g-slider, .vwf-control-b-slider {
     display: inline-block;
     width: 15em;
     margin-left: 1ex;
+}
+
+.vwf-activeCamera-dropdown {
+    display: inline-block;
+    width: 15em;
+    margin-left: 1ex;
+}
+
+.vwf-roll-value, .vwf-pitch-value, .vwf-yaw-value, .vwf-r-value, .vwf-g-value, .vwf-b-value, .vwf-a-value {
+    display: inline-block;
+    width: 2em;
+}
+
+.vwf-x-value, .vwf-y-value, .vwf-z-value {
+    display: inline-block;
+    width: 4em;
 }
