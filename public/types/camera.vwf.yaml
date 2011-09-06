@@ -1,32 +1,59 @@
 --- 
 extends: http://vwf.example.com/types/node3
 properties: 
-  active: false
+  active:
+    set: |
+      if ( value != this.active ) {
+        this.active = value;
+      }
+    value: false
   allowMouseNav: false
-  walkMode: "walk"
+  walkMode:
+    set: |
+      console.info( '  camera.walkMode.setter = function( ' +value+ ' )' );
+      switch ( value ) {
+        case 'orbit':
+        case 'walk':
+          this.walkMode = value;
+          break;
+      }
+    value: "walk"
   orbitPoint: [ 0, 0, 0 ]
-  far: 1000.0
-  near: 0.1
-  fovy: 35
+  far:
+    set: |
+      console.info( '  camera.far.setter = function( ' +value+ ' )' );
+      if ( value > 0 && value > this.near ) {
+        this.far = value;
+      }
+    value: 1000.0
+  near:
+    set: |
+      console.info( '  camera.near.setter = function( ' +value+ ' )' );
+      if ( value > 0 && value < this.far ) {
+        this.near = value;
+      }
+    value: 0.1
+  fovy:
+    value: 35
+    set: |
+      console.info( '  camera.fovy.setter = function( ' +value+ ' )' );
+      if ( value > 0 ) {
+        this.fovy = value;
+      }
   aspect: 1.0
   orthoscale: 5
-  cameraType: "perspective"
-  attachNodeID: ""
-  attachOffset: [ 0, 0, 0 ]
-  speed: 2.0
-  position: [ 0, 0, 0 ]
-  eulers: [ 0, 0, 0 ]
-  rotation: [ 0, 0, 0 ]
-  rotX: 0
-  rotY: 0
-  rotZ: 0
-  worldPosition: [ 0, 0, 0 ]
-  worldEulers: [ 0, 0, 0 ]
-  posRot: [ 0, 0, 0, 0, 0, 0 ]
-scripts:
-- text: |
-    var cam = this;
-    this.properties.attachNodeID.setter = function( value ) {
+  cameraType:
+    set: |
+      console.info( '  camera.cameraType.setter = function( ' +value+ ' )' );
+      switch ( value ) {
+        case 'perspective':
+        case 'orthographic':
+          this.cameraType = value;
+          break;
+      }
+    value: "perspective"
+  attachNodeID:
+    set: |
       console.info( '  camera.attachNodeID.setter = function( ' +value+ ' )' );
       switch ( value ) {
         case 'http-vwf-example-com-types-car-pick_up_truck02':
@@ -39,44 +66,11 @@ scripts:
           this.attachNodeID = value;
           break;
       }
-    }
-    this.properties.walkMode.setter = function( value ) {
-      console.info( '  camera.walkMode.setter = function( ' +value+ ' )' );
-      switch ( value ) {
-        case 'orbit':
-        case 'walk':
-          this.walkMode = value;
-          break;
-      }
-    }
-    this.properties.cameraType.setter = function( value ) {
-      console.info( '  camera.cameraType.setter = function( ' +value+ ' )' );
-      switch ( value ) {
-        case 'perspective':
-        case 'orthographic':
-          this.cameraType = value;
-          break;
-      }
-    }    
-    this.properties.far.setter = function( value ) { 
-      console.info( '  camera.far.setter = function( ' +value+ ' )' );
-      if ( value > 0 && value > this.near ) {
-        this.far = value;
-      }
-    }
-    this.properties.near.setter = function( value ) {
-      console.info( '  camera.near.setter = function( ' +value+ ' )' );
-      if ( value > 0 && value < this.far ) {
-        this.near = value;
-      }
-    }
-    this.properties.fovy.setter = function( value ) {
-      console.info( '  camera.fovy.setter = function( ' +value+ ' )' );
-      if ( value > 0 ) {
-        this.fovy = value;
-      }
-    }
-    this.properties.position.setter = function( value ) {
+    value: ""
+  attachOffset: [ 0, 0, 0 ]
+  speed: 2.0
+  position:
+    set: |
       if ( this.attachNodeID != '' ) {
         var newPos = [ 0, 0, 0 ];
         var offset = this.attachOffset;
@@ -89,10 +83,16 @@ scripts:
         vwf.setProperty( this.attachNodeID, 'position', newPos );
       }
       this.position = value;
-    }
-    this.properties.active.setter = function( value ) {
-      if ( value != this.active ) {
-        this.active = value;
-      }
-    }
+    value: [ 0, 0, 0 ]
+  eulers: [ 0, 0, 0 ]
+  rotation: [ 0, 0, 0 ]
+  rotX: 0
+  rotY: 0
+  rotZ: 0
+  worldPosition: [ 0, 0, 0 ]
+  worldEulers: [ 0, 0, 0 ]
+  posRot: [ 0, 0, 0, 0, 0, 0 ]
+scripts:
+- text: |
+    var cam = this;
   type: application/javascript

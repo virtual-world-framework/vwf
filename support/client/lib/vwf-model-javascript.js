@@ -79,6 +79,9 @@ node.id = nodeID; // TODO: move to a backstop model
         node.type = nodeType;
 
         node.properties = {};
+        node.getters = {};
+        node.setters = {};
+
         node.methods = {};
         node.events = {};
         node.children = [];
@@ -143,33 +146,47 @@ node.id = nodeID; // TODO: move to a backstop model
 
     // -- creatingProperty -------------------------------------------------------------------------
 
-    module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
+    module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
         vwf.logger.info( namespace + ".creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
 
-        var property = node.properties[propertyName] = {
-            getter: undefined,
-            setter: undefined,
-            value: undefined,
-            getting: false, // TODO: make private?
-            setting: false, // TODO: make private?
-            internal: propertyValue // TODO: make private?
-        };
-
-        Object.defineProperty( property, "value", {
-            get: function() { return vwf.getProperty( nodeID, propertyName ) }, // "this" is property's node
-            set: function( value ) { vwf.setProperty( nodeID, propertyName, value ) }
+        Object.defineProperty( node.properties, propertyName, {
+            get: function() { return vwf.getProperty( nodeID, propertyName ) }, // "this" is property's node  // TODO: or is it node.properties here?
+            set: function( value ) { vwf.setProperty( nodeID, propertyName, value ) },
+            enumerable: true
         } );
 
-        // TODO: if no conflict with other names on node
+        // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
 
         Object.defineProperty( node, propertyName, {
             get: function() { return vwf.getProperty( nodeID, propertyName ) }, // "this" is property's node
             set: function( value ) { vwf.setProperty( nodeID, propertyName, value ) },
             enumerable: true
         } );
+
+        if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
+            try {
+                node.getters[propertyName] = eval( getterScript( propertyGet ) );
+            } catch( e ) {
+                vwf.logger.warn( namespace + ".creatingProperty " + nodeID + " " +
+                    propertyName + " " + propertyValue + " exception evaluating getter: " + e );
+            }
+        } else if ( propertyValue !== undefined ) {
+            node.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
+        }
+        
+        if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
+            try {
+                node.setters[propertyName] = eval( setterScript( propertySet ) );
+            } catch( e ) {
+                vwf.logger.warn( namespace + ".creatingProperty " + nodeID + " " +
+                    propertyName + " " + propertyValue + " exception evaluating setter: " + e );
+            }
+        } else if ( propertyValue !== undefined ) {
+            node.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
+        }
 
     };
 
@@ -182,25 +199,23 @@ node.id = nodeID; // TODO: move to a backstop model
         vwf.logger.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
-        var value;
-		if ( node ) {
-			var property = node.properties[propertyName]; // TODO: search recursively through prototypes and copy on write.
 
-			if ( property.setter && !property.setting ) {
-				property.setting = true;
-				try { value = property.setter.call(node, propertyValue) || property.internal }
-				catch (e) {
-					vwf.logger.warn("WARNING: error( "+e.type +" ) setting property: "+ nodeID + " " + propertyName + " " + propertyValue); 
-				} 
-				property.setting = false;
-			} else {
-				value = property.internal = propertyValue;
-			}
-		} else {
-			vwf.logger.warn("WARNING: unable to find ID: " + nodeID + " while setting property: " + propertyName ); 
-		}
+        if ( ! node.properties.hasOwnProperty( propertyName ) ) {
+            vwf.createProperty( nodeID, propertyName, undefined );
+        }
 
-        return value;
+        var setter = findSetter( node, propertyName );
+
+        if ( setter && setter !== true ) {
+            try {
+                return setter.call( node, propertyValue );
+            } catch( e ) {
+                vwf.logger.warn( namespace + ".settingProperty " + nodeID + " " +
+                    propertyName + " " + propertyValue + " exception in setter: " + e );
+            }
+        }
+
+        return undefined;
     };
 
     // -- gettingProperty --------------------------------------------------------------------------
@@ -210,25 +225,18 @@ node.id = nodeID; // TODO: move to a backstop model
         vwf.logger.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
         var node = this.nodes[nodeID];
-		var value;
-		if ( node ) {
-			var property = node.properties[propertyName] || ( node.__proto__ && node.__proto__.properties[propertyName] ) || ( node.__proto__ && node.__proto__.__proto__ && node.__proto__.__proto__.properties[propertyName] ); // TODO: search recursively through prototypes.
+        var getter = findGetter( node, propertyName );
 
-			if ( property.getter && !property.getting ) {
-				property.getting = true;
-				try { value = property.getter.call(node) || property.internal }
-				catch (e) {
-					vwf.logger.warn("WARNING: error( " + e.type + " ) getting property: " + nodeID + " " + propertyName );
-				} 
-				property.getting = false;
-			} else {
-				value = property.internal;
-			}
-		} else {
-			vwf.logger.warn("WARNING: unable to find ID: " + nodeID + " while getting property: " + propertyName);
-		}
+        if ( getter && getter !== true ) {
+            try {
+                return getter.call( node );
+            } catch( e ) {
+                vwf.logger.warn( namespace + ".gettingProperty " + nodeID + " " +
+                    propertyName + " " + propertyValue + " exception in getter: " + e );
+            }
+        }
 
-        return value;
+        return undefined;
     };
 
     // TODO: creatingMethod, deletingMethod
@@ -256,20 +264,57 @@ node.id = nodeID; // TODO: move to a backstop model
 
         var node = this.nodes[nodeID];
         var value;
-		if ( node ) {
 
-			if ( scriptType == "application/javascript" ) { // TODO: or others
-        		try { value = (function (scriptText) { eval(scriptText) }).call(node, scriptText) }
-        		catch (e) {
-        			vwf.logger.error("Error( " + e.type + " ) evaling script: " + nodeID + " " + (scriptText || "").replace(/\s+/g, " ").substring(0, 100) + " " + scriptType);
-				} 
-			}
-        } else {
-        	vwf.logger.warn("WARNING: unable to find ID: " + nodeID + " while evaling script" );
+        if ( scriptType == "application/javascript" ) {
+            try {
+                value = ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
+            } catch( e ) {
+                vwf.logger.warn( namespace + ".executing " + nodeID + " " +
+                    ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType +
+                    " exception: " + e );
+            }
         }
 
         return value;
     };
+
+    // == Private functions ========================================================================
+
+    // -- getterScript -----------------------------------------------------------------------------
+
+    var getterScript = function( body ) {
+        return accessorScript( "( function() {", body, "} )" );
+    }
+
+    // -- setterScript -----------------------------------------------------------------------------
+
+    var setterScript = function( body ) {
+        return accessorScript( "( function( value ) {", body, "} )" );
+    }
+    
+    // -- accessorScript ---------------------------------------------------------------------------
+
+    var accessorScript = function( prefix, body, suffix ) {  // TODO: sanitize script, limit access
+        if ( body.charAt( body.length-1 ) == "\n" ) {
+            return prefix + "\n" + body.replace( /^./gm, "  $&" ) + suffix + "\n";
+        } else {
+            return prefix + " " + body + " " + suffix;
+        }
+    }
+
+    // -- findGetter -------------------------------------------------------------------------------
+
+    var findGetter = function( node, propertyName ) {
+        return node.getters && node.getters[propertyName] ||
+            Object.getPrototypeOf( node ) && findGetter( Object.getPrototypeOf( node ), propertyName );
+    }
+
+    // -- findSetter -------------------------------------------------------------------------------
+
+    var findSetter = function( node, propertyName ) {
+        return node.setters && node.setters[propertyName] ||
+            Object.getPrototypeOf( node ) && findSetter( Object.getPrototypeOf( node ), propertyName );
+    }
 
 
 

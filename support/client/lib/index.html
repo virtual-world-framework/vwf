@@ -45,6 +45,8 @@
     <script type="text/javascript" src="vwf-model-unity.js"></script>
     <script type="text/javascript" src="vwf-model-unity/UnityObject.js"></script>
 
+    <script type="text/javascript" src="vwf-model-object.js"></script>
+
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
 
@@ -86,6 +88,7 @@
             {
                 javascript: [],         // invokes: new vwf.modules.javascript( vwf )
                 unity: "#vwf-root",     // invokes: new vwf.modules.unity( vwf, "#vwf-root" )  // TODO: resolve after ready()
+                object: [],             // invokes: new vwf.modules.object( vwf )
             },
 
             // These are the view configurations. They use the same format as the model
@@ -168,10 +171,6 @@
 
     </form -->
 
-    <!-- The "html" view has been configured to render to "#vwf-listing".                        -->
-
-    <div id="vwf-listing"></div>
-    
   </body>
 
 </html>
