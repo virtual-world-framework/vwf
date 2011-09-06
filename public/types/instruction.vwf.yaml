@@ -1,12 +1,30 @@
 ﻿--- 
 extends: http://vwf.example.com/types/node
 properties: 
-  success: false
+  success:
+    set: |
+      this.success = value;
+    value: false
   instructionText: ""
-  actionText: ""
-  active: false
-  cameraPosition: ""
-  number: 0
+    set: |
+      this.instructionText = value;
+    value: ""
+  actionText:
+    set: |
+      this.actionText = value;
+    value: ""
+  active:
+    set: |
+      this.active = value;
+    value: false
+  cameraPosition:
+    set: |
+      this.cameraPosition = value;
+    value: ""
+  number:
+    set: |
+      this.number = value;
+    value: 0
 scripts:
 - text: |
     this.onEntry = function() {

@@ -1,8 +1,14 @@
 ﻿--- 
 extends: http://vwf.example.com/types/instruction
 properties: 
-  activeInstruction: false
+  activeInstruction:
+    - set: |
+      this.activeInstruction = value;
+    value: false
   instructionIndex: 0
+    - set: |
+      this.instructionIndex = value;
+    value: 0
 scripts:
 - text: |
     this.onEntry = function() {
