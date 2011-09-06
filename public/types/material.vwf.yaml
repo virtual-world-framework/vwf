@@ -1,11 +1,35 @@
 ﻿--- 
 extends: http://vwf.example.com/types/node
 properties:
-  texture: ""
-  color: [ 255, 255, 255, 255 ]
-  specColor: [ 255, 255, 255 ]
-  reflect: 0.8
-  shine: 10
-  specular: 1
-  emit: 0
-  alpha: 1
+  texture:
+    set: |
+      this.texture = value;
+    value: ""
+  color: 
+    set: |
+      this.color = value;
+    value: [ 255, 255, 255, 255 ]
+  specColor:
+    set: |
+      this.specColor = value;
+    value: [ 255, 255, 255, 255 ]
+  reflect:
+    set: |
+      this.reflect = value;
+    value: 0.8
+  shine:
+    set: |
+      this.shine = value;
+    value: 10
+  specular:
+    set: |
+      this.specular = value;
+    value: 1
+  emit:
+    set: |
+      this.emit = value;
+    value: 0
+  alpha:
+    set: |
+      this.alpha = value;
+    value: 1 

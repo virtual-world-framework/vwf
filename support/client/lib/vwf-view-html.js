@@ -161,15 +161,15 @@
                         "<span class='vwf-value'>" + propValue + "</span>" +
                     "</p>" +
                     "<p class='vwf-label'>roll: " +
-                        "<span class='vwf-roll-value' id='" + nodeID + "-roll-value-text'>" + values[0] + "</span>" +
+                        "<span class='vwf-roll-value' id='"+nodeID+"-"+propertyName+"-roll-value-text'>" + values[0] + "</span>" +
                         "<span class='vwf-control-roll-slider' id='slider-roll'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>pitch: " +
-                        "<span class='vwf-pitch-value' id='" + nodeID + "-pitch-value-text'>" + values[1] + "</span>" +
+                        "<span class='vwf-pitch-value' id='"+nodeID+"-"+propertyName+"-pitch-value-text'>" + values[1] + "</span>" +
                         "<span class='vwf-control-pitch-slider' id='slider-pitch'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>yaw: " +
-                        "<span class='vwf-yaw-value' id='" + nodeID + "-yaw-value-text'>" + values[2] + "</span>" +
+                        "<span class='vwf-yaw-value' id='"+nodeID+"-"+propertyName+"-yaw-value-text'>" + values[2] + "</span>" +
                         "<span class='vwf-control-yaw-slider' id='slider-yaw'></span>" +
                     "</p>" +
                 "</div>"
@@ -191,15 +191,15 @@
                         "<span class='vwf-value'>" + propValue + "</span>" +
                     "</p>" +
                     "<p class='vwf-label'>x: " +
-                        "<span class='vwf-x-value' id='" + nodeID + "-x-value-text'>" + values[0] + "</span>" +
+                        "<span class='vwf-x-value' id='"+nodeID+"-"+propertyName+"-x-value-text'>" + values[0] + "</span>" +
                         "<span class='vwf-control-x-slider' id='slider-x'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>y: " +
-                        "<span class='vwf-y-value' id='" + nodeID + "-y-value-text'>" + values[1] + "</span>" +
+                        "<span class='vwf-y-value' id='"+nodeID+"-"+propertyName+"-y-value-text'>" + values[1] + "</span>" +
                         "<span class='vwf-control-y-slider' id='slider-y'></span>" +
                     "</p>" +
                     "<p class='vwf-label'>z: " +
-                        "<span class='vwf-z-value' id='" + nodeID + "-z-value-text'>" + values[2] + "</span>" +
+                        "<span class='vwf-z-value' id='"+nodeID+"-"+propertyName+"-z-value-text'>" + values[2] + "</span>" +
                         "<span class='vwf-control-z-slider' id='slider-z'></span>" +
                     "</p>" +
                 "</div>"
@@ -222,15 +222,15 @@
                             "<span class='vwf-value'>" + propValue + "</span>" +
                         "</p>" +
                         "<p class='vwf-label'>r: " +
-                            "<span class='vwf-r-value' id='" + nodeID + "-r-value-text'>" + values[0] + "</span>" +
+                            "<span class='vwf-r-value' id='" + nodeID+"-"+propertyName+"-r-value-text'>" + values[0] + "</span>" +
                             "<span class='vwf-control-r-slider' id='slider-r'></span>" +
                         "</p>" +
                         "<p class='vwf-label'>g: " +
-                            "<span class='vwf-g-value' id='" + nodeID + "-g-value-text'>" + values[1] + "</span>" +
+                            "<span class='vwf-g-value' id='" + nodeID+"-"+propertyName+"-g-value-text'>" + values[1] + "</span>" +
                             "<span class='vwf-control-g-slider' id='slider-g'></span>" +
                         "</p>" +
                         "<p class='vwf-label'>b: " +
-                            "<span class='vwf-b-value' id='" + nodeID + "-b-value-text'>" + values[2] + "</span>" +
+                            "<span class='vwf-b-value' id='" + nodeID+"-"+propertyName+"-b-value-text'>" + values[2] + "</span>" +
                             "<span class='vwf-control-b-slider' id='slider-b'></span>" +
                         "</p>" +
                     "</div>"
@@ -243,19 +243,19 @@
                             "<span class='vwf-value'>" + propValue + "</span>" +
                         "</p>" +
                         "<p class='vwf-label'>r: " +
-                            "<span class='vwf-r-value' id='" + nodeID + "-r-value-text'>" + values[0] + "</span>" +
+                            "<span class='vwf-r-value' id='" + nodeID+"-"+propertyName+"-r-value-text'>" + values[0] + "</span>" +
                             "<span class='vwf-control-r-slider' id='slider-r'></span>" +
                         "</p>" +
                         "<p class='vwf-label'>g: " +
-                            "<span class='vwf-g-value' id='" + nodeID + "-g-value-text'>" + values[1] + "</span>" +
+                            "<span class='vwf-g-value' id='" + nodeID+"-"+propertyName+"-g-value-text'>" + values[1] + "</span>" +
                             "<span class='vwf-control-g-slider' id='slider-g'></span>" +
                         "</p>" +
                         "<p class='vwf-label'>b: " +
-                            "<span class='vwf-b-value' id='" + nodeID + "-b-value-text'>" + values[2] + "</span>" +
+                            "<span class='vwf-b-value' id='" + nodeID+"-"+propertyName+"-b-value-text'>" + values[2] + "</span>" +
                             "<span class='vwf-control-b-slider' id='slider-b'></span>" +
                         "</p>" +
                         "<p class='vwf-label'>a: " +
-                            "<span class='vwf-a-value' id='" + nodeID + "-a-value-text'>" + values[3] + "</span>" +
+                            "<span class='vwf-a-value' id='" + nodeID+"-"+propertyName+"-a-value-text'>" + values[3] + "</span>" +
                             "<span class='vwf-control-a-slider' id='slider-a'></span>" +
                         "</p>" +
                     "</div>"
@@ -345,8 +345,8 @@
                 min: 0,
                 max: 360,
                 slide: function (event, ui) {
-                    var pitch = $("#" + nodeID + "-pitch-value-text").text();
-                    var yaw = $("#" + nodeID + "-yaw-value-text").text();
+                    var pitch = $("#"+nodeID+"-"+propertyName+"-pitch-value-text").text();
+                    var yaw = $("#"+nodeID+"-"+propertyName+"-yaw-value-text").text();
                     view.setProperty(nodeID, propertyName, [Number(ui.value), Number(pitch), Number(yaw)]);
                 }
             });
@@ -356,8 +356,8 @@
                 min: 0,
                 max: 360,
                 slide: function (event, ui) {
-                    var roll = $("#" + nodeID + "-roll-value-text").text();
-                    var yaw = $("#" + nodeID + "-yaw-value-text").text();
+                    var roll = $("#"+nodeID+"-"+propertyName+"-roll-value-text").text();
+                    var yaw = $("#"+nodeID+"-"+propertyName+"-yaw-value-text").text();
                     view.setProperty(nodeID, propertyName, [Number(roll), Number(ui.value), Number(yaw)]);
                 }
             });
@@ -367,13 +367,52 @@
                 min: 0,
                 max: 360,
                 slide: function (event, ui) {
-                    var roll = $("#" + nodeID + "-roll-value-text").text();
-                    var pitch = $("#" + nodeID + "-pitch-value-text").text();
+                    var roll = $("#"+nodeID+"-"+propertyName+"-roll-value-text").text();
+                    var pitch = $("#"+nodeID+"-"+propertyName+"-pitch-value-text").text();
                     view.setProperty(nodeID, propertyName, [Number(roll), Number(pitch), Number(ui.value)]);
                 }
             });
 
-        } else if (propertyName == "position" || propertyName == "rotation" || propertyName == "worldPosition" || propertyName == "scale") {
+        } else if ( propertyName == "scale") {
+
+            propertyQuery.find(".vwf-control-x-slider").slider({
+                range: "min",
+                value: 1,
+                min: 0.1,
+                max: 20,
+                step: 0.1,
+                slide: function (event, ui) {
+                    var y = $("#"+nodeID+"-"+propertyName+"-y-value-text").text();
+                    var z = $("#"+nodeID+"-"+propertyName+"-z-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(ui.value), Number(y), Number(z)]);
+                }
+            });
+            propertyQuery.find(".vwf-control-y-slider").slider({
+                range: "min",
+                value: 1,
+                min: 0.1,
+                max: 20,
+				step: 0.1,
+                slide: function (event, ui) {
+                    var x = $("#"+nodeID+"-"+propertyName+"-x-value-text").text();
+                    var z = $("#"+nodeID+"-"+propertyName+"-z-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(x), Number(ui.value), Number(z)]);
+                }
+            });
+            propertyQuery.find(".vwf-control-z-slider").slider({
+                range: "min",
+                value: 1,
+                min: 0.1,
+                max: 20,
+				step: 0.1,
+                slide: function (event, ui) {
+                    var x = $("#"+nodeID+"-"+propertyName+"-x-value-text").text();
+                    var y = $("#"+nodeID+"-"+propertyName+"-y-value-text").text();
+                    view.setProperty(nodeID, propertyName, [Number(x), Number(y), Number(ui.value)]);
+                }
+            });
+
+        } else if (propertyName == "position" || propertyName == "rotation" || propertyName == "worldPosition" ) {
 
             propertyQuery.find(".vwf-control-x-slider").slider({
                 range: "min",
@@ -381,8 +420,8 @@
                 min: -200,
                 max: 200,
                 slide: function (event, ui) {
-                    var y = $("#" + nodeID + "-y-value-text").text();
-                    var z = $("#" + nodeID + "-z-value-text").text();
+                    var y = $("#"+nodeID+"-"+propertyName+"-y-value-text").text();
+                    var z = $("#"+nodeID+"-"+propertyName + "-z-value-text").text();
                     view.setProperty(nodeID, propertyName, [Number(ui.value), Number(y), Number(z)]);
                 }
             });
@@ -392,8 +431,8 @@
                 min: -200,
                 max: 200,
                 slide: function (event, ui) {
-                    var x = $("#" + nodeID + "-x-value-text").text();
-                    var z = $("#" + nodeID + "-z-value-text").text();
+                    var x = $("#"+nodeID+"-"+propertyName+"-x-value-text").text();
+                    var z = $("#"+nodeID+"-"+propertyName+"-z-value-text").text();
                     view.setProperty(nodeID, propertyName, [Number(x), Number(ui.value), Number(z)]);
                 }
             });
@@ -403,8 +442,8 @@
                 min: -200,
                 max: 200,
                 slide: function (event, ui) {
-                    var x = $("#" + nodeID + "-x-value-text").text();
-                    var y = $("#" + nodeID + "-y-value-text").text();
+                    var x = $("#"+nodeID+"-"+propertyName+"-x-value-text").text();
+                    var y = $("#"+nodeID+"-"+propertyName+"-y-value-text").text();
                     view.setProperty(nodeID, propertyName, [Number(x), Number(y), Number(ui.value)]);
                 }
             });
@@ -419,9 +458,9 @@
                     min: 0,
                     max: 255,
                     slide: function (event, ui) {
-                        var g = $("#" + nodeID + "-g-value-text").text();
-                        var b = $("#" + nodeID + "-b-value-text").text();
-                        var a = $("#" + nodeID + "-a-value-text").text();
+                        var g = $("#"+nodeID+"-"+propertyName+"-g-value-text").text();
+                        var b = $("#"+nodeID+"-"+propertyName+"-b-value-text").text();
+                        var a = $("#"+nodeID+"-"+propertyName+"-a-value-text").text();
                         view.setProperty(nodeID, propertyName, [Number(ui.value), Number(g), Number(b), Number(a)]);
                     }
                 });
@@ -431,9 +470,9 @@
                     min: 0,
                     max: 255,
                     slide: function (event, ui) {
-                        var r = $("#" + nodeID + "-r-value-text").text();
-                        var b = $("#" + nodeID + "-b-value-text").text();
-                        var a = $("#" + nodeID + "-a-value-text").text();
+                        var r = $("#"+nodeID+"-"+propertyName+"-r-value-text").text();
+                        var b = $("#"+nodeID+"-"+propertyName+"-b-value-text").text();
+                        var a = $("#"+nodeID+"-"+propertyName+"-a-value-text").text();
                         view.setProperty(nodeID, propertyName, [Number(r), Number(ui.value), Number(b), Number(a)]);
                     }
                 });
@@ -443,9 +482,9 @@
                     min: 0,
                     max: 255,
                     slide: function (event, ui) {
-                        var r = $("#" + nodeID + "-r-value-text").text();
-                        var g = $("#" + nodeID + "-g-value-text").text();
-                        var a = $("#" + nodeID + "-a-value-text").text();
+                        var r = $("#"+nodeID+"-"+propertyName+"-r-value-text").text();
+                        var g = $("#"+nodeID+"-"+propertyName+"-g-value-text").text();
+                        var a = $("#"+nodeID+"-"+propertyName+"-a-value-text").text();
                         view.setProperty(nodeID, propertyName, [Number(r), Number(g), Number(ui.value), Number(a)]);
                     }
                 });
@@ -456,9 +495,9 @@
                     min: 0,
                     max: 255,
                     slide: function (event, ui) {
-                        var r = $("#" + nodeID + "-r-value-text").text();
-                        var g = $("#" + nodeID + "-g-value-text").text();
-                        var b = $("#" + nodeID + "-b-value-text").text();
+                        var r = $("#"+nodeID+"-"+propertyName+"-r-value-text").text();
+                        var g = $("#"+nodeID+"-"+propertyName+"-g-value-text").text();
+                        var b = $("#"+nodeID+"-"+propertyName+"-b-value-text").text();
                         view.setProperty(nodeID, propertyName, [Number(r), Number(g), Number(b), Number(ui.value)]);
                     }
                 });
@@ -470,8 +509,8 @@
                     min: 0,
                     max: 255,
                     slide: function (event, ui) {
-                        var g = $("#" + nodeID + "-g-value-text").text();
-                        var b = $("#" + nodeID + "-b-value-text").text();
+                        var g = $("#"+nodeID+"-"+propertyName+"-g-value-text").text();
+                        var b = $("#"+nodeID+"-"+propertyName+"-b-value-text").text();
                         view.setProperty(nodeID, propertyName, [Number(ui.value), Number(g), Number(b)]);
                     }
                 });
@@ -481,8 +520,8 @@
                     min: 0,
                     max: 255,
                     slide: function (event, ui) {
-                        var r = $("#" + nodeID + "-r-value-text").text();
-                        var b = $("#" + nodeID + "-b-value-text").text();
+                        var r = $("#"+nodeID+"-"+propertyName+"-r-value-text").text();
+                        var b = $("#"+nodeID+"-"+propertyName+"-b-value-text").text();
                         view.setProperty(nodeID, propertyName, [Number(r), Number(ui.value), Number(b)]);
                     }
                 });
@@ -492,8 +531,8 @@
                     min: 0,
                     max: 255,
                     slide: function (event, ui) {
-                        var r = $("#" + nodeID + "-r-value-text").text();
-                        var g = $("#" + nodeID + "-g-value-text").text();
+                        var r = $("#"+nodeID+"-"+propertyName+"-r-value-text").text();
+                        var g = $("#"+nodeID+"-"+propertyName+"-g-value-text").text();
                         view.setProperty(nodeID, propertyName, [Number(r), Number(g), Number(ui.value)]);
                     }
                 });

@@ -1,33 +1,32 @@
 --- 
 extends: http://vwf.example.com/types/node3
 properties:
-  attachedToCamera: false 
-  position: [ 0, 0, 0 ]
-  eulers: [ 0, 0, 0 ]
-scripts:
-  - text: |
-      var car = this;
-      this.properties.attachedToCamera.setter = function( value ) {
-        console.info( ' Car.attachedToCamera.setter = ' + value );
-        console.info( '  STARTING ' );
-        if ( vwf ) {
-          console.info( ' using vwf' );
-          if ( value ) {
-            vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', 'http-vwf-example-com-types-car-pick_up_truck02' );
-          } else {
-            vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', '' );
+  attachedToCamera: 
+    set: |
+        this.properties.attachedToCamera.setter = function( value ) {
+          if ( vwf ) {
+            if ( value ) {
+              vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', 'http-vwf-example-com-types-car-pick_up_truck02' );
+            } else {
+              vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', '' );
+            }
           }
+          this.attachedToCamera = value;
         }
-        console.info( '   setting property' );
-        car.attachedToCamera = value;
-        console.info( '   DONE setting property' );
-      }
-      this.properties.position.setter = function( value ) {
-        console.info( '============  Car.position = ' + value );
-        this.position = value;
-      }
-      this.pointerClick = function() {
-        this.attachedToCamera = !this.attachedToCamera;
-        console.info( '      this.attachedToCamera = ' + this.attachedToCamera );
-      }
-    type: application/javascript
+    value: false 
+  position: 
+    set: |
+      this.position = value;
+    value: [ 0, 0, 0 ]
+  eulers:
+    set: |
+      this.eulers = value;
+    value: [ 0, 0, 0 ]
+scripts:
+- text: |
+    var car = this;
+    this.pointerClick = function() {
+      this.attachedToCamera = !this.attachedToCamera;
+      console.info( '      this.attachedToCamera = ' + this.attachedToCamera );
+    }	
+  type: application/javascript
