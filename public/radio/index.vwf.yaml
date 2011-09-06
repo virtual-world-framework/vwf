@@ -1,31 +1,247 @@
 --- 
 extends: http://vwf.example.com/types/glge
 source: radio.xml
+type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "mainCamera"
-type: model/x-glge
 children: 
   radio.dae: 
     extends: http://vwf.example.com/types/node3
     properties:
       position: [ 0, 4, 0 ]
       eulers: [ 338, 0, 211 ]
-      powerOn: false
-      volume: 0
+      powerOn:
+        set: |
+          this.powerOn = value;
+          if ( value ) {
+            this.menuMode = "channel";
+          } else { 
+            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD.png";
+          } 
+        value: false
+      volume:
+        set: |
+          if ( value >= 0 ){
+            if ( this.volume == 0 && value != 0 ) {
+              this.powerOn = true;
+            } else if ( this.volume != 0 && value == 0 ) {
+              this.powerOn = false;
+            }
+            this.volume = value;
+          }
+        value: 0
       speak: "up"
-      channel: 1
+      channel:
+        set: |
+          if ( !this.powerOn ) return;
+          switch( value ) {
+            case 1:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan1_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 2:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan2_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 3:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan3_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 4:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan4_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 5:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan5_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 6:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan6_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 7:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan7_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 8:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan8_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 9:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan9_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 10:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan10_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 11:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan11_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 12:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan12_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 13:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan13_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 14:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan14_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 15:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan15_Gon_Von.png";
+              this.channel = value;
+              break;
+            case 16:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan16_Gon_Von.png";
+              this.channel = value;
+              break;
+          }
+        value: 1
       headphones: false
-      anteanna: true
+      anteanna:
+        set: |
+          if ( value ) {
+            this.bone1.MaxScene.Radio.playing = !value;
+          } else {
+            console.info( "replace the anteanna" );
+          }
+          this.anteanna = value;
+        value: true
       battery: true
       batteryCover: true 
       beltClip: true
-      menuMode: "none"
-      backLightMode: "auto"
-      beepOn: true
-      squelch: 20
-      encryptionOn: false
-      transmitPower: 4
+      menuMode:
+        set: |
+          if ( !this.powerOn ) return;
+          switch( value ) {
+            case "channel":
+              this.channel = this.channel;
+              this.menuMode = value;
+              break;
+            case "backLight":
+              this.backLightMode = this.backLightMode;
+              this.menuMode = value;
+              break;
+            case "squelch":
+              this.squelch = this.squelch;
+              this.menuMode = value;
+              break;
+            case "beep":
+              this.beepOn = this.beepOn;
+              this.menuMode = value;
+              break;
+          }
+        value: "none"
+      backLightMode:
+        set: |
+          if ( !this.powerOn ) return;
+          switch(value) {
+            case "auto":
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_AUTO_Gon_Von.png";
+              this.backLightMode = value;
+              break;
+            case "off":
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_OFF_Gon_Von.png";
+              this.backLightMode = value;
+              break;
+            case "on":
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_ON_Gon_Von.png";
+              this.backLightMode = value;
+              break;
+          }
+        value: "auto"
+      beepOn:
+        set: |
+          if ( !this.powerOn ) return;
+          if ( value ) {
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_BEEP_ON_Gon_Von.png";
+              this.beepOn = value;
+          } else {
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_BEEP_OFF_Gon_Von.png";
+              this.beepOn = value;
+          }
+        value: true
+      squelch:
+        set: |
+          if ( !this.powerOn ) return;
+          switch(value) {
+            case 20:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL20_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 30:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL30_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 40:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL40_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 50:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL50_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 60:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL60_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 70:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL70_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 80:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL80_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 90:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL90_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 100:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL100_Gon_Von.png";
+              this.squelch = value;
+              break;
+            case 110:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL110_Gon_Von.png";
+              this.squelch = value;
+              break;
+          }
+        value: 20
+      encryptionOn:
+        set: |
+          if ( !this.powerOn ) return;
+          if ( value ) {
+            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD7_Scrambler_Gon_Von.png";
+              this.encryptionOn = value;
+          } else { 
+            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD7_Scrambler_Gon_Voff.png";
+              this.encryptionOn = value;
+          } 
+          this.encryptionOn = value;
+        value: false
+      transmitPower:
+        set: |
+          if ( !this.powerOn ) return;
+          switch ( value ){
+            case 4:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Blank_Gon_Voff.png";
+              this.transmitPower = value;
+              break;
+            case 2:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Low2_Gon_Von.png";
+              this.transmitPower = value;
+              break;
+            case 1:
+              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Low1_Gon_Von.png";
+              this.transmitPower = value;
+              break;
+          }
+        value: 4
       keysLocked: false
     scripts: 
     - text: |
@@ -123,222 +339,6 @@ children:
         }
         this.ptt = function() {
           if ( radio.keysLocked ) return;
-        }
-        this.properties.powerOn.setter = function( value ) {
-          this.powerOn = value;
-          if ( value ) {
-            this.menuMode = "channel";
-          } else { 
-            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD.png";
-          } 
-        }
-        this.properties.volume.setter = function( value ) {
-          if ( value >= 0 ){
-            if ( this.volume == 0 && value != 0 ) {
-              this.powerOn = true;
-            } else if ( this.volume != 0 && value == 0 ) {
-              this.powerOn = false;
-            }
-            this.volume = value;
-          }
-        }
-        this.properties.anteanna.setter = function( value ) {
-          if ( value ) {
-            this.bone1.MaxScene.Radio.playing = !value;
-          } else {
-            console.info( "replace the anteanna" );
-          }
-          this.anteanna = value;
-        }
-        this.properties.menuMode.setter = function( value ) {
-          if ( !this.powerOn ) return;
-          switch( value ) {
-            case "channel":
-              this.channel = this.channel;
-              this.menuMode = value;
-              break;
-            case "backLight":
-              this.backLightMode = this.backLightMode;
-              this.menuMode = value;
-              break;
-            case "squelch":
-              this.squelch = this.squelch;
-              this.menuMode = value;
-              break;
-            case "beep":
-              this.beepOn = this.beepOn;
-              this.menuMode = value;
-              break;
-          }
-        }
-        this.properties.backLightMode.setter = function( value ) {
-          if ( !this.powerOn ) return;
-          switch(value) {
-            case "auto":
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_AUTO_Gon_Von.png";
-              this.backLightMode = value;
-              break;
-            case "off":
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_OFF_Gon_Von.png";
-              this.backLightMode = value;
-              break;
-            case "on":
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_LIGT_ON_Gon_Von.png";
-              this.backLightMode = value;
-              break;
-          }
-        }
-        this.properties.beepOn.setter = function( value ) {
-          if ( !this.powerOn ) return;
-          if ( value ) {
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_BEEP_ON_Gon_Von.png";
-              this.beepOn = value;
-          } else {
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_BEEP_OFF_Gon_Von.png";
-              this.beepOn = value;
-          }
-        }
-        this.properties.squelch.setter = function( value ) {
-          if ( !this.powerOn ) return;
-          switch(value) {
-            case 20:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL20_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 30:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL30_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 40:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL40_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 50:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL50_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 60:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL60_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 70:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL70_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 80:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL80_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 90:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL90_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 100:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL100_Gon_Von.png";
-              this.squelch = value;
-              break;
-            case 110:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_SQL110_Gon_Von.png";
-              this.squelch = value;
-              break;
-          }
-        }
-        this.properties.channel.setter = function( value ) {
-          if ( !this.powerOn ) return;
-          switch( value ) {
-            case 1:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan1_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 2:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan2_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 3:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan3_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 4:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan4_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 5:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan5_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 6:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan6_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 7:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan7_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 8:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan8_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 9:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan9_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 10:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan10_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 11:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan11_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 12:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan12_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 13:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan13_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 14:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan14_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 15:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan15_Gon_Von.png";
-              this.channel = value;
-              break;
-            case 16:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Chan16_Gon_Von.png";
-              this.channel = value;
-              break;
-          }
-        }
-        this.properties.encryptionOn.setter = function( value ) {
-          if ( !this.powerOn ) return;
-          if ( value ) {
-            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD7_Scrambler_Gon_Von.png";
-              this.encryptionOn = value;
-          } else { 
-            this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD7_Scrambler_Gon_Voff.png";
-              this.encryptionOn = value;
-          } 
-          this.encryptionOn = value;
-        }
-        this.properties.transmitPower.setter = function( value ) {
-          if ( !this.powerOn ) return;
-          switch ( value ){
-            case 4:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Blank_Gon_Voff.png";
-              this.transmitPower = value;
-              break;
-            case 2:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Low2_Gon_Von.png";
-              this.transmitPower = value;
-              break;
-            case 1:
-              this.bone1.MaxScene.Radio.LCD.LCDMaterial1.texture = "images/LCD12_Low1_Gon_Von.png";
-              this.transmitPower = value;
-              break;
-          }
         }
       type: application/javascript
     children:

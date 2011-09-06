@@ -1,24 +1,8 @@
 --- 
 extends: http://vwf.example.com/types/node3
 properties: 
-  lightType: "point"
-  constantAttenuation: 1
-  linearAttenuation: 0.002
-  quadraticAttenuation: 0.0008
-  spotCosCutOff: 0.95
-  spotExponent: 10
-  diffuse: true 
-  specular: true
-  samples: 0
-  softness: 0.01
-  bufferHeight: 256
-  bufferWidth: 256
-  shadowBias: 2.0
-  distance: 100.0
-  castShadows: false
-scripts:
-- text: |
-    this.properties.lightType.setter = function( value ) {
+  lightType:
+    set: |
       switch( value ) {
         case "point":
         case "directional":
@@ -26,19 +10,60 @@ scripts:
           this.lightType = value;
           break;
       }
-    }
-    this.properties.constantAttenuation.setter = function( value ) { this.constantAttenuation = value; }
-    this.properties.linearAttenuation.setter = function( value ) { this.linearAttenuation = value; }
-    this.properties.quadraticAttenuation.setter = function( value ) { this.quadraticAttenuation = value; }
-    this.properties.spotCosCutOff.setter = function( value ) { this.spotCosCutOff = value; }
-    this.properties.spotExponent.setter = function( value ) { this.spotExponent = value; }
-    this.properties.diffuse.setter = function( value ) { this.diffuse = value; }
-    this.properties.specular.setter = function( value ) { this.specular = value; }
-    this.properties.samples.setter = function( value ) { this.samples = value; }
-    this.properties.softness.setter = function( value ) { this.softness = value; }
-    this.properties.bufferHeight.setter = function( value ) { this.bufferHeight = value; }
-    this.properties.bufferWidth.setter = function( value ) { this.bufferWidth = value; }
-    this.properties.shadowBias.setter = function( value ) { this.shadowBias = value; }
-    this.properties.distance.setter = function( value ) { this.distance = value; }
-    this.properties.castShadows.setter = function( value ) { this.castShadows = value; }
-  type: application/javascript
+    value: "point"
+  constantAttenuation:
+    set: |
+      this.constantAttenuation = value;
+    value: 1
+  linearAttenuation:
+    set: |
+      this.linearAttenuation = value;
+    value: 0.002
+  quadraticAttenuation:
+    set: |
+      this.quadraticAttenuation = value;
+    value: 0.0008
+  spotCosCutOff:
+    set: |
+      this.spotCosCutOff = value;
+    value: 0.95
+  spotExponent:
+    set: |
+      this.spotExponent = value;
+    value: 10
+  diffuse:
+    set: |
+      this.diffuse = value;
+    value: true 
+  specular:
+    set: |
+      this.specular = value;
+    value: true
+  samples:
+    set: |
+      this.samples = value;
+    value: 0
+  softness:
+    set: |
+      this.softness = value;
+    value: 0.01
+  bufferHeight:
+    set: |
+      this.bufferHeight = value;
+    value: 256
+  bufferWidth:
+    set: |
+      this.bufferWidth = value;
+    value: 256
+  shadowBias:
+    set: |
+      this.shadowBias = value;
+    value: 2.0
+  distance:
+    set: |
+      this.distance = value;
+    value: 100.0
+  castShadows:
+    set: |
+      this.castShadows = value;
+    value: false

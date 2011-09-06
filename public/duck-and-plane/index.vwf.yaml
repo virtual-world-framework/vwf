@@ -1,38 +1,37 @@
 --- 
 extends: http://vwf.example.com/types/glge
 source: level.xml
+type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "mainCamera"
-type: model/x-glge
-children: 
-  seymourplane_triangulate.dae: 
+children:
+  seymourplane_triangulate.dae:
     extends: http://vwf.example.com/types/node3
-    properties: 
+    properties:
       angle: 0
-    children: 
-      bone1: 
+    children:
+      bone1:
         extends: http://vwf.example.com/types/node3
-        children: 
-          untitled: 
+        children:
+          untitled:
             extends: http://vwf.example.com/types/node3
-      prop: 
+      prop:
         extends: http://vwf.example.com/types/node3
-  maincamera: 
+  maincamera:
     extends: http://vwf.example.com/types/camera
-  wallobject: 
+  wallobject:
     extends: http://vwf.example.com/types/node3
-  duck.dae: 
+  duck.dae:
     extends: http://vwf.example.com/types/node3
-    properties: 
-      angle: 0
-      playing: false
-    scripts: 
-    - text: |
-        this.properties.angle.setter = function( value ) {
+    properties:
+      angle:
+        set:
+          this.angle = value;
           this.parent['seymourplane_triangulate.dae'].angle = value + 1;
-        }
-      type: application/javascript
+        value: 0
+      playing: false
+    scripts:
     - text: |
         this.pointerClick = function() {
           this.playing = !this.playing

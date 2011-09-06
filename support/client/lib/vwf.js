@@ -73,9 +73,6 @@
 
         var vwf = this;
 
-//		this.classScripts = {};
-
-
         // == Public functions =====================================================================
 
         // -- initialize ---------------------------------------------------------------------------
@@ -432,9 +429,9 @@
 
             var component = normalizedComponent( component_uri_or_json_or_object );
 
-            // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; wishfulComponentHash() is a gross hack.
+            // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
 
-            var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName; // TODO: was wishfulComponentHash( component );
+            var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
 nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
 
             this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + nodeID );
@@ -448,14 +445,14 @@ if ( ! callback ) { // TODO: this is a hack to get the multiuser application cre
     };
 }
 
-			this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
-				construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
-			} );
-
+// nodeID = nodeID + "-" + Date.now();  // TODO: hack on a hack to allow (single-user mode) client tests to work
+    
+            this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
+                construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
+            } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + component_uri_or_json_or_object ); /* must log something for group level to reset in WebKit */
         };
-
 
         // -- getType ------------------------------------------------------------------------------
 
@@ -470,10 +467,15 @@ if ( ! callback ) { // TODO: this is a hack to get the multiuser application cre
             var nodeID = uri; // TODO: hash uri => nodeID to shorten for faster lookups? // TODO: canonicalize uri
 nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
 
+if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be used in place of an extends uri; this is primarily to support the tests, but should be eventually be fully supported.
+    nodeID = JSON.parse( uri.slice( 1 ) );
+    types[nodeID] = "dummy";
+}
+
             // If the URI is in the database, invoke the callback with the ID of the previously-
             // loaded prototype node.
             
-            if ( types[uri] ) {
+            if ( types[nodeID] ) {
 
                 callback && callback.call( this, nodeID );
 
@@ -495,7 +497,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
                 this.logger.info( "vwf.getType: creating type " + uri );
 
                 construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
-                    types[uri] = component;
+                    types[nodeID] = component;
                     callback && callback.call( this, nodeID );
                 } );
 
@@ -512,9 +514,9 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
                     dataType: "jsonp",
                     success: function( component ) {
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
-                            if ( ! types[uri] ) {
+                            if ( ! types[nodeID] ) {
                                 construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
-                                    types[uri] = component;
+                                    types[nodeID] = component;
                                     callback && callback.call( this, nodeID );
                                 } );
                             } else { // TODO: handle multiple loads of same type better
@@ -538,14 +540,14 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             // Call addingChild() on each model. The child is considered added after each model has
             // run.
 
-            jQuery.each( vwf.models, function( index, model ) {
+            vwf.models.forEach( function( model ) {
                 model.addingChild && model.addingChild( nodeID, childID, childName );
             } );
 
             // Call addedChild() on each view. The view is being notified that a child has been
             // added.
 
-            jQuery.each( vwf.views, function( index, view ) {
+            vwf.views.forEach( function( view ) {
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
@@ -561,14 +563,14 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             // Call removingChild() on each model. The child is considered removed after each model
             // has run.
 
-            jQuery.each( vwf.models, function( index, model ) {
+            vwf.models.forEach( function( model ) {
                 model.removingChild && model.removingChild( nodeID, childID );
             } );
 
             // Call removedChild() on each view. The view is being notified that a child has been
             // removed.
 
-            jQuery.each( vwf.views, function( index, view ) {
+            vwf.views.forEach( function( view ) {
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
@@ -584,7 +586,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
             var parent = undefined;
 
-            jQuery.each( vwf.models, function( index, model ) {
+            vwf.models.forEach( function( model ) {
                 var modelParent = model.parenting && model.parenting( nodeID );
                 parent = modelParent !== undefined ? modelParent  : parent;
             } );
@@ -603,7 +605,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
             var children = [];
 
-            jQuery.each( vwf.models, function( index, model ) {
+            vwf.models.forEach( function( model ) {
                 var modelChildren = model.childrening && model.childrening( nodeID ) || [];
                 Array.prototype.push.apply( children, modelChildren );
             } );
@@ -622,7 +624,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
             var name = undefined;
 
-            jQuery.each( vwf.models, function( index, model ) {
+            vwf.models.forEach( function( model ) {
                 var modelName = model.naming && model.naming( nodeID );
                 name = modelName !== undefined ? modelName : name;
             } );
@@ -634,25 +636,25 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
         // Create a property on a node and assign an initial value.
 
-        this.createProperty = function( nodeID, propertyName, propertyValue ) {
+        this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
-            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );  // TODO: add truncated propertyGet, propertySet to log
 
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
 
-            jQuery.each( vwf.models, function( index, model ) {
-                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue );
+            vwf.models.forEach( function( model ) {
+                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
             // Call createdProperty() on each view. The view is being notified that a property has
             // been created.
 
-            jQuery.each( vwf.views, function( index, view ) {
-                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue );
+            vwf.views.forEach( function( view ) {
+                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */  // TODO: add truncated propertyGet, propertySet to log
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -663,25 +665,62 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
             this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
-            // Call settingProperty() on each model. The property is considered set after each model
-            // has run.
+            // Call settingProperty() on each model. The first model to return a non-undefined value
+            // has performed the set and dictates the return value. The property is considered set
+            // after each model has run.
 
-            jQuery.each( vwf.models, function( index, model ) {
-                var value = model.settingProperty && model.settingProperty( nodeID, propertyName, propertyValue );
-                propertyValue = value !== undefined ? value : propertyValue;
+            var entrants = arguments.callee.entrants;
+
+            var entry = entrants[nodeID+'-'+propertyName] || {}; // TODO: need unique nodeID+propertyName hash
+            var reentry = entrants[nodeID+'-'+propertyName] = {};
+
+            vwf.models.some( function( model, index ) {
+
+                if ( index > entry.index || entry.index === undefined ) {
+
+                    reentry.index = index;
+
+                    var value = model.settingProperty &&
+                        model.settingProperty( nodeID, propertyName, propertyValue );
+
+                    if ( value === undefined )
+                        value = reentry.value;
+
+                    delete reentry.value;
+
+                    if ( value !== undefined ) {
+                        propertyValue = value;
+                        return true;
+                    }
+
+                }
+
             } );
 
-            // Call satProperty() on each view. The view is being notified that a property has been
-            // set.
+            if ( entry.index !== undefined ) {
 
-            jQuery.each( vwf.views, function( index, view ) {
-                view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
-            } );
+                entrants[nodeID+'-'+propertyName] = entry;
+                entry.value = propertyValue;
+
+            } else {
+
+                delete entrants[nodeID+'-'+propertyName];
+
+                // Call satProperty() on each view. The view is being notified that a property has
+                // been set.  TODO: only want to call when actually set and with final value
+
+                vwf.views.forEach( function( view ) {
+                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
+                } );
+
+            }
 
             this.logger.groupEnd(); this.logger.debug( "vwf.setProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */
 
             return propertyValue;
         };
+
+        this.setProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
 
         // -- getProperty --------------------------------------------------------------------------
 
@@ -696,21 +735,66 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
             var propertyValue = undefined;
 
-            jQuery.each( vwf.models, function( index, model ) {
-                var value = model.gettingProperty && model.gettingProperty( nodeID, propertyName );
-                propertyValue = value !== undefined ? value : propertyValue;
+            var entrants = arguments.callee.entrants;
+
+            var entry = entrants[nodeID+'-'+propertyName] || {}; // TODO: need unique nodeID+propertyName hash
+            var reentry = entrants[nodeID+'-'+propertyName] = {};
+
+            vwf.models.some( function( model, index ) {
+
+                if ( index > entry.index || entry.index === undefined ) {
+
+                    reentry.index = index;
+
+                    var value = model.gettingProperty &&
+                        model.gettingProperty( nodeID, propertyName, propertyValue );
+
+                    if ( value === undefined )
+                        value = reentry.value;
+
+                    delete reentry.value;
+
+                    if ( value !== undefined ) {
+                        propertyValue = value;
+                        return true;
+                    }
+
+                }
+
             } );
 
-            // Call gotProperty() on each view.
+            if ( entry.index !== undefined ) {
 
-            jQuery.each( vwf.views, function( index, view ) {
-                view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );
-            } );
+                entrants[nodeID+'-'+propertyName] = entry;
+                entry.value = propertyValue;
+
+            } else {
+
+                delete entrants[nodeID+'-'+propertyName];
+
+                // Delegate to the prototype.
+
+                if ( propertyValue === undefined ) {
+                    var prototypeID = Object.getPrototypeOf( vwf.models[0].nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+                    if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
+                        propertyValue = vwf.getProperty( prototypeID, propertyName );
+                    }
+                }
+
+                // Call gotProperty() on each view.
+
+                vwf.views.forEach( function( view ) {
+                    view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );
+                } );
+
+            }
 
             this.logger.groupEnd(); this.logger.debug( "vwf.getProperty complete " + nodeID + " " + propertyName ); /* must log something for group level to reset in WebKit */
 
             return propertyValue;
         };
+
+        this.getProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
 
         // -- createMethod -------------------------------------------------------------------------
 
@@ -721,14 +805,14 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
 
-            jQuery.each( vwf.models, function ( index, model ) {
+            vwf.models.forEach( function( model ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName );
             } );
 
             // Call createdMethod() on each view. The view is being notified that a method has been
             // created.
 
-            jQuery.each( vwf.views, function ( index, view ) {
+            vwf.views.forEach( function( view ) {
                 view.createdMethod && view.createdMethod( nodeID, methodName );
             });
 
@@ -746,14 +830,14 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
             var methodValue = undefined;
 
-            jQuery.each( vwf.models, function( index, model ) {
+            vwf.models.forEach( function( model ) {
                 var value = model.callingMethod && model.callingMethod( nodeID, methodName ); // TODO: parameters
                 methodValue = value !== undefined ? value : methodValue;
             } );
 
             // Call calledMethod() on each view.
 
-            jQuery.each( vwf.views, function( index, view ) {
+            vwf.views.forEach( function( view ) {
                 view.calledMethod && view.calledMethod( nodeID, methodName ); // TODO: parameters
             } );
 
@@ -767,21 +851,27 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
         this.execute = function( nodeID, scriptText, scriptType ) {
 
             this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
- 
+
+            // Assume javascript if the type is not specified.
+
+            if ( ! scriptType && scriptText ) {
+                scriptType = "application/javascript";
+            }
+
             // Call executing() on each model. The script is considered executed after each model
             // has run.
 
             var scriptValue = undefined;
 
-            jQuery.each( vwf.models, function( index, model ) {
-                var value = model.executing && model.executing( nodeID, scriptText, scriptType ); // TODO: return value
-                scriptValue = value !== undefined ? value : scriptValue;
+            vwf.models.some( function( model ) {
+                scriptValue = model.executing && model.executing( nodeID, scriptText, scriptType );
+                return scriptValue !== undefined;
             } );
 
             // Call executed() on each view. The view is being notified that a script has been
             // executed.
 
-            jQuery.each( vwf.views, function( index, view ) {
+            vwf.views.forEach( function( view ) {
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
@@ -803,19 +893,6 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
         // -- logging ------------------------------------------------------------------------------
 
-//        this.logger = {
-//
-//            log: function() { /*window.console && console.log && console.log.apply( console, arguments )*/ },
-//            debug: function() { /*window.console && console.debug && console.debug.apply( console, arguments )*/ },
-//            info: function() { /*window.console && console.info && console.info.apply( console, arguments )*/ },
-//            warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
-//            error: function() { window.console && console.error && console.error.apply( console, arguments ) },
-//            group: function() { /*window.console && console.group && console.group.apply( console, arguments )*/ },
-//            groupCollapsed: function() { /* window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) */ },
-//            groupEnd: function() { /* window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) */ },
-//
-//        };
-
         this.logger = {
 
             log: function() { window.console && console.log && console.log.apply( console, arguments ) },
@@ -824,8 +901,8 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
             error: function() { window.console && console.error && console.error.apply( console, arguments ) },
             group: function() { window.console && console.group && console.group.apply( console, arguments ) },
-            groupCollapsed: function() {  window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments )  },
-            groupEnd: function() {  window.console && console.groupEnd && console.groupEnd.apply( console, arguments )  },
+            groupCollapsed: function() { window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) },
+            groupEnd: function() { window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) },
 
         };
 
@@ -855,14 +932,14 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
                     // Call creatingNode() on each model. The node is considered to be constructed after
                     // each model has run.
 
-                    jQuery.each( vwf.models, function( index, model ) {
+                    vwf.models.forEach( function( model ) {
                         model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
                     } );
 
                     // Call createdNode() on each view. The view is being notified of a node that has
                     // been constructed.
 
-                    jQuery.each( vwf.views, function( index, view ) {
+                    vwf.views.forEach( function( view ) {
                         view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type );
                     } );
 
@@ -876,7 +953,11 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
                     // delegates to the models and views as above.
 
                     component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
-                        vwf.createProperty( nodeID, propertyName, propertyValue );
+                        if ( valueHasAccessors( propertyValue ) ) {
+                            vwf.createProperty( nodeID, propertyName, propertyValue.value, propertyValue.get, propertyValue.set );
+                        } else {
+                            vwf.createProperty( nodeID, propertyName, propertyValue );
+                        }
                     } );
 
                     component.methods && jQuery.each( component.methods, function( methodName ) {
@@ -916,7 +997,6 @@ childName /* TODO: hack */ );
 
                 },
 
-				
                 function( callback_err_results ) {
 
                     // Attach the scripts. For each script, load the network resource if the script is
@@ -925,41 +1005,20 @@ childName /* TODO: hack */ );
                     // perform any immediate actions and retain any callbacks as appropriate for the
                     // script type.
 
-                    component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
-//						var nameRemovedID = nodeID.substring( 0, nodeID.lastIndexOf( '-' ) );
-//						
-//						if ( nameRemovedID == "http-vwf-example-com-types" ) {
-//							
-//							//console.info( "ADDING SCRIPT TO TYPE " + nodeID + " " + ( script.text || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + script.type );
-
-//							if ( script.text && vwf.classScripts ) {
-//								if ( !vwf.classScripts[nodeID] ) {
-//									vwf.classScripts[nodeID] = [ { 'text': script.text, 'type': script.type } ];
-//								} else { 
-//									vwf.classScripts[nodeID].add( { 'text': script.text, 'type': script.type } );
-//								}
-//							}
-//						}
-
-						script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                    component.scripts && component.scripts.forEach( function( script ) {
+                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                     } );
 
                     callback_err_results( undefined, undefined );
                 },
 
                 function( callback_err_results ) {
-//					var classID = nodeID.substring( 0, nodeID.lastIndexOf( '-' ) );
 
                     // Invoke an initialization method.
-                    vwf.execute( nodeID, "this.hasOwnProperty( 'initialize' ) && this.initialize()", "application/javascript" ); 
-					
-//					if ( vwf.classScripts && vwf.classScripts[classID] ) {
-//						var scripts = vwf.classScripts[classID];
-//						for ( var i = 0; i < scripts.length; i++ ) {
-//							//console.info( "ADDING SCRIPT TO OBJECT " + nodeID + " " + ( scripts[i]['text'] || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) );
-//							vwf.execute( nodeID, scripts[i]['text'] , scripts[i]['type'] ); 						
-//						}
-//					}
+
+                    vwf.execute( nodeID, "this.hasOwnProperty( \"initialize\" ) && this.initialize()",
+                        "application/javascript" ); 
+
                     callback_err_results( undefined, undefined );
                 },
 
@@ -999,7 +1058,7 @@ childName /* TODO: hack */ );
 
             if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
 
-                jQuery.each( componentAttributes, function( index, attributeName ) {
+                componentAttributes.forEach( function( attributeName ) {
                     isComponent = isComponent || Boolean( candidate[attributeName] );
                 } );
 
@@ -1008,45 +1067,32 @@ childName /* TODO: hack */ );
             return isComponent; 
         };
 
-        // -- wishfulComponentHash -----------------------------------------------------------------
+        // -- valueHasAccessors --------------------------------------------------------------------
 
-        // Generate a hash of sort from a component specification. This is part of a wild hack to
-        // assign consistent, unique IDs to nodes, regardless of the load order. This does not
-        // produce a reliable, or even a short, hash and only partially addresses the main problem.
+        // Determine if a property initializer is a detailed initializer containing explicit
+        // accessor and value parameters (rather than being a simple value specification) by
+        // searching for accessor attributes in the candidate object.
 
-        var wishfulComponentHash = function( component ) {
+        var valueHasAccessors = function( candidate ) {
 
-            var hash = "";
+            var accessorAttributes = [
+                "get",
+                "set",
+                "value",
+            ];
 
-            if ( component.extends ) hash += component.extends + ".";
-            if ( component.source ) hash += component.source + ".";
-            // if ( component.type ) hash += component.type + "."; // just adds verbosity
+            var hasAccessors = false;
 
-            component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
-                hash += propertyName + ".";
-            } );
+            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
 
-            component.methods && jQuery.each( component.methods, function( methodName ) {
-                hash += methodName + ".";
-            } );
+                accessorAttributes.forEach( function( attributeName ) {
+                    hasAccessors = hasAccessors || Boolean( candidate[attributeName] );
+                } );
 
-            component.events && jQuery.each( component.events, function( eventName ) {
-                hash += eventName + ".";
-            } );
-
-            component.children && jQuery.each( component.children, function( childName, child_uri_or_json_or_object ) {
-                hash += childName + ".";
-            } );
-
-            component.scripts && jQuery.each( component.scripts, function( scriptNumber, script ) {
-                if ( script.text ) hash += script.text.length + ".";
-                if ( script.source ) hash += script.source + ".";
-                // if ( script.type ) hash += script.type + "."; // redundant and verbose for now
-            } );
-
-            return hash.slice( 0, -1 );
-
-        };
+            }
+            
+            return hasAccessors; 
+        }
 
         // -- normalizedComponent ------------------------------------------------------------------
 
@@ -1064,7 +1110,7 @@ childName /* TODO: hack */ );
             // an untyped reference to that asset.
 
             if ( typeof component == "string" || component instanceof String ) { // TODO: validate URI
-                component = component.match( /\.vwf$/ ) ? { "extends": component } : { source: component }; // TODO: detect component from mime-type instead of extension?
+                component = component.match( /(^@)|(\.vwf$)/ ) ? { "extends": component } : { source: component }; // TODO: detect component from mime-type instead of extension?
             }
 
             // Fill in the mime type from the source specification if not provided.
