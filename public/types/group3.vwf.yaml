@@ -1,0 +1,22 @@
+--- 
+extends: http://vwf.example.com/types/node3
+properties:
+  position:
+    value: [ 0, 0, 0 ]
+  rotation:
+    value: [ 0, 0, 0 ]
+  scale:
+    value: [ 0, 0, 0 ]
+  eulers:
+    value: [ 0, 0, 0 ]
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "== position == "+this.position+" ====================" );
+      console.info( "== eulers == "+this.eulers+" ====================" );
+      console.info( "== scale == "+this.scale+" ====================" );
+      this.position = this.position;
+      this.eulers = this.eulers;
+      this.scale = this.scale;      
+    }
+  type: application/javascript

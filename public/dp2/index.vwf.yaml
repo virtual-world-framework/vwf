@@ -6,7 +6,7 @@ properties:
   activeCamera: "mainCamera"
 type: model/x-glge
 children: 
-  plane: 
+  toyPlane: 
     extends: http://vwf.example.com/types/node3
     source: seymourplane_triangulate.dae
     type: model/vnd.collada+xml
@@ -21,19 +21,27 @@ children:
         children: 
           untitled: 
             extends: http://vwf.example.com/types/node3
-      prop: 
-        extends: http://vwf.example.com/types/node3
-        properties: 
-          position: [ 0, 0, 0 ]
-          eulers: [ 0, 0, 0 ]
-          playing: true
-          looping: true
+            children:
+              plane:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  prop: 
+                    extends: http://vwf.example.com/types/node3
+                    properties: 
+                      position: [ 0, 0, 0 ]
+                      eulers: [ 0, 0, 0 ]
+                      playing: true
+                      looping: true
     scripts:
     - text: |
         this.initialize = function() {
-            this.position = this.position;
-            this.eulers = this.eulers;
-            this.scale = this.scale;
+          console.info( "==================== plane ====================" );
+          console.info( "== position == "+this.position+" ====================" );
+          console.info( "== eulers == "+this.eulers+" ====================" );
+          console.info( "== scale == "+this.scale+" ====================" );
+          this.position = this.position;
+          this.eulers = this.eulers;
+          this.scale = this.scale;
         }
       type: application/javascript
   duck:
@@ -48,20 +56,19 @@ children:
       playing: false
     scripts: 
     - text: |
-        this.properties.angle.setter = function( value ) {
-          this.angle = value + 1;
-        }
-      type: application/javascript
-    - text: |
         this.pointerClick = function() {
           this.playing = !this.playing
         }
       type: application/javascript
     - text: |
         this.initialize = function() {
-            this.position = this.position;
-            this.eulers = this.eulers;
-            this.scale = this.scale;
+          console.info( "==================== duck ====================" );
+          console.info( "== position == "+this.position+" ====================" );
+          console.info( "== eulers == "+this.eulers+" ====================" );
+          console.info( "== scale == "+this.scale+" ====================" );
+          this.position = this.position;
+          this.eulers = this.eulers;
+          this.scale = this.scale;
         }
       type: application/javascript
   maincamera: 

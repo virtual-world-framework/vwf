@@ -1,0 +1,114 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: level.xml
+properties:
+  ambientColor: [ 183, 183, 183 ]
+  activeCamera: "mainCamera"
+type: model/x-glge
+children: 
+  group1: 
+    extends: http://vwf.example.com/types/group3
+    properties: 
+      position: [ 0, 0, 0 ]
+      eulers: [ 0, 45, 0 ]
+      scale: [ 1, 1, 1 ]
+    children:   
+      group2:
+        extends: http://vwf.example.com/types/group3
+        properties: 
+          position: [ 0, 0, 0 ]
+          eulers: [ 45, 0, 0 ]
+          scale: [ 1, 1, 1 ]
+        children:
+          blueCube: 
+            extends: http://vwf.example.com/types/node3
+            source: BlueCube.dae
+            type: model/vnd.collada+xml
+            properties: 
+              position: [ 0, 15, 0 ]
+              eulers: [ 0, 0, 0 ]
+              scale: [ 1, 1, 1 ]
+          greenCube: 
+            extends: http://vwf.example.com/types/node3
+            source: GreenCube.dae
+            type: model/vnd.collada+xml
+            properties: 
+              position: [ 15, 0, 0 ]
+              eulers: [ 0, 0, 0 ]
+              scale: [ 1, 1, 1 ]
+      redCube: 
+        extends: http://vwf.example.com/types/node3
+        source: RedCube.dae
+        type: model/vnd.collada+xml
+        properties: 
+          position: [ -15, 0, 0 ]
+          eulers: [ 0, 0, 0 ]
+          scale: [ 1, 1, 1 ]
+  yellowSphere: 
+    extends: http://vwf.example.com/types/node3
+    source: YellowSphere.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 10 ]
+      eulers: [ 0, 0, 0 ]
+      scale: [ 1, 1, 1 ]
+  maincamera: 
+    extends: http://vwf.example.com/types/camera
+    properties:
+      active: true
+      allowMouseNav: false
+      walkMode: "walk"
+      cameraType: "perspective"
+      orbitPoint: [ 0, 0, 0 ]      
+      position: [ 0, 0, 0 ]
+      eulers: [ 0, 0, 0 ]
+      rotation: [ 0, 0, 0 ]
+      rotX: 0
+      rotY: 0
+      rotZ: 0
+      worldPosition: [ 0, 0, 0 ]
+      worldEulers: [ 0, 0, 0 ]
+      attachNodeID: ""
+      attachOffest: [ 0, 0, 0 ]
+      far: 1000.0
+      near: 0.1
+      fovy: 35
+      aspect: 1.0
+      orthoscale: 5
+      speed: 2.0    
+  dir_duck_1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      linearAttenuation: 0.002
+      quadraticAttenuation: 0.0008
+      spotCosCutOff: 0.95
+      spotExponent: 10
+      diffuse: true 
+      specular: true
+      samples: 0
+      softness: 0.01
+      bufferHeight: 256
+      bufferWidth: 256
+      shadowBias: 2.0
+      distance: 100.0
+      castShadows: false
+  dir_plane_1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      linearAttenuation: 0.002
+      quadraticAttenuation: 0.0008
+      spotCosCutOff: 0.95
+      spotExponent: 10
+      diffuse: true 
+      specular: true
+      samples: 0
+      softness: 0.01
+      bufferHeight: 256
+      bufferWidth: 256
+      shadowBias: 2.0
+      distance: 100.0
+      castShadows: false
