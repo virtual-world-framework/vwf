@@ -67,3 +67,38 @@ properties:
     set: |
       this.castShadows = value;
     value: false
+  position:
+    set: |
+      this.position = value;
+    value: [ 0, 0, 0 ]
+  eulers:
+    set: |
+      this.eulers = value;
+    value: [ 0, 0, 0 ]    
+scripts:
+- text: |
+    var cam = this;
+    this.initialize = function() {
+      console.info( "==================== light ====================" );
+      console.info( "== lightType == "+this.lightType+" ====================" );
+      console.info( "== eulers == "+this.eulers+" ====================" );
+      console.info( "== position == "+this.position+" ====================" );
+      this.lightType = this.lightType;
+      this.constantAttenuation = this.constantAttenuation;
+      this.linearAttenuation = this.linearAttenuation;
+      this.quadraticAttenuation = this.quadraticAttenuation;
+      this.spotCosCutOff = this.spotCosCutOff;
+      this.spotExponent = this.spotExponent;
+      this.diffuse = this.diffuse;
+      this.specular = this.specular;      
+      this.samples = this.samples;
+      this.softness = this.softness;
+      this.bufferHeight = this.bufferHeight;
+      this.bufferWidth = this.bufferWidth;
+      this.shadowBias = this.shadowBias;
+      this.distance = this.distance;        
+      this.castShadows = this.castShadows;
+      this.position = this.position;
+      this.eulers = this.eulers;  
+    }
+  type: application/javascript    

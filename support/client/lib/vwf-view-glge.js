@@ -17,6 +17,8 @@
         this.namespace = namespace;
 
         this.rootSelector = rootSelector;
+		this.canvasQuery = undefined;
+		this.rootNodeID = undefined;
 
         this.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
         this.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
@@ -26,11 +28,6 @@
 
         this.glgeColladaObjects = new Array();
         this.keysDown = {};
-
-        this.defaultCamera = undefined;
-        this.defaultCameraID = undefined;
-
-		this.cameras = {};
 
 		this.parentIDMap = {};
 		this.childIDMap = {};
@@ -61,9 +58,13 @@
             //     "<h2>Scene</h2>"
             // );
 
-            var canvasQuery = jQuery(this.rootSelector).append(
+            this.canvasQuery = jQuery(this.rootSelector).append(
                 "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='600'/>"
             ).children(":last");
+
+			if ( !this.rootNodeID ) {
+				this.rootNodeID = nodeID;
+			}
 
            
 			window.onkeydown = function( event ) {
@@ -76,10 +77,11 @@
 			  view.keysDown[ event.keyCode ] = true;
             };
 
-            var scene = this.scenes[nodeID] = {
+            var sceneNode = this.scenes[nodeID] = {
                 glgeDocument: new GLGE.Document(),
                 glgeRenderer: undefined,
                 glgeScene: undefined,
+				ID: nodeID,
                 glgeKeys: new GLGE.KeyInput()
             };
 
@@ -91,29 +93,8 @@
                 return vwf.time() * 1000;
             };
 
-            scene.glgeDocument.onLoad = function () {
-                var canvas = canvasQuery.get(0);
-                scene.glgeRenderer = new GLGE.Renderer(canvas);
-                scene.glgeScene = scene.glgeDocument.getElement("mainscene");
-                scene.glgeRenderer.setScene(scene.glgeScene);
-
-                view.findAllColladaObjs( scene.glgeScene, view, nodeID );
-
-                // set up all of the mouse event handlers
-                initMouseEvents(canvas, nodeID, view);
-
-                // Schedule the renderer.
-
-                var lasttime = 0;
-                var now;
-                function renderScene() {
-                    now = parseInt(new Date().getTime());
-                    scene.glgeRenderer.render();
-                    checkKeys(nodeID, view, now, lasttime);
-                    lasttime = now;
-                };
-
-                setInterval(renderScene, 1);
+            sceneNode.glgeDocument.onLoad = function () {
+				view.initScene( sceneNode );
             };
 
             // Load the GLGE document into the scene.
@@ -135,13 +116,13 @@
 			if ( nodeSource ) {
 				switch ( nodeType ) {
 					case "model/x-glge":
-						scene.glgeDocument.load(nodeSource);
+						sceneNode.glgeDocument.load(nodeSource);
 						break;
 
 				}
 			}
 
-        }  else if (nodeExtendsID == "http-vwf-example-com-types-node3") {
+        } else if (nodeExtendsID == "http-vwf-example-com-types-node3") {
 
 			if ( nodeType == "model/vnd.collada+xml" ) {
 				var node = this.nodes[nodeID] = {
@@ -149,44 +130,50 @@
 					glgeObject: undefined,
 					type: nodeExtendsID,
 					source: nodeSource,
+					ID: nodeID,
 					sourceType: nodeType 
 				};
-//				var newCollada = new GLGE.Collada;
-//				view.glgeColladaObjects.push( newCollada );
-//				newCollada.loadedCallback = colladaLoaded;
-//				newCollada.setDocument(nodeSource, window.location.href);
-//				scene.glgeDocument.getElement("mainscene").addCollada(newCollada);
-//				break;				
-							
 			} else {
 
 				var node = this.nodes[nodeID] = {
 					name: undefined,  // TODO: needed?
 					glgeObject: undefined,
+					ID: nodeID,
 					type: nodeExtendsID
 				};
 			}
 
         } else if (nodeExtendsID == "http-vwf-example-com-types-camera") {
 
-			var scene = this.scenes["index-vwf"];
+			var camName = nodeID.substring( nodeID.lastIndexOf( '-' ) + 1 );
+var sceneNode = this.scenes["index-vwf"];
             var node = this.nodes[nodeID] = {
                 name: undefined,
                 glgeObject: undefined,
-				glgeScene: scene ? scene.glgeScene : undefined,
+				ID: nodeID,
+				glgeScene: sceneNode ? sceneNode.glgeScene : undefined,
 				type: nodeExtendsID
             };
 
-			if ( this.defaultCamera ) {
-				this.defaultCamera = node;
-				this.defaultCameraID = nodeID;
+			if ( camName == sceneNode.camera.defaultName ) {
+				if ( !sceneNode.camera.defaultCam ) {
+					var cam = new GLGE.Camera();
+					sceneNode.camera.defaultCam = cam;
+					sceneNode.camera.glgeCameras[ camName ] = cam;
+					initCamera( cam );
+				}
+				
+				sceneNode.camera.defaultCamNode = node;
+				
+				node.name = camName;
+				node.glgeObject = sceneNode.camera.defaultCam;
 
-				node["name"] = "vwfDefaultCam";
-				node["glgeObject"] = new GLGE.Camera();
-				this.cameras["vwfDefaultCam"] = node;
-			} else if ( !this.camera ) {
-				this.camera = node;
-				this.cameraID = nodeID;
+				if ( !sceneNode.camera.camNode ) {
+					sceneNode.camera.camNode = node;
+				}
+				
+			} else if ( !sceneNode.camera.camNode ) {
+				sceneNode.camera.camNode = node;
 			}
 
 			
@@ -195,21 +182,24 @@
             var node = this.nodes[nodeID] = {
                 name: undefined,
                 glgeObject: undefined,
+				ID: nodeID,
 				type: nodeExtendsID
             };
 
-        }  else if (nodeExtendsID == "http-vwf-example-com-types-material") {
+        } else if (nodeExtendsID == "http-vwf-example-com-types-material") {
 
             var node = this.nodes[nodeID] = {
                 name: undefined,
                 glgeObject: undefined,
                 glgeMaterial: true,
+				ID: nodeID,
 				type: nodeExtendsID
             };
 
         } else {
 
 			var node;
+			var childName;
 			switch ( nodeExtendsID ) {
 				case "index-vwf":
 				case "http-vwf-example-com-types-node":
@@ -220,17 +210,23 @@
 					break;
 
 				case "http-vwf-example-com-types-group3":
+					childName = nodeID.substring( nodeID.lastIndexOf( '-' )+1 );
 					node = this.nodes[nodeID] = {
-						name: nodeID.substring( nodeID.lastIndexOf( '-' )+1 ),
+						name: childName,
 						glgeObject: new GLGE.Group(),
+						ID: nodeID,
 						type: nodeExtendsID
-					};					
+					};
+					
+					node.gui = node.glgeObject.uid;
+					node.glgeObject.name = childName;					
 					break;
 
 				default:
 					node = this.nodes[nodeID] = {
 						name: undefined,
 						glgeObject: undefined,
+						ID: nodeID,
 						type: nodeExtendsID
 					};
 				break;	
@@ -239,11 +235,80 @@
 
     };
 
-    module.prototype.findCollada = function ( grp, view, nodeID ) {
+	module.prototype.initScene = function( sceneNode ) {
+
+        var canvas = this.canvasQuery.get(0);
+
+		sceneNode.camera = {}; 
+		sceneNode.camera.defaultCam = undefined;
+        sceneNode.camera.defaultCamNode = undefined;
+        sceneNode.camera.camNode = undefined;
+        sceneNode.camera.name = "";
+		sceneNode.camera.defaultName = "defaultCamera";
+
+		sceneNode.camera.glgeCameras = {};
+
+        sceneNode.glgeRenderer = new GLGE.Renderer(canvas);
+        sceneNode.glgeScene = sceneNode.glgeDocument.getElement("mainscene");
+		if ( !sceneNode.glgeScene ) {
+			sceneNode.glgeScene = this.createScene( sceneNode );
+		} else if ( sceneNode.glgeScene.camera ) {
+			sceneNode.camera.defaultCam = sceneNode.glgeScene.camera;
+			sceneNode.camera.glgeCameras[ sceneNode.camera.defaultName ] = sceneNode.camera.defaultCam;
+		}
+
+        sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
+
+		createDefaultCamera( sceneNode );
+
+        this.findAllColladaObjs( sceneNode.glgeScene, this.rootNodeID );
+
+        // set up all of the mouse event handlers
+        initMouseEvents(canvas, this.rootNodeID, this );
+
+        // Schedule the renderer.
+
+		var view = this;
+		var renderer = sceneNode.glgeRenderer;
+        var lasttime = 0;
+        var now;
+        function renderScene() {
+            now = parseInt( new Date().getTime() );
+            renderer.render();
+            checkKeys( view.rootNodeID, view, now, lasttime );
+            lasttime = now;
+        };
+
+        setInterval(renderScene, 1);
+		
+	} 
+
+	module.prototype.createScene = function( sceneNode ) {
+
+		var glgeScene = new GLGE.Scene();
+		var cam;
+
+		sceneNode.glgeScene = glgeScene;
+		if ( glgeScene.camera ) {
+			cam = glgeScene.camera;
+			sceneNode.camera.defaultCam = cam;
+			sceneNode.camera.glgeCameras[ sceneNode.camera.defaultName ] = cam;
+		} else {
+			cam = new GLGE.Camera();
+			sceneNode.camera.defaultCam = cam; 
+			sceneNode.camera.glgeCameras[ sceneNode.camera.defaultName ] = cam;
+		}
+		initCamera( cam );
+		setActiveCamera( this, cam, sceneNode, undefined );
+		glgeScene.setAmbientColor( [ 183, 183, 183 ] );
+		return glgeScene;
+	}
+
+    module.prototype.findCollada = function ( grp, nodeID ) {
 
         if ( grp && grp.getChildren ) {
             var children = grp.getChildren();
-            var glgeView = view;
+            var glgeView = this;
             var viewID = nodeID;
   
             function colladaLoaded( collada ) { 
@@ -262,18 +327,18 @@
   
             for ( var i = 0; i < children.length; i++ ) {
                 if ( children[i].constructor == GLGE.Collada ) {
-                    glgeView.glgeColladaObjects.push( children[i] );
+                    this.glgeColladaObjects.push( children[i] );
                     children[i].loadedCallback = colladaLoaded;
                 }
-                view.findCollada( children[i], view ); 
+                this.findCollada( children[i] ); 
             }
         }
         
     }
 
-    module.prototype.findAllColladaObjs = function (glgeScene, view, nodeID) {
+    module.prototype.findAllColladaObjs = function( glgeScene, nodeID ) {
 
-        this.findCollada( glgeScene, view, nodeID );
+        this.findCollada( glgeScene, nodeID );
 
     }
 
@@ -286,12 +351,23 @@
 
         vwf.logger.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
+		var view = this;
         var child = this.nodes[ childID ];
 		var parent = this.nodes[ nodeID ];
+		var createIfNotFound = false;
+		var success = false;
+
+		if ( !childName ) 
+			childName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
+
+		if ( !this.loadingObjects[ childID ] )
+			this.loadingObjects[ childID ] = [];
+		this.loadingObjects[ childID ].push( { "parentID": nodeID, "name": childName } );
 
 		if ( parent && parent.type == "http-vwf-example-com-types-group3" ) {
-			if ( !parent.glgeObject )
+			if ( !parent.glgeObject ) {
 				parent.glgeObject = new GLGE.Group();
+			}
 			var childIsAddedToGroup = false;
 
 			if ( parent.glgeObject ) {
@@ -316,81 +392,106 @@
 			}
 		}
 
-		if ( child && child.type == "http-vwf-example-com-types-group3" ) {
-			var glgeParent;
-			if ( ( !parent || ( parent && !parent.glgeObject ) && this.scenes[ nodeID ] ) ) {
-				glgeParent = this.scenes[ nodeID ].glgeScene;
-			} else {
-				if ( parent )
-					glgeParent = parent.glgeObject;
-			}
-			if ( glgeParent ) {
-				var childIsAddedToGroup = false;
-
-				var children = glgeParent.getChildren();
-				for ( var i = 0; i < children.length && !childIsAddedToGroup; i++ ) {
-					if ( children[i] === child.glgeObject )
-						childIsAddedToGroup = true;
+		if ( child ) {
+			if ( child.type == "http-vwf-example-com-types-group3" ) {
+				var glgeParent;
+				if ( ( !parent || ( parent && !parent.glgeObject ) && this.scenes[ nodeID ] ) ) {
+					glgeParent = this.scenes[ nodeID ].glgeScene;
+				} else {
+					if ( parent )
+						glgeParent = parent.glgeObject;
 				}
+				if ( glgeParent ) {
+					var childIsAddedToGroup = false;
 
-				if ( !childIsAddedToGroup ) {
-					if ( child.glgeObject ) {
-						glgeParent.addChild( child.glgeObject );
-						//console.info( "	adding child: " + childID + " to " + nodeID );
-					} else { 
-						if ( !this.parentIDMap[ nodeID ] )
-							this.parentIDMap[ nodeID ] = [];
-						this.parentIDMap[ nodeID ].push( childID );
-						this.childIDMap[ childID ] = nodeID;
+					var children = glgeParent.getChildren();
+					for ( var i = 0; i < children.length && !childIsAddedToGroup; i++ ) {
+						if ( children[i] === child.glgeObject )
+							childIsAddedToGroup = true;
+					}
+
+					if ( !childIsAddedToGroup ) {
+						if ( child.glgeObject ) {
+							glgeParent.addChild( child.glgeObject );
+							//console.info( "	adding child: " + childID + " to " + nodeID );
+						} else { 
+							if ( !this.parentIDMap[ nodeID ] )
+								this.parentIDMap[ nodeID ] = [];
+							this.parentIDMap[ nodeID ].push( childID );
+							this.childIDMap[ childID ] = nodeID;
+						}
 					}
 				}
 			}
-		}
 
 
-		if ( child && child.source ) {
-			var view = this;
+			if ( child.source ) {
 
-			function colladaLoaded( collada ) { 
-				var bRemoved = false;
-				for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
-					if ( view.glgeColladaObjects[j] == collada ){
-						view.glgeColladaObjects.splice( j, 1 );
-						bRemoved = true;
-					}
-				} 
-				if ( bRemoved )
-					bindColladaChildren( view, childID );
+				function colladaLoaded( collada ) { 
+					var bRemoved = false;
+					for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
+						if ( view.glgeColladaObjects[j] == collada ){
+							view.glgeColladaObjects.splice( j, 1 );
+							bRemoved = true;
+						}
+					} 
+					if ( bRemoved )
+						bindColladaChildren( view, childID );
+				}
+
+				child.name = childName;
+				child.glgeObject = new GLGE.Collada;
+				this.glgeColladaObjects.push( child.glgeObject );
+
+				child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
+				if ( parent && parent.glgeObject ) {
+					parent.glgeObject.addCollada(child.glgeObject);
+					//console.info( "	adding collada child: " + childID + " to " + nodeID );
+				} else {
+					var sceneNode = this.scenes[nodeID];
+					if ( sceneNode ) {
+						if ( !sceneNode.glgeScene ) {
+							this.initScene( sceneNode );
+						}
+
+						sceneNode.glgeScene.addCollada(child.glgeObject);
+						//console.info( "	adding collada child: " + childID + " to the scene" );
+					}	
+				}
 			}
 
-			child.name = childName;
-			child.glgeObject = new GLGE.Collada;
-			this.glgeColladaObjects.push( child.glgeObject );
+			switch ( child.type ) {
+				case "http-vwf-example-com-types-light":
+				case "http-vwf-example-com-types-camera":
+				case "http-vwf-example-com-types-particleSystem":
+					createIfNotFound = true;
+					break;
+			} 
 
-			child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
-			if ( parent && parent.glgeObject ) {
-				parent.glgeObject.addCollada(child.glgeObject);
-				//console.info( "	adding collada child: " + childID + " to " + nodeID );
-			} else {
-				var scene = this.scenes[nodeID];
-				if ( scene ) {
-					scene.glgeScene.addCollada(child.glgeObject);
-					//console.info( "	adding collada child: " + childID + " to the scene" );
-				}	
-			}
-							
-		}
-
-		if ( !this.loadingObjects[ childID ] )
-			this.loadingObjects[ childID ] = [];
-		this.loadingObjects[ childID ].push( { "parentID": nodeID, "name": childName } );
-
-        if ( child ) {
-            if ( bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID) ) {
+			success = bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID);
+            if ( success ) {
                 bindNodeChildren(this, childID);
-            }
-        }
+            } else if ( createIfNotFound ) {
+				switch ( child.type ) {
+					case "http-vwf-example-com-types-light":
+						createLight( this, nodeID, childID, childName );
+						break;					
+					case "http-vwf-example-com-types-camera":
+						createCamera( this, nodeID, childID, childName );
+						break;
+				}
+				success = bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID); 				
+			}
 
+		}
+
+		if ( success && child.type == "http-vwf-example-com-types-camera") {
+			if ( childName.toLowerCase() == "maincamera" ) {
+				setActiveCamera( this, child.glgeObject, this.scenes["index-vwf"], childID );
+			}
+		}
+
+		return success;
     };
 
     // -- removedChild -----------------------------------------------------------------------------
@@ -586,10 +687,9 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 					break;
             }
         } else if ( this.scenes[nodeID] ) {
-			var scene = this.scenes[nodeID];
 			//switch ( node[ "type" ] ) {
 			//	case "http-vwf-example-com-types-glge":
-					value = this.satSceneProperty( scene, propertyName, propertyValue );
+					value = this.satSceneProperty( nodeID, propertyName, propertyValue );
 			//		break;
 			//}
 		} else {
@@ -606,22 +706,23 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
         return value;
     };
 
-	module.prototype.satSceneProperty = function( scene, propertyName, propertyValue ) {
+	module.prototype.satSceneProperty = function( nodeID, propertyName, propertyValue ) {
 
-		if ( scene && scene.glgeScene ) {
+		var sceneNode = this.scenes[ nodeID ];
+		if ( sceneNode && sceneNode.glgeScene ) {
 			var value = propertyValue;
 			switch ( propertyName ) {
   				case "ambientColor":
 					var arrayPropValue = propertyValue;
 					if ( propertyValue.constructor != Array )
 						arrayPropValue = JSON.parse( propertyValue );
-					scene.glgeScene.setAmbientColor( arrayPropValue );
+					sceneNode.glgeScene.setAmbientColor( arrayPropValue );
 					break;
 				case "activeCamera":
-					if ( view.cameras[propertyValue] ) {
-						camDef = view.cameras[propertyValue];
-						if ( camDef && camDef.glgeScene && camDef.glgeObject ) {
-							camDef.glgeScene.camera = camDef.glgeObject;
+					if ( sceneNode.camera.glgeCameras[propertyValue] ) {
+						var cam = sceneNode.camera.glgeCameras[propertyValue];
+						if ( cam ) {
+							setActiveCamera( this, cam, sceneNode, nodeID );
 						}
 					}
 					break;
@@ -636,7 +737,16 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 		var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
 		switch ( propertyName ) {
-  			case "cameraType":
+  			case "active":
+				var sceneNode = this.scenes["index-vwf"];
+				var node = this.nodes[nodeID];
+				if ( propertyValue ) {
+					setActiveCamera( this, node.glgeObject, sceneNode, nodeID );
+				} else {
+					setActiveCamera( this, sceneNode.camera.defaultCam, sceneNode, undefined );
+				}
+				break;
+			case "cameraType":
 				switch ( propertyValue ) {
 					case "perspective":
 						node.glgeObject.setType( GLGE.C_PERSPECTIVE );
@@ -837,7 +947,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 					break;
 
 				default:
-					switch ( node[ "type" ] ) {
+					switch ( node.type ) {
 						case "http-vwf-example-com-types-light":
 							value = this.gotLightProperty( nodeID, propertyName, propertyValue );
 							break;
@@ -858,15 +968,15 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
 	module.prototype.gotSceneProperty = function( nodeID, propertyName, propertyValue ) {
 
-		var scene = view.scenes[nodeID] // { name: childName, glgeObject: undefined }
+		var sceneNode = this.scenes[nodeID] // { name: childName, glgeObject: undefined }
         var value = propertyValue;
 		switch ( propertyName ) {
   			case "ambientColor":
-				var color = scene.glgeScene.getAmbientColor();
+				var color = sceneNode.glgeScene.getAmbientColor();
 				value = [ color['r'], color['g'], color['b'] ];
 				break;
 			case "activeCamera":
-				value = name( scene.glgeScene.camera );
+				value = name( sceneNode.glgeScene.camera );
 				break;
 
 		}
@@ -876,7 +986,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     // -- gotLightProperty ------------------------------------------------------------------------------
 
-    module.prototype.gotLightProperty = function (nodeID, propertyName, propertyValue) {
+    module.prototype.gotLightProperty = function ( nodeID, propertyName, propertyValue ) {
  	        var value;
 
 			switch( propertyName ) {
@@ -994,6 +1104,53 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     // == Private functions ========================================================================
 
+	var findGlgeObject = function( objName, type ) {
+		var obj = undefined;
+		var assetObj = undefined;
+		var glgeObjName = "";
+
+		console.info( "=======   Trying to find: " + objName + " of type: " + type );
+		for ( key in GLGE.Assets.assets ) {
+			assetObj = GLGE.Assets.assets[key];
+			if ( assetObj ) {
+				glgeObjName = name( assetObj );
+				//console.info( "			Checking: " + glgeObjName + " of type " + assetObj.constructor.name );
+				if ( glgeObjName == objName ) {
+					switch ( type ) {
+						case "http-vwf-example-com-types-node3":
+							if ( ( assetObj.constructor == GLGE.Group ) || ( assetObj.constructor == GLGE.Object ) )
+								obj = assetObj;
+							break;
+						case "http-vwf-example-com-types-light":
+							if ( assetObj.constructor == GLGE.Light )
+								obj = assetObj;
+							break;
+						case "http-vwf-example-com-types-camera":
+							if ( assetObj.constructor == GLGE.Camera )
+								obj = assetObj;
+							break;
+						case "http-vwf-example-com-types-scene":
+							if ( assetObj.constructor == GLGE.Scene )
+								obj = assetObj;
+							break;
+						case "http-vwf-example-com-types-particleSystem":
+							if ( assetObj.constructor == GLGE.ParticleSystem )
+								obj = assetObj;
+							break;	
+					}
+
+					if ( obj ) {
+						console.info( "=======   FOUND : " + objName );
+						break;
+					}
+				}
+			}
+		}
+
+
+		return obj;
+	}
+
 	var isChildOfLoadingObject = function( childID ) {
 		var childOfLoading = false;
 
@@ -1004,25 +1161,90 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     var bindSceneChildren = function (view, nodeID) {
 
         vwf.logger.info("      bindSceneChildren: " + nodeID );
-        var scene = view.scenes[nodeID];
+        var sceneNode = view.scenes[nodeID];
         var child;
 
-        if ( scene.glgeScene ) {
+        if ( sceneNode.glgeScene ) {
             jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
                 if (child = view.nodes[childID]) { // assignment is intentional
-                    if (bindChild(view, scene, undefined, child, vwf.name(childID), childID)) {
+                    if (bindChild(view, sceneNode, undefined, child, vwf.name(childID), childID)) {
                         bindNodeChildren(view, childID);
                     }
                 }
             });
         }
 
-        if ( !view.defaultCamera ) {
-			view.defaultCamera = true;
-			vwf.createNode( "http://vwf.example.com/types/camera", undefined, "defaultCamera" ); 
-		}
-		
+
     };
+
+	var setActiveCamera = function( view, glgeCamera, sceneNode, nodeID ) {
+		if ( sceneNode && sceneNode.glgeScene && glgeCamera ) {
+			sceneNode.glgeScene.setCamera( glgeCamera );
+			if ( nodeID && view.nodes[nodeID] )
+				sceneNode.camera.camNode = view.nodes[ nodeID ];
+			else
+				sceneNode.camera.camNode = sceneNode.camera.defaultCamNode;
+		}
+	}
+
+	var activeCamera = function( view, sceneNode ) {
+		var cam = undefined;
+		if ( sceneNode && sceneNode.camera ) {
+			if ( sceneNode.camera.camNode )
+				cam = sceneNode.camera.camNode;
+			else 
+				cam = sceneNode.camera.defaultCamNode;
+		}
+		return cam;
+	}
+
+
+	var createDefaultCamera = function( sceneNode ) {
+		vwf.createNode( { "extends": "http://vwf.example.com/types/camera" }, undefined, sceneNode.camera.defaultName );	
+	}
+
+	var createLight = function( view, nodeID, childID, childName ) {
+		var child = view.nodes[childID];
+		if ( child ) {
+			child.glgeObject = new GLGE.Light();
+			child.glgeObject.name = childName;
+			child.name = childName;
+			child.uid = child.glgeObject.uid;
+			addGlgeChild( view, nodeID, childID );
+		}		
+	}
+
+	var createCamera = function( view, nodeID, childID, childName ) {
+		var sceneNode = view.scenes[nodeID];
+		if ( sceneNode ) {
+			var child = view.nodes[childID];
+			if ( child ) {
+				var cam;
+				
+				if ( !sceneNode.camera.glgeCameras[childName] ) {
+					cam = new GLGE.Camera();
+					initCamera( cam );
+					sceneNode.camera.glgeCameras[childName] = cam;
+				} else {
+					cam = sceneNode.camera.glgeCameras[childName]
+				}
+
+				child.name = childName;
+				child.glgeObject = cam;
+				child.uid = child.glgeObject.uid;
+				cam.name = childName;
+			}
+		}
+	}
+
+	var initCamera = function( glgeCamera ) {
+		if ( glgeCamera ) {
+			glgeCamera.setLoc( 0, 0, 0 );
+			glgeCamera.setRot( 0, 0, 0 );
+			glgeCamera.setType( GLGE.C_PERSPECTIVE );
+			glgeCamera.setRotOrder( GLGE.ROT_XZY );
+		}		
+	}
 
     var bindColladaChildren = function (view, nodeID) {
 
@@ -1083,62 +1305,49 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     };
 
-    var bindChild = function (view, scene, node, child, childName, childID) {
+    var bindChild = function (view, sceneNode, node, child, childName, childID) {
 
-        vwf.logger.info("      bindChild: " + scene + " " + node + " " + child + " " + childName);
-		if ( scene && child && child["type"] && child["type"] ==  "http-vwf-example-com-types-camera" && scene.glgeScene.camera  ) {
-			child.glgeObject = scene.glgeScene.camera;
+        vwf.logger.info("      bindChild: " + sceneNode + " " + node + " " + child + " " + childName);
+		
+		if (sceneNode && sceneNode.glgeScene && !child.glgeObject) {
 			child.name = childName;
-			child.initialized = true;
-			view.childID = childID;
-			view.cameras[childName] = node;
-			if ( scene.glgeScene.camera.id == childName ) {
-				scene.activeCamera = childName;
+			child.glgeObject = sceneNode.glgeScene && glgeSceneChild(sceneNode.glgeScene, childName);
+			if (child.glgeObject) {
+				child.uid = child.glgeObject.uid;
+				glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+				child.initialized = true;
+			} else {
+				var obj = findGlgeObject( childName, child.type );
+				if ( obj ) {
+					child.glgeObject = obj;
+					child.uid = obj.uid;
+					child.initialized = true;
+					glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
+				}
 			}
-		} else {
-			if (scene && scene.glgeScene && !child.glgeObject) {
-				child.name = childName;
-				child.glgeObject = scene.glgeScene && glgeSceneChild(scene.glgeScene, childName);
+		} else if (node && !child.glgeObject) {
+			child.name = childName;
+			if ( view.nodes[ childID ] && view.nodes[ childID ].glgeMaterial ) {
+				bindMaterial( view, childID, childName, node );
+				child.initialized = true;
+			} else {
+				child.glgeObject = node.glgeObject && glgeObjectChild(node.glgeObject, childName);
 				if (child.glgeObject) {
+					child.uid = child.glgeObject.uid;
 					glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
 					child.initialized = true;
 				} else {
-					var obj = GLGE.Assets.get(childName);
-					if ( obj ) {
-						child.glgeObject = obj;
+					var glgeObj = findGlgeObject( childName, child.type );
+					if ( glgeObj ) {
+						child.glgeObject = glgeObj;
+						child.uid = glgeObj.uid;
 						child.initialized = true;
-					}
-				}
-		   } else if (node && !child.glgeObject) {
-				child.name = childName;
-				if ( view.nodes[ childID ] && view.nodes[ childID ].glgeMaterial ) {
-					bindMaterial( view, childID, childName, node );
-					child.initialized = true;
-				} else {
-					child.glgeObject = node.glgeObject && glgeObjectChild(node.glgeObject, childName);
-					if (child.glgeObject) {
 						glgeObjectInitializeFromProperties(view, childID, child.glgeObject);
-						child.initialized = true;
-					} else {
-						switch( child["type"] ) {
-							case "http-vwf-example-com-types-light":
-								var obj = GLGE.Assets.get(childName);
-								if ( obj ) {
-									child.glgeObject = obj;
-									child.initialized = true;
-								} else {
-									obj = GLGE.Assets.get(childName+"-light");
-									if ( obj ) {
-										child.glgeObject = obj;
-										child.initialized = true;
-									}
-								}							
-								break;
-						}
-					}
+					} 
 				}
 			}
 		}
+
 
         if (child.glgeObject && child.glgeObject.constructor == GLGE.ParticleSystem && child.name == "smoke") {
             view.smoke = child;
@@ -1215,16 +1424,20 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
 	var addGlgeChild = function( view, parentID, childID ) {
 		
+		var glgeParent
 		var parent = view.nodes[ parentID ];
 		if ( !parent && view.scenes[ parentID ] ) {
-			parent = view.scenes[ parentID ].glgeScene;
+			parent = view.scenes[ parentID ];
+			glgeParent = parent.glgeScene;
+		} else {
+			glgeParent = parent.glgeObject;
 		}
 			
-		if ( parent && parent.glgeObject && view.nodes[ childID ]) {
+		if ( glgeParent && view.nodes[ childID ]) {
 			var child = view.nodes[ childID ];
 
 			if ( child.glgeObject ) {
-				parent.glgeObject.addChild( child.glgeObject );
+				glgeParent.addChild( child.glgeObject );
 				//console.info( "	adding child: " + childID + " to " + parentID );
 			}
 		}
@@ -1259,11 +1472,11 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var checkKeys = function (nodeID, view, now, lasttime) {
         
-        var scene = view.scenes[nodeID], child;
-        if (scene && scene.glgeScene) {
-            var camera = scene.glgeScene.camera;
+        var sceneNode = view.scenes[nodeID], child;
+        if (sceneNode && sceneNode.glgeScene) {
+            var camera = sceneNode.glgeScene.camera;
 			if ( camera ) {
-				var cameraComponent = view.camera;
+				var cameraComponent = sceneNode.camera.camNode;
 
 				if ( cameraComponent && false ) {
   
@@ -1287,42 +1500,43 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 					var xinc = 0;
 					var zinc = 0;
 					var yRot = 0;
+					if ( mag == 0 ) mag = 1; 
 					trans[0] = trans[0] / mag;
 					trans[1] = trans[1] / mag;
 
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_W) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
 						yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
 					}
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_S) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
 						yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
 					}
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
 						yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
 					}
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_E)) {
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_E)) {
 						yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
 					}
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { yRot = 0.04; }
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { yRot = -0.04; }
-					if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_A)) { yRot = 0.04; }
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_D)) { yRot = -0.04; }
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
 						vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
 						vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
 					}
 
 					var speed = 2.0;
-					if ( cameraComponent && (yRot != 0 ) && (xinc != 0 || yinc != 0 || zinc != 0) ) {
+					if ( cameraComponent && (yRot != 0 ) || (xinc != 0 || yinc != 0 || zinc != 0) ) {
 
 						var pr = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed, camerapos.z + zinc, camerarot.x, (camerarot.y + yRot),  camerarot.z ];
-						view.setProperty( view.cameraID, "posRot", pr );
+						view.setProperty( sceneNode.camera.camNode.ID, "posRot", pr );
 												
 					} else {
 						if (xinc != 0 || yinc != 0 || zinc != 0) {
 	//						var pos = [ camerapos.x + xinc * 0.05 * (now - lasttime), camerapos.y + yinc * 0.05 * (now - lasttime),  camerapos.z + zinc ];
 							if ( cameraComponent ) {
 								var pos = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed,  camerapos.z + zinc ];
-								view.setProperty( view.cameraID, "position", pos );
+								view.setProperty( sceneNode.camera.camNode.ID, "position", pos );
 							} else {
 								var pos = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed,  camerapos.z + zinc ];
 								camera.setLocY(pos[1]);
@@ -1333,7 +1547,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 						if (yRot != 0 ) {
 							//var rot = [ camerarot.x, (camerarot.y + yRot),  camerarot.z];
 							if ( cameraComponent ) {
-								view.setProperty( view.cameraID, "rotY", (camerarot.y + yRot) );
+								view.setProperty( sceneNode.camera.camNode.ID, "rotY", (camerarot.y + yRot) );
 							} else {
 								camera.setRotY( camerarot.y + yRot );
 							}
@@ -1351,53 +1565,53 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         /*var keysDown = {};
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_A) ) keysDown[GLGE.KI_A] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_B) ) keysDown[GLGE.KI_B] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_C) ) keysDown[GLGE.KI_C] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_D) ) keysDown[GLGE.KI_D] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_E) ) keysDown[GLGE.KI_E] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_F) ) keysDown[GLGE.KI_F] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_G) ) keysDown[GLGE.KI_G] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_H) ) keysDown[GLGE.KI_H] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_I) ) keysDown[GLGE.KI_I] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_J) ) keysDown[GLGE.KI_J] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_K) ) keysDown[GLGE.KI_K] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_L) ) keysDown[GLGE.KI_L] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_M) ) keysDown[GLGE.KI_M] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_N) ) keysDown[GLGE.KI_N] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_O) ) keysDown[GLGE.KI_O] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_P) ) keysDown[GLGE.KI_P] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_Q) ) keysDown[GLGE.KI_Q] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_R) ) keysDown[GLGE.KI_R] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_S) ) keysDown[GLGE.KI_S] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_T) ) keysDown[GLGE.KI_T] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_U) ) keysDown[GLGE.KI_U] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_V) ) keysDown[GLGE.KI_V] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_W) ) keysDown[GLGE.KI_W] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_X) ) keysDown[GLGE.KI_X] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_Y) ) keysDown[GLGE.KI_Y] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_Z) ) keysDown[GLGE.KI_Z] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_A) ) keysDown[GLGE.KI_A] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_B) ) keysDown[GLGE.KI_B] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_C) ) keysDown[GLGE.KI_C] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_D) ) keysDown[GLGE.KI_D] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_E) ) keysDown[GLGE.KI_E] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_F) ) keysDown[GLGE.KI_F] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_G) ) keysDown[GLGE.KI_G] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_H) ) keysDown[GLGE.KI_H] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_I) ) keysDown[GLGE.KI_I] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_J) ) keysDown[GLGE.KI_J] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_K) ) keysDown[GLGE.KI_K] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_L) ) keysDown[GLGE.KI_L] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_M) ) keysDown[GLGE.KI_M] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_N) ) keysDown[GLGE.KI_N] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_O) ) keysDown[GLGE.KI_O] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_P) ) keysDown[GLGE.KI_P] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Q) ) keysDown[GLGE.KI_Q] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_R) ) keysDown[GLGE.KI_R] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_S) ) keysDown[GLGE.KI_S] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_T) ) keysDown[GLGE.KI_T] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_U) ) keysDown[GLGE.KI_U] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_V) ) keysDown[GLGE.KI_V] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_W) ) keysDown[GLGE.KI_W] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_X) ) keysDown[GLGE.KI_X] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Y) ) keysDown[GLGE.KI_Y] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Z) ) keysDown[GLGE.KI_Z] = true;
 
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_1) ) keysDown[GLGE.KI_1] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_2) ) keysDown[GLGE.KI_2] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_3) ) keysDown[GLGE.KI_3] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_4) ) keysDown[GLGE.KI_4] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_5) ) keysDown[GLGE.KI_5] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_6) ) keysDown[GLGE.KI_6] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_7) ) keysDown[GLGE.KI_7] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_8) ) keysDown[GLGE.KI_8] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_9) ) keysDown[GLGE.KI_9] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_0) ) keysDown[GLGE.KI_0] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_1) ) keysDown[GLGE.KI_1] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_2) ) keysDown[GLGE.KI_2] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_3) ) keysDown[GLGE.KI_3] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_4) ) keysDown[GLGE.KI_4] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_5) ) keysDown[GLGE.KI_5] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_6) ) keysDown[GLGE.KI_6] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_7) ) keysDown[GLGE.KI_7] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_8) ) keysDown[GLGE.KI_8] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_9) ) keysDown[GLGE.KI_9] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_0) ) keysDown[GLGE.KI_0] = true;
 
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) ) keysDown[GLGE.KI_LEFT_ARROW] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) ) keysDown[GLGE.KI_RIGHT_ARROW] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW) ) keysDown[GLGE.KI_UP_ARROW] = true;
-        if ( scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW) ) keysDown[GLGE.KI_DOWN_ARROW] = true;*/
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) ) keysDown[GLGE.KI_LEFT_ARROW] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) ) keysDown[GLGE.KI_RIGHT_ARROW] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW) ) keysDown[GLGE.KI_UP_ARROW] = true;
+        if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW) ) keysDown[GLGE.KI_DOWN_ARROW] = true;*/
 
 
 
-        /*if (scene && scene.glgeScene) {
-            var camera = scene.glgeScene.camera;
+        /*if (sceneNode && sceneNode.glgeScene) {
+            var camera = sceneNode.glgeScene.camera;
             if (camera) {
                 var bOrbit = false;
 
@@ -1430,22 +1644,22 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     centerGroup.setLocZ( objectCenter.z );
                     
                     var bKeyDown = false;
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_W) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
                         // orbit up
                          orbitPitch += orbitInc;
                          bKeyDown = true;
                     }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_S) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
                         // orbit down
                         orbitPitch -= orbitInc;
                           bKeyDown = true;
                     }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_A)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_A)) {
                         // orbit left
                         orbitYaw += orbitInc;
                         bKeyDown = true;
                     }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_D)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_D)) {
                         // orbit right  
                        orbitYaw -= orbitInc;
                        bKeyDown = true;
@@ -1481,28 +1695,28 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     trans[0] = trans[0] / mag;
                     trans[1] = trans[1] / mag;
 
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_W) || scene.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_W) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
                         yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
                     }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_S) || scene.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_S) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
                         yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
                     }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
                         yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
                     }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || scene.glgeKeys.isKeyPressed(GLGE.KI_E)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_E)) {
                         yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
                     }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_A)) { camera.setRotY(camerarot.y + 0.04); }
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_D)) { camera.setRotY(camerarot.y - 0.04); }
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
                         vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
                         vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
                     }
-                    if (view.smokeID && scene.glgeKeys.isKeyPressed(GLGE.KI_P)) {
-                        if (scene.glgeKeys.isKeyPressed(GLGE.KI_SHIFT)) {
+                    if (view.smokeID && sceneNode.glgeKeys.isKeyPressed(GLGE.KI_P)) {
+                        if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_SHIFT)) {
                             view.setProperty( view.smokeID, "looping", false );
                         } else {
                             view.setProperty( view.smokeID, "looping", true );
@@ -1511,14 +1725,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
                     var allowCameraPositions = false;
                     var cp = "";
-                    if (scene.glgeKeys.isKeyPressed(GLGE.KI_1)) cp = "1";
-                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_2)) cp = "2";
-                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_3)) cp = "3";
-                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_4)) cp = "4";
-                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_5)) cp = "5";
-                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_6)) cp = "6";
-                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_7)) cp = "7";
-                    else if (scene.glgeKeys.isKeyPressed(GLGE.KI_8)) cp = "8";
+                    if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_1)) cp = "1";
+                    else if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_2)) cp = "2";
+                    else if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_3)) cp = "3";
+                    else if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_4)) cp = "4";
+                    else if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_5)) cp = "5";
+                    else if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_6)) cp = "6";
+                    else if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_7)) cp = "7";
+                    else if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_8)) cp = "8";
 
                     if ( allowCameraPositions && cp != "" ) {
                         var pos = cameraPositions[cp]["position"];
@@ -1551,7 +1765,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var initMouseEvents = function (canvas, nodeID, view) {
 
-        var scene = view.scenes[nodeID], child;
+        var sceneNode = view.scenes[nodeID], child;
         var sceneID = nodeID;
         var sceneView = view;
         var mouseDown = false;
@@ -1565,7 +1779,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         canvas.onmousedown = function (e) {
             mouseDown = true;
-            mouseDownObjectID = getPickObjectID( mousePick(e, scene ), sceneView, true );
+            mouseDownObjectID = getPickObjectID( mousePick(e, sceneNode ), sceneView, true );
 
             //vwf.logger.info("CANVAS mouseDown: " + mouseDownObjectID);
             //this.throwEvent( "onMouseDown", mouseDownObjectID);
@@ -1575,14 +1789,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         canvas.onmouseup = function (e) {
-            var mouseUpObjectID = getPickObjectID( mousePick( e, scene ), sceneView, false );
+            var mouseUpObjectID = getPickObjectID( mousePick( e, sceneNode ), sceneView, false );
             // check for time??
             if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
                 vwf.logger.info("pointerClick: id:" + mouseDownObjectID + "   name: " + name( view.nodes[mouseDownObjectID].glgeObject ) );
                 //this.throwEvent( "onMouseClick", mouseDownObjectID);
                 view.callMethod( mouseUpObjectID, "pointerClick" );
 
-				if( scene.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
+				if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
 					if ( sceneView.nodes[mouseUpObjectID] ) {
 						var colladaObj = undefined;
 						var currentObj;
@@ -1621,7 +1835,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         canvas.onmousemove = function (e) {
-            var pickInfo = mousePick( e, scene );
+            var pickInfo = mousePick( e, sceneNode );
             var mouseOverID = getPickObjectID( pickInfo, sceneView, false );
             var mouseInfo = { 
                               "lastX": lastXPos,
@@ -1696,14 +1910,10 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     };
 
     function name(obj) {
-
         return obj.colladaName || obj.colladaId || obj.name || obj.id || "";
-
     }
 
-
     function path(obj) {
-
         var sOut = "";
         var sName = "";
 
@@ -1715,7 +1925,6 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             obj = obj.parent;
         }
         return sOut;
-
     }
 
     var mouseXPos = function(e) {
@@ -1757,14 +1966,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         return undefined;
     }
 
-    var mousePick = function( e, scene ) {
+    var mousePick = function( e, sceneNode ) {
 
-        if (scene && scene.glgeScene) {
+        if (sceneNode && sceneNode.glgeScene) {
             var objectIDFound = -1;
             var x = mouseXPos( e );
             var y = mouseYPos( e );
 
-            return scene.glgeScene.pick(x, y);
+            return sceneNode.glgeScene.pick(x, y);
         }
         return undefined;
 

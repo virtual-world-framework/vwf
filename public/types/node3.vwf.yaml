@@ -20,3 +20,15 @@ properties:
   enabled: true
   speed: 1
   playing: false
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "==================== node3 ====================" );
+      console.info( "== looping == "+this.looping+" ====================" );
+      console.info( "== speed == "+this.speed+" ====================" );
+      console.info( "== playing == "+this.playing+" ====================" );
+      this.looping = this.looping;
+      this.speed = this.speed;
+      this.playing = this.playing;
+    }
+  type: application/javascript
