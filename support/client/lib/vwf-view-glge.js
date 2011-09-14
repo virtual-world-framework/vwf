@@ -1162,18 +1162,21 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         vwf.logger.info("      bindSceneChildren: " + nodeID );
         var sceneNode = view.scenes[nodeID];
-        var child;
+		if ( sceneNode ) {
+			var child;
 
-        if ( sceneNode.glgeScene ) {
-            jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
-                if (child = view.nodes[childID]) { // assignment is intentional
-                    if (bindChild(view, sceneNode, undefined, child, vwf.name(childID), childID)) {
-                        bindNodeChildren(view, childID);
-                    }
-                }
-            });
-        }
-
+			if ( sceneNode.glgeScene ) {
+				jQuery.each(vwf.children(nodeID), function (childIndex, childID) {
+					if (child = view.nodes[childID]) { // assignment is intentional
+						if (bindChild(view, sceneNode, undefined, child, vwf.name(childID), childID)) {
+							bindNodeChildren(view, childID);
+						}
+					}
+				});
+			}
+		} else {
+			vwf.logger.warn("bindSceneChildren ===>>> Invalid sceneNode reference: " + nodeID );
+		}
 
     };
 
