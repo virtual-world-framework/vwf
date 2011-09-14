@@ -1490,7 +1490,7 @@ GLGE.error=function(error){
 GLGE.Assets={};
 GLGE.Assets.assets={};
 //don't need to register assets unless we are using network or webworkers
-GLGE.REGISTER_ASSETS=false;
+GLGE.REGISTER_ASSETS=true;
  
 GLGE.Assets.createUUID=function(){
 	var data=["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];

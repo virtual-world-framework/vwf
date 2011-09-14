@@ -1,12 +1,6 @@
 --- 
 extends: http://vwf.example.com/types/node3
 properties: 
-  active:
-    set: |
-      if ( value != this.active ) {
-        this.active = value;
-      }
-    value: false
   allowMouseNav: false
   walkMode:
     set: |
@@ -95,4 +89,19 @@ properties:
 scripts:
 - text: |
     var cam = this;
+    this.initialize = function() {
+      console.info( "==================== camera ====================" );
+      console.info( "== walkMode == "+this.walkMode+" ====================" );
+      console.info( "== cameraType == "+this.cameraType+" ====================" );
+      console.info( "== position == "+this.position+" ====================" );
+      this.walkMode = this.walkMode;
+      this.far = this.far;
+      this.near = this.near;
+      this.fovy = this.fovy;
+      this.aspect = this.aspect;
+      this.orthoscale = this.orthoscale;
+      this.cameraType = this.cameraType;      
+      this.position = this.position;
+      this.eulers = this.eulers;  
+    }
   type: application/javascript
