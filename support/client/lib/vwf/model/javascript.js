@@ -1,6 +1,6 @@
-define( [ "vwf-model", "module" ], function( model, module ) {
+define( [ "vwf/model", "module" ], function( model, module ) {
 
-    // vwf-model-javascript.js is a placeholder for the JavaScript object interface to the
+    // vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
     // simulation.
 
     return model.register( module, {

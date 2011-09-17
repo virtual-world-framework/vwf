@@ -1,6 +1,6 @@
 define( [ "vwf-proxy", "module" ], function( vwf, module ) {
 
-    // vwf-model.js is the common implementation of all Virtual World Framework models. Each model
+    // vwf/model.js is the common implementation of all Virtual World Framework models. Each model
     // is part of a federation with other models attached to the simulation that implements part of
     // the greater model. Taken together, the models create the entire model system for the
     // simulation.
@@ -15,7 +15,7 @@ define( [ "vwf-proxy", "module" ], function( vwf, module ) {
     // manager. Or it might implement functionality that is only active for a short period, such as
     // importing a document.
     // 
-    // vwf-model and all deriving models are loaded as RequireJS (http://requirejs.org) modules.
+    // vwf/model and all deriving models are loaded as RequireJS (http://requirejs.org) modules.
 
     return {
 

@@ -1,6 +1,6 @@
-define( [ "vwf-model", "module" ], function( model, module ) {
+define( [ "vwf/model", "module" ], function( model, module ) {
 
-    // vwf-model-scenejs.js is a placeholder for a 3-D scene manager.
+    // vwf/model/scenejs.js is a placeholder for a 3-D scene manager.
 
     return model.register( module, {
 

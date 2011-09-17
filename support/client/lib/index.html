@@ -34,7 +34,7 @@
     <!-- directives from a connection to an outside engine that is not visible to all users- but -->
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
-    <script type="text/javascript" src="vwf-model-unity/UnityObject.js"></script>
+    <script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script>
 
     <script type="text/javascript" src="require.js"></script>
 
@@ -45,12 +45,10 @@
             // This is the common model implementation and an example model that connects the
             // simulation to a WebGL scene manager.
 
-            "vwf-model",
-
-            "vwf-model-javascript",
-            "vwf-model-scenejs",
-            "vwf-model-unity",
-            "vwf-model-object",
+            "vwf/model/javascript",
+            "vwf/model/scenejs",
+            "vwf/model/unity",
+            "vwf/model/object",
 
         ], function() {
 
@@ -84,9 +82,9 @@
                     //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
      
                     {
-                        "vwf-model-javascript": [],
-                        "vwf-model-unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
-                        "vwf-model-object": [],
+                        "vwf/model/javascript": [],
+                        "vwf/model/unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
+                        "vwf/model/object": [],
                     },
 
                     // These are the view configurations. They use the same format as the model
