@@ -1,48 +1,29 @@
-( function( modules, namespace ) {
-
-    window.console && console.info && console.info( "loading " + namespace );
+define( [ "vwf-model", "module" ], function( model, module ) {
 
     // vwf-model-scenejs.js is a placeholder for a 3-D scene manager.
-    //
-    // vwf-model is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It
-    // attaches to the vwf modules list as vwf.modules.scenejs.
 
-    var module = modules[namespace.split(".").pop()] = function( vwf ) {
+    return model.register( module, {
 
-        if ( ! vwf ) return;
+        // This is a placeholder for connecting to the SceneJS WebGL scene manager.
 
-        vwf.logger.info( "creating " + namespace );
+        // -- creatingNode -------------------------------------------------------------------------
 
-        modules.model.call( this, vwf );
-        this.namespace = namespace;
+        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+            this.logger.info( "creatingNode", nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType );
+        },
 
-    };
+        // -- settingProperty ----------------------------------------------------------------------
 
-    // Delegate any unimplemented functions to vwf-model.
+        settingProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
+        },
 
-    module.prototype = new modules.model();
+        // -- gettingProperty ----------------------------------------------------------------------
 
-    // == Response API =============================================================================
+        gettingProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
+        },
 
-    // This is a placeholder for connecting to the SceneJS WebGL scene manager.
+    } );
 
-    // -- creatingNode -----------------------------------------------------------------------------
-
-    module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
-        vwf.logger.info( namespace + ".creatingNode " + nodeID + " " + 
-            nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
-    };
-
-    // -- settingProperty --------------------------------------------------------------------------
-
-    module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
-    };
-
-    // -- gettingProperty --------------------------------------------------------------------------
-
-    module.prototype.gettingProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
-    };
-
-} ) ( window.vwf.modules, "vwf.model.scenejs" );
+} );

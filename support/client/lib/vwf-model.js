@@ -1,6 +1,4 @@
-( function( modules, namespace ) {
-
-    window.console && console.info && console.info( "loading " + namespace );
+define( [ "vwf-proxy", "module" ], function( vwf, module ) {
 
     // vwf-model.js is the common implementation of all Virtual World Framework models. Each model
     // is part of a federation with other models attached to the simulation that implements part of
@@ -17,223 +15,232 @@
     // manager. Or it might implement functionality that is only active for a short period, such as
     // importing a document.
     // 
-    // vwf-model, as well as all deriving models, is constructed as a JavaScript module
-    // (http://www.yuiblog.com/blog/2007/06/12/module-pattern). It attaches to the vwf modules list
-    // as vwf.modules.model.
+    // vwf-model and all deriving models are loaded as RequireJS (http://requirejs.org) modules.
 
-    var module = modules[namespace.split(".").pop()] = function( vwf ) {
+    return {
 
-        if ( ! vwf ) return;
+logger: vwf.logger_for( module.id.replace( /\//g, "." ) ),
 
-        vwf.logger.info( "creating " + namespace );
+        register: function( module, spec ) {
 
-        this.vwf = vwf;
-        this.namespace = namespace;
+            var id = module.id.replace( /\//g, "." );
+            this.logger.info( "register", "loading", id );
 
-    };
+            var inst = Object.create( this );
 
-    // == Stimulus API =============================================================================
+            Object.keys( spec ).forEach( function( key ) {
+                inst[key] = spec[key];
+            } );
 
-    // The base model stands between the VWF manager and the deriving model classes. API calls pass
-    // through in two directions. Calls from a deriving model to the manager are commands, causing
-    // change. These calls are the stimulus half of the API.
-    // 
-    // For models, stimulus calls pass directly through to the manager. (Views make these calls
-    // through the conference reflector.) Future development will move some functionality from the
-    // deriving models to provide a common service for mapping between vwf and model object
-    // identifiers.
+inst.logger = vwf.logger_for( id );
 
-    // -- createNode -------------------------------------------------------------------------------
+            return inst;
+        },
 
-    module.prototype.createNode = function( component_uri_or_object, callback ) {
-        vwf.logger.info( namespace + ".createNode " + component_uri_or_object )
-        return vwf.createNode( component_uri_or_object, callback );
-    };
+        // == Stimulus API =========================================================================
 
-    // TODO: deleteNode
+        // The base model stands between the VWF manager and the deriving model classes. API calls
+        // pass through in two directions. Calls from a deriving model to the manager are commands,
+        // causing change. These calls are the stimulus half of the API.
+        // 
+        // For models, stimulus calls pass directly through to the manager. (Views make these calls
+        // through the conference reflector.) Future development will move some functionality from
+        // the deriving models to provide a common service for mapping between vwf and model object
+        // identifiers.
 
-    // -- addChild ---------------------------------------------------------------------------------
+        // -- createNode ---------------------------------------------------------------------------
 
-    module.prototype.addChild = function( nodeID, childID, childName ) {
-        vwf.logger.info( namespace + ".addChild " + nodeID + " " + childID + " " + childName );
-        return vwf.addChild( nodeID, childID, childName );
-    };
+        createNode: function( component_uri_or_object, callback ) {
+            this.logger.info( "createNode", component_uri_or_object );
+            return vwf.createNode( component_uri_or_object, callback );
+        },
 
-    // -- removeChild ------------------------------------------------------------------------------
+        // TODO: deleteNode
 
-    module.prototype.removeChild = function( nodeID, childID ) {
-        vwf.logger.info( namespace + ".removeChild " + nodeID + " " + childID );
-        return vwf.removeChild( nodeID, childID );
-    };
+        // -- addChild -----------------------------------------------------------------------------
 
-    // -- parent -----------------------------------------------------------------------------------
+        addChild: function( nodeID, childID, childName ) {
+            this.logger.info( "addChild", nodeID, childID, childName );
+            return vwf.addChild( nodeID, childID, childName );
+        },
 
-    module.prototype.parent = function( nodeID ) {
-        vwf.logger.info( namespace + ".parent " + nodeID );
-        return vwf.parent( nodeID );
-    };
+        // -- removeChild --------------------------------------------------------------------------
 
-    // -- children ---------------------------------------------------------------------------------
+        removeChild: function( nodeID, childID ) {
+            this.logger.info( "removeChild", nodeID, childID );
+            return vwf.removeChild( nodeID, childID );
+        },
 
-    module.prototype.children = function( nodeID ) {
-        vwf.logger.info( namespace + ".children " + nodeID );
-        return vwf.children( nodeID );
-    };
+        // -- parent -------------------------------------------------------------------------------
 
-    // -- name  ------------------------------------------------------------------------------------
+        parent: function( nodeID ) {
+            this.logger.info( "parent", nodeID );
+            return vwf.parent( nodeID );
+        },
 
-    module.prototype.name = function( nodeID ) {
-        vwf.logger.info( namespace + ".name " + nodeID );
-        return vwf.name( nodeID );
-    };
+        // -- children -----------------------------------------------------------------------------
 
-    // -- createProperty ---------------------------------------------------------------------------
+        children: function( nodeID ) {
+            this.logger.info( "children", nodeID );
+            return vwf.children( nodeID );
+        },
 
-    module.prototype.createProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".createProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        return vwf.createProperty( nodeID, propertyName, propertyValue );
-    };
+        // -- name ---------------------------------------------------------------------------------
 
-    // TODO: deleteProperty
+        name: function( nodeID ) {
+            this.logger.info( "name", nodeID );
+            return vwf.name( nodeID );
+        },
 
-    // -- setProperty ------------------------------------------------------------------------------
+        // -- createProperty -----------------------------------------------------------------------
 
-    module.prototype.setProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".setProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        return vwf.setProperty( nodeID, propertyName, propertyValue );
-    };
+        createProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "createProperty", nodeID, propertyName, propertyValue );
+            return vwf.createProperty( nodeID, propertyName, propertyValue );
+        },
 
-    // -- getProperty ------------------------------------------------------------------------------
+        // TODO: deleteProperty
 
-    module.prototype.getProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".getProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        return vwf.getProperty( nodeID, propertyName, propertyValue );
-    };
+        // -- setProperty --------------------------------------------------------------------------
 
-    // -- createMethod -----------------------------------------------------------------------------
+        setProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "setProperty", nodeID, propertyName, propertyValue );
+            return vwf.setProperty( nodeID, propertyName, propertyValue );
+        },
 
-    module.prototype.createMethod = function( nodeID, methodName ) {
-        vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName );
-        return vwf.createMethod( nodeID, methodName );
-    };
+        // -- getProperty --------------------------------------------------------------------------
 
-    // TODO: deleteMethod
+        getProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "getProperty", nodeID, propertyName, propertyValue );
+            return vwf.getProperty( nodeID, propertyName, propertyValue );
+        },
 
-    // -- callMethod -------------------------------------------------------------------------------
+        // -- createMethod -------------------------------------------------------------------------
 
-    module.prototype.callMethod = function( nodeID, methodName ) { // TODO: parameters
-        vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName ); // TODO: parameters
-        return vwf.callMethod( nodeID, methodName ); // TODO: parameters
-    };
+        createMethod: function( nodeID, methodName ) {
+            this.logger.info( "createMethod", nodeID, methodName );
+            return vwf.createMethod( nodeID, methodName );
+        },
+
+        // TODO: deleteMethod
+
+        // -- callMethod ---------------------------------------------------------------------------
+
+        callMethod: function( nodeID, methodName ) { // TODO: parameters
+            this.logger.info( "callMethod", nodeID, methodName ); // TODO: parameters
+            return vwf.callMethod( nodeID, methodName ); // TODO: parameters
+        },
     
-    // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
+        // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
 
-    // -- execute ----------------------------------------------------------------------------------
+        // -- execute ------------------------------------------------------------------------------
 
-    module.prototype.execute = function( nodeID, scriptText, scriptType ) {
-        vwf.logger.info( namespace + ".execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
-        return vwf.execute( nodeID, scriptText, scriptType );
+        execute: function( nodeID, scriptText, scriptType ) {
+            this.logger.info( "execute", nodeID, ( scriptText || "" ).substring( 0, 100 ), scriptType );
+            return vwf.execute( nodeID, scriptText, scriptType );
+        },
+
+        // -- time ---------------------------------------------------------------------------------
+
+        time: function() {
+            // this.logger.debug( "time", "" );
+            return vwf.time();
+        },
+
+        // == Response API =========================================================================
+
+        // Calls from the manager to a deriving model are notifications, informing of change. These
+        // calls are the response half of the API.
+
+        // For models, responses are where work is actually performed, and response implementations may
+        // generate additional stimulus calls. (In contrast, views generally transfer data outward, away
+        // from the simulation when handling a response.)
+
+        // Each of these implementations provides the default, null response. A deriving model only
+        // needs to implement the response handlers that it needs for its work. These will handle the
+        // rest.
+
+        // -- creatingNode -------------------------------------------------------------------------
+
+        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+            this.logger.info( "creatingNode", nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType );
+        },
+
+        // TODO: deletingNode
+
+        // -- addingChild --------------------------------------------------------------------------
+
+        addingChild: function( nodeID, childID, childName ) {
+            this.logger.info( "addingChild", nodeID, childID, childName );
+        },
+
+        // -- removingChild ------------------------------------------------------------------------
+
+        removingChild: function( nodeID, childID ) {
+            this.logger.info( "removingChild", nodeID, childID );
+        },
+
+        // -- parenting ----------------------------------------------------------------------------
+
+        parenting: function( nodeID ) {
+            this.logger.info( "parenting", nodeID );
+        },
+
+        // -- childrening --------------------------------------------------------------------------
+
+        childrening: function( nodeID ) {
+            this.logger.info( "childrening", nodeID );
+        },
+
+        // -- naming -------------------------------------------------------------------------------
+
+        naming: function( nodeID ) {
+            this.logger.info( "naming", nodeID );
+        },
+
+        // -- creatingProperty ---------------------------------------------------------------------
+
+        creatingProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
+        },
+
+        // TODO: deletingProperty
+
+        // -- settingProperty ----------------------------------------------------------------------
+
+        settingProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
+        },
+
+        // -- gettingProperty ----------------------------------------------------------------------
+
+        gettingProperty: function( nodeID, propertyName, propertyValue ) {
+            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
+        },
+
+        // -- creatingMethod -----------------------------------------------------------------------
+
+        creatingMethod: function( nodeID, methodName ) {
+            this.logger.info( "creatingMethod", nodeID, methodName );
+        },
+
+        // TODO: deletingMethod
+
+        // -- callingMethod ------------------------------------------------------------------------
+
+        callingMethod: function( nodeID, methodName ) { // TODO: parameters
+            this.logger.info( "callingMethod", nodeID, methodName ); // TODO: parameters
+        },
+
+        // TODO: creatingEvent, deltetingEvent, firingEvent
+
+        // -- executing ----------------------------------------------------------------------------
+
+        executing: function( nodeID, scriptText, scriptType ) {
+            this.logger.info( "executing " + nodeID,
+                ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType );
+        },
+
     };
 
-    // -- time -------------------------------------------------------------------------------------
-
-    module.prototype.time = function() {
-        // vwf.logger.debug( namespace + ".time" );
-        return vwf.time();
-    };
-
-    // == Response API =============================================================================
-
-    // Calls from the manager to a deriving model are notifications, informing of change. These
-    // calls are the response half of the API.
-
-    // For models, responses are where work is actually performed, and response implementations may
-    // generate additional stimulus calls. (In contrast, views generally transfer data outward, away
-    // from the simulation when handling a response.)
-
-    // Each of these implementations provides the default, null response. A deriving model only
-    // needs to implement the response handlers that it needs for its work. These will handle the
-    // rest.
-
-    // -- creatingNode -----------------------------------------------------------------------------
-
-    module.prototype.creatingNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
-        vwf.logger.info( namespace + ".creatingNode " + nodeID + " " + 
-            nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
-    };
-
-    // TODO: deletingNode
-
-    // -- addingChild ------------------------------------------------------------------------------
-
-    module.prototype.addingChild = function( nodeID, childID, childName ) {
-        vwf.logger.info( namespace + ".addingChild " + nodeID + " " + childID + " " + childName );
-    };
-
-    // -- removingChild ----------------------------------------------------------------------------
-
-    module.prototype.removingChild = function( nodeID, childID ) {
-        vwf.logger.info( namespace + ".removingChild " + nodeID + " " + childID );
-    };
-
-    // -- parenting --------------------------------------------------------------------------------
-
-    module.prototype.parenting = function( nodeID ) {
-        vwf.logger.info( namespace + ".parenting " + nodeID );
-    };
-
-    // -- childrening ------------------------------------------------------------------------------
-
-    module.prototype.childrening = function( nodeID ) {
-        vwf.logger.info( namespace + ".childrening " + nodeID );
-    };
-
-    // -- naming -----------------------------------------------------------------------------------
-
-    module.prototype.naming = function( nodeID ) {
-        vwf.logger.info( namespace + ".naming " + nodeID );
-    };
-
-    // -- creatingProperty -------------------------------------------------------------------------
-
-    module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
-    };
-
-    // TODO: deletingProperty
-
-    // -- settingProperty --------------------------------------------------------------------------
-
-    module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
-    };
-
-    // -- gettingProperty --------------------------------------------------------------------------
-
-    module.prototype.gettingProperty = function( nodeID, propertyName, propertyValue ) {
-        vwf.logger.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
-    };
-
-    // -- creatingMethod ---------------------------------------------------------------------------
-
-    module.prototype.creatingMethod = function( nodeID, methodName ) {
-        vwf.logger.info( namespace + ".creatingMethod " + nodeID + " " + methodName );
-    };
-
-    // TODO: deletingMethod
-
-    // -- callingMethod ----------------------------------------------------------------------------
-
-    module.prototype.callingMethod = function( nodeID, methodName ) { // TODO: parameters
-        vwf.logger.info( namespace + ".callingMethod " + nodeID + " " + methodName ); // TODO: parameters
-    };
-
-    // TODO: creatingEvent, deltetingEvent, firingEvent
-
-    // -- executing --------------------------------------------------------------------------------
-
-    module.prototype.executing = function( nodeID, scriptText, scriptType ) {
-        vwf.logger.info( namespace + ".executing " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
-    };
-
-} ) ( window.vwf.modules, "vwf.model" );
+} );
