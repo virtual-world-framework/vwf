@@ -116,6 +116,8 @@
 
             var application = getQueryString( "application" ) || getQueryString( "world" ); // TODO: "world" is old; remove eventually
 
+            try { application = JSON.parse( application ) || application || {} } catch( e ) { }
+
             // Parse the function parameters. If the first parameter is a string or contains
             // component properties, then treat it as the world specification. Otherwise, fall back
             // to the "application" parameter in the query string.
