@@ -1167,7 +1167,7 @@ childName /* TODO: hack */ );
             // an untyped reference to that asset.
 
             if ( typeof component == "string" || component instanceof String ) { // TODO: validate URI
-                component = component.match( /(^@)|(\.vwf$)/ ) ? { "extends": component } : { source: component }; // TODO: detect component from mime-type instead of extension?
+                component = component.match( /(^@)|(^http:\/\/vwf.example.com\/types\/)|(\.vwf$)/ ) ? { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?  // TODO: this only detects .../types/camera (without .vwf extension) in the http://vwf.example.com/types/... domain.
             }
 
             // Fill in the mime type from the source specification if not provided.
@@ -1291,7 +1291,8 @@ childName /* TODO: hack */ );
 
         // Remap a type identifier to its location in a local cache.
 
-        // http://vwf.example.com/types/sometype => http://localhost:8001/types/sometype.js
+        // http://vwf.example.com/types/sometype => http://localhost:8001/types/sometype.vwf
+        //                              ^------^                                ^------^
 
         var remappedURI = function( uri ) {
 
