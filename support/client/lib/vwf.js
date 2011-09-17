@@ -1218,16 +1218,41 @@ childName /* TODO: hack */ );
 
             var loggable = {};
 
-            for ( var name in component ) {
+            for ( var elementName in component ) {
 
-                switch ( name ) {
+                switch ( elementName ) {
+
+                    case "properties":
+
+                        loggable.properties = {};
+
+                        for ( var propertyName in component.properties ) {
+
+                            var componentPropertyValue = component.properties[propertyName];
+                            var loggablePropertyValue = loggable.properties[propertyName] = {};
+
+                            if ( valueHasAccessors( componentPropertyValue ) ) {
+                                for ( var propertyElementName in componentPropertyValue ) {
+                                    if ( propertyElementName == "set" || propertyElementName == "get" ) {
+                                        loggablePropertyValue[propertyElementName] = "...";
+                                    } else {
+                                        loggablePropertyValue[propertyElementName] = componentPropertyValue[propertyElementName];
+                                    }
+                                }
+                            } else {
+                                loggable.properties[propertyName] = componentPropertyValue;
+                            }
+
+                        }
+
+                        break;
 
                     case "children":
 
                         loggable.children = {};
 
-                        for ( var name in component.children ) {
-                            loggable.children[name] = {};
+                        for ( var childName in component.children ) {
+                            loggable.children[childName] = {};
                         }
 
                         break;
@@ -1240,8 +1265,8 @@ childName /* TODO: hack */ );
 
                             var loggableScript = {};
 
-                            for ( var name in script ) {
-                                loggableScript[name] = name == "text" ? "" : script[name];
+                            for ( var scriptElementName in script ) {
+                                loggableScript[scriptElementName] = scriptElementName == "text" ? "..." : script[scriptElementName];
                             }
 
                             loggable.scripts.push( loggableScript );
@@ -1252,7 +1277,7 @@ childName /* TODO: hack */ );
 
                     default:
 
-                        loggable[name] = component[name];
+                        loggable[elementName] = component[elementName];
 
                         break;
                 }
