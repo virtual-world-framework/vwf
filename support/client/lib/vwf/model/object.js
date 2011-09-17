@@ -1,6 +1,6 @@
-define( [ "vwf-model", "module" ], function( model, module ) {
+define( [ "vwf/model", "module" ], function( model, module ) {
 
-    // vwf-model-object.js is a backstop property store.
+    // vwf/model/object.js is a backstop property store.
 
     return model.register( module, {
 

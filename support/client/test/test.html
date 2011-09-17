@@ -30,21 +30,21 @@
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
 
-        "vwf-model-javascript",
-        "vwf-model-object",
+        "vwf/model/javascript",
+        "vwf/model/object",
 
       ], function() {
 
         require.ready( function() {
 
           vwf.initialize(
-            /* models */ { "vwf-model-javascript": undefined, "vwf-model-object": undefined },
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
             /*  views */ { }
           );
 
           test( "Models", function() {
-            equal( vwf.models[0], require( "vwf-model-javascript" ), "JavaScript Model" );
-            equal( vwf.models[1], require( "vwf-model-object" ), "Object Model" );
+            equal( vwf.models[0], require( "vwf/model/javascript" ), "JavaScript Model" );
+            equal( vwf.models[1], require( "vwf/model/object" ), "Object Model" );
           } );
 
           test( "Views", function() {
@@ -78,15 +78,15 @@
 
               equal( vwf.execute( fixture.top, "this.tag" ), "top", "top tag" );
               ok( ! vwf.execute( fixture.top, "this.hasOwnProperty( 'property' )" ) ); // "empty" type
-              // ok( ! fixture.top.hasOwnProperty( "property_" ) ); // "empty" type  // TODO: vwf-model-javascript internals
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) ); // "empty" type  // TODO: vwf/model/javascript internals
   
               equal( vwf.execute( fixture.middle, "this.tag" ), "middle", "middle tag" );
               ok( vwf.execute( fixture.middle, "this.hasOwnProperty( 'property' )" ) ); // "value" type
-              // ok( ! fixture.middle.hasOwnProperty( "property_" ) ); // "value" type  // TODO: vwf-model-javascript internals
+              // ok( ! fixture.middle.hasOwnProperty( "property_" ) ); // "value" type  // TODO: vwf/model/javascript internals
   
               equal( vwf.execute( fixture.bottom, "this.tag" ), "bottom", "bottom tag" );
               ok( vwf.execute( fixture.bottom, "this.hasOwnProperty( 'property' )" ) ); // "accessor" type
-              // ok( fixture.bottom.hasOwnProperty( "property_" ) ); // "accessor" type  // TODO: vwf-model-javascript internals
+              // ok( fixture.bottom.hasOwnProperty( "property_" ) ); // "accessor" type  // TODO: vwf/model/javascript internals
   
               start();
             } );
@@ -193,7 +193,7 @@
             createFixtureVWF( "empty", "empty", "accessor", function( fixture ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "BOTTOM", "top before" ); // via accessor on bottom
-              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
@@ -201,8 +201,8 @@
               vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on bottom
 
               equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" );
-              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
-              // equal( fixture.top.property_, "updated" );  // TODO: vwf-model-object internals
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
@@ -307,7 +307,7 @@
             createFixtureVWF( "value", "empty", "accessor", function( fixture ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
-              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
@@ -315,7 +315,7 @@
               vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // not using accessor on bottom
 
               equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
-              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
@@ -352,8 +352,8 @@
             createFixtureVWF( "accessor", "empty", "empty", function( fixture ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
-              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
-              // equal( fixture.top.property_, "top" );  // TODO: vwf-model-object internals
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
               equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
@@ -361,8 +361,8 @@
               vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
 
               equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
-              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
-              // equal( fixture.top.property_, "updated" );  // TODO: vwf-model-object internals
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
@@ -399,8 +399,8 @@
             createFixtureVWF( "accessor", "empty", "value", function( fixture ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
-              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
-              // equal( fixture.top.property_, "top" );  // TODO: vwf-model-object internals
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
@@ -408,8 +408,8 @@
               vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
 
               equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
-              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
-              // equal( fixture.top.property_, "updated" );  // TODO: vwf-model-object internals
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
@@ -446,8 +446,8 @@
             createFixtureVWF( "accessor", "empty", "accessor", function( fixture ) {
 
               equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
-              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
-              // equal( fixture.top.property_, "top" );  // TODO: vwf-model-object internals
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
@@ -455,8 +455,8 @@
               vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
 
               equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
-              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf-model-object internals
-              // equal( fixture.top.property_, "updated" );  // TODO: vwf-model-object internals
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
               equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
               equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
