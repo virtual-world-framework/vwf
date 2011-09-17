@@ -34,18 +34,75 @@
     <!-- directives from a connection to an outside engine that is not visible to all users- but -->
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
-    <!-- This is the common model implementation and an example model that connects the          -->
-    <!-- simulation to a WebGL scene manager.                                                    -->
-
-    <script type="text/javascript" src="vwf-model.js"></script>
-
-    <script type="text/javascript" src="vwf-model-javascript.js"></script>
-    <script type="text/javascript" src="vwf-model-scenejs.js"></script>
-
-    <script type="text/javascript" src="vwf-model-unity.js"></script>
     <script type="text/javascript" src="vwf-model-unity/UnityObject.js"></script>
 
-    <script type="text/javascript" src="vwf-model-object.js"></script>
+    <script type="text/javascript" src="require.js"></script>
+
+    <script type="text/javascript">
+
+        require( [
+
+            // This is the common model implementation and an example model that connects the
+            // simulation to a WebGL scene manager.
+
+            "vwf-model",
+
+            "vwf-model-javascript",
+            "vwf-model-scenejs",
+            "vwf-model-unity",
+            "vwf-model-object",
+
+        ], function() {
+
+            require.ready( function() {
+
+                // With the scripts loaded, we must initialize the framework. vwf.initialize()
+                // accepts three parameters: a world specification, model configuration parameters,
+                // and view configuration parameters.
+
+                vwf.initialize(
+
+                    // This is the world specification. The world may be specified using a component
+                    // literal as shown here, or the specification may be placed in a network-
+                    // visible location and specified here as a URI or as a query parameter to this
+                    // index page.
+     
+                    // As a literal:
+                    //     { extends: "http://vwf.example.com/types/example-type", properties: { ... }, ... }
+     
+                    // As a string:
+                    //     "http://vwf.example.com/types/example-type",
+     
+                    // These are the model configurations. Each key within the configuration object
+                    // is a model name, and each value is an argument or an array of arguments to be
+                    // passed to the model's constructor.
+     
+                    // With an array of arguments for the "example" model:
+                    //     { example: [ p1, p2, ... ], // ==> new vwf.modules.example( vwf, p1, p2, ... ) }
+     
+                    // As a single argument to the "html" view:
+                    //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
+     
+                    {
+                        "vwf-model-javascript": [],
+                        "vwf-model-unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
+                        "vwf-model-object": [],
+                    },
+
+                    // These are the view configurations. They use the same format as the model
+                    // configurations.
+
+                    {
+                        glge: "#vwf-root",
+                    }
+
+                );
+
+            } );
+
+        } );
+
+    </script>
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
@@ -55,79 +112,8 @@
     <script type="text/javascript" src="vwf-view-glge.js"></script>
     <script type="text/javascript" src="vwf-view-glge/glge-compiled.js"></script> 
     <script type="text/javascript" src="vwf-view-glge/jiglib.js"></script> 
-	
+
     <script type="text/javascript" src="vwf-view-html.js"></script>
-
-    <!-- With the scripts loaded, we must initialize the framework. vwf.initialize() accepts     -->
-    <!-- three parameters: a world specification, model configuration parameters, and view       -->
-    <!-- configuration parameters.                                                               -->
-
-    <script type="text/javascript">
-    
-        vwf.initialize(
-
-            // This is the world specification. The world may be specified using a component literal
-            // as shown here, or the specification may be placed in a network-visible location and
-            // specified here as a URI or as a query parameter to this index page.
-
-            // As a literal:
-            //     { extends: "http://vwf.example.com/types/example-type", properties: { ... }, ... }
-
-            // As a string:
-            //     "http://vwf.example.com/types/example-type",
-
-            // These are the model configurations. Each key within the configuration object is a
-            // model name, and each value is an argument or an array of arguments to be passed to
-            // the model's constructor.
-
-            // With an array of arguments for the "example" model:
-            //     { example: [ p1, p2, ... ], // ==> new vwf.modules.example( vwf, p1, p2, ... ) }
-
-            // As a single argument to the "html" view:
-            //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
-
-            {
-                javascript: [],         // invokes: new vwf.modules.javascript( vwf )
-                unity: "#vwf-root",     // invokes: new vwf.modules.unity( vwf, "#vwf-root" )  // TODO: resolve after ready()
-                object: [],             // invokes: new vwf.modules.object( vwf )
-            },
-
-            // These are the view configurations. They use the same format as the model
-            // configurations.
-
-            {
-                glge: "#vwf-root",      // invokes: new vwf.modules.glge( vwf, "#vwf-root" )
-            }
-
-        );
-
-        jQuery( window.document ).ready( function() {
-        
-        //     if ( window.location.search ) {
-        // 
-        //         jQuery( "#world-selection" ).hide();
-        // 
-        //     } else {
-        // 
-        //         $( ".world-option" ).change( function() {
-        //             jQuery( "#world-choice" ).val( jQuery( this ).val() );
-        //         } );
-        // 
-        //         $( "#world-selection" ).submit( function () {
-        //             window.location.href = window.location.protocol + "//" + window.location.host +
-        //                 window.location.pathname + "?world=" + jQuery( "#world-choice" ).val();
-        //             return false;
-        //         } );
-        // 
-        //     }
-
-            jQuery( "h1" ).click( function() {
-                window.open( "admin" );
-            } );
-        
-        } );
-
-    </script>
 
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.14.custom.css" />
@@ -140,37 +126,9 @@
     <!-- out in any manner desired. Any view and models that render to the page should be        -->
     <!-- instructed where to attach their content.                                               -->
 
-    <h1>Virtual World Framework</h1>
-
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
     <div id="vwf-root"></div>
-
-    <!-- Show a world selection form. The form is hidden if window.location contains a world     -->
-    <!-- specification.                                                                          -->
-
-    <!-- form id="world-selection">
-
-        <table>
-            <tr>
-                <td>
-                    <p><label><input class="world-option" type="radio" name="world-option"
-                        value="http://vwf.example.com/types/cityblock" /> City Block</label><br /></p>
-                    <p><label><input class="world-option" type="radio" name="world-option"
-                        value="http://vwf.example.com/types/test1" /> Duck and Plane</label></p>
-                    <p><label><input class="world-option" type="radio" name="world-option"
-                        value="http://vwf.example.com/types/radio" /> Radio</label></p>
-                </td>
-                <td>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </td>
-                <td>
-                    <input id="world-choice" type="text" size="50" /> <input type="submit" value="Load" />
-                </td>
-            </tr>
-        </table>
-
-    </form -->
 
   </body>
 

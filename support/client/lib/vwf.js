@@ -77,8 +77,9 @@
 
         // -- initialize ---------------------------------------------------------------------------
 
-        // The main page only needs to call vwf.initialize() to launch the world. initialize()
-        // accepts three parameters.
+        // The main page only needs to call vwf.initialize() to launch the application. Use
+        // require.ready() or jQuery(document).ready() to call initialize() once the page has
+        // loaded. initialize() accepts three parameters.
         
         // A component specification identifies the world to be loaded. If a URI is provided, the
         // specification is loaded from there [1]. Alternately, a JavaScript object literal
@@ -137,44 +138,35 @@
             if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
                 viewArgumentLists = {};
 
-            // Register a callback with jQuery to be invoked when the HTML page has finished
-            // loading.
+            // Create and attach each configured model.
 
-            jQuery( window.document ).ready( function() {
+            jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
-                // Create and attach each configured model.
+                var model = require( modelName );
 
-                jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
-
-                    var model = vwf.modules[modelName];
-
-                    if ( model ) {
-                        var instance = new model();
-                        model.apply( instance, [ vwf ].concat( modelArguments || [] ) );
-                        vwf.models.push( instance );
-                    }
-
-                } );
-
-                // Create and attach each configured view.
-
-                jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
-
-                    var view = vwf.modules[viewName];
-
-                    if ( view ) {
-                        var instance = new view();
-                        view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
-                        vwf.views.push( instance );
-                    }
-
-                } );
-
-                // Load the world.
-
-                vwf.ready( application );
+                if ( model ) {
+                    vwf.models.push( model );
+                }
 
             } );
+
+            // Create and attach each configured view.
+
+            jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
+
+                var view = vwf.modules[viewName];
+
+                if ( view ) {
+                    var instance = new view();
+                    view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
+                    vwf.views.push( instance );
+                }
+
+            } );
+
+            // Load the world.
+
+            vwf.ready( application );
 
         };
 
@@ -441,7 +433,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
 
 if ( ! callback ) { // TODO: this is a hack to get the multiuser application createNode to addChild to the root
     callback = function( nodeID, prototypeID ) {
-        vwf.addChild( 0, nodeID, undefined ) 
+        vwf.addChild( 0, nodeID, undefined );
     };
 }
 
@@ -775,7 +767,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 // Delegate to the prototype.
 
                 if ( propertyValue === undefined ) {
-                    var prototypeID = Object.getPrototypeOf( vwf.models[0].nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+                    var prototypeID = Object.getPrototypeOf( vwf.models[0].private.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
                     if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
                         propertyValue = vwf.getProperty( prototypeID, propertyName );
                     }
@@ -889,9 +881,74 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
             // this.logger.debug( "vwf.time" );
 
             return this.now;
-        }
+        };
 
-        // -- logging ------------------------------------------------------------------------------
+        // -- logger_for ---------------------------------------------------------------------------
+
+        // Create a logger for a module. Record the module name. Each logger method expects to
+        // receive a function name as the first parameter. Prepend "<module_name>.<function_name>: "
+        // to each output message.
+
+        this.logger_for = function( module_name ) {
+
+            return {
+
+                log: function( /* function_name, ... */ ) {
+                    window.console && console.log && console.log.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                debug: function( /* function_name, ... */ ) {
+                    window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                info: function( /* function_name, ... */ ) {
+                    window.console && console.info && console.info.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                warn: function( /* function_name, ... */ ) {
+                    window.console && console.warn && console.warn.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                error: function( /* function_name, ... */ ) {
+                    window.console && console.error && console.error.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                group: function( /* function_name, ... */ ) {
+                    window.console && console.group && console.group.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                groupCollapsed: function( /* function_name, ... */ ) {
+                    window.console && console.groupCollapsed && console.groupCollapsed.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                groupEnd: function( /* function_name, ... */ ) {
+                    window.console && console.groupEnd && console.groupEnd.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+            };
+
+            // Calculate an arguments array to pass to a logger function. Pass the arguments
+            // following *function_name* through and prepend "<module_name>.<function_name>: ".
+
+            function prefixed_arguments( /* function_name, ... */ ) {
+
+                if ( arguments.length > 1 && ( typeof arguments[0] == "string" || arguments[0] instanceof String ) ) {
+                    if ( typeof arguments[1] == "string" || arguments[1] instanceof String ) {
+                        // concatenate when the first field is a string so that it may remain a format string
+                        return [ module_name + "." + arguments[0] + ": " + arguments[1] ].concat( Array.prototype.slice.call( arguments, 2 ) );
+                    } else {
+                        // otherwise insert a new first field
+                        return [ module_name + "." + arguments[0] + ": " ].concat( Array.prototype.slice.call( arguments, 1 ) );
+                    }
+                } else {
+                    return [];
+                }
+
+            }
+
+        };
+
+        // -- logger -------------------------------------------------------------------------------
 
         this.logger = {
 

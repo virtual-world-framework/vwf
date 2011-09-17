@@ -1,59 +1,48 @@
-( function( modules, namespace ) {
-
-    window.console && console.info && console.info( "loading " + namespace );
+define( [ "vwf-model", "module" ], function( model, module ) {
 
     // vwf-model-object.js is a backstop property store.
 
-    var module = modules[namespace.split(".").pop()] = function( vwf ) {
+    return model.register( module, {
 
-        if ( ! vwf ) return;
+        // -- creatingProperty ---------------------------------------------------------------------
 
-        vwf.logger.info( "creating " + namespace );
+        creatingProperty: function( nodeID, propertyName, propertyValue ) {
 
-        modules.model.call( this, vwf );
-        this.namespace = namespace;
+            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
 
-        this.objects = {}; // maps id => { property: value, ... }
+            var object = this.private.objects[nodeID] || ( this.private.objects[nodeID] = {} );
 
-    };
+            return object[propertyName] = propertyValue;
+        },
 
-    // Delegate any unimplemented functions to vwf-model.
+        // -- settingProperty ----------------------------------------------------------------------
 
-    module.prototype = new modules.model();
+        settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-    // == Response API =============================================================================
+            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
 
-    // -- creatingProperty -------------------------------------------------------------------------
+            var object = this.private.objects[nodeID] || ( this.private.objects[nodeID] = {} );
 
-    module.prototype.creatingProperty = function( nodeID, propertyName, propertyValue ) {
+            return object[propertyName] = propertyValue;
+        },
 
-        vwf.logger.info( namespace + ".creatingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        // -- gettingProperty ----------------------------------------------------------------------
 
-        var object = this.objects[nodeID] || ( this.objects[nodeID] = {} );
+        gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
-        return object[propertyName] = propertyValue;
-    };
+            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
 
-    // -- settingProperty --------------------------------------------------------------------------
+            var object = this.private.objects[nodeID];
 
-    module.prototype.settingProperty = function( nodeID, propertyName, propertyValue ) {
+            return object && object[propertyName];
+        },
 
-        vwf.logger.info( namespace + ".settingProperty " + nodeID + " " + propertyName + " " + propertyValue );
+        // == Private ==============================================================================
 
-        var object = this.objects[nodeID] || ( this.objects[nodeID] = {} );
+        private: {
+            objects: {} // maps id => { property: value, ... }
+        }
 
-        return object[propertyName] = propertyValue;
-    };
+    } );
 
-    // -- gettingProperty --------------------------------------------------------------------------
-
-    module.prototype.gettingProperty = function( nodeID, propertyName, propertyValue ) {
-
-        vwf.logger.info( namespace + ".gettingProperty " + nodeID + " " + propertyName + " " + propertyValue );
-
-        var object = this.objects[nodeID];
-
-        return object && object[propertyName];
-    };
-
-} ) ( window.vwf.modules, "vwf.model.object" );
+} );
