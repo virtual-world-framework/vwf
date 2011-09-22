@@ -284,7 +284,7 @@
 
                 socket.connect();
 
-            } else {
+            } else if ( component_uri_or_json_or_object ) {
 
                 // Load the world. The world is a rooted in a single node constructed here as an
                 // instance of the component passed to initialize(). That component, its
@@ -427,6 +427,7 @@
 
             var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
 nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
+// nodeID = nodeID + "-" + Math.round( Math.random() * 1000000 );  // TODO: for single-user mode testing only; don't require the tests to provide the childName hack
 
             this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + nodeID );
 
