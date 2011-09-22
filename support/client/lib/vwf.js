@@ -649,7 +649,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
             } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */  // TODO: add truncated propertyGet, propertySet to log
-        };
+};
 
         // -- setProperty --------------------------------------------------------------------------
 
@@ -705,7 +705,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                 vwf.views.forEach( function( view ) {
                     view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
-                } );
+} );
 
             }
 
@@ -1075,7 +1075,7 @@ childName /* TODO: hack */ );
 
                     // Invoke an initialization method.
 
-                    vwf.execute( nodeID, "this.hasOwnProperty( \"initialize\" ) && this.initialize()",
+                    vwf.execute( nodeID, "this.initialize && this.initialize()",
                         "application/javascript" ); 
 
                     callback_err_results( undefined, undefined );
