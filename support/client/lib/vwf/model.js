@@ -232,7 +232,7 @@ inst.logger = vwf.logger_for( id );
             this.logger.info( "callingMethod", nodeID, methodName ); // TODO: parameters
         },
 
-        // TODO: creatingEvent, deltetingEvent, firingEvent
+        // TODO: creatingEvent, deletingEvent, firingEvent
 
         // -- executing ----------------------------------------------------------------------------
 
