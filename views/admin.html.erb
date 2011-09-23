@@ -16,207 +16,213 @@
         <script type="text/javascript" src="vwf-view.js"></script>
         <script type="text/javascript" src="vwf-view-html.js"></script>
 
+        <script type="text/javascript" src="require.js"></script>
+
         <script type="text/javascript">
 
-            vwf.initialize( {}, { html: "#listing" } );
+            require( [], function() {
 
-            jQuery( window.document ).ready( function() {
+                require.ready( function() {
 
-                $( "#tabs" ).tabs();
+                    vwf.initialize( {}, { html: "#listing" } );
 
-                // ---------------------------------------------------------------------------------
+                    $( "#tabs" ).tabs();
 
-                try {
-                    socket = new io.Socket( undefined, {
-                        resource: window.location.pathname.slice( 1, window.location.pathname.lastIndexOf("/") ),
-                        transports: [ 'websocket' ],
-                    } );
-                } catch ( e ) {
-                }
+                    // ---------------------------------------------------------------------------------
 
-                if ( socket ) {
+                    try {
+                        socket = new io.Socket( undefined, {
+                            resource: window.location.pathname.slice( 1, window.location.pathname.lastIndexOf("/") ),
+                            transports: [ 'websocket' ],
+                        } );
+                    } catch ( e ) {
+                    }
 
-                    socket.on( "connect", function() {
-                        console.info( "admin socket connected" )
-                    } );
+                    if ( socket ) {
 
-                    socket.on( "message", function( message ) {
+                        socket.on( "connect", function() {
+                            console.info( "admin socket connected" )
+                        } );
 
-                        var fields = JSON.parse( message );
+                        socket.on( "message", function( message ) {
 
-                        if ( fields.action ) {
+                            var fields = JSON.parse( message );
 
-                            var now$ = jQuery( "#log .now" );
-                            var action$ = now$.clone().removeClass( "now" );
+                            if ( fields.action ) {
 
-                            action$.children().each( function( index ) {
+                                var now$ = jQuery( "#log .now" );
+                                var action$ = now$.clone().removeClass( "now" );
 
-                                switch( index ) {
-                                    case 0: jQuery( this ).text( Number( fields.time ).toFixed( 3 ) ); break;
-                                    case 1: jQuery( this ).text( command_from_fields( fields ) ); break;
+                                action$.children().each( function( index ) {
+
+                                    switch( index ) {
+                                        case 0: jQuery( this ).text( Number( fields.time ).toFixed( 3 ) ); break;
+                                        case 1: jQuery( this ).text( command_from_fields( fields ) ); break;
+                                    }
+
+                                } );
+
+                                var body$ = $("body"); // may need to be $("html") in other browsers, or maybe even $(document)
+                                body$.stop( true, true );
+
+                                // Window bottom in document coordinates.
+
+                                var window_bottom = body$.scrollTop() + $(window).height();
+
+                                // tr.now top, middle, and bottom in document coordinates.
+
+                                var now_top_before = now$.offset().top;
+                                var now_middle_before = now_top_before + now$.outerHeight() / 2;
+                                var now_bottom_before = now_top_before + now$.outerHeight();
+
+                                // Insert the new row.
+
+                                now$.before( action$ );
+
+                                // tr.now top, middle, and bottom in document coordinates.
+
+                                var now_top_after = now$.offset().top;
+                                var now_middle_after = now_top_after + now$.outerHeight() / 2;
+                                var now_bottom_after = now_top_after + now$.outerHeight();
+
+                                // Scroll to reveal now$ if it was visible before the new row was
+                                // inserted.
+
+                                if ( now_middle_before <= window_bottom ) {
+                                    if ( now_bottom_before >= window_bottom ) {
+                                        body$.animate( { scrollTop: now_top_after + now$.outerHeight() - $(window).height() }, "fast" );
+                                    } else if ( now_bottom_after >= window_bottom ) {
+                                        body$.animate( { scrollTop: body$.scrollTop() + now_top_after - now_top_before }, "fast" );
+                                    }
                                 }
 
-                            } );
+                            } else {
 
-                            var body$ = $("body"); // may need to be $("html") in other browsers, or maybe even $(document)
-                            body$.stop( true, true );
+                                // Update now$ with the most recent time.
 
-                            // Window bottom in document coordinates.
+                                var now$ = jQuery( "#log .now" );
+                                now$.children().first().text( Number( fields.time ).toFixed( 3 ) );
 
-                            var window_bottom = body$.scrollTop() + $(window).height();
-
-                            // tr.now top, middle, and bottom in document coordinates.
-
-                            var now_top_before = now$.offset().top;
-                            var now_middle_before = now_top_before + now$.outerHeight() / 2;
-                            var now_bottom_before = now_top_before + now$.outerHeight();
-
-                            // Insert the new row.
-
-                            now$.before( action$ );
-
-                            // tr.now top, middle, and bottom in document coordinates.
-
-                            var now_top_after = now$.offset().top;
-                            var now_middle_after = now_top_after + now$.outerHeight() / 2;
-                            var now_bottom_after = now_top_after + now$.outerHeight();
-
-                            // Scroll to reveal now$ if it was visible before the new row was
-                            // inserted.
-
-                            if ( now_middle_before <= window_bottom ) {
-                                if ( now_bottom_before >= window_bottom ) {
-                                    body$.animate( { scrollTop: now_top_after + now$.outerHeight() - $(window).height() }, "fast" );
-                                } else if ( now_bottom_after >= window_bottom ) {
-                                    body$.animate( { scrollTop: body$.scrollTop() + now_top_after - now_top_before }, "fast" );
-                                }
                             }
 
-                        } else {
+                        } );
 
-                            // Update now$ with the most recent time.
+                        socket.on( "disconnect", function() {
+                            console.info( "admin socket disconnected" )
+                        } );
 
-                            var now$ = jQuery( "#log .now" );
-                            now$.children().first().text( Number( fields.time ).toFixed( 3 ) );
+                        // Start communication with the conference server. 
+
+                        socket.connect();
+
+                    }
+
+                    // Create a JavaScript-like statement that describes the action.
+
+                    function command_from_fields( fields ) {
+
+                        var command = "";
+
+                        if ( fields.node || fields.node === 0 ) {
+                            command += "@" + safe_identifier( fields.node ) + ".";
+                        }
+
+                        if ( fields.action == "createNode" ) {
+
+                            command += "@" + safe_identifier( fields.parameters.shift() ) + ".new"
+                            command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
+
+                        } else if ( fields.action == "setProperty" ) {
+
+                            command += safe_identifier( fields.parameters.shift() ) + " = " +
+                                fields.parameters.shift();
+
+                        } else if ( fields.action == "callMethod" ) {
+
+                            command += safe_identifier( fields.parameters.shift() );
+                            command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
 
                         }
 
+                        return command;
+
+                    }
+
+                    // Return *identifier* unchanged if it's a valid identifier in the common form of an
+                    // alphabetic character or underscore followed by zero or more digits, alphabetic
+                    // characters or underscores. Otherwise, return *identifier* string-quoted.
+
+                    function safe_identifier( identifier ) {
+                        identifier = identifier.toString();
+                        return identifier.search( /^[A-Za-z_][0-9A-Za-z_]*$/ ) >= 0 ? identifier : JSON.stringify( identifier );
+                    }
+
+                    function parameter_list( parameters ) {
+                        return parameters.join( ", " );
+                    }
+
+                    // ---------------------------------------------------------------------------------
+
+                    var options = {};
+
+                    [ "play", "pause", "stop" ].forEach( function( state ) {
+                        options[state] = { icons: { primary: "ui-icon-" + state }, label: state, text: false };
                     } );
 
-                    socket.on( "disconnect", function() {
-                        console.info( "admin socket disconnected" )
+                    options.rate = { value: 0, min: -2, max: 2, step: 0.1, };
+
+                    var state = {};
+
+                    jQuery.get( "admin/state", undefined, update, "json" );
+
+                    jQuery( "button#play" ).button(
+                        options.pause
+                    ). click( function() {
+                        jQuery.post( state.playing ? "admin/pause" : "admin/play", undefined, update, "json" );
                     } );
 
-                    // Start communication with the conference server. 
+                    jQuery( "button#stop" ).button(
+                        options.stop
+                    ). click( function() {
+                        jQuery.post( "admin/stop", undefined, update, "json" );
+                    } );
 
-                    socket.connect();
+                    jQuery( ".rate.slider" ).slider(
+                        options.rate
+                    ) .bind( "slide", function( event, ui ) {
+                        jQuery.get( "admin/state", { "rate": Math.pow( 10, Number(ui.value) ) }, update, "json" );
+                    } );
 
-                }
+                    function update( data ) {
 
-                // Create a JavaScript-like statement that describes the action.
+                        state = data;
 
-                function command_from_fields( fields ) {
+                        jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                        jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
 
-                    var command = "";
 
-                    if ( fields.node || fields.node === 0 ) {
-                        command += "@" + safe_identifier( fields.node ) + ".";
+                        jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+
+
+                        if ( state.rate < 1.0 ) {
+                            var label_rate = 1.0 / state.rate;
+                        } else {
+                            var label_rate = state.rate;
+                        }
+
+                        var label = label_rate.toFixed(2).toString().replace( /(\.\d*?)0+$/, "$1" ).replace( /\.$/, "" );
+
+                        if ( state.rate < 1.0 ) {
+                            label = "&#x2215; " + label;
+                        } else {
+                            label = label + " &times;";
+                        }
+
+                        jQuery( ".rate.vwf-label" ).html( label );
+
                     }
 
-                    if ( fields.action == "createNode" ) {
-
-                        command += "@" + safe_identifier( fields.parameters.shift() ) + ".new"
-                        command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
-
-                    } else if ( fields.action == "setProperty" ) {
-
-                        command += safe_identifier( fields.parameters.shift() ) + " = " +
-                            fields.parameters.shift();
-
-                    } else if ( fields.action == "callMethod" ) {
-
-                        command += safe_identifier( fields.parameters.shift() );
-                        command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
-
-                    }
-
-                    return command;
-
-                }
-
-                // Return *identifier* unchanged if it's a valid identifier in the common form of an
-                // alphabetic character or underscore followed by zero or more digits, alphabetic
-                // characters or underscores. Otherwise, return *identifier* string-quoted.
-
-                function safe_identifier( identifier ) {
-                    identifier = identifier.toString();
-                    return identifier.search( /^[A-Za-z_][0-9A-Za-z_]*$/ ) >= 0 ? identifier : JSON.stringify( identifier );
-                }
-
-                function parameter_list( parameters ) {
-                    return parameters.join( ", " );
-                }
-
-                // ---------------------------------------------------------------------------------
-
-                var options = {};
-
-                [ "play", "pause", "stop" ].forEach( function( state ) {
-                    options[state] = { icons: { primary: "ui-icon-" + state }, label: state, text: false };
                 } );
-
-                options.rate = { value: 0, min: -2, max: 2, step: 0.1, };
-
-                var state = {};
-
-                jQuery.get( "admin/state", undefined, update, "json" );
-
-                jQuery( "button#play" ).button(
-                    options.pause
-                ). click( function() {
-                    jQuery.post( state.playing ? "admin/pause" : "admin/play", undefined, update, "json" );
-                } );
-
-                jQuery( "button#stop" ).button(
-                    options.stop
-                ). click( function() {
-                    jQuery.post( "admin/stop", undefined, update, "json" );
-                } );
-
-                jQuery( ".rate.slider" ).slider(
-                    options.rate
-                ) .bind( "slide", function( event, ui ) {
-                    jQuery.get( "admin/state", { "rate": Math.pow( 10, Number(ui.value) ) }, update, "json" );
-                } );
-
-                function update( data ) {
-
-                    state = data;
-
-                    jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
-                    jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
-
-
-                    jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
-
-
-                    if ( state.rate < 1.0 ) {
-                        var label_rate = 1.0 / state.rate;
-                    } else {
-                        var label_rate = state.rate;
-                    }
-
-                    var label = label_rate.toFixed(2).toString().replace( /(\.\d*?)0+$/, "$1" ).replace( /\.$/, "" );
-
-                    if ( state.rate < 1.0 ) {
-                        label = "&#x2215; " + label;
-                    } else {
-                        label = label + " &times;";
-                    }
-
-                    jQuery( ".rate.vwf-label" ).html( label );
-
-                }
 
             } );
 
