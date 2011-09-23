@@ -15,6 +15,8 @@ define( [ "vwf/model", "module" ], function( model, module ) {
             return object[propertyName] = propertyValue;
         },
 
+        // TODO: deletingProperty
+
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
