@@ -1,0 +1,112 @@
+--- 
+extends: http://vwf.example.com/types/node3
+properties:
+  numberParticles:
+    set: |
+      this.numberParticles = value;
+    value: 200  
+  lifeTime:
+    set: |
+      this.lifetime = value;
+    value: 60  
+  maxLifeTime:
+    set: |
+      this.maxLifeTime = value;
+    value: 2000  
+  minLifeTime:
+    set: |
+      this.minLifeTime = value;
+    value: 2000  
+  startSize:
+    set: |
+      this.startSize = value;
+    value: 0  
+  endSize:
+    set: |
+      this.endSize = value;
+    value: 1    
+  loop: 
+    set: |
+      this.loop = value;
+    value: 1
+  position: 
+    set: |
+      this.position = value;
+    value: [ 0, 0, 0 ]
+  eulers:
+    set: |
+      this.eulers = value;
+    value: [ 0, 0, 0 ]
+  velocity:
+    set: |
+      this.velocity = value;
+    value: [ 0, 0, 0 ]
+  startMaxVelocity:
+    set: |
+      this.startMaxVelocity = value;
+    value: [ 0, 0, 0 ]
+  startMinVelocity:
+    set: |
+      this.startMinVelocity = value;
+    value: [ 0, 0, 0 ]
+  startAcceleration:
+    set: |
+      this.startAcceleration = value;
+    value: [ 0, 0, 0 ]
+  endAcceleration:
+    set: |
+      this.endAcceleration = value;
+    value: [ 0, 0, 0 ]
+  maxStartAcceleration:
+    set: |
+      this.maxStartAcceleration = value;
+    value: [ 0, 0, 0 ]
+  maxEndAcceleration:
+    set: |
+      this.maxEndAcceleration = value;
+    value: [ 0, 0, 0 ]    
+  minStartAcceleration:
+    set: |
+      this.minStartAcceleration = value;
+    value: [ 0, 0, 0 ]
+  minEndAcceleration:
+    set: |
+      this.minEndAcceleration = value;
+    value: [ 0, 0, 0 ]    
+  startColor:
+    set: |
+      this.startColor = value;
+    value: [ 0, 0, 0, 1 ]
+  endColor:
+    set: |
+      this.endColor = value;
+    value: [ 0, 0, 0, 1 ]     
+  image:
+    set: |
+      this.image = value;
+    value: ""
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "==================== particleSystem ====================" );
+      this.numberParticles = this.numberParticles;
+      this.lifeTime = this.lifeTime;
+      this.maxLifeTime = this.maxLifeTime;
+      this.minLifeTime = this.minLifeTime;
+      this.startSize = this.startSize;
+      this.endSize = this.endSize;
+      this.loop = this.loop;
+      this.velocity = this.velocity;
+      this.maxVelocity = this.maxVelocity;
+      this.minVelocity = this.minVelocity;
+      this.startAcceleration = this.startAcceleration;
+      this.endAcceleration = this.endAcceleration;
+      this.maxStartAcceleration = this.maxStartAcceleration;
+      this.maxEndAcceleration = this.maxEndAcceleration;
+      this.minStartAcceleration = this.minStartAcceleration;
+      this.minEndAcceleration = this.minEndAcceleration;
+      this.startColor = this.startColor;
+      this.endColor = this.endColor;
+      this.image = this.image;
+    }	
+  type: application/javascript
