@@ -110,6 +110,7 @@
 
                 if ( bRemoved && view.glgeColladaObjects.length == 0 ){
                     bindSceneChildren( view, nodeID );
+					//setVertexProperties( view, nodeID );
                 }
             }
 
@@ -196,6 +197,15 @@ var sceneNode = this.scenes["index-vwf"];
 				type: nodeExtendsID
             };
 
+        } else if (nodeExtendsID == "http-vwf-example-com-types-particlesystem") {
+
+            var node = this.nodes[nodeID] = {
+                name: undefined,
+                glgeObject: undefined,
+				ID: nodeID,
+				type: nodeExtendsID
+            };
+
         } else {
 
 			var node;
@@ -261,6 +271,8 @@ var sceneNode = this.scenes["index-vwf"];
 
 		createDefaultCamera( sceneNode );
 
+		cameraInUse = sceneNode.glgeScene.camera;
+
         this.findAllColladaObjs( sceneNode.glgeScene, this.rootNodeID );
 
         // set up all of the mouse event handlers
@@ -269,6 +281,7 @@ var sceneNode = this.scenes["index-vwf"];
         // Schedule the renderer.
 
 		var view = this;
+		var scene = sceneNode.glgeScene;
 		var renderer = sceneNode.glgeRenderer;
         var lasttime = 0;
         var now;
@@ -276,6 +289,7 @@ var sceneNode = this.scenes["index-vwf"];
             now = parseInt( new Date().getTime() );
             renderer.render();
             checkKeys( view.rootNodeID, view, now, lasttime );
+			if ( mouseDown ) mouselook( now, lasttime );
             lasttime = now;
         };
 
@@ -313,6 +327,7 @@ var sceneNode = this.scenes["index-vwf"];
   
             function colladaLoaded( collada ) { 
                 var bRemoved = false;
+				console.info( "++ 1 ++		colladaLoaded( "+ collada.docURL +" )" );
                 for ( var j = 0; j < glgeView.glgeColladaObjects.length; j++ ) {
                     if ( glgeView.glgeColladaObjects[j] == collada ){
                         glgeView.glgeColladaObjects.splice( j, 1 );
@@ -322,6 +337,7 @@ var sceneNode = this.scenes["index-vwf"];
 
                 if ( bRemoved && glgeView.glgeColladaObjects.length == 0 ){
                     bindSceneChildren( glgeView, viewID );
+					//setVertexProperties( glgeView, viewID );
                 }
             }
   
@@ -350,6 +366,7 @@ var sceneNode = this.scenes["index-vwf"];
     module.prototype.addedChild = function (nodeID, childID, childName) {
 
         vwf.logger.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
+//        console.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);
 
 		var view = this;
         var child = this.nodes[ childID ];
@@ -429,14 +446,17 @@ var sceneNode = this.scenes["index-vwf"];
 
 				function colladaLoaded( collada ) { 
 					var bRemoved = false;
+					console.info( "++ 2 ++		colladaLoaded( "+ collada.docURL +" )" );
 					for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
 						if ( view.glgeColladaObjects[j] == collada ){
 							view.glgeColladaObjects.splice( j, 1 );
 							bRemoved = true;
 						}
 					} 
-					if ( bRemoved )
+					if ( bRemoved ) {
 						bindColladaChildren( view, childID );
+						//setVertexProperties( view, childID );
+					}
 				}
 
 				child.name = childName;
@@ -444,6 +464,7 @@ var sceneNode = this.scenes["index-vwf"];
 				this.glgeColladaObjects.push( child.glgeObject );
 
 				child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
+				child.glgeObject.loadedCallback = colladaLoaded;
 				if ( parent && parent.glgeObject ) {
 					parent.glgeObject.addCollada(child.glgeObject);
 					//console.info( "	adding collada child: " + childID + " to " + nodeID );
@@ -478,6 +499,9 @@ var sceneNode = this.scenes["index-vwf"];
 						break;					
 					case "http-vwf-example-com-types-camera":
 						createCamera( this, nodeID, childID, childName );
+						break;
+					case "http-vwf-example-com-types-particlesystem":
+						createParticleSystem( this, nodeID, childID, childName );
 						break;
 				}
 				success = bindChild(this, this.scenes[nodeID], this.nodes[nodeID], child, childName, childID); 				
@@ -638,7 +662,12 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                                 value.push( glgeObject.setLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) ) );
                                 value.push( glgeObject.setRot( Number( values[3] ), Number( values[4] ), Number( values[5] ) ) );
                                 break;
-                            case "worldEulers":
+                            case "posRotMatrix":
+								value = [];
+                                value.push( glgeObject.setLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) ) );
+                                value.push( glgeObject.setRotMatrix( values[3] ) );
+                                break;                            
+							case "worldEulers":
                                 value = glgeObject.setDRot( Number( values[0] )* ( 3.14159/180.0 ), Number( values[1] )* ( 3.14159/180.0 ), Number( values[2] )* ( 3.14159/180.0 ) );
                                 break;
                             case "worldPosition":
@@ -680,6 +709,9 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 						case "http-vwf-example-com-types-camera":
 							value = this.satCameraProperty( nodeID, propertyName, propertyValue );
 							break;
+						case "http-vwf-example-com-types-particlesystem":
+							value = this.satParticleSystemProperty( nodeID, propertyName, propertyValue );
+							break;						
 						case "http-vwf-example-com-types-glge":
 							value = this.satSceneProperty( nodeID, propertyName, propertyValue );
 							break;
@@ -732,20 +764,90 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 
 	};
 
+	module.prototype.satParticleSystemProperty = function( nodeID, propertyName, propertyValue ) {
+
+		var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
+        var value = propertyValue;
+		switch ( propertyName ) {
+			case "numberParticles":
+				node.glgeObject.setNumParticles( propertyValue );
+				break;
+			case "lifeTime":
+				node.glgeObject.setLifeTime( propertyValue );
+				break;
+			case "maxLifeTime":
+				node.glgeObject.setMaxLifeTime( propertyValue );
+				break;
+			case "minLifeTime":
+				node.glgeObject.setMinLifeTime( propertyValue );
+				break;
+			case "startSize":
+				node.glgeObject.setStartSize( propertyValue );
+				break;
+			case "endSize":
+				node.glgeObject.setEndSize( propertyValue );
+				break;
+			case "loop":
+				node.glgeObject.setLoop( propertyValue );
+				break;
+			case "velocity":
+				node.glgeObject.setVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;V
+			case "maxVelocity":
+				node.glgeObject.setMaxVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;			
+			case "minVelocity":
+				node.glgeObject.setMinVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;	
+			case "startAcceleration":
+				node.glgeObject.setStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;
+			case "endAcceleration":
+				node.glgeObject.setEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;
+			case "maxStartAcceleration":
+				node.glgeObject.setMaxStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;
+			case "maxEndAcceleration":
+				node.glgeObject.setMaxEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;
+			case "minStartAcceleration":
+				node.glgeObject.setMinStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;
+			case "minEndAcceleration":
+				node.glgeObject.setMinEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+				break;
+			case "startColor":
+				node.glgeObject.setStartColor( propertyValue );
+				break;
+			case "endColor":
+				node.glgeObject.setEndColor( propertyValue );
+				break;
+			case "image":
+				node.glgeObject.setImage( propertyValue );
+				break;
+			default:
+				break;
+		}
+		return value;
+
+	};
+
+
 	module.prototype.satCameraProperty = function( nodeID, propertyName, propertyValue ) {
 
 		var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
 		switch ( propertyName ) {
-  			case "active":
-				var sceneNode = this.scenes["index-vwf"];
-				var node = this.nodes[nodeID];
-				if ( propertyValue ) {
-					setActiveCamera( this, node.glgeObject, sceneNode, nodeID );
-				} else {
-					setActiveCamera( this, sceneNode.camera.defaultCam, sceneNode, undefined );
-				}
-				break;
+//  			case "active":
+//				var sceneNode = this.scenes["index-vwf"];
+//				var node = this.nodes[nodeID];
+//				if ( propertyValue ) {
+//					setActiveCamera( this, node.glgeObject, sceneNode, nodeID );
+//				} else {
+//					setActiveCamera( this, sceneNode.camera.defaultCam, sceneNode, undefined );
+//				}
+//				break;
 			case "cameraType":
 				switch ( propertyValue ) {
 					case "perspective":
@@ -926,6 +1028,22 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     value = new Array;
                     value.push( glgeObject.getLocX(), glgeObject.getLocY(), glgeObject.getLocZ() );
                     break;
+                case "posRot":
+                    value = new Array;
+                    value.push( glgeObject.getLocX() );
+					value.push( glgeObject.getLocY() );
+					value.push( glgeObject.getLocZ() );
+                    value.push( glgeObject.getRotX() );
+					value.push( glgeObject.getRotY() );
+					value.push( glgeObject.getRotZ() );
+                    break;
+                case "posRotMatrix":
+                    value = new Array;
+                    value.push( glgeObject.getLocX() );
+					value.push( glgeObject.getLocY() );
+					value.push( glgeObject.getLocZ() );
+					value.push( glgeObject.getRotMatrix() );
+                    break;
                 case "worldEulers":
                     value = new Array;
                     value.push( glgeObject.getDRotX()* ( 180.0/3.14159 ), glgeObject.getDRotY()* ( 180.0/3.14159 ), glgeObject.getDRotZ()* ( 180.0/3.14159 ) );
@@ -945,6 +1063,23 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
 				case "transform":
 					break;
+				
+				case "boundingbox":
+					var bbox = getLocalBoundingBox( glgeObject );
+					value = [ bbox.xMin, bbox.xMax, bbox.yMin, bbox.yMax, bbox.zMin, bbox.zMax ];
+					break;
+
+				case "centerOffset":
+					value = getCenterOffset( glgeObject );
+					break;
+
+				case "vertices":
+					value = getMeshVertices( glgeObject );
+					break;
+
+				case "vertexIndices":
+					value = getMeshVertexIndices( glgeObject );
+					break;
 
 				default:
 					switch ( node.type ) {
@@ -954,6 +1089,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 						case "http-vwf-example-com-types-camera":
 							value = this.gotCameraProperty( nodeID, propertyName, propertyValue );
 							break;
+						case "http-vwf-example-com-types-particlesystem":
+							value = this.gotParticleSystemProperty( nodeID, propertyName, propertyValue );
+							break;						
 						case "http-vwf-example-com-types-scene":
 							value = this.gotSceneProperty( nodeID, propertyName, propertyValue );
 							break;
@@ -982,6 +1120,17 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 		}
 		return value;
 
+	};
+
+	module.prototype.gotParticleSystemProperty = function( nodeID, propertyName, propertyValue ) {
+		var node = this.nodes[nodeID] 
+        var value = propertyValue;
+		switch ( propertyName ) {
+			default:
+				vwf.logger.info( "WARNING: unable to get property " + namespace + " " + nodeID + " " + propertyName );
+				break;
+		}
+		return value;
 	};
 
     // -- gotLightProperty ------------------------------------------------------------------------------
@@ -1136,7 +1285,11 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 						case "http-vwf-example-com-types-particleSystem":
 							if ( assetObj.constructor == GLGE.ParticleSystem )
 								obj = assetObj;
-							break;	
+							break;
+						case "http-vwf-example-com-types-mesh":
+							if ( assetObj.constructor == GLGE.Mesh )
+								obj = assetObj;
+							break;
 					}
 
 					if ( obj ) {
@@ -1190,6 +1343,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 		}
 	}
 
+	var cameraInUse;
 	var activeCamera = function( view, sceneNode ) {
 		var cam = undefined;
 		if ( sceneNode && sceneNode.camera ) {
@@ -1198,6 +1352,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 			else 
 				cam = sceneNode.camera.defaultCamNode;
 		}
+		cameraInUse = cam;
 		return cam;
 	}
 
@@ -1229,7 +1384,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 					initCamera( cam );
 					sceneNode.camera.glgeCameras[childName] = cam;
 				} else {
-					cam = sceneNode.camera.glgeCameras[childName]
+					cam = sceneNode.camera.glgeCameras[childName];
 				}
 
 				child.name = childName;
@@ -1240,6 +1395,10 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 		}
 	}
 
+	var createParticleSystem = function( view, nodeID, childID, childName ) {
+	
+	}
+
 	var initCamera = function( glgeCamera ) {
 		if ( glgeCamera ) {
 			glgeCamera.setLoc( 0, 0, 0 );
@@ -1247,6 +1406,125 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 			glgeCamera.setType( GLGE.C_PERSPECTIVE );
 			glgeCamera.setRotOrder( GLGE.ROT_XZY );
 		}		
+	}
+
+	var getLocalBoundingBox = function( glgeObject ) {
+		var bBox = { xMin: Number.MAX_VALUE, xMax: Number.MIN_VALUE,
+					 yMin: Number.MAX_VALUE, yMax: Number.MIN_VALUE,
+					 zMin: Number.MAX_VALUE, zMax: Number.MIN_VALUE };
+
+		var glgeObjectList = [];
+		findAllGlgeObjects( glgeObject, glgeObjectList );
+
+		for ( var j = 0; j < glgeObjectList.length; j++ ) {
+			var vertices = getMeshVertices( glgeObjectList[j] );
+			for ( var i = 0; i < vertices.length; i++ ) {
+				if ( vertices[i][0] < bBox.xMin )
+					bBox.xMin = vertices[i][0];
+				if ( vertices[i][0] > bBox.xMax )
+					bBox.xMax = vertices[i][0];
+				if ( vertices[i][1] < bBox.yMin )
+					bBox.yMin = vertices[i][1];
+				if ( vertices[i][1] > bBox.yMax )
+					bBox.yMax = vertices[i][1];
+				if ( vertices[i][2] < bBox.zMin )
+					bBox.zMin = vertices[i][2];
+				if ( vertices[i][2] > bBox.zMax )
+					bBox.zMax = vertices[i][2];
+			}
+		}
+
+		return bBox;	
+	}
+
+	var getCenterOffset = function( glgeObject ) {
+		var offset = [ 0, 0, 0 ];
+		if ( glgeObject ) {
+			var bBox = getLocalBoundingBox( glgeObject )
+			offset[0] = ( bBox.xMax - bBox.xMin ) * 0.50;
+			offset[1] = ( bBox.yMax - bBox.yMin ) * 0.50;
+			offset[2] = ( bBox.zMax - bBox.zMin ) * 0.50;
+		}
+		return offset;
+	}
+
+	var setVertexProperties = function( view, nodeID ){
+		var t1, t2;
+		vwf.setProperty( nodeID, "vertices", view.gotProperty( nodeID, "vertices", t1 ) );
+		vwf.setProperty( nodeID, "vertexIndices", view.gotProperty( nodeID, "vertexIndices", t2 ) );
+	}
+
+	var getNodeVertices = function( view, nodeID ) {
+		if ( view && view.nodes[nodeID] ) {
+			return getMeshVertices( view.nodes[nodeID] );
+		}
+		return undefined;
+	}
+
+	var getMeshVertices = function( glgeObject ) {
+		var vertices = [];
+		var glgeMesh;
+		if ( glgeObject ) {
+			if ( glgeObject.getChildren && !glgeObject.getMesh ) {
+				var objects = []; 
+				findAllGlgeObjects( glgeObject, objects );
+				for ( var j = 0; j < objects.length; j++ ) {
+					if ( objects[j].getMesh ) {
+						var pos = objects[j].getMesh().positions;
+						if ( pos ) {
+							for ( var i = 0; i < pos.length; i = i + 3 ) {
+								vertices.push([pos[i], pos[i + 1], pos[i + 2]]);
+							}
+						}
+					}					
+				}
+			} else if ( glgeObject.getMesh && glgeObject.getMesh() ) {
+				glgeMesh = glgeObject.getMesh();
+			} else if ( glgeObject.constructor == GLGE.Mesh ) {
+				glgeMesh = glgeObject;
+			}
+
+			if ( glgeMesh ) {
+				var pos = glgeMesh.positions;
+				if ( pos ) {
+					for ( var i = 0; i < pos.length; i = i + 3 ) {
+						vertices.push( [pos[i], pos[i + 1], pos[i + 2]] );
+					}
+				}			
+			}
+
+		}	
+		return vertices;
+	}
+
+	var getNodeVertexIndices = function( view, nodeID ) {
+		if ( view && view.nodes[nodeID] ) {
+			return getMeshVertexIndices( view.nodes[nodeID] );
+		}
+		return undefined;
+	}
+
+	var getMeshVertexIndices = function( glgeObject ) {
+		var vertexIndices = [];
+		var mesh;
+		if ( glgeObject ) {
+			if ( glgeObject.getMesh && glgeObject.getMesh() ) {
+				mesh = glgeObject.getMesh();
+			} else if ( glgeObject.constructor == GLGE.Mesh ) {
+				mesh = glgeObject;
+			}
+
+			if ( mesh && mesh.faces ) {
+				var faces = mesh.faces.data;
+				if ( faces ) {
+					for (var i = 0; i < faces.length; i = i + 3) {
+						vertexIndices.push([faces[i], faces[i + 1], faces[i + 2]]);
+					}
+				}
+			}
+		}
+
+		return vertexIndices;
 	}
 
     var bindColladaChildren = function (view, nodeID) {
@@ -1308,6 +1586,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     };
 
+	var meshIndex = 1;
     var bindChild = function (view, sceneNode, node, child, childName, childID) {
 
         vwf.logger.info("      bindChild: " + sceneNode + " " + node + " " + child + " " + childName);
@@ -1363,6 +1642,68 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             vwf.logger.info( "     unable to bind: " + childID );
         } else {
 			delete view.loadingObjects[ childID ];
+			if ( child.glgeObject.getChildren ) {
+				var children = child.glgeObject.getChildren();
+				var childObj;
+				var objName;
+				var node;
+				var type;
+				var extendType;
+				for ( var i = 0; i < children.length; i++ ) {
+					childObj = children[i];
+					objName = name( childObj );
+					
+					if ( childObj.constructor == GLGE.Group || childObj.constructor == GLGE.Object ) {
+						extendType = "http://vwf.example.com/types/node3";
+						type = "http-vwf-example-com-types-node3";
+						node = type +"-"+ objName;
+					}
+
+					if ( node && type ) {
+						if ( !view.nodes[ node ] ) {
+							console.info( "[[  Creating " + type + " named: " + objName );
+							vwf.createNode( { "extends": extendType }, function() {
+								vwf.addChild( childID, node, objName );
+							}, objName );
+							console.info( "]]  Creating " + type + " named: " + objName );
+						}
+					}
+
+					var mesh;
+					var meshType;
+					var meshName;
+					var meshNodeID;
+					var meshID;
+					if ( childObj.constructor == GLGE.Object && childObj.getMesh && childObj.getMesh() ) {
+						mesh = childObj.getMesh();
+						meshName = name( mesh );
+						if ( meshName == "" ) {
+							meshName = objName + "Mesh" + meshIndex++;
+							mesh.name = meshName;
+						}
+						meshType = "http://vwf.example.com/types/mesh";
+						meshID = "http-vwf-example-com-types-mesh";
+						meshNodeID = meshID +"-"+ meshName;	
+
+						//vwf.logger.enable = true;
+						if ( meshNodeID && meshType ) {
+							if ( !view.nodes[ meshNodeID ] ) {
+								console.info( "		++  Creating Mesh  " + meshNodeID + " Named: " + meshName );
+								vwf.createNode( { "extends": meshType }, function() {
+									//vwf.logger.enable = true;
+									vwf.addChild( node, meshNodeID, meshName );
+									setVertexProperties( view, meshNodeID );
+									//vwf.logger.enable = false;
+								}, meshName );
+								console.info( "		++  Creating Mesh " + meshNodeID + " Named: " + meshName );
+							}
+						}	
+						//vwf.logger.enable = false;					
+												
+					}
+				}  
+			}
+
             if ( child.glgeObject.animate && child.glgeObject.animation ) {
                vwf.logger.info( "$$$$$     child id " + childID + " with name " + childName ); 
             }
@@ -1471,6 +1812,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     var objectCenter = {};
 
     var centerGroup = undefined;
+
+	var lastCubeCreated;
     //var keysDown = {};
 
     var checkKeys = function (nodeID, view, now, lasttime) {
@@ -1524,8 +1867,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_A)) { yRot = 0.04; }
 					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_D)) { yRot = -0.04; }
 					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
-						vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
-						vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
+						console.info("	camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
+						console.info("	camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
 					}
 
 					var speed = 2.0;
@@ -1563,9 +1906,403 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 	//						}
 						}
 					}
+
+					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_SPACE)) {
+						var useCube = true;
+
+						if ( !lastCubeCreated )
+							lastCubeCreated = now - 1001;
+
+						if ( now - lastCubeCreated > 1000 ) {
+//							if ( useCube ) {
+//								var physics=new GLGE.PhysicsBox;
+//								var collada=new GLGE.Collada;
+//								collada.setDocument("yellowCube.dae");
+//								collada.setScale(1);
+//								physics.setHeight( 15 );
+//								physics.setWidth( 15 );
+//								physics.setDepth( 15 );
+//								physics.setMass( 8 );
+//								physics.setRotationalVelocityDamping([0.8, 0.8, 0.8]);//								physics.setLinearVelocityDamping([0.99,0.99,0.99,0]);//								physics.setFriction(0.5);//								physics.setRestitution(0.1);
+//								physics.addChild(collada);
+//								sceneNode.glgeScene.addChild(physics);//								physics.setLoc( camerapos.x, camerapos.y, camerapos.z + 100 );//								var mat=camera.getRotMatrix();//								var trans=GLGE.mulMat4Vec4(mat,[0,0,-1,1]);
+//								physics.setVelocity([trans[0]*60,trans[1]*60,trans[2]*60]);						
+//							} else {
+//								var physics=new GLGE.PhysicsSphere;
+//								var collada=new GLGE.Collada;
+//								collada.setDocument("yellowSphere.dae");
+//								collada.setScale(1);
+//								physics.setRadius( 3.4 );
+//								physics.setMass( 8 );
+//								physics.setRotationalVelocityDamping([0.5, 0.5, 0.5]);//								physics.setLinearVelocityDamping([0.99,0.99,0.99,0]);//								physics.setFriction(0.5);//								physics.setRestitution(0.1);
+//								physics.addChild(collada);
+//								sceneNode.glgeScene.addChild(physics);//								physics.setLoc( camerapos.x, camerapos.y, camerapos.z );//								var mat=camera.getRotMatrix();//								var trans=GLGE.mulMat4Vec4(mat,[0,0,-1,1]);
+//								physics.setVelocity([trans[0]*60,trans[1]*60,trans[2]*60]);
+//							}
+						}
+						lastCubeCreated = now;
+					}
+
 				}
 			}
         }
+
+    }
+
+
+	var mouselook = function( now, lasttime ) {
+		var mousepos = mouse.getMousePosition();
+		mousepos.x = mousepos.x - sceneCanvas.offsetLeft + window.scrollX;
+		mousepos.y = mousepos.y - sceneCanvas.offsetTop + window.scrollY;
+		var camera = cameraInUse;
+		camerarot = camera.getRotation();
+		inc = (mousepos.y - (sceneCanvas.offsetHeight / 2)) / 500;
+
+		var trans = GLGE.mulMat4Vec4(camera.getRotMatrix(), [0, 0, -1, 1]);
+		var mag = Math.pow(Math.pow(trans[0], 2) + Math.pow(trans[1], 2), 0.5);
+		trans[0] = trans[0] / mag;
+		trans[1] = trans[1] / mag;
+		camera.setRotX(1.56 - trans[1] * inc);
+		camera.setRotZ(-trans[0] * inc);
+		var width = sceneCanvas.offsetWidth;
+		if (mousepos.x < width * 0.3) {
+			var turn = Math.pow((mousepos.x - width * 0.3) / (width * 0.3), 2) * 0.005 * (now - lasttime);
+			camera.setRotY(camerarot.y + turn);
+		}
+		if (mousepos.x > width * 0.7) {
+			var turn = Math.pow((mousepos.x - width * 0.7) / (width * 0.3), 2) * 0.005 * (now - lasttime);
+			camera.setRotY(camerarot.y - turn);
+		}
+	}
+
+	var mouse; 
+    var sceneCanvas;
+	var container;
+	var mouseDown = false;
+    var mouseOverCanvas = false;
+
+    var initMouseEvents = function (canvas, nodeID, view) {
+
+        var sceneNode = view.scenes[nodeID], child;
+        var sceneID = nodeID;
+        var sceneView = view;
+
+        var mouseDownObjectID = undefined;
+        var mouseOverObjectID = undefined;
+
+        var lastXPos = -1;
+        var lastYPos = -1;
+
+		container = document.getElementById("container");
+		sceneCanvas = canvas;
+		mouse = new GLGE.MouseInput( sceneCanvas );
+
+        canvas.onmousedown = function (e) {
+            mouseDown = true;
+            mouseDownObjectID = getPickObjectID( mousePick(e, sceneNode ), sceneView, true );
+
+            //vwf.logger.info("CANVAS mouseDown: " + mouseDownObjectID);
+            //this.throwEvent( "onMouseDown", mouseDownObjectID);
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
+
+        }
+
+        canvas.onmouseup = function (e) {
+			var pickInfo = mousePick( e, sceneNode );
+            var mouseUpObjectID = getPickObjectID( pickInfo, sceneView, false );
+            // check for time??
+            if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
+                vwf.logger.info("pointerClick: id:" + mouseDownObjectID + "   name: " + name( view.nodes[mouseDownObjectID].glgeObject ) );
+                //this.throwEvent( "onMouseClick", mouseDownObjectID);
+                view.callMethod( mouseUpObjectID, "pointerClick" );
+
+				if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
+					if ( sceneView.nodes[mouseUpObjectID] ) {
+						var colladaObj = undefined;
+						var currentObj;
+						var glgeObj = sceneView.nodes[mouseUpObjectID].glgeObject;
+						if ( glgeObj ) {
+							currentObj = glgeObj;
+							while ( !colladaObj && currentObj ) {
+								if ( currentObj.constructor == GLGE.Collada )
+									colladaObj = currentObj;
+								else
+									currentObj = currentObj.parent;
+							} 
+						}
+						if ( colladaObj ) {
+							recurseGroup( colladaObj, 0 );
+						}
+					}				
+				}
+            }
+
+            //vwf.logger.info("CANVAS onMouseUp: " + mouseDownObjectID);
+            //this.throwEvent( "onMouseUp", mouseDownObjectID);
+
+            mouseDownObjectID = undefined;
+            mouseDown = false;
+
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
+        }
+
+        canvas.onmouseover = function (e) {
+            mouseOverCanvas = true;
+
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
+        }
+
+        canvas.onmousemove = function (e) {
+            var pickInfo = mousePick( e, sceneNode );
+            var mouseOverID = getPickObjectID( pickInfo, sceneView, false );
+            var mouseInfo = { 
+                              "lastX": lastXPos,
+                              "lastY": lastYPos,
+                              "X" : mouseXPos(e),
+                              "Y" : mouseYPos(e),
+                              "mouseDownID" : mouseDownObjectID,
+                              "mouseOverID" : mouseOverID,
+                              "pickInfo" : pickInfo,
+                            };
+
+            if (mouseDown) {
+                if (mouseDownObjectID) {
+
+                    //vwf.logger.info("CANVAS onMouseMove: " + mouseDownObjectID);
+                    //this.throwEvent( "onMouseMove", mouseDownObjectID);
+                }
+
+                //view.callMethod( mouseDownObjectID, "onMouseMove" );
+            } else {
+                if (mouseOverID) {
+                    if (mouseOverObjectID) {
+                        if (mouseOverID != mouseOverObjectID) {
+
+                            //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                            //this.throwEvent( "onMouseLeave", mouseOverObjectID);
+
+                            mouseOverObjectID = mouseOverID;
+
+                            //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+                            //this.throwEvent( "onMouseEnter", mouseOverObjectID);
+                        } else {
+                            //vwf.logger.info("CANVAS onMouseHover: " + mouseOverObjectID);
+                            //this.throwEvent( "onMouseHover", mouseOverObjectID);
+
+                        }
+                    } else {
+                        mouseOverObjectID = mouseOverID;
+
+                        //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+                        //this.throwEvent( "onMouseEnter", mouseOverObjectID);
+                    }
+
+                } else {
+                    if (mouseOverObjectID) {
+                        //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                        //this.throwEvent( "onMouseLeave", mouseOverObjectID);
+                        mouseOverObjectID = undefined;
+
+                    }
+                }
+            }
+
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );
+
+            //this.mouseOverCanvas = true; 
+        }
+
+        canvas.onmouseout = function (e) {
+            if (mouseOverObjectID) {
+                //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+                //this.throwEvent( "onMouseLeave", mouseOverObjectID);
+                mouseOverObjectID = undefined;
+            }
+            mouseOverCanvas = false;
+        }
+
+        canvas.onmousewheel = function (e) {
+        }
+
+    };
+
+    function name(obj) {
+        return obj.colladaName || obj.colladaId || obj.name || obj.id || "";
+    }
+
+    function path(obj) {
+        var sOut = "";
+        var sName = "";
+
+        while (obj && obj.parent) {
+            if (sOut == "")
+                sOut = name(obj);
+            else
+                sOut = name(obj) + "." + sOut;
+            obj = obj.parent;
+        }
+        return sOut;
+    }
+
+    var mouseXPos = function(e) {
+        return e.clientX - e.currentTarget.offsetLeft + window.scrollX;
+    }
+
+    var mouseYPos = function(e) {
+        return e.clientY - e.currentTarget.offsetTop + window.scrollY;
+    }
+
+    var getPickObjectID = function( pickInfo, view, debug ) {
+
+        if (pickInfo && pickInfo.object) {
+			return getObjectID( pickInfo.object, view, debug );
+        }
+        return undefined;
+
+    }
+
+    var getObjectID = function( objectToLookFor, view, debug ) {
+
+        var objectIDFound = -1;
+            
+        while (objectIDFound == -1 && objectToLookFor) {
+            if ( debug ) {
+				vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
+			}
+            jQuery.each(view.nodes, function (nodeID, node) {
+                if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
+                    //vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
+                    objectIDFound = nodeID;
+				}
+            });
+            objectToLookFor = objectToLookFor.parent;
+        }
+        if (objectIDFound != -1)
+            return objectIDFound;
+
+        return undefined;
+    }
+
+    var mousePick = function( e, sceneNode ) {
+
+        if (sceneNode && sceneNode.glgeScene) {
+            var objectIDFound = -1;
+            var x = mouseXPos( e );
+            var y = mouseYPos( e );
+
+            return sceneNode.glgeScene.pick(x, y);
+        }
+        return undefined;
+
+    };
+
+	var findAllGlgeObjects = function( glgeNode, objList ) {
+		if ( glgeNode ) {
+			if ( glgeNode.constructor == GLGE.Object )
+				objList.push( glgeNode );
+
+			if ( glgeNode.getChildren ) {
+				var nodeChildren = glgeNode.getChildren();
+				for (var i = 0; i < nodeChildren.length; i++) {
+					findAllGlgeObjects( nodeChildren[i], objList );
+				}
+			}
+		}
+	}
+
+    var recurseGroup = function(grp, iDepth) {
+        var grpChildren = grp.getChildren();
+        var sOut = indent(iDepth);
+        var name = "";
+
+        for (var i = 0; i < grpChildren.length; i++) {
+            if (grpChildren[i].constructor == GLGE.Collada) {
+                iDepth++;
+                outputCollada(grpChildren[i], iDepth, true);
+                recurseGroup(grpChildren[i], iDepth + 1);
+                outputCollada(grpChildren[i], iDepth, false);
+                iDepth--;
+            } else if (grpChildren[i].constructor == GLGE.Group) {
+                iDepth++;
+                outputGroup(grpChildren[i], iDepth, true);
+                recurseGroup(grpChildren[i], iDepth + 1);
+                outputGroup(grpChildren[i], iDepth, false);
+                iDepth--;
+            } else if (grpChildren[i].constructor == GLGE.Object) {
+                outputObject(grpChildren[i], iDepth);
+            }
+        }
+    }
+
+
+    var getChildCount = function(grp) {
+        var iCount = 0;
+        if (grp) {
+            var grpChildren = grp.getChildren();
+            if (grpChildren) {
+                for (var i = 0; i < grpChildren.length; i++) {
+                    if (grpChildren[i].constructor != GLGE.Object) {
+                        iCount++;
+                    }
+                }
+            }
+        }
+        return iCount;
+    }
+
+    var indentStr = function() {
+        return "  ";
+    }
+
+    var indent = function(iIndent) {
+        var sOut = "";
+        for (var j = 0; j < iIndent; j++) { sOut = sOut + indentStr(); }
+        return sOut;
+    }
+
+    var outputCollada = function(collada, iIndent, open) {
+        var sOut = indent(iIndent);
+        if (open) {
+            console.info(sOut + "children:")
+        }
+    }
+
+    var outputGroup = function(group, iIndent, open) {
+        var sOut = indent(iIndent + 1);
+        if (open) {
+            lastGroupName = name(group);
+            console.info(indent(iIndent) + lastGroupName + ":");
+            console.info(indent(iIndent + 1) + "extends: http://vwf.example.com/types/node3");
+
+            if (getChildCount(group) > 0)
+                console.info(sOut + "children:");
+        }
+    }
+
+    var outputObject = function(obj, iIndent) {
+        if (obj.multimaterials && obj.multimaterials.length > 0) {
+            console.info(indent(iIndent) + "children:");
+            materialIndex = 1;
+            for (var i = 0; i < obj.multimaterials.length; i++) {
+                outputMaterial(obj.getMaterial(i), iIndent + 1);
+            }
+        }
+    }
+
+    var outputMaterial = function(obj, iIndent) {
+
+        var sOut = indent(iIndent + 1);
+        console.info(indent(iIndent) + lastGroupName + "Material" + materialIndex++ + ":");
+        console.info(sOut + "extends: 'http://vwf.example.com/types/material'");
+
+    }
+
+})(window.vwf.modules, "vwf.view.glge");
+
 
         /*var keysDown = {};
         if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_A) ) keysDown[GLGE.KI_A] = true;
@@ -1763,311 +2500,3 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 }
             }
         }*/
-
-    }
-
-    var initMouseEvents = function (canvas, nodeID, view) {
-
-        var sceneNode = view.scenes[nodeID], child;
-        var sceneID = nodeID;
-        var sceneView = view;
-        var mouseDown = false;
-        var mouseOverCanvas = false;
-
-        var mouseDownObjectID = undefined;
-        var mouseOverObjectID = undefined;
-
-        var lastXPos = -1;
-        var lastYPos = -1;
-
-        canvas.onmousedown = function (e) {
-            mouseDown = true;
-            mouseDownObjectID = getPickObjectID( mousePick(e, sceneNode ), sceneView, true );
-
-            //vwf.logger.info("CANVAS mouseDown: " + mouseDownObjectID);
-            //this.throwEvent( "onMouseDown", mouseDownObjectID);
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
-
-        }
-
-        canvas.onmouseup = function (e) {
-            var mouseUpObjectID = getPickObjectID( mousePick( e, sceneNode ), sceneView, false );
-            // check for time??
-            if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
-                vwf.logger.info("pointerClick: id:" + mouseDownObjectID + "   name: " + name( view.nodes[mouseDownObjectID].glgeObject ) );
-                //this.throwEvent( "onMouseClick", mouseDownObjectID);
-                view.callMethod( mouseUpObjectID, "pointerClick" );
-
-				if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
-					if ( sceneView.nodes[mouseUpObjectID] ) {
-						var colladaObj = undefined;
-						var currentObj;
-						var glgeObj = sceneView.nodes[mouseUpObjectID].glgeObject;
-						if ( glgeObj ) {
-							currentObj = glgeObj;
-							while ( !colladaObj && currentObj ) {
-								if ( currentObj.constructor == GLGE.Collada )
-									colladaObj = currentObj;
-								else
-									currentObj = currentObj.parent;
-							} 
-						}
-						if ( colladaObj ) {
-							recurseGroup( colladaObj, 0 );
-						}
-					}				
-				}
-            }
-
-            //vwf.logger.info("CANVAS onMouseUp: " + mouseDownObjectID);
-            //this.throwEvent( "onMouseUp", mouseDownObjectID);
-
-            mouseDownObjectID = undefined;
-            mouseDown = false;
-
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
-        }
-
-        canvas.onmouseover = function (e) {
-            mouseOverCanvas = true;
-
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
-        }
-
-        canvas.onmousemove = function (e) {
-            var pickInfo = mousePick( e, sceneNode );
-            var mouseOverID = getPickObjectID( pickInfo, sceneView, false );
-            var mouseInfo = { 
-                              "lastX": lastXPos,
-                              "lastY": lastYPos,
-                              "X" : mouseXPos(e),
-                              "Y" : mouseYPos(e),
-                              "mouseDownID" : mouseDownObjectID,
-                              "mouseOverID" : mouseOverID,
-                              "pickInfo" : pickInfo,
-                            };
-
-            if (mouseDown) {
-                if (mouseDownObjectID) {
-
-                    //vwf.logger.info("CANVAS onMouseMove: " + mouseDownObjectID);
-                    //this.throwEvent( "onMouseMove", mouseDownObjectID);
-                }
-
-                //view.callMethod( mouseDownObjectID, "onMouseMove" );
-            } else {
-                if (mouseOverID) {
-                    if (mouseOverObjectID) {
-                        if (mouseOverID != mouseOverObjectID) {
-
-                            //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
-                            //this.throwEvent( "onMouseLeave", mouseOverObjectID);
-
-                            mouseOverObjectID = mouseOverID;
-
-                            //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
-                            //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                        } else {
-                            //vwf.logger.info("CANVAS onMouseHover: " + mouseOverObjectID);
-                            //this.throwEvent( "onMouseHover", mouseOverObjectID);
-
-                        }
-                    } else {
-                        mouseOverObjectID = mouseOverID;
-
-                        //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
-                        //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                    }
-
-                } else {
-                    if (mouseOverObjectID) {
-                        //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
-                        //this.throwEvent( "onMouseLeave", mouseOverObjectID);
-                        mouseOverObjectID = undefined;
-
-                    }
-                }
-            }
-
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
-
-            //this.mouseOverCanvas = true; 
-        }
-
-        canvas.onmouseout = function (e) {
-            if (mouseOverObjectID) {
-                //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
-                //this.throwEvent( "onMouseLeave", mouseOverObjectID);
-                mouseOverObjectID = undefined;
-            }
-            mouseOverCanvas = false;
-        }
-
-        canvas.onmousewheel = function (e) {
-        }
-
-    };
-
-    function name(obj) {
-        return obj.colladaName || obj.colladaId || obj.name || obj.id || "";
-    }
-
-    function path(obj) {
-        var sOut = "";
-        var sName = "";
-
-        while (obj && obj.parent) {
-            if (sOut == "")
-                sOut = name(obj);
-            else
-                sOut = name(obj) + "." + sOut;
-            obj = obj.parent;
-        }
-        return sOut;
-    }
-
-    var mouseXPos = function(e) {
-        return e.clientX - e.currentTarget.offsetLeft + window.scrollX;
-    }
-
-    var mouseYPos = function(e) {
-        return e.clientY - e.currentTarget.offsetTop + window.scrollY;
-    }
-
-    var getPickObjectID = function( pickInfo, view, debug ) {
-
-        if (pickInfo && pickInfo.object) {
-			return getObjectID( pickInfo.object, view, debug );
-        }
-        return undefined;
-
-    }
-
-    var getObjectID = function( objectToLookFor, view, debug ) {
-
-        var objectIDFound = -1;
-            
-        while (objectIDFound == -1 && objectToLookFor) {
-            if ( debug ) {
-				vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
-			}
-            jQuery.each(view.nodes, function (nodeID, node) {
-                if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    //vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
-                    objectIDFound = nodeID;
-				}
-            });
-            objectToLookFor = objectToLookFor.parent;
-        }
-        if (objectIDFound != -1)
-            return objectIDFound;
-
-        return undefined;
-    }
-
-    var mousePick = function( e, sceneNode ) {
-
-        if (sceneNode && sceneNode.glgeScene) {
-            var objectIDFound = -1;
-            var x = mouseXPos( e );
-            var y = mouseYPos( e );
-
-            return sceneNode.glgeScene.pick(x, y);
-        }
-        return undefined;
-
-    };
-
-
-    var recurseGroup = function(grp, iDepth) {
-        var grpChildren = grp.getChildren();
-        var sOut = indent(iDepth);
-        var name = "";
-
-        for (var i = 0; i < grpChildren.length; i++) {
-            if (grpChildren[i].constructor == GLGE.Collada) {
-                iDepth++;
-                outputCollada(grpChildren[i], iDepth, true);
-                recurseGroup(grpChildren[i], iDepth + 1);
-                outputCollada(grpChildren[i], iDepth, false);
-                iDepth--;
-            } else if (grpChildren[i].constructor == GLGE.Group) {
-                iDepth++;
-                outputGroup(grpChildren[i], iDepth, true);
-                recurseGroup(grpChildren[i], iDepth + 1);
-                outputGroup(grpChildren[i], iDepth, false);
-                iDepth--;
-            } else if (grpChildren[i].constructor == GLGE.Object) {
-                outputObject(grpChildren[i], iDepth);
-            }
-        }
-    }
-
-
-    var getChildCount = function(grp) {
-        var iCount = 0;
-        if (grp) {
-            var grpChildren = grp.getChildren();
-            if (grpChildren) {
-                for (var i = 0; i < grpChildren.length; i++) {
-                    if (grpChildren[i].constructor != GLGE.Object) {
-                        iCount++;
-                    }
-                }
-            }
-        }
-        return iCount;
-    }
-
-    var indentStr = function() {
-        return "  ";
-    }
-
-    var indent = function(iIndent) {
-        var sOut = "";
-        for (var j = 0; j < iIndent; j++) { sOut = sOut + indentStr(); }
-        return sOut;
-    }
-
-    var outputCollada = function(collada, iIndent, open) {
-        var sOut = indent(iIndent);
-        if (open) {
-            console.info(sOut + "children:")
-        }
-    }
-
-    var outputGroup = function(group, iIndent, open) {
-        var sOut = indent(iIndent + 1);
-        if (open) {
-            lastGroupName = name(group);
-            console.info(indent(iIndent) + lastGroupName + ":");
-            console.info(indent(iIndent + 1) + "extends: http://vwf.example.com/types/node3");
-
-            if (getChildCount(group) > 0)
-                console.info(sOut + "children:");
-        }
-    }
-
-    var outputObject = function(obj, iIndent) {
-        if (obj.multimaterials && obj.multimaterials.length > 0) {
-            console.info(indent(iIndent) + "children:");
-            materialIndex = 1;
-            for (var i = 0; i < obj.multimaterials.length; i++) {
-                outputMaterial(obj.getMaterial(i), iIndent + 1);
-            }
-        }
-    }
-
-    var outputMaterial = function(obj, iIndent) {
-
-        var sOut = indent(iIndent + 1);
-        console.info(indent(iIndent) + lastGroupName + "Material" + materialIndex++ + ":");
-        console.info(sOut + "extends: 'http://vwf.example.com/types/material'");
-
-    }
-
-})(window.vwf.modules, "vwf.view.glge");
