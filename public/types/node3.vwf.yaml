@@ -3,32 +3,61 @@ methods:
   pointerClick: 
 extends: http://vwf.example.com/types/node
 properties: 
-  looping: false
-  transform: 
-  - 1
-  - 0
-  - 0
-  - 0
-  - 1
-  - 0
-  - 0
-  - 0
-  - 1
-  - 0
-  - 0
-  - 0
   enabled: true
+  position: [ 0, 0, 0 ]
+  rotation: [ 0, 0, 0 ]
+  boundingbox: 
+    set: |
+      console.info( "WARNING: node3 boundingbox cannot be set" )
+    value: [ 0, 0, 0, 0, 0, 0 ] 
+  centerOffset: 
+    set: |
+      console.info( "WARNING: node3 centerOffset cannot be set" )
+    value: [ 0, 0, 0 ] 
+  transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ]
+  vertices: 
+    set: |
+      console.info( "WARNING: node3 vertices cannot be set" )
+    value: []
+  vertexIndices: 
+    set: |
+      console.info( "WARNING: node3 vertexIndices cannot be set" )
+    value: []
+  transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ]
   speed: 1
   playing: false
+  looping: false
+  physics: "none"
+  physicsDef: 0
+  mass: 1
+  restitution: 0.1
+  friction: 0.5
+  rotVelocityDamping: [ 0.5, 0.5, 0.5 ]
+  linVelocityDamping: [ 1, 1, 1, 0 ]  
 scripts:
 - text: |
+    var self = this;
     this.initialize = function() {
       console.info( "==================== node3 ====================" );
       console.info( "== looping == "+this.looping+" ====================" );
       console.info( "== speed == "+this.speed+" ====================" );
       console.info( "== playing == "+this.playing+" ====================" );
+      console.info( "== physics == "+this.physics+" ====================" );
+      console.info( "== physicsDef == "+this.physicsDef+" ====================" );
+      console.info( "== mass == "+this.mass+" ====================" );
+      console.info( "== restitution == "+this.restitution+" ====================" );
+      console.info( "== friction == "+this.friction+" ====================" );      
+      console.info( "== rotVelocityDamping == "+this.rotVelocityDamping+" ====================" );
+      console.info( "== linVelocityDamping == "+this.linVelocityDamping+" ====================" );
       this.looping = this.looping;
       this.speed = this.speed;
       this.playing = this.playing;
+      this.physics = this.physics;
+      this.physicsDef = this.physicsDef;
+      this.mass = this.mass;
+      this.restitution = this.restitution;
+      this.friction = this.friction;
+      this.rotVelocityDamping = this.rotVelocityDamping;
+      this.linVelocityDamping = this.linVelocityDamping;
     }
   type: application/javascript
