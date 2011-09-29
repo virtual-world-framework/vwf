@@ -906,7 +906,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 },
 
                 debug: function( /* function_name, ... */ ) {
-                    window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
+                    // window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
                 },
 
                 info: function( /* function_name, ... */ ) {
