@@ -1,8 +1,18 @@
-define( [ "vwf/model", "module" ], function( model, module ) {
+define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/object.js is a backstop property store.
 
-    return model.register( module, {
+    return model.load( module, {
+
+        // == Module Definition ====================================================================
+
+        // -- initialize ---------------------------------------------------------------------------
+
+        initialize: function() {
+            this.objects = {}; // maps id => { property: value, ... }
+        },
+
+        // == Model API ============================================================================
 
         // -- creatingProperty ---------------------------------------------------------------------
 
@@ -10,7 +20,7 @@ define( [ "vwf/model", "module" ], function( model, module ) {
 
             this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
 
-            var object = this.private.objects[nodeID] || ( this.private.objects[nodeID] = {} );
+            var object = this.objects[nodeID] || ( this.objects[nodeID] = {} );
 
             return object[propertyName] = propertyValue;
         },
@@ -23,7 +33,7 @@ define( [ "vwf/model", "module" ], function( model, module ) {
 
             this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
 
-            var object = this.private.objects[nodeID] || ( this.private.objects[nodeID] = {} );
+            var object = this.objects[nodeID] || ( this.objects[nodeID] = {} );
 
             return object[propertyName] = propertyValue;
         },
@@ -34,15 +44,9 @@ define( [ "vwf/model", "module" ], function( model, module ) {
 
             this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
 
-            var object = this.private.objects[nodeID];
+            var object = this.objects[nodeID];
 
             return object && object[propertyName];
-        },
-
-        // == Private ==============================================================================
-
-        private: {
-            objects: {} // maps id => { property: value, ... }
         }
 
     } );

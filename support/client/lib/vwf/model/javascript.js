@@ -1,9 +1,9 @@
-define( [ "vwf/model", "module" ], function( model, module ) {
+define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
     // simulation.
 
-    return model.register( module, {
+    return model.load( module, {
 
         // This is a placeholder for providing a natural integration between simulation and the
         // browser's JavaScript environment.
@@ -23,26 +23,38 @@ define( [ "vwf/model", "module" ], function( model, module ) {
         //   - Properties support getters and setters that invoke a handler that may influence the
         //     property access.
 
+        // == Module Definition ====================================================================
+
+        // -- initialize ---------------------------------------------------------------------------
+
+        initialize: function() {
+            this.types = {}; // maps id => function() { }
+            this.root = undefined;
+            this.nodes = {}; // maps id => new type()
+        },
+
+        // == Model API ============================================================================
+
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
 
             this.logger.info( "creatingNode", nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType );
 
-            var type = nodeExtendsID ? this.private.types[nodeExtendsID] : Object;
+            var type = nodeExtendsID ? this.types[nodeExtendsID] : Object;
 
             if ( ! type ) {
 
-                var prototype = this.private.nodes[nodeExtendsID];
+                var prototype = this.nodes[nodeExtendsID];
 
-                type = this.private.types[nodeExtendsID] = function() { };
+                type = this.types[nodeExtendsID] = function() { };
 
                 type.prototype = prototype;
                 type.prototype.constructor = type; // resetting constructor breaks enumerables?
 
             }
 
-            var node = this.private.nodes[nodeID] = new type( nodeSource, nodeType );
+            var node = this.nodes[nodeID] = new type( nodeSource, nodeType );
 
 node.id = nodeID; // TODO: move to a backstop model
 
@@ -67,8 +79,8 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "addingChild", nodeID, childID, childName );
 
-            var node = this.private.nodes[nodeID];
-            var child = this.private.nodes[childID];
+            var node = this.nodes[nodeID];
+            var child = this.nodes[childID];
 
             child.name = childName;
             child.parent = node;
@@ -88,7 +100,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "parenting", nodeID );
 
-            var node = this.private.nodes[nodeID];
+            var node = this.nodes[nodeID];
 
             return node.parent && node.parent.id || 0;
         },
@@ -99,7 +111,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "childrening", nodeID );
 
-            var node = this.private.nodes[nodeID];
+            var node = this.nodes[nodeID];
 
             return jQuery.map( node.children, function( child ) {
                 return child.id;
@@ -112,7 +124,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "naming", nodeID );
 
-            var node = this.private.nodes[nodeID];
+            var node = this.nodes[nodeID];
 
             return node.name || "";
         },
@@ -123,26 +135,26 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
 
-            var node = this.private.nodes[nodeID];
+            var node = this.nodes[nodeID];
             var self = this;
 
             Object.defineProperty( node.properties, propertyName, {
-                get: function() { return self.getProperty( nodeID, propertyName ) }, // "this" is property's node  // TODO: or is it node.properties here?
-                set: function( value ) { self.setProperty( nodeID, propertyName, value ) },
+                get: function() { return self.kernel.getProperty( nodeID, propertyName ) }, // "this" is property's node  // TODO: or is it node.properties here?
+                set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
                 enumerable: true
             } );
 
             // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
 
             Object.defineProperty( node, propertyName, {
-                get: function() { return self.getProperty( nodeID, propertyName ) }, // "this" is property's node
-                set: function( value ) { self.setProperty( nodeID, propertyName, value ) },
+                get: function() { return self.kernel.getProperty( nodeID, propertyName ) }, // "this" is property's node
+                set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
                 enumerable: true
             } );
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.getters[propertyName] = eval( this.private.getterScript( propertyGet ) );
+                    node.getters[propertyName] = eval( getterScript( propertyGet ) );
                 } catch( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", e );
@@ -153,7 +165,7 @@ node.id = nodeID; // TODO: move to a backstop model
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.setters[propertyName] = eval( this.private.setterScript( propertySet ) );
+                    node.setters[propertyName] = eval( setterScript( propertySet ) );
                 } catch( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", e );
@@ -172,13 +184,13 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
 
-            var node = this.private.nodes[nodeID];
+            var node = this.nodes[nodeID];
 
             if ( ! node.properties.hasOwnProperty( propertyName ) ) {
-                this.createProperty( nodeID, propertyName, undefined );
+                this.kernel.createProperty( nodeID, propertyName, undefined );
             }
 
-            var setter = this.private.findSetter( node, propertyName );
+            var setter = findSetter( node, propertyName );
 
             if ( setter && setter !== true ) {
                 try {
@@ -198,8 +210,8 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
 
-            var node = this.private.nodes[nodeID];
-            var getter = this.private.findGetter( node, propertyName );
+            var node = this.nodes[nodeID];
+            var getter = findGetter( node, propertyName );
 
             if ( getter && getter !== true ) {
                 try {
@@ -221,7 +233,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
             this.logger.info( "callingMethod", nodeID, methodName ); // TODO: parameters
 
-            var node = this.private.nodes[nodeID];
+            var node = this.nodes[nodeID];
             // var method = ... verify it's in node.methods[], search prototypes, etc.
             var value;
 
@@ -237,7 +249,7 @@ node.id = nodeID; // TODO: move to a backstop model
             this.logger.info( "executing", nodeID,
                 ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType );
 
-            var node = this.private.nodes[nodeID];
+            var node = this.nodes[nodeID];
             var value;
 
             if ( scriptType == "application/javascript" ) {
@@ -252,56 +264,46 @@ node.id = nodeID; // TODO: move to a backstop model
             return value;
         },
 
-        private: {
-
-            // == Private variables ================================================================
-
-            types: {}, // maps id => function() { }
-
-            root: undefined,
-            nodes: {}, // maps id => new type()
-
-            // == Private functions ================================================================
-
-            // -- getterScript ---------------------------------------------------------------------
-
-            getterScript: function( body ) {
-                return this.accessorScript( "( function() {", body, "} )" );
-            },
-
-            // -- setterScript ---------------------------------------------------------------------
-
-            setterScript: function( body ) {
-                return this.accessorScript( "( function( value ) {", body, "} )" );
-            },
-
-            // -- accessorScript -------------------------------------------------------------------
-
-            accessorScript: function( prefix, body, suffix ) {  // TODO: sanitize script, limit access
-                if ( body.charAt( body.length-1 ) == "\n" ) {
-                    return prefix + "\n" + body.replace( /^./gm, "  $&" ) + suffix + "\n";
-                } else {
-                    return prefix + " " + body + " " + suffix;
-                }
-            },
-
-            // -- findGetter -----------------------------------------------------------------------
-
-            findGetter: function( node, propertyName ) {
-                return node.getters && node.getters[propertyName] ||
-                    Object.getPrototypeOf( node ) && this.findGetter( Object.getPrototypeOf( node ), propertyName );
-            },
-
-            // -- findSetter -----------------------------------------------------------------------
-
-            findSetter: function( node, propertyName ) {
-                return node.setters && node.setters[propertyName] ||
-                    Object.getPrototypeOf( node ) && this.findSetter( Object.getPrototypeOf( node ), propertyName );
-            },
-
-        }
-
     } );
+
+    // == Private functions ========================================================================
+
+    // -- getterScript -----------------------------------------------------------------------------
+
+    function getterScript( body ) {
+        return accessorScript( "( function() {", body, "} )" );
+    }
+
+    // -- setterScript -----------------------------------------------------------------------------
+
+    function setterScript( body ) {
+        return accessorScript( "( function( value ) {", body, "} )" );
+    }
+
+    // -- accessorScript ---------------------------------------------------------------------------
+
+    function accessorScript( prefix, body, suffix ) {  // TODO: sanitize script, limit access
+        if ( body.charAt( body.length-1 ) == "\n" ) {
+            return prefix + "\n" + body.replace( /^./gm, "  $&" ) + suffix + "\n";
+        } else {
+            return prefix + " " + body + " " + suffix;
+        }
+    }
+
+    // -- findGetter -------------------------------------------------------------------------------
+
+    function findGetter( node, propertyName ) {
+        return node.getters && node.getters[propertyName] ||
+            Object.getPrototypeOf( node ) && findGetter( Object.getPrototypeOf( node ), propertyName );
+    }
+
+    // -- findSetter -------------------------------------------------------------------------------
+
+    function findSetter( node, propertyName ) {
+        return node.setters && node.setters[propertyName] ||
+            Object.getPrototypeOf( node ) && findSetter( Object.getPrototypeOf( node ), propertyName );
+    }
+
 
     // == Node =====================================================================================
 
