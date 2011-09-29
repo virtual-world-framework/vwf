@@ -17,11 +17,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
-
             var object = this.objects[nodeID] || ( this.objects[nodeID] = {} );
-
             return object[propertyName] = propertyValue;
         },
 
@@ -30,22 +26,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
-
             var object = this.objects[nodeID] || ( this.objects[nodeID] = {} );
-
             return object[propertyName] = propertyValue;
         },
 
         // -- gettingProperty ----------------------------------------------------------------------
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
-
             var object = this.objects[nodeID];
-
             return object && object[propertyName];
         }
 

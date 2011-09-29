@@ -144,10 +144,15 @@
 
             jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
-                var model = require( modelName ).create( vwf /* , [ require( "vwf/model/stage/log" ) ] */ );
+                var model = require( modelName ).create( vwf, [ require( "vwf/model/stage/log" ) ] );
 
                 if ( model ) {
                     vwf.models.push( model );
+
+if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+    vwf.models.javascript = model;
+    while ( vwf.models.javascript.model ) vwf.models.javascript = vwf.models.javascript.model;
+}
                 }
 
             } );
@@ -770,7 +775,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 // Delegate to the prototype.
 
                 if ( propertyValue === undefined ) {
-                    var prototypeID = Object.getPrototypeOf( vwf.models[0].nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+                    var prototypeID = Object.getPrototypeOf( vwf.models.javascript.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
                     if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
                         propertyValue = vwf.getProperty( prototypeID, propertyName );
                     }
