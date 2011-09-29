@@ -1,4 +1,4 @@
-define( [ "vwf-proxy", "module" ], function( vwf, module ) {
+define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
 
     // vwf/model.js is the common implementation of all Virtual World Framework models. Each model
     // is part of a federation with other models attached to the simulation that implements part of
@@ -17,230 +17,112 @@ define( [ "vwf-proxy", "module" ], function( vwf, module ) {
     // 
     // vwf/model and all deriving models are loaded as RequireJS (http://requirejs.org) modules.
 
+    var kernel_functions = [  // TODO: get this list from vwf
+        "createNode", /* TODO: deleteNode, */
+        "addChild", "removeChild", "parent", "children", "name",
+        "createProperty", /* TODO: deleteProperty, */ "setProperty", "getProperty",
+        "createMethod", /* TODO: deleteMethod, */ "callMethod",
+        /* TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent, */
+        "execute",
+        "time",
+    ];
+
+    var model_functions = [  // TODO: get this list from vwf
+        "creatingNode", /* TODO: deletingNode, */
+        "addingChild", "removingChild", "parenting", "childrening", "naming",
+        "creatingProperty", /* TODO: deletingProperty, */ "settingProperty", "gettingProperty",
+        "creatingMethod", /* TODO: deletingMethod, */ "callingMethod",
+        /* TODO: creatingEvent, deletingEvent, firingEvent, */
+        "executing",
+    ];
+
+    var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+    logger.info( "load" );
+
     return {
 
-logger: vwf.logger_for( module.id.replace( /\//g, "." ) ),
+        module: module,
+        logger: logger,
 
-        register: function( module, spec ) {
+        load: function( module, initializer, kernel_generator, model_generator ) {
 
-            var id = module.id.replace( /\//g, "." );
-            this.logger.info( "register", "loading", id );
+            var instance = Object.create( this );
 
-            var inst = Object.create( this );
+            instance.module = module;
+            instance.logger = require( "vwf-proxy" ).logger_for( instance.module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+            
+            instance.logger.info( "load" );
 
-            Object.keys( spec ).forEach( function( key ) {
-                inst[key] = spec[key];
-            } );
+            if ( typeof initializer == "function" || initializer instanceof Function ) {
+                initializer = initializer();
+            }
 
-inst.logger = vwf.logger_for( id );
+            for ( var key in initializer ) {
+                instance[key] = initializer[key]; 
+            }
 
-            return inst;
+            if ( kernel_generator ) {
+
+                kernel_functions.forEach( function( kernel_function ) {
+                    instance[kernel_function] = kernel_generator( kernel_function );
+                } );
+                
+            }
+
+            if ( model_generator ) {
+
+                model_functions.forEach( function( model_function ) {
+                    instance[model_function] = model_generator( model_function );
+                } );
+                
+            }
+
+            return instance;
         },
 
-        // == Stimulus API =========================================================================
+        create: function( kernel, model, stages ) {
 
-        // The base model stands between the VWF manager and the deriving model classes. API calls
-        // pass through in two directions. Calls from a deriving model to the manager are commands,
-        // causing change. These calls are the stimulus half of the API.
-        // 
-        // For models, stimulus calls pass directly through to the manager. (Views make these calls
-        // through the conference reflector.) Future development will move some functionality from
-        // the deriving models to provide a common service for mapping between vwf and model object
-        // identifiers.
+            this.logger.info( "create" );
 
-        // -- createNode ---------------------------------------------------------------------------
+            if ( model && model.length !== undefined ) {
+                stages = model;
+                model = undefined;
+            }
 
-        createNode: function( component_uri_or_object, callback ) {
-            this.logger.info( "createNode", component_uri_or_object );
-            return vwf.createNode( component_uri_or_object, callback );
+            if ( ! model ) {
+                stages = Array.prototype.concat.apply( [], ( this.pipeline || [] ).map( function( stage ) {
+                    return ( stages || [] ).concat( stage );
+                } ) ).concat( stages || [] );
+            } else {
+                stages = ( stages || [] ).concat( this.pipeline || [] );
+            }
+
+            var instance = Object.create( this );
+
+            initialize.call( instance,
+                stages.length ?
+                    stages.pop().create( kernel, instance, stages ) :
+                    kernel,
+                model );
+
+            function initialize( /* kernel, model */ ) {
+                this.__proto__ && initialize.apply( this.__proto__, arguments ); // depth-first recursion
+                this.hasOwnProperty( "initialize" ) && this.initialize.apply( instance, arguments ); // initialize() from the bottom up
+            }
+
+            if ( ! model ) {
+                while ( instance.kernel !== kernel ) {
+                    instance = instance.kernel;
+                }
+            }
+
+            return instance;
         },
 
-        // TODO: deleteNode
-
-        // -- addChild -----------------------------------------------------------------------------
-
-        addChild: function( nodeID, childID, childName ) {
-            this.logger.info( "addChild", nodeID, childID, childName );
-            return vwf.addChild( nodeID, childID, childName );
+        initialize: function( kernel ) {
+            this.kernel = kernel;
         },
-
-        // -- removeChild --------------------------------------------------------------------------
-
-        removeChild: function( nodeID, childID ) {
-            this.logger.info( "removeChild", nodeID, childID );
-            return vwf.removeChild( nodeID, childID );
-        },
-
-        // -- parent -------------------------------------------------------------------------------
-
-        parent: function( nodeID ) {
-            this.logger.info( "parent", nodeID );
-            return vwf.parent( nodeID );
-        },
-
-        // -- children -----------------------------------------------------------------------------
-
-        children: function( nodeID ) {
-            this.logger.info( "children", nodeID );
-            return vwf.children( nodeID );
-        },
-
-        // -- name ---------------------------------------------------------------------------------
-
-        name: function( nodeID ) {
-            this.logger.info( "name", nodeID );
-            return vwf.name( nodeID );
-        },
-
-        // -- createProperty -----------------------------------------------------------------------
-
-        createProperty: function( nodeID, propertyName, propertyValue ) {
-            this.logger.info( "createProperty", nodeID, propertyName, propertyValue );
-            return vwf.createProperty( nodeID, propertyName, propertyValue );
-        },
-
-        // TODO: deleteProperty
-
-        // -- setProperty --------------------------------------------------------------------------
-
-        setProperty: function( nodeID, propertyName, propertyValue ) {
-            this.logger.info( "setProperty", nodeID, propertyName, propertyValue );
-            return vwf.setProperty( nodeID, propertyName, propertyValue );
-        },
-
-        // -- getProperty --------------------------------------------------------------------------
-
-        getProperty: function( nodeID, propertyName, propertyValue ) {
-            this.logger.info( "getProperty", nodeID, propertyName, propertyValue );
-            return vwf.getProperty( nodeID, propertyName, propertyValue );
-        },
-
-        // -- createMethod -------------------------------------------------------------------------
-
-        createMethod: function( nodeID, methodName ) {
-            this.logger.info( "createMethod", nodeID, methodName );
-            return vwf.createMethod( nodeID, methodName );
-        },
-
-        // TODO: deleteMethod
-
-        // -- callMethod ---------------------------------------------------------------------------
-
-        callMethod: function( nodeID, methodName ) { // TODO: parameters
-            this.logger.info( "callMethod", nodeID, methodName ); // TODO: parameters
-            return vwf.callMethod( nodeID, methodName ); // TODO: parameters
-        },
-    
-        // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
-
-        // -- execute ------------------------------------------------------------------------------
-
-        execute: function( nodeID, scriptText, scriptType ) {
-            this.logger.info( "execute", nodeID, ( scriptText || "" ).substring( 0, 100 ), scriptType );
-            return vwf.execute( nodeID, scriptText, scriptType );
-        },
-
-        // -- time ---------------------------------------------------------------------------------
-
-        time: function() {
-            // this.logger.debug( "time", "" );
-            return vwf.time();
-        },
-
-        // == Response API =========================================================================
-
-        // Calls from the manager to a deriving model are notifications, informing of change. These
-        // calls are the response half of the API.
-
-        // For models, responses are where work is actually performed, and response implementations may
-        // generate additional stimulus calls. (In contrast, views generally transfer data outward, away
-        // from the simulation when handling a response.)
-
-        // Each of these implementations provides the default, null response. A deriving model only
-        // needs to implement the response handlers that it needs for its work. These will handle the
-        // rest.
-
-        // -- creatingNode -------------------------------------------------------------------------
-
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
-            this.logger.info( "creatingNode", nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType );
-        },
-
-        // TODO: deletingNode
-
-        // -- addingChild --------------------------------------------------------------------------
-
-        addingChild: function( nodeID, childID, childName ) {
-            this.logger.info( "addingChild", nodeID, childID, childName );
-        },
-
-        // -- removingChild ------------------------------------------------------------------------
-
-        removingChild: function( nodeID, childID ) {
-            this.logger.info( "removingChild", nodeID, childID );
-        },
-
-        // -- parenting ----------------------------------------------------------------------------
-
-        parenting: function( nodeID ) {
-            this.logger.info( "parenting", nodeID );
-        },
-
-        // -- childrening --------------------------------------------------------------------------
-
-        childrening: function( nodeID ) {
-            this.logger.info( "childrening", nodeID );
-        },
-
-        // -- naming -------------------------------------------------------------------------------
-
-        naming: function( nodeID ) {
-            this.logger.info( "naming", nodeID );
-        },
-
-        // -- creatingProperty ---------------------------------------------------------------------
-
-        creatingProperty: function( nodeID, propertyName, propertyValue ) {
-            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
-        },
-
-        // TODO: deletingProperty
-
-        // -- settingProperty ----------------------------------------------------------------------
-
-        settingProperty: function( nodeID, propertyName, propertyValue ) {
-            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
-        },
-
-        // -- gettingProperty ----------------------------------------------------------------------
-
-        gettingProperty: function( nodeID, propertyName, propertyValue ) {
-            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
-        },
-
-        // -- creatingMethod -----------------------------------------------------------------------
-
-        creatingMethod: function( nodeID, methodName ) {
-            this.logger.info( "creatingMethod", nodeID, methodName );
-        },
-
-        // TODO: deletingMethod
-
-        // -- callingMethod ------------------------------------------------------------------------
-
-        callingMethod: function( nodeID, methodName ) { // TODO: parameters
-            this.logger.info( "callingMethod", nodeID, methodName ); // TODO: parameters
-        },
-
-        // TODO: creatingEvent, deletingEvent, firingEvent
-
-        // -- executing ----------------------------------------------------------------------------
-
-        executing: function( nodeID, scriptText, scriptType ) {
-            this.logger.info( "executing " + nodeID,
-                ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType );
-        },
-
+        
     };
 
 } );

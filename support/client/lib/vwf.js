@@ -144,7 +144,7 @@
 
             jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
-                var model = require( modelName );
+                var model = require( modelName ).create( vwf /* , [ require( "vwf/model/stage/log" ) ] */ );
 
                 if ( model ) {
                     vwf.models.push( model );
@@ -650,7 +650,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
             } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */  // TODO: add truncated propertyGet, propertySet to log
-};
+        };
 
         // -- setProperty --------------------------------------------------------------------------
 
@@ -706,7 +706,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                 vwf.views.forEach( function( view ) {
                     view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
-} );
+                } );
 
             }
 
@@ -770,7 +770,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 // Delegate to the prototype.
 
                 if ( propertyValue === undefined ) {
-                    var prototypeID = Object.getPrototypeOf( vwf.models[0].private.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+                    var prototypeID = Object.getPrototypeOf( vwf.models[0].nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
                     if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
                         propertyValue = vwf.getProperty( prototypeID, propertyName );
                     }
@@ -935,8 +935,11 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             function prefixed_arguments( /* function_name, ... */ ) {
 
-                if ( arguments.length > 1 && ( typeof arguments[0] == "string" || arguments[0] instanceof String ) ) {
-                    if ( typeof arguments[1] == "string" || arguments[1] instanceof String ) {
+                if ( arguments.length > 0 && ( typeof arguments[0] == "string" || arguments[0] instanceof String ) ) {
+                    if ( arguments.length == 1 ) {
+                        // just show the module and function name when there are no additional arguments
+                        return [ module_name + "." + arguments[0] ];
+                    } else if ( typeof arguments[1] == "string" || arguments[1] instanceof String ) {
                         // concatenate when the first field is a string so that it may remain a format string
                         return [ module_name + "." + arguments[0] + ": " + arguments[1] ].concat( Array.prototype.slice.call( arguments, 2 ) );
                     } else {
@@ -944,7 +947,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                         return [ module_name + "." + arguments[0] + ": " ].concat( Array.prototype.slice.call( arguments, 1 ) );
                     }
                 } else {
-                    return [];
+                    return []; // no-op
                 }
 
             }
@@ -1152,7 +1155,7 @@ childName /* TODO: hack */ );
             }
             
             return hasAccessors; 
-        }
+        };
 
         // -- normalizedComponent ------------------------------------------------------------------
 
@@ -1170,7 +1173,8 @@ childName /* TODO: hack */ );
             // an untyped reference to that asset.
 
             if ( typeof component == "string" || component instanceof String ) { // TODO: validate URI
-                component = component.match( /(^@)|(^http:\/\/vwf.example.com\/types\/)|(\.vwf$)/ ) ? { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?  // TODO: this only detects .../types/camera (without .vwf extension) in the http://vwf.example.com/types/... domain.
+                component = component.match( /(^@)|(^http:\/\/vwf.example.com\/types\/)|(\.vwf$)/ ) ?
+                    { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?  // TODO: this only detects .../types/camera (without .vwf extension) in the http://vwf.example.com/types/... domain.
             }
 
             // Fill in the mime type from the source specification if not provided.
