@@ -39,8 +39,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
 
-            this.logger.info( "creatingNode", nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType );
-
             var type = nodeExtendsID ? this.types[nodeExtendsID] : Object;
 
             if ( ! type ) {
@@ -77,8 +75,6 @@ node.id = nodeID; // TODO: move to a backstop model
 
         addingChild: function( nodeID, childID, childName ) {
 
-            this.logger.info( "addingChild", nodeID, childID, childName );
-
             var node = this.nodes[nodeID];
             var child = this.nodes[childID];
 
@@ -98,8 +94,6 @@ node.id = nodeID; // TODO: move to a backstop model
 
         parenting: function( nodeID ) {  // TODO: move to a backstop model
 
-            this.logger.info( "parenting", nodeID );
-
             var node = this.nodes[nodeID];
 
             return node.parent && node.parent.id || 0;
@@ -108,8 +102,6 @@ node.id = nodeID; // TODO: move to a backstop model
         // -- childrening --------------------------------------------------------------------------
 
         childrening: function( nodeID ) {  // TODO: move to a backstop model
-
-            this.logger.info( "childrening", nodeID );
 
             var node = this.nodes[nodeID];
 
@@ -122,8 +114,6 @@ node.id = nodeID; // TODO: move to a backstop model
 
         naming: function( nodeID ) {  // TODO: move to a backstop model
 
-            this.logger.info( "naming", nodeID );
-
             var node = this.nodes[nodeID];
 
             return node.name || "";
@@ -132,8 +122,6 @@ node.id = nodeID; // TODO: move to a backstop model
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
-
-            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
 
             var node = this.nodes[nodeID];
             var self = this;
@@ -182,8 +170,6 @@ node.id = nodeID; // TODO: move to a backstop model
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
-
             var node = this.nodes[nodeID];
 
             if ( ! node.properties.hasOwnProperty( propertyName ) ) {
@@ -208,8 +194,6 @@ node.id = nodeID; // TODO: move to a backstop model
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
-
             var node = this.nodes[nodeID];
             var getter = findGetter( node, propertyName );
 
@@ -231,8 +215,6 @@ node.id = nodeID; // TODO: move to a backstop model
 
         callingMethod: function( nodeID, methodName ) { // TODO: parameters
 
-            this.logger.info( "callingMethod", nodeID, methodName ); // TODO: parameters
-
             var node = this.nodes[nodeID];
             // var method = ... verify it's in node.methods[], search prototypes, etc.
             var value;
@@ -245,9 +227,6 @@ node.id = nodeID; // TODO: move to a backstop model
         // -- executing ----------------------------------------------------------------------------
 
         executing: function( nodeID, scriptText, scriptType ) {
-
-            this.logger.info( "executing", nodeID,
-                ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType );
 
             var node = this.nodes[nodeID];
             var value;
