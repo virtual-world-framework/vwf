@@ -112,7 +112,6 @@
 
                 if ( bRemoved && view.glgeColladaObjects.length == 0 ){
                     bindSceneChildren( view, nodeID );
-					//setVertexProperties( view, nodeID );
 					vwf.setProperty( sceneNode.ID, "loadComplete", true );
                 }
             }
@@ -344,7 +343,6 @@ var sceneNode = this.scenes["index-vwf"];
 
                 if ( bRemoved && glgeView.glgeColladaObjects.length == 0 ){
                     bindSceneChildren( glgeView, viewID );
-					//setVertexProperties( glgeView, viewID );
 					vwf.setProperty( viewID, "loadComplete", true );
                 }
             }
@@ -463,8 +461,6 @@ var sceneNode = this.scenes["index-vwf"];
 					} 
 					if ( bRemoved ) {
 						bindColladaChildren( view, childID );
-						//setVertexProperties( view, childID );
-
 						//console.info( "++ 2 ++		view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
 						if ( view.glgeColladaObjects.length == 0 ) {
 							vwf.setProperty( "index-vwf", "loadComplete", true );
@@ -1463,12 +1459,6 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 		return offset;
 	}
 
-	var setVertexProperties = function( view, nodeID ){
-		var t1, t2;
-		vwf.setProperty( nodeID, "vertices", view.gotProperty( nodeID, "vertices", t1 ) );
-		vwf.setProperty( nodeID, "vertexIndices", view.gotProperty( nodeID, "vertexIndices", t2 ) );
-	}
-
 	var getNodeVertices = function( view, nodeID ) {
 		if ( view && view.nodes[nodeID] ) {
 			return getMeshVertices( view.nodes[nodeID] );
@@ -1707,7 +1697,6 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 								vwf.createNode( { "extends": meshType }, function() {
 									//vwf.logger.enable = true;
 									vwf.addChild( node, meshNodeID, meshName );
-									setVertexProperties( view, meshNodeID );
 									//vwf.logger.enable = false;
 								}, meshName );
 								//console.info( "		++  Creating Mesh " + meshNodeID + " Named: " + meshName );
