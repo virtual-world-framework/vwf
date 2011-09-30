@@ -11,11 +11,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.nodes = {}; // maps id => { property: value, ... }
             this.scenes = {};
             this.active = {};
+			this.enable = false;
             this.now = undefined;
             this.lastTime = (new Date()).getTime();
 
             var self = this;
-            setInterval( function() { self.update() }, 1 );
+            setInterval( function() { self.update() }, 80 );
 
         },
 
@@ -154,14 +155,24 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 var v1, v2;
                                 switch ( propertyValue ) {
                                     case "mesh": {
-                                            var childList = [];
-                                            findMeshChildren( nodeID, childList );
+											var childList = [];
+											var verts, vertIndices;
+											this.findMeshChildren( nodeID, childList );
+											if ( childList.length > 0 ) {
+												node.jigLibMeshes = {};
 
-                                            var verts = vwf.getProperty( nodeID, "vertices", v1 );
-                                            var vertIndices = vwf.getProperty( nodeID, "vertexIndices", v1 );
-                                            node.jigLibObj = new jigLib.JTriangleMesh();
-                                            node.jigLibObj.createMesh(verts, vertIndices);
-                                            scene.system.addBody( node.jigLibObj );
+												for ( var i = 0; i < childList.length; i++ ) {
+												
+													if ( !node.jigLibMeshes[ childList[i] ] ) {
+														verts = vwf.getProperty( childList[i], "vertices", v1 );
+														vertIndices = vwf.getProperty( childList[i], "vertexIndices", v2 );
+
+														node.jigLibMeshes[ childList[i] ] = new jigLib.JTriangleMesh();
+														node.jigLibMeshes[ childList[i] ].createMesh(verts, vertIndices);
+														scene.system.addBody( node.jigLibMeshes[ childList[i] ] );
+													}
+												}
+											}
                                         }
                                         break;
                                     case "box": {
@@ -274,6 +285,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 sceneNode.system.setCollisionSystem( pv[0], pv[1], pv[2], pv[3], pv[4], pv[5], pv[6], pv[7], pv[8], pv[9] );
                             }
                             break;
+						case "loadComplete":
+							this.enable = propertyValue;
+							break;
                     }
                 }
             }
@@ -314,10 +328,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                         propertyValue.push(node.jigLibObj._sideLengths[2]);
                                         break;
                                     case "sphere":
-                                        node.jigLibObj.set_radius( propertyValue );
+                                        propertyValue = node.jigLibObj.get_radius();
                                         break;
                                     case "plane":
-                                        node.jigLibObj.set_normal( propertyValue );
+                                        propertyValue = node.jigLibObj.get_normal();
                                         break;
                                     default:
                                         break;
@@ -387,7 +401,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var sceneNode = this.scenes["index-vwf"];
 
             this.now = (new Date()).getTime();
-            if ( sceneNode && sceneNode.system ) {
+            if ( this.enable && sceneNode && sceneNode.system ) {
 
                 var inttime = (this.now - this.lastTime) / 1000;
                 if (inttime > 0.05) inttime = 0.05;
@@ -440,13 +454,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         findMeshChildren: function( nodeID, childList ) {
             var children = vwf.children( nodeID );
 
-            if ( this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
+            if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
                 childList.push( this.nodes[nodeID] ); 
             }
 
             if ( children && children.length ) {
                 for ( var i = 0; i < children.length; i++ ) {
-                    findMeshChildren( children[i], childList );
+                    this.findMeshChildren( children[i], childList );
                 }
             }
         },

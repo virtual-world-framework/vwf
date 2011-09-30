@@ -14,8 +14,8 @@ scripts:
     var scene = this;
     this.initialize = function() {
       console.info( "==================== scene ====================" );
-      console.info( "== activeCamera == "+this.activeCamera+" ====================" );
-      console.info( "== ambientColor == "+this.ambientColor+" ====================" );
+      //console.info( "== activeCamera == "+this.activeCamera+" ====================" );
+      //console.info( "== ambientColor == "+this.ambientColor+" ====================" );
       this.activeCamera = this.activeCamera;
       this.ambientColor = this.ambientColor;
     }

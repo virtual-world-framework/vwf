@@ -108,9 +108,12 @@
                     }
                 } 
 
+				//console.info( "++ 3 ++		view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
+
                 if ( bRemoved && view.glgeColladaObjects.length == 0 ){
                     bindSceneChildren( view, nodeID );
 					//setVertexProperties( view, nodeID );
+					vwf.setProperty( sceneNode.ID, "loadComplete", true );
                 }
             }
 
@@ -289,7 +292,9 @@ var sceneNode = this.scenes["index-vwf"];
             now = parseInt( new Date().getTime() );
             renderer.render();
             checkKeys( view.rootNodeID, view, now, lasttime );
-			if ( mouseDown ) mouselook( now, lasttime );
+			if ( mouseDown && ( ( now - mouseDownTime ) > 700 ) ) {
+				mouselook( now, lasttime );
+			}
             lasttime = now;
         };
 
@@ -335,9 +340,12 @@ var sceneNode = this.scenes["index-vwf"];
                     }
                 } 
 
+				//console.info( "++ 1 ++		glgeView.glgeColladaObjects.length = " + glgeView.glgeColladaObjects.length );
+
                 if ( bRemoved && glgeView.glgeColladaObjects.length == 0 ){
                     bindSceneChildren( glgeView, viewID );
 					//setVertexProperties( glgeView, viewID );
+					vwf.setProperty( viewID, "loadComplete", true );
                 }
             }
   
@@ -456,6 +464,11 @@ var sceneNode = this.scenes["index-vwf"];
 					if ( bRemoved ) {
 						bindColladaChildren( view, childID );
 						//setVertexProperties( view, childID );
+
+						//console.info( "++ 2 ++		view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
+						if ( view.glgeColladaObjects.length == 0 ) {
+							vwf.setProperty( "index-vwf", "loadComplete", true );
+						}
 					}
 				}
 
@@ -765,6 +778,8 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 	};
 
 	module.prototype.satParticleSystemProperty = function( nodeID, propertyName, propertyValue ) {
+
+		//console.info(namespace + ".satParticleSystemProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )");
 
 		var node = this.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
@@ -1258,7 +1273,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 		var assetObj = undefined;
 		var glgeObjName = "";
 
-		console.info( "=======   Trying to find: " + objName + " of type: " + type );
+		//console.info( "=======   Trying to find: " + objName + " of type: " + type );
 		for ( key in GLGE.Assets.assets ) {
 			assetObj = GLGE.Assets.assets[key];
 			if ( assetObj ) {
@@ -1293,7 +1308,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 					}
 
 					if ( obj ) {
-						console.info( "=======   FOUND : " + objName );
+						//console.info( "=======   FOUND : " + objName );
 						break;
 					}
 				}
@@ -1661,11 +1676,11 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
 					if ( node && type ) {
 						if ( !view.nodes[ node ] ) {
-							console.info( "[[  Creating " + type + " named: " + objName );
+							//console.info( "[[  Creating " + type + " named: " + objName );
 							vwf.createNode( { "extends": extendType }, function() {
 								vwf.addChild( childID, node, objName );
 							}, objName );
-							console.info( "]]  Creating " + type + " named: " + objName );
+							//console.info( "]]  Creating " + type + " named: " + objName );
 						}
 					}
 
@@ -1688,14 +1703,14 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 						//vwf.logger.enable = true;
 						if ( meshNodeID && meshType ) {
 							if ( !view.nodes[ meshNodeID ] ) {
-								console.info( "		++  Creating Mesh  " + meshNodeID + " Named: " + meshName );
+								//console.info( "		++  Creating Mesh  " + meshNodeID + " Named: " + meshName );
 								vwf.createNode( { "extends": meshType }, function() {
 									//vwf.logger.enable = true;
 									vwf.addChild( node, meshNodeID, meshName );
 									setVertexProperties( view, meshNodeID );
 									//vwf.logger.enable = false;
 								}, meshName );
-								console.info( "		++  Creating Mesh " + meshNodeID + " Named: " + meshName );
+								//console.info( "		++  Creating Mesh " + meshNodeID + " Named: " + meshName );
 							}
 						}	
 						//vwf.logger.enable = false;					
@@ -1979,6 +1994,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     var sceneCanvas;
 	var container;
 	var mouseDown = false;
+	var mouseDownTime = undefined;
     var mouseOverCanvas = false;
 
     var initMouseEvents = function (canvas, nodeID, view) {
@@ -2005,7 +2021,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             //this.throwEvent( "onMouseDown", mouseDownObjectID);
             lastXPos = mouseXPos( e );
             lastYPos = mouseYPos( e );
-
+			mouseDownTime = parseInt( new Date().getTime() );
         }
 
         canvas.onmouseup = function (e) {
