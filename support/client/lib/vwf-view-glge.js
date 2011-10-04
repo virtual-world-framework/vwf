@@ -23,10 +23,8 @@
         this.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
         this.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
 
-        this.smoke = undefined; // { name: string, glgeObject: GLGE.ParticleSystem }
-        this.smokeID = undefined;
-
-        this.glgeColladaObjects = new Array();
+        this.glgeColladaObjects = [];
+//		this.glgeColladaIDs = {};
         this.keysDown = {};
 
 		this.parentIDMap = {};
@@ -110,9 +108,23 @@
 
 				//console.info( "++ 3 ++		view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
 
-                if ( bRemoved && view.glgeColladaObjects.length == 0 ){
-                    bindSceneChildren( view, nodeID );
-					vwf.setProperty( sceneNode.ID, "loadComplete", true );
+
+                if ( bRemoved ){
+					if ( view.glgeColladaObjects.length == 0 ) {
+						bindSceneChildren( view, nodeID );
+						vwf.setProperty( sceneNode.ID, "loadComplete", true );
+						loadComplete( view );
+					}
+
+					var id = collada.vwfID;
+					if ( !id ) id = getObjectID( collada, view, false );
+					if ( id && id != "" ){
+						view.callMethod( id, "loadComplete" );
+					}
+//					if ( view.glgeColladaIDs[ collada ] ){
+//						view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
+//					}
+
                 }
             }
 
@@ -341,15 +353,28 @@ var sceneNode = this.scenes["index-vwf"];
 
 				//console.info( "++ 1 ++		glgeView.glgeColladaObjects.length = " + glgeView.glgeColladaObjects.length );
 
-                if ( bRemoved && glgeView.glgeColladaObjects.length == 0 ){
-                    bindSceneChildren( glgeView, viewID );
-					vwf.setProperty( viewID, "loadComplete", true );
+                if ( bRemoved ){
+					if ( glgeView.glgeColladaObjects.length == 0 ) {
+						bindSceneChildren( glgeView, viewID );
+						vwf.setProperty( viewID, "loadComplete", true );
+						loadComplete( glgeView );
+					}
+
                 }
+				var id = collada.vwfID;
+				if ( !id ) id = getObjectID( collada, glgeView, false );
+				if ( id && id != "" ){
+					glgeView.callMethod( id, "loadComplete" );
+				}
+//				if ( glgeView.glgeColladaIDs[ collada ] ){
+//					glgeView.callMethod( glgeView.glgeColladaIDs[ collada ], "loadComplete" );
+//				}
             }
   
             for ( var i = 0; i < children.length; i++ ) {
                 if ( children[i].constructor == GLGE.Collada ) {
                     this.glgeColladaObjects.push( children[i] );
+					//this.glgeColladaIDs[ children[i] ] = getObjectID( children[i], glgeView, false );
                     children[i].loadedCallback = colladaLoaded;
                 }
                 this.findCollada( children[i] ); 
@@ -461,16 +486,28 @@ var sceneNode = this.scenes["index-vwf"];
 					} 
 					if ( bRemoved ) {
 						bindColladaChildren( view, childID );
-						//console.info( "++ 2 ++		view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
+						console.info( "++ 2 ++		view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
 						if ( view.glgeColladaObjects.length == 0 ) {
 							vwf.setProperty( "index-vwf", "loadComplete", true );
+							loadComplete( view );
 						}
+
+						var id = collada.vwfID;
+						if ( !id ) id = getObjectID( collada, view, false );
+						if ( id && id != "" ){
+							view.callMethod( id, "loadComplete" );
+						}
+//						if ( view.glgeColladaIDs[ collada ] ){
+//							view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
+//						}
 					}
 				}
 
 				child.name = childName;
 				child.glgeObject = new GLGE.Collada;
 				this.glgeColladaObjects.push( child.glgeObject );
+				child.glgeObject.vwfID = childID;
+//				this.glgeColladaIDs[ child.glgeObject ] = childID;
 
 				child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
 				child.glgeObject.loadedCallback = colladaLoaded;
@@ -664,6 +701,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                                 value = glgeObject.setRot( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
                                 break;
                             case "position":
+								//console.info( " ++++  "+nodeID+".position = " + value );
                                 value = glgeObject.setLoc( Number( values[0] ), Number( values[1] ), Number( values[2] ) );
                                 break;
                             case "posRot":
@@ -736,12 +774,11 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 		} else {
 			var propArray;
 			if ( !this.delayedProperties[nodeID] ) {
-				this.delayedProperties[nodeID] = [];
+				this.delayedProperties[nodeID] = {};
 			}
 			propArray = this.delayedProperties[nodeID];
 
-			propArray.push( { "property": propertyName, "value": propertyValue } );
-
+			propArray[ propertyName ] = propertyValue;
 		}
 
         return value;
@@ -927,13 +964,13 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 					node.glgeObject.setSpotExponent( propertyValue );
 					break;
 
-  				case "diffuse":
-					node.glgeObject.setDiffuse( propertyValue );
-					break;
+//  				case "diffuse":
+//					node.glgeObject.setDiffuse( propertyValue );
+//					break;
 
-  				case "specular":
-					node.glgeObject.setSpecular( propertyValue );
-					break;
+//  				case "specular":
+//					node.glgeObject.setSpecular( propertyValue );
+//					break;
 
   				case "samples":
 					node.glgeObject.setShadowSamples( propertyValue );
@@ -1356,6 +1393,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
 	var cameraInUse;
 	var activeCamera = function( view, sceneNode ) {
+
 		var cam = undefined;
 		if ( sceneNode && sceneNode.camera ) {
 			if ( sceneNode.camera.camNode )
@@ -1363,6 +1401,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 			else 
 				cam = sceneNode.camera.defaultCamNode;
 		}
+		console.info( "Changing active camera: " + name( cam ) );
 		cameraInUse = cam;
 		return cam;
 	}
@@ -1562,16 +1601,25 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 					parentArray.splice( index, 1 );
 			}
 		}
-
-		if ( view.delayedProperties[nodeID] ) {
-			var props = view.delayedProperties[nodeID];
-			for ( var i = 0; i < props.length; i++ ) {
-				view.satProperty( nodeID, props[i].property, props[i].value );
-			}
-			delete view.delayedProperties[nodeID];
-		}
-
     };
+
+	var loadComplete = function( view ) {
+		var itemsToDelete = [];
+		for ( var id in view.delayedProperties ) {
+			if ( view.nodes[id] ) {
+				var props = view.delayedProperties[id];
+				for ( var propertyName in props ) {
+					//console.info( id + " delayed property set: " + propertyName + " = " + props[propertyName] );
+					view.satProperty( id, propertyName, props[propertyName] );
+				}
+				itemsToDelete.push( id );
+			}
+		}
+		
+		for ( var i = 0; i < itemsToDelete.length; i++ ) {
+			delete view.delayedProperties[itemsToDelete[i]];
+		}
+	};
 
     var bindNodeChildren = function (view, nodeID) {
 
@@ -1635,17 +1683,12 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 			}
 		}
 
-
-        if (child.glgeObject && child.glgeObject.constructor == GLGE.ParticleSystem && child.name == "smoke") {
-            view.smoke = child;
-            view.smokeID = childID;
-        }
-
-        var success = Boolean(child.glgeObject);
+		var success = Boolean(child.glgeObject);
 
         if ( !success ) {
             vwf.logger.info( "     unable to bind: " + childID );
         } else {
+			//console.info( "VWF binded to glge object: " + childID );
 			delete view.loadingObjects[ childID ];
 			if ( child.glgeObject.getChildren ) {
 				var children = child.glgeObject.getChildren();
@@ -2459,13 +2502,6 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
                         vwf.logger.info("camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
                         vwf.logger.info("camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
-                    }
-                    if (view.smokeID && sceneNode.glgeKeys.isKeyPressed(GLGE.KI_P)) {
-                        if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_SHIFT)) {
-                            view.setProperty( view.smokeID, "looping", false );
-                        } else {
-                            view.setProperty( view.smokeID, "looping", true );
-                        }
                     }
 
                     var allowCameraPositions = false;

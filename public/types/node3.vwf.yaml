@@ -60,4 +60,9 @@ scripts:
       this.rotVelocityDamping = this.rotVelocityDamping;
       this.linVelocityDamping = this.linVelocityDamping;
     }
+    this.loadComplete = function() {
+      console.info( "== loadComplete == node3 == loadComplete ==" );
+      console.info( "== loadComplete == " + vwf.name( this )+ " == loadComplete ==" );
+      this.eulers = this.eulers;
+    }    
   type: application/javascript
