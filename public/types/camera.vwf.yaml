@@ -65,17 +65,18 @@ properties:
   speed: 2.0
   position:
     set: |
-      if ( this.attachNodeID != '' ) {
-        var newPos = [ 0, 0, 0 ];
-        var offset = this.attachOffset;
-        var wPos = this.position;
-        console.info( '===========  offset = ' + offset );
-        console.info( '===========  wPos = ' + wPos );
-        newPos[0] = wPos[0] + offset[0];
-        newPos[1] = wPos[1] + offset[1];
-        newPos[2] = wPos[2] + offset[2];
-        vwf.setProperty( this.attachNodeID, 'position', newPos );
-      }
+      //if ( this.attachNodeID != '' ) {
+      //  var newPos = [ 0, 0, 0 ];
+      //  var offset = this.attachOffset;
+      //  var wPos = this.position;
+      //  console.info( '===========  offset = ' + offset );
+      //  console.info( '===========  wPos = ' + wPos );
+      //  newPos[0] = wPos[0] + offset[0];
+      //  newPos[1] = wPos[1] + offset[1];
+      //  newPos[2] = wPos[2] + offset[2];
+      //  vwf.setProperty( this.attachNodeID, 'position', newPos );
+      //}
+      console.info( " ++++  Camera.position = " + value );
       this.position = value;
     value: [ 0, 0, 0 ]
   eulers: [ 0, 0, 0 ]

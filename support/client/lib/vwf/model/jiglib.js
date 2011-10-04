@@ -447,9 +447,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.settingProperty( node.ID, "friction", vwf.getProperty( node.ID, "friction", propValue ) );
             this.settingProperty( node.ID, "rotVelocityDamping", vwf.getProperty( node.ID, "rotVelocityDamping", propValue ) );
             this.settingProperty( node.ID, "linVelocityDamping", vwf.getProperty( node.ID, "linVelocityDamping", propValue ) );
-            this.settingProperty( node.ID, "position", vwf.getProperty( node.ID, "position", propValue ) );
-
-        },
+            
+			propValue = vwf.getProperty( node.ID, "position", propValue );
+			if ( propValue && propValue != "" ) this.settingProperty( node.ID, "position", propValue );
+			propValue = vwf.getProperty( node.ID, "x", propValue );
+			if ( propValue && propValue != "" ) this.settingProperty( node.ID, "x", propValue );
+			propValue = vwf.getProperty( node.ID, "y", propValue );
+			if ( propValue && propValue != "" ) this.settingProperty( node.ID, "y", propValue );
+			propValue = vwf.getProperty( node.ID, "z", propValue );
+			if ( propValue && propValue != "" ) this.settingProperty( node.ID, "z", propValue );
+		},
 
         findMeshChildren: function( nodeID, childList ) {
             var children = vwf.children( nodeID );
