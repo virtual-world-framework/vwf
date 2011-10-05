@@ -1,0 +1,61 @@
+--- 
+extends: http://vwf.example.com/types/scene
+properties: 
+  navmode:
+    set: |
+      console.info( "=================== navmode = " + value + " ===================" );
+      switch ( navMode ) {
+        case "walk":
+        case "orbit":
+          this.navmode = value;
+          break;
+      }
+    value: "walk"  
+scripts:
+- text: |
+    var pointerDown = false;
+    var camera = undefined;
+    var counter = 0;
+    this.initialize = function() {
+      console.info( "== initialize == NavScene == initialize ==" );
+      this.navmode = this.navmode;
+    }
+    this.mouseDown = function( parms ){
+      pointerDown = true;
+    }
+    this.mouseUp = function( parms ){
+      pointerDown = false;
+    }
+    this.mouseOver = function( parms ){
+      if ( pointerDown ) {
+        mouseLook( parms )
+      } else {
+        //console.info( "" );
+      }
+    }
+    this.mouseEnter = function( parms ){ }
+    this.mouseLeave = function( parms ){ }
+    this.mouseHover = function( parms ){ }
+    this.handleKeyEvents( parms ) {
+      //parms = [ view.keysDown, now, lasttime, mat, trans, mag ]
+      if ( counter == 1000 ) {
+        console.info( "handleKeyEvents( "+parms+" )" );
+        counter = 0;
+      }
+      counter++;
+    }
+    var mouselook = function( parms ) {
+      if ( camera ) {
+        camerarot = camera.rotation;
+        inc = ( mousepos.y - (sceneCanvas.offsetHeight / 2)) / 500;
+
+        var trans = GLGE.mulMat4Vec4( camera.getRotMatrix(), [ 0, 0, -1, 1 ] );
+        var mag = Math.pow(Math.pow(trans[0], 2) + Math.pow(trans[1], 2), 0.5);
+        if ( mag == 0 ) mag = 1;
+        trans[0] = trans[0] / mag;
+        trans[1] = trans[1] / mag;
+
+        camera.rotation = [ 1.56 - trans[1] * inc, 0, (-trans[0] * inc ];  
+      }
+    }    
+  type: application/javascript
