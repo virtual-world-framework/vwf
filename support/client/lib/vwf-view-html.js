@@ -127,7 +127,7 @@
                     "<button id='vwf-activeCamera-dropdown'>" + propertyValue + "</button>" +
 //                    "<div class='vwf-activeCamera-dropdown-menu' id='" + nodeID + "-activeCamera-dropdown-menu'>" +
 //                        "<ul>" +
-//                            "<li><a hef='#'>mainCamera</a></li>" +
+//                            "<li><a hef='#'>maincamera</a></li>" +
 //                            "<li><a hef='#'>defaultCamera</a></li>" +
 //                        "</ul>" +
 //                    "</div>" +

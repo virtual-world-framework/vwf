@@ -4,7 +4,7 @@ source: level.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "mainCamera"
+  activeCamera: "http-vwf-example-com-types-camera-maincamera"
 children:
   seymourplane_triangulate.dae:
     extends: http://vwf.example.com/types/node3

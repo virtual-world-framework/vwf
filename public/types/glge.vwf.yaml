@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/types/scene
+extends: http://vwf.example.com/types/navscene
 properties: 
   gravity:
     value: [ 0, 0, -50.8, 0 ]
@@ -11,9 +11,6 @@ properties:
     set: |
       console.info( "=================== loadComplete = " + value + " ===================" );
       this.loadComplete = value;
-      //if ( value ) {
-      //  vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "eulers", [ 90, -270, 0 ] );
-      //}
     value: false  
 scripts:
 - text: |
