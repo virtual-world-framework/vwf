@@ -3,7 +3,7 @@ extends: http://vwf.example.com/types/glge
 source: level.xml
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "maincamera"
+  activeCamera: "http-vwf-example-com-types-camera-maincamera"
 type: model/x-glge
 children: 
   dir_duck_1:

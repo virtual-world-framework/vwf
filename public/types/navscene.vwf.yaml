@@ -3,8 +3,7 @@ extends: http://vwf.example.com/types/scene
 properties: 
   navmode:
     set: |
-      console.info( "=================== navmode = " + value + " ===================" );
-      switch ( navMode ) {
+      switch ( value ) {
         case "walk":
         case "orbit":
           this.navmode = value;
@@ -14,8 +13,7 @@ properties:
 scripts:
 - text: |
     var pointerDown = false;
-    var camera = undefined;
-    var counter = 0;
+    var counter = 1;
     this.initialize = function() {
       console.info( "== initialize == NavScene == initialize ==" );
       this.navmode = this.navmode;
@@ -26,36 +24,91 @@ scripts:
     this.mouseUp = function( parms ){
       pointerDown = false;
     }
-    this.mouseOver = function( parms ){
-      if ( pointerDown ) {
-        mouseLook( parms )
-      } else {
-        //console.info( "" );
-      }
+    this.mouseMove = function( parms ){
+      if ( pointerDown && parms.mouseEventTime - parms.mouseDownTime > 600 ) {
+        this.mouseLook( parms );
+      }    
     }
+    this.mouseOver = function( parms ){ }
     this.mouseEnter = function( parms ){ }
     this.mouseLeave = function( parms ){ }
     this.mouseHover = function( parms ){ }
-    this.handleKeyEvents( parms ) {
-      //parms = [ view.keysDown, now, lasttime, mat, trans, mag ]
-      if ( counter == 1000 ) {
-        console.info( "handleKeyEvents( "+parms+" )" );
-        counter = 0;
+    this.handleKeyEvents = function( keyMap, now, lasttime, mat, trans, mag ) {
+      if (!this.activeCameraComp) {
+        this.getActiveCamera();
       }
-      counter++;
-    }
-    var mouselook = function( parms ) {
-      if ( camera ) {
-        camerarot = camera.rotation;
-        inc = ( mousepos.y - (sceneCanvas.offsetHeight / 2)) / 500;
-
-        var trans = GLGE.mulMat4Vec4( camera.getRotMatrix(), [ 0, 0, -1, 1 ] );
-        var mag = Math.pow(Math.pow(trans[0], 2) + Math.pow(trans[1], 2), 0.5);
-        if ( mag == 0 ) mag = 1;
+      if ( this.activeCameraComp ) {
+        var camerapos = this.activeCameraComp.position;
+        var camerarot = this.activeCameraComp.rotation;
+        var yinc = 0;
+        var xinc = 0;
+        var zinc = 0;
+        var yRot = 0;        
+        if ( mag == 0 ) mag = 1; 
         trans[0] = trans[0] / mag;
-        trans[1] = trans[1] / mag;
-
-        camera.rotation = [ 1.56 - trans[1] * inc, 0, (-trans[0] * inc ];  
+        trans[1] = trans[1] / mag;    
+        for ( keyPress in keyMap ) {
+          switch ( Number( keyPress ) ) {
+            case 87:  //w
+            case 38:  //up
+              yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
+              break;
+            case 83:  //s
+            case 40:  //down
+              yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
+              break;
+            case 65:  //a
+              yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]);
+              break;
+            case 68:  //d
+              yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]);
+              break;
+            case 37: // left
+            case 81: // q
+              yRot += 0.04;
+              break;
+            case 39: // right
+            case 69: // e
+              yRot -= 0.04;
+              break;
+            case 90: // z
+              break;
+            case 88: // x
+              break;
+            case 82: // r
+              zinc = zinc + 1.0;
+              break;
+            case 67: // c
+              zinc = zinc - 1.0;
+              break;
+            default:
+              break;
+          }
+        }
+        
+        if ( yRot != 0 ) {
+          this.activeCameraComp.rotation = [ camerarot[0], camerarot[1] + yRot, camerarot[2] ];
+        }
+        if (xinc != 0 || yinc != 0 || zinc != 0) {
+          this.activeCameraComp.position = [ camerapos[0] + xinc, camerapos[1] + yinc, camerapos[2] + zinc ];
+        }
       }
-    }    
+    }
+    this.mouseLook = function( parms ) {
+      if (!this.activeCameraComp) this.getActiveCamera();
+      if ( this.activeCameraComp ) {
+        var rot = this.activeCameraComp.rotation;
+        var viewCenter = [ 400, 300 ];
+        var incX = -( viewCenter[1] - parms.Y ) * 0.004;
+        var incY = ( viewCenter[0] - parms.X ) * 0.0008;
+        console.info( "X = " + parms.X + "    Y = " + parms.Y + "   incX = " + incX + "    incY = " + incY );
+
+        if ( parms.mag == 0 ) parms.mag = 1;
+        parms.trans[0] = parms.trans[0] / parms.mag;
+        parms.trans[1] = parms.trans[1] / parms.mag;
+        
+        this.activeCameraComp.rotation = [ 1.56 - parms.trans[1] * incX, rot[1] + incY, -parms.trans[0] * incX ];
+      }
+    }
   type: application/javascript
+  

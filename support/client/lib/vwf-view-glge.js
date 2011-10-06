@@ -72,7 +72,7 @@
 
 			window.onkeyup = function( event ) {
               //console.info( "keyup( " + event.keyCode + " )" );
-			  view.keysDown[ event.keyCode ] = true;
+			  delete view.keysDown[ event.keyCode ];
             };
 
             var sceneNode = this.scenes[nodeID] = {
@@ -303,9 +303,6 @@ var sceneNode = this.scenes["index-vwf"];
             now = parseInt( new Date().getTime() );
             renderer.render();
             checkKeys( view.rootNodeID, view, now, lasttime );
-			if ( mouseDown && ( ( now - mouseDownTime ) > 700 ) ) {
-				mouselook( now, lasttime );
-			}
             lasttime = now;
         };
 
@@ -1162,7 +1159,11 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 				value = [ color['r'], color['g'], color['b'] ];
 				break;
 			case "activeCamera":
-				value = name( sceneNode.glgeScene.camera );
+				if ( sceneNode.glgeScene.camera && sceneNode.glgeScene.camera.ID ) {
+					value = sceneNode.glgeScene.camera.ID;
+				} else { 
+					value = name( sceneNode.glgeScene.camera );
+				}
 				break;
 
 		}
@@ -1384,10 +1385,13 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 	var setActiveCamera = function( view, glgeCamera, sceneNode, nodeID ) {
 		if ( sceneNode && sceneNode.glgeScene && glgeCamera ) {
 			sceneNode.glgeScene.setCamera( glgeCamera );
-			if ( nodeID && view.nodes[nodeID] )
+			if ( nodeID && view.nodes[nodeID] ) {
 				sceneNode.camera.camNode = view.nodes[ nodeID ];
-			else
+				sceneNode.camera.ID = nodeID;
+			} else {
 				sceneNode.camera.camNode = sceneNode.camera.defaultCamNode;
+				sceneNode.camera.ID = undefined;
+			}
 		}
 	}
 
@@ -1863,15 +1867,16 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 	var lastCubeCreated;
     //var keysDown = {};
 
-    var checkKeys = function (nodeID, view, now, lasttime) {
+    var checkKeys = function( nodeID, view, now, lasttime ) {
         
         var sceneNode = view.scenes[nodeID], child;
         if (sceneNode && sceneNode.glgeScene) {
             var camera = sceneNode.glgeScene.camera;
 			if ( camera ) {
 				var cameraComponent = sceneNode.camera.camNode;
+				//var 
 
-				if ( cameraComponent && false ) {
+				if ( cameraComponent && view.keysDown && Object.keys( view.keysDown ).length ) {
   
 				  var mat = camera.getRotMatrix();
 				  var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
@@ -1879,148 +1884,19 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
  
 				  // should only be sending the keysDown, now, lastime, but I'm going to
 				  // inlcude the additional data for now to cut some corners
-				  var strParams = JSON.stringify( [ view.keysDown, now, lasttime, mat, trans, mag ] );
+				  var params = [ JSON.stringify(view.keysDown), 
+									JSON.stringify(now), 
+									JSON.stringify(lasttime), 
+									JSON.stringify(mat),
+									JSON.stringify(trans),
+									JSON.stringify(mag) ];
 				  //view.callMethod( this.cameraID, "handleKeyEvents", strParams );
-				  vwf.execute( view.cameraID, "this.handleKeyEvents("+strParams+")", "application/javascript" );
-				} else {
-					camerapos = camera.getPosition();
-					camerarot = camera.getRotation();
-					var mat = camera.getRotMatrix();
-					var trans = GLGE.mulMat4Vec4(mat, [0, 0, -1, 1]);
-					var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
-
-					var yinc = 0;
-					var xinc = 0;
-					var zinc = 0;
-					var yRot = 0;
-					if ( mag == 0 ) mag = 1; 
-					trans[0] = trans[0] / mag;
-					trans[1] = trans[1] / mag;
-
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_W) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_UP_ARROW)) {
-						yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
-					}
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_S) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_DOWN_ARROW)) {
-						yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
-					}
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_LEFT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Q)) {
-						yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]); 
-					}
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_RIGHT_ARROW) || sceneNode.glgeKeys.isKeyPressed(GLGE.KI_E)) {
-						yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]); 
-					}
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_R)) { zinc = zinc + 1.0 }
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_C)) { zinc = zinc - 1.0 }
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_A)) { yRot = 0.04; }
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_D)) { yRot = -0.04; }
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_Z)) {
-						console.info("	camerapos = " + camerapos.x + ", " + camerapos.y + ", " + camerapos.z);
-						console.info("	camerarot = " + camerarot.x + ", " + camerarot.y + ", " + camerarot.z);
-					}
-
-					var speed = 2.0;
-					if ( cameraComponent && (yRot != 0 ) || (xinc != 0 || yinc != 0 || zinc != 0) ) {
-
-						var pr = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed, camerapos.z + zinc, camerarot.x, (camerarot.y + yRot),  camerarot.z ];
-						view.setProperty( sceneNode.camera.camNode.ID, "posRot", pr );
-												
-					} else {
-						if (xinc != 0 || yinc != 0 || zinc != 0) {
-	//						var pos = [ camerapos.x + xinc * 0.05 * (now - lasttime), camerapos.y + yinc * 0.05 * (now - lasttime),  camerapos.z + zinc ];
-							if ( cameraComponent ) {
-								var pos = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed,  camerapos.z + zinc ];
-								view.setProperty( sceneNode.camera.camNode.ID, "position", pos );
-							} else {
-								var pos = [ camerapos.x + xinc * speed, camerapos.y + yinc * speed,  camerapos.z + zinc ];
-								camera.setLocY(pos[1]);
-								camera.setLocX(pos[0]);
-								camera.setLocZ(pos[2]);
-							}
-						}
-						if (yRot != 0 ) {
-							//var rot = [ camerarot.x, (camerarot.y + yRot),  camerarot.z];
-							if ( cameraComponent ) {
-								view.setProperty( sceneNode.camera.camNode.ID, "rotY", (camerarot.y + yRot) );
-							} else {
-								camera.setRotY( camerarot.y + yRot );
-							}
-
-	//						var rot = [ camerarot.x * ( 180.0/3.14159 ), (camerarot.y + yRot) * ( 180.0/3.14159 ),  camerarot.z * ( 180.0/3.14159 ) ];
-	//						if ( cameraComponent ) {
-	//							view.setProperty( view.cameraID, "eulers", JSON.stringify(rot) );
-	//						} else {
-	//							camera.setRotY( camerarot.y + yRot );
-	//						}
-						}
-					}
-
-					if (sceneNode.glgeKeys.isKeyPressed(GLGE.KI_SPACE)) {
-						var useCube = true;
-
-						if ( !lastCubeCreated )
-							lastCubeCreated = now - 1001;
-
-						if ( now - lastCubeCreated > 1000 ) {
-//							if ( useCube ) {
-//								var physics=new GLGE.PhysicsBox;
-//								var collada=new GLGE.Collada;
-//								collada.setDocument("yellowCube.dae");
-//								collada.setScale(1);
-//								physics.setHeight( 15 );
-//								physics.setWidth( 15 );
-//								physics.setDepth( 15 );
-//								physics.setMass( 8 );
-//								physics.setRotationalVelocityDamping([0.8, 0.8, 0.8]);//								physics.setLinearVelocityDamping([0.99,0.99,0.99,0]);//								physics.setFriction(0.5);//								physics.setRestitution(0.1);
-//								physics.addChild(collada);
-//								sceneNode.glgeScene.addChild(physics);//								physics.setLoc( camerapos.x, camerapos.y, camerapos.z + 100 );//								var mat=camera.getRotMatrix();//								var trans=GLGE.mulMat4Vec4(mat,[0,0,-1,1]);
-//								physics.setVelocity([trans[0]*60,trans[1]*60,trans[2]*60]);						
-//							} else {
-//								var physics=new GLGE.PhysicsSphere;
-//								var collada=new GLGE.Collada;
-//								collada.setDocument("yellowSphere.dae");
-//								collada.setScale(1);
-//								physics.setRadius( 3.4 );
-//								physics.setMass( 8 );
-//								physics.setRotationalVelocityDamping([0.5, 0.5, 0.5]);//								physics.setLinearVelocityDamping([0.99,0.99,0.99,0]);//								physics.setFriction(0.5);//								physics.setRestitution(0.1);
-//								physics.addChild(collada);
-//								sceneNode.glgeScene.addChild(physics);//								physics.setLoc( camerapos.x, camerapos.y, camerapos.z );//								var mat=camera.getRotMatrix();//								var trans=GLGE.mulMat4Vec4(mat,[0,0,-1,1]);
-//								physics.setVelocity([trans[0]*60,trans[1]*60,trans[2]*60]);
-//							}
-						}
-						lastCubeCreated = now;
-					}
-
+				  vwf.execute( nodeID, "this.handleKeyEvents && this.handleKeyEvents("+params.join(',')+")", "application/javascript" );
 				}
 			}
         }
 
     }
-
-
-	var mouselook = function( now, lasttime ) {
-		var mousepos = mouse.getMousePosition();
-		mousepos.x = mousepos.x - sceneCanvas.offsetLeft + window.scrollX;
-		mousepos.y = mousepos.y - sceneCanvas.offsetTop + window.scrollY;
-		var camera = cameraInUse;
-		camerarot = camera.getRotation();
-		inc = (mousepos.y - (sceneCanvas.offsetHeight / 2)) / 500;
-
-		var trans = GLGE.mulMat4Vec4(camera.getRotMatrix(), [0, 0, -1, 1]);
-		var mag = Math.pow(Math.pow(trans[0], 2) + Math.pow(trans[1], 2), 0.5);
-		trans[0] = trans[0] / mag;
-		trans[1] = trans[1] / mag;
-		camera.setRotX(1.56 - trans[1] * inc);
-		camera.setRotZ(-trans[0] * inc);
-		var width = sceneCanvas.offsetWidth;
-		if (mousepos.x < width * 0.3) {
-			var turn = Math.pow((mousepos.x - width * 0.3) / (width * 0.3), 2) * 0.005 * (now - lasttime);
-			camera.setRotY(camerarot.y + turn);
-		}
-		if (mousepos.x > width * 0.7) {
-			var turn = Math.pow((mousepos.x - width * 0.7) / (width * 0.3), 2) * 0.005 * (now - lasttime);
-			camera.setRotY(camerarot.y - turn);
-		}
-	}
 
 	var mouse; 
     var sceneCanvas;
@@ -2045,118 +1921,170 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 		sceneCanvas = canvas;
 		mouse = new GLGE.MouseInput( sceneCanvas );
 
+		var mouseInfo = function( e ) {
+            var pickInfo = mousePick( e, sceneNode );
+			if ( pickInfo ) {
+				var mouseOverID = getPickObjectID( pickInfo, sceneView, false );
+				return { 
+							"lastX": lastXPos,
+							"lastY": lastYPos,
+							"X" : mouseXPos(e),
+							"Y" : mouseYPos(e),
+							"mouseDownID" : mouseDownObjectID,
+							"mouseOverID" : mouseOverID,
+							"pickInfo" : {
+											"coord": pickInfo.coord,
+											"distance": pickInfo.distance,
+											"normal": pickInfo.normal,
+											"texture": { "u": pickInfo.texture[0], "v": pickInfo.texture[1] },
+										},
+							"mouseDownTime": mouseDownTime,
+							"mouseEventTime": parseInt( new Date().getTime() ),
+							"trans": undefined,
+							"mag": undefined,
+						};
+			}
+							
+			return undefined;				
+		}
+		
+		var cameraInfo = function( info ) {
+			var camera = cameraInUse;
+			if ( camera ) {
+				info.trans = GLGE.mulMat4Vec4(camera.getRotMatrix(), [0, 0, -1, 1]);
+				info.mag = Math.pow(Math.pow(info.trans[0], 2) + Math.pow(info.trans[1], 2), 0.5);
+			}
+		}
+
         canvas.onmousedown = function (e) {
             mouseDown = true;
-            mouseDownObjectID = getPickObjectID( mousePick(e, sceneNode ), sceneView, true );
+			var mi = mouseInfo( e );
+			if ( mi ) {
+				cameraInfo( mi );
+				mouseDownObjectID = mi.mouseOverID;
 
-            //vwf.logger.info("CANVAS mouseDown: " + mouseDownObjectID);
-            //this.throwEvent( "onMouseDown", mouseDownObjectID);
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
+				//vwf.logger.info("CANVAS mouseDown: " + mouseDownObjectID);
+				//this.throwEvent( "onMouseDown", mouseDownObjectID);
+				var strParams = JSON.stringify( mi );
+				vwf.execute( sceneID, "this.mouseDown && this.mouseDown("+strParams+")", "application/javascript" );
+			}
+			lastXPos = mouseXPos( e );
+			lastYPos = mouseYPos( e );
 			mouseDownTime = parseInt( new Date().getTime() );
+
         }
 
         canvas.onmouseup = function (e) {
-			var pickInfo = mousePick( e, sceneNode );
-            var mouseUpObjectID = getPickObjectID( pickInfo, sceneView, false );
-            // check for time??
-            if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
-                vwf.logger.info("pointerClick: id:" + mouseDownObjectID + "   name: " + name( view.nodes[mouseDownObjectID].glgeObject ) );
-                //this.throwEvent( "onMouseClick", mouseDownObjectID);
-                view.callMethod( mouseUpObjectID, "pointerClick" );
+			var mi = mouseInfo( e );
+			if ( mi ) {
+				cameraInfo( mi );
+				var mouseUpObjectID =  mi.mouseOverID;
+				// check for time??
+				if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
+					vwf.logger.info("pointerClick: id:" + mouseDownObjectID + "   name: " + name( view.nodes[mouseDownObjectID].glgeObject ) );
+					//this.throwEvent( "onMouseClick", mouseDownObjectID);
+					view.callMethod( mouseUpObjectID, "pointerClick" );
 
-				if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
-					if ( sceneView.nodes[mouseUpObjectID] ) {
-						var colladaObj = undefined;
-						var currentObj;
-						var glgeObj = sceneView.nodes[mouseUpObjectID].glgeObject;
-						if ( glgeObj ) {
-							currentObj = glgeObj;
-							while ( !colladaObj && currentObj ) {
-								if ( currentObj.constructor == GLGE.Collada )
-									colladaObj = currentObj;
-								else
-									currentObj = currentObj.parent;
-							} 
-						}
-						if ( colladaObj ) {
-							recurseGroup( colladaObj, 0 );
-						}
-					}				
+					if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
+						if ( sceneView.nodes[mouseUpObjectID] ) {
+							var colladaObj = undefined;
+							var currentObj;
+							var glgeObj = sceneView.nodes[mouseUpObjectID].glgeObject;
+							if ( glgeObj ) {
+								currentObj = glgeObj;
+								while ( !colladaObj && currentObj ) {
+									if ( currentObj.constructor == GLGE.Collada )
+										colladaObj = currentObj;
+									else
+										currentObj = currentObj.parent;
+								} 
+							}
+							if ( colladaObj ) {
+								recurseGroup( colladaObj, 0 );
+							}
+						}				
+					}
 				}
-            }
 
-            //vwf.logger.info("CANVAS onMouseUp: " + mouseDownObjectID);
-            //this.throwEvent( "onMouseUp", mouseDownObjectID);
+				//vwf.logger.info("CANVAS onMouseUp: " + mouseDownObjectID);
+				//this.throwEvent( "onMouseUp", mouseDownObjectID);
+				var strParams = JSON.stringify( mi );
+				vwf.execute( sceneID, "this.mouseUp && this.mouseUp("+strParams+")", "application/javascript" );
 
-            mouseDownObjectID = undefined;
-            mouseDown = false;
+			}
+			mouseDownObjectID = undefined;
+			mouseDownTime = undefined;
+			mouseDown = false;
 
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
-        }
+			lastXPos = mouseXPos( e );
+			lastYPos = mouseYPos( e );
+		}
 
         canvas.onmouseover = function (e) {
             mouseOverCanvas = true;
+			var mi = mouseInfo( e );
+			if ( mi ) {
+				cameraInfo( mi );
+				var strParams = JSON.stringify( mi );
+				vwf.execute( sceneID, "this.mouseOver && this.mouseOver("+strParams+")", "application/javascript" );
+			}
 
             lastXPos = mouseXPos( e );
             lastYPos = mouseYPos( e );
         }
 
         canvas.onmousemove = function (e) {
-            var pickInfo = mousePick( e, sceneNode );
-            var mouseOverID = getPickObjectID( pickInfo, sceneView, false );
-            var mouseInfo = { 
-                              "lastX": lastXPos,
-                              "lastY": lastYPos,
-                              "X" : mouseXPos(e),
-                              "Y" : mouseYPos(e),
-                              "mouseDownID" : mouseDownObjectID,
-                              "mouseOverID" : mouseOverID,
-                              "pickInfo" : pickInfo,
-                            };
+			var mi = mouseInfo( e );
+			if ( mi ) {
+				cameraInfo( mi );
+				var strParams = JSON.stringify( mi );
+				if (mouseDown) {
+					if (mouseDownObjectID) {
 
-            if (mouseDown) {
-                if (mouseDownObjectID) {
+						//vwf.logger.info("CANVAS onMouseMove: " + mouseDownObjectID);
+						//this.throwEvent( "onMouseMove", mouseDownObjectID);
+						vwf.execute( sceneID, "this.mouseMove("+strParams+")", "application/javascript" );
+					}
 
-                    //vwf.logger.info("CANVAS onMouseMove: " + mouseDownObjectID);
-                    //this.throwEvent( "onMouseMove", mouseDownObjectID);
-                }
+					//view.callMethod( mouseDownObjectID, "onMouseMove" );
+				} else {
+					if ( mi.mouseOverID ) {
+						if (mouseOverObjectID) {
+							if (mi.mouseOverID != mouseOverObjectID) {
 
-                //view.callMethod( mouseDownObjectID, "onMouseMove" );
-            } else {
-                if (mouseOverID) {
-                    if (mouseOverObjectID) {
-                        if (mouseOverID != mouseOverObjectID) {
+								//vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+								//this.throwEvent( "onMouseLeave", mouseOverObjectID);
 
-                            //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
-                            //this.throwEvent( "onMouseLeave", mouseOverObjectID);
+								mouseOverObjectID = mi.mouseOverID;
+								vwf.execute( sceneID, "this.mouseLeave("+strParams+")", "application/javascript" );
 
-                            mouseOverObjectID = mouseOverID;
+								//vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+								//this.throwEvent( "onMouseEnter", mouseOverObjectID);
+								vwf.execute( sceneID, "this.mouseEnter("+strParams+")", "application/javascript" );
+							} else {
+								//vwf.logger.info("CANVAS onMouseHover: " + mouseOverObjectID);
+								//this.throwEvent( "onMouseHover", mouseOverObjectID);
+								vwf.execute( sceneID, "this.mouseHover("+strParams+")", "application/javascript" );
+							}
+						} else {
+							mouseOverObjectID = mi.mouseOverID;
 
-                            //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
-                            //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                        } else {
-                            //vwf.logger.info("CANVAS onMouseHover: " + mouseOverObjectID);
-                            //this.throwEvent( "onMouseHover", mouseOverObjectID);
+							//vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
+							//this.throwEvent( "onMouseEnter", mouseOverObjectID);
+							vwf.execute( sceneID, "this.mouseEnter("+strParams+")", "application/javascript" );
+						}
 
-                        }
-                    } else {
-                        mouseOverObjectID = mouseOverID;
+					} else {
+						if (mouseOverObjectID) {
+							//vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
+							//this.throwEvent( "onMouseLeave", mouseOverObjectID);
+							mouseOverObjectID = undefined;
+							vwf.execute( sceneID, "this.mouseLeave("+strParams+")", "application/javascript" );
 
-                        //vwf.logger.info("CANVAS onMouseEnter: " + mouseOverObjectID);
-                        //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                    }
-
-                } else {
-                    if (mouseOverObjectID) {
-                        //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
-                        //this.throwEvent( "onMouseLeave", mouseOverObjectID);
-                        mouseOverObjectID = undefined;
-
-                    }
-                }
-            }
+						}
+					}
+				}
+			}
 
             lastXPos = mouseXPos( e );
             lastYPos = mouseYPos( e );
@@ -2169,6 +2097,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 //vwf.logger.info("CANVAS onMouseLeave: " + mouseOverObjectID);
                 //this.throwEvent( "onMouseLeave", mouseOverObjectID);
                 mouseOverObjectID = undefined;
+				//vwf.execute( sceneID, "this.mouseOut && this.mouseOut()", "application/javascript" );
             }
             mouseOverCanvas = false;
         }
