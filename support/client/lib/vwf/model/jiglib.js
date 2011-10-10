@@ -382,7 +382,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function (nodeID, methodName) { // TODO: parameters
+        callingMethod: function ( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
         },
 
         // TODO: creatingEvent, deltetingEvent, firingEvent

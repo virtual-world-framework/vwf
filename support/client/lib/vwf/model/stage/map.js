@@ -100,7 +100,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- callMethod ---------------------------------------------------------------------------
 
-        callMethod: function( node, methodName ) { // TODO: parameters
+        callMethod: function( node, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
             return this.kernel.callMethod( this.model_to_kernel[this.object_id(node)] || node,
                 methodName );
         },
@@ -206,7 +206,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
             return this.model.callingMethod && this.model.callingMethod( this.kernel_to_model[nodeID] || nodeID,
                 methodName );
         },
@@ -218,6 +218,12 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
         executing: function( nodeID, scriptText, scriptType ) {
             return this.model.executing && this.model.executing( this.kernel_to_model[nodeID] || nodeID,
                 scriptText, scriptType );
+        },
+
+        // -- ticking ------------------------------------------------------------------------------
+
+        ticking: function( time ) {
+            return this.model.ticking && this.model.ticking( time );
         },
 
     } );

@@ -92,7 +92,7 @@
 
     // -- callMethod -------------------------------------------------------------------------------
 
-    module.prototype.callMethod = function( nodeID, methodName ) { // TODO: parameters
+    module.prototype.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
         vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName ); // TODO: parameters
         vwf.send( nodeID, "callMethod", methodName ); // TODO: parameters
     };
@@ -109,7 +109,6 @@
     // -- time -------------------------------------------------------------------------------------
 
     module.prototype.time = function() {
-        // vwf.logger.debug( namespace + ".time " );
         return vwf.time(); 
     };
 
@@ -180,7 +179,7 @@
 
     // -- calledMethod -----------------------------------------------------------------------------
 
-    module.prototype.calledMethod = function( nodeID, methodName ) { // TODO: parameters
+    module.prototype.calledMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
         vwf.logger.info( namespace + ".calledMethod " + nodeID + " " + methodName ); // TODO: parameters
     };
 
@@ -190,6 +189,11 @@
 
     module.prototype.executed = function( nodeID, scriptText, scriptType ) {
         vwf.logger.info( namespace + ".executed " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
+    };
+
+    // -- ticked -----------------------------------------------------------------------------------
+
+    module.prototype.ticked = function( time ) {
     };
 
 } ) ( window.vwf.modules, "vwf.view" );
