@@ -34,6 +34,7 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
         "creatingMethod", /* TODO: deletingMethod, */ "callingMethod",
         /* TODO: creatingEvent, deletingEvent, firingEvent, */
         "executing",
+        "ticking",
     ];
 
     var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )

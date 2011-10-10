@@ -178,7 +178,7 @@ node.id = nodeID; // TODO: move to a backstop model
 
             var setter = findSetter( node, propertyName );
 
-            if ( setter && setter !== true ) {
+            if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
                     return setter.call( node, propertyValue );
                 } catch( e ) {
@@ -197,7 +197,7 @@ node.id = nodeID; // TODO: move to a backstop model
             var node = this.nodes[nodeID];
             var getter = findGetter( node, propertyName );
 
-            if ( getter && getter !== true ) {
+            if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {
                     return getter.call( node );
                 } catch( e ) {
@@ -213,15 +213,22 @@ node.id = nodeID; // TODO: move to a backstop model
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
 
             var node = this.nodes[nodeID];
-            // var method = ... verify it's in node.methods[], search prototypes, etc.
-            var value;
+            var method = findMethod( node, methodName );
+            var parameters = Array.prototype.slice.call( arguments, 2 );
 
-            value = node[methodName] && node[methodName]();
+            if ( method ) {
+                try {
+                    return method.apply( node, parameters );
+                } catch( e ) {
+                    this.logger.warn( "callingMethod", nodeID, methodName, parameters, // TODO: flatten parameters array, limit for log
+                        "exception:", e );
+                }
+            }
 
-            return value;
+            return undefined;
         },
 
         // -- executing ----------------------------------------------------------------------------
@@ -281,6 +288,14 @@ node.id = nodeID; // TODO: move to a backstop model
     function findSetter( node, propertyName ) {
         return node.setters && node.setters[propertyName] ||
             Object.getPrototypeOf( node ) && findSetter( Object.getPrototypeOf( node ), propertyName );
+    }
+
+    // -- findMethod -------------------------------------------------------------------------------
+
+    function findMethod( node, methodName ) {
+        return node.methods && node.methods[methodName] ||
+( typeof node[methodName] == "function" || node[methodName] instanceof Function ) && node[methodName] ||  // TODO: use any old function property as a work-around until we support createMethod()
+            Object.getPrototypeOf( node ) && findMethod( Object.getPrototypeOf( node ), methodName );
     }
 
 

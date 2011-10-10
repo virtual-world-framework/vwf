@@ -37,7 +37,10 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             }
 
-            logees && this.logger.debug.apply( this.logger, [ kernel_function ].concat( logees ) );
+            if ( logees ) {
+                this.logger.debug.apply( this.logger, [ kernel_function ].concat( logees ) );
+            } 
+
             return this.kernel[kernel_function].apply( this.kernel, arguments );
 
         };
@@ -63,9 +66,16 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                         logees[1] && ( logees[1] = loggableScript( logees[1] ) ); // scriptText
                         break;
 
+                    case "ticking":
+                        logees = undefined; // no logging for model.ticking()
+                        break;
+
                 }
 
-                logees && this.logger.debug.apply( this.logger, [ model_function ].concat( logees ) );
+                if ( logees ) {
+                    this.logger.debug.apply( this.logger, [ model_function ].concat( logees ) );
+                }
+
                 return this.model[model_function].apply( this.model, arguments );
 
             }

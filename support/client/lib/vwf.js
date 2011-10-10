@@ -29,6 +29,14 @@
 
         this.now = 0;
 
+        // Nodes that are receiving ticks.
+
+        this.tickable = {
+            // models: [],
+            // views: [],
+            nodeIDs: [],
+        };
+
         // == Private variables ====================================================================
 
         this.private = {}; // for debugging
@@ -387,7 +395,36 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // Set the simulation time to the new current time.
 
             this.now = currentTime;
+            this.tick();
             
+        };
+
+        // -- dispatch -----------------------------------------------------------------------------
+
+        // Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
+        // simulation time that we should advance to and was taken from the time stamp of the last
+        // message received from the conference server.
+
+        this.tick = function() {
+
+            // Call ticking() on each model.
+
+            vwf.models.forEach( function( model ) {
+                model.ticking && model.ticking( vwf.now ); // TODO: maintain a list of tickable models and only call those
+            } );
+
+            // Call ticked() on each view.
+
+            vwf.views.forEach( function( view ) {
+                view.ticked && view.ticked( vwf.now ); // TODO: maintain a list of tickable views and only call those
+            } );
+
+            // Call tick() on each tickable node.
+
+            vwf.tickable.nodeIDs.forEach( function( nodeID ) {
+                vwf.callMethod( nodeID, "tick", vwf.now );
+            } );
+
         };
 
         // -- createNode ---------------------------------------------------------------------------
@@ -821,9 +858,11 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
         // -- callMethod ---------------------------------------------------------------------------
 
-        this.callMethod = function( nodeID, methodName ) { // TODO: parameters
+        this.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
 
             this.logger.group( "vwf.callMethod " + nodeID + " " + methodName ); // TODO: parameters
+
+            var args = Array.prototype.slice.call( arguments );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -831,14 +870,14 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
             var methodValue = undefined;
 
             vwf.models.forEach( function( model ) {
-                var value = model.callingMethod && model.callingMethod( nodeID, methodName ); // TODO: parameters
+                var value = model.callingMethod && model.callingMethod.apply( model, args ); // TODO: parameters
                 methodValue = value !== undefined ? value : methodValue;
             } );
 
             // Call calledMethod() on each view.
 
             vwf.views.forEach( function( view ) {
-                view.calledMethod && view.calledMethod( nodeID, methodName ); // TODO: parameters
+                view.calledMethod && view.calledMethod.apply( view, args ); // TODO: parameters
             } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.callMethod complete " + nodeID + " " + methodName ); /* must log something for group level to reset in WebKit */
@@ -1097,6 +1136,12 @@ childName /* TODO: hack */ );
                 },
 
                 function( callback_err_results ) {
+
+// TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
+
+if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
+    vwf.tickable.nodeIDs.push( nodeID );
+}
 
                     // Invoke an initialization method.
 
