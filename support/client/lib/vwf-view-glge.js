@@ -909,7 +909,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
 				node.glgeObject.setNear( Number( propertyValue ) );
 				break;
 			case "fovy":
-				node.glgeObject.setsetFovY( Number( propertyValue ) );
+				node.glgeObject.setFovY( Number( propertyValue ) );
 				break;			
 			case "aspect":
 				node.glgeObject.setAspect( Number( propertyValue ) );
@@ -1285,7 +1285,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 				value = node.glgeObject.getNear();
 				break;
 			case "fovy":
-				value = node.glgeObject.getsetFovY();
+				value = node.glgeObject.getFovY();
 				break;			
 			case "aspect":
 				value = node.glgeObject.getAspect();
