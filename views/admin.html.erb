@@ -20,11 +20,24 @@
 
         <script type="text/javascript">
 
-            require( [], function() {
+            require( [
+
+                "vwf/model/javascript",
+                "vwf/model/glge",
+                "vwf/model/object",
+                "vwf/model/stage/log",
+            
+            ], function() {
 
                 require.ready( function() {
 
-                    vwf.initialize( {}, { html: "#listing" } );
+                    vwf.initialize( {
+                        "vwf/model/javascript": [],
+                        "vwf/model/glge": [],
+                        "vwf/model/object": [],
+                    }, {
+                        html: "#listing"
+                    } );
 
                     $( "#tabs" ).tabs();
 
