@@ -24,6 +24,20 @@
         this.models = [];
         this.views = [];
 
+        // this.models and this.views are lists of references to the head of each driver pipeline.
+        // Define an "actual" property on each that evaluates to a list of references to the
+        // pipeline tails. This is a list of the actual drivers after any intermediate stages and is
+        // useful for debugging.
+
+        Object.defineProperty( this.models, "actual", {  // TODO: for this.views too once that's converted to use the RequireJS loader
+            get: function() {
+                return this.map( function( model ) {
+                    while ( model.model ) model = model.model;
+                    return model;
+                } );
+            }
+        } );
+
         // This is the simulation clock, which contains the current time in milliseconds. Time is
         // controlled by the conference server and updates here as we receive control messages.
 
