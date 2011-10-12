@@ -72,6 +72,8 @@ scripts:
               yRot -= 0.04;
               break;
             case 90: // z
+              console.info( "position: " + camerapos );
+              console.info( "rotation: " + camerarot );
               break;
             case 88: // x
               break;
@@ -101,7 +103,7 @@ scripts:
         var viewCenter = [ 400, 300 ];
         var incX = -( viewCenter[1] - parms.Y ) * 0.004;
         var incY = ( viewCenter[0] - parms.X ) * 0.0008;
-        console.info( "X = " + parms.X + "    Y = " + parms.Y + "   incX = " + incX + "    incY = " + incY );
+        //console.info( "X = " + parms.X + "    Y = " + parms.Y + "   incX = " + incX + "    incY = " + incY );
 
         if ( parms.mag == 0 ) parms.mag = 1;
         parms.trans[0] = parms.trans[0] / parms.mag;

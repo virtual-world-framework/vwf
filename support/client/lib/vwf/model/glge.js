@@ -24,8 +24,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.glge_view || ( this.glge_view = find_glge_view( this.kernel ) ) ) {
                 // if ( propertyName != "playing" && propertyName != "looping" && propertyName != "speed" ) { // vwf-view-glge expects to vwf.getProperty() on these to get to default property settings
-                if ( propertyName == "vertices" || propertyName == "vertexIndices" ) { // only proxy the large physics-related properties now; don't get from glge what we also aren't setting into glge, otherwise initialized values aren't recognized
-                    return this.glge_view.gotProperty( nodeID, propertyName, propertyValue );
+                switch ( propertyName ) {
+                    case "vertices":
+                    case "vertexIndices":
+                    case "boundingbox":
+                    case "centerOffset":
+                        return this.glge_view.gotProperty( nodeID, propertyName, propertyValue );
+                        break;
                 }
             }
 

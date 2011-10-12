@@ -80,9 +80,9 @@ scripts:
     var cam = this;
     this.initialize = function() {
       console.info( "==================== light ====================" );
-      console.info( "== lightType == "+this.lightType+" ====================" );
-      console.info( "== eulers == "+this.eulers+" ====================" );
-      console.info( "== position == "+this.position+" ====================" );
+      //console.info( "== lightType == "+this.lightType+" ====================" );
+      //console.info( "== eulers == "+this.eulers+" ====================" );
+      //console.info( "== position == "+this.position+" ====================" );
       this.lightType = this.lightType;
       this.constantAttenuation = this.constantAttenuation;
       this.linearAttenuation = this.linearAttenuation;

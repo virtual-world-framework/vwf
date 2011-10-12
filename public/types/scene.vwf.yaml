@@ -50,7 +50,7 @@ scripts:
       if ( !this.activeCameraComp ) {
         if ( this.getChild ) {
           this.activeCameraComp = this.getChild( this.activeCamera );
-          if ( !activeCameraComp ) {
+          if ( !this.activeCameraComp ) {
              this.activeCameraComp = this.maincamera;
           }
         }
