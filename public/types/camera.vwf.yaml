@@ -4,7 +4,6 @@ properties:
   allowMouseNav: false
   walkMode:
     set: |
-      console.info( '  camera.walkMode.setter = function( ' +value+ ' )' );
       switch ( value ) {
         case 'orbit':
         case 'walk':
@@ -15,14 +14,12 @@ properties:
   orbitPoint: [ 0, 0, 0 ]
   far:
     set: |
-      console.info( '  camera.far.setter = function( ' +value+ ' )' );
       if ( value > 0 && value > this.near ) {
         this.far = value;
       }
     value: 1000.0
   near:
     set: |
-      console.info( '  camera.near.setter = function( ' +value+ ' )' );
       if ( value > 0 && value < this.far ) {
         this.near = value;
       }
@@ -30,7 +27,6 @@ properties:
   fovy:
     value: 35
     set: |
-      console.info( '  camera.fovy.setter = function( ' +value+ ' )' );
       if ( value > 0 ) {
         this.fovy = value;
       }
@@ -38,7 +34,6 @@ properties:
   orthoscale: 5
   cameraType:
     set: |
-      console.info( '  camera.cameraType.setter = function( ' +value+ ' )' );
       switch ( value ) {
         case 'perspective':
         case 'orthographic':
@@ -48,7 +43,6 @@ properties:
     value: "perspective"
   attachNodeID:
     set: |
-      console.info( '  camera.attachNodeID.setter = function( ' +value+ ' )' );
       switch ( value ) {
         case 'http-vwf-example-com-types-car-pick_up_truck02':
           this.position = [ -52.29, -114.67, 100 ];
@@ -76,7 +70,6 @@ properties:
       //  newPos[2] = wPos[2] + offset[2];
       //  vwf.setProperty( this.attachNodeID, 'position', newPos );
       //}
-      console.info( " ++++  Camera.position = " + value );
       this.position = value;
     value: [ 0, 0, 0 ]
   eulers: [ 0, 0, 0 ]
@@ -92,9 +85,6 @@ scripts:
     var cam = this;
     this.initialize = function() {
       console.info( "==================== camera ====================" );
-      console.info( "== walkMode == "+this.walkMode+" ====================" );
-      console.info( "== cameraType == "+this.cameraType+" ====================" );
-      console.info( "== position == "+this.position+" ====================" );
       this.walkMode = this.walkMode;
       this.far = this.far;
       this.near = this.near;
