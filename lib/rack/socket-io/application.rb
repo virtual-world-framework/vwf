@@ -15,7 +15,7 @@ module Rack
 
       def onconnect
 
-        logger.info "Rack::SocketIO::Application#onconnect"
+        logger.info "Rack::SocketIO::Application#onconnect #{ object_id }"
 
         @@clients[resource] ||= []
         @@clients[resource] << self
@@ -28,19 +28,19 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
 
       def onmessage message
 
-        logger.debug "Rack::SocketIO::Application#onmessage #{ message_for_log message }"
+        logger.debug "Rack::SocketIO::Application#onmessage #{ object_id } #{ message_for_log message }"
 
       end
 
       def ondisconnect
 
-        logger.info "Rack::SocketIO::Application#ondisconnect"
+        logger.info "Rack::SocketIO::Application#ondisconnect #{ object_id }"
 
       end
 
       def send message
 
-        logger.debug "Rack::SocketIO::Application#send #{ message_for_log message }"
+        logger.debug "Rack::SocketIO::Application#send #{ object_id } #{ message_for_log message }"
 
         # unless connected
         #   queue message  # TODO
@@ -56,7 +56,7 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
   
       def broadcast message
 
-        logger.debug "Rack::SocketIO::Application#broadcast #{ message_for_log message }"
+        logger.debug "Rack::SocketIO::Application#broadcast #{ object_id } #{ message_for_log message }"
 
         clients.each do |client|
           client.send message
