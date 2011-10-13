@@ -1,9 +1,9 @@
 --- 
 extends: http://vwf.example.com/types/glge
-source: level.xml
+sourceOLD: level.xml
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "mainCamera"
+  activeCamera: "http-vwf-example-com-types-camera-maincamera"
 type: model/x-glge
 children: 
   toyPlane: 
@@ -63,6 +63,33 @@ children:
     - text: |
         this.initialize = function() {
           console.info( "==================== duck ====================" );
+          console.info( "== position == "+this.position+" ====================" );
+          console.info( "== eulers == "+this.eulers+" ====================" );
+          console.info( "== scale == "+this.scale+" ====================" );
+          this.position = this.position;
+          this.eulers = this.eulers;
+          this.scale = this.scale;
+        }
+      type: application/javascript
+  box1:
+    extends: http://vwf.example.com/types/node3
+    source: box.dae
+    type: model/vnd.collada+xml
+    properties: 
+      angle: 0
+      position: [ 10, 15, 0 ]
+      eulers: [ 90, 0, 0 ]
+      scale: [ 0.2, 0.2, 0.2 ]
+      playing: false
+    scripts: 
+    - text: |
+        this.pointerClick = function() {
+          this.playing = !this.playing
+        }
+      type: application/javascript
+    - text: |
+        this.initialize = function() {
+          console.info( "==================== box1 ====================" );
           console.info( "== position == "+this.position+" ====================" );
           console.info( "== eulers == "+this.eulers+" ====================" );
           console.info( "== scale == "+this.scale+" ====================" );

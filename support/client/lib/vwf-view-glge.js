@@ -1696,7 +1696,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         } else {
             //console.info( "VWF binded to glge object: " + childID );
             delete view.loadingObjects[ childID ];
-            if ( child.glgeObject.getChildren ) {
+            if ( false && child.glgeObject.getChildren ) {
                 var children = child.glgeObject.getChildren();
                 var childObj;
                 var objName;
@@ -1715,11 +1715,13 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
                     if ( node && type ) {
                         if ( !view.nodes[ node ] ) {
-                            //console.info( "[[  Creating " + type + " named: " + objName );
-                            vwf.createNode( { "extends": extendType }, function() {
-                                vwf.addChild( childID, node, objName );
+                            console.info( "[[  Creating " + type  );
+                            vwf.createNode( { "extends": extendType }, function( nodeID, prototypeID ) {
+                                console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
+                                vwf.addChild( nodeID, nodeID, objName );
+                                console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
                             }, objName );
-                            //console.info( "]]  Creating " + type + " named: " + objName );
+                            console.info( "]]  Creating " + type  );
                         }
                     }
 
@@ -1742,13 +1744,16 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                         //vwf.logger.enable = true;
                         if ( meshNodeID && meshType ) {
                             if ( !view.nodes[ meshNodeID ] ) {
-                                //console.info( "        ++  Creating Mesh  " + meshNodeID + " Named: " + meshName );
-                                vwf.createNode( { "extends": meshType }, function() {
+                                console.info( "        ++  Creating Mesh  Named: " + meshName );
+                                vwf.createNode( { "extends": meshType }, function( nodeID, prototypeID ) {
                                     //vwf.logger.enable = true;
-                                    vwf.addChild( node, meshNodeID, meshName );
+                                    console.info( "     createNode.callback( "+nodeID+", "+prototypeID+ " )" )
+                                    console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
+                                    vwf.addChild( nodeID, nodeID, meshName );
+                                    console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
                                     //vwf.logger.enable = false;
                                 }, meshName );
-                                //console.info( "        ++  Creating Mesh " + meshNodeID + " Named: " + meshName );
+                                console.info( "        ++  Creating Mesh  Named: " + meshName );
                             }
                         }    
                         //vwf.logger.enable = false;                    
