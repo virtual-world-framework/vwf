@@ -8,20 +8,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.model = model;
         },
         
-    }, function( kernel_function ) {
+    }, function( kernelFunctionName ) {
 
         // == Kernel API ===========================================================================
 
-        return function() {  // TODO: possible to return this.kernel[kernel_function] instead for passthrough?
-            return this.kernel[kernel_function].apply( this.kernel, arguments );
+        return function() {  // TODO: possible to return this.kernel[kernelFunctionName] instead for passthrough?
+            return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
         };
         
-    }, function( model_function ) {
+    }, function( modelFunctionName ) {
         
         // == Model API ============================================================================
 
-        return function() {  // TODO: possible to return this.model[model_function] instead for passthrough?
-            return this.model[model_function] && this.model[model_function].apply( this.model, arguments );
+        return function() {  // TODO: possible to return this.model[modelFunctionName] instead for passthrough?
+            return this.model[modelFunctionName] && this.model[modelFunctionName].apply( this.model, arguments );
         };
 
     } );
