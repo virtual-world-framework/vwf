@@ -8,7 +8,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             this.logger = this.model.logger; // steal the model's logger since we're logging for it
         },
         
-    }, function( kernel_function ) {
+    }, function( kernelFunctionName ) {
 
         // == Kernel API ===========================================================================
 
@@ -16,7 +16,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             var logees = Array.prototype.slice.call( arguments );
 
-            switch ( kernel_function ) {
+            switch ( kernelFunctionName ) {
 
                 case "createNode":
                     objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // component_uri_or_json_or_object
@@ -38,24 +38,23 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             }
 
             if ( logees ) {
-                this.logger.debug.apply( this.logger, [ kernel_function ].concat( logees ) );
+                this.logger.debug.apply( this.logger, [ kernelFunctionName ].concat( logees ) );
             } 
 
-            return this.kernel[kernel_function].apply( this.kernel, arguments );
-
+            return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
         };
         
-    }, function( model_function ) {
+    }, function( modelFunctionName ) {
 
         // == Model API ============================================================================
 
         return function() {
 
-            if ( this.model[model_function] ) {
+            if ( this.model[modelFunctionName] ) {
 
                 var logees = Array.prototype.slice.call( arguments );
 
-                switch ( model_function ) {
+                switch ( modelFunctionName ) {
 
                     case "creatingProperty":
                         logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet
@@ -73,11 +72,10 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 }
 
                 if ( logees ) {
-                    this.logger.debug.apply( this.logger, [ model_function ].concat( logees ) );
+                    this.logger.debug.apply( this.logger, [ modelFunctionName ].concat( logees ) );
                 }
 
-                return this.model[model_function].apply( this.model, arguments );
-
+                return this.model[modelFunctionName].apply( this.model, arguments );
             }
 
         };

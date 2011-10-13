@@ -17,7 +17,7 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
     // 
     // vwf/model and all deriving models are loaded as RequireJS (http://requirejs.org) modules.
 
-    var kernel_functions = [  // TODO: get this list from vwf
+    var kernelFunctionNames = [  // TODO: get this list from vwf
         "createNode", /* TODO: deleteNode, */
         "addChild", "removeChild", "parent", "children", "name",
         "createProperty", /* TODO: deleteProperty, */ "setProperty", "getProperty",
@@ -27,7 +27,7 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
         "time",
     ];
 
-    var model_functions = [  // TODO: get this list from vwf
+    var modelFunctionNames = [  // TODO: get this list from vwf
         "creatingNode", /* TODO: deletingNode, */
         "addingChild", "removingChild", "parenting", "childrening", "naming",
         "creatingProperty", /* TODO: deletingProperty, */ "settingProperty", "gettingProperty",
@@ -45,7 +45,7 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
         module: module,
         logger: logger,
 
-        load: function( module, initializer, kernel_generator, model_generator ) {
+        load: function( module, initializer, kernelGenerator, modelGenerator ) {
 
             var instance = Object.create( this );
 
@@ -62,18 +62,18 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
                 instance[key] = initializer[key]; 
             }
 
-            if ( kernel_generator ) {
+            if ( kernelGenerator ) {
 
-                kernel_functions.forEach( function( kernel_function ) {
-                    instance[kernel_function] = kernel_generator( kernel_function );
+                kernelFunctionNames.forEach( function( kernelFunctionName ) {
+                    instance[kernelFunctionName] = kernelGenerator( kernelFunctionName );
                 } );
                 
             }
 
-            if ( model_generator ) {
+            if ( modelGenerator ) {
 
-                model_functions.forEach( function( model_function ) {
-                    instance[model_function] = model_generator( model_function );
+                modelFunctionNames.forEach( function( modelFunctionName ) {
+                    instance[modelFunctionName] = modelGenerator( modelFunctionName );
                 } );
                 
             }
