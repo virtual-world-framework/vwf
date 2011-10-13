@@ -34,7 +34,7 @@
     <!-- directives from a connection to an outside engine that is not visible to all users- but -->
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
-    <!-- script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script -->
+    <script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script>
 
     <script type="text/javascript" src="require.js"></script>
 
@@ -49,6 +49,7 @@
             "vwf/model/jiglib",
             "vwf/model/glge",
             "vwf/model/scenejs",
+            "vwf/model/unity",
             "vwf/model/object",
             "vwf/model/stage/log",
 
@@ -87,6 +88,7 @@
                         "vwf/model/javascript": [],
                         "vwf/model/jiglib": [],
                         "vwf/model/glge": [],
+                        "vwf/model/unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
                         "vwf/model/object": [],
                     },
 
