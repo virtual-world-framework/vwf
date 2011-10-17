@@ -72,6 +72,7 @@
         // by execution time.
 
         var queue = this.private.queue = [];
+        queue.ready = true;
 
         // This is the connection to the conference server. In this sample implementation, "socket"
         // is a socket.io client that communicates over a channel provided by the server hosting the
@@ -371,7 +372,7 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( fields ) {
+        this.receive = function( fields, callback_ready ) {
 
             // Advance the time and locate the node ID and action name.
 
@@ -388,9 +389,51 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // handler.
 
             var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields.parameters ) : fields.parameters;
+
+if ( actionName == "createNode" && args.length == 1 ) {
+    callback_ready( false );
+    args.push( function( nodeID, prototypeID ) {
+        vwf.addChild( 0, nodeID, undefined );
+        callback_ready( true );
+    } );
+}
+
             this[actionName] && this[actionName].apply( this, args );
             
         };
+
+
+/*
+
+Ready use cases
+
+
+    function maybe_takes_long_time( arguments [, callback_ready ] ) {
+
+        if ( completed ) {
+            return value;
+        } else if ( completed_but_calling_out_of_habit ) {
+            callback( value );
+        } else if ( initiating ) {
+            callback( false ); // starting
+            do_something( arguments, function() { callback( true ) / * finished * / } );
+        }
+
+    }
+
+
+    createNode( xxx, callback_ready ) {
+        callback_ready( false );
+        ...
+        ... -> callback_ready( true );
+    }
+
+    setProperty( xxx ) {
+        // don't call callback_ready()
+    }
+
+*/
+
 
         // -- dispatch -----------------------------------------------------------------------------
 
@@ -404,13 +447,24 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // remove the message and perform the action. The simulation time is advanced to the
             // message time as each one is processed.
 
-            while ( queue.length > 0 && queue[0].time <= currentTime ) {
-                this.receive( queue.shift() );
+            while ( queue.ready && queue.length > 0 && queue[0].time <= currentTime ) {
+
+                var fields = queue.shift();
+
+                this.receive( fields, function( ready ) {
+ready ? console.warn( currentTime, "resuming" ) : console.warn( currentTime, "pausing" );
+                    queue.ready = ready;
+                    queue.ready && vwf.dispatch( queue.time );
+                } );
+
             }
 
             // Set the simulation time to the new current time.
 
-            this.now = currentTime;
+            if ( queue.ready ) {
+                this.now = currentTime;
+            }
+
             this.tick();
             
         };
