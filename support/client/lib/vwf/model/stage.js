@@ -4,8 +4,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // == Module Definition ====================================================================
 
-        initialize: function( kernel, model ) {
+        modelize: function( model, model_api ) {
+
             this.model = model;
+
+            // Suppress functions that aren't implemented in the stage to the right.
+
+            Object.keys( model_api ).forEach( function( modelFunctionName ) {
+                if ( ! model[modelFunctionName] ) {
+                    this[modelFunctionName] = undefined;
+                }
+            }, this );
+
         },
         
     }, function( kernelFunctionName ) {

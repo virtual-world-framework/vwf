@@ -8,7 +8,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- initialize ---------------------------------------------------------------------------
 
-        initialize: function( kernel, model, object_id ) {
+        initialize: function( object_id ) {
 
             this.kernel_to_model = {}; // maps nodeID => model object
             this.model_to_kernel = {}; // maps model object => nodeID
