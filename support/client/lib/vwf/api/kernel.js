@@ -2,6 +2,11 @@ define( {
 
     createNode: [],
     /* TODO: deleteNode, */
+    setNode: [],
+    getNode: [],
+
+    prototype: [],
+    prototypes: [],
 
     addChild: [],
     removeChild: [],
@@ -9,6 +14,8 @@ define( {
     children: [],
     name: [],
 
+    setProperties: [],
+    getProperties: [],
     createProperty: [],
     /* TODO: deleteProperty, */
     setProperty: [],

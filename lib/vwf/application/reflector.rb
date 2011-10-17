@@ -12,14 +12,49 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
   end
 
   def onconnect
+
     super
+
+    session[:pending_clients] or session[:pending_clients] = {}
+    session[:pending_clients][self] = true
+
+    if clients.length > session[:pending_clients].size
+      clients.first.send JSON.generate :time => session[:transport].time, :node => 0, :action => "getNode", :parameters => []
+    else
+      session[:pending_clients].delete self
+    end
+
     send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
+
+# if clients.size > 1
+#   clients.first.send JSON.generate :time => session[:transport].time, :node => 0, :action => "getNode", :parameters => []
+# end
+
+#     send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
+
+# send JSON.generate :time => 0, :node => nil, :action => "setNode", :parameters => [
+#   "busybox-vwf-undefined",
+#   { :extends => { :children => [ { :properties => { :on => false } }, { :properties => { :on => true } } ] } }
+# ]
+
     schedule_tick
+
   end
   
   def onmessage message
+
     super
-    broadcast message
+
+    if message =~ /"action":"getNode"/
+      state = JSON.parse( message )["result"]  # TODO: error
+      session[:pending_clients].each do |client, dummy|
+        client.send JSON.generate :time => session[:transport].time, :node => 0, :action => "setNode", :parameters => [ state ]
+      end
+      session[:pending_clients].clear
+    else
+      broadcast message
+    end
+
   end
   
   def ondisconnect
