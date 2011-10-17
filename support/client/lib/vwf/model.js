@@ -1,4 +1,4 @@
-define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( module, kernel_api, model_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
 
     // vwf/model.js is the common implementation of all Virtual World Framework models. Each model
     // is part of a federation with other models attached to the simulation that implements part of
@@ -17,32 +17,13 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
     // 
     // vwf/model and all deriving models are loaded as RequireJS (http://requirejs.org) modules.
 
-    var kernelFunctionNames = [  // TODO: get this list from vwf
-        "createNode", /* TODO: deleteNode, */
-        "addChild", "removeChild", "parent", "children", "name",
-        "createProperty", /* TODO: deleteProperty, */ "setProperty", "getProperty",
-        "createMethod", /* TODO: deleteMethod, */ "callMethod",
-        /* TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent, */
-        "execute",
-        "time",
-    ];
-
-    var modelFunctionNames = [  // TODO: get this list from vwf
-        "creatingNode", /* TODO: deletingNode, */
-        "addingChild", "removingChild", "parenting", "childrening", "naming",
-        "creatingProperty", /* TODO: deletingProperty, */ "settingProperty", "gettingProperty",
-        "creatingMethod", /* TODO: deletingMethod, */ "callingMethod",
-        /* TODO: creatingEvent, deletingEvent, firingEvent, */
-        "executing",
-        "ticking",
-    ];
-
     var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
     logger.info( "load" );
 
     return {
 
         module: module,
+
         logger: logger,
 
         load: function( module, initializer, kernelGenerator, modelGenerator ) {
@@ -62,22 +43,14 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
                 instance[key] = initializer[key]; 
             }
 
-            if ( kernelGenerator ) {
+            kernelGenerator && Object.keys( kernel_api ).forEach( function( kernelFunctionName ) {
+                instance[kernelFunctionName] = kernelGenerator.call( instance, kernelFunctionName ); // TODO: ignore if undefined
+            } );
 
-                kernelFunctionNames.forEach( function( kernelFunctionName ) {
-                    instance[kernelFunctionName] = kernelGenerator( kernelFunctionName );
-                } );
+            modelGenerator && Object.keys( model_api ).forEach( function( modelFunctionName ) {
+                instance[modelFunctionName] = modelGenerator.call( instance, modelFunctionName ); // TODO: ignore if undefined
+            } );
                 
-            }
-
-            if ( modelGenerator ) {
-
-                modelFunctionNames.forEach( function( modelFunctionName ) {
-                    instance[modelFunctionName] = modelGenerator( modelFunctionName );
-                } );
-                
-            }
-
             return instance;
         },
 
@@ -85,10 +58,14 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
 
             this.logger.info( "create" );
 
+            // Interpret create( kernel, stages ) as create( kernel, undefined, stages )
+
             if ( model && model.length !== undefined ) {
                 stages = model;
                 model = undefined;
             }
+
+            // Append this driver's stages to the pipeline to be placed in front of this driver.
 
             if ( ! model ) {
                 stages = Array.prototype.concat.apply( [], ( this.pipeline || [] ).map( function( stage ) {
@@ -98,18 +75,50 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
                 stages = ( stages || [] ).concat( this.pipeline || [] );
             }
 
+            // Create the driver stage using its module as its prototype.
+
             var instance = Object.create( this );
 
-            initialize.call( instance,
+            // Attach the reference to the stage to the right through the model API.
+
+            modelize.call( instance, model, model_api );
+
+            // Create the pipeline to the left and attach the reference to the stage to the left
+            // through the kernel API.
+
+            kernelize.call( instance,
                 stages.length ?
                     stages.pop().create( kernel, instance, stages ) :
                     kernel,
-                model );
+                kernel_api );
 
-            function initialize( /* kernel, model */ ) {
-                this.__proto__ && initialize.apply( this.__proto__, arguments ); // depth-first recursion
+            // Call the driver's initialize().
+
+            initialize.call( instance );
+
+            // Call modelize() on the driver.
+
+            function modelize( model, model_api ) {
+                this.__proto__ && modelize.call( this.__proto__, model, model_api ); // depth-first recursion through the prototypes
+                this.hasOwnProperty( "modelize" ) && this.modelize.call( instance, model, model_api ); // modelize() from the bottom up
+            }
+
+            // Call kernelize() on the driver.
+
+            function kernelize( kernel, kernel_api ) {
+                this.__proto__ && kernelize.call( this.__proto__, kernel, kernel_api ); // depth-first recursion through the prototypes
+                this.hasOwnProperty( "kernelize" ) && this.kernelize.call( instance, kernel, kernel_api ); // kernelize() from the bottom up
+            }
+
+            // Call initialize() on the driver.
+
+            function initialize() {
+                this.__proto__ && initialize.apply( this.__proto__, arguments ); // depth-first recursion through the prototypes
                 this.hasOwnProperty( "initialize" ) && this.initialize.apply( instance, arguments ); // initialize() from the bottom up
             }
+
+            // Return the driver stage. For the actual driver, return the leftmost stage in the
+            // pipeline.
 
             if ( ! model ) {
                 while ( instance.kernel !== kernel ) {
@@ -120,7 +129,7 @@ define( [ "module", "vwf-proxy" ], function( module ) {  // TODO: remove explici
             return instance;
         },
 
-        initialize: function( kernel ) {
+        kernelize: function( kernel, kernel_api ) {
             this.kernel = kernel;
         },
         
