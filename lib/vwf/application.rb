@@ -13,10 +13,6 @@ class VWF::Application
         ]
       end
 
-      map "/socket.io" do
-        run Rack::File.new( File.join VWF.settings.support, "socket.io-client" ) # socket.io client files from ^/support/socket.io-client
-      end
-
       map "/admin" do
         run Admin
       end
