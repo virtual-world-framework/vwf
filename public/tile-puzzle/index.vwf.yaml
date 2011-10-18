@@ -1,0 +1,375 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: index.xml
+type: model/x-glge
+properties:
+  tilePosition1: [  16.5, -33, 0 ]
+  tilePosition2: [   5.5, -33, 0 ]
+  tilePosition3: [  -5.5, -33, 0 ]
+  tilePosition4: [ -16.5, -33, 0 ]
+  tilePosition5: [  16.5, -22, 0 ]
+  tilePosition6: [   5.5, -22, 0 ]
+  tilePosition7: [  -5.5, -22, 0 ]
+  tilePosition8: [ -16.5, -22, 0 ]
+  tilePosition9: [  16.5, -11, 0 ]
+  tilePosition10: [  5.5, -11, 0 ]
+  tilePosition11: [  -5.5, -11, 0 ]
+  tilePosition12: [ -16.5, -11, 0 ]
+  tilePosition13: [  16.5,   0, 0 ]
+  tilePosition14: [   5.5,   0, 0 ]
+  tilePosition15: [  -5.5,   0, 0 ]
+  tilePosition16: [ -16.5,   0, 0 ]
+  openTilePosition: [ -16.5, 0, 0 ]
+  tileDistance: 12
+children: 
+  shuffleBtn: 
+    extends: http://vwf.example.com/types/node3
+    source: shuffleBtn.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 5, 10, 0 ]
+      eulers: [90, 0, 180]
+      scale: [ 2, 2, 2 ]
+    //children:
+      //bone1:
+        //extends: http://vwf.example.com/types/node3
+        //children:
+          //Scene:
+            //extends: http://vwf.example.com/types/node3
+            //children:
+              //Cube:
+                //extends: http://vwf.example.com/types/node3
+                //children:
+                  //CubeMaterial1:
+                    //extends: http://vwf.example.com/types/material
+                    //properties:
+                      //texture: ""
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.position = this.position;
+          this.eulers = this.eulers;
+          this.scale = this.scale;
+          //this.bone1.Scene.Cube.CubeMaterial1.texture = "images/blue.png";
+        }
+        this.pointerClick = function() {
+          this.parent.shuffle();        	
+        }
+      type: application/javascript
+  solveBtn: 
+    extends: http://vwf.example.com/types/node3
+    source: solveBtn.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ -5, 10, 0 ]
+      eulers: [90, 0, 180]
+      scale: [ 2, 2, 2 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.position = this.position;
+          this.eulers = this.eulers;
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.initialize();     	
+        }
+      type: application/javascript
+  tile1: 
+    extends: http://vwf.example.com/types/node3
+    source: tile1.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile2: 
+    extends: http://vwf.example.com/types/node3
+    source: tile2.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile3: 
+    extends: http://vwf.example.com/types/node3
+    source: tile3.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile4: 
+    extends: http://vwf.example.com/types/node3
+    source: tile4.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile5: 
+    extends: http://vwf.example.com/types/node3
+    source: tile5.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this);         	
+        }
+      type: application/javascript
+  tile6: 
+    extends: http://vwf.example.com/types/node3
+    source: tile6.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this);         	
+        }
+      type: application/javascript
+  tile7: 
+    extends: http://vwf.example.com/types/node3
+    source: tile7.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this);         	
+        }
+      type: application/javascript
+  tile8: 
+    extends: http://vwf.example.com/types/node3
+    source: tile8.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile9: 
+    extends: http://vwf.example.com/types/node3
+    source: tile9.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile10: 
+    extends: http://vwf.example.com/types/node3
+    source: tile10.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile11: 
+    extends: http://vwf.example.com/types/node3
+    source: tile11.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile12: 
+    extends: http://vwf.example.com/types/node3
+    source: tile12.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile13: 
+    extends: http://vwf.example.com/types/node3
+    source: tile13.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile14: 
+    extends: http://vwf.example.com/types/node3
+    source: tile14.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile15: 
+    extends: http://vwf.example.com/types/node3
+    source: tile15.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.scale = this.scale;
+        }
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+scripts:
+- text: |
+    this.initialize = function() {
+      this.tile1.position = this.tilePosition1;
+      this.tile2.position = this.tilePosition2;
+      this.tile3.position = this.tilePosition3;
+      this.tile4.position = this.tilePosition4;
+      this.tile5.position = this.tilePosition5;
+      this.tile6.position = this.tilePosition6;
+      this.tile7.position = this.tilePosition7;
+      this.tile8.position = this.tilePosition8;
+      this.tile9.position = this.tilePosition9;
+      this.tile10.position = this.tilePosition10;
+      this.tile11.position = this.tilePosition11;
+      this.tile12.position = this.tilePosition12;
+      this.tile13.position = this.tilePosition13;
+      this.tile14.position = this.tilePosition14;
+      this.tile15.position = this.tilePosition15;
+      this.openTilePosition = this.tilePosition16;
+    }
+    
+    this.shuffle = function() {
+      tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
+                       this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
+                       this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
+                       this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
+      //PROBLEM: Different results per client
+      tilePositions.sort(function() { return (Math.round(Math.random())-0.5); }); 
+      this.tile1.position = tilePositions[0];
+      this.tile2.position = tilePositions[1];
+      this.tile3.position = tilePositions[2];
+      this.tile4.position = tilePositions[3];
+      this.tile5.position = tilePositions[4];
+      this.tile6.position = tilePositions[5];
+      this.tile7.position = tilePositions[6];
+      this.tile8.position = tilePositions[7];
+      this.tile9.position = tilePositions[8];
+      this.tile10.position = tilePositions[9];
+      this.tile11.position = tilePositions[10];
+      this.tile12.position = tilePositions[11];
+      this.tile13.position = tilePositions[12];
+      this.tile14.position = tilePositions[13];
+      this.tile15.position = tilePositions[14];
+      this.openTilePosition = tilePositions[15];
+    }
+    
+    this.moveTile = function(obj) {
+      dx = Math.abs(obj.position[0] - this.openTilePosition[0]);
+      dy = Math.abs(obj.position[1] - this.openTilePosition[1]);
+      if((dx < this.tileDistance && dy == 0) ||
+         (dy < this.tileDistance && dx == 0))
+      {
+        currentPosition = obj.position;
+        obj.position = this.openTilePosition;
+        this.openTilePosition = currentPosition;
+      }           	
+    }
+  type: application/javascript
