@@ -108,7 +108,7 @@ class VWFTest < Test::Unit::TestCase
   # Serves the socket.io client from an application session.
 
   def test_application_session_socketio_client
-    get "/directory/component.vwf/0000000000000000/socket.io/socket.io.js"
+    get "/directory/component.vwf/0000000000000000/socket.io.js"
     assert last_response.ok?
   end
 

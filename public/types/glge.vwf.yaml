@@ -9,13 +9,13 @@ properties:
     value: [ false ]
   loadComplete:
     set: |
-      console.info( "=================== loadComplete = " + value + " ===================" );
+      //console.info( "=================== loadComplete = " + value + " ===================" );
       this.loadComplete = value;
     value: false  
 scripts:
 - text: |
     this.initialize = function() {
-      console.info( "==================== GLGE.Scene ====================" );
+      //console.info( "==================== GLGE.Scene ====================" );
       //console.info( "== gravity == "+this.gravity+" ====================" );
       //console.info( "== collisionSystem == "+this.collisionSystem+" ====================" );
       this.gravity = this.gravity;
