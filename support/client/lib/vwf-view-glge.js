@@ -51,7 +51,7 @@
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
 
-        if ( nodeID == "index-vwf" && ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "arabtown-vwf" ) ) {
+        if ( nodeID == "index-vwf" && ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "appscene-vwf" ) ) {
 
             this.canvasQuery = jQuery(this.rootSelector).append(
                 "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='600'/>"
@@ -135,25 +135,39 @@
 
         } else if (nodeExtendsID == "http-vwf-example-com-types-node3") {
 
-            if ( nodeType == "model/vnd.collada+xml" ) {
-                var node = this.nodes[nodeID] = {
-                    name: undefined,  
-                    glgeObject: undefined,
-                    type: nodeExtendsID,
-                    source: nodeSource,
-                    ID: nodeID,
-                    sourceType: nodeType 
-                };
-            } else {
+            var node;
+            switch ( nodeType ) {
+                case "model/vnd.collada+xml":
+                    node = this.nodes[nodeID] = {
+                        name: undefined,  
+                        glgeObject: undefined,
+                        type: nodeExtendsID,
+                        source: nodeSource,
+                        ID: nodeID,
+                        sourceType: nodeType 
+                    };
+                    break;
 
-                var node = this.nodes[nodeID] = {
-                    name: undefined,  // TODO: needed?
-                    glgeObject: undefined,
-                    ID: nodeID,
-                    type: nodeExtendsID
-                };
-            }
+                case "text/xml":
+                    node = this.nodes[nodeID] = {
+                        name: undefined,  
+                        glgeObject: undefined,
+                        type: nodeExtendsID,
+                        source: nodeSource,
+                        ID: nodeID,
+                        sourceType: nodeType 
+                    };
+                    break;
 
+                default:
+                    node = this.nodes[nodeID] = {
+                        name: undefined,  // TODO: needed?
+                        glgeObject: undefined,
+                        ID: nodeID,
+                        type: nodeExtendsID
+                    };
+                    break;
+            }            
         } else if (nodeExtendsID == "http-vwf-example-com-types-camera") {
 
             var camName = nodeID.substring( nodeID.lastIndexOf( '-' ) + 1 );
@@ -228,7 +242,7 @@ var sceneNode = this.scenes["index-vwf"];
                 case "http-vwf-example-com-types-node2":
                 case "http-vwf-example-com-types-scene":
                 case "http-vwf-example-com-types-glge":
-                case "arabtown-vwf":
+                case "appscene-vwf":
                     case undefined:
                     break;
 
@@ -512,55 +526,75 @@ var sceneNode = this.scenes["index-vwf"];
 
             if ( child.source ) {
 
-                function colladaLoaded( collada ) { 
-                    var bRemoved = false;
-                    //console.info( "++ 2 ++ "+collada.vwfID+" colladaLoaded( "+ collada.docURL +" )" );
-                    for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
-                        if ( view.glgeColladaObjects[j] == collada ){
-                            view.glgeColladaObjects.splice( j, 1 );
-                            bRemoved = true;
-                        }
-                    } 
-                    if ( bRemoved ) {
-                        bindColladaChildren( view, childID );
-                        //console.info( "++ 2 ++        view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
-                        if ( view.glgeColladaObjects.length == 0 ) {
-                            vwf.setProperty( "index-vwf", "loadComplete", true );
-                            loadComplete( view );
-                        }
+                if ( child.sourceType == "model/vnd.collada+xml" ) {
 
-                        var id = collada.vwfID;
-                        if ( !id ) id = getObjectID( collada, view, true, false );
-                        if ( id && id != "" ){
-                            view.callMethod( id, "loadComplete" );
+                    function colladaLoaded( collada ) { 
+                        var bRemoved = false;
+                        //console.info( "++ 2 ++ "+collada.vwfID+" colladaLoaded( "+ collada.docURL +" )" );
+                        for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
+                            if ( view.glgeColladaObjects[j] == collada ){
+                                view.glgeColladaObjects.splice( j, 1 );
+                                bRemoved = true;
+                            }
+                        } 
+                        if ( bRemoved ) {
+                            bindColladaChildren( view, childID );
+                            //console.info( "++ 2 ++        view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
+                            if ( view.glgeColladaObjects.length == 0 ) {
+                                vwf.setProperty( "index-vwf", "loadComplete", true );
+                                loadComplete( view );
+                            }
+
+                            var id = collada.vwfID;
+                            if ( !id ) id = getObjectID( collada, view, true, false );
+                            if ( id && id != "" ){
+                                view.callMethod( id, "loadComplete" );
+                            }
+    //                        if ( view.glgeColladaIDs[ collada ] ){
+    //                            view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
+    //                        }
                         }
-//                        if ( view.glgeColladaIDs[ collada ] ){
-//                            view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
-//                        }
                     }
-                }
 
-                child.name = childName;
-                child.glgeObject = new GLGE.Collada;
-                this.glgeColladaObjects.push( child.glgeObject );
-                child.glgeObject.vwfID = childID;
-//                this.glgeColladaIDs[ child.glgeObject ] = childID;
+                    child.name = childName;
+                    child.glgeObject = new GLGE.Collada;
+                    this.glgeColladaObjects.push( child.glgeObject );
+                    child.glgeObject.vwfID = childID;
+    //                this.glgeColladaIDs[ child.glgeObject ] = childID;
 
-                child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
-                child.glgeObject.loadedCallback = colladaLoaded;
-                if ( parent && parent.glgeObject ) {
-                    parent.glgeObject.addCollada(child.glgeObject);
-                    //console.info( "    adding collada child: " + childID + " to " + nodeID );
-                } else {
-                    var sceneNode = this.scenes[nodeID];
-                    if ( sceneNode ) {
-                        if ( !sceneNode.glgeScene ) {
-                            this.initScene( sceneNode );
+                    child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
+                    child.glgeObject.loadedCallback = colladaLoaded;
+                    if ( parent && parent.glgeObject ) {
+                        parent.glgeObject.addCollada(child.glgeObject);
+                        //console.info( "    adding collada child: " + childID + " to " + nodeID );
+                    } else {
+                        var sceneNode = this.scenes[nodeID];
+                        if ( sceneNode ) {
+                            if ( !sceneNode.glgeScene ) {
+                                this.initScene( sceneNode );
+                            }
+
+                            sceneNode.glgeScene.addCollada(child.glgeObject);
+                            //console.info( "    adding collada child: " + childID + " to the scene" );
+                        }    
+                    }
+                } else if ( child.sourceType == "text/xml" ) {
+                    var sceneNode = this.scenes[ "index-vwf" ];
+                    if ( sceneNode && sceneNode.glgeDocument ){
+                        var meshDef = sceneNode.glgeDocument.getElement( child.source );
+                        if ( meshDef ) {
+                            child.glgeObject = new GLGE.Object();
+                            child.glgeObject.setMesh( meshDef );
+                            child.glgeObject.setMaterial( sceneNode.glgeDocument.getElement( "blue" ) );
+                            if ( this.nodes[nodeID] && this.nodes[nodeID].glgeObject ) {
+                                this.nodes[nodeID].glgeObject.addObject( child.glgeObject );
+                            } else {
+                                if ( sceneNode.glgeScene ) {
+                                    sceneNode.glgeScene.addObject( child.glgeObject );
+                                }
+                            }
                         }
-
-                        sceneNode.glgeScene.addCollada(child.glgeObject);
-                        //console.info( "    adding collada child: " + childID + " to the scene" );
-                    }    
+                    }
                 }
             }
 
@@ -720,11 +754,6 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                 case "position":
                     value = glgeObject.setLoc( pv[0], pv[1], pv[2] );
                     break;
-                case "posRot":
-                    value = [];
-                    value.push( glgeObject.setLoc( pv[0], pv[1], pv[2] ) );
-                    value.push( glgeObject.setRot( pv[3], pv[4], pv[5] ) );
-                    break;
                 case "posRotMatrix":
                     value = [];
                     value.push( glgeObject.setLoc( pv[0], pv[1], pv[2] ) );
@@ -773,7 +802,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                             value = this.satParticleSystemProperty( nodeID, propertyName, propertyValue );
                             break;                        
                         case "http-vwf-example-com-types-glge":
-                        case "arabtown-vwf":
+                        case "appscene-vwf":
                             value = this.satSceneProperty( nodeID, propertyName, propertyValue );
                             break;
                     }
@@ -804,10 +833,12 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                     sceneNode.glgeScene.setAmbientColor( propertyValue );
                     break;
                 case "activeCamera":
-                    if ( sceneNode.camera.glgeCameras[propertyValue] ) {
-                        var cam = sceneNode.camera.glgeCameras[propertyValue];
-                        if ( cam ) {
-                            setActiveCamera( this, cam, sceneNode, nodeID );
+                    if ( sceneNode.camera && sceneNode.camera.glgeCameras ) {
+                        if ( sceneNode.camera.glgeCameras[propertyValue] ) {
+                            var cam = sceneNode.camera.glgeCameras[propertyValue];
+                            if ( cam ) {
+                                setActiveCamera( this, cam, sceneNode, nodeID );
+                            }
                         }
                     }
                     break;
@@ -1083,15 +1114,6 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 case "position":
                     value = new Array;
                     value.push( glgeObject.getLocX(), glgeObject.getLocY(), glgeObject.getLocZ() );
-                    break;
-                case "posRot":
-                    value = new Array;
-                    value.push( glgeObject.getLocX() );
-                    value.push( glgeObject.getLocY() );
-                    value.push( glgeObject.getLocZ() );
-                    value.push( glgeObject.getRotX() );
-                    value.push( glgeObject.getRotY() );
-                    value.push( glgeObject.getRotZ() );
                     break;
                 case "posRotMatrix":
                     value = new Array;
@@ -1448,18 +1470,20 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if ( child ) {
                 var cam;
                 
-                if ( !sceneNode.camera.glgeCameras[childName] ) {
-                    cam = new GLGE.Camera();
-                    initCamera( cam );
-                    sceneNode.camera.glgeCameras[childName] = cam;
-                } else {
-                    cam = sceneNode.camera.glgeCameras[childName];
-                }
+                if ( sceneNode.camera && sceneNode.camera.glgeCameras ) {
+                    if ( !sceneNode.camera.glgeCameras[childName] ) {
+                        cam = new GLGE.Camera();
+                        initCamera( cam );
+                        sceneNode.camera.glgeCameras[childName] = cam;
+                    } else {
+                        cam = sceneNode.camera.glgeCameras[childName];
+                    }
 
-                child.name = childName;
-                child.glgeObject = cam;
-                child.uid = child.glgeObject.uid;
-                cam.name = childName;
+                    child.name = childName;
+                    child.glgeObject = cam;
+                    child.uid = child.glgeObject.uid;
+                    cam.name = childName;
+                }
             }
         }
     }
@@ -2003,6 +2027,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                             "mouseEventTime": parseInt( new Date().getTime() ),
                             "trans": undefined,
                             "mag": undefined,
+                            "camPos": undefined, 
+                            "camRot": undefined,                             
                         };
             } else {
                 return { 
@@ -2017,6 +2043,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                             "mouseEventTime": parseInt( new Date().getTime() ),
                             "trans": undefined,
                             "mag": undefined,
+                            "camPos": undefined, 
+                            "camRot": undefined,
                         };                
             }
                             
@@ -2028,6 +2056,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if ( camera ) {
                 info.trans = GLGE.mulMat4Vec4(camera.getRotMatrix(), [0, 0, -1, 1]);
                 info.mag = Math.pow(Math.pow(info.trans[0], 2) + Math.pow(info.trans[1], 2), 0.5);
+                info.camPos = camera.position;
+                info.camPos = camera.rotation;
             }
         }
 
