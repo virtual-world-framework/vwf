@@ -2149,12 +2149,12 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 cameraInfo( mi );
                 var strParams = JSON.stringify( mi );
                 if (mouseDown) {
-                    if (mouseDownObjectID) {
+                    //if (mouseDownObjectID) {
 
                         //vwf.logger.info("CANVAS onMouseMove: " + mouseDownObjectID);
                         //this.throwEvent( "onMouseMove", mouseDownObjectID);
                         sceneView.execute( sceneID, "this.mouseMove("+strParams+")", "application/javascript" );
-                    }
+                    //}
 
                     //view.callMethod( mouseDownObjectID, "onMouseMove" );
                 } else {
