@@ -28,6 +28,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        creatingNode: function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
           switch (nodeExtendsID) {
+             case "arabtown-vwf":
              case "http-vwf-example-com-types-glge":
                 this.scenes[ nodeID ] = {};
                 this.scenes[ nodeID ].ID = nodeID;
@@ -42,7 +43,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
              case "http-vwf-example-com-types-node3":
              case "http-vwf-example-com-types-mesh":
                 this.nodes[ nodeID ] = {};
- /* hardcoded */    this.nodes[ nodeID ].sceneID = "index-vwf";
+ /* hardcoded */this.nodes[ nodeID ].sceneID = "index-vwf";
                 this.nodes[ nodeID ].ID = nodeID;
                 this.nodes[ nodeID ].extendsID = nodeExtendsID;
                 this.nodes[ nodeID ].implementsIDs = nodeImplementsIDs;
@@ -202,7 +203,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                           if ( bBox[3] - bBox[2] != 0 ) depth = ( bBox[3] - bBox[2] );
                                           if ( bBox[5] - bBox[4] != 0 ) height = ( bBox[5] - bBox[4] );                                
                                        }
-                                       console.info( nodeID + " created JBox ( " + width + ", " + depth + ", " + height + " )" );                                
+                                       //console.info( nodeID + " created JBox ( " + width + ", " + depth + ", " + height + " )" );                                
                                        //console.info( nodeID + " created JBox with offset = " + offset );                                
                                        node.jigLibObj = new jigLib.JBox( null, width, depth, height );
                                        scene.system.addBody( node.jigLibObj );
@@ -218,12 +219,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                        var verts = vwf.getProperty( nodeID, "vertices", v1 );
                                        var offset = vwf.getProperty( nodeID, "centerOffset", v2 );
                                        var raduis = 10;
-                                                if ( propertyValue.constructor == Array && propertyValue.length == 2 ) {
-                                                    raduis = propertyValue[1];
-                                                } else {
-                                                    var cRadius = calcRadius( offset, verts );
-                                                    if ( cRadius > 0 ) raduis = cRadius; 
-                                                }
+                                        if ( propertyValue.constructor == Array && propertyValue.length == 2 ) {
+                                            raduis = propertyValue[1];
+                                        } else {
+                                            var cRadius = calcRadius( offset, verts );
+                                            if ( cRadius > 0 ) raduis = cRadius; 
+                                        }
                                        node.jigLibObj = new jigLib.JSphere(null, raduis);
                                        scene.system.addBody( node.jigLibObj );
                                        this.active[ nodeID ] = {};
@@ -234,23 +235,23 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 break;
                              case "plane": {
                                     if ( !node.jigLibObj ) {
-                                                var normal = [0, 0, 1, 0];
-                                                if ( propertyValue.constructor == Array ) {
-                                                    switch ( propertyValue.length ) {
-                                                        case "2":
-                                                            if ( propertyValue[1].constructor == Array ) {
-                                                                if ( propertyValue[1].length == 4 ) {
-                                                                    normal = propertyValue[1];
-                                                                }
-                                                            }
-                                                            break;
-                                                        case "5":
-                                                            for ( var i = 0; i < 4; i++ ) {
-                                                                normal[i] = propertyValue[i+1];
-                                                            }
-                                                            break;
-                                                    }    
-                                                }
+                                        var normal = [0, 0, 1, 0];
+                                        if ( propertyValue.constructor == Array ) {
+                                            switch ( propertyValue.length ) {
+                                                case "2":
+                                                    if ( propertyValue[1].constructor == Array ) {
+                                                        if ( propertyValue[1].length == 4 ) {
+                                                            normal = propertyValue[1];
+                                                        }
+                                                    }
+                                                    break;
+                                                case "5":
+                                                    for ( var i = 0; i < 4; i++ ) {
+                                                        normal[i] = propertyValue[i+1];
+                                                    }
+                                                    break;
+                                            }    
+                                        }
 
                                        node.jigLibObj = new jigLib.JPlane( null, normal );
                                        scene.system.addBody( node.jigLibObj );
