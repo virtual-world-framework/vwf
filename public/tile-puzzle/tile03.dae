@@ -206,7 +206,7 @@
   </library_geometries>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="Text_001" type="NODE">
+      <node id="Text03" type="NODE">
         <translate sid="location">43.95695 -1.508032 67.97694</translate>
         <rotate sid="rotationZ">0 0 1 179.9999</rotate>
         <rotate sid="rotationY">0 1 0 4.38239e-12</rotate>
@@ -214,7 +214,7 @@
         <scale sid="scale">200 200 100</scale>
         <instance_geometry url="#Mesh_001-mesh"/>
       </node>
-      <node id="Cube" type="NODE">
+      <node id="Cube03" type="NODE">
         <translate sid="location">0 0 0</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>

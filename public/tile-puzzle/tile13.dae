@@ -321,23 +321,7 @@
   </library_geometries>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
-      <node id="Camera_001" type="NODE">
-        <translate sid="location">7.481132 -6.50764 5.343665</translate>
-        <rotate sid="rotationZ">0 0 1 46.69194</rotate>
-        <rotate sid="rotationY">0 1 0 0.6197696</rotate>
-        <rotate sid="rotationX">1 0 0 63.5593</rotate>
-        <scale sid="scale">0.9999999 0.9999999 1</scale>
-        <instance_camera url="#Camera_001-camera"/>
-      </node>
-      <node id="Lamp_001" type="NODE">
-        <translate sid="location">4.076245 1.005454 5.903862</translate>
-        <rotate sid="rotationZ">0 0 1 106.9363</rotate>
-        <rotate sid="rotationY">0 1 0 3.163704</rotate>
-        <rotate sid="rotationX">1 0 0 37.26105</rotate>
-        <scale sid="scale">0.9999999 1 0.9999999</scale>
-        <instance_light url="#Lamp_001-light"/>
-      </node>
-      <node id="Text_001" type="NODE">
+      <node id="Text13_1" type="NODE">
         <translate sid="location">26.36238 -1.508032 67.97694</translate>
         <rotate sid="rotationZ">0 0 1 179.9999</rotate>
         <rotate sid="rotationY">0 1 0 5.45038e-12</rotate>
@@ -345,7 +329,7 @@
         <scale sid="scale">200 200 100</scale>
         <instance_geometry url="#Mesh_001-mesh-mesh"/>
       </node>
-      <node id="Text_001" type="NODE">
+      <node id="Text13_2" type="NODE">
         <translate sid="location">90.38322 3.130592 67.72265</translate>
         <rotate sid="rotationZ">0 0 1 1.31217e-11</rotate>
         <rotate sid="rotationY">0 1 0 -179.9999</rotate>
@@ -353,7 +337,7 @@
         <scale sid="scale">200 200 100</scale>
         <instance_geometry url="#Mesh_003-mesh"/>
       </node>
-      <node id="Cube" type="NODE">
+      <node id="Cube13" type="NODE">
         <translate sid="location">0 0 0</translate>
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
