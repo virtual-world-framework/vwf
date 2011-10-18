@@ -718,28 +718,44 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
+            // Record calls into this function by nodeID and propertyName so that models may call
+            // back here (directly or indirectly) to delegate responses further down the chain
+            // without causing infinite recursion.
+
+            var entrants = arguments.callee.entrants;
+
+            var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
+            var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
+
             // Call settingProperty() on each model. The first model to return a non-undefined value
             // has performed the set and dictates the return value. The property is considered set
             // after each model has run.
 
-            var entrants = arguments.callee.entrants;
-
-            var entry = entrants[nodeID+'-'+propertyName] || {}; // TODO: need unique nodeID+propertyName hash
-            var reentry = entrants[nodeID+'-'+propertyName] = {};
-
             vwf.models.some( function( model, index ) {
+
+                // Skip models up through the one making the most recent call here (if any).
 
                 if ( index > entry.index || entry.index === undefined ) {
 
+                    // Record the active model number.
+ 
                     reentry.index = index;
+
+                    // Make the call.
 
                     var value = model.settingProperty &&
                         model.settingProperty( nodeID, propertyName, propertyValue );
+
+                    // Look for a return value potentially stored by a reentrant call here if the
+                    // model didn't return one explicitly (such as with a JavaScript accessor
+                    // method).
 
                     if ( value === undefined )
                         value = reentry.value;
 
                     delete reentry.value;
+
+                    // If we have a return value, save it and exit from Array.some().
 
                     if ( value !== undefined ) {
                         propertyValue = value;
@@ -752,10 +768,15 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             if ( entry.index !== undefined ) {
 
+                // For a reentrant call, restore the previous state and record the current result.
+
                 entrants[nodeID+'-'+propertyName] = entry;
                 entry.value = propertyValue;
 
             } else {
+
+                // Delete the call record if this is the first, non-reentrant call here (the normal
+                // case).
 
                 delete entrants[nodeID+'-'+propertyName];
 
@@ -788,24 +809,43 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             var propertyValue = undefined;
 
+            // Record calls into this function by nodeID and propertyName so that models may call
+            // back here (directly or indirectly) to delegate responses further down the chain
+            // without causing infinite recursion.
+
             var entrants = arguments.callee.entrants;
 
-            var entry = entrants[nodeID+'-'+propertyName] || {}; // TODO: need unique nodeID+propertyName hash
-            var reentry = entrants[nodeID+'-'+propertyName] = {};
+            var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
+            var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
+
+            // Call gettingProperty() on each model. The first model to return a non-undefined value
+            // dictates the return value.
 
             vwf.models.some( function( model, index ) {
 
+                // Skip models up through the one making the most recent call here (if any).
+
                 if ( index > entry.index || entry.index === undefined ) {
 
+                    // Record the active model number.
+ 
                     reentry.index = index;
+
+                    // Make the call.
 
                     var value = model.gettingProperty &&
                         model.gettingProperty( nodeID, propertyName, propertyValue );
+
+                    // Look for a return value potentially stored by a reentrant call here if the
+                    // model didn't return one explicitly (such as with a JavaScript accessor
+                    // method).
 
                     if ( value === undefined )
                         value = reentry.value;
 
                     delete reentry.value;
+
+                    // If we have a return value, save it and exit from Array.some().
 
                     if ( value !== undefined ) {
                         propertyValue = value;
@@ -818,14 +858,19 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             if ( entry.index !== undefined ) {
 
+                // For a reentrant call, restore the previous state and record the current result.
+
                 entrants[nodeID+'-'+propertyName] = entry;
                 entry.value = propertyValue;
 
             } else {
 
+                // Delete the call record if this is the first, non-reentrant call here (the normal
+                // case).
+
                 delete entrants[nodeID+'-'+propertyName];
 
-                // Delegate to the prototype.
+                // Delegate to the prototype if we didn't get a result from the current node.
 
                 if ( propertyValue === undefined ) {
                     var prototypeID = Object.getPrototypeOf( vwf.models.javascript.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
