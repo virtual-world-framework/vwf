@@ -28,7 +28,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        creatingNode: function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
           switch (nodeExtendsID) {
-             case "arabtown-vwf":
+             case "appscene-vwf":
              case "http-vwf-example-com-types-glge":
                 this.scenes[ nodeID ] = {};
                 this.scenes[ nodeID ].ID = nodeID;
@@ -289,9 +289,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                        if ( node.jigLibObj ) {
                           node.jigLibObj.set_linVelocityDamping( propertyValue );
                        }
-                       break;                       
-                       
-                                
+                       break; 
+                    case "velocity":
+                       if ( node.jigLibObj ) {
+                          node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
+                       }
+                       break;                        
                 }
              }
           } else if ( this.scenes[ nodeID ] ) {
@@ -368,7 +371,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "linVelocityDamping":
                        propertyValue = node.jigLibObj.get_linVelocityDamping();
                        break;    
-
+                    case "velocity":
+                       propertyValue = node.jigLibObj.getVelocity();
+                       break;
                 }
              }
           } else if ( this.scenes[ nodeID ] ) {

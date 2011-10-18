@@ -379,7 +379,7 @@
                 range: "min",
                 value: 1,
                 min: 0.1,
-                max: 20,
+                max: 100,
                 step: 0.1,
                 slide: function (event, ui) {
                     var y = $("#"+nodeID+"-"+propertyName+"-y-value-text").text();
@@ -391,7 +391,7 @@
                 range: "min",
                 value: 1,
                 min: 0.1,
-                max: 20,
+                max: 100,
 				step: 0.1,
                 slide: function (event, ui) {
                     var x = $("#"+nodeID+"-"+propertyName+"-x-value-text").text();
@@ -403,7 +403,7 @@
                 range: "min",
                 value: 1,
                 min: 0.1,
-                max: 20,
+                max: 100,
 				step: 0.1,
                 slide: function (event, ui) {
                     var x = $("#"+nodeID+"-"+propertyName+"-x-value-text").text();
