@@ -106,6 +106,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
        settingProperty: function (nodeID, propertyName, propertyValue) {
 
+          if ( this.updating ) {
+            switch ( propertyName ) { 
+                case "position":
+                case "rotation":
+                case "posRotMatrix":
+                    return;
+                    break;
+            }
+          }
+
+          if ( propertyName == "velocity" ) 
+            console.info( " setting velocity" );
+          console.info( "   settingProperty( " + nodeID+", " + propertyName + ", " + propertyValue + " )");
+           
           var activeNode;
           if ( this.active[ nodeID ] ) 
              activeNode = this.active[ nodeID ];
@@ -132,7 +146,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                        }    
                        break;
                     case "position":
-                       if ( !this.updating && activeNode && activeNode.jlObj ) {
+                       if ( activeNode && activeNode.jlObj ) {
 //                          if ( activeNode.offset ) {
 //                              var newPos = [ propertyValue[0] - activeNode.offset[0], propertyValue[1] - activeNode.offset[1], propertyValue[2] - activeNode.offset[2] ];
 //                              activeNode.jlObj.moveTo( newPos );
@@ -180,7 +194,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                                 node.jigLibMeshes[ childList[i].ID ] = new jigLib.JTriangleMesh();
                                                 node.jigLibMeshes[ childList[i].ID ].createMesh(verts, vertIndices);
                                                 //console.info( childList[i].ID + " created JTriangleMesh" ); 
-                                                scene.system.addBody( node.jigLibMeshes[ childList[i] ] );
+                                                scene.system.addBody( node.jigLibMeshes[ childList[i].ID ] );
                                            }
                                         }
                                     }
@@ -203,7 +217,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                           if ( bBox[3] - bBox[2] != 0 ) depth = ( bBox[3] - bBox[2] );
                                           if ( bBox[5] - bBox[4] != 0 ) height = ( bBox[5] - bBox[4] );                                
                                        }
-                                       //console.info( nodeID + " created JBox ( " + width + ", " + depth + ", " + height + " )" );                                
+                                       console.info( nodeID + " created JBox ( " + width + ", " + depth + ", " + height + " )" );                                
                                        //console.info( nodeID + " created JBox with offset = " + offset );                                
                                        node.jigLibObj = new jigLib.JBox( null, width, depth, height );
                                        scene.system.addBody( node.jigLibObj );
@@ -292,6 +306,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                        break; 
                     case "velocity":
                        if ( node.jigLibObj ) {
+                          console.info( nodeID + ".velocity = " + propertyValue );
                           node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
                        }
                        break;                        
@@ -318,7 +333,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                        }           
                        break;
                     }
-                    case "loadComplete":
+                    case "loadDone":
                        this.enable = propertyValue;
                        break;
                 }
