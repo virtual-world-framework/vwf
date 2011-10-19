@@ -21,6 +21,8 @@ properties:
   tilePosition16: [ -16.5,   0, 0 ]
   openTilePosition: [ -16.5, 0, 0 ]
   tileDistance: 12
+methods:
+  setPositions: 
 children: 
   shuffleBtn: 
     extends: http://vwf.example.com/types/node3
@@ -329,24 +331,32 @@ scripts:
                        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
       //PROBLEM: Different results per client
       tilePositions.sort(function() { return (Math.round(Math.random())-0.5); }); 
-      this.tile1.position = tilePositions[0];
-      this.tile2.position = tilePositions[1];
-      this.tile3.position = tilePositions[2];
-      this.tile4.position = tilePositions[3];
-      this.tile5.position = tilePositions[4];
-      this.tile6.position = tilePositions[5];
-      this.tile7.position = tilePositions[6];
-      this.tile8.position = tilePositions[7];
-      this.tile9.position = tilePositions[8];
-      this.tile10.position = tilePositions[9];
-      this.tile11.position = tilePositions[10];
-      this.tile12.position = tilePositions[11];
-      this.tile13.position = tilePositions[12];
-      this.tile14.position = tilePositions[13];
-      this.tile15.position = tilePositions[14];
-      this.openTilePosition = tilePositions[15];
+      // this.setPositions(tilePositions);
+      vwf.send(this.id, "callMethod", "setPositions", tilePositions);
     }
     
+    this.setPositions = function(tilePositions) {
+      if (vwf.time() >= (this.lastSetPositionTime || 0) + 0.1) {
+        this.lastSetPositionTime = vwf.time();
+        this.tile1.position = tilePositions[0];
+        this.tile2.position = tilePositions[1];
+        this.tile3.position = tilePositions[2];
+        this.tile4.position = tilePositions[3];
+        this.tile5.position = tilePositions[4];
+        this.tile6.position = tilePositions[5];
+        this.tile7.position = tilePositions[6];
+        this.tile8.position = tilePositions[7];
+        this.tile9.position = tilePositions[8];
+        this.tile10.position = tilePositions[9];
+        this.tile11.position = tilePositions[10];
+        this.tile12.position = tilePositions[11];
+        this.tile13.position = tilePositions[12];
+        this.tile14.position = tilePositions[13];
+        this.tile15.position = tilePositions[14];
+        this.openTilePosition = tilePositions[15];
+      }
+    }
+
     this.moveTile = function(obj) {
       dx = Math.abs(obj.position[0] - this.openTilePosition[0]);
       dy = Math.abs(obj.position[1] - this.openTilePosition[1]);
