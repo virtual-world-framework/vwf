@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/types/glge
+extends: appscene.vwf
 source: index.xml
 type: model/x-glge
 properties:
@@ -79,6 +79,15 @@ children:
           this.parent.moveTile(this);        	
         }
       type: application/javascript
+    children:
+      Cube01Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text01Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""        
   tile2: 
     extends: http://vwf.example.com/types/node3
     source: tile02.dae
