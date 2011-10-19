@@ -104,6 +104,15 @@ children:
           this.parent.moveTile(this);        	
         }
       type: application/javascript
+    children:
+      Cube02Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text02Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""  
   tile3: 
     extends: http://vwf.example.com/types/node3
     source: tile03.dae
@@ -120,6 +129,15 @@ children:
           this.parent.moveTile(this);        	
         }
       type: application/javascript
+    children:
+      Cube03Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text03Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""        
   tile4: 
     extends: http://vwf.example.com/types/node3
     source: tile04.dae
@@ -136,6 +154,15 @@ children:
           this.parent.moveTile(this);        	
         }
       type: application/javascript
+    children:
+      Cube04Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text04Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: "" 
   tile5: 
     extends: http://vwf.example.com/types/node3
     source: tile05.dae
@@ -152,6 +179,15 @@ children:
           this.parent.moveTile(this);         	
         }
       type: application/javascript
+    children:
+      Cube05Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text05Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
   tile6: 
     extends: http://vwf.example.com/types/node3
     source: tile06.dae
@@ -168,6 +204,15 @@ children:
           this.parent.moveTile(this);         	
         }
       type: application/javascript
+    children:
+      Cube06Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text06Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
   tile7: 
     extends: http://vwf.example.com/types/node3
     source: tile07.dae
@@ -184,6 +229,15 @@ children:
           this.parent.moveTile(this);         	
         }
       type: application/javascript
+    children:
+      Cube07Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text07Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
   tile8: 
     extends: http://vwf.example.com/types/node3
     source: tile08.dae
@@ -200,6 +254,15 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube08Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text08Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
   tile9: 
     extends: http://vwf.example.com/types/node3
     source: tile09.dae
@@ -216,6 +279,15 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube09Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text09Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
   tile10: 
     extends: http://vwf.example.com/types/node3
     source: tile10.dae
@@ -232,6 +304,19 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube10Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text10_1Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text10_2Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
   tile11: 
     extends: http://vwf.example.com/types/node3
     source: tile11.dae
@@ -248,6 +333,19 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube11Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text11_1Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text11_2Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
   tile12: 
     extends: http://vwf.example.com/types/node3
     source: tile12.dae
@@ -264,6 +362,19 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube12Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text12_1Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text12_2Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""      
   tile13: 
     extends: http://vwf.example.com/types/node3
     source: tile13.dae
@@ -280,6 +391,19 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube13Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text13_1Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text13_2Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""        
   tile14: 
     extends: http://vwf.example.com/types/node3
     source: tile14.dae
@@ -296,6 +420,19 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube14Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text14_1Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text14_2Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""  
   tile15: 
     extends: http://vwf.example.com/types/node3
     source: tile15.dae
@@ -312,6 +449,19 @@ children:
           this.parent.moveTile(this); 	
         }
       type: application/javascript
+    children:
+      Cube15Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text15_1Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""
+      Text15_2Material1:
+        extends: http://vwf.example.com/types/material
+        properties:
+          texture: ""      
 scripts:
 - text: |
     this.initialize = function() {
