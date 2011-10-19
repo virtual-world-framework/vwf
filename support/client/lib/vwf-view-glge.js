@@ -104,11 +104,10 @@
 
                 //console.info( "++ 3 ++        view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
 
-
                 if ( bRemoved ){
                     if ( view.glgeColladaObjects.length == 0 ) {
                         bindSceneChildren( view, nodeID );
-                        vwf.setProperty( sceneNode.ID, "loadComplete", true );
+                        vwf.setProperty( sceneNode.ID, "loadDone", true );
                         loadComplete( view );
                     }
 
@@ -117,10 +116,6 @@
                     if ( id && id != "" ){
                         view.callMethod( id, "loadComplete" );
                     }
-//                    if ( view.glgeColladaIDs[ collada ] ){
-//                        view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
-//                    }
-
                 }
             }
 
@@ -367,10 +362,9 @@ var sceneNode = this.scenes["index-vwf"];
                 if ( bRemoved ){
                     if ( glgeView.glgeColladaObjects.length == 0 ) {
                         bindSceneChildren( glgeView, viewID );
-                        vwf.setProperty( viewID, "loadComplete", true );
+                        vwf.setProperty( viewID, "loadDone", true );
                         loadComplete( glgeView );
                     }
-
                 }
                 var id = collada.vwfID;
                 if ( !id ) id = getObjectID( collada, glgeView, true, false );
@@ -541,7 +535,7 @@ var sceneNode = this.scenes["index-vwf"];
                             bindColladaChildren( view, childID );
                             //console.info( "++ 2 ++        view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
                             if ( view.glgeColladaObjects.length == 0 ) {
-                                vwf.setProperty( "index-vwf", "loadComplete", true );
+                                vwf.setProperty( "index-vwf", "loadDone", true );
                                 loadComplete( view );
                             }
 
@@ -585,13 +579,34 @@ var sceneNode = this.scenes["index-vwf"];
                         if ( meshDef ) {
                             child.glgeObject = new GLGE.Object();
                             child.glgeObject.setMesh( meshDef );
-                            child.glgeObject.setMaterial( sceneNode.glgeDocument.getElement( "blue" ) );
+                            var matName = vwf.getProperty( childID, "material", "" );
+                            if ( matName && matName.constructor == Array ) matName = matName[(Math.random() * matName.length) | 0];
+                            if ( !matName ) matName = "grey";
+                            child.glgeObject.setMaterial( sceneNode.glgeDocument.getElement( matName ) );
                             if ( this.nodes[nodeID] && this.nodes[nodeID].glgeObject ) {
                                 this.nodes[nodeID].glgeObject.addObject( child.glgeObject );
                             } else {
                                 if ( sceneNode.glgeScene ) {
                                     sceneNode.glgeScene.addObject( child.glgeObject );
                                 }
+                            }
+
+                            var callLoadComplete = true;
+                            var phyType = vwf.getProperty( childID, "physics", "" );
+                            if ( !phyType || phyType == "mesh" || ( phyType.constructor == Array && phyType[0] == "mesh" ) ) {
+                                var meshList = findAllMeshes( child.glgeObject );
+
+                                if ( meshList && meshList.length ) {
+                                    child.meshesCreated = [];
+                                    //console.info( "     adding meshes to : " + objID );
+                                    for ( var k = 0; k < meshList.length; k++ ) {
+                                        child.meshesCreated.push( name( meshList[k] ) );
+                                        createViewNode( view, childID, meshList[k] );
+                                    }
+                                }
+                            }
+                            if ( callLoadComplete ) {
+                                view.callMethod( childID, "loadComplete" );
                             }
                         }
                     }
@@ -787,6 +802,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         } else if ( mat ) {
 					        var ml=new GLGE.MaterialLayer;
 					        ml.setMapto(GLGE.M_COLOR);
+					        //ml.setMapto(GLGE.M_NOR);
 					        ml.setMapinput(GLGE.UV1);
                             var txt = new GLGE.Texture();
                             txt.setSrc( propertyValue );
@@ -1698,6 +1714,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         var addedID;
+        var parentNode = view.nodes[ parentID ];
         if ( newChildID && type ) {
             if ( !view.nodes[ newChildID ] ) {
                 //console.info( "[[  Creating " + type + " as child of " + parentID );
@@ -1709,9 +1726,25 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     //console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
                     if ( extendType == meshExtendType ) {
                         meshesCreated--;
+                        if ( parentNode.meshesCreated ) {
+                            var found = false;
+                            var i = 0;
+                            for ( i = 0; i < parentNode.meshesCreated.length && !found; i++ ) {
+                                if ( parentNode.meshesCreated[i] == objName ) {
+                                    found = true;
+                                    parentNode.meshesCreated.splice(i,1);
+                                }
+                            }
+                            if ( parentNode.meshesCreated.length == 0 ) {
+                                view.callMethod( parentID, "loadComplete" );
+                            }
+
+                        }
                         //console.info( "   meshesCreated = " + meshesCreated );
                         if ( meshesCreated == 0 ) {
                             console.info( "   ALL MESHES Created and Added" );
+                            vwf.setProperty( "index-vwf", "loadDone", true );
+                            //vwf.logger.enable = true;
                         }
                     }
                 }, objName );
@@ -2086,8 +2119,10 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if ( camera ) {
                 info.trans = GLGE.mulMat4Vec4(camera.getRotMatrix(), [0, 0, -1, 1]);
                 info.mag = Math.pow(Math.pow(info.trans[0], 2) + Math.pow(info.trans[1], 2), 0.5);
-                info.camPos = camera.position;
-                info.camPos = camera.rotation;
+                info.camPos = new Array;
+                info.camPos.push( camera.getLocX(), camera.getLocY(), camera.getLocZ() );
+                info.camRot = new Array;
+                info.camRot.push( camera.getRotX(), camera.getRotY(), camera.getRotZ() );
             }
         }
 
@@ -2110,7 +2145,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         canvas.onmouseup = function( e ) {
-            var mi = mouseInfo( e, true );
+            var mi = mouseInfo( e, false );
             if ( mi ) {
                 cameraInfo( mi );
                 var mouseUpObjectID =  mi.mouseOverID;

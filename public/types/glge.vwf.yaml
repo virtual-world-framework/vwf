@@ -7,10 +7,10 @@ properties:
     get: |
       console.info( "WARNING: scene.collisionSystem can only be set, get is not implemented" );
     value: [ false ]
-  loadComplete:
+  loadDone:
     set: |
       //console.info( "=================== loadComplete = " + value + " ===================" );
-      this.loadComplete = value;
+      this.loadDone = value;
     value: false  
 scripts:
 - text: |
@@ -20,6 +20,6 @@ scripts:
       //console.info( "== collisionSystem == "+this.collisionSystem+" ====================" );
       this.gravity = this.gravity;
       this.collisionSystem = this.collisionSystem;
-      this.loadComplete = this.loadComplete;
+      this.loadDone = this.loadDone;
     }
   type: application/javascript    
