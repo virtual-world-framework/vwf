@@ -1,0 +1,437 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: index.xml
+type: model/x-glge
+properties:
+  tilePosition01: [  16.5, -33, 0 ]
+  tilePosition02: [   5.5, -33, 0 ]
+  tilePosition03: [  -5.5, -33, 0 ]
+  tilePosition04: [ -16.5, -33, 0 ]
+  tilePosition05: [  16.5, -22, 0 ]
+  tilePosition06: [   5.5, -22, 0 ]
+  tilePosition07: [  -5.5, -22, 0 ]
+  tilePosition08: [ -16.5, -22, 0 ]
+  tilePosition09: [  16.5, -11, 0 ]
+  tilePosition10: [  5.5, -11, 0 ]
+  tilePosition11: [  -5.5, -11, 0 ]
+  tilePosition12: [ -16.5, -11, 0 ]
+  tilePosition13: [  16.5,   0, 0 ]
+  tilePosition14: [   5.5,   0, 0 ]
+  tilePosition15: [  -5.5,   0, 0 ]
+  tilePosition16: [ -16.5,   0, 0 ]
+  openTilePosition: [ -16.5, 0, 0 ]
+  tileDistance: 12
+children: 
+  shuffleBtn: 
+    extends: http://vwf.example.com/types/node3
+    source: shuffleBtn.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 5, 10, 0 ]
+      eulers: [90, 0, 180]
+      scale: [ 2, 2, 2 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.shuffle();        	
+        }
+      type: application/javascript
+    children:
+      bone1:
+        extends: http://vwf.example.com/types/node3
+        children:
+          Scene:
+            extends: http://vwf.example.com/types/node3
+            children:
+              ShuffleText:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  ShuffleTextMaterial1:
+                    extends: http://vwf.example.com/types/material
+                    properties:
+                      texture: ""
+                scripts:
+                - text: |
+                    this.pointerClick = function() {
+                      this.parent.parent.parent.pointerClick();
+                    }
+                  type: application/javascript
+              ShuffleCube:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  ShuffleCubeMaterial1:
+                    extends: http://vwf.example.com/types/material
+                    properties:
+                      texture: ""
+                scripts:
+                - text: |
+                    this.pointerClick = function() {
+                      this.parent.parent.parent.pointerClick();
+                    }
+                  type: application/javascript
+  solveBtn: 
+    extends: http://vwf.example.com/types/node3
+    source: solveBtn.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ -5, 10, 0 ]
+      eulers: [90, 0, 180]
+      scale: [ 2, 2, 2 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.initialize();     	
+        }
+      type: application/javascript
+    children:
+      bone1:
+        extends: http://vwf.example.com/types/node3
+        children:
+          Scene:
+            extends: http://vwf.example.com/types/node3
+            children:
+              SolveText:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  SolveTextMaterial1:
+                    extends: http://vwf.example.com/types/material
+                    properties:
+                      texture: ""
+                scripts:
+                - text: |
+                    this.pointerClick = function() {
+                      this.parent.parent.parent.pointerClick();
+                    }
+                  type: application/javascript
+              SolveCube:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  SolveCubeMaterial1:
+                    extends: http://vwf.example.com/types/material
+                    properties:
+                      texture: ""
+                scripts:
+                - text: |
+                    this.pointerClick = function() {
+                      this.parent.parent.parent.pointerClick();
+                    }
+                  type: application/javascript
+  tile01: 
+    extends: http://vwf.example.com/types/node3
+    source: tile01.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    children:
+      bone1:
+        extends: http://vwf.example.com/types/node3
+        children:
+          Scene:
+            extends: http://vwf.example.com/types/node3
+            children:
+              Text01:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  Text01Material1:
+                    extends: http://vwf.example.com/types/material
+                    properties:
+                      texture: ""
+                scripts:
+                - text: |
+                    this.pointerClick = function() {
+                      this.parent.parent.parent.pointerClick();
+                    }
+                  type: application/javascript
+              Cube01:
+                extends: http://vwf.example.com/types/node3
+                children:
+                  Cube01Material1:
+                    extends: http://vwf.example.com/types/material
+                    properties:
+                      texture: ""
+                scripts:
+                - text: |
+                    this.pointerClick = function() {
+                      this.parent.parent.parent.pointerClick();
+                    }
+                  type: application/javascript
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile02: 
+    extends: http://vwf.example.com/types/node3
+    source: tile02.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile03: 
+    extends: http://vwf.example.com/types/node3
+    source: tile03.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile04: 
+    extends: http://vwf.example.com/types/node3
+    source: tile04.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this);        	
+        }
+      type: application/javascript
+  tile05: 
+    extends: http://vwf.example.com/types/node3
+    source: tile05.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this);         	
+        }
+      type: application/javascript
+  tile06: 
+    extends: http://vwf.example.com/types/node3
+    source: tile06.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this);         	
+        }
+      type: application/javascript
+  tile07: 
+    extends: http://vwf.example.com/types/node3
+    source: tile07.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this);         	
+        }
+      type: application/javascript
+  tile08: 
+    extends: http://vwf.example.com/types/node3
+    source: tile08.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile09: 
+    extends: http://vwf.example.com/types/node3
+    source: tile09.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile10: 
+    extends: http://vwf.example.com/types/node3
+    source: tile10.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile11: 
+    extends: http://vwf.example.com/types/node3
+    source: tile11.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile12: 
+    extends: http://vwf.example.com/types/node3
+    source: tile12.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile13: 
+    extends: http://vwf.example.com/types/node3
+    source: tile13.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile14: 
+    extends: http://vwf.example.com/types/node3
+    source: tile14.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+  tile15: 
+    extends: http://vwf.example.com/types/node3
+    source: tile15.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.parent.moveTile(this); 	
+        }
+      type: application/javascript
+scripts:
+- text: |
+    this.initialize = function() {
+      this.shuffleBtn.position = this.shuffleBtn.position;
+      this.shuffleBtn.eulers = this.shuffleBtn.eulers;
+      this.shuffleBtn.scale = this.shuffleBtn.scale;
+      
+      this.solveBtn.position = this.solveBtn.position;
+      this.solveBtn.eulers = this.solveBtn.eulers;
+      this.solveBtn.scale = this.solveBtn.scale;
+      
+      this.tile01.scale = this.tile01.scale;
+      this.tile02.scale = this.tile02.scale;
+      this.tile03.scale = this.tile03.scale;
+      this.tile04.scale = this.tile04.scale;
+      this.tile05.scale = this.tile05.scale;
+      this.tile06.scale = this.tile06.scale;
+      this.tile07.scale = this.tile07.scale;
+      this.tile08.scale = this.tile08.scale;
+      this.tile09.scale = this.tile09.scale;
+      this.tile10.scale = this.tile10.scale;      
+      this.tile11.scale = this.tile11.scale;
+      this.tile12.scale = this.tile12.scale;
+      this.tile13.scale = this.tile13.scale;
+      this.tile14.scale = this.tile14.scale;
+      this.tile15.scale = this.tile15.scale;
+      
+      this.tile01.position = this.tilePosition01;
+      this.tile02.position = this.tilePosition02;
+      this.tile03.position = this.tilePosition03;
+      this.tile04.position = this.tilePosition04;
+      this.tile05.position = this.tilePosition05;
+      this.tile06.position = this.tilePosition06;
+      this.tile07.position = this.tilePosition07;
+      this.tile08.position = this.tilePosition08;
+      this.tile09.position = this.tilePosition09;
+      this.tile10.position = this.tilePosition10;
+      this.tile11.position = this.tilePosition11;
+      this.tile12.position = this.tilePosition12;
+      this.tile13.position = this.tilePosition13;
+      this.tile14.position = this.tilePosition14;
+      this.tile15.position = this.tilePosition15;
+      this.openTilePosition = this.tilePosition16;
+      
+      this.shuffleBtn.bone1.Scene.ShuffleCube.ShuffleCubeMaterial1.texture = "images/red.png";
+      this.shuffleBtn.bone1.Scene.ShuffleText.ShuffleTextMaterial1.texture = "images/black.png";
+      
+      this.solveBtn.bone1.Scene.SolveCube.SolveCubeMaterial1.texture = "images/blue.png";
+      this.solveBtn.bone1.Scene.SolveText.SolveTextMaterial1.texture = "images/black.png";
+      
+      this.tile01.bone1.Scene.Cube01.Cube01Material1.texture = "images/ltBlue.png";
+      this.tile01.bone1.Scene.Text01.Text01Material1.texture = "images/dkBlue.png";
+    }
+    
+    this.shuffle = function() {
+      tilePositions = [this.tilePosition01, this.tilePosition02, this.tilePosition03, this.tilePosition04, 
+                       this.tilePosition05, this.tilePosition06, this.tilePosition07, this.tilePosition08, 
+                       this.tilePosition09, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
+                       this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
+      //PROBLEM: Different results per client
+      tilePositions.sort(function() { return (Math.round(Math.random())-0.5); }); 
+      this.tile01.position = tilePositions[0];
+      this.tile02.position = tilePositions[1];
+      this.tile03.position = tilePositions[2];
+      this.tile04.position = tilePositions[3];
+      this.tile05.position = tilePositions[4];
+      this.tile06.position = tilePositions[5];
+      this.tile07.position = tilePositions[6];
+      this.tile08.position = tilePositions[7];
+      this.tile09.position = tilePositions[8];
+      this.tile10.position = tilePositions[9];
+      this.tile11.position = tilePositions[10];
+      this.tile12.position = tilePositions[11];
+      this.tile13.position = tilePositions[12];
+      this.tile14.position = tilePositions[13];
+      this.tile15.position = tilePositions[14];
+      this.openTilePosition = tilePositions[15];
+    }
+    
+    this.moveTile = function(obj) {
+      dx = Math.abs(obj.position[0] - this.openTilePosition[0]);
+      dy = Math.abs(obj.position[1] - this.openTilePosition[1]);
+      if((dx < this.tileDistance && dy == 0) ||
+         (dy < this.tileDistance && dx == 0))
+      {
+        currentPosition = obj.position;
+        obj.position = this.openTilePosition;
+        this.openTilePosition = currentPosition;
+      }           	
+    }
+  type: application/javascript

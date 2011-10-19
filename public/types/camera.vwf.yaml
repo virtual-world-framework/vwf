@@ -79,7 +79,6 @@ properties:
   rotZ: 0
   worldPosition: [ 0, 0, 0 ]
   worldEulers: [ 0, 0, 0 ]
-  posRot: [ 0, 0, 0, 0, 0, 0 ]
 scripts:
 - text: |
     var cam = this;

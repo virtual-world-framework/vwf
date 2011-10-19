@@ -20,6 +20,19 @@ children:
         extends: http://vwf.example.com/types/node3
   maincamera:
     extends: http://vwf.example.com/types/camera
+    properties:
+      walkMode: "walk"
+      cameraType: "perspective"
+      orbitPoint: [ 0, 0, 0 ]      
+      position: [ 1, 20, 8 ]
+      eulers: [ 0, 0, 0 ]
+      rotation: [ 1.56, 3.14, 0 ]
+      far: 1000.0
+      near: 0.1
+      fovy: 35
+      aspect: 1.0
+      orthoscale: 5
+      speed: 2.0
   wallobject:
     extends: http://vwf.example.com/types/node3
   duck.dae:
