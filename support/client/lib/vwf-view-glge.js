@@ -1807,9 +1807,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         if ( !success ) {
             vwf.logger.info( "     unable to bind: " + childID );
-            console.info( "     unable to bind: " + childID );
+            //console.info( "     unable to bind: " + childID );
         } else {
-            console.info( "VWF binded to glge object: " + childID );
+            //console.info( "VWF binded to glge object: " + childID );
             delete view.loadingObjects[ childID ];
             var temp;
             var phyProp = vwf.getProperty( childID, "physics", temp );
