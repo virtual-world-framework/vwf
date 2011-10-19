@@ -785,7 +785,14 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         if ( txtr ) {
                             txtr.setSrc( propertyValue );
                         } else if ( mat ) {
-                            mat.addTexture( propertyValue );
+					        var ml=new GLGE.MaterialLayer;
+					        ml.setMapto(GLGE.M_COLOR);
+					        ml.setMapinput(GLGE.UV1);
+                            var txt = new GLGE.Texture();
+                            txt.setSrc( propertyValue );
+                            mat.addTexture( txt );
+					        ml.setTexture(txt);
+					        mat.addMaterialLayer(ml);
                         }
                     }
                     break;
@@ -1800,6 +1807,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         if ( !success ) {
             vwf.logger.info( "     unable to bind: " + childID );
+            //console.info( "     unable to bind: " + childID );
         } else {
             //console.info( "VWF binded to glge object: " + childID );
             delete view.loadingObjects[ childID ];
@@ -1879,23 +1887,45 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindMaterial = function( view, childID, childName, node ) {
 
-        if ( node && node.glgeObject && view.nodes[childID] ) {
-            if ( node.glgeObject.children.length == 1 && node.glgeObject.children[0].constructor == GLGE.Object ) {
-                var childNode = view.nodes[childID];
-                var glgeChild = node.glgeObject.children[0];
-                var materialStringIndex = childName.lastIndexOf( "Material" );
-                var materialIndex = Number( childName.substr( materialStringIndex + 8 ) ) - 1;
+        var materialStringIndex, materialIndex, parentName;
+        var childNode = view.nodes[childID];
 
-                childNode.glgeObject = glgeChild;
-                childNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
+        // the material name is a combination of the following information
+        // groupParentName + 'Material' + indexOfTheMultiMaterial
+
+        if ( childNode ) {
+            materialStringIndex = childName.lastIndexOf( "Material" );
+            materialIndex = Number( childName.substr( materialStringIndex + 8 ) ) - 1;
+            parentName = childName.substr( 0, materialStringIndex );
+            if ( node && node.glgeObject ) {
+                var glgeObjs = [];
+                var found = false;
+                findAllGlgeObjects( node.glgeObject, glgeObjs );
+                if ( glgeObjs && glgeObjs.length ) {
+                    for ( var i = 0; i < glgeObjs.length && !found; i++ ) {
+                        if ( name( glgeObjs[i].parent ) == parentName ) {
+                            childNode.glgeObject = glgeObjs[i];
+                            childNode.glgeMaterial = glgeObjs[i].getMaterial( materialIndex );
+                            found = true;                        
+                        }                   
+                    }
+                } else if ( node.glgeObject.children.length == 1 && node.glgeObject.children[0].constructor == GLGE.Object ) {
+
+                    var glgeChild = node.glgeObject.children[0];
+                    materialStringIndex = childName.lastIndexOf( "Material" );
+                    materialIndex = Number( childName.substr( materialStringIndex + 8 ) ) - 1;
+
+                    childNode.glgeObject = glgeChild;
+                    childNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
                 
-                if ( !( childNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
-                    childNode.glgeMaterial = childNode.glgeObject.material;
-                }
+                    if ( !( childNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
+                        childNode.glgeMaterial = childNode.glgeObject.material;
+                    }
 
-//                if ( childNode.glgeMaterial === childNode.glgeObject.material ) {
-//                    console.info( " materials are the same object!!!!! " );
-//                }
+//                  if ( childNode.glgeMaterial === childNode.glgeObject.material ) {
+//                       console.info( " materials are the same object!!!!! " );
+//                  }
+                }
             }
         }
 
