@@ -11502,7 +11502,7 @@ distribution.
 		var entry = colBody.externalData;
 		if (entry == null){
 			//trace("Warning skin has grid entry null!");
-			return null;
+			return entries;
 		}
                         
 		// todo - work back from the mGridIndex rather than calculating it again...

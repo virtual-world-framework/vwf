@@ -8,8 +8,13 @@ properties:
 children:
   seymourplane_triangulate.dae:
     extends: http://vwf.example.com/types/node3
+    source: seymourplane_triangulate.dae
+    type: model/vnd.collada+xml
     properties:
       angle: 0
+      scale: [ 1, 1, 1 ]
+      position: [ -1, 0, 3 ]
+      rotation: [ 1.57, 1.57, 0 ]      
     children:
       bone1:
         extends: http://vwf.example.com/types/node3
@@ -18,6 +23,19 @@ children:
             extends: http://vwf.example.com/types/node3
       prop:
         extends: http://vwf.example.com/types/node3
+        properties:
+          playing: true
+          looping: true
+    scripts:
+    - text: |
+        this.loadComplete = function() {
+          this.scale = this.scale;
+          this.position = this.position;
+          this.rotation = this.rotation;
+          this['prop'].looping = this['prop'].looping;
+          this['prop'].playing = this['prop'].playing;
+        }
+      type: application/javascript
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
@@ -25,7 +43,7 @@ children:
       cameraType: "perspective"
       orbitPoint: [ 0, 0, 0 ]      
       position: [ 1, 20, 8 ]
-      eulers: [ 0, 0, 0 ]
+      eulers: [ 90, 180, 0 ]
       rotation: [ 1.56, 3.14, 0 ]
       far: 1000.0
       near: 0.1
@@ -44,10 +62,20 @@ children:
           this.parent['seymourplane_triangulate.dae'].angle = value + 1;
         value: 0
       playing: false
+      scale: [ 0.05, 0.05, 0.05 ]
+      position: [ 0, -15, 0 ]
+      rotation: [ 1.57, 0, 0 ]
     scripts:
     - text: |
         this.pointerClick = function() {
+          console.info( "duck.dae.pointerClick this.playing = " + this.playing );
           this.playing = !this.playing
+        }
+        this.loadComplete = function() {
+          this.playing = this.playing;
+          this.scale = this.scale;
+          this.position = this.position;
+          this.rotation = this.rotation;
         }
       type: application/javascript
   dir_duck_1:

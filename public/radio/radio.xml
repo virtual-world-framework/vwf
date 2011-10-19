@@ -19,7 +19,7 @@
 	<!-- light name="Omni03" id="mainlight" loc_x="4.477905"  loc_y="16.0664"    loc_z="-13.47203" attenuation_constant="1" type="L_POINT" /> -->
 	<!-- light name="Omni04" id="mainlight" loc_x="-5.310547" loc_y="-17.2605"  loc_z="14.88007" attenuation_constant="1" type="L_POINT" /> -->
 
-	<collada document="radio.dae" scale="1" />
+	<!-- collada document="radio.dae" scale="1" / -->
   </scene>
 
 </glge>
