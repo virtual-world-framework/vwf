@@ -8,6 +8,8 @@ properties:
 children: 
   radio.dae: 
     extends: http://vwf.example.com/types/node3
+    source: Radio.DAE
+    type: model/vnd.collada+xml
     properties:
       position: [ 0, 4, 0 ]
       eulers: [ 338, 0, 211 ]
@@ -731,12 +733,9 @@ children:
       walkMode: "walk"
       cameraType: "perspective"
       orbitPoint: [ 0, 0, 0 ]      
-      position: [ 0, 0, 0 ]
-      eulers: [ 0, 0, 0 ]
-      worldPosition: [ 0, 0, 0 ]
-      worldEulers: [ 0, 0, 0 ]
-      attachNodeID: ""
-      attachOffest: [ 0, 0, 0 ]
+      position: [ -0.3733, 12.29, 0 ]
+      eulers: [ 90, 180, 0 ]
+      rotation: [ 1.56, 3.141, 0 ]
       far: 1000.0
       near: 0.1
       fovy: 35

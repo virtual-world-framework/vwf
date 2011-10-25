@@ -4,3 +4,9 @@ properties:
   enabled: true
   vertices: ""
   vertexIndices: ""
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "==================== mesh ====================" );
+    }
+  type: application/javascript
