@@ -50,11 +50,8 @@
         vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
 
-        if (nodeExtendsID == "http-vwf-example-com-types-glge") {
 
-            // jQuery(this.rootSelector).append(
-            //     "<h2>Scene</h2>"
-            // );
+        if ( nodeID == "index-vwf" && ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "appscene-vwf" ) ) {
 
             this.canvasQuery = jQuery(this.rootSelector).append(
                 "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='600'/>"
@@ -63,7 +60,6 @@
             if ( !this.rootNodeID ) {
                 this.rootNodeID = nodeID;
             }
-
            
             window.onkeydown = function( event ) {
               //console.info( "keydown( " + event.keyCode + " )" );
@@ -108,23 +104,18 @@
 
                 //console.info( "++ 3 ++        view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
 
-
                 if ( bRemoved ){
                     if ( view.glgeColladaObjects.length == 0 ) {
                         bindSceneChildren( view, nodeID );
-                        vwf.setProperty( sceneNode.ID, "loadComplete", true );
+                        vwf.setProperty( sceneNode.ID, "loadDone", true );
                         loadComplete( view );
                     }
 
                     var id = collada.vwfID;
-                    if ( !id ) id = getObjectID( collada, view, false );
+                    if ( !id ) id = getObjectID( collada, view, true, false );
                     if ( id && id != "" ){
                         view.callMethod( id, "loadComplete" );
                     }
-//                    if ( view.glgeColladaIDs[ collada ] ){
-//                        view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
-//                    }
-
                 }
             }
 
@@ -139,25 +130,39 @@
 
         } else if (nodeExtendsID == "http-vwf-example-com-types-node3") {
 
-            if ( nodeType == "model/vnd.collada+xml" ) {
-                var node = this.nodes[nodeID] = {
-                    name: undefined,  
-                    glgeObject: undefined,
-                    type: nodeExtendsID,
-                    source: nodeSource,
-                    ID: nodeID,
-                    sourceType: nodeType 
-                };
-            } else {
+            var node;
+            switch ( nodeType ) {
+                case "model/vnd.collada+xml":
+                    node = this.nodes[nodeID] = {
+                        name: undefined,  
+                        glgeObject: undefined,
+                        type: nodeExtendsID,
+                        source: nodeSource,
+                        ID: nodeID,
+                        sourceType: nodeType 
+                    };
+                    break;
 
-                var node = this.nodes[nodeID] = {
-                    name: undefined,  // TODO: needed?
-                    glgeObject: undefined,
-                    ID: nodeID,
-                    type: nodeExtendsID
-                };
-            }
+                case "text/xml":
+                    node = this.nodes[nodeID] = {
+                        name: undefined,  
+                        glgeObject: undefined,
+                        type: nodeExtendsID,
+                        source: nodeSource,
+                        ID: nodeID,
+                        sourceType: nodeType 
+                    };
+                    break;
 
+                default:
+                    node = this.nodes[nodeID] = {
+                        name: undefined,  // TODO: needed?
+                        glgeObject: undefined,
+                        ID: nodeID,
+                        type: nodeExtendsID
+                    };
+                    break;
+            }            
         } else if (nodeExtendsID == "http-vwf-example-com-types-camera") {
 
             var camName = nodeID.substring( nodeID.lastIndexOf( '-' ) + 1 );
@@ -232,7 +237,8 @@ var sceneNode = this.scenes["index-vwf"];
                 case "http-vwf-example-com-types-node2":
                 case "http-vwf-example-com-types-scene":
                 case "http-vwf-example-com-types-glge":
-                case undefined:
+                case "appscene-vwf":
+                    case undefined:
                     break;
 
                 case "http-vwf-example-com-types-group3":
@@ -356,13 +362,12 @@ var sceneNode = this.scenes["index-vwf"];
                 if ( bRemoved ){
                     if ( glgeView.glgeColladaObjects.length == 0 ) {
                         bindSceneChildren( glgeView, viewID );
-                        vwf.setProperty( viewID, "loadComplete", true );
+                        vwf.setProperty( viewID, "loadDone", true );
                         loadComplete( glgeView );
                     }
-
                 }
                 var id = collada.vwfID;
-                if ( !id ) id = getObjectID( collada, glgeView, false );
+                if ( !id ) id = getObjectID( collada, glgeView, true, false );
                 if ( id && id != "" ){
                     glgeView.callMethod( id, "loadComplete" );
                 }
@@ -387,6 +392,21 @@ var sceneNode = this.scenes["index-vwf"];
 
         this.findCollada( glgeScene, nodeID );
 
+    }
+
+    var findColladaParent = function( glgeObject ) {
+        var colladaObj = undefined;
+        var currentObj;
+        if ( glgeObject ) {
+            currentObj = glgeObject;
+            while ( !colladaObj && currentObj ) {
+                if ( currentObj.constructor == GLGE.Collada )
+                    colladaObj = currentObj;
+                else
+                    currentObj = currentObj.parent;
+            } 
+        }
+        return colladaObj;    
     }
 
     var mouselook = function( now, lasttime ) {
@@ -500,55 +520,96 @@ var sceneNode = this.scenes["index-vwf"];
 
             if ( child.source ) {
 
-                function colladaLoaded( collada ) { 
-                    var bRemoved = false;
-                    console.info( "++ 2 ++ "+collada.vwfID+" colladaLoaded( "+ collada.docURL +" )" );
-                    for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
-                        if ( view.glgeColladaObjects[j] == collada ){
-                            view.glgeColladaObjects.splice( j, 1 );
-                            bRemoved = true;
-                        }
-                    } 
-                    if ( bRemoved ) {
-                        bindColladaChildren( view, childID );
-                        //console.info( "++ 2 ++        view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
-                        if ( view.glgeColladaObjects.length == 0 ) {
-                            vwf.setProperty( "index-vwf", "loadComplete", true );
-                            loadComplete( view );
-                        }
+                if ( child.sourceType == "model/vnd.collada+xml" ) {
 
-                        var id = collada.vwfID;
-                        if ( !id ) id = getObjectID( collada, view, false );
-                        if ( id && id != "" ){
-                            view.callMethod( id, "loadComplete" );
+                    function colladaLoaded( collada ) { 
+                        var bRemoved = false;
+                        //console.info( "++ 2 ++ "+collada.vwfID+" colladaLoaded( "+ collada.docURL +" )" );
+                        for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
+                            if ( view.glgeColladaObjects[j] == collada ){
+                                view.glgeColladaObjects.splice( j, 1 );
+                                bRemoved = true;
+                            }
+                        } 
+                        if ( bRemoved ) {
+                            bindColladaChildren( view, childID );
+                            //console.info( "++ 2 ++        view.glgeColladaObjects.length = " + view.glgeColladaObjects.length );
+                            if ( view.glgeColladaObjects.length == 0 ) {
+                                vwf.setProperty( "index-vwf", "loadDone", true );
+                                loadComplete( view );
+                            }
+
+                            var id = collada.vwfID;
+                            if ( !id ) id = getObjectID( collada, view, true, false );
+                            if ( id && id != "" ){
+                                view.callMethod( id, "loadComplete" );
+                            }
+    //                        if ( view.glgeColladaIDs[ collada ] ){
+    //                            view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
+    //                        }
                         }
-//                        if ( view.glgeColladaIDs[ collada ] ){
-//                            view.callMethod( view.glgeColladaIDs[ collada ], "loadComplete" );
-//                        }
                     }
-                }
 
-                child.name = childName;
-                child.glgeObject = new GLGE.Collada;
-                this.glgeColladaObjects.push( child.glgeObject );
-                child.glgeObject.vwfID = childID;
-//                this.glgeColladaIDs[ child.glgeObject ] = childID;
+                    child.name = childName;
+                    child.glgeObject = new GLGE.Collada;
+                    this.glgeColladaObjects.push( child.glgeObject );
+                    child.glgeObject.vwfID = childID;
+    //                this.glgeColladaIDs[ child.glgeObject ] = childID;
 
-                child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
-                child.glgeObject.loadedCallback = colladaLoaded;
-                if ( parent && parent.glgeObject ) {
-                    parent.glgeObject.addCollada(child.glgeObject);
-                    //console.info( "    adding collada child: " + childID + " to " + nodeID );
-                } else {
-                    var sceneNode = this.scenes[nodeID];
-                    if ( sceneNode ) {
-                        if ( !sceneNode.glgeScene ) {
-                            this.initScene( sceneNode );
+                    child.glgeObject.setDocument( child.source, window.location.href, colladaLoaded);
+                    child.glgeObject.loadedCallback = colladaLoaded;
+                    if ( parent && parent.glgeObject ) {
+                        parent.glgeObject.addCollada(child.glgeObject);
+                        //console.info( "    adding collada child: " + childID + " to " + nodeID );
+                    } else {
+                        var sceneNode = this.scenes[nodeID];
+                        if ( sceneNode ) {
+                            if ( !sceneNode.glgeScene ) {
+                                this.initScene( sceneNode );
+                            }
+
+                            sceneNode.glgeScene.addCollada(child.glgeObject);
+                            //console.info( "    adding collada child: " + childID + " to the scene" );
+                        }    
+                    }
+                } else if ( child.sourceType == "text/xml" ) {
+                    var sceneNode = this.scenes[ "index-vwf" ];
+                    if ( sceneNode && sceneNode.glgeDocument ){
+                        var meshDef = sceneNode.glgeDocument.getElement( child.source );
+                        if ( meshDef ) {
+                            child.glgeObject = new GLGE.Object();
+                            child.glgeObject.setMesh( meshDef );
+                            var matName = vwf.getProperty( childID, "material", "" );
+                            if ( matName && matName.constructor == Array ) matName = matName[(Math.random() * matName.length) | 0];
+                            if ( !matName ) matName = "grey";
+                            child.glgeObject.setMaterial( sceneNode.glgeDocument.getElement( matName ) );
+                            if ( this.nodes[nodeID] && this.nodes[nodeID].glgeObject ) {
+                                this.nodes[nodeID].glgeObject.addObject( child.glgeObject );
+                            } else {
+                                if ( sceneNode.glgeScene ) {
+                                    sceneNode.glgeScene.addObject( child.glgeObject );
+                                }
+                            }
+
+                            var callLoadComplete = true;
+                            var phyType = vwf.getProperty( childID, "physics", "" );
+                            if ( !phyType || phyType == "mesh" || ( phyType.constructor == Array && phyType[0] == "mesh" ) ) {
+                                var meshList = findAllMeshes( child.glgeObject );
+
+                                if ( meshList && meshList.length ) {
+                                    child.meshesCreated = [];
+                                    //console.info( "     adding meshes to : " + objID );
+                                    for ( var k = 0; k < meshList.length; k++ ) {
+                                        child.meshesCreated.push( name( meshList[k] ) );
+                                        createViewNode( view, childID, meshList[k] );
+                                    }
+                                }
+                            }
+                            if ( callLoadComplete ) {
+                                view.callMethod( childID, "loadComplete" );
+                            }
                         }
-
-                        sceneNode.glgeScene.addCollada(child.glgeObject);
-                        //console.info( "    adding collada child: " + childID + " to the scene" );
-                    }    
+                    }
                 }
             }
 
@@ -708,11 +769,6 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                 case "position":
                     value = glgeObject.setLoc( pv[0], pv[1], pv[2] );
                     break;
-                case "posRot":
-                    value = [];
-                    value.push( glgeObject.setLoc( pv[0], pv[1], pv[2] ) );
-                    value.push( glgeObject.setRot( pv[3], pv[4], pv[5] ) );
-                    break;
                 case "posRotMatrix":
                     value = [];
                     value.push( glgeObject.setLoc( pv[0], pv[1], pv[2] ) );
@@ -744,7 +800,15 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                         if ( txtr ) {
                             txtr.setSrc( propertyValue );
                         } else if ( mat ) {
-                            mat.addTexture( propertyValue );
+					        var ml=new GLGE.MaterialLayer;
+					        ml.setMapto(GLGE.M_COLOR);
+					        //ml.setMapto(GLGE.M_NOR);
+					        ml.setMapinput(GLGE.UV1);
+                            var txt = new GLGE.Texture();
+                            txt.setSrc( propertyValue );
+                            mat.addTexture( txt );
+					        ml.setTexture(txt);
+					        mat.addMaterialLayer(ml);
                         }
                     }
                     break;
@@ -761,6 +825,7 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                             value = this.satParticleSystemProperty( nodeID, propertyName, propertyValue );
                             break;                        
                         case "http-vwf-example-com-types-glge":
+                        case "appscene-vwf":
                             value = this.satSceneProperty( nodeID, propertyName, propertyValue );
                             break;
                     }
@@ -791,10 +856,12 @@ if ( !node.initialized ) {  // TODO: this is a hack to set the animation to fram
                     sceneNode.glgeScene.setAmbientColor( propertyValue );
                     break;
                 case "activeCamera":
-                    if ( sceneNode.camera.glgeCameras[propertyValue] ) {
-                        var cam = sceneNode.camera.glgeCameras[propertyValue];
-                        if ( cam ) {
-                            setActiveCamera( this, cam, sceneNode, nodeID );
+                    if ( sceneNode.camera && sceneNode.camera.glgeCameras ) {
+                        if ( sceneNode.camera.glgeCameras[propertyValue] ) {
+                            var cam = sceneNode.camera.glgeCameras[propertyValue];
+                            if ( cam ) {
+                                setActiveCamera( this, cam, sceneNode, nodeID );
+                            }
                         }
                     }
                     break;
@@ -1070,15 +1137,6 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 case "position":
                     value = new Array;
                     value.push( glgeObject.getLocX(), glgeObject.getLocY(), glgeObject.getLocZ() );
-                    break;
-                case "posRot":
-                    value = new Array;
-                    value.push( glgeObject.getLocX() );
-                    value.push( glgeObject.getLocY() );
-                    value.push( glgeObject.getLocZ() );
-                    value.push( glgeObject.getRotX() );
-                    value.push( glgeObject.getRotY() );
-                    value.push( glgeObject.getRotZ() );
                     break;
                 case "posRotMatrix":
                     value = new Array;
@@ -1435,18 +1493,20 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if ( child ) {
                 var cam;
                 
-                if ( !sceneNode.camera.glgeCameras[childName] ) {
-                    cam = new GLGE.Camera();
-                    initCamera( cam );
-                    sceneNode.camera.glgeCameras[childName] = cam;
-                } else {
-                    cam = sceneNode.camera.glgeCameras[childName];
-                }
+                if ( sceneNode.camera && sceneNode.camera.glgeCameras ) {
+                    if ( !sceneNode.camera.glgeCameras[childName] ) {
+                        cam = new GLGE.Camera();
+                        initCamera( cam );
+                        sceneNode.camera.glgeCameras[childName] = cam;
+                    } else {
+                        cam = sceneNode.camera.glgeCameras[childName];
+                    }
 
-                child.name = childName;
-                child.glgeObject = cam;
-                child.uid = child.glgeObject.uid;
-                cam.name = childName;
+                    child.name = childName;
+                    child.glgeObject = cam;
+                    child.uid = child.glgeObject.uid;
+                    cam.name = childName;
+                }
             }
         }
     }
@@ -1607,7 +1667,94 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     parentArray.splice( index, 1 );
             }
         }
+
+        if ( colladaTopNode.delayLoadObjects ) {
+            var dObjs = colladaTopNode.delayLoadObjects;
+            var meshList, parentID, objID;
+            //console.info( "FINDING and adding children: " );
+            for ( var j = 0; j < dObjs.length; j++ ) {
+                meshList = findAllMeshes( dObjs[j] );
+                if ( meshList && meshList.length ) {
+                    objID = getObjectID( dObjs[j], view, false, false );
+                    parentID = getObjectID( dObjs[j].parent, view, true, false );
+                    if ( parentID && !objID ) {
+                        createViewNode( view, parentID, dObjs[j] );
+                    }
+                    objID = getObjectID( dObjs[j], view, false, false );
+                    //console.info( "     adding meshes to : " + objID );
+                    for ( var k = 0; k < meshList.length; k++ ) {
+                        createViewNode( view, objID, meshList[k] );
+                    }
+                }
+            }
+            //console.info( "DONE adding children: " );
+        }
     };
+
+    var meshesCreated = 0;
+    var meshExtendType = "http://vwf.example.com/types/mesh";
+    var createViewNode = function( view, parentID, glgeObject ) {
+        var extendType, type, newChildID, mesh;
+        var objName = name( glgeObject );
+
+        if ( glgeObject.constructor == GLGE.Mesh ) {
+            mesh = glgeObject;
+            if ( objName == "" ) {
+                objName = "Mesh" + meshIndex++;
+                mesh.name = objName;
+            }             
+            extendType = meshExtendType;
+            type = "http-vwf-example-com-types-mesh";
+            newChildID = type +"-"+ objName;  
+            meshesCreated++;        
+        } else {
+            extendType = "http://vwf.example.com/types/node3";
+            type = "http-vwf-example-com-types-node3";
+            newChildID = type +"-"+ objName;
+        }
+
+        var addedID;
+        var parentNode = view.nodes[ parentID ];
+        if ( newChildID && type ) {
+            if ( !view.nodes[ newChildID ] ) {
+                //console.info( "[[  Creating " + type + " as child of " + parentID );
+//                vwf.createNode( { "extends": extendType }, undefined, objName );
+                vwf.createNode( { "extends": extendType }, function( nodeID, prototypeID ) {
+                    //console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
+                    vwf.addChild( parentID, nodeID, objName );
+                    addedID = nodeID;
+                    //console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
+                    if ( extendType == meshExtendType ) {
+                        meshesCreated--;
+                        if ( parentNode.meshesCreated ) {
+                            var found = false;
+                            var i = 0;
+                            for ( i = 0; i < parentNode.meshesCreated.length && !found; i++ ) {
+                                if ( parentNode.meshesCreated[i] == objName ) {
+                                    found = true;
+                                    parentNode.meshesCreated.splice(i,1);
+                                }
+                            }
+                            if ( parentNode.meshesCreated.length == 0 ) {
+                                view.callMethod( parentID, "loadComplete" );
+                            }
+
+                        }
+                        //console.info( "   meshesCreated = " + meshesCreated );
+                        if ( meshesCreated == 0 ) {
+                            console.info( "   ALL MESHES Created and Added" );
+                            vwf.setProperty( "index-vwf", "loadDone", true );
+                            //vwf.logger.enable = true;
+                        }
+                    }
+                }, objName );
+                //console.info( "]]  Creating " + type  );
+            }
+        }
+        return addedID;    
+    }
+    
+     
 
     var loadComplete = function( view ) {
         var itemsToDelete = [];
@@ -1693,73 +1840,38 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         if ( !success ) {
             vwf.logger.info( "     unable to bind: " + childID );
+            //console.info( "     unable to bind: " + childID );
         } else {
             //console.info( "VWF binded to glge object: " + childID );
             delete view.loadingObjects[ childID ];
-            if ( false && child.glgeObject.getChildren ) {
+            var temp;
+            var phyProp = vwf.getProperty( childID, "physics", temp );
+            //console.info( "        " + childID + ".physics = " + phyProp );
+            if ( child.glgeObject.getChildren && phyProp == "mesh" ) {
                 var children = child.glgeObject.getChildren();
-                var childObj;
-                var objName;
-                var node;
-                var type;
-                var extendType;
-                for ( var i = 0; i < children.length; i++ ) {
-                    childObj = children[i];
-                    objName = name( childObj );
-                    
-                    if ( childObj.constructor == GLGE.Group || childObj.constructor == GLGE.Object ) {
-                        extendType = "http://vwf.example.com/types/node3";
-                        type = "http-vwf-example-com-types-node3";
-                        node = type +"-"+ objName;
-                    }
-
-                    if ( node && type ) {
-                        if ( !view.nodes[ node ] ) {
-                            console.info( "[[  Creating " + type  );
-                            vwf.createNode( { "extends": extendType }, function( nodeID, prototypeID ) {
-                                console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
-                                vwf.addChild( nodeID, nodeID, objName );
-                                console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
-                            }, objName );
-                            console.info( "]]  Creating " + type  );
+                //console.info( "      bounded glge object has children: " + children.length  );
+                if ( children && children.length > 0 ) {
+                    var colladaParent = findColladaParent( child.glgeObject );
+                    //console.info( "     ADDING children for: " )
+                    if ( colladaParent ) {
+                        colladaID = colladaParent.vwfID;
+                        if ( !colladaID ) { 
+                            colladaID = getObjectID( colladaParent, view, true, false );
+                            colladaParent.vwfID = colladaID;
+                        }
+                        if ( colladaID ) {
+                            //console.info( "     CHECKING children for: " + childID );
+                            colladaNode = view.nodes[ colladaID ];
+                            if ( !colladaNode.delayLoadObjects ) { colladaNode.delayLoadObjects = []; }
+                            var dObjs = colladaNode.delayLoadObjects;
+                            var phyProp;
+                            for ( var j = 0; j < children.length; j++ ) {
+                                dObjs.push( children[j] );
+                                //console.info( "         ++ ADDING child: " + name( children[j] ) );
+                            }                        
                         }
                     }
-
-                    var mesh;
-                    var meshType;
-                    var meshName;
-                    var meshNodeID;
-                    var meshID;
-                    if ( childObj.constructor == GLGE.Object && childObj.getMesh && childObj.getMesh() ) {
-                        mesh = childObj.getMesh();
-                        meshName = name( mesh );
-                        if ( meshName == "" ) {
-                            meshName = objName + "Mesh" + meshIndex++;
-                            mesh.name = meshName;
-                        }
-                        meshType = "http://vwf.example.com/types/mesh";
-                        meshID = "http-vwf-example-com-types-mesh";
-                        meshNodeID = meshID +"-"+ meshName;    
-
-                        //vwf.logger.enable = true;
-                        if ( meshNodeID && meshType ) {
-                            if ( !view.nodes[ meshNodeID ] ) {
-                                console.info( "        ++  Creating Mesh  Named: " + meshName );
-                                vwf.createNode( { "extends": meshType }, function( nodeID, prototypeID ) {
-                                    //vwf.logger.enable = true;
-                                    console.info( "     createNode.callback( "+nodeID+", "+prototypeID+ " )" )
-                                    console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
-                                    vwf.addChild( nodeID, nodeID, meshName );
-                                    console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
-                                    //vwf.logger.enable = false;
-                                }, meshName );
-                                console.info( "        ++  Creating Mesh  Named: " + meshName );
-                            }
-                        }    
-                        //vwf.logger.enable = false;                    
-                                                
-                    }
-                }  
+                }
             }
 
             if ( child.glgeObject.animate && child.glgeObject.animation ) {
@@ -1790,10 +1902,16 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
     // Search a GLGE.Object, GLGE.Collada, GLGE.Light for a child with the given name.  TODO: really, it's anything with children[]; could be the same as glgeSceneChild().
 
     var glgeObjectChild = function (glgeObject, childName) {
+        
+        var childToReturn;
+        if ( GLGE.Assets && GLGE.Assets.assets ) 
+           childToReturn = GLGE.Assets.assets[childName];
 
-        var childToReturn = jQuery.grep(glgeObject.children || [], function (glgeChild) {
-            return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
-        }).shift();
+        if ( !childToReturn ) {
+            childToReturn = jQuery.grep(glgeObject.children || [], function (glgeChild) {
+               return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
+            }).shift();
+        }
 
         //vwf.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
@@ -1802,23 +1920,45 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var bindMaterial = function( view, childID, childName, node ) {
 
-        if ( node && node.glgeObject && view.nodes[childID] ) {
-            if ( node.glgeObject.children.length == 1 && node.glgeObject.children[0].constructor == GLGE.Object ) {
-                var childNode = view.nodes[childID];
-                var glgeChild = node.glgeObject.children[0];
-                var materialStringIndex = childName.lastIndexOf( "Material" );
-                var materialIndex = Number( childName.substr( materialStringIndex + 8 ) ) - 1;
+        var materialStringIndex, materialIndex, parentName;
+        var childNode = view.nodes[childID];
 
-                childNode.glgeObject = glgeChild;
-                childNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
+        // the material name is a combination of the following information
+        // groupParentName + 'Material' + indexOfTheMultiMaterial
+
+        if ( childNode ) {
+            materialStringIndex = childName.lastIndexOf( "Material" );
+            materialIndex = Number( childName.substr( materialStringIndex + 8 ) ) - 1;
+            parentName = childName.substr( 0, materialStringIndex );
+            if ( node && node.glgeObject ) {
+                var glgeObjs = [];
+                var found = false;
+                findAllGlgeObjects( node.glgeObject, glgeObjs );
+                if ( glgeObjs && glgeObjs.length ) {
+                    for ( var i = 0; i < glgeObjs.length && !found; i++ ) {
+                        if ( name( glgeObjs[i].parent ) == parentName ) {
+                            childNode.glgeObject = glgeObjs[i];
+                            childNode.glgeMaterial = glgeObjs[i].getMaterial( materialIndex );
+                            found = true;                        
+                        }                   
+                    }
+                } else if ( node.glgeObject.children.length == 1 && node.glgeObject.children[0].constructor == GLGE.Object ) {
+
+                    var glgeChild = node.glgeObject.children[0];
+                    materialStringIndex = childName.lastIndexOf( "Material" );
+                    materialIndex = Number( childName.substr( materialStringIndex + 8 ) ) - 1;
+
+                    childNode.glgeObject = glgeChild;
+                    childNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
                 
-                if ( !( childNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
-                    childNode.glgeMaterial = childNode.glgeObject.material;
-                }
+                    if ( !( childNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
+                        childNode.glgeMaterial = childNode.glgeObject.material;
+                    }
 
-//                if ( childNode.glgeMaterial === childNode.glgeObject.material ) {
-//                    console.info( " materials are the same object!!!!! " );
-//                }
+//                  if ( childNode.glgeMaterial === childNode.glgeObject.material ) {
+//                       console.info( " materials are the same object!!!!! " );
+//                  }
+                }
             }
         }
 
@@ -1922,15 +2062,17 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         var lastXPos = -1;
         var lastYPos = -1;
+        var glgeActualObj = undefined;
 
         container = document.getElementById("container");
         sceneCanvas = canvas;
         mouse = new GLGE.MouseInput( sceneCanvas );
 
-        var mouseInfo = function( e ) {
+        var mouseInfo = function( e, debug ) {
             var pickInfo = mousePick( e, sceneNode );
             if ( pickInfo ) {
-                var mouseOverID = getPickObjectID( pickInfo, sceneView, false );
+                glgeActualObj = pickInfo.object;
+                var mouseOverID = getPickObjectID( pickInfo, sceneView, debug );
                 return { 
                             "lastX": lastXPos,
                             "lastY": lastYPos,
@@ -1948,6 +2090,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                             "mouseEventTime": parseInt( new Date().getTime() ),
                             "trans": undefined,
                             "mag": undefined,
+                            "camPos": undefined, 
+                            "camRot": undefined,                             
                         };
             } else {
                 return { 
@@ -1962,6 +2106,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                             "mouseEventTime": parseInt( new Date().getTime() ),
                             "trans": undefined,
                             "mag": undefined,
+                            "camPos": undefined, 
+                            "camRot": undefined,
                         };                
             }
                             
@@ -1973,12 +2119,16 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             if ( camera ) {
                 info.trans = GLGE.mulMat4Vec4(camera.getRotMatrix(), [0, 0, -1, 1]);
                 info.mag = Math.pow(Math.pow(info.trans[0], 2) + Math.pow(info.trans[1], 2), 0.5);
+                info.camPos = new Array;
+                info.camPos.push( camera.getLocX(), camera.getLocY(), camera.getLocZ() );
+                info.camRot = new Array;
+                info.camRot.push( camera.getRotX(), camera.getRotY(), camera.getRotZ() );
             }
         }
 
         canvas.onmousedown = function (e) {
             mouseDown = true;
-            var mi = mouseInfo( e );
+            var mi = mouseInfo( e, false );
             if ( mi ) {
                 cameraInfo( mi );
                 mouseDownObjectID = mi.mouseOverID;
@@ -1994,8 +2144,8 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         }
 
-        canvas.onmouseup = function (e) {
-            var mi = mouseInfo( e );
+        canvas.onmouseup = function( e ) {
+            var mi = mouseInfo( e, false );
             if ( mi ) {
                 cameraInfo( mi );
                 var mouseUpObjectID =  mi.mouseOverID;
@@ -2005,24 +2155,28 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     //this.throwEvent( "onMouseClick", mouseDownObjectID);
                     view.callMethod( mouseUpObjectID, "pointerClick" );
 
-                    if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
-                        if ( sceneView.nodes[mouseUpObjectID] ) {
-                            var colladaObj = undefined;
-                            var currentObj;
-                            var glgeObj = sceneView.nodes[mouseUpObjectID].glgeObject;
-                            if ( glgeObj ) {
-                                currentObj = glgeObj;
+                    var glgeObj = sceneView.nodes[mouseUpObjectID].glgeObject;
+                    if ( glgeObj ) {
+                        if ( mi && mi.pickInfo ) {
+                                
+                        }
+                        if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
+                            if ( sceneView.nodes[mouseUpObjectID] ) {
+                                var colladaObj;
+                                var currentObj = glgeObj;
                                 while ( !colladaObj && currentObj ) {
                                     if ( currentObj.constructor == GLGE.Collada )
                                         colladaObj = currentObj;
                                     else
                                         currentObj = currentObj.parent;
                                 } 
-                            }
-                            if ( colladaObj ) {
-                                recurseGroup( colladaObj, 0 );
-                            }
-                        }                
+                                if ( colladaObj ) {
+                                    recurseGroup( colladaObj, 0 );
+                                }
+                            }                
+                        } else if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_ALT) ) {
+                            recurseGroup( glgeObj, 0 ); 
+                        }
                     }
                 }
 
@@ -2042,7 +2196,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         canvas.onmouseover = function (e) {
             mouseOverCanvas = true;
-            var mi = mouseInfo( e );
+            var mi = mouseInfo( e, false );
             if ( mi ) {
                 cameraInfo( mi );
                 var strParams = JSON.stringify( mi );
@@ -2055,17 +2209,17 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
 
         canvas.onmousemove = function (e) {
-            var mi = mouseInfo( e );
+            var mi = mouseInfo( e, false );
             if ( mi ) {
                 cameraInfo( mi );
                 var strParams = JSON.stringify( mi );
                 if (mouseDown) {
-                    if (mouseDownObjectID) {
+                    //if (mouseDownObjectID) {
 
                         //vwf.logger.info("CANVAS onMouseMove: " + mouseDownObjectID);
                         //this.throwEvent( "onMouseMove", mouseDownObjectID);
                         sceneView.execute( sceneID, "this.mouseMove("+strParams+")", "application/javascript" );
-                    }
+                    //}
 
                     //view.callMethod( mouseDownObjectID, "onMouseMove" );
                 } else {
@@ -2124,12 +2278,13 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         }
 
         canvas.onmousewheel = function (e) {
+            console.info( "     onmousewheel() " );
         }
 
     };
 
     function name(obj) {
-        return obj.colladaName || obj.colladaId || obj.name || obj.id || "";
+        return obj.colladaName || obj.colladaId || obj.name || obj.id || obj.uid || "";
     }
 
     function path(obj) {
@@ -2156,28 +2311,32 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     var getPickObjectID = function( pickInfo, view, debug ) {
 
-        if (pickInfo && pickInfo.object) {
-            return getObjectID( pickInfo.object, view, debug );
+        if ( pickInfo && pickInfo.object ) {
+            return getObjectID( pickInfo.object, view, true, debug );
         }
         return undefined;
 
     }
 
-    var getObjectID = function( objectToLookFor, view, debug ) {
+    var getObjectID = function( objectToLookFor, view, bubbleUp, debug ) {
 
         var objectIDFound = -1;
             
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
-                vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
+                console.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
             }
             jQuery.each(view.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    //vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID );
+                    if ( debug ) { console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });
-            objectToLookFor = objectToLookFor.parent;
+            if ( bubbleUp ) {
+                objectToLookFor = objectToLookFor.parent;
+            } else {
+                objectToLookFor = undefined;
+            }
         }
         if (objectIDFound != -1)
             return objectIDFound;
@@ -2210,6 +2369,18 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                 }
             }
         }
+    }
+
+    var findAllMeshes = function( glgeNode ) {
+        var meshes = [];
+        var objs = [];
+        findAllGlgeObjects( glgeNode, objs );
+        for ( var i = 0; i < objs.length; i++ ){
+            if ( objs[i].getMesh && objs[i].getMesh() ) {
+                meshes.push( objs[i].getMesh() );
+            }       
+        }
+        return meshes;
     }
 
     var recurseGroup = function(grp, iDepth) {
@@ -2302,3 +2473,65 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 })(window.vwf.modules, "vwf.view.glge");
 
 
+//                var childObj;
+//                var objName;
+//                var node;
+//                var type;
+//                var extendType;
+//                for ( var i = 0; i < children.length; i++ ) {
+//                    childObj = children[i];
+//                    objName = name( childObj );
+//                    
+//                    if ( childObj.constructor == GLGE.Group || childObj.constructor == GLGE.Object ) {
+//                        extendType = "http://vwf.example.com/types/node3";
+//                        type = "http-vwf-example-com-types-node3";
+//                        node = type +"-"+ objName;
+//                    }
+
+//                    if ( node && type ) {
+//                        if ( !view.nodes[ node ] ) {
+//                            console.info( "[[  Creating " + type  );
+//                            vwf.createNode( { "extends": extendType }, function( nodeID, prototypeID ) {
+//                                console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
+//                                vwf.addChild( nodeID, nodeID, objName );
+//                                console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
+//                            }, objName );
+//                            console.info( "]]  Creating " + type  );
+//                        }
+//                    }
+
+//                    var mesh;
+//                    var meshType;
+//                    var meshName;
+//                    var meshNodeID;
+//                    var meshID;
+//                    if ( childObj.constructor == GLGE.Object && childObj.getMesh && childObj.getMesh() ) {
+//                        mesh = childObj.getMesh();
+//                        meshName = name( mesh );
+//                        if ( meshName == "" ) {
+//                            meshName = objName + "Mesh" + meshIndex++;
+//                            mesh.name = meshName;
+//                        }
+//                        meshType = "http://vwf.example.com/types/mesh";
+//                        meshID = "http-vwf-example-com-types-mesh";
+//                        meshNodeID = meshID +"-"+ meshName;    
+
+//                        //vwf.logger.enable = true;
+//                        if ( meshNodeID && meshType ) {
+//                            if ( !view.nodes[ meshNodeID ] ) {
+//                                console.info( "        ++  Creating Mesh  Named: " + meshName );
+//                                vwf.createNode( { "extends": meshType }, function( nodeID, prototypeID ) {
+//                                    //vwf.logger.enable = true;
+//                                    console.info( "     createNode.callback( "+nodeID+", "+prototypeID+ " )" )
+//                                    console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
+//                                    vwf.addChild( nodeID, nodeID, meshName );
+//                                    console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
+//                                    //vwf.logger.enable = false;
+//                                }, meshName );
+//                                console.info( "        ++  Creating Mesh  Named: " + meshName );
+//                            }
+//                        }    
+//                        //vwf.logger.enable = false;                    
+//                                                
+//                    }
+//                }  
