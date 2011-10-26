@@ -29,6 +29,7 @@
 
         "vwf/model/javascript",
         "vwf/model/object",
+        "vwf/model/stage/log",
 
       ], function() {
 
@@ -40,8 +41,8 @@
           );
 
           test( "Models", function() {
-            equal( vwf.models[0], require( "vwf/model/javascript" ), "JavaScript Model" );
-            equal( vwf.models[1], require( "vwf/model/object" ), "Object Model" );
+            equal( vwf.models.actual[0].module.id, "vwf/model/javascript", "JavaScript Model" );
+            equal( vwf.models.actual[1].module.id, "vwf/model/object", "Object Model" );
           } );
 
           test( "Views", function() {
