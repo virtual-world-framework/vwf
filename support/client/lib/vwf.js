@@ -72,6 +72,8 @@
         // by execution time.
 
         var queue = this.private.queue = [];
+        queue.time = 0; // current server time
+        queue.ready = true;
 
         // This is the connection to the conference server. In this sample implementation, "socket"
         // is a socket.io client that communicates over a channel provided by the server hosting the
@@ -282,7 +284,11 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
                         // Add the message to the queue and keep it ordered by time.
 
                         queue.push( fields );
-                        queue.sort( function( a, b ) { return a.time - b.time } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive
+                        queue.time = fields.time || queue.time; // current server time
+
+                        queue.sort( function( a, b ) {
+                            return a.time - b.time
+                        } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive; also ensure that new messages added at the same time as other messages in the queue are inserted after them
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -361,7 +367,11 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
                 // Otherwise, for single-user mode, loop it immediately back to the incoming queue.
 
                 queue.push( fields );
-                queue.sort( function( a, b ) { return a.time - b.time } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive
+                queue.time = fields.time || queue.time;
+
+                queue.sort( function( a, b ) {
+                    return a.time - b.time
+                } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive; also ensure that new messages added at the same time as other messages in the queue are inserted after them
 
             }
 
@@ -371,7 +381,7 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( fields ) {
+        this.receive = function( fields, callback_ready ) {
 
             // Advance the time and locate the node ID and action name.
 
@@ -388,6 +398,26 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // handler.
 
             var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields.parameters ) : fields.parameters;
+
+            // Insert the ready callback for potentially-asynchronous actions.
+
+            switch ( actionName ) {
+
+                case "createNode":
+
+                    callback_ready( false ); // suspend the queue
+
+                    args[1] = function( nodeID, prototypeID ) {
+                        vwf.addChild( 0, nodeID, undefined );
+                        callback_ready( true ); // resume the queue when the action completes
+                    };
+
+                    break;
+
+            }
+
+            // Invoke the action.
+
             this[actionName] && this[actionName].apply( this, args );
             
         };
@@ -404,13 +434,29 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // remove the message and perform the action. The simulation time is advanced to the
             // message time as each one is processed.
 
-            while ( queue.length > 0 && queue[0].time <= currentTime ) {
-                this.receive( queue.shift() );
+            // Actions may use receive's ready function to suspend the queue for asynchronous
+            // operations, and to resume it when the operation is complete.
+
+            while ( queue.ready && queue.length > 0 && queue[0].time <= currentTime ) {
+
+                var fields = queue.shift();
+
+                this.receive( fields, function( ready ) {
+                    if ( Boolean( ready ) != Boolean( queue.ready ) ) {
+                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", currentTime, "for", fields.action );
+                        queue.ready = ready;
+                        queue.ready && vwf.dispatch( queue.time );
+                    }
+                } );
+
             }
 
             // Set the simulation time to the new current time.
 
-            this.now = currentTime;
+            if ( queue.ready ) {
+                this.now = currentTime;
+            }
+
             this.tick();
             
         };
