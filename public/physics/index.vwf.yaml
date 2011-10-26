@@ -1,0 +1,78 @@
+--- 
+extends: appscene.vwf
+source: physics.xml
+properties:
+  ambientColor: [ 183, 183, 183 ]
+  activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  gravity: [ 0, 0, -50.8, 0 ]
+  collisionSystem: [ false ]
+type: model/x-glge
+scripts:
+- text: |
+    var rampLoaded = false;
+    var physicsSystemInit = false;
+    var ramp = { "source": "city", "type": "text/xml", "extends": "http://vwf.example.com/types/node3", "properties": { "material": "grey", "scale": [ 10, 10, 10 ], "physics": [ "mesh" ] }, "scripts": [ { "text": "this.loadComplete = function() {\n  this.scale = this.scale;\n  this.physics = this.physics;\n}\n", "type": "application/javascript" } ] };    
+    this.initialize = function() {
+      console.info( "==================== appscene.vwf ====================" );
+      if ( !physicsSystemInit ) {
+        console.info( "	setting up physics" );
+        this.gravity = [ 0, 0, -50.8, 0 ];
+        console.info( "	  gravity set" );
+        this.collisionSystem = [ false ];
+        console.info( "	  collisionSystem set" );
+        physicsSystemInit = true;
+      }
+      var scn = this;
+      if ( !rampLoaded ){
+        var newObjName = "ramp";
+        vwf.createNode( ramp, function( nodeID, prototypeID ){
+          vwf.addChild( "index-vwf", nodeID, newObjName );
+          console.info( "   LOAD DONE   " );  
+          scn.loadDone = true;
+        }, newObjName );
+        rampLoaded = true;        
+      }
+    }
+  type: application/javascript
+children:
+  maincamera: 
+    extends: http://vwf.example.com/types/camera
+    properties:
+      allowMouseNav: false
+      walkMode: "walk"
+      cameraType: "perspective"
+      orbitPoint: [ 0, 0, 0 ]      
+      position: [ 7.5, -93.93, 26 ]
+      eulers: [ 0, 0, 0 ]
+      rotation: [ 1.49, -0.0296, -0.0022 ]
+      rotX: 0
+      rotY: 0
+      rotZ: 0
+      far: 1000.0
+      near: 0.1
+      fovy: 35
+      aspect: 1.0
+      orthoscale: 5
+      speed: 2.0
+    scripts: 
+    - text: |
+        this.initialize = function() {
+          console.info( "==================== maincamera ====================" );
+        }
+      type: application/javascript
+  groundplane:
+    extends: http://vwf.example.com/types/node3
+    properties:
+      physics: [ "plane", [ 0, 0, 1, 0 ] ]
+      friction: 0.99
+      restitution: 0
+      position: [ 0, 0, 2 ]
+    scripts: 
+    - text: |
+        this.initialize = function() {
+          console.info( "==================== groundplane ====================" );
+          this.physics = [ "plane", 0, 0, 1, 0 ];
+          this.friction = this.friction;
+          this.restitution = this.restitution; 
+          this.position = this.position;          
+        }       

@@ -1,0 +1,65 @@
+--- 
+extends: http://vwf.example.com/types/glge
+properties:
+  createCube: true
+  cubesCreated: 0
+  spheresCreated: 0
+scripts:
+- text: |
+    var lastTimeObjWasCreated;
+    var mouseIsDown = false;
+    var mouseDownTime = -1;
+    var idsToAddVelocity;
+    var cube = { "source": "Cube", "extends": "http://vwf.example.com/types/node3", "properties": { "material": [ "red", "blue", "yellow" ], "scale": [ 1.5, 1.5, 1.5 ], "eulers": [ 0, 0, 0 ], "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], "physics": [ "box", 3.0, 3.0, 3.0 ], "friction": 0.5, "mass": 1000, "position": [ 0, 0, 0 ], "linVelocityDamping": [ 1, 1, 1, 0 ], "restitution": 0.10, "velocity": [ 0, 0, 0 ] }, "scripts": [ { "text": "this.initialize = function() {\n  this.scale = this.scale;\n  this.physics = this.physics;\n  this.mass = this.mass;\n  this.friction = this.friction;\n  this.restitution = this.restitution;\n  this.rotVelocityDamping = this.rotVelocityDamping;\n  this.linVelocityDamping = this.linVelocityDamping;\n  this.position = this.position;\n  this.eulers = this.eulers;\n }\n",  "type": "application/javascript" } ], "type": "text/xml" };
+    var sphere = { "source": "Sphere", "extends": "http://vwf.example.com/types/node3", "properties": { "material": [ "red", "blue", "yellow" ], "scale": [ 2.0, 2.0, 2.0 ], "eulers": [ 0, 0, 0 ], "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], "physics": [ "sphere", 2.0 ], "friction": 0.5, "mass": 100, "position": [ 0, 0, 0 ], "linVelocityDamping": [ 1, 1, 1, 0 ], "restitution": 0.10, "velocity": [ 0, 0, 0 ] }, "scripts": [ { "text": "this.initialize = function() {\n  this.scale = this.scale;\n  this.physics = this.physics;\n  this.mass = this.mass;\n  this.friction = this.friction;\n  this.restitution = this.restitution;\n  this.rotVelocityDamping = this.rotVelocityDamping;\n  this.linVelocityDamping = this.linVelocityDamping;\n  this.position = this.position;\n  this.eulers = this.eulers;\n }\n",  "type": "application/javascript" } ], "type": "text/xml" };
+    this.mouseDown = function( parms ) {
+      mouseIsDown = true;
+      mouseDownTime = new Date().getTime();
+      if ( this.__proto__ && this.__proto__.__proto__ && this.__proto__.__proto__.mouseDown ) {
+        this.__proto__.__proto__.mouseDown.call( this, parms );  
+      }     
+    }
+    this.mouseUp = function( parms ) {
+      mouseIsDown = false;
+      var now = new Date().getTime();
+      if ( now - mouseDownTime < 600 ) {
+        this.createObject( parms );
+      }
+      if ( this.__proto__ && this.__proto__.__proto__ && this.__proto__.__proto__.mouseUp ) {
+        this.__proto__.__proto__.mouseUp.call( this, parms );  
+      }
+      mouseDownTime = -1;
+    }
+    this.createObject = function( parms ) {
+      var newObjName;
+      if ( this.createCube ) {
+        this.cubesCreated = this.cubesCreated + 1;
+        newObjName = "cube" + this.cubesCreated;
+        vwf.createNode( cube, function( nodeID, prototypeID ){
+          vwf.addChild( "index-vwf", nodeID, newObjName );
+          vwf.setProperty( nodeID, "position", [ parms.camPos[0], parms.camPos[1], parms.camPos[2] ] );
+          //if ( !idsToAddVelocity ) idsToAddVelocity = {};
+          //idsToAddVelocity[nodeID] = [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60];
+          vwf.setProperty( nodeID, "velocity", [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60] );
+        }, newObjName );        
+        this.createCube = false;
+      } else {
+        this.spheresCreated = this.spheresCreated + 1;
+        newObjName = "sphere" + this.spheresCreated;
+        vwf.createNode( sphere, function( nodeID, prototypeID ){
+          vwf.addChild( "index-vwf", nodeID, newObjName );
+          vwf.setProperty( nodeID, "position", [ parms.camPos[0], parms.camPos[1], parms.camPos[2] ] );
+          //if ( !idsToAddVelocity ) idsToAddVelocity = {};
+          //idsToAddVelocity[nodeID] = [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60];
+          vwf.setProperty( nodeID, "velocity", [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60] );
+        }, newObjName );   
+        this.createCube = true;      
+      }
+    }
+    this.tick = function() {
+      //for ( id in idsToAddVelocity ) {
+      //    vwf.setProperty( id, "velocity", idsToAddVelocity[id] );
+      //}
+      //idsToAddVelocity = undefined;
+    }
+  type: application/javascript    
