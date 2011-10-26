@@ -73,6 +73,7 @@
 
         var queue = this.private.queue = [];
         queue.time = 0; // current server time
+        queue.ready = true;
 
         // This is the connection to the conference server. In this sample implementation, "socket"
         // is a socket.io client that communicates over a channel provided by the server hosting the
@@ -380,7 +381,7 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( fields ) {
+        this.receive = function( fields, callback_ready ) {
 
             // Advance the time and locate the node ID and action name.
 
@@ -397,6 +398,25 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // handler.
 
             var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields.parameters ) : fields.parameters;
+
+            // Insert the ready callback for potentially-asynchronous actions.
+
+            switch ( actionName ) {
+
+                case "createNode":
+
+                    callback_ready( false ); // suspend the queue
+
+                    args[1] = function( nodeID, prototypeID ) {
+                        vwf.addChild( 0, nodeID, undefined );
+                        callback_ready( true ); // resume the queue when the action completes
+                    };
+
+                    break;
+
+            }
+
+            // Invoke the action.
 
             var result = this[actionName] && this[actionName].apply( this, args );
 
@@ -430,13 +450,29 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
             // remove the message and perform the action. The simulation time is advanced to the
             // message time as each one is processed.
 
-            while ( queue.length > 0 && queue[0].time <= currentTime ) {
-                this.receive( queue.shift() );
+            // Actions may use receive's ready function to suspend the queue for asynchronous
+            // operations, and to resume it when the operation is complete.
+
+            while ( queue.ready && queue.length > 0 && queue[0].time <= currentTime ) {
+
+                var fields = queue.shift();
+
+                this.receive( fields, function( ready ) {
+                    if ( Boolean( ready ) != Boolean( queue.ready ) ) {
+                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", currentTime, "for", fields.action );
+                        queue.ready = ready;
+                        queue.ready && vwf.dispatch( queue.time );
+                    }
+                } );
+
             }
 
             // Set the simulation time to the new current time.
 
-            this.now = currentTime;
+            if ( queue.ready ) {
+                this.now = currentTime;
+            }
+
             this.tick();
             
         };
