@@ -54,13 +54,14 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
             return instance;
         },
 
-        create: function( kernel, model, stages ) {
+        create: function( kernel, model, stages, state ) {  // TODO: configuration parameters
 
             this.logger.info( "create" );
 
-            // Interpret create( kernel, stages ) as create( kernel, undefined, stages )
+            // Interpret create( kernel, stages, state ) as create( kernel, undefined, stages, state )
 
             if ( model && model.length !== undefined ) {
+                state = stages;
                 stages = model;
                 model = undefined;
             }
@@ -92,9 +93,13 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
                     kernel,
                 kernel_api );
 
+            // Attach the shared state object.
+
+            instance.state = state || {};
+
             // Call the driver's initialize().
 
-            initialize.call( instance );
+            initialize.call( instance );  // TODO: configuration parameters
 
             // Call modelize() on the driver.
 
