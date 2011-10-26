@@ -30,12 +30,25 @@
         // useful for debugging.
 
         Object.defineProperty( this.models, "actual", {  // TODO: for this.views too once that's converted to use the RequireJS loader
+
             get: function() {
-                return this.map( function( model ) {
+
+                var actual = this.map( function( model ) {
                     while ( model.model ) model = model.model;
                     return model;
                 } );
+
+                for ( var propertyName in this ) {
+                    if ( this.hasOwnProperty( propertyName ) && this[propertyName].module && this[propertyName].module.id ) {
+                        var model = this[propertyName];
+                        while ( model.model ) model = model.model;
+                        actual[propertyName] = model;
+                    }
+                }
+
+                return actual;
             }
+
         } );
 
         // This is the simulation clock, which contains the current time in milliseconds. Time is
@@ -166,10 +179,12 @@
 
             jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
-                var model = require( modelName ).create( vwf, [ require( "vwf/model/stage/log" ) ] );
+                var model = require( modelName ).create( vwf, [ require( "vwf/model/stage/log" ) ], { note: "model state from vwf.js" } );  // TODO: modelArguments too?
+var m = model; while ( m.model ) m = m.model; m.state.model = modelName;
 
                 if ( model ) {
                     vwf.models.push( model );
+                    vwf.models[modelName] = model;
 
 if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
     vwf.models.javascript = model;
@@ -187,8 +202,11 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
                 if ( view ) {
                     var instance = new view();
+                    instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || { note: "view state from vwf.js" };
+instance.state.view = viewName;
                     view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
                     vwf.views.push( instance );
+                    vwf.views[viewName] = instance;
                 }
 
             } );
