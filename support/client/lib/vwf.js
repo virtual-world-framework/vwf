@@ -33,17 +33,25 @@
 
             get: function() {
 
+                // Map the array to the result.
+
                 var actual = this.map( function( model ) {
-                    while ( model.model ) model = model.model;
-                    return model;
+                    return last( model );
                 } );
 
+                // Map the non-integer properties too.
+
                 for ( var propertyName in this ) {
-                    if ( this.hasOwnProperty( propertyName ) && this[propertyName].module && this[propertyName].module.id ) {
-                        var model = this[propertyName];
-                        while ( model.model ) model = model.model;
-                        actual[propertyName] = model;
+                    if ( isNaN( Number( propertyName ) ) ) {
+                        actual[propertyName] = last( this[propertyName] );
                     }
+                }
+
+                // Follow a pipeline to the last stage.
+
+                function last( model ) {
+                    while ( model.model ) model = model.model;
+                    return model;
                 }
 
                 return actual;
@@ -179,12 +187,16 @@
 
             jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
-                var model = require( modelName ).create( vwf, [ require( "vwf/model/stage/log" ) ], { note: "model state from vwf.js" } );  // TODO: modelArguments too?
-var m = model; while ( m.model ) m = m.model; m.state.model = modelName;
+                var model = require( modelName ).create(
+                    vwf,                                        // model's kernel access
+                    [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
+                    {}                                          // state shared with a paired view
+                    // TODO: configuration parameters (modelArguments)
+                );
 
                 if ( model ) {
                     vwf.models.push( model );
-                    vwf.models[modelName] = model;
+                    vwf.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
 if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
     vwf.models.javascript = model;
@@ -202,11 +214,10 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
                 if ( view ) {
                     var instance = new view();
-                    instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || { note: "view state from vwf.js" };
-instance.state.view = viewName;
+                    instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
                     view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
                     vwf.views.push( instance );
-                    vwf.views[viewName] = instance;
+                    vwf.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple model instances are allowed
                 }
 
             } );
