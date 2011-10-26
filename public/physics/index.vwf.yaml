@@ -9,9 +9,22 @@ properties:
 type: model/x-glge
 scripts:
 - text: |
-    var rampLoaded = false;
+    var rampPhysicsSetup = false;
     var physicsSystemInit = false;
-    var ramp = { "source": "city", "type": "text/xml", "extends": "http://vwf.example.com/types/node3", "properties": { "material": "grey", "scale": [ 10, 10, 10 ], "physics": [ "mesh" ] }, "scripts": [ { "text": "this.loadComplete = function() {\n  this.scale = this.scale;\n  this.physics = this.physics;\n}\n", "type": "application/javascript" } ] };    
+    var ramp = {
+      "source": "city",
+      "type": "text/xml",
+      "extends": "http://vwf.example.com/types/node3",
+      "properties": { 
+        "material": "grey",
+        "scale": [ 10, 10, 10 ],
+        "physics": [ "mesh" ], 
+      }, 
+      "scripts": [ {
+        "text": "this.loadComplete = function() {\n this.scale = [ 10, 10, 10 ];\n this.physics = [ 'mesh' ];\n }", 
+        "type": "application/javascript" 
+      } ] 
+    };    
     this.initialize = function() {
       console.info( "==================== appscene.vwf ====================" );
       if ( !physicsSystemInit ) {
@@ -23,14 +36,14 @@ scripts:
         physicsSystemInit = true;
       }
       var scn = this;
-      if ( !rampLoaded ){
+      if ( !rampPhysicsSetup ){
         var newObjName = "ramp";
         vwf.createNode( ramp, function( nodeID, prototypeID ){
           vwf.addChild( "index-vwf", nodeID, newObjName );
           console.info( "   LOAD DONE   " );  
           scn.loadDone = true;
         }, newObjName );
-        rampLoaded = true;        
+        rampPhysicsSetup = true;        
       }
     }
   type: application/javascript
@@ -75,4 +88,5 @@ children:
           this.friction = this.friction;
           this.restitution = this.restitution; 
           this.position = this.position;          
-        }       
+        } 
+      type: application/javascript
