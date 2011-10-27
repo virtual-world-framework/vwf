@@ -45,7 +45,8 @@
 
     // -- createdNode ------------------------------------------------------------------------------
 
-    module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
+    module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
+        callback /* ( ready ) */ ) {
 
         vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
@@ -88,6 +89,7 @@
             };
 
             sceneNode.glgeDocument.onLoad = function () {
+                callback( true ); // ready
                 view.initScene( sceneNode );
             };
 
@@ -122,6 +124,7 @@
             if ( nodeSource ) {
                 switch ( nodeType ) {
                     case "model/x-glge":
+                        callback( false ); // not ready
                         sceneNode.glgeDocument.load(nodeSource);
                         break;
 
