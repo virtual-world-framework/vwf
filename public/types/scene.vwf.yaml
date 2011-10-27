@@ -13,10 +13,12 @@ properties:
           }
         }        
       } else {
-        this.activeCamera = value;
-        if ( this.getChild ) {
-          var temp = this.getChild( value );
-          if ( temp ) this.activeCameraComp = temp;
+        if ( this.activeCamera != value ) {
+          this.activeCamera = value;
+          if ( this.getChild ) {
+            var temp = this.getChild( value );
+            if ( temp ) this.activeCameraComp = temp;
+          }
         }
       }
     value: "http-vwf-example-com-types-camera-maincamera"
