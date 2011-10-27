@@ -588,12 +588,6 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
 
-if ( ! callback ) { // TODO: this is a hack to get the multiuser application createNode to addChild to the root
-    callback = function( nodeID, prototypeID ) {
-        vwf.addChild( 0, nodeID, undefined );
-    };
-}
-
 // nodeID = nodeID + "-" + Date.now();  // TODO: hack on a hack to allow (single-user mode) client tests to work
     
             this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
