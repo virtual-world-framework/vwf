@@ -26,17 +26,6 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
 
-# if clients.size > 1
-#   clients.first.send JSON.generate :time => session[:transport].time, :node => 0, :action => "getNode", :parameters => []
-# end
-
-#     send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
-
-# send JSON.generate :time => 0, :node => nil, :action => "setNode", :parameters => [
-#   "busybox-vwf-undefined",
-#   { :extends => { :children => [ { :properties => { :on => false } }, { :properties => { :on => true } } ] } }
-# ]
-
     schedule_tick
 
   end
@@ -48,7 +37,11 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     if message =~ /"action":"getNode"/
       state = JSON.parse( message )["result"]  # TODO: error
       session[:pending_clients].each do |client, dummy|
+
+EventMachine::Timer.new( 10 ) do  # TODO: wait until client has finished loading
         client.send JSON.generate :time => session[:transport].time, :node => 0, :action => "setNode", :parameters => [ state ]
+end
+
       end
       session[:pending_clients].clear
     else
@@ -62,6 +55,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     cancel_tick
 
     session[:pending_clients].delete self
+    # TODO: resend getNode if this was the reference client and a getNode was pending
 
     super
 
@@ -76,7 +70,7 @@ private
       session[:timer] = EventMachine::PeriodicTimer.new( 0.1 ) do  # TODO: configuration parameter for update rate
         transport.playing and broadcast JSON.generate :time => transport.time
       end
-      transport.play
+      transport.play  # TODO: wait until first client has completed loading  # TODO: wait until all clients are ready for an instructor session
     end
 
   end

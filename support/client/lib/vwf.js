@@ -175,6 +175,11 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
     vwf.models.javascript = model;
     while ( vwf.models.javascript.model ) vwf.models.javascript = vwf.models.javascript.model;
 }
+
+if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
+    vwf.models.object = model;
+    while ( vwf.models.object.model ) vwf.models.object = vwf.models.object.model;
+}
                 }
 
             } );
@@ -653,6 +658,12 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
         this.setNode = function( nodeID, component ) {
 
+Object.keys( component ).forEach( function( nodeID ) {
+    vwf.setProperties( nodeID, component[nodeID] );
+} );
+
+return;
+
             var prototypeID = this.prototype( nodeID );
             var childrenIDs = this.children( nodeID );
 
@@ -678,6 +689,13 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
         this.getNode = function( nodeID ) {
 
             var component = {};
+
+Object.keys( vwf.models.object.objects ).forEach( function( nodeID ) {
+    component[nodeID] = vwf.getProperties( nodeID );
+    Object.keys( component[nodeID] ).length || delete component[nodeID];
+} );
+
+return component;
 
             var prototypeID = this.prototype( nodeID );
             var childrenIDs = this.children( nodeID );
@@ -918,6 +936,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                     model.gettingProperties( nodeID, intermediate_properties );
 
                 for ( var propertyName in model_properties || {} ) {
+if ( nodeID != "http-vwf-example-com-types-node3-LCD" )  // blacklist certain nodes and properties that aren't updating correctly  // TODO: this is due to the delayed load problems and property inconsistency
                     intermediate_properties[propertyName] = model_properties[propertyName];
                 }
 
