@@ -13422,7 +13422,7 @@ GLGE.Collada.prototype.getInstanceController=function(node){
 	}
 
 	var inverseBindMatrix=[bindShapeMatrix];
-	var base=new GLGE.Group;
+	var base= this.newGroup( undefined );
 	this.addGroup(base);
 	var joints=[base];
 	var mat;
@@ -13615,6 +13615,17 @@ GLGE.Collada.prototype.getInstanceLight=function(node){
 	return light;
 }
 
+GLGE.Collada.prototype.newGroup=function( node ){
+	var newGroup = new GLGE.Group();
+	var name="bone"+(++this.boneIdx);
+	newGroup.setName(name);
+    if ( node ) {
+        newGroup.colladaId = node.getAttribute( "id" );
+        newGroup.colladaName = node.getAttribute( "name" );
+    }
+    return newGroup;
+}
+
 
 /**
 * Creates a new group and parses it's children
@@ -13635,12 +13646,8 @@ GLGE.Collada.prototype.getNode=function(node,ref){
 	if(ref && node && node.GLGEObjects){
 		return node.GLGEObjects[0];
 	}
-	
-	var newGroup=new GLGE.Group();
-	var name="bone"+(++this.boneIdx);
-	newGroup.setName(name);
-    newGroup.colladaId = node.getAttribute( "id" );
-    newGroup.colladaName = node.getAttribute( "name" );
+	var newGroup = this.newGroup( node );
+
 	if (!node) {
         return newGroup;
     }
@@ -13717,7 +13724,7 @@ GLGE.Collada.prototype.initVisualScene=function(){
     }
     var transformRoot=this;
     if (up_axis[0]!="Y"&&up_axis[0]!="y") {
-        transformRoot = new GLGE.Group();
+        transformRoot = this.newGroup( undefined );
         this.addChild(transformRoot);
         if (up_axis[0]!="Z"&&up_axis[0]!="z") {
             this.setRotMatrix(GLGE.Mat4([0, -1 , 0,  0,
