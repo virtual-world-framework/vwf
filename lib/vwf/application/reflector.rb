@@ -15,7 +15,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    session[:pending_clients] or session[:pending_clients] = {}
+    session[:pending_clients] ||= {}
     session[:pending_clients][self] = true
 
     if clients.length > session[:pending_clients].size
@@ -58,14 +58,20 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
   end
   
   def ondisconnect
+
+    cancel_tick
+
+    session[:pending_clients].delete self
+
     super
+
   end
 
 private
 
   def schedule_tick
 
-    unless session[:transport]
+    if clients.length == 1
       transport = session[:transport] = Transport.new
       session[:timer] = EventMachine::PeriodicTimer.new( 0.1 ) do  # TODO: configuration parameter for update rate
         transport.playing and broadcast JSON.generate :time => transport.time
@@ -73,6 +79,17 @@ private
       transport.play
     end
 
+  end
+  
+  def cancel_tick
+
+    if clients.length == 1
+      session[:timer].cancel
+      session.delete :timer
+      session[:transport].stop
+      session.delete :transport
+    end
+    
   end
 
 public
