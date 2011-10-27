@@ -2,6 +2,11 @@ define( {
 
     createNode: [ /* component_uri_or_json_or_object, callback, childName /- TODO: hack -/ */ ],
     /* TODO: deleteNode, */
+    setNode: [ /* nodeID, component */ ],
+    getNode: [ /* nodeID */ ],
+
+    prototype: [ /* nodeID */ ],
+    prototypes: [ /* nodeID */ ],
 
     addChild: [ /* nodeID, childID, childName */ ],
     removeChild: [ /* nodeID, childID */ ],
@@ -9,6 +14,8 @@ define( {
     children: [ /* nodeID */ ],
     name: [ /* nodeID */ ],
 
+    setProperties: [ /* nodeID, properties */ ],
+    getProperties: [ /* nodeID */ ],
     createProperty: [ /* nodeID, propertyName, propertyValue, propertyGet, propertySet */ ],
     /* TODO: deleteProperty, */
     setProperty: [ /* nodeID, propertyName, propertyValue */ ],

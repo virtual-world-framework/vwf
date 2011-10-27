@@ -202,6 +202,11 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
     vwf.models.javascript = model;
     while ( vwf.models.javascript.model ) vwf.models.javascript = vwf.models.javascript.model;
 }
+
+if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
+    vwf.models.object = model;
+    while ( vwf.models.object.model ) vwf.models.object = vwf.models.object.model;
+}
                 }
 
             } );
@@ -447,7 +452,23 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
             // Invoke the action.
 
-            this[actionName] && this[actionName].apply( this, args );
+            var result = this[actionName] && this[actionName].apply( this, args );
+
+if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
+
+    var fieldsout = {
+        time: fields.time,
+        node: fields.node,
+        action: fields.action,
+        parameters: fields.parameters,
+        result: result
+    };
+
+    var message = JSON.stringify( fieldsout );
+    socket.send( message );
+
+}
+
             
         };
 
@@ -680,6 +701,131 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
         };
 
+
+
+
+        // -- setNode ------------------------------------------------------------------------------
+
+        this.setNode = function( nodeID, component ) {
+
+Object.keys( component ).forEach( function( nodeID ) {
+    vwf.setProperties( nodeID, component[nodeID] );
+} );
+
+return;
+
+            var prototypeID = this.prototype( nodeID );
+            var childrenIDs = this.children( nodeID );
+
+            if ( prototypeID && component.extends ) {
+                this.setNode( prototypeID, component.extends );
+            }
+
+            // implements: [ ? ]  // TODO
+
+            component.properties && this.setProperties( nodeID, component.properties );
+            // component.methods  // TODO
+            // component.events  // TODO
+
+            component.children && childrenIDs.forEach( function( childID, childIndex ) {
+                component.children[childIndex] && vwf.setNode( childID, component.children[childIndex] );
+            } );
+
+            return component;
+        };
+
+        // -- getNode ------------------------------------------------------------------------------
+
+        this.getNode = function( nodeID ) {
+
+            var component = {};
+
+Object.keys( vwf.models.object.objects ).forEach( function( nodeID ) {
+    component[nodeID] = vwf.getProperties( nodeID );
+    Object.keys( component[nodeID] ).length || delete component[nodeID];
+} );
+
+return component;
+
+            var prototypeID = this.prototype( nodeID );
+            var childrenIDs = this.children( nodeID );
+
+            if ( prototypeID !== undefined ) {
+                component.extends = this.getNode( prototypeID );
+                Object.keys( component.extends ).length || delete component.extends;
+            }
+
+            // implements: [ ? ]  // TODO
+
+            component.properties = this.getProperties( nodeID );
+
+            for ( var propertyName in component.properties ) {
+                component.properties[propertyName] === undefined && delete component.properties[propertyName];
+            }
+
+            Object.keys( component.properties ).length || delete component.properties;
+
+            component.methods = {};  // TODO
+
+            for ( var methodName in component.methods ) {
+                component.methods[methodName] === undefined && delete component.methods[methodName];
+            }
+
+            Object.keys( component.methods ).length || delete component.methods;
+
+            component.events = {};  // TODO
+
+            for ( var eventName in component.events ) {
+                component.events[eventName] === undefined && delete component.events[eventName];
+            }
+
+            Object.keys( component.events ).length || delete component.events;
+            
+            if ( childrenIDs.length ) {
+                component.children = childrenIDs.map( function( childID ) {
+                    return vwf.getNode( childID );
+                } );
+            }
+
+            return component;
+        };
+
+
+        // -- prototype ----------------------------------------------------------------------------
+
+        this.prototype = function( nodeID ) {
+
+            // Call prototyping() on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var prototypeID = undefined;
+
+            vwf.models.some( function( model ) {
+                prototypeID = model.prototyping && model.prototyping( nodeID );
+                return prototypeID !== undefined;
+            } );
+
+            return prototypeID;
+        }
+
+        // -- prototypes ---------------------------------------------------------------------------
+
+        this.prototypes = function( nodeID ) {
+
+            var prototypeIDs = [];
+            var prototypeID = undefined;
+            
+            while ( nodeID !== undefined ) {
+                if ( ( prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                    prototypeIDs.push( prototypeID );
+                }
+                nodeID = prototypeID;
+            }
+            
+            return prototypeIDs;
+        }
+
+
         // -- addChild -----------------------------------------------------------------------------
 
         this.addChild = function( nodeID, childID, childName ) {
@@ -779,6 +925,84 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
             } );
 
             return name;
+        };
+
+        // -- setProperties ------------------------------------------------------------------------
+
+        // Set all of the properties for a node.
+
+        this.setProperties = function( nodeID, properties ) {
+
+            this.logger.group( "vwf.setProperties " + nodeID + " " + properties );
+
+            // Call settingProperties() on each model.
+
+            properties = vwf.models.reduceRight( function( intermediate_properties, model ) {
+
+                var model_properties = model.settingProperties &&
+                    model.settingProperties( nodeID, properties );  // TODO: if no settingProperties, call settingProperty on each (resolve include/exclude proto)
+
+                for ( var propertyName in model_properties || {} ) {
+                    intermediate_properties[propertyName] = model_properties[propertyName];
+                }
+
+                return intermediate_properties;
+
+            }, {} );
+
+            // Call satProperties() on each view.
+
+            vwf.views.forEach( function( view ) {
+
+                if ( view.satProperties ) {
+                    view.satProperties( nodeID, properties );
+                } else if ( view.satProperty ) {
+                    for ( var propertyName in properties ) {
+                        view.satProperty( nodeID, propertyName, properties[propertyName] );
+
+                    }
+                }
+
+            } );
+
+            this.logger.groupEnd(); this.logger.debug( "vwf.settingProperties complete " + nodeID ); /* must log something for group level to reset in WebKit */
+
+            return properties;
+        };
+
+        // -- getProperties ------------------------------------------------------------------------
+
+        // Get all of the properties for a node.
+
+        this.getProperties = function( nodeID ) {
+
+            this.logger.group( "vwf.getProperties " + nodeID );
+
+            // Call gettingProperties() on each model.
+
+            var properties = vwf.models.reduceRight( function( intermediate_properties, model ) {
+
+                var model_properties = model.gettingProperties &&
+                    model.gettingProperties( nodeID, intermediate_properties );
+
+                for ( var propertyName in model_properties || {} ) {
+if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-example-com-types-material-ic40RedMaterial1" )  // blacklist certain nodes and properties that aren't updating correctly  // TODO: this is due to the delayed load problems and property inconsistency
+                    intermediate_properties[propertyName] = model_properties[propertyName];
+                }
+
+                return intermediate_properties;
+
+            }, {} );
+
+            // Call gotProperties() on each view.
+
+            vwf.views.forEach( function( view ) {
+                view.gotProperties && view.gotProperties( nodeID, properties );
+            } );
+
+            this.logger.groupEnd(); this.logger.debug( "vwf.gettingProperties complete " + nodeID ); /* must log something for group level to reset in WebKit */
+
+            return properties;
         };
 
         // -- createProperty -----------------------------------------------------------------------

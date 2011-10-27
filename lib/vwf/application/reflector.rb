@@ -12,32 +12,74 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
   end
 
   def onconnect
+
     super
+
+    session[:pending_clients] ||= {}
+    session[:pending_clients][self] = true
+
+    if clients.length > session[:pending_clients].size
+      clients.first.send JSON.generate :time => session[:transport].time, :node => 0, :action => "getNode", :parameters => []
+    else
+      session[:pending_clients].delete self
+    end
+
     send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
+
     schedule_tick
+
   end
   
   def onmessage message
+
     super
-    broadcast message
+
+    if message =~ /"action":"getNode"/
+      state = JSON.parse( message )["result"]  # TODO: error
+      session[:pending_clients].each do |client, dummy|
+        client.send JSON.generate :time => session[:transport].time, :node => 0, :action => "setNode", :parameters => [ state ]
+      end
+      session[:pending_clients].clear
+    else
+      broadcast message
+    end
+
   end
   
   def ondisconnect
+
+    cancel_tick
+
+    session[:pending_clients].delete self
+    # TODO: resend getNode if this was the reference client and a getNode was pending
+
     super
+
   end
 
 private
 
   def schedule_tick
 
-    unless session[:transport]
+    if clients.length == 1
       transport = session[:transport] = Transport.new
       session[:timer] = EventMachine::PeriodicTimer.new( 0.1 ) do  # TODO: configuration parameter for update rate
         transport.playing and broadcast JSON.generate :time => transport.time
       end
-      transport.play
+      transport.play  # TODO: wait until first client has completed loading  # TODO: wait until all clients are ready for an instructor session
     end
 
+  end
+  
+  def cancel_tick
+
+    if clients.length == 1
+      session[:timer].cancel
+      session.delete :timer
+      session[:transport].stop
+      session.delete :transport
+    end
+    
   end
 
 public
