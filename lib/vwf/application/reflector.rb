@@ -37,11 +37,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     if message =~ /"action":"getNode"/
       state = JSON.parse( message )["result"]  # TODO: error
       session[:pending_clients].each do |client, dummy|
-
-EventMachine::Timer.new( 10 ) do  # TODO: wait until client has finished loading
         client.send JSON.generate :time => session[:transport].time, :node => 0, :action => "setNode", :parameters => [ state ]
-end
-
       end
       session[:pending_clients].clear
     else
