@@ -38,6 +38,7 @@ scripts:
         this.getActiveCamera();
       }
       if ( this.activeCameraComp ) {
+        var speed = 1.0;
         var camerapos = this.activeCameraComp.position;
         var camerarot = this.activeCameraComp.rotation;
         var yinc = 0;
@@ -46,7 +47,9 @@ scripts:
         var yRot = 0;        
         if ( mag == 0 ) mag = 1; 
         trans[0] = trans[0] / mag;
-        trans[1] = trans[1] / mag;    
+        trans[1] = trans[1] / mag;
+        if ( this.activeCameraComp && this.activeCameraComp.speed )
+          speed = Number( this.activeCameraComp.speed );
         for ( keyPress in keyMap ) {
           switch ( Number( keyPress ) ) {
             case 87:  //w
@@ -87,12 +90,11 @@ scripts:
               break;
           }
         }
-        
         if ( yRot != 0 ) {
           this.activeCameraComp.rotation = [ camerarot[0], camerarot[1] + yRot, camerarot[2] ];
         }
         if (xinc != 0 || yinc != 0 || zinc != 0) {
-          this.activeCameraComp.position = [ camerapos[0] + xinc, camerapos[1] + yinc, camerapos[2] + zinc ];
+          this.activeCameraComp.position = [ camerapos[0] + xinc*speed, camerapos[1] + yinc*speed, camerapos[2] + zinc*speed ];
         }
       }
     }
@@ -101,8 +103,8 @@ scripts:
       if ( this.activeCameraComp ) {
         var rot = this.activeCameraComp.rotation;
         var viewCenter = [ 400, 300 ];
-        var incX = -( viewCenter[1] - parms.Y ) * 0.004;
-        var incY = ( viewCenter[0] - parms.X ) * 0.0008;
+        var incX = -( viewCenter[1] - parms.Y ) * 0.001;
+        var incY = ( viewCenter[0] - parms.X ) * 0.0002;
         //console.info( "X = " + parms.X + "    Y = " + parms.Y + "   incX = " + incX + "    incY = " + incY );
 
         if ( parms.mag == 0 ) parms.mag = 1;
