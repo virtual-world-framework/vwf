@@ -965,7 +965,7 @@ return component;
                     model.gettingProperties( nodeID, intermediate_properties );
 
                 for ( var propertyName in model_properties || {} ) {
-if ( nodeID != "http-vwf-example-com-types-node3-LCD" )  // blacklist certain nodes and properties that aren't updating correctly  // TODO: this is due to the delayed load problems and property inconsistency
+if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-example-com-types-material-ic40RedMaterial1" )  // blacklist certain nodes and properties that aren't updating correctly  // TODO: this is due to the delayed load problems and property inconsistency
                     intermediate_properties[propertyName] = model_properties[propertyName];
                 }
 
