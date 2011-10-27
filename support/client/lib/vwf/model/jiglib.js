@@ -25,7 +25,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
        // -- creatingNode -------------------------------------------------------------------------
 
-       creatingNode: function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
+       creatingNode: function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
+          callback /* ( ready ) */) {
 
           switch (nodeExtendsID) {
              case "appscene-vwf":
