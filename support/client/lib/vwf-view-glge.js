@@ -45,7 +45,8 @@
 
     // -- createdNode ------------------------------------------------------------------------------
 
-    module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
+    module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
+        callback /* ( ready ) */ ) {
 
         vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
             nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
@@ -88,6 +89,7 @@
             };
 
             sceneNode.glgeDocument.onLoad = function () {
+                callback( true ); // ready
                 view.initScene( sceneNode );
             };
 
@@ -122,6 +124,7 @@
             if ( nodeSource ) {
                 switch ( nodeType ) {
                     case "model/x-glge":
+                        callback( false ); // not ready
                         sceneNode.glgeDocument.load(nodeSource);
                         break;
 
@@ -524,7 +527,7 @@ var sceneNode = this.scenes["index-vwf"];
 
                     function colladaLoaded( collada ) { 
                         var bRemoved = false;
-                        //console.info( "++ 2 ++ "+collada.vwfID+" colladaLoaded( "+ collada.docURL +" )" );
+                        console.info( "++ 2 ++ "+collada.vwfID+" colladaLoaded( "+ collada.docURL +" )" );
                         for ( var j = 0; j < view.glgeColladaObjects.length; j++ ) {
                             if ( view.glgeColladaObjects[j] == collada ){
                                 view.glgeColladaObjects.splice( j, 1 );
@@ -1372,7 +1375,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
             assetObj = GLGE.Assets.assets[key];
             if ( assetObj ) {
                 glgeObjName = name( assetObj );
-                //console.info( "            Checking: " + glgeObjName + " of type " + assetObj.constructor.name );
+                //console.info( "            Checking: '" + glgeObjName + "' of type " + assetObj.constructor.name );
                 if ( glgeObjName == objName ) {
                     switch ( type ) {
                         case "http-vwf-example-com-types-node3":
@@ -1726,7 +1729,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                     //console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
                     if ( extendType == meshExtendType ) {
                         meshesCreated--;
-                        if ( parentNode.meshesCreated ) {
+                        if (  parentNode && parentNode.meshesCreated ) {
                             var found = false;
                             var i = 0;
                             for ( i = 0; i < parentNode.meshesCreated.length && !found; i++ ) {
@@ -2283,8 +2286,12 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
     };
 
-    function name(obj) {
+    function nameGlge(obj) {
         return obj.colladaName || obj.colladaId || obj.name || obj.id || obj.uid || "";
+    }
+
+    function name(obj) {
+        return obj.colladaName || obj.colladaId || obj.name || obj.id || "";
     }
 
     function path(obj) {
@@ -2466,7 +2473,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
         var sOut = indent(iIndent + 1);
         console.info(indent(iIndent) + lastGroupName + "Material" + materialIndex++ + ":");
-        console.info(sOut + "extends: 'http://vwf.example.com/types/material'");
+        console.info(sOut + "extends: http://vwf.example.com/types/material");
 
     }
 

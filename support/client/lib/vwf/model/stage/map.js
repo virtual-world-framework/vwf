@@ -124,11 +124,12 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- creatingNode -------------------------------------------------------------------------
 
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
+            callback /* ( ready ) */ ) {
 
             var node = this.model.creatingNode && this.model.creatingNode( nodeID,
                 this.kernel_to_model[nodeExtendsID] || nodeExtendsID,
-                nodeImplementsIDs, nodeSource, nodeType );  // TODO: remap nodeImplementsIDs array values
+                nodeImplementsIDs, nodeSource, nodeType, callback );  // TODO: remap nodeImplementsIDs array values
 
             if ( node !== undefined ) {
                 this.kernel_to_model[nodeID] = node;
