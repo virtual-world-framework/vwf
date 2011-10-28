@@ -31,13 +31,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.types = {}; // maps id => function() { }
             this.root = undefined;
             this.nodes = {}; // maps id => new type()
+            this.creatingNode( 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
         // == Model API ============================================================================
 
         // -- creatingNode -------------------------------------------------------------------------
 
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
+            callback /* ( ready ) */ ) {
 
             var type = nodeExtendsID ? this.types[nodeExtendsID] : Object;
 

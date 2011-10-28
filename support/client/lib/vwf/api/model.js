@@ -3,12 +3,16 @@ define( {
     creatingNode: [],
     /* TODO: deletingNode, */
 
+    prototyping: [],
+
     addingChild: [],
     removingChild: [],
     parenting: [],
     childrening: [],
     naming: [],
 
+    settingProperties: [],
+    gettingProperties: [],
     creatingProperty: [],
     /* TODO: deletingProperty, */
     settingProperty: [],
