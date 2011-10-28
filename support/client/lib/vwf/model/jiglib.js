@@ -28,6 +28,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        creatingNode: function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType) {
 
           switch (nodeExtendsID) {
+             case "appscene-vwf":
              case "http-vwf-example-com-types-glge":
                 this.scenes[ nodeID ] = {};
                 this.scenes[ nodeID ].ID = nodeID;
@@ -42,7 +43,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
              case "http-vwf-example-com-types-node3":
              case "http-vwf-example-com-types-mesh":
                 this.nodes[ nodeID ] = {};
- /* hardcoded */    this.nodes[ nodeID ].sceneID = "index-vwf";
+ /* hardcoded */this.nodes[ nodeID ].sceneID = "index-vwf";
                 this.nodes[ nodeID ].ID = nodeID;
                 this.nodes[ nodeID ].extendsID = nodeExtendsID;
                 this.nodes[ nodeID ].implementsIDs = nodeImplementsIDs;
@@ -105,6 +106,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
        settingProperty: function (nodeID, propertyName, propertyValue) {
 
+          if ( this.updating ) {
+            switch ( propertyName ) { 
+                case "position":
+                case "rotation":
+                case "posRotMatrix":
+                    return;
+                    break;
+            }
+          }
+
+          if ( propertyName == "velocity" ) 
+            console.info( " setting velocity" );
+          console.info( "   settingProperty( " + nodeID+", " + propertyName + ", " + propertyValue + " )");
+           
           var activeNode;
           if ( this.active[ nodeID ] ) 
              activeNode = this.active[ nodeID ];
@@ -131,7 +146,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                        }    
                        break;
                     case "position":
-                       if ( !this.updating && activeNode && activeNode.jlObj ) {
+                       if ( activeNode && activeNode.jlObj ) {
 //                          if ( activeNode.offset ) {
 //                              var newPos = [ propertyValue[0] - activeNode.offset[0], propertyValue[1] - activeNode.offset[1], propertyValue[2] - activeNode.offset[2] ];
 //                              activeNode.jlObj.moveTo( newPos );
@@ -179,7 +194,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                                 node.jigLibMeshes[ childList[i].ID ] = new jigLib.JTriangleMesh();
                                                 node.jigLibMeshes[ childList[i].ID ].createMesh(verts, vertIndices);
                                                 //console.info( childList[i].ID + " created JTriangleMesh" ); 
-                                                scene.system.addBody( node.jigLibMeshes[ childList[i] ] );
+                                                scene.system.addBody( node.jigLibMeshes[ childList[i].ID ] );
                                            }
                                         }
                                     }
@@ -218,12 +233,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                        var verts = vwf.getProperty( nodeID, "vertices", v1 );
                                        var offset = vwf.getProperty( nodeID, "centerOffset", v2 );
                                        var raduis = 10;
-                                                if ( propertyValue.constructor == Array && propertyValue.length == 2 ) {
-                                                    raduis = propertyValue[1];
-                                                } else {
-                                                    var cRadius = calcRadius( offset, verts );
-                                                    if ( cRadius > 0 ) raduis = cRadius; 
-                                                }
+                                        if ( propertyValue.constructor == Array && propertyValue.length == 2 ) {
+                                            raduis = propertyValue[1];
+                                        } else {
+                                            var cRadius = calcRadius( offset, verts );
+                                            if ( cRadius > 0 ) raduis = cRadius; 
+                                        }
                                        node.jigLibObj = new jigLib.JSphere(null, raduis);
                                        scene.system.addBody( node.jigLibObj );
                                        this.active[ nodeID ] = {};
@@ -234,23 +249,23 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 break;
                              case "plane": {
                                     if ( !node.jigLibObj ) {
-                                                var normal = [0, 0, 1, 0];
-                                                if ( propertyValue.constructor == Array ) {
-                                                    switch ( propertyValue.length ) {
-                                                        case "2":
-                                                            if ( propertyValue[1].constructor == Array ) {
-                                                                if ( propertyValue[1].length == 4 ) {
-                                                                    normal = propertyValue[1];
-                                                                }
-                                                            }
-                                                            break;
-                                                        case "5":
-                                                            for ( var i = 0; i < 4; i++ ) {
-                                                                normal[i] = propertyValue[i+1];
-                                                            }
-                                                            break;
-                                                    }    
-                                                }
+                                        var normal = [0, 0, 1, 0];
+                                        if ( propertyValue.constructor == Array ) {
+                                            switch ( propertyValue.length ) {
+                                                case "2":
+                                                    if ( propertyValue[1].constructor == Array ) {
+                                                        if ( propertyValue[1].length == 4 ) {
+                                                            normal = propertyValue[1];
+                                                        }
+                                                    }
+                                                    break;
+                                                case "5":
+                                                    for ( var i = 0; i < 4; i++ ) {
+                                                        normal[i] = propertyValue[i+1];
+                                                    }
+                                                    break;
+                                            }    
+                                        }
 
                                        node.jigLibObj = new jigLib.JPlane( null, normal );
                                        scene.system.addBody( node.jigLibObj );
@@ -288,9 +303,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                        if ( node.jigLibObj ) {
                           node.jigLibObj.set_linVelocityDamping( propertyValue );
                        }
-                       break;                       
-                       
-                                
+                       break; 
+                    case "velocity":
+                       if ( node.jigLibObj ) {
+                          console.info( nodeID + ".velocity = " + propertyValue );
+                          node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
+                       }
+                       break;                        
                 }
              }
           } else if ( this.scenes[ nodeID ] ) {
@@ -314,7 +333,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                        }           
                        break;
                     }
-                    case "loadComplete":
+                    case "loadDone":
                        this.enable = propertyValue;
                        break;
                 }
@@ -367,7 +386,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "linVelocityDamping":
                        propertyValue = node.jigLibObj.get_linVelocityDamping();
                        break;    
-
+                    case "velocity":
+                       propertyValue = node.jigLibObj.getVelocity();
+                       break;
                 }
              }
           } else if ( this.scenes[ nodeID ] ) {
