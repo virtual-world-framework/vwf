@@ -58,8 +58,6 @@ scripts:
       return this.activeCameraComp;
     }
     this.load = function( obj, objName ){
-      vwf.createNode( obj, function( nodeID, prototypeID ){
-        vwf.addChild( "index-vwf", nodeID, objName );
-      }, objName );
+      vwf.createNode( "index-vwf", obj, objName );
     }
   type: application/javascript

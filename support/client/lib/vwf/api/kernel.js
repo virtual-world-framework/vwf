@@ -1,6 +1,6 @@
 define( {
 
-    createNode: [ /* component_uri_or_json_or_object, callback, childName /- TODO: hack -/ */ ],
+    createNode: [ /* nodeID, childComponent, childName, callback /- ( childID, childPrototypeID ) -/ */ ],
     /* TODO: deleteNode, */
     setNode: [ /* nodeID, component */ ],
     getNode: [ /* nodeID */ ],

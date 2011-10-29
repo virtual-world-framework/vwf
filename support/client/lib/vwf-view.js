@@ -37,9 +37,9 @@
 
     // -- createNode -------------------------------------------------------------------------------
 
-    module.prototype.createNode = function( component_uri_or_object ) {
-        vwf.logger.info( namespace + ".createNode " + component_uri_or_object );
-        vwf.send( undefined, "createNode", component_uri_or_object );
+    module.prototype.createNode = function( nodeID, childComponent, childName ) {
+        vwf.logger.info( namespace + ".createNode " + nodeID + " " + childComponent + " " + childName );
+        vwf.send( nodeID, "createNode", childComponent, childName );
     };
 
     // TODO: deleteNode
@@ -127,11 +127,11 @@
 
     // -- createdNode ------------------------------------------------------------------------------
 
-    module.prototype.createdNode = function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
-        callback /* ( ready ) */ ) {
+    module.prototype.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
+        childSource, childType, childName, callback /* ( ready ) */ ) {
 
-        vwf.logger.info( namespace + ".createdNode " + nodeID + " " +
-            nodeExtendsID + " " +  nodeImplementsIDs + " " +  nodeSource + " " +  nodeType );
+        vwf.logger.info( namespace + ".createdNode " + nodeID + " " + childID + " " + childExtendsID + " " +  childImplementsIDs + " " +
+            childSource + " " +  childType + " " + childName );
     };
 
     // TODO: deletedNode

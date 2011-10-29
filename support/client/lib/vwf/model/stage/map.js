@@ -27,8 +27,9 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- createNode ---------------------------------------------------------------------------
 
-        createNode: function( component_uri_or_object, callback_nodeID_prototypeID ) {
-            return this.kernel.createNode( component_uri_or_object, callback_nodeID_prototypeID );  // TODO: remap callback parameters
+        createNode: function( node, childComponent, childName, callback /* ( childID, childPrototypeID ) */ ) {
+            return this.kernel.createNode( this.model_to_kernel[this.object_id(node)] || node,
+                childComponent, childName, callback );  // TODO: remap callback parameters
         },
 
         // TODO: deleteNode
@@ -124,16 +125,18 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- creatingNode -------------------------------------------------------------------------
 
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
-            callback /* ( ready ) */ ) {
+        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childName, callback /* ( ready ) */ ) {
 
-            var node = this.model.creatingNode && this.model.creatingNode( nodeID,
-                this.kernel_to_model[nodeExtendsID] || nodeExtendsID,
-                nodeImplementsIDs, nodeSource, nodeType, callback );  // TODO: remap nodeImplementsIDs array values
+            var child = this.model.creatingNode && this.model.creatingNode(
+                this.kernel_to_model[nodeID] || nodeID,
+                childID,
+                this.kernel_to_model[childExtendsID] || childExtendsID,
+                childImplementsIDs, childSource, childType, callback );  // TODO: remap nodeImplementsIDs array values
 
-            if ( node !== undefined ) {
-                this.kernel_to_model[nodeID] = node;
-                this.model_to_kernel[this.object_id(node)] = nodeID;
+            if ( child !== undefined ) {
+                this.kernel_to_model[childID] = child;
+                this.model_to_kernel[this.object_id(child)] = childID;
             }
 
             return undefined; // creatingNode doesn't return anything to the kernel

@@ -142,7 +142,7 @@
 
                         if ( fields.action == "createNode" ) {
 
-                            command += "@" + safe_identifier( fields.parameters.shift() ) + ".new"
+                            command += "create";
                             command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
 
                         } else if ( fields.action == "setProperty" ) {

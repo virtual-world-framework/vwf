@@ -24,7 +24,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       session[:pending_clients].delete self
     end
 
-    send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
+    send JSON.generate :time => 0, :node => 0, :action => "createNode", :parameters => [ env["vwf.application"], nil ]  # TODO: get current time; session[:transport] and session[:transport].time don't exist yet
 
     schedule_tick
 

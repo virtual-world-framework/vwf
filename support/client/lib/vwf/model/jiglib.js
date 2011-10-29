@@ -25,31 +25,31 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
        // -- creatingNode -------------------------------------------------------------------------
 
-       creatingNode: function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
-          callback /* ( ready ) */) {
+       creatingNode: function(nodeID, childID, childExtendsID, childImplementsIDs,
+          childSource, childType, childName, callback /* ( ready ) */) {
 
-          switch (nodeExtendsID) {
+          switch (childExtendsID) {
              case "appscene-vwf":
              case "http-vwf-example-com-types-glge":
-                this.scenes[ nodeID ] = {};
-                this.scenes[ nodeID ].ID = nodeID;
-                this.scenes[ nodeID ].extendsID = nodeExtendsID;
-                this.scenes[ nodeID ].implementsIDs = nodeImplementsIDs;
-                this.scenes[ nodeID ].source = nodeSource;
-                this.scenes[ nodeID ].type = nodeType;
-                this.scenes[ nodeID ].system = jigLib.PhysicsSystem.getInstance();
-                this.scenes[ nodeID ].initialized = false;
+                this.scenes[ childID ] = {};
+                this.scenes[ childID ].ID = childID;
+                this.scenes[ childID ].extendsID = childExtendsID;
+                this.scenes[ childID ].implementsIDs = childImplementsIDs;
+                this.scenes[ childID ].source = childSource;
+                this.scenes[ childID ].type = childType;
+                this.scenes[ childID ].system = jigLib.PhysicsSystem.getInstance();
+                this.scenes[ childID ].initialized = false;
                 break;
 
              case "http-vwf-example-com-types-node3":
              case "http-vwf-example-com-types-mesh":
-                this.nodes[ nodeID ] = {};
-/* hardcoded */ this.nodes[ nodeID ].sceneID = "index-vwf";
-                this.nodes[ nodeID ].ID = nodeID;
-                this.nodes[ nodeID ].extendsID = nodeExtendsID;
-                this.nodes[ nodeID ].implementsIDs = nodeImplementsIDs;
-                this.nodes[ nodeID ].source = nodeSource;
-                this.nodes[ nodeID ].type = nodeType;
+                this.nodes[ childID ] = {};
+/* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
+                this.nodes[ childID ].ID = childID;
+                this.nodes[ childID ].extendsID = childExtendsID;
+                this.nodes[ childID ].implementsIDs = childImplementsIDs;
+                this.nodes[ childID ].source = childSource;
+                this.nodes[ childID ].type = childType;
                 
                 break;
           }
