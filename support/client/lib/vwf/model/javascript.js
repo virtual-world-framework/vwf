@@ -41,6 +41,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childName, callback /* ( ready ) */ ) {
 
+            var self = this;
+
             var type = childExtendsID ? this.types[childExtendsID] : Object;
 
             if ( ! type ) {
@@ -68,8 +70,85 @@ node.id = childID; // TODO: move to a backstop model
             node.setters = {};
 
             node.methods = {};
+            node.bodies = {};
+
             node.events = {};
             node.children = [];
+
+
+
+
+Object.defineProperty( node, "future", {
+
+    enumerable: true,
+
+    get: function() { // "this" is node
+
+        return function( when ) {
+
+            var future = {
+                properties: {},
+                methods: {},
+                events: {},
+            };
+
+            for ( var propertyName in this.properties ) {
+
+                ( function( propertyName ) {
+
+                    Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
+                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, { "in": when } ) },
+                        enumerable: true
+                    } );
+
+                    Object.defineProperty( future, propertyName, { // "this" is future in get/set
+                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, { "in": when } ) },
+                        enumerable: true
+                    } );
+
+                } )( propertyName );
+
+            }
+
+            for ( var methodName in this.methods ) {
+
+                ( function( methodName ) {
+
+                    Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) {
+                                var parameters = Array.prototype.slice.call( arguments );
+                                return self.kernel.callMethod.apply( self.kernel, [ childID, methodName ].concat( parameters ).concat( { "in": when } ) );  // TODO: any way to avoid converting arguments to an Array?
+                            }
+                        },
+                        enumerable: true
+                    } );
+
+                    Object.defineProperty( future, methodName, { // "this" is future in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) {
+                                var parameters = Array.prototype.slice.call( arguments );
+                                return self.kernel.callMethod.apply( self.kernel, [ childID, methodName ].concat( parameters ).concat( { "in": when } ) );  // TODO: any way to avoid converting arguments to an Array?
+                            }
+                        },
+                        enumerable: true
+                    } );
+
+                } )( methodName );
+
+            }
+
+            return future;
+        }
+
+    },
+
+} );
+
+
+
+
+
 
         },
 
@@ -128,16 +207,16 @@ node.id = childID; // TODO: move to a backstop model
             var node = this.nodes[nodeID];
             var self = this;
 
-            Object.defineProperty( node.properties, propertyName, {
-                get: function() { return self.kernel.getProperty( nodeID, propertyName ) }, // "this" is property's node  // TODO: or is it node.properties here?
+            Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
+                get: function() { return self.kernel.getProperty( nodeID, propertyName ) },
                 set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
                 enumerable: true
             } );
 
             // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
 
-            Object.defineProperty( node, propertyName, {
-                get: function() { return self.kernel.getProperty( nodeID, propertyName ) }, // "this" is property's node
+            Object.defineProperty( node, propertyName, { // "this" is node in get/set
+                get: function() { return self.kernel.getProperty( nodeID, propertyName ) },
                 set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
                 enumerable: true
             } );
@@ -211,19 +290,59 @@ node.id = childID; // TODO: move to a backstop model
             return undefined;
         },
 
-        // TODO: creatingMethod, deletingMethod
+        // -- creatingMethod -----------------------------------------------------------------------
+
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+
+if ( methodName == "setPositions" || methodName == "pointerClick" ) return;
+
+            var node = this.nodes[nodeID];
+            var self = this;
+
+            Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) {
+                        var parameters = Array.prototype.slice.call( arguments );
+                        return self.kernel.callMethod.apply( self.kernel, [ nodeID, methodName ].concat( parameters ) );  // TODO: any way to avoid converting arguments to an Array?
+                    }
+                },
+                enumerable: true,
+            } );
+
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+
+            Object.defineProperty( node, methodName, { // "this" is node in get/set
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) {
+                        var parameters = Array.prototype.slice.call( arguments );
+                        return self.kernel.callMethod.apply( self.kernel, [ nodeID, methodName ].concat( parameters ) );  // TODO: any way to avoid converting arguments to an Array?
+                    }
+                },
+                enumerable: true,
+            } );
+
+            try {
+                node.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
+            } catch( e ) {
+                this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
+                    "exception evaluating body:", e );
+            }
+        
+        },
+
+        // TODO: deletingMethod
 
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
 
             var node = this.nodes[nodeID];
-            var method = findMethod( node, methodName );
+            var body = findBody( node, methodName );
             var parameters = Array.prototype.slice.call( arguments, 2 );
 
-            if ( method ) {
+            if ( body ) {
                 try {
-                    return method.apply( node, parameters );
+                    return body.apply( node, parameters );
                 } catch( e ) {
                     this.logger.warn( "callingMethod", nodeID, methodName, parameters, // TODO: flatten parameters array, limit for log
                         "exception:", e );
@@ -268,6 +387,12 @@ node.id = childID; // TODO: move to a backstop model
         return accessorScript( "( function( value ) {", body, "} )" );
     }
 
+    // -- bodyScript -------------------------------------------------------------------------------
+
+    function bodyScript( parameters, body ) {
+        return accessorScript( "( function() {", body, "} )" );  // TODO: parameters
+    }
+
     // -- accessorScript ---------------------------------------------------------------------------
 
     function accessorScript( prefix, body, suffix ) {  // TODO: sanitize script, limit access
@@ -292,12 +417,12 @@ node.id = childID; // TODO: move to a backstop model
             Object.getPrototypeOf( node ) && findSetter( Object.getPrototypeOf( node ), propertyName );
     }
 
-    // -- findMethod -------------------------------------------------------------------------------
+    // -- findBody ---------------------------------------------------------------------------------
 
-    function findMethod( node, methodName ) {
-        return node.methods && node.methods[methodName] ||
+    function findBody( node, methodName ) {
+        return node.bodies && node.bodies[methodName] ||
 ( typeof node[methodName] == "function" || node[methodName] instanceof Function ) && node[methodName] ||  // TODO: use any old function property as a work-around until we support createMethod()
-            Object.getPrototypeOf( node ) && findMethod( Object.getPrototypeOf( node ), methodName );
+            Object.getPrototypeOf( node ) && findBody( Object.getPrototypeOf( node ), methodName );
     }
 
 
