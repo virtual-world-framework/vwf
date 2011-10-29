@@ -2039,7 +2039,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                                     JSON.stringify(trans),
                                     JSON.stringify(mag) ];
                   //view.callMethod( this.cameraID, "handleKeyEvents", strParams );
-                  view.execute( nodeID, "this.handleKeyEvents && this.handleKeyEvents("+params.join(',')+")", "application/javascript" );
+                  // view.execute( nodeID, "this.handleKeyEvents && this.handleKeyEvents("+params.join(',')+")", "application/javascript" );
                 }
             }
         }

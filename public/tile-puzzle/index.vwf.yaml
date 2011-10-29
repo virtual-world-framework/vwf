@@ -32,15 +32,21 @@ children:
       position: [ 7.2, 10, 0 ]
       eulers: [90, 0, 180]
       scale: [ 3, 3, 3 ]
+    methods:
+      rotate: 
+        var orientation = this.eulers;
+        this.eulers = [ orientation[0] + 2, orientation[1], orientation[2] ];
+        this.future( 0.1 ).rotate();
     scripts:
     - text: |
         this.initialize = function() {
           this.position = this.position;
           this.eulers = this.eulers;
           this.scale = this.scale;
+          this.rotate();
         }
         this.pointerClick = function() {
-          this.parent.shuffle();        	
+          this.parent.shuffle();
         }
       type: application/javascript
     children:
@@ -66,9 +72,10 @@ children:
           this.position = this.position;
           this.eulers = this.eulers;
           this.scale = this.scale;
+          this.future( 10 ).position = [ -7.2, 10, 2 ];
         }
         this.pointerClick = function() {
-          this.parent.solve();     	
+          this.parent.solve();
         }
       type: application/javascript
     children:

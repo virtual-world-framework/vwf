@@ -21,7 +21,7 @@ define( {
     setProperty: [ /* nodeID, propertyName, propertyValue */ ],
     getProperty: [ /* nodeID, propertyName */ ],
 
-    createMethod: [ /* nodeID, methodName */ ],
+    createMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
     /* TODO: deleteMethod, */
     callMethod: [ /* nodeID, methodName /- [, parameter1, parameter2, ... ] -/ */ ],
 
