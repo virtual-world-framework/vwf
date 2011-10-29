@@ -568,11 +568,11 @@
             var middleProperties = factories[middle]( "middle" );
             var topProperties = factories[top]( "top" );
 
-            vwf.createNode( { extends: "http://vwf.example.com/types/node", properties: bottomProperties }, function( bottomID ) {
+            vwf.createNode( 0, { extends: "http://vwf.example.com/types/node", properties: bottomProperties }, undefined, function( bottomID ) {
               vwf.execute( bottomID, "this.tag = 'bottom'" );
-              vwf.createNode( { extends: "@" + JSON.stringify( bottomID ), properties: middleProperties }, function( middleID ) {
+              vwf.createNode( 0, { extends: "@" + JSON.stringify( bottomID ), properties: middleProperties }, undefined, function( middleID ) {
                 vwf.execute( middleID, "this.tag = 'middle'" );
-                vwf.createNode( { extends: "@" + JSON.stringify( middleID ), properties: topProperties }, function( topID ) {
+                vwf.createNode( 0, { extends: "@" + JSON.stringify( middleID ), properties: topProperties }, undefined, function( topID ) {
                   vwf.execute( topID, "this.tag = 'top'" );
                   callback( { top: topID, middle: middleID, bottom: bottomID } );
                 } );

@@ -36,20 +36,18 @@ scripts:
         this.cubesCreated = this.cubesCreated + 1;
         newObjName = "cube" + this.cubesCreated;
         cube.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] ];
-        vwf.createNode( cube, function( nodeID, prototypeID ){
-          vwf.addChild( "index-vwf", nodeID, newObjName );
+        vwf.createNode( "index-vwf", cube, newObjName, function( nodeID, prototypeID ){
           vwf.setProperty( nodeID, "velocity", [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60] );
-        }, newObjName );        
+        } );        
         this.createCube = false;
       } else {
         this.spheresCreated = this.spheresCreated + 1;
         newObjName = "sphere" + this.spheresCreated;
         sphere.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] ];
-        vwf.createNode( sphere, function( nodeID, prototypeID ){
-          vwf.addChild( "index-vwf", nodeID, newObjName );
+        vwf.createNode( "index-vwf", sphere, newObjName, function( nodeID, prototypeID ){
           vwf.setProperty( nodeID, "position", [ parms.camPos[0], parms.camPos[1], parms.camPos[2] ] );
           vwf.setProperty( nodeID, "velocity", [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60] );
-        }, newObjName );   
+        } );   
         this.createCube = true;      
       }
     }

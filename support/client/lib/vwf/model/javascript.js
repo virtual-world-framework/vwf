@@ -31,37 +31,37 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.types = {}; // maps id => function() { }
             this.root = undefined;
             this.nodes = {}; // maps id => new type()
-            this.creatingNode( 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
         // == Model API ============================================================================
 
         // -- creatingNode -------------------------------------------------------------------------
 
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
-            callback /* ( ready ) */ ) {
+        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childName, callback /* ( ready ) */ ) {
 
-            var type = nodeExtendsID ? this.types[nodeExtendsID] : Object;
+            var type = childExtendsID ? this.types[childExtendsID] : Object;
 
             if ( ! type ) {
 
-                var prototype = this.nodes[nodeExtendsID];
+                var prototype = this.nodes[childExtendsID];
 
-                type = this.types[nodeExtendsID] = function() { };
+                type = this.types[childExtendsID] = function() { };
 
                 type.prototype = prototype;
                 type.prototype.constructor = type; // resetting constructor breaks enumerables?
 
             }
 
-            var node = this.nodes[nodeID] = new type( nodeSource, nodeType );
+            var node = this.nodes[childID] = new type( childSource, childType );
 
-node.id = nodeID; // TODO: move to a backstop model
+node.id = childID; // TODO: move to a backstop model
 
             node.parent = undefined;
 
-            node.source = nodeSource;
-            node.type = nodeType;
+            node.source = childSource;
+            node.type = childType;
 
             node.properties = {};
             node.getters = {};

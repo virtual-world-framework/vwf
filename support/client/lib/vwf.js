@@ -359,9 +359,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // TODO: add note that this is only for a self-determined world; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
-                this.createNode( component_uri_or_json_or_object, function( rootID, rootTypeID ) {
-                    vwf.addChild( 0, rootID, undefined );
-                } );
+                this.createNode( 0, component_uri_or_json_or_object, undefined );
 
             } else {  // TODO: also do this if component_uri_or_json_or_object was invalid and createNode() failed
 
@@ -437,12 +435,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             switch ( actionName ) {
 
-                case "createNode":
+                case "createNode": // nodeID, childComponent, childName, callback /* ( childID, childPrototypeID ) */
 
                     callback( false ); // suspend the queue
 
-                    args[1] = function( nodeID, prototypeID ) {
-                        vwf.addChild( 0, nodeID, undefined );
+                    args[3] = function( childID, childPrototypeID ) {
                         callback( true ); // resume the queue when the action completes
                     };
 
@@ -564,37 +561,40 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( component_uri_or_json_or_object, callback, childName /* TODO: hack */ ) {
+        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID, childPrototypeID ) */ ) {
 
             this.logger.group( "vwf.createNode " + (
-                typeof component_uri_or_json_or_object == "string" || component_uri_or_json_or_object instanceof String ?
-                    component_uri_or_json_or_object : JSON.stringify( loggableComponent( component_uri_or_json_or_object ) )
+                typeof childComponent == "string" || childComponent instanceof String ?
+                    childComponent : JSON.stringify( loggableComponent( childComponent ) )
             ) );
 
             // Any component specification may be provided as either a URI identifying a network
             // resource containing the specification or as an object literal that provides the data
             // directly.
 
-            var component = normalizedComponent( component_uri_or_json_or_object );
+            var component = normalizedComponent( childComponent );
 
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
 
-            var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
-nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
-// nodeID = nodeID + "-" + Math.round( Math.random() * 1000000 );  // TODO: for single-user mode testing only; don't require the tests to provide the childName hack
+            var childNodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
+childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
+if ( ! childName ) childNodeID = childNodeID + "-" + Math.round( Math.random() * 1000000 );  // TODO: for single-user mode testing only; don't require the tests to provide the childName hack
 
-            this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + nodeID );
+            this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + childNodeID );
 
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
-
-// nodeID = nodeID + "-" + Date.now();  // TODO: hack on a hack to allow (single-user mode) client tests to work
     
-            this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
-                construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
+            this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
+                construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID, childPrototypeID ) {
+if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
+vwf.addChild( nodeID, childNodeID, childName );
+                    callback && callback.call( vwf, childNodeID, childPrototypeID );
+                } );
+
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + component_uri_or_json_or_object ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + ( typeof childComponent == "string" || childComponent instanceof String ? childComponent : JSON.stringify( loggableComponent( childComponent ) ) ) ); /* must log something for group level to reset in WebKit */
         };
 
         // -- getType ------------------------------------------------------------------------------
@@ -605,7 +605,7 @@ nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe char
         // save a reference in the database (since no other component can refer to it), and just
         // create it as an anonymous type.
 
-        this.getType = function( uri, callback ) {
+        this.getType = function( uri, callback /* nodeID */ ) {
 
             var nodeID = uri; // TODO: hash uri => nodeID to shorten for faster lookups? // TODO: canonicalize uri
 nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
@@ -648,7 +648,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                 this.logger.info( "vwf.getType: creating type " + uri );
 
-                construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
+                construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID, prototypeID ) {
 
                     var callbacks = types[nodeID];
                     types[nodeID] = component; // component specification once loaded
@@ -678,7 +678,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
 
-                            construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
+                            construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID, prototypeID ) {
 
                                 var callbacks = types[nodeID];
                                 types[nodeID] = component; // component specification once loaded
@@ -1425,9 +1425,9 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ ) {
+        var construct = function( parentID, nodeID, prototypeID, nodeComponent, nodeName, callback /* ( nodeID, prototypeID ) */ ) {
 
-            this.logger.group( "vwf.construct " + nodeID + " " + component.source + " " + component.type );
+            this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
 
             async.series( [
 
@@ -1440,9 +1440,9 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
 
                         var driver_ready = true;
 
-                        model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type, function( ready ) {
+                        model.creatingNode && model.creatingNode( parentID, nodeID, prototypeID, [], nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", nodeID, "for", component.source );
+                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
                                 driver_ready = ready;
                                 driver_ready && callback( undefined );
                             }
@@ -1465,9 +1465,9 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
 
                         var driver_ready = true;
 
-                        view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type, function( ready ) {
+                        view.createdNode && view.createdNode( parentID, nodeID, prototypeID, [], nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", nodeID, "for", component.source );
+                                vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
                                 driver_ready = ready;
                                 driver_ready && callback( undefined );
                             }
@@ -1487,7 +1487,7 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
                     // delegates to the models and views as above.
 
-                    component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
+                    nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {
                         if ( valueHasAccessors( propertyValue ) ) {
                             vwf.createProperty( nodeID, propertyName, propertyValue.value, propertyValue.get, propertyValue.set );
                         } else {
@@ -1495,11 +1495,11 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
                         }
                     } );
 
-                    component.methods && jQuery.each( component.methods, function( methodName ) {
+                    nodeComponent.methods && jQuery.each( nodeComponent.methods, function( methodName ) {
                         vwf.createMethod( nodeID, methodName );
                     } );
 
-                    component.events && jQuery.each( component.events, function( eventName ) {
+                    nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName ) {
                         vwf.createEvent( nodeID, eventName );
                     } );
 
@@ -1512,12 +1512,10 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
                     // child's component specification, then once loaded, call addChild() to attach the
                     // new node as a child. addChild() delegates to the models and views as before.
 
-                    async.forEach( Object.keys( component.children || {} ), function( childName, callback /* ( err ) */ ) {
-                        vwf.createNode( component.children[childName], function( childID, childTypeID ) {
-                            vwf.addChild( nodeID, childID, childName ); // TODO: add in original order from component.children
+                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, callback /* ( err ) */ ) {
+                        vwf.createNode( nodeID, nodeComponent.children[childName], childName, function( childID, childPrototypeID ) {  // TODO: add in original order from nodeComponent.children
                             callback( undefined );
-                        },
-childName /* TODO: hack */ );
+                        } );
                     }, function( err ) {
                         callback( err, undefined );
                     } );
@@ -1532,7 +1530,7 @@ childName /* TODO: hack */ );
                     // perform any immediate actions and retain any callbacks as appropriate for the
                     // script type.
 
-                    component.scripts && component.scripts.forEach( function( script ) {
+                    nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
                         script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                     } );
 
@@ -1564,7 +1562,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
                 callback && callback.call( vwf, nodeID, prototypeID );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + component.source + " " + component.type ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type ); /* must log something for group level to reset in WebKit */
         }
 
         // -- objectIsComponent --------------------------------------------------------------------

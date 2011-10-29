@@ -45,21 +45,21 @@
 
     // -- createdNode ------------------------------------------------------------------------------
 
-    module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
-        callback /* ( ready ) */ ) {
+    module.prototype.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs,
+        childSource, childType, childName, callback /* ( ready ) */) {
 
-        vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
-            nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
+        vwf.logger.info(namespace + ".createdNode " + nodeID + " " + childID + " " + childExtendsID + " " +  childImplementsIDs + " " +
+            childSource + " " +  childType + " " + childName);
 
 
-        if ( nodeID == "index-vwf" && ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "appscene-vwf" ) ) {
+        if ( childID == "index-vwf" && ( childExtendsID == "http-vwf-example-com-types-glge" || childExtendsID == "appscene-vwf" ) ) {
 
             this.canvasQuery = jQuery(this.rootSelector).append(
-                "<canvas id='" + nodeID + "' class='vwf-scene' width='800' height='600'/>"
+                "<canvas id='" + childID + "' class='vwf-scene' width='800' height='600'/>"
             ).children(":last");
 
             if ( !this.rootNodeID ) {
-                this.rootNodeID = nodeID;
+                this.rootNodeID = childID;
             }
            
             window.onkeydown = function( event ) {
@@ -72,11 +72,11 @@
               delete view.keysDown[ event.keyCode ];
             };
 
-            var sceneNode = this.scenes[nodeID] = {
+            var sceneNode = this.scenes[childID] = {
                 glgeDocument: new GLGE.Document(),
                 glgeRenderer: undefined,
                 glgeScene: undefined,
-                ID: nodeID,
+                ID: childID,
                 glgeKeys: new GLGE.KeyInput()
             };
 
@@ -108,7 +108,7 @@
 
                 if ( bRemoved ){
                     if ( view.glgeColladaObjects.length == 0 ) {
-                        bindSceneChildren( view, nodeID );
+                        bindSceneChildren( view, childID );
                         vwf.setProperty( sceneNode.ID, "loadDone", true );
                         loadComplete( view );
                     }
@@ -121,61 +121,61 @@
                 }
             }
 
-            if ( nodeSource ) {
-                switch ( nodeType ) {
+            if ( childSource ) {
+                switch ( childType ) {
                     case "model/x-glge":
                         callback( false ); // not ready
-                        sceneNode.glgeDocument.load(nodeSource);
+                        sceneNode.glgeDocument.load(childSource);
                         break;
 
                 }
             }
 
-        } else if (nodeExtendsID == "http-vwf-example-com-types-node3") {
+        } else if (childExtendsID == "http-vwf-example-com-types-node3") {
 
             var node;
-            switch ( nodeType ) {
+            switch ( childType ) {
                 case "model/vnd.collada+xml":
-                    node = this.nodes[nodeID] = {
+                    node = this.nodes[childID] = {
                         name: undefined,  
                         glgeObject: undefined,
-                        type: nodeExtendsID,
-                        source: nodeSource,
-                        ID: nodeID,
-                        sourceType: nodeType 
+                        type: childExtendsID,
+                        source: childSource,
+                        ID: childID,
+                        sourceType: childType 
                     };
                     break;
 
                 case "text/xml":
-                    node = this.nodes[nodeID] = {
+                    node = this.nodes[childID] = {
                         name: undefined,  
                         glgeObject: undefined,
-                        type: nodeExtendsID,
-                        source: nodeSource,
-                        ID: nodeID,
-                        sourceType: nodeType 
+                        type: childExtendsID,
+                        source: childSource,
+                        ID: childID,
+                        sourceType: childType 
                     };
                     break;
 
                 default:
-                    node = this.nodes[nodeID] = {
+                    node = this.nodes[childID] = {
                         name: undefined,  // TODO: needed?
                         glgeObject: undefined,
-                        ID: nodeID,
-                        type: nodeExtendsID
+                        ID: childID,
+                        type: childExtendsID
                     };
                     break;
             }            
-        } else if (nodeExtendsID == "http-vwf-example-com-types-camera") {
+        } else if (childExtendsID == "http-vwf-example-com-types-camera") {
 
-            var camName = nodeID.substring( nodeID.lastIndexOf( '-' ) + 1 );
+            var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
 var sceneNode = this.scenes["index-vwf"];
-            var node = this.nodes[nodeID] = {
+            var node = this.nodes[childID] = {
                 name: undefined,
                 glgeObject: undefined,
-                ID: nodeID,
+                ID: childID,
                 glgeScene: sceneNode ? sceneNode.glgeScene : undefined,
-                type: nodeExtendsID
+                type: childExtendsID
             };
 
             if ( sceneNode && sceneNode.camera ) {
@@ -202,39 +202,39 @@ var sceneNode = this.scenes["index-vwf"];
             }
 
             
-        } else if (nodeExtendsID == "http-vwf-example-com-types-light") {
+        } else if (childExtendsID == "http-vwf-example-com-types-light") {
 
-            var node = this.nodes[nodeID] = {
+            var node = this.nodes[childID] = {
                 name: undefined,
                 glgeObject: undefined,
-                ID: nodeID,
-                type: nodeExtendsID
+                ID: childID,
+                type: childExtendsID
             };
 
-        } else if (nodeExtendsID == "http-vwf-example-com-types-material") {
+        } else if (childExtendsID == "http-vwf-example-com-types-material") {
 
-            var node = this.nodes[nodeID] = {
+            var node = this.nodes[childID] = {
                 name: undefined,
                 glgeObject: undefined,
                 glgeMaterial: true,
-                ID: nodeID,
-                type: nodeExtendsID
+                ID: childID,
+                type: childExtendsID
             };
 
-        } else if (nodeExtendsID == "http-vwf-example-com-types-particlesystem") {
+        } else if (childExtendsID == "http-vwf-example-com-types-particlesystem") {
 
-            var node = this.nodes[nodeID] = {
+            var node = this.nodes[childID] = {
                 name: undefined,
                 glgeObject: undefined,
-                ID: nodeID,
-                type: nodeExtendsID
+                ID: childID,
+                type: childExtendsID
             };
 
         } else {
 
             var node;
             var childName;
-            switch ( nodeExtendsID ) {
+            switch ( childExtendsID ) {
                 case "index-vwf":
                 case "http-vwf-example-com-types-node":
                 case "http-vwf-example-com-types-node2":
@@ -245,12 +245,12 @@ var sceneNode = this.scenes["index-vwf"];
                     break;
 
                 case "http-vwf-example-com-types-group3":
-                    childName = nodeID.substring( nodeID.lastIndexOf( '-' )+1 );
-                    node = this.nodes[nodeID] = {
+                    childName = childID.substring( childID.lastIndexOf( '-' )+1 );
+                    node = this.nodes[childID] = {
                         name: childName,
                         glgeObject: new GLGE.Group(),
-                        ID: nodeID,
-                        type: nodeExtendsID
+                        ID: childID,
+                        type: childExtendsID
                     };
                     
                     node.gui = node.glgeObject.uid;
@@ -258,11 +258,11 @@ var sceneNode = this.scenes["index-vwf"];
                     break;
 
                 default:
-                    node = this.nodes[nodeID] = {
+                    node = this.nodes[childID] = {
                         name: undefined,
                         glgeObject: undefined,
-                        ID: nodeID,
-                        type: nodeExtendsID
+                        ID: childID,
+                        type: childExtendsID
                     };
                 break;    
             }        
@@ -1475,7 +1475,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
 
 
     var createDefaultCamera = function( sceneNode ) {
-        vwf.createNode( { "extends": "http://vwf.example.com/types/camera" }, undefined, sceneNode.camera.defaultName );    
+        vwf.createNode( 0, { "extends": "http://vwf.example.com/types/camera" }, sceneNode.camera.defaultName );    
     }
 
     var createLight = function( view, nodeID, childID, childName ) {
@@ -1721,10 +1721,9 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
         if ( newChildID && type ) {
             if ( !view.nodes[ newChildID ] ) {
                 //console.info( "[[  Creating " + type + " as child of " + parentID );
-//                vwf.createNode( { "extends": extendType }, undefined, objName );
-                vwf.createNode( { "extends": extendType }, function( nodeID, prototypeID ) {
+//                vwf.createNode( 0, { "extends": extendType }, objName );
+                vwf.createNode( parentID, { "extends": extendType }, objName, function( nodeID, prototypeID ) {
                     //console.info( "     [[  Adding " + type + "     nodeID: " + nodeID );
-                    vwf.addChild( parentID, nodeID, objName );
                     addedID = nodeID;
                     //console.info( "     ]]  Adding " + type + "     nodeID: " + nodeID );
                     if ( extendType == meshExtendType ) {
@@ -1750,7 +1749,7 @@ isAnimatable = isAnimatable && node.name != "cityblock.dae"; // TODO: this is a 
                             //vwf.logger.enable = true;
                         }
                     }
-                }, objName );
+                } );
                 //console.info( "]]  Creating " + type  );
             }
         }
