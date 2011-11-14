@@ -103,7 +103,7 @@
           // Create a VWF object with two levels of inheritance using the given initializers. Add a
           // "test" property to each.
 
-          function create_node_prototype( node, prototype, callback_nodeID_prototypeID ) {
+          function create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ ) {
 
             prototype.properties = prototype.properties || {};
             prototype.properties.test = prototype.properties.test || null;
@@ -116,7 +116,7 @@
                 node.properties.test = node.properties.test || null;
 
                 vwf.createNode( 0, node, undefined, function( nodeID ) {
-                    callback_nodeID_prototypeID( nodeID, prototypeID );
+                    callback( nodeID, prototypeID );
                 } );
 
             } );
@@ -126,7 +126,7 @@
           // Create a node with a prototype. Add initialize() methods as specified to set the "test"
           // property.
 
-          function create_node_prototype_with_initializers( node_init, prototype_init, callback_nodeID_prototypeID ) {
+          function create_node_prototype_with_initializers( node_init, prototype_init, callback /* ( nodeID, prototypeID ) */ ) {
 
             var node = {};
 
@@ -146,7 +146,7 @@
                 } ];
             }
 
-            create_node_prototype( node, prototype, callback_nodeID_prototypeID );
+            create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ );
 
           }
 
