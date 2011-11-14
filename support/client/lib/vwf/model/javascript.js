@@ -75,78 +75,73 @@ node.id = childID; // TODO: move to a backstop model
             node.events = {};
             node.children = [];
 
+            // Define a "future" proxy so that for any this.property, this.method, or this.event, we
+            // can reference this.future( when, callback ).property/method/event and have the
+            // expression evaluated at the future time.
+            
+            // TODO: every reference to future() generates a set of proxies for every property, method, and event on the object so performance is pretty horrible; look for ways to cache
 
+            Object.defineProperty( node, "future", {
 
+                enumerable: true,
+                writable: false,
 
-Object.defineProperty( node, "future", {
+                value: function( when, callback ) {
 
-    enumerable: true,
+                    var future = {
+                        properties: {},
+                        methods: {},
+                        events: {},
+                    };
 
-    get: function() { // "this" is node
+                    for ( var propertyName in this.properties ) {
 
-        return function( when ) {
+                        ( function( propertyName ) {
 
-            var future = {
-                properties: {},
-                methods: {},
-                events: {},
-            };
+                            Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
+                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
+                                enumerable: true
+                            } );
 
-            for ( var propertyName in this.properties ) {
+                            Object.defineProperty( future, propertyName, { // "this" is future in get/set
+                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
+                                enumerable: true
+                            } );
 
-                ( function( propertyName ) {
+                        } )( propertyName );
 
-                    Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when ) },
-                        enumerable: true
-                    } );
+                    }
 
-                    Object.defineProperty( future, propertyName, { // "this" is future in get/set
-                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when ) },
-                        enumerable: true
-                    } );
+                    for ( var methodName in this.methods ) {
 
-                } )( propertyName );
+                        ( function( methodName ) {
 
-            }
+                            Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
+                                get: function() {
+                                    return function( /* parameter1, parameter2, ... */ ) {
+                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
+                                    }
+                                },
+                                enumerable: true
+                            } );
 
-            for ( var methodName in this.methods ) {
+                            Object.defineProperty( future, methodName, { // "this" is future in get/set
+                                get: function() {
+                                    return function( /* parameter1, parameter2, ... */ ) {
+                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
+                                    }
+                                },
+                                enumerable: true
+                            } );
 
-                ( function( methodName ) {
+                        } )( methodName );
 
-                    Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) {
-                                return self.kernel.callMethod( childID, methodName, arguments, -when );
-                            }
-                        },
-                        enumerable: true
-                    } );
+                    }
 
-                    Object.defineProperty( future, methodName, { // "this" is future in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) {
-                                return self.kernel.callMethod( childID, methodName, arguments, -when );
-                            }
-                        },
-                        enumerable: true
-                    } );
+                    return future;
+                }
 
-                } )( methodName );
-
-            }
-
-            return future;
-        }
-
-    },
-
-} );
-
-
-
-
-
+            } );
 
         },
 
