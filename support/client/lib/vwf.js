@@ -93,6 +93,7 @@
         // by execution time.
 
         var queue = this.private.queue = [];
+
         queue.time = 0; // current server time
         queue.ready = true;
 
@@ -183,12 +184,16 @@
             if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
                 viewArgumentLists = {};
 
+            // Create the model interface to the kernel.
+
+            var kernel_for_models = require( "vwf/kernel/model" ).create( vwf );
+
             // Create and attach each configured model.
 
             jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
                 var model = require( modelName ).create(
-                    vwf,                                        // model's kernel access
+                    kernel_for_models,                          // model's kernel access
                     [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
                     {}                                          // state shared with a paired view
                     // TODO: configuration parameters (modelArguments)
@@ -210,6 +215,30 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 }
 
             } );
+
+//            // Create the view interface to the kernel.
+
+//            var kernel_for_views = require( "vwf/kernel/view" ).create( vwf );
+
+//            // Create and attach each configured view.
+
+//            jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
+
+//                var modelPeer = vwf.models.actual[ viewName.replace( "vwf/view", "view/model" ) ];
+
+//                var view = require( viewName ).create(
+//                    kernel_for_views,                           // view's kernel access
+//                    [],                                         // stages between the kernel and view
+//                    modelPeer && modelPeer.state || {}          // state shared with a paired model
+//                    // TODO: configuration parameters (viewArguments)
+//                );
+
+//                if ( view ) {
+//                    vwf.views.push( view );
+//                    vwf.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+//                }
+
+//            } );
 
             // Create and attach each configured view.
 
@@ -312,17 +341,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // Unpack the arguments.
 
                         fields = JSON.parse( message );
+
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
 
-                        // Add the message to the queue and keep it ordered by time.
+                        // Add the message to the queue.
 
-                        queue.push( fields );
-                        queue.time = fields.time || queue.time; // current server time
-
-                        queue.sort( function( a, b ) {
-                            return a.time - b.time
-                        } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive; also ensure that new messages added at the same time as other messages in the queue are inserted after them
+                        vwf.queue( fields.time, fields.node, fields.action, fields.member, fields.parameters );
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -369,58 +394,118 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         };
 
+        // -- queue --------------------------------------------------------------------------------
+
+        this.queue = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
+
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
+
+            var fields = {
+                time: time,
+                sequence: undefined, // for stabilizing the sort
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO
+            };
+
+            queue.push( fields );
+
+            // Sort by time then by sequence.  // TODO: use a better-performing priority queue
+
+            var sequence = 0;
+
+            queue.forEach( function( fields ) {
+                fields.sequence = ++sequence;
+            } );
+
+            queue.sort( function( a, b ) {
+                return a.time != b.time ?
+                    a.time - b.time :
+                    a.sequence - b.sequence;
+            } );
+
+        };
+
         // -- send ---------------------------------------------------------------------------------
 
         // Send a message to the conference server. The message will be reflected back to all
         // participants in the conference.
 
-        this.send = function( /* nodeID, actionName, parameters ... */ ) {
+        this.send = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
 
-            var args = Array.prototype.slice.call( arguments );
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
+
+            // For single-user mode, loop the message back to the incoming queue.
+
+            if ( ! socket ) {
+                return this.queue( time, nodeID, actionName, memberName, parameters, callback /* ( result ) */ );
+            }
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
-                time: this.now,
-                node: args.shift(),
-                action: args.shift(),
-                parameters: args
+                time: time,
+                // sequence: undefined,  // TODO: use to identify on return from reflector?
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
-            if ( socket ) {
+            // Send the message.
 
-                // Send the message if the connection is available.
-
-                var message = JSON.stringify( fields );
-                socket.send( message );
-
-            } else {
-                
-                // Otherwise, for single-user mode, loop it immediately back to the incoming queue.
-
-                queue.push( fields );
-                queue.time = fields.time || queue.time;
-
-                queue.sort( function( a, b ) {
-                    return a.time - b.time
-                } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive; also ensure that new messages added at the same time as other messages in the queue are inserted after them
-
-            }
+            var message = JSON.stringify( fields );
+            socket.send( message );
 
         };
+
+        // -- respond ------------------------------------------------------------------------------
+
+        // Return a result for a function invoked by the server.
+
+        this.respond = function( time, nodeID, actionName, memberName, parameters, result ) {
+
+            // Nothing to do in single-user mode.
+
+            if ( ! socket ) {
+                return;
+            }
+
+            // Attach the current simulation time and pack the message as an array of the arguments.
+
+            var fields = {
+                time: time,
+                // sequence: undefined,  // TODO: use to identify on return from reflector?
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                result: result,
+            };
+
+            // Send the message.
+
+            var message = JSON.stringify( fields );
+            socket.send( message );
+
+        }
 
         // -- receive ------------------------------------------------------------------------------
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( fields, callback /* ( ready ) */ ) {
+        this.receive = function( time, nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
 
-            // Advance the time and locate the node ID and action name.
+            // Advance the time.
 
-            this.now = fields.time;
-
-            var nodeID = fields.node;
-            var actionName = fields.action;
+            this.now = time;
 
 // TODO: delegate parsing and validation to each action.
 
@@ -429,7 +514,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields.parameters ) : fields.parameters;
+            var args = [];
+
+            if ( nodeID || nodeID === 0 ) args.push( nodeID );
+            if ( memberName ) args.push( memberName );
+            if ( parameters ) args = args.concat( parameters ); // flatten
 
             // Insert the ready callback for potentially-asynchronous actions.
 
@@ -452,20 +541,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             var result = this[actionName] && this[actionName].apply( this, args );
 
 if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
-
-    var fieldsout = {
-        time: fields.time,
-        node: fields.node,
-        action: fields.action,
-        parameters: fields.parameters,
-        result: result
-    };
-
-    var message = JSON.stringify( fieldsout );
-    socket.send( message );
-
+    this.respond( time, nodeID, actionName, memberName, parameters, result );
 }
-
             
         };
 
@@ -481,16 +558,18 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
             // remove the message and perform the action. The simulation time is advanced to the
             // message time as each one is processed.
 
+            queue.time = Math.max( queue.time, currentTime ); // save current server time for pause/resume
+
             // Actions may use receive's ready function to suspend the queue for asynchronous
             // operations, and to resume it when the operation is complete.
 
-            while ( queue.ready && queue.length > 0 && queue[0].time <= currentTime ) {
+            while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time ) {
 
                 var fields = queue.shift();
 
-                this.receive( fields, function( ready ) {
+                this.receive( fields.time, fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
-                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", currentTime, "for", fields.action );
+                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
                         queue.ready = ready;
                         queue.ready && vwf.dispatch( queue.time );
                     }
@@ -501,7 +580,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
             // Set the simulation time to the new current time.
 
             if ( queue.ready ) {
-                this.now = currentTime;
+                this.now = queue.time;
             }
 
             this.tick();
