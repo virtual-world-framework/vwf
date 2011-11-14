@@ -93,6 +93,7 @@
         // by execution time.
 
         var queue = this.private.queue = [];
+
         queue.time = 0; // current server time
         queue.ready = true;
 
@@ -183,12 +184,16 @@
             if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
                 viewArgumentLists = {};
 
+            // Create the model interface to the kernel.
+
+            var kernel_for_models = require( "vwf/kernel/model" ).create( vwf );
+
             // Create and attach each configured model.
 
             jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
                 var model = require( modelName ).create(
-                    vwf,                                        // model's kernel access
+                    kernel_for_models,                          // model's kernel access
                     [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
                     {}                                          // state shared with a paired view
                     // TODO: configuration parameters (modelArguments)
@@ -210,6 +215,30 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 }
 
             } );
+
+//            // Create the view interface to the kernel.
+
+//            var kernel_for_views = require( "vwf/kernel/view" ).create( vwf );
+
+//            // Create and attach each configured view.
+
+//            jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
+
+//                var modelPeer = vwf.models.actual[ viewName.replace( "vwf/view", "view/model" ) ];
+
+//                var view = require( viewName ).create(
+//                    kernel_for_views,                           // view's kernel access
+//                    [],                                         // stages between the kernel and view
+//                    modelPeer && modelPeer.state || {}          // state shared with a paired model
+//                    // TODO: configuration parameters (viewArguments)
+//                );
+
+//                if ( view ) {
+//                    vwf.views.push( view );
+//                    vwf.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+//                }
+
+//            } );
 
             // Create and attach each configured view.
 
@@ -311,18 +340,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         // Unpack the arguments.
 
-                        fields = JSON.parse( message );
+                        var fields = JSON.parse( message );
+
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
 
-                        // Add the message to the queue and keep it ordered by time.
+                        // Add the message to the queue.
 
-                        queue.push( fields );
-                        queue.time = fields.time || queue.time; // current server time
-
-                        queue.sort( function( a, b ) {
-                            return a.time - b.time
-                        } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive; also ensure that new messages added at the same time as other messages in the queue are inserted after them
+                        vwf.queue( fields.time, fields.node, fields.action, fields.member, fields.parameters );
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -369,91 +394,118 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         };
 
+        // -- queue --------------------------------------------------------------------------------
 
+        this.queue = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
 
-
-
-
-        this.queue_ = function( /* when, nodeID, actionName, parameters ... */ ) {
-
-            var args = Array.prototype.slice.call( arguments );
-            var when = args.shift();
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
 
             var fields = {
-                time: this.now + when,
-                node: args.shift(),
-                action: args.shift(),
-                parameters: args
+                time: time,
+                sequence: undefined, // for stabilizing the sort
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO
             };
-
-console.warn( "queue", fields.time, fields.node, fields.action, args[0] );
 
             queue.push( fields );
 
+            // Sort by time then by sequence.  // TODO: use a better-performing priority queue
+
+            var sequence = 0;
+
+            queue.forEach( function( fields ) {
+                fields.sequence = ++sequence;
+            } );
+
             queue.sort( function( a, b ) {
-                return a.time - b.time
+                return a.time != b.time ?
+                    a.time - b.time :
+                    a.sequence - b.sequence;
             } );
 
         };
-
-
-
-
-
-
 
         // -- send ---------------------------------------------------------------------------------
 
         // Send a message to the conference server. The message will be reflected back to all
         // participants in the conference.
 
-        this.send = function( /* nodeID, actionName, parameters ... */ ) {
+        this.send = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
 
-            var args = Array.prototype.slice.call( arguments );
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
+
+            // For single-user mode, loop the message back to the incoming queue.
+
+            if ( ! socket ) {
+                return this.queue( time, nodeID, actionName, memberName, parameters, callback /* ( result ) */ );
+            }
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
-                time: this.now,  // TODO: make sure reflector ignores this
-                node: args.shift(),
-                action: args.shift(),
-                parameters: args
+                time: time,
+                // sequence: undefined,  // TODO: use to identify on return from reflector?
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
-            if ( socket ) {
+            // Send the message.
 
-                // Send the message if the connection is available.
-
-                var message = JSON.stringify( fields );
-                socket.send( message );
-
-            } else {
-                
-                // Otherwise, for single-user mode, loop it immediately back to the incoming queue.
-
-                queue.push( fields );
-                queue.time = fields.time || queue.time;
-
-                queue.sort( function( a, b ) {
-                    return a.time - b.time
-                } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive; also ensure that new messages added at the same time as other messages in the queue are inserted after them
-
-            }
+            var message = JSON.stringify( fields );
+            socket.send( message );
 
         };
+
+        // -- respond ------------------------------------------------------------------------------
+
+        // Return a result for a function invoked by the server.
+
+        this.respond = function( time, nodeID, actionName, memberName, parameters, result ) {
+
+            // Nothing to do in single-user mode.
+
+            if ( ! socket ) {
+                return;
+            }
+
+            // Attach the current simulation time and pack the message as an array of the arguments.
+
+            var fields = {
+                time: time,
+                // sequence: undefined,  // TODO: use to identify on return from reflector?
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                result: result,
+            };
+
+            // Send the message.
+
+            var message = JSON.stringify( fields );
+            socket.send( message );
+
+        }
 
         // -- receive ------------------------------------------------------------------------------
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( fields, callback /* ( ready ) */ ) {
+        this.receive = function( time, nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
 
-            // Advance the time and locate the node ID and action name.
+            // Advance the time.
 
-            this.now = fields.time;
-
-            var nodeID = fields.node;
-            var actionName = fields.action;
+            this.now = time;
 
 // TODO: delegate parsing and validation to each action.
 
@@ -462,17 +514,21 @@ console.warn( "queue", fields.time, fields.node, fields.action, args[0] );
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields.parameters ) : fields.parameters;
+            var args = [];
+
+            if ( nodeID || nodeID === 0 ) args.push( nodeID );
+            if ( memberName ) args.push( memberName );
+            if ( parameters ) args = args.concat( parameters ); // flatten
 
             // Insert the ready callback for potentially-asynchronous actions.
 
             switch ( actionName ) {
 
-                case "createNode": // nodeID, childComponent, childName, callback /* ( childID, childPrototypeID ) */
+                case "createNode": // nodeID, childComponent, childName, callback /* ( childID ) */
 
                     callback( false ); // suspend the queue
 
-                    args[3] = function( childID, childPrototypeID ) {
+                    args[3] = function( childID ) {
                         callback( true ); // resume the queue when the action completes
                     };
 
@@ -480,29 +536,13 @@ console.warn( "queue", fields.time, fields.node, fields.action, args[0] );
 
             }
 
-if ( actionName ) {
-    console.warn( "receive", fields.time, fields.node, fields.action, args[0] );
-}
-
             // Invoke the action.
 
             var result = this[actionName] && this[actionName].apply( this, args );
 
 if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
-
-    var fieldsout = {
-        time: fields.time,
-        node: fields.node,
-        action: fields.action,
-        parameters: fields.parameters,
-        result: result
-    };
-
-    var message = JSON.stringify( fieldsout );
-    socket.send( message );
-
+    this.respond( time, nodeID, actionName, memberName, parameters, result );
 }
-
             
         };
 
@@ -518,16 +558,18 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
             // remove the message and perform the action. The simulation time is advanced to the
             // message time as each one is processed.
 
+            queue.time = Math.max( queue.time, currentTime ); // save current server time for pause/resume
+
             // Actions may use receive's ready function to suspend the queue for asynchronous
             // operations, and to resume it when the operation is complete.
 
-            while ( queue.ready && queue.length > 0 && queue[0].time <= currentTime ) {
+            while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time ) {
 
                 var fields = queue.shift();
 
-                this.receive( fields, function( ready ) {
+                this.receive( fields.time, fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
-                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", currentTime, "for", fields.action );
+                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
                         queue.ready = ready;
                         queue.ready && vwf.dispatch( queue.time );
                     }
@@ -538,7 +580,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
             // Set the simulation time to the new current time.
 
             if ( queue.ready ) {
-                this.now = currentTime;
+                this.now = queue.time;
             }
 
             this.tick();
@@ -598,7 +640,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID, childPrototypeID ) */ ) {
+        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID ) */ ) {
 
             this.logger.group( "vwf.createNode " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
@@ -623,10 +665,10 @@ if ( ! childName ) childNodeID = childNodeID + "-" + Math.round( Math.random() *
             // component specification to construct().
     
             this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
-                construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID, childPrototypeID ) {
+                construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID ) {
 if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
 vwf.addChild( nodeID, childNodeID, childName );
-                    callback && callback.call( vwf, childNodeID, childPrototypeID );
+                    callback && callback.call( vwf, childNodeID );
                 } );
 
             } );
@@ -685,7 +727,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                 this.logger.info( "vwf.getType: creating type " + uri );
 
-                construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID, prototypeID ) {
+                construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID ) {
 
                     var callbacks = types[nodeID];
                     types[nodeID] = component; // component specification once loaded
@@ -715,7 +757,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
 
-                            construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID, prototypeID ) {
+                            construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID ) {
 
                                 var callbacks = types[nodeID];
                                 types[nodeID] = component; // component specification once loaded
@@ -1067,34 +1109,11 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
             this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */  // TODO: add truncated propertyGet, propertySet to log
         };
 
-this.future = function( when ) {
-
-    return {
-
-        setProperty: function( nodeID, propertyName, propertyValue ) {
-            this.queue_( when, nodeID, "setProperty", propertyName, propertyValue );
-        },
-
-        callMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) {
-            var parameters = Array.prototype.slice.call( arguments );
-            this.queue_.apply( this, [ when, parameters.shift(), "callMethod" ].concat( parameters ) );  // TODO: parameters  // TODO: we convert to an array, then queue_ pulls everything back out; pass only parameters as an array and everything else flat?
-        },
-
-    }
-
-}
-
-
         // -- setProperty --------------------------------------------------------------------------
 
         // Set a property value on a node.
 
-        this.setProperty = function( nodeID, propertyName, propertyValue, when ) {
-
-if ( typeof when == "object" && ( when.at != undefined || when["in"] != undefined ) ) {
-    var args = Array.prototype.slice.call( arguments, 0, -1 );  // TODO: arguments conversion is expensive; don't remove when?
-    return this.future( when["in"] ).setProperty.apply( this, args );  // TODO: at too
-}
+        this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
             this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
@@ -1299,18 +1318,11 @@ if ( typeof when == "object" && ( when.at != undefined || when["in"] != undefine
 
         // -- callMethod ---------------------------------------------------------------------------
 
-        this.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] [, when ] */ ) { // TODO: parameters
+        this.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
 
             this.logger.group( "vwf.callMethod " + nodeID + " " + methodName ); // TODO: parameters
 
             var args = Array.prototype.slice.call( arguments );
-
-var when = args.length && args[args.length-1];
-
-if ( typeof when == "object" && ( when.at != undefined || when["in"] != undefined ) ) {
-    args.pop();
-    return this.future( when["in"] ).callMethod.apply( this, args );  // TODO: at too
-}
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -1492,7 +1504,7 @@ if ( typeof when == "object" && ( when.at != undefined || when["in"] != undefine
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( parentID, nodeID, prototypeID, nodeComponent, nodeName, callback /* ( nodeID, prototypeID ) */ ) {
+        var construct = function( parentID, nodeID, prototypeID, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
 
             this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
 
@@ -1584,7 +1596,7 @@ if ( typeof when == "object" && ( when.at != undefined || when["in"] != undefine
                     // new node as a child. addChild() delegates to the models and views as before.
 
                     async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, callback /* ( err ) */ ) {
-                        vwf.createNode( nodeID, nodeComponent.children[childName], childName, function( childID, childPrototypeID ) {  // TODO: add in original order from nodeComponent.children
+                        vwf.createNode( nodeID, nodeComponent.children[childName], childName, function( childID ) {  // TODO: add in original order from nodeComponent.children
                             callback( undefined );
                         } );
                     }, function( err ) {
@@ -1630,7 +1642,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
                 // ID of its prototype. If this was the root node for the world, the world is now
                 // fully initialized.
 
-                callback && callback.call( vwf, nodeID, prototypeID );
+                callback && callback.call( vwf, nodeID );
             } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type ); /* must log something for group level to reset in WebKit */

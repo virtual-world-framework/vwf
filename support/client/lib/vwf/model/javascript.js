@@ -97,12 +97,12 @@ Object.defineProperty( node, "future", {
                 ( function( propertyName ) {
 
                     Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, { "in": when } ) },
+                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when ) },
                         enumerable: true
                     } );
 
                     Object.defineProperty( future, propertyName, { // "this" is future in get/set
-                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, { "in": when } ) },
+                        set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when ) },
                         enumerable: true
                     } );
 
@@ -117,8 +117,7 @@ Object.defineProperty( node, "future", {
                     Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) {
-                                var parameters = Array.prototype.slice.call( arguments );
-                                return self.kernel.callMethod.apply( self.kernel, [ childID, methodName ].concat( parameters ).concat( { "in": when } ) );  // TODO: any way to avoid converting arguments to an Array?
+                                return self.kernel.callMethod( childID, methodName, arguments, -when );
                             }
                         },
                         enumerable: true
@@ -127,8 +126,7 @@ Object.defineProperty( node, "future", {
                     Object.defineProperty( future, methodName, { // "this" is future in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) {
-                                var parameters = Array.prototype.slice.call( arguments );
-                                return self.kernel.callMethod.apply( self.kernel, [ childID, methodName ].concat( parameters ).concat( { "in": when } ) );  // TODO: any way to avoid converting arguments to an Array?
+                                return self.kernel.callMethod( childID, methodName, arguments, -when );
                             }
                         },
                         enumerable: true
@@ -302,8 +300,7 @@ if ( methodName == "setPositions" || methodName == "pointerClick" ) return;
             Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) {
-                        var parameters = Array.prototype.slice.call( arguments );
-                        return self.kernel.callMethod.apply( self.kernel, [ nodeID, methodName ].concat( parameters ) );  // TODO: any way to avoid converting arguments to an Array?
+                        return self.kernel.callMethod( nodeID, methodName, arguments );
                     }
                 },
                 enumerable: true,
@@ -314,8 +311,7 @@ if ( methodName == "setPositions" || methodName == "pointerClick" ) return;
             Object.defineProperty( node, methodName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) {
-                        var parameters = Array.prototype.slice.call( arguments );
-                        return self.kernel.callMethod.apply( self.kernel, [ nodeID, methodName ].concat( parameters ) );  // TODO: any way to avoid converting arguments to an Array?
+                        return self.kernel.callMethod( nodeID, methodName, arguments );
                     }
                 },
                 enumerable: true,
