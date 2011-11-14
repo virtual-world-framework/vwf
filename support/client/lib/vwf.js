@@ -435,11 +435,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             switch ( actionName ) {
 
-                case "createNode": // nodeID, childComponent, childName, callback /* ( childID, childPrototypeID ) */
+                case "createNode": // nodeID, childComponent, childName, callback /* ( childID ) */
 
                     callback( false ); // suspend the queue
 
-                    args[3] = function( childID, childPrototypeID ) {
+                    args[3] = function( childID ) {
                         callback( true ); // resume the queue when the action completes
                     };
 
@@ -561,7 +561,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID, childPrototypeID ) */ ) {
+        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID ) */ ) {
 
             this.logger.group( "vwf.createNode " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
@@ -586,10 +586,10 @@ if ( ! childName ) childNodeID = childNodeID + "-" + Math.round( Math.random() *
             // component specification to construct().
     
             this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
-                construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID, childPrototypeID ) {
+                construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID ) {
 if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
 vwf.addChild( nodeID, childNodeID, childName );
-                    callback && callback.call( vwf, childNodeID, childPrototypeID );
+                    callback && callback.call( vwf, childNodeID );
                 } );
 
             } );
@@ -648,7 +648,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                 this.logger.info( "vwf.getType: creating type " + uri );
 
-                construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID, prototypeID ) {
+                construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID ) {
 
                     var callbacks = types[nodeID];
                     types[nodeID] = component; // component specification once loaded
@@ -678,7 +678,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
 
-                            construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID, prototypeID ) {
+                            construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID ) {
 
                                 var callbacks = types[nodeID];
                                 types[nodeID] = component; // component specification once loaded
@@ -1425,7 +1425,7 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( parentID, nodeID, prototypeID, nodeComponent, nodeName, callback /* ( nodeID, prototypeID ) */ ) {
+        var construct = function( parentID, nodeID, prototypeID, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
 
             this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
 
@@ -1513,7 +1513,7 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
                     // new node as a child. addChild() delegates to the models and views as before.
 
                     async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, callback /* ( err ) */ ) {
-                        vwf.createNode( nodeID, nodeComponent.children[childName], childName, function( childID, childPrototypeID ) {  // TODO: add in original order from nodeComponent.children
+                        vwf.createNode( nodeID, nodeComponent.children[childName], childName, function( childID ) {  // TODO: add in original order from nodeComponent.children
                             callback( undefined );
                         } );
                     }, function( err ) {
@@ -1559,7 +1559,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
                 // ID of its prototype. If this was the root node for the world, the world is now
                 // fully initialized.
 
-                callback && callback.call( vwf, nodeID, prototypeID );
+                callback && callback.call( vwf, nodeID );
             } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type ); /* must log something for group level to reset in WebKit */
