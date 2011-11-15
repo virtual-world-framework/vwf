@@ -854,7 +854,7 @@
 //            return undefined;
 //        };
 //        
-//        this.onCreateMethod = function( nodeID, methodName ) {
+//        this.onCreateMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 //        
 //            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
 //            var containerQuery = nodeQuery.children( ".vwf-methods" );
@@ -880,7 +880,7 @@
 //            ). children( ":last" );
 //        };
 
-//        this.onCallMethod = function( nodeID, methodName ) {
+//        this.onCallMethod = function( nodeID, methodName, methodParameters ) {
 //        
 //        };
 
