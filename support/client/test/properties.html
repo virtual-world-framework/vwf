@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.5.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+      "vwf/model/javascript",
+      "vwf/model/object",
+      "vwf/model/stage/log",
+
+      ], function() {
+
+        require.ready( function() {
+
+          vwf.initialize(
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
+            /*  views */ { }
+          );
+
+          // Property inheritance and copy-on-write behavior (kernel)
+
+          asyncTest( "Property inheritance Kernel", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived property in derived" );
+              equal( vwf.getProperty( derivedID, "base" ), "base", "base property inherited by derived" );
+
+              equal( vwf.getProperty( baseID, "derived" ), undefined, "derived property not visible in base" );
+              equal( vwf.getProperty( baseID, "base" ), "base", "base property in base" );
+              
+              equal( vwf.setProperty( derivedID, "derived", "derived updated" ), "derived updated", "update derived property in derived" );
+              equal( vwf.setProperty( derivedID, "base", "base updated" ), "base updated", "update base property in derived" );
+
+              equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived property updated in derived" );
+              equal( vwf.getProperty( derivedID, "base" ), "base updated", "base property updated in derived" );
+
+              equal( vwf.getProperty( baseID, "derived" ), undefined, "derived property unchanged in base" );
+              equal( vwf.getProperty( baseID, "base" ), "base", "base property unchanged in base" );
+
+              start();
+            } );
+
+          } );
+
+          // Property inheritance and copy-on-write behavior (JavaScript binding)
+
+          asyncTest( "Property inheritance JavaScript", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.execute( derivedID, "this.derived" ), "derived", "derived property in derived" );
+              equal( vwf.execute( derivedID, "this.base" ), "base", "base property inherited by derived" );
+
+              equal( vwf.execute( baseID, "this.derived" ), undefined, "derived property not visible in base" );
+              equal( vwf.execute( baseID, "this.base" ), "base", "base property in base" );
+              
+              equal( vwf.execute( derivedID, "this.derived = 'derived updated'" ), "derived updated", "update derived property in derived" );
+              equal( vwf.execute( derivedID, "this.base = 'base updated'" ), "base updated", "update base property in derived" );
+
+              equal( vwf.execute( derivedID, "this.derived" ), "derived updated", "derived property updated in derived" );
+              equal( vwf.execute( derivedID, "this.base" ), "base updated", "base property updated in derived" );
+
+              equal( vwf.execute( baseID, "this.derived" ), undefined, "derived property unchanged in base" );
+              equal( vwf.execute( baseID, "this.base" ), "base", "base property unchanged in base" );
+
+              start();
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create a node with two levels of inheritance and properties to manipulate.
+
+          function createFixtureDerivedBase( callback ) {
+
+            vwf.createNode( {
+
+              extends:
+                "http://vwf.example.com/types/node",
+              
+              properties: {
+                base: "base",
+              },
+
+            }, function( baseID ) {
+
+              vwf.createNode( {
+
+                extends:
+                  "@" + JSON.stringify( baseID ),
+                
+                properties: {
+                  derived: "derived",
+                },
+
+              }, function( derivedID ) {
+
+                callback( derivedID, baseID );
+
+              } );
+
+            } );
+
+          }
+         
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>
