@@ -64,6 +64,7 @@ node.id = nodeID; // TODO: move to a backstop model
             node.type = nodeType;
 
             node.properties = {};
+            node.properties.node = node; // for node.properties accessors
             node.getters = {};
             node.setters = {};
 
@@ -128,17 +129,17 @@ node.id = nodeID; // TODO: move to a backstop model
             var node = this.nodes[nodeID];
             var self = this;
 
-            Object.defineProperty( node.properties, propertyName, {
-                get: function() { return self.kernel.getProperty( nodeID, propertyName ) }, // "this" is property's node  // TODO: or is it node.properties here?
-                set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
+            Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
+                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
+                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
                 enumerable: true
             } );
 
             // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
 
-            Object.defineProperty( node, propertyName, {
-                get: function() { return self.kernel.getProperty( nodeID, propertyName ) }, // "this" is property's node
-                set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
+            Object.defineProperty( node, propertyName, { // "this" is node in get/set
+                get: function() { return self.kernel.getProperty( this.id, propertyName ) },
+                set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
                 enumerable: true
             } );
 
