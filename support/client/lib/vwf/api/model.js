@@ -18,9 +18,9 @@ define( {
     settingProperty: [],
     gettingProperty: [],
 
-    creatingMethod: [],
+    creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
     /* TODO: deletingMethod, */
-    callingMethod: [],
+    callingMethod: [ /* nodeID, methodName, methodParameters */ ],
 
     /* TODO: creatingEvent, */
     /* TODO: deletingEvent, */
