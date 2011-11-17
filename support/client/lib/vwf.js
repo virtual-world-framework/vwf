@@ -1351,9 +1351,9 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
 
             this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
 
-            // Assume javascript if the type is not specified.
+            // Assume JavaScript if the type is not specified and the text is a string.
 
-            if ( ! scriptType && scriptText ) {
+            if ( ! scriptType && ( typeof scriptText == "string" || scriptText instanceof String ) ) {
                 scriptType = "application/javascript";
             }
 
@@ -1614,7 +1614,11 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
                     // script type.
 
                     nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
-                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                        if ( valueHasType( script ) ) {
+                            script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                        } else {
+                            script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
+                        }
                     } );
 
                     callback( undefined, undefined );
@@ -1731,6 +1735,32 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             }
             
             return hasBody; 
+        };
+
+        // -- valueHasType -------------------------------------------------------------------------
+
+        // Determine if a script initializer is a detailed initializer containing explicit text and
+        // type parameters (rather than being a simple text specification) by searching for the
+        // attributes in the candidate object.
+
+        var valueHasType = function( candidate ) {  // TODO: refactor and share with valueHasBody, valueHasAccessors and possibly objectIsComponent
+
+            var typeAttributes = [
+                "text",
+                "type",
+            ];
+
+            var hasType = false;
+
+            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+
+                typeAttributes.forEach( function( attributeName ) {
+                    hasType = hasType || Boolean( candidate[attributeName] );
+                } );
+
+            }
+            
+            return hasType; 
         };
 
         // -- normalizedComponent ------------------------------------------------------------------

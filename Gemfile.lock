@@ -4,10 +4,10 @@ GEM
     addressable (2.2.6)
     backports (2.3.0)
     daemons (1.1.4)
-    em-websocket (0.3.1)
+    em-websocket (0.3.5)
       addressable (>= 2.1.1)
       eventmachine (>= 0.12.9)
-    eventmachine (1.0.0.beta.3)
+    eventmachine (1.0.0.beta.4)
     json (1.5.3)
     monkey-lib (0.5.4)
       backports

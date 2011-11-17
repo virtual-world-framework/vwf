@@ -66,6 +66,7 @@ node.id = childID; // TODO: move to a backstop model
             node.type = childType;
 
             node.properties = {};
+            node.properties.node = node; // for node.properties accessors
             node.getters = {};
             node.setters = {};
 
@@ -201,16 +202,16 @@ node.id = childID; // TODO: move to a backstop model
             var self = this;
 
             Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
-                get: function() { return self.kernel.getProperty( nodeID, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
+                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
+                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
                 enumerable: true
             } );
 
             // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
 
             Object.defineProperty( node, propertyName, { // "this" is node in get/set
-                get: function() { return self.kernel.getProperty( nodeID, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( nodeID, propertyName, value ) },
+                get: function() { return self.kernel.getProperty( this.id, propertyName ) },
+                set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
                 enumerable: true
             } );
 
