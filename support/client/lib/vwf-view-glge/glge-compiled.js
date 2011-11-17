@@ -6860,7 +6860,7 @@ GLGE.Texture.prototype.setSrc=function(url){
 	this.image=new Image();
 	var texture=this;
 	this.image.onload = function(){
-		texture.state=1;
+ 		texture.state=1;
 	}	
 	this.image.src=url;	
 	if(this.glTexture && this.gl){
@@ -7690,7 +7690,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * @augments GLGE.JSONLoader
 */
 GLGE.ObjectLod=function(uid){
-	GLGE.Assets.registerAsset(this,uid);
+	GLGE.Assets.registerAsset( this, uid );
 }
 GLGE.augment(GLGE.QuickNotation,GLGE.ObjectLod);
 GLGE.augment(GLGE.JSONLoader,GLGE.ObjectLod);
@@ -7740,11 +7740,11 @@ GLGE.ObjectLod.prototype.setMaterial=function(material){
 	if(typeof material=="string")  material=GLGE.Assets.get(material);
 	
 	//remove event listener from current material
-	if(this.material){
+	if ( this.material ) {
 		this.material.removeEventListener("shaderupdate",this.materialupdated);
 	}
 	var ObjectLOD=this;
-	this.materialupdated=function(event){
+	this.materialupdated = function( event ) {
 		ObjectLOD.GLShaderProgram=null;
 	};
 	//set event listener for new material
@@ -9869,7 +9869,7 @@ GLGE.Light.prototype.setShadowSoftness=function(value){
 * Gets the shadow softness
 * @returns {number} The softness of the shadows
 */
-GLGE.Light.prototype.getShadowSamples=function(){
+GLGE.Light.prototype.getShadowSoftness=function(){
 	return this.softness;
 }
 /**
@@ -9937,11 +9937,11 @@ GLGE.Light.prototype.getSpotExponent=function(){
 * Sets the light sources Attenuation
 * @returns {Object} The components of the light sources attenuation
 */
-GLGE.Light.prototype.getAttenuation=function(constant,linear,quadratic){
+GLGE.Light.prototype.getAttenuation=function(){
 	var attenuation={};
-	attenuation.constant=this.constantAttenuation;
-	attenuation.linear=this.linearAttenuation;
-	attenuation.quadratic=this.quadraticAttenuation;
+	attenuation.constant = this.constantAttenuation;
+	attenuation.linear = this.linearAttenuation;
+	attenuation.quadratic = this.quadraticAttenuation;
 	return attenuation;
 }
 /**
