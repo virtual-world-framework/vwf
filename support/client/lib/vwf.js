@@ -531,7 +531,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
             // Call tick() on each tickable node.
 
             vwf.tickable.nodeIDs.forEach( function( nodeID ) {
-                vwf.callMethod( nodeID, "tick", vwf.now );
+                vwf.callMethod( nodeID, "tick", [ vwf.now ] );
             } );
 
         };
@@ -1216,34 +1216,32 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
 
         // -- createMethod -------------------------------------------------------------------------
 
-        this.createMethod = function ( nodeID, methodName ) {
+        this.createMethod = function ( nodeID, methodName, methodParameters, methodBody ) {
 
-            this.logger.group( "vwf.createMethod " + nodeID + " " + methodName );
+            this.logger.group( "vwf.createMethod " + nodeID + " " + methodName + " " + methodParameters );
 
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
 
             vwf.models.forEach( function( model ) {
-                model.creatingMethod && model.creatingMethod( nodeID, methodName );
+                model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
             // Call createdMethod() on each view. The view is being notified that a method has been
             // created.
 
             vwf.views.forEach( function( view ) {
-                view.createdMethod && view.createdMethod( nodeID, methodName );
+                view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
             });
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createMethod complete " + nodeID + " " + methodName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.createMethod complete " + nodeID + " " + methodName + " " + methodParameters ); /* must log something for group level to reset in WebKit */
         };
 
         // -- callMethod ---------------------------------------------------------------------------
 
-        this.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName ); // TODO: parameters
-
-            var args = Array.prototype.slice.call( arguments );
+            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName + " " + methodParameters );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -1251,17 +1249,17 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
             var methodValue = undefined;
 
             vwf.models.forEach( function( model ) {
-                var value = model.callingMethod && model.callingMethod.apply( model, args ); // TODO: parameters
+                var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
                 methodValue = value !== undefined ? value : methodValue;
             } );
 
             // Call calledMethod() on each view.
 
             vwf.views.forEach( function( view ) {
-                view.calledMethod && view.calledMethod.apply( view, args ); // TODO: parameters
+                view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.callMethod complete " + nodeID + " " + methodName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.callMethod complete " + nodeID + " " + methodName + " " + methodParameters ); /* must log something for group level to reset in WebKit */
 
             return methodValue;
         };
@@ -1495,8 +1493,12 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
                         }
                     } );
 
-                    nodeComponent.methods && jQuery.each( nodeComponent.methods, function( methodName ) {
-                        vwf.createMethod( nodeID, methodName );
+                    nodeComponent.methods && jQuery.each( nodeComponent.methods, function( methodName, methodValue ) {
+                        if ( valueHasBody( methodValue ) ) {
+                            vwf.createMethod( nodeID, methodName, methodValue.parameters, methodValue.body );
+                        } else {
+                            vwf.createMethod( nodeID, methodName, undefined, methodValue );
+                        }
                     } );
 
                     nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName ) {
@@ -1626,6 +1628,32 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             }
             
             return hasAccessors; 
+        };
+
+        // -- valueHasBody -------------------------------------------------------------------------
+
+        // Determine if a method initializer is a detailed initializer containing a parameter list
+        // along with the body text by searching for the parameter and body attributes in the
+        // candidate object.
+
+        var valueHasBody = function( candidate ) {  // TODO: refactor and share with valueHasAccessors and possibly objectIsComponent  // TODO: unlike a property initializer, we really only care if it's an object vs. text; text == use as body; object == presume o.parameters and o.body
+
+            var bodyAttributes = [
+                "parameters",
+                "body",
+            ];
+
+            var hasBody = false;  // TODO: "body" term is confusing, but that's the current terminology used in vwf/model/javascript
+
+            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+
+                bodyAttributes.forEach( function( attributeName ) {
+                    hasBody = hasBody || Boolean( candidate[attributeName] );
+                } );
+
+            }
+            
+            return hasBody; 
         };
 
         // -- valueHasType -------------------------------------------------------------------------
