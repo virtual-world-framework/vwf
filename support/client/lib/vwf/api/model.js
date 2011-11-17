@@ -22,9 +22,9 @@ define( {
     /* TODO: deletingMethod, */
     callingMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-    /* TODO: creatingEvent, */
+    creatingEvent: [ /* nodeID, eventName, eventParameters */ ],
     /* TODO: deletingEvent, */
-    /* TODO: firingEvent, */
+    firingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
     executing: [],
 

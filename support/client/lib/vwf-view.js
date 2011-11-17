@@ -96,9 +96,23 @@
         vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName + " " + methodParameters );
         vwf.send( nodeID, "callMethod", methodName, methodParameters );
     };
-    
-    // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
 
+    // -- createEvent ------------------------------------------------------------------------------
+
+    module.prototype.createEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".createEvent " + nodeID + " " + eventName + " " + eventParameters );
+        vwf.send( nodeID, "createEvent", eventName, eventParameters );
+    };
+
+    // TODO: deleteEvent
+
+    // -- fireEvent --------------------------------------------------------------------------------
+
+    module.prototype.fireEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".fireEvent " + nodeID + " " + eventName + " " + eventParameters );
+        vwf.send( nodeID, "fireEvent", eventName, eventParameters );
+    };
+    
     // -- execute ----------------------------------------------------------------------------------
 
     module.prototype.execute = function( nodeID, scriptText, scriptType ) {
@@ -185,7 +199,19 @@
         vwf.logger.info( namespace + ".calledMethod " + nodeID + " " + methodName + " " + methodParameters );
     };
 
-    // TODO: createdEvent, deletedEvent, firedEvent
+    // -- createdEvent -----------------------------------------------------------------------------
+
+    module.prototype.createdEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".createdEvent " + nodeID + " " + eventName + " " + eventParameters );
+    };
+
+    // TODO: deletedEvent
+
+    // -- calledEvent ------------------------------------------------------------------------------
+
+    module.prototype.firedEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".firedEvent " + nodeID + " " + eventName + " " + eventParameters );
+    };
 
     // -- executed ---------------------------------------------------------------------------------
 
