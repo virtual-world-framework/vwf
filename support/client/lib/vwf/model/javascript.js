@@ -69,7 +69,11 @@ node.id = childID; // TODO: move to a backstop model
             node.setters = {};
 
             node.methods = {};
+
             node.events = {};
+            node.events.node = node; // for node.events accessors
+            node.listeners = {};
+
             node.children = [];
 
         },
@@ -230,6 +234,76 @@ node.id = childID; // TODO: move to a backstop model
                         "exception:", e );
                 }
             }
+
+            return undefined;
+        },
+
+        // -- creatingEvent ------------------------------------------------------------------------
+
+        creatingEvent: function( nodeID, eventName, eventParameters ) {
+
+            var node = this.nodes[nodeID];
+            var self = this;
+
+            var proxyEvents = function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
+                return self.kernel.fireEvent( this.node.id, eventName, arguments );  // TODO: nodeID or this.node.id?
+            };
+
+            var proxyNode = function( /* parameter1, parameter2, ... */ ) { // "this" is node
+                return self.kernel.fireEvent( this.id, eventName, arguments );  // TODO: nodeID or this.node.id?
+            };
+
+            proxyEvents.node = proxyNode.node = node; // for proxyEvents/proxyNode.add/remove/flush
+
+            proxyEvents.add = proxyNode.add = function( handler, context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
+                var listeners = this.node.listeners[eventName] || ( this.node.listeners[eventName] = [] );  // TODO: verify created on first access if on base but not derived
+                listeners.push( { handler: handler, context: context } );
+            };
+
+            proxyEvents.remove = proxyNode.remove = function( handler ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
+                this.node.listeners[eventName] = ( this.node.listeners[eventName] || [] ).filter( function( listener ) {
+                    return listener.handler !== handler;
+                } );
+            };
+
+            proxyEvents.flush = proxyNode.flush = function( context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
+                this.node.listeners[eventName] = ( this.node.listeners[eventName] || [] ).filter( function( listener ) {
+                    return listener.context !== context;
+                } );
+            };
+
+            Object.defineProperty( node.events, eventName, {
+                value: proxyEvents,  // TODO: invoked with this as derived when only defined on base?
+                writable: false,
+                enumerable: true,
+            } );
+
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+
+            Object.defineProperty( node, eventName, { // "this" is node in get/set
+                value: proxyNode,  // TODO: invoked with this as derived when only defined on base?
+                writable: false,
+                enumerable: true,
+            } );
+
+            node.listeners[eventName] = [];
+        },
+
+        // -- firingEvent --------------------------------------------------------------------------
+
+        firingEvent: function( nodeID, eventName, eventParameters ) {
+
+            var node = this.nodes[nodeID];
+            var listeners = node.listeners[eventName];
+
+            listeners && listeners.forEach( function( listener ) {
+                try {
+                    return listener.handler.apply( listener.context, eventParameters );
+                } catch( e ) {
+                    this.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+                        "exception:", e );
+                }
+            }, this );
 
             return undefined;
         },

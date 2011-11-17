@@ -25,11 +25,9 @@ define( {
     /* TODO: deleteMethod, */
     callMethod: [ /* nodeID, methodName /- [, parameter1, parameter2, ... ] -/ */ ],
 
-    /* TODO: createEvent, */
+    createEvent: [ /* nodeID, eventName, eventParameters */ ],
     /* TODO: deleteEvent, */
-    /* TODO: addEventListener, */
-    /* TODO: removeEventListener, */
-    /* TODO: fireEvent, */
+    fireEvent: [ /* nodeID, eventName, eventParameters */ ],
 
     execute: [ /* nodeID, scriptText, scriptType */ ],
 

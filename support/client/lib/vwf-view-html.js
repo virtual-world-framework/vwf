@@ -884,7 +884,7 @@
 //        
 //        };
 
-//        this.onCreateEvent = function( nodeID, eventName ) {
+//        this.onCreateEvent = function( nodeID, eventName, eventParameters ) {
 //        
 //            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
 //            var containerQuery = nodeQuery.children( ".vwf-events" );
@@ -911,7 +911,7 @@
 
 //        };
 
-//        this.onFireEvent = function( nodeID, eventName ) {
+//        this.onFireEvent = function( nodeID, eventName, eventParameters ) {
 //        
 //        };
 
