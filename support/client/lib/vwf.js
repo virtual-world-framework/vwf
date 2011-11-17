@@ -1264,6 +1264,50 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
             return methodValue;
         };
 
+        // -- createEvent --------------------------------------------------------------------------
+
+        this.createEvent = function ( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)
+
+            this.logger.group( "vwf.createEvent " + nodeID + " " + eventName + " " + eventParameters );
+
+            // Call creatingEvent() on each model. The event is considered created after each model
+            // has run.
+
+            vwf.models.forEach( function( model ) {
+                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
+            } );
+
+            // Call createdEvent() on each view. The view is being notified that a event has been
+            // created.
+
+            vwf.views.forEach( function( view ) {
+                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+            } );
+
+            this.logger.groupEnd(); this.logger.debug( "vwf.createEvent complete " + nodeID + " " + eventName + " " + eventParameters ); /* must log something for group level to reset in WebKit */
+        };
+
+        // -- fireEvent ----------------------------------------------------------------------------
+
+        this.fireEvent = function( nodeID, eventName, eventParameters ) {
+
+            this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " + eventParameters );
+
+            // Call firingEvent() on each model.
+
+            vwf.models.forEach( function( model ) {
+                model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters );
+            } );
+
+            // Call firedEvent() on each view.
+
+            vwf.views.forEach( function( view ) {
+                view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
+            } );
+
+            this.logger.groupEnd(); this.logger.debug( "vwf.fireEvent complete " + nodeID + " " + eventName + " " + eventParameters ); /* must log something for group level to reset in WebKit */
+        };
+
         // -- execute ------------------------------------------------------------------------------
 
         this.execute = function( nodeID, scriptText, scriptType ) {
@@ -1501,8 +1545,12 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
                         }
                     } );
 
-                    nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName ) {
-                        vwf.createEvent( nodeID, eventName );
+                    nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName, eventValue ) {
+                        if ( valueHasBody( eventValue ) ) {
+                            vwf.createEvent( nodeID, eventName, eventValue.parameters );
+                        } else {
+                            vwf.createEvent( nodeID, eventName, undefined );
+                        }
                     } );
 
                     callback( undefined, undefined );
@@ -1632,11 +1680,11 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
         // -- valueHasBody -------------------------------------------------------------------------
 
-        // Determine if a method initializer is a detailed initializer containing a parameter list
-        // along with the body text by searching for the parameter and body attributes in the
-        // candidate object.
+        // Determine if a method or event initializer is a detailed initializer containing a
+        // parameter list along with the body text (method initializers only) by searching for the
+        // parameter and body attributes in the candidate object.
 
-        var valueHasBody = function( candidate ) {  // TODO: refactor and share with valueHasAccessors and possibly objectIsComponent  // TODO: unlike a property initializer, we really only care if it's an object vs. text; text == use as body; object == presume o.parameters and o.body
+        var valueHasBody = function( candidate ) {  // TODO: refactor and share with valueHasAccessors and possibly objectIsComponent  // TODO: unlike a property initializer, we really only care if it's an object vs. text; text == use as body; object == presume o.parameters and o.body  // TODO: except that a script in the unnamed-list format would appear as an object but should be used as the body
 
             var bodyAttributes = [
                 "parameters",
