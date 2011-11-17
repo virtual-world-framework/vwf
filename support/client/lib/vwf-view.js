@@ -39,7 +39,7 @@
 
     module.prototype.createNode = function( nodeID, childComponent, childName ) {
         vwf.logger.info( namespace + ".createNode " + nodeID + " " + childComponent + " " + childName );
-        vwf.send( nodeID, "createNode", childComponent, childName );
+        vwf.send( 0, nodeID, "createNode", undefined, [ childComponent, childName ] );  // TODO: swap childComponent & childName
     };
 
     // TODO: deleteNode
@@ -48,21 +48,21 @@
 
     module.prototype.addChild = function( nodeID, childID, childName ) {
         vwf.logger.info( namespace + ".addChild " + nodeID + " " + childID + " " + childName );
-        vwf.send( nodeID, "addChild", childID, childName );
+        vwf.send( 0, nodeID, "addChild", undefined, [ childID, childName ] );
     };
 
     // -- removeChild ------------------------------------------------------------------------------
 
     module.prototype.removeChild = function( nodeID, childID ) {
         vwf.logger.info( namespace + ".removeChild " + nodeID + " " + childID );
-        vwf.send( nodeID, "removeChild", childID );
+        vwf.send( 0, nodeID, "removeChild", undefined, [ childID ] );
     };
 
     // -- createProperty ------------------------------------------------------------------------------
 
     module.prototype.createProperty = function( nodeID, propertyName, propertyValue ) {
         vwf.logger.info( namespace + ".createProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        vwf.send( nodeID, "createProperty", propertyName, propertyValue );
+        vwf.send( 0, nodeID, "createProperty", propertyName, [ propertyValue ] );
     };
 
     // TODO: deleteProperty
@@ -71,21 +71,21 @@
 
     module.prototype.setProperty = function( nodeID, propertyName, propertyValue ) {
         vwf.logger.info( namespace + ".setProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        vwf.send( nodeID, "setProperty", propertyName, propertyValue );
+        vwf.send( 0, nodeID, "setProperty", propertyName, [ propertyValue ] );
     };
 
     // -- getProperty ------------------------------------------------------------------------------
 
     module.prototype.getProperty = function( nodeID, propertyName, propertyValue ) {
         vwf.logger.info( namespace + ".getProperty " + nodeID + " " + propertyName + " " + propertyValue );
-        vwf.send( nodeID, "getProperty", propertyName, propertyValue );
+        vwf.send( 0, nodeID, "getProperty", propertyName );
     };
     
     // -- createMethod -----------------------------------------------------------------------------
 
     module.prototype.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
         vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName + " " + methodParameters );
-        vwf.send( nodeID, "createMethod", methodName, methodParameters, methodBody );
+        vwf.send( 0, nodeID, "createMethod", methodName, methodParameters, methodBody );
     };
 
     // TODO: deleteMethod
@@ -94,14 +94,14 @@
 
     module.prototype.callMethod = function( nodeID, methodName, methodParameters ) {
         vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName + " " + methodParameters );
-        vwf.send( nodeID, "callMethod", methodName, methodParameters );
+        vwf.send( 0, nodeID, "callMethod", methodName, methodParameters );
     };
 
     // -- createEvent ------------------------------------------------------------------------------
 
     module.prototype.createEvent = function( nodeID, eventName, eventParameters ) {
         vwf.logger.info( namespace + ".createEvent " + nodeID + " " + eventName + " " + eventParameters );
-        vwf.send( nodeID, "createEvent", eventName, eventParameters );
+        vwf.send( 0, nodeID, "createEvent", eventName, eventParameters );
     };
 
     // TODO: deleteEvent
@@ -110,14 +110,14 @@
 
     module.prototype.fireEvent = function( nodeID, eventName, eventParameters ) {
         vwf.logger.info( namespace + ".fireEvent " + nodeID + " " + eventName + " " + eventParameters );
-        vwf.send( nodeID, "fireEvent", eventName, eventParameters );
+        vwf.send( 0, nodeID, "fireEvent", eventName, eventParameters );
     };
     
     // -- execute ----------------------------------------------------------------------------------
 
     module.prototype.execute = function( nodeID, scriptText, scriptType ) {
         vwf.logger.info( namespace + ".execute " + nodeID + " " + ( scriptText || "" ).substring( 0, 100 ) + " " + scriptType );
-        vwf.send( nodeID, "execute", scriptText, scriptType );
+        vwf.send( 0, nodeID, "execute", undefined, [ scriptText, scriptType ] );
     };
 
     // -- time -------------------------------------------------------------------------------------

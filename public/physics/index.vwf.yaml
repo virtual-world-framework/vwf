@@ -38,7 +38,7 @@ scripts:
       var scn = this;
       if ( !rampPhysicsSetup ){
         var newObjName = "ramp";
-        vwf.createNode( "index-vwf", ramp, newObjName, function( nodeID, prototypeID ){
+        vwf.createNode( "index-vwf", ramp, newObjName, function( nodeID ){
           console.info( "   LOAD DONE   " );  
           scn.loadDone = true;
         } );
