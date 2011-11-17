@@ -31,46 +31,149 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.types = {}; // maps id => function() { }
             this.root = undefined;
             this.nodes = {}; // maps id => new type()
-            this.creatingNode( 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
         // == Model API ============================================================================
 
         // -- creatingNode -------------------------------------------------------------------------
 
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
-            callback /* ( ready ) */ ) {
+        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childName, callback /* ( ready ) */ ) {
 
-            var type = nodeExtendsID ? this.types[nodeExtendsID] : Object;
+            var self = this;
+
+            var type = childExtendsID ? this.types[childExtendsID] : Object;
 
             if ( ! type ) {
 
-                var prototype = this.nodes[nodeExtendsID];
+                var prototype = this.nodes[childExtendsID];
 
-                type = this.types[nodeExtendsID] = function() { };
+                type = this.types[childExtendsID] = function() { };
 
                 type.prototype = prototype;
                 type.prototype.constructor = type; // resetting constructor breaks enumerables?
 
             }
 
-            var node = this.nodes[nodeID] = new type( nodeSource, nodeType );
+            var node = this.nodes[childID] = new type( childSource, childType );
 
-node.id = nodeID; // TODO: move to a backstop model
+node.id = childID; // TODO: move to a backstop model
 
             node.parent = undefined;
 
-            node.source = nodeSource;
-            node.type = nodeType;
+            node.source = childSource;
+            node.type = childType;
 
             node.properties = {};
-            node.properties.node = node; // for node.properties accessors
             node.getters = {};
             node.setters = {};
 
             node.methods = {};
+            node.bodies = {};
+
             node.events = {};
+            node.listeners = {};
+
             node.children = [];
+
+            Object.defineProperty( node.properties, "node", { value: node } ); // for node.properties accessors (non-enumerable)
+            Object.defineProperty( node.methods, "node", { value: node } ); // for node.methods accessors (non-enumerable)
+            Object.defineProperty( node.events, "node", { value: node } ); // for node.events accessors (non-enumerable)
+
+            // Define a "future" proxy so that for any this.property, this.method, or this.event, we
+            // can reference this.future( when, callback ).property/method/event and have the
+            // expression evaluated at the future time.
+            
+            // TODO: every reference to future() generates a set of proxies for every property, method, and event on the object so performance is pretty horrible; look for ways to cache
+
+            Object.defineProperty( node, "future", {
+
+                enumerable: true,
+                writable: false,
+
+                value: function( when, callback ) {
+
+                    var future = {
+                        properties: {},
+                        methods: {},
+                        events: {},
+                    };
+
+                    for ( var propertyName in this.properties ) {
+
+                        ( function( propertyName ) {
+
+                            Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
+                                get: function() { return self.kernel.getProperty( childID, propertyName, -when, callback ) },
+                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
+                                enumerable: true
+                            } );
+
+                            Object.defineProperty( future, propertyName, { // "this" is future in get/set
+                                get: function() { return self.kernel.getProperty( childID, propertyName, -when, callback ) },
+                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
+                                enumerable: true
+                            } );
+
+                        } )( propertyName );
+
+                    }
+
+                    for ( var methodName in this.methods ) {
+
+                        ( function( methodName ) {
+
+                            Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
+                                get: function() {
+                                    return function( /* parameter1, parameter2, ... */ ) {
+                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
+                                    }
+                                },
+                                enumerable: true
+                            } );
+
+                            Object.defineProperty( future, methodName, { // "this" is future in get/set
+                                get: function() {
+                                    return function( /* parameter1, parameter2, ... */ ) {
+                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
+                                    }
+                                },
+                                enumerable: true
+                            } );
+
+                        } )( methodName );
+
+                    }
+
+                    for ( var eventName in this.events ) {
+
+                        ( function( eventName ) {
+
+                            Object.defineProperty( future.events, eventName, {
+                                value: function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
+                                    return self.kernel.fireEvent( childID, eventName, arguments, -when, callback );
+                                },
+                                writable: false,
+                                enumerable: true,
+                            } );
+
+                            Object.defineProperty( future, eventName, {
+                                value: function( /* parameter1, parameter2, ... */ ) { // "this" is future
+                                    return self.kernel.fireEvent( childID, eventName, arguments, -when, callback );
+                                },
+                                writable: false,
+                                enumerable: true,
+                            } );
+
+                        } )( eventName );
+
+                    }
+
+                    return future;
+                }
+
+            } );
 
         },
 
@@ -212,24 +315,137 @@ node.id = nodeID; // TODO: move to a backstop model
             return undefined;
         },
 
-        // TODO: creatingMethod, deletingMethod
+        // -- creatingMethod -----------------------------------------------------------------------
+
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+
+            var node = this.nodes[nodeID];
+            var self = this;
+
+            Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) {
+                        return self.kernel.callMethod( this.node.id, methodName, arguments );
+                    }
+                },
+                set: function( value ) {
+                    this.node.methods.hasOwnProperty( methodName ) || self.kernel.createMethod( this.node.id, methodName );
+                    this.node.bodies[methodName] = value;
+                },
+                enumerable: true,
+            } );
+
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+
+            Object.defineProperty( node, methodName, { // "this" is node in get/set
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) {
+                        return self.kernel.callMethod( this.id, methodName, arguments );
+                    }
+                },
+                set: function( value ) {
+                    this.methods.hasOwnProperty( methodName ) || self.kernel.createMethod( this.id, methodName );
+                    this.bodies[methodName] = value;
+                },
+                enumerable: true,
+            } );
+
+            try {
+                node.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
+            } catch( e ) {
+                this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
+                    "exception evaluating body:", e );
+            }
+        
+        },
+
+        // TODO: deletingMethod
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters ) {
 
             var node = this.nodes[nodeID];
-            var method = findMethod( node, methodName );
-            var parameters = Array.prototype.slice.call( arguments, 2 );
+            var body = findBody( node, methodName );
 
-            if ( method ) {
+            if ( body ) {
                 try {
-                    return method.apply( node, parameters );
+                    return body.apply( node, methodParameters );
                 } catch( e ) {
-                    this.logger.warn( "callingMethod", nodeID, methodName, parameters, // TODO: flatten parameters array, limit for log
+                    this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", e );
                 }
             }
+
+            return undefined;
+        },
+
+        // -- creatingEvent ------------------------------------------------------------------------
+
+        creatingEvent: function( nodeID, eventName, eventParameters ) {
+
+            var node = this.nodes[nodeID];
+            var self = this;
+
+            var proxyEvents = function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
+                return self.kernel.fireEvent( this.node.id, eventName, arguments );  // TODO: nodeID or this.node.id?
+            };
+
+            var proxyNode = function( /* parameter1, parameter2, ... */ ) { // "this" is node
+                return self.kernel.fireEvent( this.id, eventName, arguments );  // TODO: nodeID or this.node.id?
+            };
+
+            proxyEvents.node = proxyNode.node = node; // for proxyEvents/proxyNode.add/remove/flush
+
+            proxyEvents.add = proxyNode.add = function( handler, context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
+                var listeners = this.node.listeners[eventName] || ( this.node.listeners[eventName] = [] );  // TODO: verify created on first access if on base but not derived
+                listeners.push( { handler: handler, context: context } );
+            };
+
+            proxyEvents.remove = proxyNode.remove = function( handler ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
+                this.node.listeners[eventName] = ( this.node.listeners[eventName] || [] ).filter( function( listener ) {
+                    return listener.handler !== handler;
+                } );
+            };
+
+            proxyEvents.flush = proxyNode.flush = function( context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
+                this.node.listeners[eventName] = ( this.node.listeners[eventName] || [] ).filter( function( listener ) {
+                    return listener.context !== context;
+                } );
+            };
+
+            Object.defineProperty( node.events, eventName, {
+                value: proxyEvents,  // TODO: invoked with this as derived when only defined on base?
+                writable: false,
+                enumerable: true,
+            } );
+
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+
+            Object.defineProperty( node, eventName, { // "this" is node in get/set
+                value: proxyNode,  // TODO: invoked with this as derived when only defined on base?
+                writable: false,
+                enumerable: true,
+            } );
+
+            node.listeners[eventName] = [];
+        },
+
+        // -- firingEvent --------------------------------------------------------------------------
+
+        firingEvent: function( nodeID, eventName, eventParameters ) {
+
+            var node = this.nodes[nodeID];
+            var listeners = node.listeners[eventName];
+
+            listeners && listeners.forEach( function( listener ) {
+                try {
+                    return listener.handler.apply( listener.context, eventParameters );
+                } catch( e ) {
+                    this.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+                        "exception:", e );
+                }
+            }, this );
 
             return undefined;
         },
@@ -269,13 +485,23 @@ node.id = nodeID; // TODO: move to a backstop model
         return accessorScript( "( function( value ) {", body, "} )" );
     }
 
+    // -- bodyScript -------------------------------------------------------------------------------
+
+    function bodyScript( parameters, body ) {
+        var parameterString = ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  );
+        return accessorScript( "( function(" + parameterString + ") {", body, "} )" );
+        // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
+    }
+
     // -- accessorScript ---------------------------------------------------------------------------
 
     function accessorScript( prefix, body, suffix ) {  // TODO: sanitize script, limit access
-        if ( body.charAt( body.length-1 ) == "\n" ) {
-            return prefix + "\n" + body.replace( /^./gm, "  $&" ) + suffix + "\n";
+        if ( body.length && body.charAt( body.length-1 ) == "\n" ) {
+            var bodyString = body.replace( /^./gm, "  $&" );
+            return prefix + "\n" + bodyString + suffix + "\n";
         } else {
-            return prefix + " " + body + " " + suffix;
+            var bodyString = body.length ? " " + body + " " : "";
+            return prefix + bodyString + suffix;
         }
     }
 
@@ -293,12 +519,11 @@ node.id = nodeID; // TODO: move to a backstop model
             Object.getPrototypeOf( node ) && findSetter( Object.getPrototypeOf( node ), propertyName );
     }
 
-    // -- findMethod -------------------------------------------------------------------------------
+    // -- findBody ---------------------------------------------------------------------------------
 
-    function findMethod( node, methodName ) {
-        return node.methods && node.methods[methodName] ||
-( typeof node[methodName] == "function" || node[methodName] instanceof Function ) && node[methodName] ||  // TODO: use any old function property as a work-around until we support createMethod()
-            Object.getPrototypeOf( node ) && findMethod( Object.getPrototypeOf( node ), methodName );
+    function findBody( node, methodName ) {
+        return node.bodies && node.bodies[methodName] ||
+            Object.getPrototypeOf( node ) && findBody( Object.getPrototypeOf( node ), methodName );
     }
 
 
