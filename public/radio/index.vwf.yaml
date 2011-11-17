@@ -5,6 +5,17 @@ type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  loadDone: false
+scripts:
+- text:
+    this.initialize = function() {
+      console.info( "================ radio ================" );
+      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+      this.loadDone = true;
+      this["radio.dae"].position = this["radio.dae"].position;
+      this["radio.dae"].eulers = this["radio.dae"].eulers;      
+    }
+  type: application/javascript
 children: 
   radio.dae: 
     extends: http://vwf.example.com/types/node3
@@ -729,41 +740,14 @@ children:
   maincamera: 
     extends: http://vwf.example.com/types/camera
     properties: 
-      allowMouseNav: false
       walkMode: "walk"
       cameraType: "perspective"
-      orbitPoint: [ 0, 0, 0 ]      
       position: [ -0.3733, 12.29, 0 ]
       eulers: [ 90, 180, 0 ]
       rotation: [ 1.56, 3.141, 0 ]
-      far: 1000.0
-      near: 0.1
-      fovy: 35
-      aspect: 1.0
-      orthoscale: 5
-      speed: 2.0
   Omni01:
     extends: http://vwf.example.com/types/light
     properties:
       lightType: "point"
       constantAttenuation: 1
-      linearAttenuation: 0.002
-      quadraticAttenuation: 0.0008
-      spotCosCutOff: 0.95
-      spotExponent: 10
-      diffuse: true 
-      specular: true
-      samples: 0
-      softness: 0.01
-      bufferHeight: 256
-      bufferWidth: 256
-      shadowBias: 2.0
-      distance: 100.0
-      castShadows: false
-scripts:
-- text: |
-    this.initialize = function() {
-        this["radio.dae"].position = this["radio.dae"].position;
-        this["radio.dae"].eulers = this["radio.dae"].eulers;
-    }
-  type: application/javascript
+      position: [ 16.37, -18.15, 17.92 ]

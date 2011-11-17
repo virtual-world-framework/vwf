@@ -85,28 +85,3 @@ properties:
     set: |
       this.image = value;
     value: ""
-scripts:
-- text: |
-    this.initialize = function() {
-      console.info( "==================== particleSystem ====================" );
-      this.numberParticles = this.numberParticles;
-      this.lifeTime = this.lifeTime;
-      this.maxLifeTime = this.maxLifeTime;
-      this.minLifeTime = this.minLifeTime;
-      this.startSize = this.startSize;
-      this.endSize = this.endSize;
-      this.loop = this.loop;
-      this.velocity = this.velocity;
-      this.maxVelocity = this.maxVelocity;
-      this.minVelocity = this.minVelocity;
-      this.startAcceleration = this.startAcceleration;
-      this.endAcceleration = this.endAcceleration;
-      this.maxStartAcceleration = this.maxStartAcceleration;
-      this.maxEndAcceleration = this.maxEndAcceleration;
-      this.minStartAcceleration = this.minStartAcceleration;
-      this.minEndAcceleration = this.minEndAcceleration;
-      this.startColor = this.startColor;
-      this.endColor = this.endColor;
-      this.image = this.image;
-    }	
-  type: application/javascript

@@ -34,7 +34,6 @@
 	</mesh>
 
 	<material id="green" specular="0" shininess="20" color="green" />
-
 	<material id="yellow" specular="0" shininess="20" color="yellow" />
 	<material id="red" specular="0" shininess="20" color="red" />
 	<material id="blue" specular="0" shininess="20" color="blue" />

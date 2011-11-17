@@ -14,10 +14,6 @@ scripts:
 - text: |
     var pointerDown = false;
     var counter = 1;
-    this.initialize = function() {
-      console.info( "== initialize == NavScene == initialize ==" );
-      this.navmode = this.navmode;
-    }
     this.mouseDown = function( parms ){
       pointerDown = true;
     }
