@@ -41,6 +41,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childName, callback /* ( ready ) */ ) {
 
+            var self = this;
+
             var type = childExtendsID ? this.types[childExtendsID] : Object;
 
             if ( ! type ) {
@@ -64,19 +66,114 @@ node.id = childID; // TODO: move to a backstop model
             node.type = childType;
 
             node.properties = {};
-            node.properties.node = node; // for node.properties accessors
             node.getters = {};
             node.setters = {};
 
             node.methods = {};
-            node.methods.node = node; // for node.methods accessors
             node.bodies = {};
 
             node.events = {};
-            node.events.node = node; // for node.events accessors
             node.listeners = {};
 
             node.children = [];
+
+            Object.defineProperty( node.properties, "node", { value: node } ); // for node.properties accessors (non-enumerable)
+            Object.defineProperty( node.methods, "node", { value: node } ); // for node.methods accessors (non-enumerable)
+            Object.defineProperty( node.events, "node", { value: node } ); // for node.events accessors (non-enumerable)
+
+            // Define a "future" proxy so that for any this.property, this.method, or this.event, we
+            // can reference this.future( when, callback ).property/method/event and have the
+            // expression evaluated at the future time.
+            
+            // TODO: every reference to future() generates a set of proxies for every property, method, and event on the object so performance is pretty horrible; look for ways to cache
+
+            Object.defineProperty( node, "future", {
+
+                enumerable: true,
+                writable: false,
+
+                value: function( when, callback ) {
+
+                    var future = {
+                        properties: {},
+                        methods: {},
+                        events: {},
+                    };
+
+                    for ( var propertyName in this.properties ) {
+
+                        ( function( propertyName ) {
+
+                            Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
+                                get: function() { return self.kernel.getProperty( childID, propertyName, -when, callback ) },
+                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
+                                enumerable: true
+                            } );
+
+                            Object.defineProperty( future, propertyName, { // "this" is future in get/set
+                                get: function() { return self.kernel.getProperty( childID, propertyName, -when, callback ) },
+                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
+                                enumerable: true
+                            } );
+
+                        } )( propertyName );
+
+                    }
+
+                    for ( var methodName in this.methods ) {
+
+                        ( function( methodName ) {
+
+                            Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
+                                get: function() {
+                                    return function( /* parameter1, parameter2, ... */ ) {
+                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
+                                    }
+                                },
+                                enumerable: true
+                            } );
+
+                            Object.defineProperty( future, methodName, { // "this" is future in get/set
+                                get: function() {
+                                    return function( /* parameter1, parameter2, ... */ ) {
+                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
+                                    }
+                                },
+                                enumerable: true
+                            } );
+
+                        } )( methodName );
+
+                    }
+
+                    for ( var eventName in this.events ) {
+
+                        ( function( eventName ) {
+
+                            Object.defineProperty( future.events, eventName, {
+                                value: function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
+                                    return self.kernel.fireEvent( childID, eventName, arguments, -when, callback );
+                                },
+                                writable: false,
+                                enumerable: true,
+                            } );
+
+                            Object.defineProperty( future, eventName, {
+                                value: function( /* parameter1, parameter2, ... */ ) { // "this" is future
+                                    return self.kernel.fireEvent( childID, eventName, arguments, -when, callback );
+                                },
+                                writable: false,
+                                enumerable: true,
+                            } );
+
+                        } )( eventName );
+
+                    }
+
+                    return future;
+                }
+
+            } );
 
         },
 

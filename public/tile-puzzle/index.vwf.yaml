@@ -522,7 +522,7 @@ scripts:
                        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
       tilePositions.sort(function() { return (Math.round(Math.random())-0.5); }); 
       // this.setPositions(tilePositions);
-      vwf.send(0, this.id, "callMethod", "setPositions", [tilePositions]);
+      vwf.send(0, this.id, "callMethod", "setPositions", [[tilePositions]]);
     }
     
     this.solve = function() {

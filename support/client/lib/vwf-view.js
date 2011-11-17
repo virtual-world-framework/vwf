@@ -85,7 +85,7 @@
 
     module.prototype.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
         vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName + " " + methodParameters );
-        vwf.send( 0, nodeID, "createMethod", methodName, methodParameters, methodBody );
+        vwf.send( 0, nodeID, "createMethod", methodName, [ methodParameters, methodBody ] );
     };
 
     // TODO: deleteMethod
@@ -94,14 +94,14 @@
 
     module.prototype.callMethod = function( nodeID, methodName, methodParameters ) {
         vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName + " " + methodParameters );
-        vwf.send( 0, nodeID, "callMethod", methodName, methodParameters );
+        vwf.send( 0, nodeID, "callMethod", methodName, [ methodParameters ] );
     };
 
     // -- createEvent ------------------------------------------------------------------------------
 
     module.prototype.createEvent = function( nodeID, eventName, eventParameters ) {
         vwf.logger.info( namespace + ".createEvent " + nodeID + " " + eventName + " " + eventParameters );
-        vwf.send( 0, nodeID, "createEvent", eventName, eventParameters );
+        vwf.send( 0, nodeID, "createEvent", eventName, [ eventParameters ] );
     };
 
     // TODO: deleteEvent
@@ -110,7 +110,7 @@
 
     module.prototype.fireEvent = function( nodeID, eventName, eventParameters ) {
         vwf.logger.info( namespace + ".fireEvent " + nodeID + " " + eventName + " " + eventParameters );
-        vwf.send( 0, nodeID, "fireEvent", eventName, eventParameters );
+        vwf.send( 0, nodeID, "fireEvent", eventName, [ eventParameters ] );
     };
     
     // -- execute ----------------------------------------------------------------------------------

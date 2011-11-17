@@ -93,13 +93,39 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         return this.kernel[kernelFunctionName]( nodeID, methodName, methodParameters );
                     } else {
                         this.kernel.queue( when, nodeID, kernelFunctionName, methodName,
-                            methodParameters, callback /* ( result ) */ );
+                            [ methodParameters ], callback /* ( result ) */ );
                     }
 
                 };
     
-            // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
+            case "createEvent":
 
+                return function( nodeID, eventName, eventParameters, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
+                    } else {
+                        this.kernel.queue( when, nodeID, kernelFunctionName, eventName,
+                            [ eventParameters ], callback /* ( result ) */ );
+                    }
+
+                };
+
+            // TODO: deleteEvent
+
+            case "fireEvent":
+
+                return function( nodeID, eventName, eventParameters, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
+                    } else {
+                        this.kernel.queue( when, nodeID, kernelFunctionName, eventName,
+                            [ eventParameters ], callback /* ( result ) */ );
+                    }
+
+                };
+    
             case "execute":
 
                 return function( nodeID, scriptText, scriptType, when, callback ) {
