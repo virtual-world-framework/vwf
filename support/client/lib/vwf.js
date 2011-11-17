@@ -340,7 +340,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         // Unpack the arguments.
 
-                        fields = JSON.parse( message );
+                        var fields = JSON.parse( message );
 
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
