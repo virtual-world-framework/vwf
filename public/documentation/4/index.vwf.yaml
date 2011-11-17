@@ -1,0 +1,65 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: index.xml
+type: model/x-glge
+children: 
+  hello: 
+    extends: http://vwf.example.com/types/node3
+    source: hello.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0, 0, 0.5 ]
+      rotation: [ -1, 0, 0 ]
+    children:
+      HelloTextMaterial1:
+        extends: http://vwf.example.com/types/material
+        properties: 
+          texture: “”
+    scripts:
+    - text: |
+        this.loadComplete = function() {
+          this.position = this.position;
+          this.rotation = this.rotation;
+          this.HelloTextMaterial1.texture = "images/red.png";
+        }
+        this.pointerClick = function() {
+          if( this.HelloTextMaterial1.texture == "images/red.png" )
+          {
+            this.HelloTextMaterial1.texture = "images/blue.png";
+          }
+          else
+          {
+            this.HelloTextMaterial1.texture = "images/red.png";
+          }
+        }
+      type: application/javascript
+  world: 
+    extends: http://vwf.example.com/types/node3
+    source: world.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ 0.2, 0, -0.5 ]
+      rotation: [ -1, 0, 0 ]
+    children:
+      WorldTextMaterial1:
+        extends: http://vwf.example.com/types/material
+        properties: 
+          texture: “”
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.position = this.position;
+          this.rotation = this.rotation;
+          this.WorldTextMaterial1.texture = "images/blue.png";
+        }
+        this.pointerClick = function() {
+          if( this.WorldTextMaterial1.texture == "images/red.png" )
+          {
+            this.WorldTextMaterial1.texture = "images/blue.png";
+          }
+          else
+          {
+            this.WorldTextMaterial1.texture = "images/red.png";
+          }
+        }
+      type: application/javascript
