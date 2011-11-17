@@ -38,28 +38,28 @@
 
     // -- createdNode ------------------------------------------------------------------------------
 
-    module.prototype.createdNode = function (nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType,
-        callback /* ( ready ) */) {
+    module.prototype.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs,
+        childSource, childType, childName, callback /* ( ready ) */) {
 
-        vwf.logger.info(namespace + ".createdNode " + nodeID + " " +
-            nodeExtendsID + " " + nodeImplementsIDs + " " + nodeSource + " " + nodeType);
+        vwf.logger.info(namespace + ".createdNode " + nodeID + " " + childID + " " + childExtendsID + " " +  childImplementsIDs + " " +
+            childSource + " " +  childType + " " + childName );
 
-        var nodeQuery = jQuery(".vwf-orphanage").append(
-            "<div id='view-html-" + nodeID + "' class='vwf-node'>" +
+        var childQuery = jQuery(".vwf-orphanage").append(
+            "<div id='view-html-" + childID + "' class='vwf-node'>" +
                 "<p class='vwf-label'>" +
-                    nodeID + " " + "<span class='vwf-name'/>" +
-                        (nodeExtendsID || (nodeImplementsIDs && nodeImplementsIDs.length) ? ", type: " : "") +
+                    childID + " " + "<span class='vwf-name'/>" +
+                        (childExtendsID || (childImplementsIDs && childImplementsIDs.length) ? ", type: " : "") +
                     "<span class='vwf-attribute'>" +
-                        ([nodeExtendsID].concat(nodeImplementsIDs || []).join(", ")) +
+                        ([childExtendsID].concat(childImplementsIDs || []).join(", ")) +
                     "</span>" +
-                    (nodeSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
-                        "source=\"" + nodeSource + "\" type=\"" + (nodeType || "") + "\"" +
+                    (childSource ? "&nbsp;&nbsp;<span class='vwf-attribute'>" +
+                        "source=\"" + childSource + "\" type=\"" + (childType || "") + "\"" +
                     "</span>" : "") +
                 "</p>" +
             "</div>"
         ).children(":last");
 
-        nodeQuery.children(".vwf-label").click(function () {
+        childQuery.children(".vwf-label").click(function () {
             jQuery(this).siblings(".vwf-properties, .vwf-methods, .vwf-events, .vwf-children, .vwf-scripts").toggle();
         });
 
@@ -854,7 +854,7 @@
 //            return undefined;
 //        };
 //        
-//        this.onCreateMethod = function( nodeID, methodName ) {
+//        this.onCreateMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 //        
 //            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
 //            var containerQuery = nodeQuery.children( ".vwf-methods" );
@@ -880,11 +880,11 @@
 //            ). children( ":last" );
 //        };
 
-//        this.onCallMethod = function( nodeID, methodName ) {
+//        this.onCallMethod = function( nodeID, methodName, methodParameters ) {
 //        
 //        };
 
-//        this.onCreateEvent = function( nodeID, eventName ) {
+//        this.onCreateEvent = function( nodeID, eventName, eventParameters ) {
 //        
 //            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
 //            var containerQuery = nodeQuery.children( ".vwf-events" );
@@ -911,7 +911,7 @@
 
 //        };
 
-//        this.onFireEvent = function( nodeID, eventName ) {
+//        this.onFireEvent = function( nodeID, eventName, eventParameters ) {
 //        
 //        };
 

@@ -10,23 +10,24 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         initialize: function() {
             this.objects = {}; // maps id => { property: value, ... }
-            this.creatingNode( 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
         // == Model API ============================================================================
 
         // -- creatingNode -------------------------------------------------------------------------
 
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childName, callback /* ( ready ) */ ) {
 
-            this.objects[nodeID] = {
+            this.objects[childID] = {
 
-                id: nodeID,
-                extends: nodeExtendsID,
-                implements: nodeImplementsIDs,
+                id: childID,
+                extends: childExtendsID,
+                implements: childImplementsIDs,
 
-                source: nodeSource,
-                type: nodeType,
+                source: childSource,
+                type: childType,
 
                 properties: {},
                 children: [],

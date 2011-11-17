@@ -24,9 +24,10 @@
 
       }, [
 
-      "vwf/model/javascript",
-      "vwf/model/object",
-      "vwf/model/stage/log",
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
 
       ], function() {
 
@@ -95,7 +96,7 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( {
+            vwf.createNode( 0, {
 
               extends:
                 "http://vwf.example.com/types/node",
@@ -104,9 +105,9 @@
                 base: "base",
               },
 
-            }, function( baseID ) {
+            }, undefined, function( baseID ) {
 
-              vwf.createNode( {
+              vwf.createNode( 0, {
 
                 extends:
                   "@" + JSON.stringify( baseID ),
@@ -115,7 +116,7 @@
                   derived: "derived",
                 },
 
-              }, function( derivedID ) {
+              }, undefined, function( derivedID ) {
 
                 callback( derivedID, baseID );
 

@@ -1,6 +1,6 @@
 define( {
 
-    createNode: [ /* component_uri_or_json_or_object, callback, childName /- TODO: hack -/ */ ],
+    createNode: [ /* nodeID, childComponent, childName, callback /- ( childID ) -/ */ ],
     /* TODO: deleteNode, */
     setNode: [ /* nodeID, component */ ],
     getNode: [ /* nodeID */ ],
@@ -21,15 +21,13 @@ define( {
     setProperty: [ /* nodeID, propertyName, propertyValue */ ],
     getProperty: [ /* nodeID, propertyName */ ],
 
-    createMethod: [ /* nodeID, methodName */ ],
+    createMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
     /* TODO: deleteMethod, */
-    callMethod: [ /* nodeID, methodName /- [, parameter1, parameter2, ... ] -/ */ ],
+    callMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-    /* TODO: createEvent, */
+    createEvent: [ /* nodeID, eventName, eventParameters */ ],
     /* TODO: deleteEvent, */
-    /* TODO: addEventListener, */
-    /* TODO: removeEventListener, */
-    /* TODO: fireEvent, */
+    fireEvent: [ /* nodeID, eventName, eventParameters */ ],
 
     execute: [ /* nodeID, scriptText, scriptType */ ],
 
