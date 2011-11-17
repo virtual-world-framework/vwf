@@ -69,6 +69,9 @@ node.id = childID; // TODO: move to a backstop model
             node.setters = {};
 
             node.methods = {};
+            node.methods.node = node; // for node.methods accessors
+            node.bodies = {};
+
             node.events = {};
             node.children = [];
 
@@ -212,21 +215,64 @@ node.id = childID; // TODO: move to a backstop model
             return undefined;
         },
 
-        // TODO: creatingMethod, deletingMethod
+        // -- creatingMethod -----------------------------------------------------------------------
+
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+
+            var node = this.nodes[nodeID];
+            var self = this;
+
+            Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) {
+                        return self.kernel.callMethod( this.node.id, methodName, arguments );
+                    }
+                },
+                set: function( value ) {
+                    this.node.methods.hasOwnProperty( methodName ) || self.kernel.createMethod( this.node.id, methodName );
+                    this.node.bodies[methodName] = value;
+                },
+                enumerable: true,
+            } );
+
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+
+            Object.defineProperty( node, methodName, { // "this" is node in get/set
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) {
+                        return self.kernel.callMethod( this.id, methodName, arguments );
+                    }
+                },
+                set: function( value ) {
+                    this.methods.hasOwnProperty( methodName ) || self.kernel.createMethod( this.id, methodName );
+                    this.bodies[methodName] = value;
+                },
+                enumerable: true,
+            } );
+
+            try {
+                node.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
+            } catch( e ) {
+                this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
+                    "exception evaluating body:", e );
+            }
+        
+        },
+
+        // TODO: deletingMethod
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters ) {
 
             var node = this.nodes[nodeID];
-            var method = findMethod( node, methodName );
-            var parameters = Array.prototype.slice.call( arguments, 2 );
+            var body = findBody( node, methodName );
 
-            if ( method ) {
+            if ( body ) {
                 try {
-                    return method.apply( node, parameters );
+                    return body.apply( node, methodParameters );
                 } catch( e ) {
-                    this.logger.warn( "callingMethod", nodeID, methodName, parameters, // TODO: flatten parameters array, limit for log
+                    this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", e );
                 }
             }
@@ -269,13 +315,23 @@ node.id = childID; // TODO: move to a backstop model
         return accessorScript( "( function( value ) {", body, "} )" );
     }
 
+    // -- bodyScript -------------------------------------------------------------------------------
+
+    function bodyScript( parameters, body ) {
+        var parameterString = ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  );
+        return accessorScript( "( function(" + parameterString + ") {", body, "} )" );
+        // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
+    }
+
     // -- accessorScript ---------------------------------------------------------------------------
 
     function accessorScript( prefix, body, suffix ) {  // TODO: sanitize script, limit access
-        if ( body.charAt( body.length-1 ) == "\n" ) {
-            return prefix + "\n" + body.replace( /^./gm, "  $&" ) + suffix + "\n";
+        if ( body.length && body.charAt( body.length-1 ) == "\n" ) {
+            var bodyString = body.replace( /^./gm, "  $&" );
+            return prefix + "\n" + bodyString + suffix + "\n";
         } else {
-            return prefix + " " + body + " " + suffix;
+            var bodyString = body.length ? " " + body + " " : "";
+            return prefix + bodyString + suffix;
         }
     }
 
@@ -293,12 +349,11 @@ node.id = childID; // TODO: move to a backstop model
             Object.getPrototypeOf( node ) && findSetter( Object.getPrototypeOf( node ), propertyName );
     }
 
-    // -- findMethod -------------------------------------------------------------------------------
+    // -- findBody ---------------------------------------------------------------------------------
 
-    function findMethod( node, methodName ) {
-        return node.methods && node.methods[methodName] ||
-( typeof node[methodName] == "function" || node[methodName] instanceof Function ) && node[methodName] ||  // TODO: use any old function property as a work-around until we support createMethod()
-            Object.getPrototypeOf( node ) && findMethod( Object.getPrototypeOf( node ), methodName );
+    function findBody( node, methodName ) {
+        return node.bodies && node.bodies[methodName] ||
+            Object.getPrototypeOf( node ) && findBody( Object.getPrototypeOf( node ), methodName );
     }
 
 

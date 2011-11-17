@@ -83,18 +83,18 @@
     
     // -- createMethod -----------------------------------------------------------------------------
 
-    module.prototype.createMethod = function( nodeID, methodName ) {
-        vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName );
-        vwf.send( nodeID, "createMethod", methodName );
+    module.prototype.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
+        vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName + " " + methodParameters );
+        vwf.send( nodeID, "createMethod", methodName, methodParameters, methodBody );
     };
 
     // TODO: deleteMethod
 
     // -- callMethod -------------------------------------------------------------------------------
 
-    module.prototype.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-        vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName ); // TODO: parameters
-        vwf.send( nodeID, "callMethod", methodName ); // TODO: parameters
+    module.prototype.callMethod = function( nodeID, methodName, methodParameters ) {
+        vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName + " " + methodParameters );
+        vwf.send( nodeID, "callMethod", methodName, methodParameters );
     };
     
     // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
@@ -173,16 +173,16 @@
 
     // -- createdMethod ----------------------------------------------------------------------------
 
-    module.prototype.createdMethod = function( nodeID, methodName ) {
-        vwf.logger.info( namespace + ".createdMethod " + nodeID + " " + methodName );
+    module.prototype.createdMethod = function( nodeID, methodName, methodParameters, methodBody ) {
+        vwf.logger.info( namespace + ".createdMethod " + nodeID + " " + methodName + " " + methodParameters );
     };
 
     // TODO: deletedMethod
 
     // -- calledMethod -----------------------------------------------------------------------------
 
-    module.prototype.calledMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-        vwf.logger.info( namespace + ".calledMethod " + nodeID + " " + methodName ); // TODO: parameters
+    module.prototype.calledMethod = function( nodeID, methodName, methodParameters ) {
+        vwf.logger.info( namespace + ".calledMethod " + nodeID + " " + methodName + " " + methodParameters );
     };
 
     // TODO: createdEvent, deletedEvent, firedEvent
