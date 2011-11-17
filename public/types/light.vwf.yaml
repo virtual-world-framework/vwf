@@ -10,95 +10,53 @@ properties:
           this.lightType = value;
           break;
       }
-    value: "point"
+    value: 
   constantAttenuation:
     set: |
       this.constantAttenuation = value;
-    value: 1
+    value: 
   linearAttenuation:
     set: |
       this.linearAttenuation = value;
-    value: 0.002
+    value: 
   quadraticAttenuation:
     set: |
       this.quadraticAttenuation = value;
-    value: 0.0008
+    value: 
   spotCosCutOff:
     set: |
       this.spotCosCutOff = value;
-    value: 0.95
+    value: 
   spotExponent:
     set: |
       this.spotExponent = value;
-    value: 10
-  diffuse:
-    set: |
-      this.diffuse = value;
-    value: true 
-  specular:
-    set: |
-      this.specular = value;
-    value: true
+    value: 
   samples:
     set: |
       this.samples = value;
-    value: 0
+    value: 
   softness:
     set: |
       this.softness = value;
-    value: 0.01
+    value: 
   bufferHeight:
     set: |
       this.bufferHeight = value;
-    value: 256
+    value: 
   bufferWidth:
     set: |
       this.bufferWidth = value;
-    value: 256
+    value: 
   shadowBias:
     set: |
       this.shadowBias = value;
-    value: 2.0
+    value: 
   distance:
     set: |
       this.distance = value;
-    value: 100.0
+    value: 
   castShadows:
     set: |
       this.castShadows = value;
-    value: false
-  position:
-    set: |
-      this.position = value;
-    value: [ 0, 0, 0 ]
-  eulers:
-    set: |
-      this.eulers = value;
-    value: [ 0, 0, 0 ]    
-scripts:
-- text: |
-    var cam = this;
-    this.initialize = function() {
-      console.info( "==================== light ====================" );
-      //console.info( "== lightType == "+this.lightType+" ====================" );
-      //console.info( "== eulers == "+this.eulers+" ====================" );
-      //console.info( "== position == "+this.position+" ====================" );
-      this.lightType = this.lightType;
-      this.constantAttenuation = this.constantAttenuation;
-      this.linearAttenuation = this.linearAttenuation;
-      this.quadraticAttenuation = this.quadraticAttenuation;
-      this.spotCosCutOff = this.spotCosCutOff;
-      this.spotExponent = this.spotExponent;
-      this.diffuse = this.diffuse;
-      this.specular = this.specular;      
-      this.samples = this.samples;
-      this.softness = this.softness;
-      this.bufferHeight = this.bufferHeight;
-      this.bufferWidth = this.bufferWidth;
-      this.shadowBias = this.shadowBias;
-      this.distance = this.distance;        
-      this.castShadows = this.castShadows;
-      this.position = this.position;
-      this.eulers = this.eulers;  
-    }
-  type: application/javascript    
+    value: 
+  

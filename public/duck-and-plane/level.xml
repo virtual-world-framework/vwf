@@ -13,20 +13,12 @@
 		<material_layer texture="#wallcolour" mapinput="UV1" mapto="M_COLOR" />
 	</material>
 
-	<animation_vector id="spin" frames="200">
-		<animation_curve channel="RotY">
-			<linear_point x="1" y="0" />
-			<linear_point x="200" y="6.282" />
-		</animation_curve>
-	</animation_vector>
-
-
 	<camera id="maincamera" loc_x="1" loc_y="20" loc_z="8" rot_order="ROT_XZY" xtype="C_ORTHO" rot_z="0" rot_x="1.56" rot_y="3.141" />
 
 	<scene id="mainscene" camera="#maincamera" ambient_color="#666" fog_type="FOG_NONE">
 		<object id="wallobject" mesh="#cube" scale_x="10" scale_y="10" scale_z="10" material="#wallmaterial" />
-		<collada document="duck.dae" animation="#spin" rot_x="1.57" loc_y="-15" scale="0.05" />
-		<!-- collada document="seymourplane_triangulate.dae" rot_x="1.57" rot_y="1.57" loc_y="5" loc_z="3" scale="1" / -->
+		<!-- collada document="duck.dae" animation="#spin" rot_x="1.57" loc_y="-15" scale="0.05" />
+		<collada document="seymourplane_triangulate.dae" rot_x="1.57" rot_y="1.57" loc_y="5" loc_z="3" scale="1" / -->
 		
 		<light name="dir_duck_1" id="mainlight" loc_x="148.654" loc_y="183.672" loc_z="-292.179" rot_z="-0.22" rot_y="-3.34" rot_x="-0.79" attenuation_constant="1" type="L_DIR" />
 		<light name="dir_plane_1" id="mainlight" rot_z="0.279" rot_y="0.9539" rot_x="-0.08268" attenuation_constant="1" type="L_DIR" />

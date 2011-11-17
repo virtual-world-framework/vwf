@@ -2,24 +2,13 @@
 extends: http://vwf.example.com/types/navscene
 properties: 
   gravity:
-    value: [ 0, -50.8, 0, 0 ]
+    value: [ 0, 0, -50.8, 0 ]
   collisionSystem:
     get: |
       console.info( "WARNING: scene.collisionSystem can only be set, get is not implemented" );
     value: [ false ]
   loadDone:
     set: |
-      //console.info( "=================== loadComplete = " + value + " ===================" );
       this.loadDone = value;
     value: false  
-scripts:
-- text: |
-    this.initialize = function() {
-      //console.info( "==================== GLGE.Scene ====================" );
-      //console.info( "== gravity == "+this.gravity+" ====================" );
-      //console.info( "== collisionSystem == "+this.collisionSystem+" ====================" );
-      this.gravity = this.gravity;
-      this.collisionSystem = this.collisionSystem;
-      this.loadDone = this.loadDone;
-    }
-  type: application/javascript    
+  
