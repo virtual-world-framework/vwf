@@ -331,6 +331,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 initializeScene.call( this, scene ); 
                             }
                             this.enable = propertyValue;
+                            //this.enable = false;
                             break;
                     }
                 }
@@ -477,7 +478,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 pos = activeObj.jlObj.get_currentState().position;
                                 rot = GLGE.Mat4( activeObj.jlObj.get_currentState().get_orientation().glmatrix );
                                 posRot = [ pos[0], pos[1], pos[2], rot ];
-                                vwf.setProperty( nodeID, "posRotMatrix", posRot );
+                                this.kernel.setProperty( nodeID, "posRotMatrix", posRot );
                             }
                         }
                         this.updating = false;
@@ -511,7 +512,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // == findMeshChildren =================================================================
 
     function findMeshChildren( nodeID, childList ) {
-        var children = vwf.children( nodeID );
+        var children = this.kernel.children( nodeID );
 
         if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
             childList.push( this.nodes[nodeID] ); 
@@ -536,12 +537,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var width = 1;
                 var depth = 1;
                 var height = 1;
-                var pos = vwf.getProperty( nodeID, "position", v1 );
+                var pos = this.kernel.getProperty( nodeID, "position" );
                 var useBoundingBox = scale || !def;
 
                 if ( useBoundingBox ) { 
-                    var bBox = vwf.getProperty( nodeID, "boundingbox", v1 );
-                    var offset = vwf.getProperty( nodeID, "centerOffset", v2 );
+                    var bBox = this.kernel.getProperty( nodeID, "boundingbox" );
+                    var offset = this.kernel.getProperty( nodeID, "centerOffset" );
                     if ( bBox[1] - bBox[0] != 0 ) width = ( bBox[1] - bBox[0] );
                     if ( bBox[3] - bBox[2] != 0 ) depth = ( bBox[3] - bBox[2] );
                     if ( bBox[5] - bBox[4] != 0 ) height = ( bBox[5] - bBox[4] );                                
@@ -580,16 +581,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var scene = this.scenes[ node.sceneID ];
             if ( scene ) {
                 var v1, v2;
-                var verts = vwf.getProperty( nodeID, "vertices", v1 );
-                var offset = vwf.getProperty( nodeID, "centerOffset", v2 );
-                var pos = vwf.getProperty( nodeID, "position", undefined );
+                var verts = this.kernel.getProperty( nodeID, "vertices" );
+                var offset = this.kernel.getProperty( nodeID, "centerOffset" );
+                var pos = this.kernel.getProperty( nodeID, "position" );
 
                 var raduis = 10;
                 var useBoundingBox = scale || !def;
 
                 if ( useBoundingBox ) {
                     var cRadius = 0; 
-                    if ( !scale ) scale = vwf.getProperty( nodeID, "scale", undefined );
+                    if ( !scale ) scale = this.kernel.getProperty( nodeID, "scale" );
                     for ( var j = 0; j < verts.length; j++ ) {
                         vt = verts[j];
                         vt[0] = vt[0] * scale[0];
@@ -613,7 +614,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     //console.info( "     JSphere object created" );
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
-                    this.active[ nodeID ].offset = vwf.getProperty( nodeID, "centerOffset", v2 );
+                    this.active[ nodeID ].offset = this.kernel.getProperty( nodeID, "centerOffset" );
                 }
             }
         }
@@ -625,7 +626,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function createJMesh( nodeID, scale ) {
 
-        console.info( "createJMesh( "+nodeID+","+scale+" )" )
+        //console.info( "createJMesh( "+nodeID+","+scale+" )" )
         var node = this.nodes[ nodeID ];
         if ( node ) {
             var scene = this.scenes[ node.sceneID ];
@@ -636,8 +637,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                 }
                 node.jigLibMeshes = [];
-                var pos = this.kernel.getProperty( nodeID, "position", undefined );
-                var meshDataList = this.kernel.getProperty( nodeID, "meshData", [] );
+                var pos = this.kernel.getProperty( nodeID, "position" );
+                var meshDataList = this.kernel.getProperty( nodeID, "meshData" );
                 if ( meshDataList ) {
                     var verts, vertIndices, scale, vt, jMesh;
                     for ( var i = 0; i < meshDataList.length; i++ ) {
@@ -670,13 +671,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 //                if ( childList.length > 0 ) {
 //                    node.jigLibMeshes = {};
-//                    if ( !scale ) scale = vwf.getProperty( nodeID, "scale", undefined );
-//                    var pos = vwf.getProperty( nodeID, "position", undefined );
+//                    if ( !scale ) scale = this.kernel.getProperty( nodeID, "scale", undefined );
+//                    var pos = this.kernel.getProperty( nodeID, "position", undefined );
 //                    var vt;
 //                    for ( var i = 0; i < childList.length; i++ ) {
 //    
 //                        if ( !node.jigLibMeshes[ childList[i].ID ] ) {
-//                            verts = vwf.getProperty( childList[i].ID, "vertices", v1 );
+//                            verts = this.kernel.getProperty( childList[i].ID, "vertices", v1 );
 //                            for ( var j = 0; j < verts.length; j++ ) {
 //                                vt = verts[j];
 //                                vt[0] = vt[0] * scale[0];
@@ -684,7 +685,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 //                                vt[2] = vt[2] * scale[2];
 //                                verts[j] = vt;
 //                            }
-//                            vertIndices = vwf.getProperty( childList[i].ID, "vertexIndices", v2 );
+//                            vertIndices = this.kernel.getProperty( childList[i].ID, "vertexIndices", v2 );
 //                            if ( node.jigLibObj ) {
 //                                scene.system.removeBody( node.jigLibObj );
 //                                node.jigLibObj = null;

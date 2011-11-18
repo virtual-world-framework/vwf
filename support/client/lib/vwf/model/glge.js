@@ -403,16 +403,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 //                            }
 //                        }                        
 //                        break;
-                    case "material": {
-                            var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                            if ( sceneNode ) {
-                                if ( propertyValue && propertyValue.constructor == Array ) propertyValue = propertyValue[(Math.random() * propertyValue.length) | 0];
-                                if ( !propertyValue ) propertyValue = "grey";
-                                node.glgeObject.setMaterial( sceneNode.glgeDocument.getElement( propertyValue ) ); 
-                            } 
-                        }                      
-                        break;
-
 
                     default:
                         if ( node ) {
@@ -543,6 +533,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         value = glgeObject.setScale( pv[0], pv[1], pv[2] );
                         break;
                     case "transform":
+                        break;
+
+                    case "material": {
+                            var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                            if ( sceneNode && node.glgeObject ) {
+                                if ( propertyValue && propertyValue.constructor == Array ) propertyValue = propertyValue[(Math.random() * propertyValue.length) | 0];
+                                if ( !propertyValue ) propertyValue = "grey";
+                                var mat = sceneNode.glgeDocument.getElement( propertyValue );
+                                if ( mat ) {
+                                    value = node.glgeObject.setMaterial( mat ); 
+                                }
+                            } 
+                        }                      
                         break;
 
                     default:
@@ -683,13 +686,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
-                        var scale = vwf.getProperty( nodeID, "scale", undefined );
+                        var scale = this.kernel.getProperty( nodeID, "scale", undefined );
                         value = [ bbox.xMin * scale[0], bbox.xMax* scale[0], bbox.yMin* scale[1], bbox.yMax * scale[1], bbox.zMin * scale[2], bbox.zMax * scale[2] ];
                         break;
 
                     case "centerOffset":
                         var centerOff = getCenterOffset.call( this, glgeObject );
-                        var scale = vwf.getProperty( nodeID, "scale", undefined );
+                        var scale = this.kernel.getProperty( nodeID, "scale", undefined );
                         value = new Array;
                         value.push( centerOff[0] * scale[0], centerOff[1] * scale[1], centerOff[2] * scale[2] ); 
                         break;
@@ -703,7 +706,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         break;
 
                     case "meshData":
-                        this.logger.info( "gettingProperty", " GETTING meshData -------------------" );
+                        //console.info( "gettingProperty", " GETTING meshData -------------------" );
                         value = [];
                         var scale = this.gettingProperty( nodeID, "scale", [] ); 
                         var meshList = findAllMeshes.call( this, glgeObject );
@@ -713,7 +716,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                            "scale": scale 
                                         } );
                         }
-                        this.logger.info( "gettingProperty", "  (meshData)  value = " + value + "      value.length = " + value.length );
+                        //console.info( "gettingProperty", "  (meshData)  value = " + value + "      value.length = " + value.length );
                         break;
                          
 
@@ -897,7 +900,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( bRemoved ){
                 //console.info( "REMOVING XML Collada -------------------- " + sceneNode.xmlColladaObjects.length );
                 if ( sceneNode.xmlColladaObjects.length == 0 ) {
-                    //vwf.setProperty( modelID, "loadDone", true );
+                    //this.kernel.setProperty( modelID, "loadDone", true );
                     loadComplete.call( glgeModel );
                 }
             }
@@ -1264,7 +1267,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var value = undefined;
         switch ( propertyName ) {
             default:
-                vwf.logger.info( "WARNING: unable to get property " + namespace + " " + nodeID + " " + propertyName );
+                this.logger.info( "getParticleSystemProperty", " WARNING: unable to get property ", nodeID, propertyName );
                 break;
         }
         return value;
@@ -1789,7 +1792,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             extendType = "http://vwf.example.com/types/mesh";
         } 
 
-        vwf.createNode( parentID, { "extends": extendType }, objName, undefined );
+        this.kernel.createNode( parentID, { "extends": extendType }, objName, undefined );
 
     }
 

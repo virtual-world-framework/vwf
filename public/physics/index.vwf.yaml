@@ -19,22 +19,10 @@ children:
   maincamera: 
     extends: http://vwf.example.com/types/camera
     properties:
-      allowMouseNav: false
       walkMode: "walk"
       cameraType: "perspective"
-      orbitPoint: [ 0, 0, 0 ]      
       position: [ 7.5, -93.93, 26 ]
-      eulers: [ 0, 0, 0 ]
       rotation: [ 1.49, -0.0296, -0.0022 ]
-      rotX: 0
-      rotY: 0
-      rotZ: 0
-      far: 1000.0
-      near: 0.1
-      fovy: 35
-      aspect: 1.0
-      orthoscale: 5
-      speed: 2.0
   groundplane:
     extends: http://vwf.example.com/types/node3
     properties:
@@ -50,3 +38,21 @@ children:
       scale: [ 10, 10, 10 ]
       physics: [ "mesh" ]
       material: "grey"
+  light1:
+    extends: "http://vwf.example.com/types/light"
+    properties: 
+      lightType: "directional"
+      position: [ 60, 85, 70 ]
+      rotation: [ 0.5, 0.1, 0 ]
+      constantAttenuation: 1.5
+      linearAttenuation: 0.00000001
+      quadraticAttenuation: 0.00001
+  light2:
+    extends: "http://vwf.example.com/types/light"
+    properties: 
+      lightType: "directional"
+      position: [ 60, 85, 70 ]
+      rotation: [ -0.5, -0.1, 0 ]
+      constantAttenuation: 1.5
+      linearAttenuation: 0.00000001
+      quadraticAttenuation: 0.00001       
