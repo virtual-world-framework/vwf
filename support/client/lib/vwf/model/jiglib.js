@@ -608,7 +608,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     scene.system.removeBody( node.jigLibObj );
                     node.jigLibObj = null;
                 }        
-                node.jigLibObj = new jigLib.JSphere( null, raduis * scale[0] );
+                node.jigLibObj = new jigLib.JSphere( null, raduis );
                 if ( node.jigLibObj ) {
                     scene.system.addBody( node.jigLibObj );
                     //console.info( "     JSphere object created" );
