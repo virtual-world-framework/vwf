@@ -52,6 +52,8 @@ children:
       speed: 2.0
   wallobject:
     extends: http://vwf.example.com/types/node3
+    properties:
+      scale: [ 10, 10, 10 ]
   duck.dae:
     extends: http://vwf.example.com/types/node3
     source: duck.dae
@@ -62,7 +64,7 @@ children:
           this.angle = value;
           this.parent['seymourplane_triangulate.dae'].angle = value + 1;
         value: 0
-      playing: false
+      spinning: false
       scale: [ 0.05, 0.05, 0.05 ]
       position: [ 0, -15, 0 ]
       rotation: [ 1.57, 0, 0 ]
@@ -70,7 +72,10 @@ children:
     - text: |
         this.pointerClick = function() {
           console.info( "duck.dae.pointerClick this.playing = " + this.playing );
-          this.playing = !this.playing
+          this.spinning = !this.spinning;
+          if ( spinning ) {
+            this.future
+          }
         }
       type: application/javascript
   dir_duck_1:
@@ -78,34 +83,10 @@ children:
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      linearAttenuation: 0.002
-      quadraticAttenuation: 0.0008
-      spotCosCutOff: 0.95
-      spotExponent: 10
-      diffuse: true 
-      specular: true
-      samples: 0
-      softness: 0.01
-      bufferHeight: 256
-      bufferWidth: 256
-      shadowBias: 2.0
-      distance: 100.0
-      castShadows: false
+      rotation: [ -0.79, -3.34, -0.22 ]
   dir_plane_1:
     extends: http://vwf.example.com/types/light
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      linearAttenuation: 0.002
-      quadraticAttenuation: 0.0008
-      spotCosCutOff: 0.95
-      spotExponent: 10
-      diffuse: true 
-      specular: true
-      samples: 0
-      softness: 0.01
-      bufferHeight: 256
-      bufferWidth: 256
-      shadowBias: 2.0
-      distance: 100.0
-      castShadows: false
+      rotation: [ 0.279, 0.9539, -0.08268 ]
