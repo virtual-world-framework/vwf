@@ -56,6 +56,10 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
                 switch ( modelFunctionName ) {
 
+                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /* ( ready ) */
+                        logees[7] = undefined; // callback /* ( ready ) */
+                        break;
+
                     case "creatingProperty":
                         logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet
                         logees[4] && ( logees[4] = loggableScript( logees[4] ) ); // propertySet
