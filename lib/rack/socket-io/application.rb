@@ -4,6 +4,7 @@ module Rack
     class Application < Rack::WebSocket::Application
 
       attr_reader :env
+      attr_reader :closing
   
       @@clients = {}  # TODO: threading issues? use mutex on access?
       @@sessions = {}  # TODO: threading issues? use mutex on access?
@@ -68,7 +69,7 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
         logger.debug "Rack::SocketIO::Application#broadcast #{ object_id } #{ message_for_log message }"
 
         clients.each do |client|
-          client.send message
+          client.send message unless client.closing
         end
 
       end
@@ -77,12 +78,21 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
 
         @heartbeat_interval = EventMachine::Timer.new 10 do  # TODO: options.heartbeat_interval
 
-          send_heartbeat ( @heartbeats += 1 ).to_s
+          send_heartbeat ( @heartbeats += 1 ).to_s unless @closing
 
           @heartbeat_timeout = EventMachine::Timer.new 8 do  # TODO: options.timeout
+
             # logger.debug "Rack::SocketIO::Application#schedule_heartbeat #{ object_id } timeout #{ @heartbeats }"
+
             @heartbeat_timeout = nil
             close_websocket
+
+            # close_websocket doesn't call on_close until the other side closes, so the connection
+            # still appears to be open. But we must not send to it since EventMachine::WebSocket
+            # will throw an exception.
+
+            @closing = true
+
           end
 
           @heartbeat_interval = nil
