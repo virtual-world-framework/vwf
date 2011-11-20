@@ -26,13 +26,6 @@ body {
 	position:relative;
 	left:-30px;
 }
-.navmenu a:link {
-	color:#444456;
-	text-decoration:none;
-}
-.navmenu a:hover {
-	color:#AAAABB;
-}
 .navmenu a:visited {
 	color:#444456;
 }
@@ -43,6 +36,13 @@ body {
 }
 .navmenu ul li {
 	padding-bottom:5px;
+}
+.navmenu ul li a:link {
+	color:#444456;
+	text-decoration:none;
+}
+.navmenu ul li a:hover {
+	color:#AAAABB;
 }
 .content {
 	width:600px;
