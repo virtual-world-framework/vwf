@@ -8,13 +8,15 @@ children:
     source: hello.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0.5 ]
+      position: [ 0.2, -2, 0.4 ]
       rotation: [ -1, 0, 0 ]
+      scale: [ 0.65, 0.65, 0.65 ]
     scripts:
     - text: |
-        this.loadComplete = function() {
+        this.initialize = function() {
           this.position = this.position;
           this.rotation = this.rotation;
+          this.scale = this.scale;
         }
       type: application/javascript
   world: 
@@ -22,12 +24,14 @@ children:
     source: world.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0.2, 0, -0.5 ]
+      position: [ 0.4, -2, -0.4 ]
       rotation: [ -1, 0, 0 ]
+      scale: [ 0.65, 0.65, 0.65 ]
     scripts:
     - text: |
         this.initialize = function() {
           this.position = this.position;
           this.rotation = this.rotation;
+          this.scale = this.scale;
         }
       type: application/javascript
