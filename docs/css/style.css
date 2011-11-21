@@ -51,8 +51,9 @@ body {
 }	
 .content iframe {
 	width:580px;
-	height:200px;
+	height:300px;
 	display:inline;
+	overflow:hidden;
 }
 .content pre {
 	border:1px solid #AAA;

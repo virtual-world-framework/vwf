@@ -8,8 +8,9 @@ children:
     source: hello.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0.5 ]
+      position: [ 0.2, -2, 0.4 ]
       rotation: [ -1, 0, 0 ]
+      scale: [ 0.65, 0.65, 0.65 ]
     children:
       HelloTextMaterial1:
         extends: http://vwf.example.com/types/material
@@ -17,9 +18,10 @@ children:
           texture: “images/red.png”
     scripts:
     - text: |
-        this.loadComplete = function() {
+        this.initialize = function() {
           this.position = this.position;
           this.rotation = this.rotation;
+          this.scale = this.scale;
           this.HelloTextMaterial1.texture = "images/red.png";
         }
       type: application/javascript
@@ -28,8 +30,9 @@ children:
     source: world.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0.2, 0, -0.5 ]
+      position: [ 0.4, -2, -0.4 ]
       rotation: [ -1, 0, 0 ]
+      scale: [ 0.65, 0.65, 0.65 ]
     children:
       WorldTextMaterial1:
         extends: http://vwf.example.com/types/material
@@ -40,6 +43,7 @@ children:
         this.initialize = function() {
           this.position = this.position;
           this.rotation = this.rotation;
+          this.scale = this.scale;
           this.WorldTextMaterial1.texture = "images/blue.png";
         }
       type: application/javascript

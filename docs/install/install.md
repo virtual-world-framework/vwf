@@ -39,7 +39,7 @@ ________________________________________________________________________________
 Extract VWF from ZIP File
 -------------------------
 
-Download and extract the contents of the VWF.zip to C:\Users\YOU\path\to\your\Virtual World Framework.
+Download and extract the contents of the VWF.zip to C:\Users\YOU\pathto\VirtualWorldFramework.
 _____________________________________________________________________________________
 
 Install the Gems
@@ -47,7 +47,7 @@ Install the Gems
 
 Use the previous Cygwin terminal window or launch a new one and cd to your VWF development directory:
 
-	cd "C:\Users\YOU\path\to\your\Virtual World Framework"
+	cd "C:\Users\YOU\pathto\VirtualWorldFramework"
 	
 The easiest way is to type c-d-space as above, drag a VWF directory icon from Windows Explorer, drop it onto the Cygwin terminal, then hit return.
 
@@ -92,11 +92,11 @@ ________________________________________________________________________________
 Extract VWF from TAR File
 -------------------------
 
-Download and extract the contents of the vwf.tar to your development directory
+Download and extract the contents of the vwf.tar to your development directory.
 
 	$ tar -xvzf vwf.tar
+	
 _____________________________________________________________________________________
-
 
 Install the Gems
 ----------------
@@ -127,7 +127,7 @@ And make them look like this:
 	fi
 	export PATH
 
-Now you can install the RugyGems to the system (as root):
+Now you can install the RubyGems to the system (as root):
 
 	# bundle install
 	
