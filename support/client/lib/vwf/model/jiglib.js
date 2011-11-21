@@ -113,6 +113,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
 
             this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
+            //console.info( "creatingProperty " +  nodeID + ", " + propertyName + ", " + propertyValue );
 
             if ( !( propertyValue === undefined ) ) {
                 var node = this.nodes[ nodeID ];
@@ -170,6 +171,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var value = undefined;
             this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
+            //console.info( "settingProperty " + nodeID + ", " + propertyName + ", " + propertyValue );
 
             if ( this.updating ) {
                 switch ( propertyName ) { 
@@ -642,9 +644,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if ( meshDataList ) {
                     var verts, vertIndices, scale, vt, jMesh;
                     for ( var i = 0; i < meshDataList.length; i++ ) {
-                        verts = meshDataList[i];
-                        vertIndices = meshDataList[i];
-                        scale = meshDataList[i];
+                        verts = meshDataList[i].vertices;
+                        vertIndices = meshDataList[i].vertexIndices;
+                        scale = meshDataList[i].scale;
                         for ( var j = 0; j < verts.length; j++ ) {
                             vt = verts[j];
                             vt[0] = vt[0] * scale[0];
@@ -652,13 +654,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             vt[2] = vt[2] * scale[2];
                             verts[j] = vt;
                         }
+
+//                      console.info("=====================================================================================");
+//			            console.info("=====================================================================================");
+//			            for (var i = 0; i < verts.length; i++) {
+//				            console.info(i + ".	x: " + verts[i][0] + "	y: " + verts[i][1] + "	z: " + verts[i][2]);
+//			            }
+//			            console.info("=====================================================================================");
+//			            console.info("=====================================================================================");
+
                         console.info( nodeID + " created JTriangleMesh()" );
                         jMesh = new jigLib.JTriangleMesh();
                         node.jigLibMeshes.push( jMesh );
                         jMesh.createMesh( verts, vertIndices );
 
                         scene.system.addBody( jMesh );
-                        jMesh.moveTo( pos );
+                        if ( pos ) jMesh.moveTo( pos );
                     }
                 }
 
