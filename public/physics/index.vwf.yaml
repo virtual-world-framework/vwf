@@ -5,7 +5,8 @@ properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "http-vwf-example-com-types-camera-maincamera"
   gravity: [ 0, 0, -50.8, 0 ]
-  collisionSystem: [ false ]
+  collisionSystem: [ true, -100, -100, -100, 200, 200, 200, 3, 3, 3 ]
+  backgroundColor: [ 83, 157, 194 ]
 type: model/x-glge
 scripts:
 - text: |
@@ -29,7 +30,7 @@ children:
       physics: [ "plane", [ 0, 0, 1, 0 ] ]
       friction: 0.99
       restitution: 0
-      position: [ 0, 0, 2 ]
+      position: [ 0, 0, 0 ]
   ramp:
     extends: "http://vwf.example.com/types/node3"
     source: "city"
@@ -38,6 +39,8 @@ children:
       scale: [ 10, 10, 10 ]
       physics: [ "mesh" ]
       material: "grey"
+      friction: 0.5
+      restitution: 0.1
   light1:
     extends: "http://vwf.example.com/types/light"
     properties: 

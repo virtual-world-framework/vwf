@@ -41,7 +41,7 @@ scripts:
         "friction": 0.5, 
         "mass": 100, 
         "position": [ 0, 0, 0 ], 
-        "linVelocityDamping": [ 1, 1, 1, 0 ], 
+        "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
         "velocity": [ 0, 0, 0 ], 
         } 
