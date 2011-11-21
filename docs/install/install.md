@@ -72,30 +72,71 @@ The server runs on port 3000 in development mode by default. Use Google Chrome t
 
 _____________________________________________________________________________________
 
-For Linux and Mac
-==================
+For Linux
+=========
 
-Ensure RubyGems is installed. 
+Ensure RubyGems is installed (for Debian/Ubuntu). 
+
+	# apt-get install ruby rubygems
+
+Or (for Red Hat/Fedora)
+
+	# yum install ruby rubygems
+
+Or (for OSX with Boo)
+
+	# boo install ruby rubygems
+
 _____________________________________________________________________________________
 
 Extract VWF from TAR File
 -------------------------
 
-Download and extract the contents of the VWF.tar to /Users/username/Documents/VWF
+Download and extract the contents of the vwf.tar to your development directory
+
+	$ tar -xvzf vwf.tar
 _____________________________________________________________________________________
+
 
 Install the Gems
 ----------------
 
 Launch a terminal window and cd to your VWF development directory:
 
-	cd "/Users/username/Documents/VWF"
+	$ cs vwf/
 
 Then enter these commands:
 
-	gem install bundler
-	bundle install
+	# gem install bundler
+
+On Debian-based systems, RubyGems are not automatically added to the path. Find the lines that look like this:
+
+	if [ "`id -u`" -eq 0 ]; then
+	  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+	else
+	  PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+	fi
+	export PATH
+
+And make them look like this:
+
+	if [ "`id -u`" -eq 0 ]; then
+	  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/var/lib/gems/1.8/bin/"
+	else
+	  PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/var/lib/gems/1.8/bin/"
+	fi
+	export PATH
+
+Now you can install the RugyGems to the system (as root):
+
+	# bundle install
 	
+_____________________________________________________________________________________
+
+Launch the Server
+-----------------
+
+	# bin/thin start
 _____________________________________________________________________________________
 
 Connect
