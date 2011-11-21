@@ -3,20 +3,22 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>VWF DOCUMENTATION</title>
-		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
 	</head>
 	<body>
 		<div class="header">
-			<img src="images/vwl_logo.jpg" alt="Virtual World Labs" width="100px" />
+			<img src="../images/vwl_logo.jpg" alt="Virtual World Labs" width="100px" />
 			<div class="title">Virtual World Framework</div>
 		</div>
 		<div style="width:800px;margin:auto;text-align:left;padding-top:10px">
 			<div class="navmenu">
 				<ul>
-				    <li><a href="install.html" title="Installation Guide">Installation Guide</a></li>
-					<li><span style="position:relative;left:20px"><a href="install.html" title="For Windows">For Windows</a></span></li>
-					<li><span style="position:relative;left:20px"><a href="install.html#linux" title="For Linux and Mac">For Linux and Mac</a></span></li>
-					<li><a href="readme.html" title="Getting Started with VWF">Getting Started</a></li>
+				    <li><a href="../install/install.html" title="Installation Guide">Installation Guide</a></li>
+					<li><span style="position:relative;left:20px"><a href="../install/install.html" title="For Windows">For Windows</a></span></li>
+					<li><span style="position:relative;left:20px"><a href="../install/install.html#linux" title="For Linux and Mac">For Linux and Mac</a></span></li>
+					<li><a href="../readme/readme.html" title="Getting Started with VWF">Getting Started</a></li>
+					<li><a href="../application/application.html" title="Application">Application</a></li>
+					<li><a href="../system/system.html" title="System">System</a></li>
 				</ul>
 			</div>
 			<div class="content"><br>
@@ -27,8 +29,9 @@
 				
 				<!-- BEGIN WINDOWS INSTALL -->
 
-				
 
+
+				
 <h1>Installing the Ruby server on Windows</h1>
 
 <h2>Install Cygwin</h2>
@@ -61,22 +64,6 @@
 
 <hr />
 
-<h2>Configure Proxy Settings for the Cygwin Environment</h2>
-
-<p>Use the shortcut in the <em>Start</em> menu or on the Desktop to launch a Cygwin terminal session. Enter the following command:</p>
-
-<pre><code>cygstart .
-</code></pre>
-
-<p>(That’s c-y-g-s-t-a-r-t-space-period.) A window to your Cygwin home directory will open. Use Notepad or another text editor to add the following to the bottom of .bashrc (not including the leading spaces):</p>
-
-<pre><code>export FTP_PROXY=http://proxy-lmi.global.lmco.com:80/export HTTP_PROXY=http://proxy-lmi.global.lmco.com:80/export ftp_proxy=http://proxy-lmi.global.lmco.com:80/export http_proxy=http://proxy-lmi.global.lmco.com:80/export no_proxy=.lmco.com
-</code></pre>
-
-<p>Save and close Notepad. Close the home directory window and the Cygwin terminal window.</p>
-
-<hr />
-
 <h2>Install RubyGems</h2>
 
 <p>Cygwin’s ruby installs without the library manager, so we have to install it from source. Open a new Cygwin terminal session and issue the following commands. Don’t use the previous session since it hadn’t loaded the proxy settings.</p>
@@ -84,9 +71,11 @@
 <pre><code>curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.5.tgz | tar xzcd rubygems-1.8.5ruby setup.rb install 
 </code></pre>
 
-<p>Checkout VWF from Subversion.</p>
+<hr />
 
-<p>Do a Subversion checkout from svn+ssh://3dls-svn.orl.lmco.com/var/lib/svn/vwf/trunk to a VWF folder in your development directory.</p>
+<h2>Extract VWF from ZIP File</h2>
+
+<p>Download and extract the contents of the VWF.zip to C:\Users\YOU\path   o\your\Virtual World Framework.</p>
 
 <hr />
 
@@ -120,35 +109,6 @@ bundle install
 
 <p>The server runs on port 3000 in development mode by default. Use Google Chrome to connect to <a href="http://localhost:3000/duck-and-plane">http://localhost:3000/duck-and-plane</a>. View the excellent duck and the fascinating plane. Other applications may be available at other paths.</p>
 
-<hr />
-
-<h1>For Linux and Mac</h1>
-
-<p>Ensure RubyGems is installed. </p>
-
-<hr />
-
-<h2>Install the Gems</h2>
-
-<p>Launch a terminal window and cd to your VWF development directory:</p>
-
-<pre><code>cd "C:\Users\YOU\path   o\your\Virtual World Framework"
-</code></pre>
-
-<p>Then enter these commands:</p>
-
-<pre><code>gem install bundler
-bundle install
-</code></pre>
-
-<hr />
-
-<h2>Connect</h2>
-
-<p>The server runs on port 3000 in development mode by default. Use Google Chrome to connect to <a href="http://localhost:3000/duck-and-plane">http://localhost:3000/duck-and-plane</a>. </p>
-
-<hr />
-
 
 				
 				
@@ -162,9 +122,17 @@ bundle install
 
 
 				
+<hr />
+
 <h1>For Linux and Mac</h1>
 
 <p>Ensure RubyGems is installed. </p>
+
+<hr />
+
+<h2>Extract VWF from TAR File</h2>
+
+<p>Download and extract the contents of the VWF.tar to /Users/username/Documents/VWF</p>
 
 <hr />
 
@@ -172,7 +140,7 @@ bundle install
 
 <p>Launch a terminal window and cd to your VWF development directory:</p>
 
-<pre><code>cd "C:\Users\YOU\path   o\your\Virtual World Framework"
+<pre><code>cd "/Users/username/Documents/VWF"
 </code></pre>
 
 <p>Then enter these commands:</p>
@@ -188,6 +156,7 @@ bundle install
 <p>The server runs on port 3000 in development mode by default. Use Google Chrome to connect to <a href="http://localhost:3000/duck-and-plane">http://localhost:3000/duck-and-plane</a>. </p>
 
 <hr />
+
 
 				
 				
