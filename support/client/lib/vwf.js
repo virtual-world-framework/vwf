@@ -1294,7 +1294,7 @@ return component;
 
         // -- createMethod -------------------------------------------------------------------------
 
-        this.createMethod = function ( nodeID, methodName, methodParameters, methodBody ) {
+        this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 
             this.logger.group( "vwf.createMethod " + nodeID + " " + methodName + " " + methodParameters );
 
@@ -1344,7 +1344,7 @@ return component;
 
         // -- createEvent --------------------------------------------------------------------------
 
-        this.createEvent = function ( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)
+        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)
 
             this.logger.group( "vwf.createEvent " + nodeID + " " + eventName + " " + eventParameters );
 
@@ -1422,7 +1422,7 @@ return component;
 
         // -- time ---------------------------------------------------------------------------------
 
-        // Return the current simulation time;
+        // Return the current simulation time.
 
         this.time = function() {
 
