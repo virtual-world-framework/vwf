@@ -455,18 +455,17 @@ node.id = childID; // TODO: move to a backstop model
         executing: function( nodeID, scriptText, scriptType ) {
 
             var node = this.nodes[nodeID];
-            var value;
 
             if ( scriptType == "application/javascript" ) {
                 try {
-                    value = ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
+                    return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
                 } catch( e ) {
                     this.logger.warn( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", e );
                 }
             }
 
-            return value;
+            return undefined;
         },
 
     } );
