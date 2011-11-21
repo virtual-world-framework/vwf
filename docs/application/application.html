@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>VWF DOCUMENTATION</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="header">
+			<img src="../images/vwl_logo.jpg" alt="Virtual World Labs" width="100px" />
+			<div class="title">Virtual World Framework</div>
+		</div>
+		<div style="width:800px;margin:auto;text-align:left;padding-top:10px">
+			<div class="navmenu">
+				<ul>
+				    <li><a href="../install/install.html" title="Installation Guide">Installation Guide</a></li>
+					<li><span style="position:relative;left:20px"><a href="../install/install.html" title="For Windows">For Windows</a></span></li>
+					<li><span style="position:relative;left:20px"><a href="../install/install.html#linux" title="For Linux">For Linux</a></span></li>
+					<li><a href="../readme/readme.html" title="Getting Started with VWF">Getting Started</a></li>
+					<li><a href="../application/application.html" title="Application">Application</a></li>
+					<li><a href="../system/system.html" title="System">System</a></li>
+				</ul>
+			</div>
+			<div class="content"><br>
+				<!-- Convert source.txt using markdown converter: http://daringfireball.net/projects/markdown/dingus -->
+				
+				<!-- INSERT MARKDOWN HERE -->
+				
+				
+
+<h1>Application Reference</h1>
+
+<p>A Virtual World Framework application is an arrangement of nodes communicating through properties,
+methods, and events. Applications are constructed from components, which may themselves build on
+more fundamental components. An application is an instance of some component, and any component may
+be launched as an application.</p>
+
+<p>The fundamental component is <em>node</em>. Components build on <em>node</em> and others by <em>extending</em> a
+component, <em>implementing</em> functionality from multiple components, and adding components as children.
+Components add new properties, methods and events to the base component and define behavior by
+adding new scripts.</p>
+
+<p>Drivers loaded into the kernel provide additional intrisic components providing access to scene
+managers, external devices, and other functions.</p>
+
+<h2>Format</h2>
+
+<p>Components are written as either JSON or YAML documents and served as Internet resources. The two
+formats are equivalent, although YAML is somewhat easier for humans to write.</p>
+
+<p><a href="example.vwf.html">Specification</a>.</p>
+
+<h2>Script Bindings</h2>
+
+<p>Component scripts execute in a context appropriate for the scripting language.</p>
+
+<p><a href="example.html">JavaScript binding</a>.</p>
+
+
+				<!-- END MARKDOWN -->
+			</div>		
+		</div>
+	</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>methods.vwf.yaml</title>
+  <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="children.vwf.html">children.vwf.yaml</a>
+          <a class="source" href="events.vwf.html">events.vwf.yaml</a>
+          <a class="source" href="example.vwf.html">example.vwf.yaml</a>
+          <a class="source" href="methods.vwf.html">methods.vwf.yaml</a>
+          <a class="source" href="properties.vwf.html">properties.vwf.yaml</a>
+          <a class="source" href="scripts.vwf.html">scripts.vwf.yaml</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>methods.vwf.yaml</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="nn">---</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-2'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-2">&#182;</a>
+        </div>
+        <p>Methods define the component&rsquo;s public functions. The component inherits methods from its prototype
+and receives copies of methods defined in its behaviors. Redefining those methods here will
+override the inherited ones.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-3'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-3">&#182;</a>
+        </div>
+        <p>Use a short specifier and only provide the body.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">short</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+    <span class="no">// method body</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-4'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-4">&#182;</a>
+        </div>
+        <p>The long specifier allows named parameters in the body. The function may still parse the
+arguments when needed.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">long</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">parameters</span><span class="p-Indicator">:</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">one</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">two</span>
+    <span class="l-Scalar-Plain">body</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+      <span class="no">var three = arguments[2]</span>
+      <span class="no">this.something( one, two, three )</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-5'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-5">&#182;</a>
+        </div>
+        <p>A method may be declared empty,</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">later</span><span class="p-Indicator">:</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-6'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-6">&#182;</a>
+        </div>
+        <p>&hellip; and initialized in a script.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+<span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+  <span class="no">this.later = function( alpha, beta, gamma ) {</span>
+    <span class="no">this.something( alpha, beta, gamma )</span>
+  <span class="no">}</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>

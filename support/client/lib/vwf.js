@@ -1065,7 +1065,6 @@ return component;
                     model.gettingProperties( nodeID, intermediate_properties );
 
                 for ( var propertyName in model_properties || {} ) {
-if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-example-com-types-material-ic40RedMaterial1" )  // blacklist certain nodes and properties that aren't updating correctly  // TODO: this is due to the delayed load problems and property inconsistency
                     intermediate_properties[propertyName] = model_properties[propertyName];
                 }
 
@@ -1295,7 +1294,7 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
 
         // -- createMethod -------------------------------------------------------------------------
 
-        this.createMethod = function ( nodeID, methodName, methodParameters, methodBody ) {
+        this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 
             this.logger.group( "vwf.createMethod " + nodeID + " " + methodName + " " + methodParameters );
 
@@ -1345,7 +1344,7 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
 
         // -- createEvent --------------------------------------------------------------------------
 
-        this.createEvent = function ( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)
+        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)
 
             this.logger.group( "vwf.createEvent " + nodeID + " " + eventName + " " + eventParameters );
 
@@ -1423,7 +1422,7 @@ if ( nodeID != "http-vwf-example-com-types-node3-LCD" && nodeID != "http-vwf-exa
 
         // -- time ---------------------------------------------------------------------------------
 
-        // Return the current simulation time;
+        // Return the current simulation time.
 
         this.time = function() {
 

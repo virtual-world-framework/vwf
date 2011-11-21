@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>properties.vwf.yaml</title>
+  <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="children.vwf.html">children.vwf.yaml</a>
+          <a class="source" href="events.vwf.html">events.vwf.yaml</a>
+          <a class="source" href="example.vwf.html">example.vwf.yaml</a>
+          <a class="source" href="methods.vwf.html">methods.vwf.yaml</a>
+          <a class="source" href="properties.vwf.html">properties.vwf.yaml</a>
+          <a class="source" href="scripts.vwf.html">scripts.vwf.yaml</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>properties.vwf.yaml</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="nn">---</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-2'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-2">&#182;</a>
+        </div>
+        <p>Properties declare the component&rsquo;s public variables. The component inherits properties from its
+prototype and receives copies of properties declared in its behaviors. Initializing those
+properties here will override the defaults.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-3'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-3">&#182;</a>
+        </div>
+        <p>Most declarations use a short specifier and only provide the value.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">short</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-4'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-4">&#182;</a>
+        </div>
+        <p>The long specifier supports accessor functions.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">long</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">get</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span> <span class="c1"># calculate and return the value</span>
+      <span class="no">return this.long // protected from infinite recursion</span>
+    <span class="l-Scalar-Plain">set</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span> <span class="c1"># calculate and set the value</span>
+      <span class="no">this.long = value // protected from infinite recursion</span>
+    <span class="l-Scalar-Plain">value</span><span class="p-Indicator">:</span> <span class="c1"># the value is available to the accessor functions</span>
+      <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-5'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-5">&#182;</a>
+        </div>
+        <p>Accessors allow the component to detect changes,</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">notify</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">set</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+      <span class="no">this.something( value, this.notify ) // new value, old value</span>
+      <span class="no">this.notify = value</span>
+    <span class="l-Scalar-Plain">value</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-6'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-6">&#182;</a>
+        </div>
+        <p>&hellip; to heal to acceptable values,</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">limit</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">set</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+      <span class="no">this.limit = Math.max( 0, Math.min( value, 1 ) )</span>
+    <span class="l-Scalar-Plain">value</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-7'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-7">&#182;</a>
+        </div>
+        <p>&hellip; to accept only valid values,</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">accept</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">set</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+      <span class="no">if ( typeof value == &quot;string&quot; )</span>
+        <span class="no">this.accept = value</span>
+    <span class="l-Scalar-Plain">value</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-8'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-8">&#182;</a>
+        </div>
+        <p>&hellip; or to serve as a proxy for another.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">proxy</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">get</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+      <span class="no">return this.short // or any other calculation</span>
+    <span class="l-Scalar-Plain">set</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+      <span class="no">this.short = value // or any other calculation</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-9'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-9">&#182;</a>
+        </div>
+        <p>Declare <code>get</code> as <code>null</code> to prevent reads.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">wo</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">get</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">null</span>
+    <span class="l-Scalar-Plain">value</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-10'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-10">&#182;</a>
+        </div>
+        <p>Declare <code>set</code> as <code>null</code> to prevent writes.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">ro</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">set</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">null</span>
+    <span class="l-Scalar-Plain">value</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
