@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>VWF DOCUMENTATION</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="header">
+			<img src="../images/vwl_logo.jpg" alt="Virtual World Labs" width="100px" />
+			<div class="title">Virtual World Framework</div>
+		</div>
+		<div style="width:800px;margin:auto;text-align:left;padding-top:10px">
+			<div class="navmenu">
+				<ul>
+				    <li><a href="../install/install.html" title="Installation Guide">Installation Guide</a></li>
+					<li><span style="position:relative;left:20px"><a href="../install/install.html" title="For Windows">For Windows</a></span></li>
+					<li><span style="position:relative;left:20px"><a href="../install/install.html#linux" title="For Linux">For Linux</a></span></li>
+					<li><a href="../readme/readme.html" title="Getting Started with VWF">Getting Started</a></li>
+					<li><a href="../application/application.html" title="Application">Application</a></li>
+					<li><a href="../system/system.html" title="System">System</a></li>
+				</ul>
+			</div>
+			<div class="content"><br>
+				<!-- Convert source.txt using markdown converter: http://daringfireball.net/projects/markdown/dingus -->
+				
+				<!-- INSERT MARKDOWN HERE -->
+				
+				
+
+
+<h1>System Reference</h1>
+
+<h2>Kernel</h2>
+
+<ul>
+<li><p>createNode( nodeID, childComponent, childName, callback /* ( childID ) */  )</p>
+
+<p>Create a node from a component specification.</p></li>
+<li><p>deleteNode( nodeID )</p></li>
+<li><p>getNode( nodeID )</p>
+
+<p>Return an object describing the state of the node, its prototypes and its children.</p></li>
+<li><p>setNode( nodeID, component )</p>
+
+<p>Restore a node, its prototypes and its children to a specific state.</p></li>
+<li><p>prototype( nodeID )</p>
+
+<p>Return a node's prototype.</p></li>
+<li><p>prototypes( nodeID )</p>
+
+<p>Return an array containing a node's entire prototype chain.</p></li>
+<li><p>addChild( nodeID, childID, childName )</p></li>
+<li><p>removeChild( nodeID, childID )</p></li>
+<li><p>parent( nodeID )</p>
+
+<p>Return a node's parent.</p></li>
+<li><p>children( nodeID )</p></li>
+<li><p>name( nodeID )</p></li>
+<li><p>createProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet )</p>
+
+<p>Create a property on a node and assign an initial value.</p></li>
+<li><p>deleteProperty( nodeID, propertyName )</p></li>
+<li><p>getProperty( nodeID, propertyName )</p>
+
+<p>Get a property value for a node.</p></li>
+<li><p>setProperty( nodeID, propertyName, propertyValue )</p>
+
+<p>Set a property value on a node.</p></li>
+<li><p>getProperties( nodeID )</p>
+
+<p>Get all of the properties for a node.</p></li>
+<li><p>setProperties( nodeID, properties )</p>
+
+<p>Set all of the properties for a node.</p></li>
+<li><p>createMethod( nodeID, methodName, methodParameters, methodBody )</p></li>
+<li><p>deleteMethod( nodeID, methodName )</p></li>
+<li><p>callMethod( nodeID, methodName, methodParameters )</p></li>
+<li><p>createEvent( nodeID, eventName, eventParameters )</p></li>
+<li><p>deleteEvent( nodeID, eventName )</p></li>
+<li><p>fireEvent( nodeID, eventName, eventParameters )</p></li>
+<li><p>execute( nodeID, scriptText, scriptType )</p></li>
+<li><p>time()</p>
+
+<p>Return the current simulation time.</p></li>
+</ul>
+
+<h2>Model Drivers</h2>
+
+<ul>
+<li><p>creatingNode( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /* ( ready ) */ )</p></li>
+<li><p>deletingNode( nodeID, childName )</p></li>
+<li><p>prototyping( nodeID );</p></li>
+<li><p>addingChild( nodeID, childID, childName )</p></li>
+<li><p>removingChild( nodeID, childID )</p></li>
+<li><p>parenting( nodeID )</p></li>
+<li><p>childrening( nodeID )</p></li>
+<li><p>naming( nodeID )</p></li>
+<li><p>creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet )</p></li>
+<li><p>deletingProperty( nodeID, propertyName )</p></li>
+<li><p>gettingProperty( nodeID, propertyName, propertyValue )</p></li>
+<li><p>settingProperty( nodeID, propertyName, propertyValue )</p></li>
+<li><p>gettingProperties( nodeID, propertyValues )</p></li>
+<li><p>settingProperties( nodeID, propertyValues )</p></li>
+<li><p>creatingMethod( nodeID, methodName, methodParameters, methodBody )</p></li>
+<li><p>deletingMethod( nodeID, methodName )</p></li>
+<li><p>callingMethod( nodeID, methodName, methodParameters )</p></li>
+<li><p>creatingEvent( nodeID, eventName, eventParameters )</p></li>
+<li><p>deletingEvent( nodeID, eventName )</p></li>
+<li><p>firingEvent( nodeID, eventName, eventParameters )</p></li>
+<li><p>executing( nodeID, scriptText, scriptType )</p></li>
+<li><p>ticking()</p></li>
+</ul>
+
+<h2>View Drivers</h2>
+
+<ul>
+<li><p>createdNode( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /* ( ready ) */ )</p></li>
+<li><p>deletedNode( nodeID, childName )</p></li>
+<li><p>addedChild( nodeID, childID, childName )</p></li>
+<li><p>removedChild( nodeID, childID )</p></li>
+<li><p>createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet )</p></li>
+<li><p>deletingProperty( nodeID, propertyName )</p></li>
+<li><p>gotProperty( nodeID, propertyName, propertyValue )</p></li>
+<li><p>satProperty( nodeID, propertyName, propertyValue )</p></li>
+<li><p>gotProperties( nodeID, propertyValues )</p></li>
+<li><p>satProperties( nodeID, propertyValue )</p></li>
+<li><p>createdMethod( nodeID, methodName, methodParameters, methodBody )</p></li>
+<li><p>deletedMethod( nodeID, methodName )</p></li>
+<li><p>calledMethod( nodeID, methodName, methodParameters )</p></li>
+<li><p>createdEvent( nodeID, eventName, eventParameters )</p></li>
+<li><p>deletingEvent( nodeID, eventName )</p></li>
+<li><p>firedEvent( nodeID, eventName, eventParameters )</p></li>
+<li><p>executed( nodeID, scriptText, scriptType )</p></li>
+<li><p>ticking()</p></li>
+</ul>
+
+
+
+				<!-- END MARKDOWN -->
+			</div>		
+		</div>
+	</body>
+</html>

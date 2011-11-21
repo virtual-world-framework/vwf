@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>children.vwf.yaml</title>
+  <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="children.vwf.html">children.vwf.yaml</a>
+          <a class="source" href="events.vwf.html">events.vwf.yaml</a>
+          <a class="source" href="example.vwf.html">example.vwf.yaml</a>
+          <a class="source" href="methods.vwf.html">methods.vwf.yaml</a>
+          <a class="source" href="properties.vwf.html">properties.vwf.yaml</a>
+          <a class="source" href="scripts.vwf.html">scripts.vwf.yaml</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>children.vwf.yaml</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="nn">---</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-2'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-2">&#182;</a>
+        </div>
+        <p>Children are instances of other components to be attached to this component.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="l-Scalar-Plain">children</span><span class="p-Indicator">:</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-3'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-3">&#182;</a>
+        </div>
+        <p>Some simply reference a separate component.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">component</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">http://vwf.example.com/path/to/component.vwf</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-4'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-4">&#182;</a>
+        </div>
+        <p>Most reference a component and configure it.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">configured</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">http://vwf.example.com/path/to/component.vwf</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">something</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">value</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-5'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-5">&#182;</a>
+        </div>
+        <p>Some provide a detailed configuration. The format for a child specification is the same as for a
+component. It may be converted to a component by cutting out the value (from <code>extends</code> though
+<code>scripts</code>), placing it in an addressable file, and replacing it with the URI of the new file.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="l-Scalar-Plain">literal</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> 
+      <span class="l-Scalar-Plain">http://vwf.example.com/path/to/prototype.vwf</span>
+    <span class="l-Scalar-Plain">implements</span><span class="p-Indicator">:</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http://vwf.example.com/path/to/behavior.vwf</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">http://vwf.example.com/a/different/behavior.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">asset.dat</span>
+    <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">mime/type</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">initializer</span>
+      <span class="l-Scalar-Plain">another</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">initializer</span>
+    <span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">initializer</span>
+      <span class="l-Scalar-Plain">another</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">initializer</span>
+    <span class="l-Scalar-Plain">events</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">initializer</span>
+      <span class="l-Scalar-Plain">another</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">initializer</span>
+    <span class="l-Scalar-Plain">children</span><span class="p-Indicator">:</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">component</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">another</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">component</span>
+    <span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">specifier</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">specifier</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>

@@ -65,14 +65,14 @@ node.id = childID; // TODO: move to a backstop model
             node.source = childSource;
             node.type = childType;
 
-            node.properties = {};
+            node.properties = {};  // TODO: make node.properties.__proto__ == node.__proto__.properties so that node.properties.p propagates correctly from node.__proto__ to node
             node.getters = {};
             node.setters = {};
 
-            node.methods = {};
+            node.methods = {};  // TODO: make node.methods.__proto__ == node.__proto__.methods so that node.methods.m propagates correctly from node.__proto__ to node
             node.bodies = {};
 
-            node.events = {};
+            node.events = {};  // TODO: make node.events.__proto__ == node.__proto__.events so that node.events.e propagates correctly from node.__proto__ to node
             node.listeners = {};
 
             node.children = [];
@@ -455,18 +455,17 @@ node.id = childID; // TODO: move to a backstop model
         executing: function( nodeID, scriptText, scriptType ) {
 
             var node = this.nodes[nodeID];
-            var value;
 
             if ( scriptType == "application/javascript" ) {
                 try {
-                    value = ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
+                    return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
                 } catch( e ) {
                     this.logger.warn( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", e );
                 }
             }
 
-            return value;
+            return undefined;
         },
 
     } );

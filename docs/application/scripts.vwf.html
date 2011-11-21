@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>scripts.vwf.yaml</title>
+  <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div id="jump_to">
+    Jump To &hellip;
+    <div id="jump_wrapper">
+      <div id="jump_page">
+          <a class="source" href="children.vwf.html">children.vwf.yaml</a>
+          <a class="source" href="events.vwf.html">events.vwf.yaml</a>
+          <a class="source" href="example.vwf.html">example.vwf.yaml</a>
+          <a class="source" href="methods.vwf.html">methods.vwf.yaml</a>
+          <a class="source" href="properties.vwf.html">properties.vwf.yaml</a>
+          <a class="source" href="scripts.vwf.html">scripts.vwf.yaml</a>
+      </div>
+    </div>
+  </div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>scripts.vwf.yaml</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="nn">---</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-2'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-2">&#182;</a>
+        </div>
+        <p>Scripts create the component&rsquo;s internal behavior. The system&rsquo;s <code>initialize</code> message and other node
+notifications are delivered here. The component may provide private support functions for property
+accessors and method calls as scripts. The component&rsquo;s events are fired from here. The component
+inherits scripts from its prototype and receives copies of scripts declared in its behaviors.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-3'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-3">&#182;</a>
+        </div>
+        <p>Most declarations use a short specifier and only provide the body text.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+  <span class="no">this.initialize = function() {</span>
+    <span class="no">// initialization code</span>
+  <span class="no">}</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-4'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-4">&#182;</a>
+        </div>
+        <p>A long specifier allows external scripts to be loaded.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">http://vwf.example.com/path/to/script.js</span>
+  <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">application/javascript</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-5'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-5">&#182;</a>
+        </div>
+        <p>The default scripting language is JavaScript. A MIME type must be provided for other languages
+(but no other languages are supported now).</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="p-Indicator">-</span> <span class="l-Scalar-Plain">text</span><span class="p-Indicator">:</span> <span class="p-Indicator">|</span>
+    <span class="no">// code</span>
+  <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">application/javascript</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
