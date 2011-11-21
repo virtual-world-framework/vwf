@@ -27,30 +27,19 @@ Select the following packages for installation. Use the search box or scroll dow
 Click through to *Finish* to close Cygwin setup. Save setup.exe for later since you may need it to add or update packages.
 _____________________________________________________________________________________
 
-Configure Proxy Settings for the Cygwin Environment
----------------------------------------------------
-
-Use the shortcut in the *Start* menu or on the Desktop to launch a Cygwin terminal session. Enter the following command:
-
-	cygstart .
-
-(That’s c-y-g-s-t-a-r-t-space-period.) A window to your Cygwin home directory will open. Use Notepad or another text editor to add the following to the bottom of .bashrc (not including the leading spaces):
-
-	export FTP_PROXY=http://proxy-lmi.global.lmco.com:80/export HTTP_PROXY=http://proxy-lmi.global.lmco.com:80/export ftp_proxy=http://proxy-lmi.global.lmco.com:80/export http_proxy=http://proxy-lmi.global.lmco.com:80/export no_proxy=.lmco.com
-
-Save and close Notepad. Close the home directory window and the Cygwin terminal window.
-_____________________________________________________________________________________
-
 Install RubyGems
 ----------------
 
 Cygwin’s ruby installs without the library manager, so we have to install it from source. Open a new Cygwin terminal session and issue the following commands. Don’t use the previous session since it hadn’t loaded the proxy settings.
 
 	curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.5.tgz | tar xzcd rubygems-1.8.5ruby setup.rb install 
-	
-Checkout VWF from Subversion.
 
-Do a Subversion checkout from svn+ssh://3dls-svn.orl.lmco.com/var/lib/svn/vwf/trunk to a VWF folder in your development directory.
+_____________________________________________________________________________________	
+
+Extract VWF from ZIP File
+-------------------------
+
+Download and extract the contents of the VWF.zip to C:\Users\YOU\path\to\your\Virtual World Framework.
 _____________________________________________________________________________________
 
 Install the Gems
@@ -89,12 +78,18 @@ For Linux and Mac
 Ensure RubyGems is installed. 
 _____________________________________________________________________________________
 
+Extract VWF from TAR File
+-------------------------
+
+Download and extract the contents of the VWF.tar to /Users/username/Documents/VWF
+_____________________________________________________________________________________
+
 Install the Gems
 ----------------
 
 Launch a terminal window and cd to your VWF development directory:
 
-	cd "C:\Users\YOU\path\to\your\Virtual World Framework"
+	cd "/Users/username/Documents/VWF"
 
 Then enter these commands:
 
