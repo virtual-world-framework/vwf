@@ -184,7 +184,8 @@
             if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
                 viewArgumentLists = {};
 
-            // Create the model interface to the kernel.
+            // Create the model interface to the kernel. Models can make direct calls that execute
+            // immediately or future calls that are placed on the queue and executed when removed.
 
             var kernel_for_models = require( "vwf/kernel/model" ).create( vwf );
 
@@ -216,42 +217,44 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             } );
 
-//            // Create the view interface to the kernel.
+            // Create the view interface to the kernel. Views can only make replicated calls which
+            // bounce off the reflection server, are placed on the queue when received, and executed
+            // when removed.
 
-//            var kernel_for_views = require( "vwf/kernel/view" ).create( vwf );
-
-//            // Create and attach each configured view.
-
-//            jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
-
-//                var modelPeer = vwf.models.actual[ viewName.replace( "vwf/view", "view/model" ) ];
-
-//                var view = require( viewName ).create(
-//                    kernel_for_views,                           // view's kernel access
-//                    [],                                         // stages between the kernel and view
-//                    modelPeer && modelPeer.state || {}          // state shared with a paired model
-//                    // TODO: configuration parameters (viewArguments)
-//                );
-
-//                if ( view ) {
-//                    vwf.views.push( view );
-//                    vwf.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
-//                }
-
-//            } );
+            var kernel_for_views = require( "vwf/kernel/view" ).create( vwf );
 
             // Create and attach each configured view.
 
             jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
 
-                var view = vwf.modules[viewName];
+                if ( ! viewName.match( "^vwf/view/" ) ) { // old way
 
-                if ( view ) {
-                    var instance = new view();
-                    instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
-                    view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
-                    vwf.views.push( instance );
-                    vwf.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple model instances are allowed
+                    var view = vwf.modules[viewName];
+
+                    if ( view ) {
+                        var instance = new view();
+                        instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
+                        view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
+                        vwf.views.push( instance );
+                        vwf.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                    }
+
+                } else { // new way
+
+                    var modelPeer = vwf.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: vwf.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
+
+                    var view = require( viewName ).create(
+                        kernel_for_views,                           // view's kernel access
+                        [],                                         // stages between the kernel and view
+                        modelPeer && modelPeer.state || {}          // state shared with a paired model
+                        // TODO: configuration parameters (viewArguments)
+                    );
+
+                    if ( view ) {
+                        vwf.views.push( view );
+                        vwf.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                    }
+
                 }
 
             } );
@@ -516,7 +519,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             var args = [];
 
-            if ( nodeID || nodeID === 0 ) args.push( nodeID );
+            if ( nodeID || nodeID === 0 ) args.push( nodeID );  // TODO: don't bother testing anymore? createNode() before parentID didn't have a nodeID but now I think all functions do ... except time()?
             if ( memberName ) args.push( memberName );
             if ( parameters ) args = args.concat( parameters ); // flatten
 
@@ -640,7 +643,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID ) */ ) {
+        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID ) */ ) {  // TODO: swap childComponent & childName for consistency with createProperty( nodeID, memberName, memberDescription ), etc.  // TODO: consider renaming to createChild(), or switch node/child => parent/node
 
             this.logger.group( "vwf.createNode " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
@@ -668,7 +671,7 @@ if ( ! childName ) childNodeID = childNodeID + "-" + Math.round( Math.random() *
                 construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID ) {
 if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
 vwf.addChild( nodeID, childNodeID, childName );
-                    if ( nodeID == 0 ) {  // TODO: const for root id
+                    if ( nodeID == 0 && component["extends"] ) {  // TODO: const for root id  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
                         jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html" ); // load the UI chrome if available
                     }
                     callback && callback.call( vwf, childNodeID );
