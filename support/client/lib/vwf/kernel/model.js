@@ -19,15 +19,39 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             callback && callback( childID );
                         } );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, childName,
-                            [ childComponent ], callback /* ( result ) */ );
+                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
+                            [ childComponent, childName ], callback /* ( result ) */ );  // TODO: swap childComponent & childName
                     }
 
                 };
 
             // TODO: deleteNode
 
-            // TODO: addChild, removeChild
+            case "addChild":
+
+                return function( nodeID, childID, childName, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, childID, childName );
+                    } else {
+                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
+                            [ childID, childName ], callback /* ( result ) */ );  // TODO: swap childID & childName?
+                    }
+
+                };
+
+            case "removeChild":
+
+                return function( nodeID, childID, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, childID );
+                    } else {
+                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
+                            [ childID ], callback /* ( result ) */ );  // TODO: swap childID & childName?
+                    }
+
+                };
 
             case "createProperty":
 

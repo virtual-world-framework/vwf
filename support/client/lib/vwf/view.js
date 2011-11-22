@@ -1,21 +1,14 @@
-define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( module, kernel_api, model_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( module, kernel_api, view_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
 
-    // vwf/model.js is the common implementation of all Virtual World Framework models. Each model
-    // is part of a federation with other models attached to the simulation that implements part of
-    // the greater model. Taken together, the models create the entire model system for the
-    // simulation.
+    // vwf/view.js is the common implementation of all Virtual World Framework views. Views
+    // interpret information from the simulation, present it to the user, and accept user input
+    // influencing the simulation.
     //
-    // Models are inside of, and directly part of the simulation. They may control the simulation
-    // and cause immediate change, but they cannot accept external input. The model configuration is
-    // identical for all participants in a shared world.
+    // Views are outside of the simulation. Unlike models, they may accept external input--such as
+    // pointer and key events from a user--but may only affect the simulation indirectly through the
+    // synchronization server.
     // 
-    // A given model might be responsible for a certain subset of nodes in the the simulation, such
-    // as those representing Flash objects. Or it might implement part of the functionality of any
-    // node, such as translating 3-D transforms and material properties back and forth to a scene
-    // manager. Or it might implement functionality that is only active for a short period, such as
-    // importing a document.
-    // 
-    // vwf/model and all deriving models are loaded as RequireJS (http://requirejs.org) modules.
+    // vwf/view and all deriving views are loaded as RequireJS (http://requirejs.org) modules.
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
@@ -28,7 +21,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
         logger: logger,
 
-        load: function( module, initializer, kernelGenerator, modelGenerator ) {
+        load: function( module, initializer, kernelGenerator, viewGenerator ) {
 
             var instance = Object.create( this );
 
@@ -49,28 +42,28 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
                 instance[kernelFunctionName] = kernelGenerator.call( instance, kernelFunctionName ); // TODO: ignore if undefined
             } );
 
-            modelGenerator && Object.keys( model_api ).forEach( function( modelFunctionName ) {
-                instance[modelFunctionName] = modelGenerator.call( instance, modelFunctionName ); // TODO: ignore if undefined
+            viewGenerator && Object.keys( view_api ).forEach( function( viewFunctionName ) {
+                instance[viewFunctionName] = viewGenerator.call( instance, viewFunctionName ); // TODO: ignore if undefined
             } );
                 
             return instance;
         },
 
-        create: function( kernel, model, stages, state ) {  // TODO: configuration parameters
+        create: function( kernel, view, stages, state ) {  // TODO: configuration parameters
 
             this.logger.info( "create" );
 
             // Interpret create( kernel, stages, state ) as create( kernel, undefined, stages, state )
 
-            if ( model && model.length !== undefined ) {
+            if ( view && view.length !== undefined ) {
                 state = stages;
-                stages = model;
-                model = undefined;
+                stages = view;
+                view = undefined;
             }
 
             // Append this driver's stages to the pipeline to be placed in front of this driver.
 
-            if ( ! model ) {
+            if ( ! view ) {
                 stages = Array.prototype.concat.apply( [], ( this.pipeline || [] ).map( function( stage ) {
                     return ( stages || [] ).concat( stage );
                 } ) ).concat( stages || [] );
@@ -82,9 +75,9 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
             var instance = Object.create( this );
 
-            // Attach the reference to the stage to the right through the model API.
+            // Attach the reference to the stage to the right through the view API.
 
-            modelize.call( instance, model, model_api );
+            viewize.call( instance, view, view_api );
 
             // Create the pipeline to the left and attach the reference to the stage to the left
             // through the kernel API.
@@ -103,11 +96,11 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
             initialize.call( instance );  // TODO: configuration parameters
 
-            // Call modelize() on the driver.
+            // Call viewize() on the driver.
 
-            function modelize( model, model_api ) {
-                this.__proto__ && modelize.call( this.__proto__, model, model_api ); // depth-first recursion through the prototypes
-                this.hasOwnProperty( "modelize" ) && this.modelize.call( instance, model, model_api ); // modelize() from the bottom up
+            function viewize( view, view_api ) {
+                this.__proto__ && viewize.call( this.__proto__, view, view_api ); // depth-first recursion through the prototypes
+                this.hasOwnProperty( "viewize" ) && this.viewize.call( instance, view, view_api ); // viewize() from the bottom up
             }
 
             // Call kernelize() on the driver.
@@ -127,7 +120,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
             // Return the driver stage. For the actual driver, return the leftmost stage in the
             // pipeline.
 
-            if ( ! model ) {
+            if ( ! view ) {
                 while ( instance.kernel !== kernel ) {
                     instance = instance.kernel;
                 }
