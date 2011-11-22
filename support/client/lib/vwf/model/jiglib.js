@@ -672,46 +672,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         if ( pos ) jMesh.moveTo( pos );
                     }
                 }
-
-
-//                var v1, v2;
-//                var childList = [];
-//                var verts, vertIndices;
-
-//                findMeshChildren.call( this, nodeID, childList );
-
-//                if ( childList.length > 0 ) {
-//                    node.jigLibMeshes = {};
-//                    if ( !scale ) scale = this.kernel.getProperty( nodeID, "scale", undefined );
-//                    var pos = this.kernel.getProperty( nodeID, "position", undefined );
-//                    var vt;
-//                    for ( var i = 0; i < childList.length; i++ ) {
-//    
-//                        if ( !node.jigLibMeshes[ childList[i].ID ] ) {
-//                            verts = this.kernel.getProperty( childList[i].ID, "vertices", v1 );
-//                            for ( var j = 0; j < verts.length; j++ ) {
-//                                vt = verts[j];
-//                                vt[0] = vt[0] * scale[0];
-//                                vt[1] = vt[1] * scale[1];
-//                                vt[2] = vt[2] * scale[2];
-//                                verts[j] = vt;
-//                            }
-//                            vertIndices = this.kernel.getProperty( childList[i].ID, "vertexIndices", v2 );
-//                            if ( node.jigLibObj ) {
-//                                scene.system.removeBody( node.jigLibObj );
-//                                node.jigLibObj = null;
-//                            }
-//                            node.jigLibMeshes[ childList[i].ID ] = new jigLib.JTriangleMesh();
-//                            node.jigLibMeshes[ childList[i].ID ].createMesh( verts, vertIndices );
-
-
-//                            scene.system.addBody( node.jigLibMeshes[ childList[i].ID ] );
-//                            node.jigLibMeshes[ childList[i].ID ].moveTo( pos );
-//                        }
-//                    }
-//                } else {
-//                    console.info( "     WARNING: Unable to find any meshes to add to the physics system" );
-//                }
             }
         }
     }

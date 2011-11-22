@@ -14685,7 +14685,7 @@ GLGE.Wavefront.prototype.parseMaterials=function(file){
 					var ml=new GLGE.MaterialLayer;
 					ml.setMapto(GLGE.M_COLOR);
 					ml.setMapinput(GLGE.UV1);
-					var tex=new GLGE.Texture;
+					var tex=new GLGE.Texture();
 					var k=1;
 					while(data[k][0]=="-") k=k+2;
 					tex.setSrc(this.getAbsolutePath(data[k],this.relativeTo));
@@ -14697,7 +14697,7 @@ GLGE.Wavefront.prototype.parseMaterials=function(file){
 					var ml=new GLGE.MaterialLayer;
 					ml.setMapto(GLGE.M_SPECULAR);
 					ml.setMapinput(GLGE.UV1);
-					var tex=new GLGE.Texture;
+					var tex=new GLGE.Texture();
 					var k=1;
 					while(data[k][0]=="-") k=k+2;
 					tex.setSrc(this.getAbsolutePath(data[k],this.relativeTo));
@@ -14709,7 +14709,7 @@ GLGE.Wavefront.prototype.parseMaterials=function(file){
 					var ml=new GLGE.MaterialLayer;
 					ml.setMapto(GLGE.M_NOR);
 					ml.setMapinput(GLGE.UV1);
-					var tex=new 3;
+					var tex=new GLGE.Texture();
 					var k=1;
 					while(data[k][0]=="-") k=k+2;
 					tex.setSrc(this.getAbsolutePath(data[k],this.relativeTo));
