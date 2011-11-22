@@ -92,21 +92,35 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- createMethod -------------------------------------------------------------------------
 
-        createMethod: function( node, methodName ) {
+        createMethod: function( node, methodName, methodParameters, methodBody ) {
             return this.kernel.createMethod( this.model_to_kernel[this.object_id(node)] || node,
-                methodName );
+                methodName, methodParameters, methodBody );
         },
 
         // TODO: deleteMethod
 
         // -- callMethod ---------------------------------------------------------------------------
 
-        callMethod: function( node, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callMethod: function( node, methodName, methodParameters ) {
             return this.kernel.callMethod( this.model_to_kernel[this.object_id(node)] || node,
-                methodName );
+                methodName, methodParameters );
         },
-    
-        // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
+
+        // -- createEvent --------------------------------------------------------------------------
+
+        createEvent: function( node, eventName, eventParameters ) {
+            return this.kernel.createEvent( this.model_to_kernel[this.object_id(node)] || node,
+                eventName, eventParameters );
+        },
+
+        // TODO: deleteEvent
+
+        // -- fireEvent ----------------------------------------------------------------------------
+
+        fireEvent: function( node, eventName, eventParameters ) {
+            return this.kernel.fireEvent( this.model_to_kernel[this.object_id(node)] || node,
+                eventName, eventParameters );
+        },
 
         // -- execute ------------------------------------------------------------------------------
 
@@ -201,21 +215,35 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- creatingMethod -----------------------------------------------------------------------
 
-        creatingMethod: function( nodeID, methodName ) {
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
             return this.model.creatingMethod && this.model.creatingMethod( this.kernel_to_model[nodeID] || nodeID,
-                methodName );
+                methodName, methodParameters, methodBody );
         },
 
         // TODO: deletingMethod
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters ) {
             return this.model.callingMethod && this.model.callingMethod( this.kernel_to_model[nodeID] || nodeID,
-                methodName );
+                methodName, methodParameters );
         },
 
-        // TODO: creatingEvent, deletingEvent, firingEvent
+        // -- creatingEvent ------------------------------------------------------------------------
+
+        creatingEvent: function( nodeID, eventName, eventParameters ) {
+            return this.model.creatingEvent && this.model.creatingEvent( this.kernel_to_model[nodeID] || nodeID,
+                eventName, eventParameters );
+        },
+
+        // TODO: deletingEvent
+
+        // -- firingEvent --------------------------------------------------------------------------
+
+        firingEvent: function( nodeID, eventName, eventParameters ) {
+            return this.model.firingEvent && this.model.firingEvent( this.kernel_to_model[nodeID] || nodeID,
+                eventName, eventParameters );
+        },
 
         // -- executing ----------------------------------------------------------------------------
 
