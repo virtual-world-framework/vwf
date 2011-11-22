@@ -4,13 +4,6 @@
   <material id="yellow" specular="0.00" color="#ffff00" emit="1">
   </material>
 
-  <!-- >animation_vector id="setZ" frames="2">
-    <animation_curve channel="RotZ">
-      <linear_point x="1" y="3.14" />
-      <linear_point x="2" y="3.14" />
-    </animation_curve>
-  </animation_vector -->
-
   <camera id="maincamera" loc_x="-0.3733" loc_y="12.29" loc_z="0" rot_order="ROT_XZY" xtype="C_ORTHO" rot_z="0" rot_x="1.56" rot_y="3.141" />
 
   <scene id="mainscene" name="maincamera" camera="#maincamera" ambient_color="#B7B7B7" fog_type="FOG_NONE">

@@ -14,21 +14,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           this.enable = false;
           this.lastTime = 0;
           this.delayedProperties = {};
-
-          var self = this;
-          //setInterval( function() { self.update() }, 80 );
           this.updating = false;
-
        },
 
        // == Model API ============================================================================
 
        // -- creatingNode -------------------------------------------------------------------------
 
-       creatingNode: function(nodeID, childID, childExtendsID, childImplementsIDs,
+       creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
           childSource, childType, childName, callback /* ( ready ) */) {
 
-          switch (childExtendsID) {
+          this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+                            childSource, childType, childName );
+
+          switch ( childExtendsID ) {
              case "appscene-vwf":
              case "http-vwf-example-com-types-glge":
                 this.scenes[ childID ] = {};
@@ -39,13 +38,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.scenes[ childID ].type = childType;
                 this.scenes[ childID ].system = jigLib.PhysicsSystem.getInstance();
                 this.scenes[ childID ].initialized = false;
+                this.scenes[ childID ].propertyMap = {};
                 break;
 
              case "http-vwf-example-com-types-node3":
              case "http-vwf-example-com-types-mesh":
                 this.nodes[ childID ] = {};
 /* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
+                this.nodes[ childID ].name = childName;
                 this.nodes[ childID ].ID = childID;
+                this.nodes[ childID ].parentID = nodeID;
                 this.nodes[ childID ].extendsID = childExtendsID;
                 this.nodes[ childID ].implementsIDs = childImplementsIDs;
                 this.nodes[ childID ].source = childSource;
@@ -56,247 +58,224 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
        },
 
-       // TODO: deletingNode
+        // TODO: deletingNode
 
-       // -- addingChild --------------------------------------------------------------------------
+        // -- addingChild --------------------------------------------------------------------------
 
-       addingChild: function (nodeID, childID, childName) {
-    
-          if ( this.scenes[ nodeID ] ) {
-             var sceneNode = this.scenes[ nodeID ];
-//             if ( !sceneNode.initialized ) {
-//                this.initScene( sceneNode );
-//             }
-          }
+        addingChild: function( nodeID, childID, childName ) {
 
-          if ( this.nodes[ childID ] ) {
-             var node = this.nodes[ childID ];
-             //this.nodes[ childID ].jigLibObj = undefined;
-             //this.initPhysics( node );
-          }
-       },
+            this.logger.info( "addingChild", nodeID, childID, childName );
 
-       // -- removingChild ------------------------------------------------------------------------
+        },
 
-       removingChild: function (nodeID, childID) {
-       },
+        // -- movingChild --------------------------------------------------------------------------
 
-       // -- parenting ----------------------------------------------------------------------------
+        movingChild: function( nodeID, childID, childName ) {
 
-       parenting: function (nodeID) {
-       },
+            this.logger.info( "movingChild", nodeID, childID, childName );
 
-       // -- childrening --------------------------------------------------------------------------
+        },
 
-       childrening: function (nodeID) {
-       },
+        // -- removingChild ------------------------------------------------------------------------
 
-       // -- naming -------------------------------------------------------------------------------
+        removingChild: function( nodeID, childID, childName ) {
 
-       naming: function (nodeID) {
-       },
+            this.logger.info( "removingChild", nodeID, childID, childName );
 
-       // -- creatingProperty ---------------------------------------------------------------------
+        },
 
-       creatingProperty: function (nodeID, propertyName, propertyValue) {
-       },
+        // -- parenting ----------------------------------------------------------------------------
 
-       // TODO: deletingProperty
+        parenting: function( nodeID ) {
 
-       // -- settingProperty ----------------------------------------------------------------------
+            this.logger.info( "parenting", nodeID );
 
-       settingProperty: function (nodeID, propertyName, propertyValue) {
+        },
 
-            if ( propertyName == "physics" ) { 
-                console.info( "   settingProperty( " + nodeID+", " + propertyName + ", " + propertyValue + " )");
+        // -- childrening --------------------------------------------------------------------------
+
+        childrening: function( nodeID ) {
+
+            this.logger.info( "childrening", nodeID );
+
+        },
+
+        // -- naming -------------------------------------------------------------------------------
+
+        naming: function( nodeID ) {
+
+            this.logger.info( "naming", nodeID );
+
+        },
+
+        // -- creatingProperty ---------------------------------------------------------------------
+
+        creatingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
+            //console.info( "creatingProperty " +  nodeID + ", " + propertyName + ", " + propertyValue );
+
+            if ( !( propertyValue === undefined ) ) {
+                var node = this.nodes[ nodeID ];
+                if ( node ) {
+                    var scene = this.scenes[ node.sceneID ];
+                    if ( scene && !scene.initialized ) {
+                        var pm;
+                        if ( !scene.propertyMap[ nodeID ] ) {
+                            scene.propertyMap[ nodeID ] = {};
+                            scene.propertyMap[ nodeID ].hasPhysics = false;
+                        }
+                        pm = scene.propertyMap[ nodeID ];
+                        pm[ propertyName ] = propertyValue;
+                        if ( !pm.hasPhysics ) {
+                            pm.hasPhysics = isPhysicsProp.call( this, propertyName );    
+                        }
+                    } else {
+                        if ( node.jigLibObj ) {
+                            this.settingProperty( nodeID, propertyName, propertyValue );
+                        } else {
+                            if ( propertyName == "physics" ) {
+                                this.settingProperty( nodeID, propertyName, propertyValue );
+                                if ( this.delayedProperties[ nodeID ] ) {
+                                    var propValue;
+                                    for ( propName in this.delayedProperties[ nodeID ] ) {
+                                        propValue = this.delayedProperties[ nodeID ][ propName ];
+                                        this.settingProperty( nodeID, propName, propValue );
+                                    }
+                                    delete this.delayedProperties[ nodeID ];
+                                }
+                            } else {
+                                if ( !this.delayedProperties[ nodeID ] ) {
+                                    this.delayedProperties[ nodeID ] = {};
+                                }
+                                this.delayedProperties[ nodeID ][ propertyName ] = propertyValue;
+                            }                
+                        }
+
+                    }
+                } else {
+                    var scene = this.scenes[ nodeID ];
+                    if ( scene ) {
+                        this.settingProperty( nodeID, propertyName, propertyValue );
+                    }
+                }
             }
+
+        },
+
+        // TODO: deletingProperty
+
+        // -- settingProperty ----------------------------------------------------------------------
+
+        settingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            var value = undefined;
+            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
+            //console.info( "settingProperty " + nodeID + ", " + propertyName + ", " + propertyValue );
 
             if ( this.updating ) {
-            switch ( propertyName ) { 
-                case "position":
-                case "rotation":
-                case "posRotMatrix":
-                    return;
-                    break;
-                }
+                switch ( propertyName ) { 
+                    case "position":
+                    case "rotation":
+                    case "posRotMatrix":
+                        return;
+                        break;
+                    }
             }
 
-            if ( nodeID != "http-vwf-example-com-types-camera-maincamera" ) {
-                if ( propertyName == "velocity" ) { 
-                    console.info( "   settingProperty( " + nodeID+", " + propertyName + ", " + propertyValue + " )");
-                }
-            }
-           
             var activeNode  = this.active[ nodeID ];
             var node = this.nodes[ nodeID ];
             var scene = this.scenes[ nodeID ]
 
-             if ( node && node.jigLibObj ) { 
-                if ( propertyName == "velocity" ) 
-                    console.info( "     node is valid and jiblib object created" );
-                 scene = this.scenes[ node.sceneID ];  
-                 switch ( propertyName ) {
-                    case "x":
-                        node.jigLibObj.set_x( propertyValue );    
-                        break;
-                    case "y":
-                        node.jigLibObj.set_y( propertyValue );    
-                        break;
-                    case "z":
-                        node.jigLibObj.set_z( propertyValue );    
-                        break;
-                    case "position":
-                        if ( activeNode && activeNode.jlObj ) {
-//                          if ( activeNode.offset ) {
-//                              var newPos = [ propertyValue[0] - activeNode.offset[0], propertyValue[1] - activeNode.offset[1], propertyValue[2] - activeNode.offset[2] ];
-//                              activeNode.jlObj.moveTo( newPos );
-//                          } else {                     
-                            activeNode.jlObj.moveTo( propertyValue ); 
-//                          }   
-                        } else {
-                            node.jigLibObj.moveTo( propertyValue ); 
-                        }   
-                        break;                       
-                    case "rotation":                       
-                        break;                    
-                    case "eulers":
-                        if ( activeNode ) { }
-                        break;
-                    case "scale":
-                        if ( activeNode ) { }
-                        break;
-                    case "mass":
-                        node.jigLibObj.set_mass( propertyValue );
-                        break;
-                    case "restitution":
-                        node.jigLibObj.set_restitution( propertyValue );
-                        break;                       
-                    case "friction":
-                        node.jigLibObj.set_friction( propertyValue );
-                        break;                    
-                    case "rotVelocityDamping":
-                        node.jigLibObj.set_rotVelocityDamping( propertyValue );
-                        break;    
-                    case "linVelocityDamping":
-                        node.jigLibObj.set_linVelocityDamping( propertyValue );
-                        break; 
-                    case "velocity":
-                        console.info( nodeID + ".velocity = " + propertyValue );
-                        node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
-                        break;                        
+            if ( node && node.jigLibObj ) {
+                //console.info( "jiglib-model.settingProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )" );
+             
+                scene = this.scenes[ node.sceneID ];  
+                switch ( propertyName ) {
+                case "x":
+                    node.jigLibObj.set_x( propertyValue );    
+                    break;
+                case "y":
+                    node.jigLibObj.set_y( propertyValue );    
+                    break;
+                case "z":
+                    node.jigLibObj.set_z( propertyValue );    
+                    break;
+                case "position":
+                    if ( activeNode && activeNode.jlObj ) {
+    //                          if ( activeNode.offset ) {
+    //                              var newPos = [ propertyValue[0] - activeNode.offset[0], propertyValue[1] - activeNode.offset[1], propertyValue[2] - activeNode.offset[2] ];
+    //                              activeNode.jlObj.moveTo( newPos );
+    //                          } else {                     
+                        activeNode.jlObj.moveTo( propertyValue ); 
+    //                          }   
+                    } else {
+                        node.jigLibObj.moveTo( propertyValue ); 
+                    }   
+                    break;                       
+                case "rotation":                       
+                    break;                    
+                case "eulers":
+                    if ( activeNode ) { }
+                    break;
+                case "scale": {
+                        var physics = this.gettingProperty( nodeID, "physics", [] );
+                        physicsType = ( physics.constructor == Array ) ? physics[0] : physics;
+                        switch( physicsType ) {
+                            case "box":
+                                createJBox.call( this, nodeID, propertyValue, undefined );
+                                break;
+                            case "sphere":
+                                createJSphere.call( this, nodeID, propertyValue, undefined );
+                                break;
+                            case "mesh":
+                                createJMesh.call( this, nodeID, propertyValue );
+                                break;                            
+                        }
+
+                    }
+                    break;
+                case "mass":
+                    node.jigLibObj.set_mass( propertyValue );
+                    break;
+                case "restitution":
+                    node.jigLibObj.set_restitution( propertyValue );
+                    break;                       
+                case "friction":
+                    node.jigLibObj.set_friction( propertyValue );
+                    break;                    
+                case "rotVelocityDamping":
+                    node.jigLibObj.set_rotVelocityDamping( propertyValue );
+                    break;    
+                case "linVelocityDamping":
+                    node.jigLibObj.set_linVelocityDamping( propertyValue );
+                    break; 
+                case "velocity":
+                    console.info( nodeID + ".velocity = " + propertyValue );
+                    node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
+                    break;                        
                 }
             } else if ( node && !scene ) {
                 scene = this.scenes[ node.sceneID ];
                 if ( propertyName == "physics" ) {
                     if ( scene && scene.system && propertyValue ) {
-                        var v1, v2;
+                        //console.info( "**  jiglib-model.settingProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )" );
                         var type = ( propertyValue.constructor == Array ) ? propertyValue[0] : propertyValue;
                         switch ( type ) {
                             case "mesh": {
-                                var childList = [];
-                                var verts, vertIndices;
-                                this.findMeshChildren( nodeID, childList );
-                                if ( childList.length > 0 ) {
-                                    node.jigLibMeshes = {};
-                                    var scale = vwf.getProperty( nodeID, "scale", undefined );
-                                    var pos = vwf.getProperty( nodeID, "position", undefined );
-                                    var vt;
-                                    for ( var i = 0; i < childList.length; i++ ) {
-    
-                                        if ( !node.jigLibMeshes[ childList[i].ID ] ) {
-                                            verts = vwf.getProperty( childList[i].ID, "vertices", v1 );
-                                            for ( var j = 0; j < verts.length; j++ ) {
-                                                vt = verts[j];
-                                                vt[0] = vt[0] * scale[0];
-                                                vt[1] = vt[1] * scale[1];
-                                                vt[2] = vt[2] * scale[2];
-                                                verts[j] = vt;
-                                            }
-                                            vertIndices = vwf.getProperty( childList[i].ID, "vertexIndices", v2 );
-
-                                            node.jigLibMeshes[ childList[i].ID ] = new jigLib.JTriangleMesh();
-                                            node.jigLibMeshes[ childList[i].ID ].createMesh(verts, vertIndices);
-                                            //console.info( childList[i].ID + " created JTriangleMesh" ); 
-                                            scene.system.addBody( node.jigLibMeshes[ childList[i].ID ] );
-                                        }
-                                    }
-                                }
-                                console.info( "WARNING: Unable to find any meshes to add to the physics system" );
+                                createJMesh.call( this, nodeID, undefined );
                             }
                             break;
                             case "box": {
-                                if ( !node.jigLibObj ) {
-                                    var width = 1;
-                                    var depth = 1;
-                                    var height = 1;
-                                    //var pos = vwf.getProperty( nodeID, "position", v1 );
-                                    if ( propertyValue.constructor == Array && propertyValue.length == 4 ) {
-                                        width = propertyValue[1];
-                                        depth = propertyValue[2];
-                                        height = propertyValue[3];
-                                    } else { 
-                                        var bBox = vwf.getProperty( nodeID, "boundingbox", v1 );
-                                        var offset = vwf.getProperty( nodeID, "centerOffset", v2 );
-                                        if ( bBox[1] - bBox[0] != 0 ) width = ( bBox[1] - bBox[0] );
-                                        if ( bBox[3] - bBox[2] != 0 ) depth = ( bBox[3] - bBox[2] );
-                                        if ( bBox[5] - bBox[4] != 0 ) height = ( bBox[5] - bBox[4] );                                
-                                    }
-                                    console.info( nodeID + " created JBox ( " + width + ", " + depth + ", " + height + " )" );                                
-                                    //console.info( nodeID + " created JBox with offset = " + offset );                                
-                                    node.jigLibObj = new jigLib.JBox( null, width, depth, height );
-                                    scene.system.addBody( node.jigLibObj );
-                                    console.info( "     JBox object created" );
-                                    //node.jigLibObj.moveTo( [ -offset[0], -offset[1], -offset[2] ] );
-                                    this.active[ nodeID ] = {};
-                                    this.active[ nodeID ].jlObj = node.jigLibObj;
-                                    this.active[ nodeID ].offset = offset;
-                                }
+                                createJBox.call( this, nodeID, undefined, propertyValue );
                             }
                             break;
                             case "sphere": {
-                                if ( !node.jigLibObj ) {
-                                    var verts = vwf.getProperty( nodeID, "vertices", v1 );
-                                    var offset = vwf.getProperty( nodeID, "centerOffset", v2 );
-                                    var raduis = 10;
-                                    if ( propertyValue.constructor == Array && propertyValue.length == 2 ) {
-                                        raduis = propertyValue[1];
-                                    } else {
-                                        var cRadius = calcRadius( offset, verts );
-                                        if ( cRadius > 0 ) raduis = cRadius; 
-                                    }
-                                    node.jigLibObj = new jigLib.JSphere(null, raduis);
-                                    scene.system.addBody( node.jigLibObj );
-                                    console.info( "     JSphere object created" );
-                                    this.active[ nodeID ] = {};
-                                    this.active[ nodeID ].jlObj = node.jigLibObj;
-                                    this.active[ nodeID ].offset = vwf.getProperty( nodeID, "centerOffset", v2 );;
-                                }
+                                createJSphere.call( this, nodeID, undefined, propertyValue );
                             }
                             break;
                             case "plane": {
-                                if ( !node.jigLibObj ) {
-                                    var normal = [0, 0, 1, 0];
-                                    if ( propertyValue.constructor == Array ) {
-                                        switch ( propertyValue.length ) {
-                                            case "2":
-                                                if ( propertyValue[1].constructor == Array ) {
-                                                    if ( propertyValue[1].length == 4 ) {
-                                                        normal = propertyValue[1];
-                                                    }
-                                                }
-                                                break;
-                                            case "5":
-                                                for ( var i = 0; i < 4; i++ ) {
-                                                    normal[i] = propertyValue[i+1];
-                                                }
-                                                break;
-                                        }    
-                                    }
-
-                                    node.jigLibObj = new jigLib.JPlane( null, normal );
-                                    scene.system.addBody( node.jigLibObj );
-                                    //this.active[ nodeID ] = node.jigLibObj;
-                                }
+                                createJPlane.call( this, nodeID, propertyValue );
                             }
                             break;
                             default:
@@ -330,6 +309,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             } else {
                 if ( scene && scene.system ) {
+                    //console.info( "     jiglib-model.settingProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )" );
                     switch ( propertyName ) {
                         case "gravity":
                             scene.system.setGravity( propertyValue );
@@ -349,110 +329,140 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 break;
                             }
                         case "loadDone":
+                            if ( propertyValue && !scene.initialized ) {
+                                initializeScene.call( this, scene ); 
+                            }
                             this.enable = propertyValue;
+                            //this.enable = false;
                             break;
                     }
                 }
             }
-       },
 
-       // -- gettingProperty ----------------------------------------------------------------------
+            return value;
+        },
 
-       gettingProperty: function (nodeID, propertyName, propertyValue) {
+        // -- gettingProperty ----------------------------------------------------------------------
+
+        gettingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
           
-          propertyValue = undefined;
+            propertyValue = undefined;
 
-          if ( this.nodes[ nodeID ] ) {
-             var node = this.nodes[ nodeID ];
-             if ( node && node.jigLibObj ) {
+            if ( this.nodes[ nodeID ] ) {
+                var node = this.nodes[ nodeID ];
+                if ( node && node.jigLibObj ) {
                 switch ( propertyName ) {
-                   case "physics":
-                       if ( node.jigLibObj.constructor == jigLib.JBox ) {
-                          propertyValue = [];
-                          propertyValue.push( "box" );
-                          propertyValue.push( node.jigLibObj._sideLengths[0] );
-                          propertyValue.push( node.jigLibObj._sideLengths[1] );
-                          propertyValue.push( node.jigLibObj._sideLengths[2] );
-                       } else if ( node.jigLibObj.constructor == jigLib.JSphere ) {
-                          propertyValue = [];
-                          propertyValue.push( "sphere" );
-                          propertyValue.push( node.jigLibObj.get_radius() );
-                       } else if ( node.jigLibObj.constructor == jigLib.JPlane ) {
-                          propertyValue = [];
-                          propertyValue.push( "plane" );
-                          propertyValue.push( node.jigLibObj.get_normal() );
-                      } else {
-                          propertyValue = [];
-                          propertyValue.push( "mesh" );
-                       }
-                       break;
+                    case "physics":
+                        if ( node.jigLibObj.constructor == jigLib.JBox ) {
+                            propertyValue = [];
+                            propertyValue.push( "box" );
+                            propertyValue.push( node.jigLibObj._sideLengths[0] );
+                            propertyValue.push( node.jigLibObj._sideLengths[1] );
+                            propertyValue.push( node.jigLibObj._sideLengths[2] );
+                        } else if ( node.jigLibObj.constructor == jigLib.JSphere ) {
+                            propertyValue = [];
+                            propertyValue.push( "sphere" );
+                            propertyValue.push( node.jigLibObj.get_radius() );
+                        } else if ( node.jigLibObj.constructor == jigLib.JPlane ) {
+                            propertyValue = [];
+                            propertyValue.push( "plane" );
+                            propertyValue.push( node.jigLibObj.get_normal() );
+                        } else {
+                            propertyValue = [];
+                            propertyValue.push( "mesh" );
+                        }
+                        break;
                     case "mass":
-                       propertyValue = node.jigLibObj.get_mass();
-                       break;
+                        propertyValue = node.jigLibObj.get_mass();
+                        break;
                     case "restitution":
-                       propertyValue = node.jigLibObj.get_restitution();
-                       break;                       
+                        propertyValue = node.jigLibObj.get_restitution();
+                        break;                       
                     case "friction":
-                       propertyValue = node.jigLibObj.get_friction();
-                       break;                    
+                        propertyValue = node.jigLibObj.get_friction();
+                        break;                    
                     case "rotVelocityDamping":
-                       propertyValue = node.jigLibObj.get_rotVelocityDamping();
-                       break;    
+                        propertyValue = node.jigLibObj.get_rotVelocityDamping();
+                        break;    
                     case "linVelocityDamping":
-                       propertyValue = node.jigLibObj.get_linVelocityDamping();
-                       break;    
-//                    case "velocity":
-//                       propertyValue = node.jigLibObj.getVelocity( node.jigLibObj.get_position() );
-//                       break;
+                        propertyValue = node.jigLibObj.get_linVelocityDamping();
+                        break;    
+        //                    case "velocity":
+        //                       propertyValue = node.jigLibObj.getVelocity( node.jigLibObj.get_position() );
+        //                       break;
+                    }
                 }
-             }
-          } else if ( this.scenes[ nodeID ] ) {
-             var sceneNode = this.scenes[ nodeID ];
-             if ( sceneNode && sceneNode.system ) {
-                switch ( propertyName ) {
-                    case "gravity":
-                       propertyValue = sceneNode.system.get_gravity();
-                       break;
-                    case "collisionSystem":
-                       propertyValue = undefined;
-                       break;
+            } else if ( this.scenes[ nodeID ] ) {
+                var sceneNode = this.scenes[ nodeID ];
+                if ( sceneNode && sceneNode.system ) {
+                    switch ( propertyName ) {
+                        case "gravity":
+                            propertyValue = sceneNode.system.get_gravity();
+                            break;
+                        case "collisionSystem":
+                            propertyValue = undefined;
+                            break;
+                    }
                 }
-             }
                 
-          }
-          return propertyValue;
-       },
+            }
+            return propertyValue;
+        },
 
-       // -- creatingMethod -----------------------------------------------------------------------
 
-       creatingMethod: function (nodeID, methodName, methodParameters, methodBody) {
-       },
 
-       // TODO: deletingMethod
+        // -- creatingMethod ------------------------------------------------------------------------
 
-       // -- callingMethod ------------------------------------------------------------------------
+        creatingMethod: function( nodeID, methodName, methodName, methodBody ) {
 
-       callingMethod: function (nodeID, methodName, methodParameters) {
-       },
+            this.logger.info( "creatingMethod", nodeID, methodName, methodName, methodBody );
 
-       // -- creatingEvent ------------------------------------------------------------------------
+        },
 
-       creatingEvent: function (nodeID, eventName, eventParameters) {
-       },
 
-       // TODO: deletingEvent
+        // -- callingMethod ------------------------------------------------------------------------
 
-       // -- firingEvent --------------------------------------------------------------------------
+        callingMethod: function( nodeID, methodName, methodParameters ) {
 
-       firingEvent: function (nodeID, eventName, eventParameters) {
-       },
+            this.logger.info( "creatingMethod", nodeID, methodName, methodParameters );
 
-       // -- executing ----------------------------------------------------------------------------
+        },
 
-       executing: function (nodeID, scriptText, scriptType) {
-       },
 
-       ticking: function( vwfTime ) {
+        // -- creatingEvent ------------------------------------------------------------------------
+
+        creatingEvent: function( nodeID, eventName, eventParameters ) {
+
+            this.logger.info( "creatingEvent", nodeID, eventName, eventParameters );
+
+        },
+
+        // TODO: deletingEvent
+
+        // -- firingEvent --------------------------------------------------------------------------
+
+        firingEvent: function( nodeID, eventName, eventParameters ) {
+
+            this.logger.info( "firingEvent", nodeID, eventName, eventParameters );
+
+        },
+
+
+        // -- executing ----------------------------------------------------------------------------
+
+        executing: function (nodeID, scriptText, scriptType) {
+
+            this.logger.info( "callingMethod", nodeID, scriptText, scriptType );
+            return undefined;
+
+        },
+
+
+        // == ticking =============================================================================
+
+        ticking: function( vwfTime ) {
 
             var elaspedTime = vwfTime - this.lastTime;
             this.lastTime = vwfTime;
@@ -470,51 +480,377 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 pos = activeObj.jlObj.get_currentState().position;
                                 rot = GLGE.Mat4( activeObj.jlObj.get_currentState().get_orientation().glmatrix );
                                 posRot = [ pos[0], pos[1], pos[2], rot ];
-                                vwf.setProperty( nodeID, "posRotMatrix", posRot );
+                                this.kernel.setProperty( nodeID, "posRotMatrix", posRot );
                             }
                         }
                         this.updating = false;
                     }
                 }
             }
-              
-       },
-
-       // == JigLib ===============================================================================
-
-
-       findMeshChildren: function( nodeID, childList ) {
-          var children = vwf.children( nodeID );
-
-          if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
-             childList.push( this.nodes[nodeID] ); 
-          }
-
-          if ( children && children.length ) {
-             for ( var i = 0; i < children.length; i++ ) {
-                this.findMeshChildren( children[i], childList );
-             }
-          }
-       },
+        },
 
     } );
 
-    // == Private functions ========================================================================
+    // == Private functions ==================================================================
+    
+    // == calcRadius =========================================================================
 
     function calcRadius( offset, verts ) {
-       var radius = 0;
-       var temp = 0;
-       var iIndex = -1;
-       for ( var i = 0; i < verts.length; i++ ) {
-          temp = ( verts[i][0] - offset[0] ) ^ 2 + ( verts[i][1] - offset[1] ) ^ 2 + + ( verts[i][2] - offset[2] ) ^ 2;
-          if ( temp > radius ) {
-             radius = temp; 
-             iIndex = i;
-          }
-       }
+        var radius = 0;
+        var temp = 0;
+        var iIndex = -1;
+        for ( var i = 0; i < verts.length; i++ ) {
+            temp = ( verts[i][0] - offset[0] ) ^ 2 + ( verts[i][1] - offset[1] ) ^ 2 + + ( verts[i][2] - offset[2] ) ^ 2;
+            if ( temp > radius ) {
+                radius = temp; 
+                iIndex = i;
+            }
+        }
 
-       raduis = Math.sqrt( radius );
-       return radius;
+        raduis = Math.sqrt( radius );
+        return radius;
+    }
+
+    // == findMeshChildren =================================================================
+
+    function findMeshChildren( nodeID, childList ) {
+        var children = this.kernel.children( nodeID );
+
+        if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
+            childList.push( this.nodes[nodeID] ); 
+        }
+
+        if ( children && children.length ) {
+            for ( var i = 0; i < children.length; i++ ) {
+                findMeshChildren.call( this, children[i], childList );
+            }
+        }
+    }
+
+    // == createJBox =====================================================================
+
+    function createJBox( nodeID, scale, def ) {
+
+        var node = this.nodes[ nodeID ];
+        if ( node ) {
+            var scene = this.scenes[ node.sceneID ];
+            if ( scene ) {
+                var v1, v2;
+                var width = 1;
+                var depth = 1;
+                var height = 1;
+                var pos = this.kernel.getProperty( nodeID, "position" );
+                var useBoundingBox = scale || !def;
+
+                if ( useBoundingBox ) { 
+                    var bBox = this.kernel.getProperty( nodeID, "boundingbox" );
+                    var offset = this.kernel.getProperty( nodeID, "centerOffset" );
+                    if ( bBox[1] - bBox[0] != 0 ) width = ( bBox[1] - bBox[0] );
+                    if ( bBox[3] - bBox[2] != 0 ) depth = ( bBox[3] - bBox[2] );
+                    if ( bBox[5] - bBox[4] != 0 ) height = ( bBox[5] - bBox[4] );                                
+                } else if ( def.constructor == Array && def.length == 4 ) {
+                    width = def[ 1 ];
+                    depth = def[ 2 ]
+                    height = def[ 3 ];
+                }
+
+                //console.info( nodeID + " created JBox ( " + width + ", " + depth + ", " + height + " )" );                                
+                
+                if ( node.jigLibObj ) {
+                    scene.system.removeBody( node.jigLibObj );
+                    node.jigLibObj = null;
+                }                
+                node.jigLibObj = new jigLib.JBox( null, width, depth, height );
+
+                if ( node.jigLibObj ) {
+                    scene.system.addBody( node.jigLibObj );
+                    if ( pos ) node.jigLibObj.moveTo( pos )
+                    this.active[ nodeID ] = {};
+                    this.active[ nodeID ].jlObj = node.jigLibObj;
+                    this.active[ nodeID ].offset = offset;
+                }
+            }
+        }    
+    
+    }
+
+    // == createJSphere =====================================================================
+
+    function createJSphere( nodeID, scale, def ) {
+
+        var node = this.nodes[ nodeID ];
+        if ( node ) {
+            var scene = this.scenes[ node.sceneID ];
+            if ( scene ) {
+                var v1, v2;
+                var verts = this.kernel.getProperty( nodeID, "vertices" );
+                var offset = this.kernel.getProperty( nodeID, "centerOffset" );
+                var pos = this.kernel.getProperty( nodeID, "position" );
+
+                var raduis = 10;
+                var useBoundingBox = scale || !def;
+
+                if ( useBoundingBox ) {
+                    var cRadius = 0; 
+                    if ( !scale ) scale = this.kernel.getProperty( nodeID, "scale" );
+                    for ( var j = 0; j < verts.length; j++ ) {
+                        vt = verts[j];
+                        vt[0] = vt[0] * scale[0];
+                        vt[1] = vt[1] * scale[1];
+                        vt[2] = vt[2] * scale[2];
+                        verts[j] = vt;
+                    }
+                    cRadius = calcRadius.call( this, offset, verts );
+                    if ( cRadius > 0 ) raduis = cRadius; 
+                } else if ( def.constructor == Array && def.length == 2 ) {
+                    raduis = def[1];
+                } 
+            
+                if ( node.jigLibObj ) {
+                    scene.system.removeBody( node.jigLibObj );
+                    node.jigLibObj = null;
+                }        
+                node.jigLibObj = new jigLib.JSphere( null, raduis );
+                if ( node.jigLibObj ) {
+                    scene.system.addBody( node.jigLibObj );
+                    //console.info( "     JSphere object created" );
+                    this.active[ nodeID ] = {};
+                    this.active[ nodeID ].jlObj = node.jigLibObj;
+                    this.active[ nodeID ].offset = this.kernel.getProperty( nodeID, "centerOffset" );
+                }
+            }
+        }
+
+    }
+
+
+    // == createJMesh =====================================================================
+
+    function createJMesh( nodeID, scale ) {
+
+        //console.info( "createJMesh( "+nodeID+","+scale+" )" )
+        var node = this.nodes[ nodeID ];
+        if ( node ) {
+            var scene = this.scenes[ node.sceneID ];
+            if ( scene ) {
+                if ( node.jigLibMeshes ) {
+                    for ( var j = 0; j < node.jigLibMeshes.length; j++ ) {
+                        scene.system.removeBody( node.jigLibMeshes[ j ] );
+                    }
+                }
+                node.jigLibMeshes = [];
+                var pos = this.kernel.getProperty( nodeID, "position" );
+                var meshDataList = this.kernel.getProperty( nodeID, "meshData" );
+                if ( meshDataList ) {
+                    var verts, vertIndices, scale, vt, jMesh;
+                    for ( var i = 0; i < meshDataList.length; i++ ) {
+                        verts = meshDataList[i].vertices;
+                        vertIndices = meshDataList[i].vertexIndices;
+                        scale = meshDataList[i].scale;
+                        for ( var j = 0; j < verts.length; j++ ) {
+                            vt = verts[j];
+                            vt[0] = vt[0] * scale[0];
+                            vt[1] = vt[1] * scale[1];
+                            vt[2] = vt[2] * scale[2];
+                            verts[j] = vt;
+                        }
+
+//                      console.info("=====================================================================================");
+//			            console.info("=====================================================================================");
+//			            for (var i = 0; i < verts.length; i++) {
+//				            console.info(i + ".	x: " + verts[i][0] + "	y: " + verts[i][1] + "	z: " + verts[i][2]);
+//			            }
+//			            console.info("=====================================================================================");
+//			            console.info("=====================================================================================");
+
+                        console.info( nodeID + " created JTriangleMesh()" );
+                        jMesh = new jigLib.JTriangleMesh();
+                        node.jigLibMeshes.push( jMesh );
+                        jMesh.createMesh( verts, vertIndices );
+
+                        scene.system.addBody( jMesh );
+                        if ( pos ) jMesh.moveTo( pos );
+                    }
+                }
+
+
+//                var v1, v2;
+//                var childList = [];
+//                var verts, vertIndices;
+
+//                findMeshChildren.call( this, nodeID, childList );
+
+//                if ( childList.length > 0 ) {
+//                    node.jigLibMeshes = {};
+//                    if ( !scale ) scale = this.kernel.getProperty( nodeID, "scale", undefined );
+//                    var pos = this.kernel.getProperty( nodeID, "position", undefined );
+//                    var vt;
+//                    for ( var i = 0; i < childList.length; i++ ) {
+//    
+//                        if ( !node.jigLibMeshes[ childList[i].ID ] ) {
+//                            verts = this.kernel.getProperty( childList[i].ID, "vertices", v1 );
+//                            for ( var j = 0; j < verts.length; j++ ) {
+//                                vt = verts[j];
+//                                vt[0] = vt[0] * scale[0];
+//                                vt[1] = vt[1] * scale[1];
+//                                vt[2] = vt[2] * scale[2];
+//                                verts[j] = vt;
+//                            }
+//                            vertIndices = this.kernel.getProperty( childList[i].ID, "vertexIndices", v2 );
+//                            if ( node.jigLibObj ) {
+//                                scene.system.removeBody( node.jigLibObj );
+//                                node.jigLibObj = null;
+//                            }
+//                            node.jigLibMeshes[ childList[i].ID ] = new jigLib.JTriangleMesh();
+//                            node.jigLibMeshes[ childList[i].ID ].createMesh( verts, vertIndices );
+
+
+//                            scene.system.addBody( node.jigLibMeshes[ childList[i].ID ] );
+//                            node.jigLibMeshes[ childList[i].ID ].moveTo( pos );
+//                        }
+//                    }
+//                } else {
+//                    console.info( "     WARNING: Unable to find any meshes to add to the physics system" );
+//                }
+            }
+        }
+    }
+
+    // == createJPlane =====================================================================
+
+    function createJPlane( nodeID, physicsDef ) {
+
+         var node = this.nodes[ nodeID ];
+        if ( node ) {
+            var scene = this.scenes[ node.sceneID ];
+            if ( scene ) {
+                var normal = [0, 0, 1, 0];
+                if ( physicsDef.constructor == Array ) {
+                    switch ( physicsDef.length ) {
+                        case "2":
+                            if ( physicsDef[1].constructor == Array ) {
+                                if ( physicsDef[1].length == 4 ) {
+                                    normal = physicsDef[1];
+                                }
+                            }
+                            break;
+                        case "5":
+                            for ( var i = 0; i < 4; i++ ) {
+                                normal[i] = physicsDef[i+1];
+                            }
+                            break;
+                    }    
+                }
+
+                if ( node.jigLibObj ) {
+                    scene.system.removeBody( node.jigLibObj );
+                    node.jigLibObj = null;
+                }
+                //console.info( nodeID + " created JPlane ( null, " + normal + " )" );                                
+                node.jigLibObj = new jigLib.JPlane( null, normal );
+
+                scene.system.addBody( node.jigLibObj );
+            }
+        }
+    }
+
+
+    // == isPhysicsProp =====================================================================
+
+    function isPhysicsProp( pn ) {
+        var physicsProp = false;
+        switch ( pn ) {
+            case "physics":
+            case "mass":     
+            case "velocity":
+            case "restitution":
+            case "friction":
+            case "rotVelocityDamping":     
+            case "linVelocityDamping":
+                physicsProp = true;
+                break;
+            default:
+                physicsProp = false;
+                break;                
+        }
+        return physicsProp;
+    }
+
+    // == initializeScene ===================================================================
+
+    function initializeScene( scene ) {
+        var pm;
+        for ( nodeID in scene.propertyMap ) {
+            pm = scene.propertyMap[ nodeID ];
+            if ( pm.hasPhysics ) {
+                initializeObject.call( this, nodeID, pm );
+            }
+        }
+        scene.propertyMap = {};
+        scene.initialized = true;
+    }
+
+    // == initializeObject ===================================================================
+
+    function initializeObject( nodeID, props ) {
+        var physicsDef, physicsType, scale;
+        if ( props.physics ) {
+            physicsDef = props.physics;
+            physicsType = ( physicsDef.constructor == Array ) ? physicsDef[0] : physicsDef;
+            scale = props.scale
+
+            // set up the physics object for each 
+            switch( physicsType ) {
+                case "box":
+                    if ( scale ) {
+                        createJBox.call( this, nodeID, scale, undefined );
+                    } else {
+                        createJBox.call( this, nodeID, undefined, physicsDef );
+                    }
+                    break;
+                case "sphere":
+                    if ( scale ) {
+                        createJSphere.call( this, nodeID, scale, undefined );
+                    } else {
+                        createJSphere.call( this, nodeID, undefined, physicsDef );
+                    }
+                    break;
+                case "mesh":
+                    createJMesh.call( this, nodeID, scale );
+                    break;
+                case "plane":
+                    createJPlane.call( this, nodeID, physicsDef );
+                    break;                            
+            }  
+            
+            // set the rest of the non physics props
+            for ( propertyName in props ) {
+                switch( propertyName ) {
+                    case "physics":
+                    case "scale":
+                        break;
+                    default:
+                        if ( !isPhysicsProp.call( this, propertyName ) ) {
+                            this.settingProperty( nodeID, propertyName, props[ propertyName ] );
+                        }
+                        break;    
+                }
+            } 
+            
+            // set the physics props
+            for ( propertyName in props ) {
+                switch( propertyName ) {
+                    case "physics":
+                    case "scale":
+                        break;
+                    default:
+                        if ( isPhysicsProp.call( this, propertyName ) ) {
+                            this.settingProperty( nodeID, propertyName, props[ propertyName ] );
+                        }
+                        break;    
+                }
+            }                      
+        }
     }
 
 } );
