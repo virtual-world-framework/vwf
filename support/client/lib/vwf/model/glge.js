@@ -49,7 +49,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 if ( parentNode ) {
                     var glgeParent = parentNode.glgeObject ? parentNode.glgeObject : parentNode.glgeScene;
-                    if ( glgeParent  && childName ) {
+                    if ( glgeParent && childName ) {
                         glgeChild = glgeObjectChild.call( this, glgeParent, childName, childExtendsID );
                     }
                 }
@@ -163,6 +163,47 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                     }
                                 }
                             }
+                            break;
+                        
+                        case "definition/mesh":
+                            node = this.state.nodes[childID] = {
+                                name: childName,  
+                                glgeObject: undefined,
+                                type: childExtendsID,
+                                source: childSource,
+                                ID: childID,                                
+                                parentID: nodeID,
+                                sourceType: childType 
+                            };
+                            var meshDefObject = {
+			                    positions: [ 1.000,1.000,1.000,1.000,1.000,-1.000,-1.000,1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,-1.000,-1.000,1.000,1.000,-1.000,-1.000,-1.000,-1.000,-1.000,1.000,-1.000,1.000,1.000,-1.000,-1.000,-1.000,-1.000,1.000,1.000,-1.000,1.000,-1.000,1.000,-1.000,-1.000,1.000,-1.000,1.000,-1.000,-1.000,-1.000,1.000,-1.000,1.000,-1.000,-1.000,1.000,-1.000,-1.000,-1.000,1.000,1.000,-1.000,1.000,1.000,1.000,1.000,-1.000,-1.000,1.000,1.000,1.000,1.000,-1.000,1.000,1.000,-1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,-1.000,1.000,1.000,-1.000,-1.000,1.000,1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,-1.000,-1.000,-1.000,-1.000,-1.000,1.000,1.000,-1.000,-1.000,-1.000,-1.000,-1.000,1.000,-1.000 ],
+			                    normals: [ 0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-0.000,-1.000,-0.000,-0.000,-1.000,-0.000,-0.000,-1.000,-0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,-0.000,0.000,1.000,-0.000,0.000,1.000,-0.000,0.000,-0.000,-0.000,1.000,-0.000,-0.000,1.000,-0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,0.000,-1.000,0.000,0.000,-1.000,0.000,0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000 ],
+			                    //uv1: [ ],
+			                    faces: [ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35 ],
+                                //positions: [5,5,100, 5,-5,100, -5,-5,100, -5,5,100],
+                                //normals: [0,0,1, 0,0,1, 0,0,1, 0,0,1],
+                                //faces: [3,0,1,3,1,2],
+                            };
+
+                            if ( glgeParent ) {
+                                node.glgeObject = new GLGE.Group();
+                                glgeParent.addObject( node.glgeObject );
+                                var obj = new GLGE.Object();
+                                var mesh = new GLGE.Mesh();
+
+                                if ( meshDefObject.positions )
+                                    mesh.setPositions( meshDefObject.positions );
+                                if ( meshDefObject.normals )
+                                    mesh.setNormals( meshDefObject.normals );
+                                if ( meshDefObject.uv1 )
+                                    mesh.setUV( meshDefObject.uv1 );
+                                if ( meshDefObject.faces )
+                                    mesh.setFaces( meshDefObject.faces );
+
+                                obj.setMesh( mesh );
+                                node.glgeObject.addObject( obj );
+                            }
+
                             break;
 
                         default:
@@ -548,6 +589,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }                      
                         break;
 
+                    case "lookAt": {
+                            var lookAtNode = this.state.nodes[ propertyValue ];
+                            if ( lookAtNode && lookAtNode.glgeObject ) {
+                                glgeObject.setLookat( lookAtNode.glgeObject );
+                            } else {
+                                if ( glgeObject.getLookAt && glgeObject.getLookAt() ) 
+                                    glgeObject.setLookat( null );
+                            }
+                        }
+                        break;
+
                     default:
                         switch ( node[ "type" ] ) {
                             case "http-vwf-example-com-types-material":
@@ -718,7 +770,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                         //console.info( "gettingProperty", "  (meshData)  value = " + value + "      value.length = " + value.length );
                         break;
-                         
+ 
+                    case "lookAt": {
+                            value = "";
+                            var lookAtObject = glgeObject.getLookAt();
+                            if ( lookAtObject ) {
+                                value = getObjectID( lookAtObject, this, false, false );
+                            }
+                        }
+                        break;                         
 
                     default:
                         switch ( node.type ) {
@@ -1766,7 +1826,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var faces = mesh.faces.data;
                 if ( faces ) {
                     for (var i = 0; i < faces.length; i = i + 3) {
-                        vertexIndices.push([faces[i], faces[i + 1], faces[i + 2]]);
+                        vertexIndices.push( [faces[i], faces[i + 1], faces[i + 2]] );
                     }
                 }
             }
