@@ -83,22 +83,36 @@
     
     // -- createMethod -----------------------------------------------------------------------------
 
-    module.prototype.createMethod = function( nodeID, methodName ) {
-        vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName );
-        vwf.send( 0, nodeID, "createMethod", methodName );
+    module.prototype.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
+        vwf.logger.info( namespace + ".createMethod " + nodeID + " " + methodName + " " + methodParameters );
+        vwf.send( 0, nodeID, "createMethod", methodName, methodParameters, methodBody );
     };
 
     // TODO: deleteMethod
 
     // -- callMethod -------------------------------------------------------------------------------
 
-    module.prototype.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-        vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName ); // TODO: parameters
-        vwf.send( 0, nodeID, "callMethod", methodName ); // TODO: parameters
+    module.prototype.callMethod = function( nodeID, methodName, methodParameters ) {
+        vwf.logger.info( namespace + ".callMethod " + nodeID + " " + methodName + " " + methodParameters );
+        vwf.send( 0, nodeID, "callMethod", methodName, methodParameters );
+    };
+
+    // -- createEvent ------------------------------------------------------------------------------
+
+    module.prototype.createEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".createEvent " + nodeID + " " + eventName + " " + eventParameters );
+        vwf.send( 0, nodeID, "createEvent", eventName, eventParameters );
+    };
+
+    // TODO: deleteEvent
+
+    // -- fireEvent --------------------------------------------------------------------------------
+
+    module.prototype.fireEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".fireEvent " + nodeID + " " + eventName + " " + eventParameters );
+        vwf.send( 0, nodeID, "fireEvent", eventName, eventParameters );
     };
     
-    // TODO: createEvent, deleteEvent, addEventListener, removeEventListener, fireEvent
-
     // -- execute ----------------------------------------------------------------------------------
 
     module.prototype.execute = function( nodeID, scriptText, scriptType ) {
@@ -173,19 +187,31 @@
 
     // -- createdMethod ----------------------------------------------------------------------------
 
-    module.prototype.createdMethod = function( nodeID, methodName ) {
-        vwf.logger.info( namespace + ".createdMethod " + nodeID + " " + methodName );
+    module.prototype.createdMethod = function( nodeID, methodName, methodParameters, methodBody ) {
+        vwf.logger.info( namespace + ".createdMethod " + nodeID + " " + methodName + " " + methodParameters );
     };
 
     // TODO: deletedMethod
 
     // -- calledMethod -----------------------------------------------------------------------------
 
-    module.prototype.calledMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-        vwf.logger.info( namespace + ".calledMethod " + nodeID + " " + methodName ); // TODO: parameters
+    module.prototype.calledMethod = function( nodeID, methodName, methodParameters ) {
+        vwf.logger.info( namespace + ".calledMethod " + nodeID + " " + methodName + " " + methodParameters );
     };
 
-    // TODO: createdEvent, deletedEvent, firedEvent
+    // -- createdEvent -----------------------------------------------------------------------------
+
+    module.prototype.createdEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".createdEvent " + nodeID + " " + eventName + " " + eventParameters );
+    };
+
+    // TODO: deletedEvent
+
+    // -- calledEvent ------------------------------------------------------------------------------
+
+    module.prototype.firedEvent = function( nodeID, eventName, eventParameters ) {
+        vwf.logger.info( namespace + ".firedEvent " + nodeID + " " + eventName + " " + eventParameters );
+    };
 
     // -- executed ---------------------------------------------------------------------------------
 

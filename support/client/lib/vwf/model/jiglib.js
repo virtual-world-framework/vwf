@@ -425,17 +425,27 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
        // -- creatingMethod -----------------------------------------------------------------------
 
-       creatingMethod: function (nodeID, methodName) {
+       creatingMethod: function (nodeID, methodName, methodParameters, methodBody) {
        },
 
        // TODO: deletingMethod
 
        // -- callingMethod ------------------------------------------------------------------------
 
-       callingMethod: function ( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+       callingMethod: function (nodeID, methodName, methodParameters) {
        },
 
-       // TODO: creatingEvent, deltetingEvent, firingEvent
+       // -- creatingEvent ------------------------------------------------------------------------
+
+       creatingEvent: function (nodeID, eventName, eventParameters) {
+       },
+
+       // TODO: deletingEvent
+
+       // -- firingEvent --------------------------------------------------------------------------
+
+       firingEvent: function (nodeID, eventName, eventParameters) {
+       },
 
        // -- executing ----------------------------------------------------------------------------
 

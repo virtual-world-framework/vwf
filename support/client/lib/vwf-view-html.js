@@ -854,7 +854,7 @@
 //            return undefined;
 //        };
 //        
-//        this.onCreateMethod = function( nodeID, methodName ) {
+//        this.onCreateMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 //        
 //            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
 //            var containerQuery = nodeQuery.children( ".vwf-methods" );
@@ -880,11 +880,11 @@
 //            ). children( ":last" );
 //        };
 
-//        this.onCallMethod = function( nodeID, methodName ) {
+//        this.onCallMethod = function( nodeID, methodName, methodParameters ) {
 //        
 //        };
 
-//        this.onCreateEvent = function( nodeID, eventName ) {
+//        this.onCreateEvent = function( nodeID, eventName, eventParameters ) {
 //        
 //            var nodeQuery = jQuery( nodeID == 0 ? rootSelector : "#" + nodeID );
 //            var containerQuery = nodeQuery.children( ".vwf-events" );
@@ -911,7 +911,7 @@
 
 //        };
 
-//        this.onFireEvent = function( nodeID, eventName ) {
+//        this.onFireEvent = function( nodeID, eventName, eventParameters ) {
 //        
 //        };
 

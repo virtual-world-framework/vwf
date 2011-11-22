@@ -18,13 +18,13 @@ define( {
     settingProperty: [],
     gettingProperty: [],
 
-    creatingMethod: [],
+    creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
     /* TODO: deletingMethod, */
-    callingMethod: [],
+    callingMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-    /* TODO: creatingEvent, */
+    creatingEvent: [ /* nodeID, eventName, eventParameters */ ],
     /* TODO: deletingEvent, */
-    /* TODO: firingEvent, */
+    firingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
     executing: [],
 
