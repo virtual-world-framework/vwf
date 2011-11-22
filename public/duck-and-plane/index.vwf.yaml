@@ -4,7 +4,17 @@ source: level.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
+  backgroundColor: [ 255, 255, 255 ]
   activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  loadDone: false
+scripts:
+- text:
+    this.initialize = function() {
+      console.info( "================ duck and plane ================" );
+      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+      this.loadDone = true;
+    }
+  type: application/javascript  
 children:
   seymourplane_triangulate.dae:
     extends: http://vwf.example.com/types/node3
@@ -14,28 +24,20 @@ children:
       angle: 0
       scale: [ 1, 1, 1 ]
       position: [ -1, 0, 3 ]
-      rotation: [ 1.57, 1.57, 0 ]      
+      rotation: [ 1.57, 1.57, 0 ]
     children:
       bone1:
         extends: http://vwf.example.com/types/node3
-        children:
-          untitled:
-            extends: http://vwf.example.com/types/node3
+        scripts:
+        - |
+          this.pointerClick = function() {
+            this.parent.prop.playing = !this.parent.prop.playing;
+          }
       prop:
         extends: http://vwf.example.com/types/node3
         properties:
           playing: true
           looping: true
-    scripts:
-    - text: |
-        this.loadComplete = function() {
-          this.scale = this.scale;
-          this.position = this.position;
-          this.rotation = this.rotation;
-          this['prop'].looping = this['prop'].looping;
-          this['prop'].playing = this['prop'].playing;
-        }
-      type: application/javascript
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
@@ -52,65 +54,51 @@ children:
       orthoscale: 5
       speed: 2.0
   wallobject:
-    extends: http://vwf.example.com/types/node3
+    extends: "http://vwf.example.com/types/node3"
+    source: "cube"
+    type: "text/xml"
+    properties:
+      scale: [ 10, 10, 10 ]
+      material: "wallmaterial"
   duck.dae:
     extends: http://vwf.example.com/types/node3
+    source: duck.dae
+    type: model/vnd.collada+xml
     properties:
-      angle:
-        set:
-          this.angle = value;
-          this.parent['seymourplane_triangulate.dae'].angle = value + 1;
-        value: 0
-      playing: false
+      spinning: 
+        set: |
+          if ( value && !this.spinning ) {
+            this.future( 0.1 ).spin(); 
+          }
+          this.spinning = value;
+        value: false
       scale: [ 0.05, 0.05, 0.05 ]
       position: [ 0, -15, 0 ]
       rotation: [ 1.57, 0, 0 ]
+      eulers: [ 90, 0, 0 ]
     scripts:
     - text: |
         this.pointerClick = function() {
-          console.info( "duck.dae.pointerClick this.playing = " + this.playing );
-          this.playing = !this.playing
-        }
-        this.loadComplete = function() {
-          this.playing = this.playing;
-          this.scale = this.scale;
-          this.position = this.position;
-          this.rotation = this.rotation;
+          this.spinning = !this.spinning;
         }
       type: application/javascript
+    methods:
+      spin: |
+        var e = this.eulers;
+        e[1] += 2;
+        this.eulers = e;
+        if ( this.spinning ) {
+          this.future( 0.1 ).spin();
+        }
   dir_duck_1:
     extends: http://vwf.example.com/types/light
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      linearAttenuation: 0.002
-      quadraticAttenuation: 0.0008
-      spotCosCutOff: 0.95
-      spotExponent: 10
-      diffuse: true 
-      specular: true
-      samples: 0
-      softness: 0.01
-      bufferHeight: 256
-      bufferWidth: 256
-      shadowBias: 2.0
-      distance: 100.0
-      castShadows: false
+      rotation: [ -0.79, -3.34, -0.22 ]
   dir_plane_1:
     extends: http://vwf.example.com/types/light
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      linearAttenuation: 0.002
-      quadraticAttenuation: 0.0008
-      spotCosCutOff: 0.95
-      spotExponent: 10
-      diffuse: true 
-      specular: true
-      samples: 0
-      softness: 0.01
-      bufferHeight: 256
-      bufferWidth: 256
-      shadowBias: 2.0
-      distance: 100.0
-      castShadows: false
+      rotation: [ 0.279, 0.9539, -0.08268 ]
