@@ -1,0 +1,202 @@
+---
+extends: http://vwf.example.com/types/glge
+properties:
+  orbitRadius: -1
+  mouseMode: "orbit"
+  speed: 4.0
+scripts:
+- text: |
+    var _piDiv180 = Math.PI / 180;
+    var _180DivPI = 180 / Math.PI;
+    var _2PI = 2 * Math.PI;
+    var _85 = 85.0 * _piDiv180;
+    var _10 = 10.0 * _piDiv180;
+    var pointerDown = false;
+    var counter = 1;
+    var pointerCoord = null;
+    var phi, theta;
+    var positionChanged = false;
+    
+    // functions
+    this.mouseDown = function( parms ){
+      pointerDown = true;
+      pointerCoord = { "x": parms.X, "y": parms.Y };
+    }
+    this.mouseUp = function( parms ){
+      pointerDown = false;
+      pointerCoord = null;
+    }
+    this.mouseMove = function( parms ){
+      if ( pointerDown && this.mouseMode != "draw" ) {
+        this.mouseNav( parms );
+        pointerCoord = { "x": parms.X, "y": parms.Y };
+      } else {
+        this.draw( parms );
+      }
+    }
+    this.mouseOver = function( parms ){ }
+    this.mouseEnter = function( parms ){ }
+    this.mouseLeave = function( parms ){ }
+    this.mouseHover = function( parms ){ }
+    this.handleKeyEvents = function( keyMap, now, lasttime, mat, trans, mag ) {
+      if (!this.activeCameraComp) {
+        this.getActiveCamera();
+      }
+      if ( this.activeCameraComp ) {
+        var camerapos = this.activeCameraComp.position;
+        var camerarot = this.activeCameraComp.rotation;
+        var yinc = 0;
+        var xinc = 0;
+        var zinc = 0;
+        var yRot = 0;
+        if ( mag == 0 ) mag = 1;
+        trans[0] = trans[0] / mag;
+        trans[1] = trans[1] / mag;
+        for ( keyPress in keyMap ) {
+          switch ( Number( keyPress ) ) {
+            case 87:  //w
+            case 38:  //up
+              yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
+              break;
+            case 83:  //s
+            case 40:  //down
+              yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
+              break;
+            case 81:  //q
+              yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]);
+              break;
+            case 69:  //e
+              yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]);
+              break;
+            case 37: // left
+            case 65: // a
+              yRot += 0.04;
+              break;
+            case 39: // right
+            case 68: // d
+              yRot -= 0.04;
+              break;
+            case 90: // z
+              console.info( "position: " + camerapos );
+              console.info( "rotation: " + camerarot );
+              break;
+            case 88: // x
+              break;
+            case 82: // r
+              zinc = zinc + 1.0;
+              break;
+            case 67: // c
+              zinc = zinc - 1.0;
+              break;
+            case 16: // 0
+              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-group3-worldCenter");
+              break;
+            case 17: // 1
+              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-predator1");
+              break;
+            case 18: // 2
+              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-predator2");
+              break;
+            default:
+              break;
+          }
+        }
+
+        if ( yRot != 0 ) {
+          this.activeCameraComp.rotation = [ camerarot[0], camerarot[1] + yRot, camerarot[2] ];
+        }
+        if (xinc != 0 || yinc != 0 || zinc != 0) {
+          this.activeCameraComp.position = [ camerapos[0] + xinc * this.speed, camerapos[1] + yinc * this.speed, camerapos[2] + zinc * this.speed ];
+          positionChanged = true;
+        }
+      }
+    }
+    this.update = function() {
+      var pos = this.activeCameraComp.position;
+      this.orbitRadius = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2]) );
+      var dist2D = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) );
+      phi = Math.acos( pos[2] / this.orbitRadius );
+      if ( 0 <= pos[0] ) theta = Math.asin( pos[1]/dist2D );
+      else theta = Math.PI - Math.asin( pos[1]/dist2D );
+        console.info( "=========================== UPDATE ============================" );
+        console.info( "= theta = " + theta + "     phi = " + phi );      
+    }
+    this.mouseNav = function( parms ) {
+      switch ( this.mouseMode ) {
+        case "orbit":
+          this.orbit( parms );
+          break;
+        case "look":
+          this.look( parms );
+          break;
+      }
+    }
+    this.look = function( parms ) {
+      if (!this.activeCameraComp) this.getActiveCamera();
+      if ( this.activeCameraComp ) {
+        var rot = this.activeCameraComp.rotation;
+        var viewCenter = [ 400, 300 ];
+        var incX = -( viewCenter[1] - parms.Y ) * 0.001;
+        var incY = ( viewCenter[0] - parms.X ) * 0.0002;
+        //console.info( "X = " + parms.X + "    Y = " + parms.Y + "   incX = " + incX + "    incY = " + incY );
+
+        if ( parms.mag == 0 ) parms.mag = 1;
+        parms.trans[0] = parms.trans[0] / parms.mag;
+        parms.trans[1] = parms.trans[1] / parms.mag;
+        
+        this.activeCameraComp.rotation = [ 1.56 - parms.trans[1] * incX, rot[1] + incY, -parms.trans[0] * incX ];
+      }      
+    }
+    this.orbit = function( parms ){
+      if (!this.activeCameraComp) this.getActiveCamera();
+      if ( this.activeCameraComp ) {
+
+        var xDelta = parms.X - pointerCoord.x;
+        var yDelta = parms.Y - pointerCoord.y;
+       
+        //if ( this.orbitRadius == -1 || positionChanged ) {
+          this.activeCameraComp.lookAt = "http-vwf-example-com-types-group3-worldCenter";
+          this.update();
+        //  positionChanged = false;
+        //}
+        
+        var pixelToRadian = 10 / this.orbitRadius;
+        var phiDelta = yDelta * pixelToRadian;
+        var thetaDelta = xDelta * pixelToRadian * 4.0;
+
+        var pos = this.activeCameraComp.position;
+        console.info( "=========================== START ============================" );
+        console.info( "= MOUSE =   xDelta = " + xDelta + "     yDelta = " + yDelta );
+        console.info( "= POSITION =   x = " + pos[0] + "     y = " + pos[1] + "     z = " + pos[2] );
+        console.info( "= ORIGINAL =   theta = " + theta + "     phi = " + phi );
+        console.info( "= ORIGINAL =   thetaDelta = " + thetaDelta + "     phiDelta = " + phiDelta );
+        
+        phi = phi + phiDelta;
+        theta = theta + thetaDelta;
+
+        console.info( "= MODIFIED =   theta = " + theta + "     phi = " + phi );
+        
+        if ( theta >= _2PI ) theta -= _2PI;
+        else if ( theta < 0 ) theta += _2PI;
+
+        if ( phi > _85 ) phi = _85;
+        else if ( phi < _10 ) phi = _10;
+        
+        console.info( "= CLAMPED =   theta = " + theta + "     phi = " + phi );
+          
+        // Spherical to Cartesian
+        var x = this.orbitRadius * Math.sin(phi) * Math.cos(theta);
+        var y = this.orbitRadius * Math.sin(phi) * Math.sin(theta);
+        var z = this.orbitRadius * Math.cos(phi);
+        
+        console.info( "= NEW POSITION =   x = " + x + "     y = " + y + "     z = " + z );
+
+        this.activeCameraComp.position = [ x, y, z ];
+        this.activeCameraComp.lookAt = "http-vwf-example-com-types-group3-worldCenter";
+      }  
+      this.draw = function( parms ) {
+        
+      }
+    }
+    
+  type: application/javascript
