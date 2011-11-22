@@ -2,8 +2,21 @@
 extends: http://vwf.example.com/types/glge
 properties:
   orbitRadius: -1
-  mouseMode: "orbit"
-  speed: 4.0
+  orbitObjectID: "http-vwf-example-com-types-group3-worldCenter"
+  mouseMode: 
+    set: |
+      switch( value ) {
+        case "look":
+        case "orbit":
+        case "draw":
+          this.mouseMode = value;
+          break;
+        default:
+          console.info( "WARNING: walk, look, and draw are the only supported mouseMode" );
+          break;
+      }
+    value: "orbit"
+  speed: 10.0
 scripts:
 - text: |
     var _piDiv180 = Math.PI / 180;
@@ -104,7 +117,6 @@ scripts:
               break;
           }
         }
-
         if ( yRot != 0 ) {
           this.activeCameraComp.rotation = [ camerarot[0], camerarot[1] + yRot, camerarot[2] ];
         }
@@ -159,12 +171,12 @@ scripts:
         var yDelta = parms.Y - pointerCoord.y;
        
         //if ( this.orbitRadius == -1 || positionChanged ) {
-          this.activeCameraComp.lookAt = "http-vwf-example-com-types-group3-worldCenter";
+          this.activeCameraComp.lookAt = this.orbitObjectID;
           this.update();
         //  positionChanged = false;
         //}
         
-        var pixelToRadian = 10 / this.orbitRadius;
+        var pixelToRadian = 5 / this.orbitRadius;
         var phiDelta = yDelta * pixelToRadian;
         var thetaDelta = xDelta * pixelToRadian * 4.0;
 
@@ -196,7 +208,7 @@ scripts:
         //console.info( "= NEW POSITION =   x = " + x + "     y = " + y + "     z = " + z );
 
         this.activeCameraComp.position = [ x, y, z ];
-        this.activeCameraComp.lookAt = "http-vwf-example-com-types-group3-worldCenter";
+        this.activeCameraComp.lookAt = this.orbitObjectID;
       }  
       this.draw = function( parms ) {
         
