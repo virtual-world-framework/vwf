@@ -668,6 +668,9 @@ if ( ! childName ) childNodeID = childNodeID + "-" + Math.round( Math.random() *
                 construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID ) {
 if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
 vwf.addChild( nodeID, childNodeID, childName );
+                    if ( nodeID == 0 ) {  // TODO: const for root id
+                        jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html" ); // load the UI chrome if available
+                    }
                     callback && callback.call( vwf, childNodeID );
                 } );
 
