@@ -120,7 +120,7 @@ children:
     properties:
       walkMode: "walk"
       cameraType: "perspective"
-      position: [ 0, 4000, 1000 ]
+      position: [ 0, 8000, 2000 ]
       rotation: [ 1.56, 3.14, 0 ]
       far: 500000
       near: 2

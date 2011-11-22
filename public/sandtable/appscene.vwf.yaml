@@ -36,7 +36,10 @@ scripts:
     }
     this.mouseOver = function( parms ){ }
     this.mouseEnter = function( parms ){ }
-    this.mouseLeave = function( parms ){ }
+    this.mouseLeave = function( parms ){
+      pointerDown = false;
+      pointerCoord = null;      
+    }
     this.mouseHover = function( parms ){ }
     this.handleKeyEvents = function( keyMap, now, lasttime, mat, trans, mag ) {
       if (!this.activeCameraComp) {
@@ -118,8 +121,9 @@ scripts:
       phi = Math.acos( pos[2] / this.orbitRadius );
       if ( 0 <= pos[0] ) theta = Math.asin( pos[1]/dist2D );
       else theta = Math.PI - Math.asin( pos[1]/dist2D );
-        console.info( "=========================== UPDATE ============================" );
-        console.info( "= theta = " + theta + "     phi = " + phi );      
+      
+      //console.info( "=========================== UPDATE ============================" );
+      //console.info( "= theta = " + theta + "     phi = " + phi );      
     }
     this.mouseNav = function( parms ) {
       switch ( this.mouseMode ) {
@@ -165,16 +169,16 @@ scripts:
         var thetaDelta = xDelta * pixelToRadian * 4.0;
 
         var pos = this.activeCameraComp.position;
-        console.info( "=========================== START ============================" );
-        console.info( "= MOUSE =   xDelta = " + xDelta + "     yDelta = " + yDelta );
-        console.info( "= POSITION =   x = " + pos[0] + "     y = " + pos[1] + "     z = " + pos[2] );
-        console.info( "= ORIGINAL =   theta = " + theta + "     phi = " + phi );
-        console.info( "= ORIGINAL =   thetaDelta = " + thetaDelta + "     phiDelta = " + phiDelta );
+        //console.info( "=========================== START ============================" );
+        //console.info( "= MOUSE =   xDelta = " + xDelta + "     yDelta = " + yDelta );
+        //console.info( "= POSITION =   x = " + pos[0] + "     y = " + pos[1] + "     z = " + pos[2] );
+        //console.info( "= ORIGINAL =   theta = " + theta + "     phi = " + phi );
+        //console.info( "= ORIGINAL =   thetaDelta = " + thetaDelta + "     phiDelta = " + phiDelta );
         
-        phi = phi + phiDelta;
-        theta = theta + thetaDelta;
+        phi = phi - phiDelta;
+        theta = theta - thetaDelta;
 
-        console.info( "= MODIFIED =   theta = " + theta + "     phi = " + phi );
+        //console.info( "= MODIFIED =   theta = " + theta + "     phi = " + phi );
         
         if ( theta >= _2PI ) theta -= _2PI;
         else if ( theta < 0 ) theta += _2PI;
@@ -182,14 +186,14 @@ scripts:
         if ( phi > _85 ) phi = _85;
         else if ( phi < _10 ) phi = _10;
         
-        console.info( "= CLAMPED =   theta = " + theta + "     phi = " + phi );
+        //console.info( "= CLAMPED =   theta = " + theta + "     phi = " + phi );
           
         // Spherical to Cartesian
         var x = this.orbitRadius * Math.sin(phi) * Math.cos(theta);
         var y = this.orbitRadius * Math.sin(phi) * Math.sin(theta);
         var z = this.orbitRadius * Math.cos(phi);
         
-        console.info( "= NEW POSITION =   x = " + x + "     y = " + y + "     z = " + z );
+        //console.info( "= NEW POSITION =   x = " + x + "     y = " + y + "     z = " + z );
 
         this.activeCameraComp.position = [ x, y, z ];
         this.activeCameraComp.lookAt = "http-vwf-example-com-types-group3-worldCenter";
