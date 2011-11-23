@@ -8,7 +8,7 @@ Kernel
 
     Create a node from a component specification.
 
-*   deleteNode( nodeID )
+*   deleteNode( nodeID, childName )
 
 *   getNode( nodeID )
 

@@ -354,6 +354,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                
         },
          
+        // -- deletingNode -------------------------------------------------------------------------
+
+        deletingNode: function( nodeID, childName ) {
+
+            this.logger.info( "deletingNode", nodeID, childName );
+
+            this.logger.warn( "deletingNode", "unimplemented" );
+
+        },
+
         // -- addingChild ------------------------------------------------------------------------
         
         addingChild: function( nodeID, childID, childName ) {

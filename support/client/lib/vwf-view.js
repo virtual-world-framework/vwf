@@ -42,7 +42,12 @@
         vwf.send( 0, nodeID, "createNode", undefined, [ childComponent, childName ] );  // TODO: swap childComponent & childName
     };
 
-    // TODO: deleteNode
+    // -- deleteNode -------------------------------------------------------------------------------
+
+    module.prototype.deleteNode = function( nodeID, childName ) {
+        vwf.logger.info( namespace + ".deleteNode " + nodeID + " " + childName );
+        vwf.send( 0, nodeID, "deleteNode", childName );
+    };
 
     // -- addChild ---------------------------------------------------------------------------------
 
@@ -148,7 +153,12 @@
             childSource + " " +  childType + " " + childName );
     };
 
-    // TODO: deletedNode
+    // -- deletedNode ------------------------------------------------------------------------------
+
+    module.prototype.deletedNode = function( nodeID, childName ) {
+        vwf.logger.info( namespace + ".deletedNode " + nodeID + " " + childName );
+    };
+
 
     // -- addedChild -------------------------------------------------------------------------------
 

@@ -32,21 +32,25 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 childComponent, childName, callback );  // TODO: remap callback parameter
         },
 
-        // TODO: deleteNode
+        // -- deleteNode ---------------------------------------------------------------------------
+
+        deleteNode: function( node, childName ) {
+            return this.kernel.deleteNode( this.model_to_kernel[this.object_id(node)] || node,
+                childName );
+        },
 
         // -- addChild -----------------------------------------------------------------------------
 
         addChild: function( node, child, childName ) {
-            return this.kernel.addChild(
-                this.model_to_kernel[this.object_id(node)] || node, this.model_to_kernel[this.object_id(child)] || child,
-                childName );
+            return this.kernel.addChild( this.model_to_kernel[this.object_id(node)] || node,
+                this.model_to_kernel[this.object_id(child)] || child, childName );
         },
 
         // -- removeChild --------------------------------------------------------------------------
 
         removeChild: function( node, child ) {
-            return this.kernel.removeChild(
-                this.model_to_kernel[this.object_id(node)] || node, this.model_to_kernel[this.object_id(child)] || child );
+            return this.kernel.removeChild( this.model_to_kernel[this.object_id(node)] || node,
+                this.model_to_kernel[this.object_id(child)] || child );
         },
 
         // -- parent -------------------------------------------------------------------------------
@@ -156,13 +160,18 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return undefined; // creatingNode doesn't return anything to the kernel
         },
 
-        // TODO: deletingNode
+        // -- deletingNode -------------------------------------------------------------------------
+
+        deletingNode: function( nodeID, childName ) {
+            return this.model.deletingNode && this.model.deletingNode( this.kernel_to_model[nodeID] || nodeID,
+                childName );
+        },
 
         // -- addingChild --------------------------------------------------------------------------
 
         addingChild: function( nodeID, childID, childName ) {
-            return this.model.addingChild && this.model.addingChild(
-                this.kernel_to_model[nodeID] || nodeID, this.kernel_to_model[childID] || childID, childName );
+            return this.model.addingChild && this.model.addingChild( this.kernel_to_model[nodeID] || nodeID,
+                this.kernel_to_model[childID] || childID, childName );
         },
 
         // -- removingChild ------------------------------------------------------------------------

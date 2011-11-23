@@ -1,7 +1,7 @@
 define( {
 
     creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /- ( ready ) -/ */ ],
-    /* TODO: deletingNode, */
+    deletingNode: [ /* nodeID, childName */ ],
 
     prototyping: [],
 
