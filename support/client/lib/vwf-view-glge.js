@@ -53,10 +53,10 @@
             window.onkeydown = function( event ) {
                 switch ( event.keyCode ) {
                     case 17:
+                    case 16:
                     case 18:
                     case 19:
                     case 20:
-                        glgeView.keysDown.mods[ event.keyCode ] = true;
                         break;                        
                     default:
                         glgeView.keysDown.keys[ event.keyCode ] = true;
@@ -66,11 +66,11 @@
 
             window.onkeyup = function( event ) {
                 switch ( event.keyCode ) {
+                    case 16:
                     case 17:
                     case 18:
                     case 19:
                     case 20:
-                        delete glgeView.keysDown.mods[ event.keyCode ];
                         break;                        
                     default:
                         delete glgeView.keysDown.keys[ event.keyCode ];
@@ -196,6 +196,12 @@
             if ( cameraNode && cameraNode.glgeObject ) {
                 if ( view.keysDown.keys && Object.keys( view.keysDown.keys ).length ) {
   
+                  view.keysDown.mods = {
+                    alt: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_ALT ),
+                    shift: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_SHIFT ),
+                    ctrl: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_CTRL ),
+                  }; 
+                   
                   var mat = cameraNode.glgeObject.getRotMatrix();
                   var trans = GLGE.mulMat4Vec4( mat, [0, 0, -1, 1] );
                   var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
