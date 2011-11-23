@@ -7,8 +7,8 @@
       function setColor(color) {
         vwf_view.kernel.setProperty( "http-vwf-example-com-types-node-toolbar", "selectedColor", color );
         highlightColor(color);
-      }
-      
+       }
+	        
       function highlightColor(color) {
         document.getElementById('black').style.border = "2px solid black";
         document.getElementById('red').style.border = "2px solid black";
@@ -31,16 +31,30 @@
 			case "blue":
 				vColor = [0, 0, 255];
 				break;
-			cdefault:
+			default:
 				vColor = [0, 0, 0];
 				break;
 		}
         vwf_view.kernel.setProperty("index-vwf", "lineColor", vColor);
       }
+
+      function setMode(mode) {
+		vwf_view.kernel.setProperty( "http-vwf-example-com-types-node-toolbar", "inputMode", mode );
+		highlightMode(mode);
+	  }
+
+      function highlightMode(mode) {
+       	document.getElementById('orbit').style.border = "2px solid black";
+       	document.getElementById('draw').style.border = "2px solid black";
+
+       	document.getElementById(mode).style.border = "3px solid red";
+       	vwf_view.kernel.setProperty("index-vwf", "mouseMode", mode);
+      }
       
       function clearOverlay() {
-        vwf_view.kernel.callMethod( "http-vwf-example-com-types-node-toolbar", "clear" );      
+        vwf_view.kernel.callMethod( "http-vwf-example-com-types-node-toolbar", "clear" );
         setColor('black');
+        setMode('orbit');
       }
       
       function showToolbar()
@@ -69,20 +83,30 @@
         evt.stopPropagation(); 
         showToolbar(); 
         return false; 
-      }); 
+      });
 
       vwf_view.propertyChanged = function (nodeId, propertyName, propertyValue) {
-        if(nodeId == "http-vwf-example-com-types-node-toolbar" && propertyName == "selectedColor")
-        {
-          highlightColor(propertyValue);   
-        }
+      	if (nodeId == "http-vwf-example-com-types-node-toolbar" ) {
+      		switch (propertyName) {
+      			case "selectedColor":
+      				highlightColor(propertyValue);
+      				break;
+      			case "inputMode":
+      				highlightMode( propertyValue );
+      				break;
+      		}
+      	 }
       }
+
+
 
     </script>
   </head>
   <body>
     <div style="text-align:center">
       <div class="toolstyle" id="toolbar">
+        <img id="orbit" src="images/spin.png" style="border:3px solid red" alt="orbit" onclick="setMode('orbit')"/>
+        <img id="draw" src="images/draw.png" style="border:3px solid red" alt="draw" onclick="setMode('draw')"/>
         <img id="black" src="images/black.png" style="border:3px solid orange" alt="black" onclick="setColor('black')"/>
         <img id="red" src="images/red.png" style="border:2px solid black" alt="red" onclick="setColor('red')"/>
         <img id="yellow" src="images/yellow.png" style="border:2px solid black" alt="yellow" onclick="setColor('yellow')"/>

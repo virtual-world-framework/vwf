@@ -4,7 +4,7 @@ properties:
   orbitRadius: -1
   orbitObjectID: "http-vwf-example-com-types-group3-worldCenter"
   lineWidth: 16
-  lineColor: [ 255, 0, 0 ]
+  lineColor: [ 0, 0, 0 ]
   mouseMode: 
     set: |
       switch( value ) {
@@ -37,7 +37,7 @@ scripts:
       "extends": "http://vwf.example.com/types/node3",
       "type": "definition/mesh",
       "properties": { 
-        "meshDefinition": { positions: [], faces: [], color: [ 255, 0, 0 ] }
+        "meshDefinition": { positions: [], faces: [], color: [] }
       }
     };
     

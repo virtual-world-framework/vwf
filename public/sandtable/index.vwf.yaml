@@ -27,8 +27,15 @@ children:
           this.selectedColorChanged( value );
         value:
           "black"
+      inputMode:
+        set: |
+          this.inputMode = value;
+          this.inputModeChanged( value );
+        value:
+          "orbit"      
     events:
       selectedColorChanged:
+      inputModeChanged:
   flat_terrain:
     extends: http://vwf.example.com/types/node3
     source: models/vwf_terrain.dae
@@ -41,7 +48,6 @@ children:
     extends: http://vwf.example.com/types/group3
     properties:
       position: [ 0, 0, 0 ]
-
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
