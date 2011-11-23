@@ -21,6 +21,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             childSource, childType, childName, callback /* ( ready ) */ ) {
         },
 
+        // -- deletingNode -------------------------------------------------------------------------
+
+        deletingNode: function( nodeID, childName ) {
+        },
+
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {

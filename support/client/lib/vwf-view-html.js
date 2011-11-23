@@ -65,6 +65,16 @@
 
     };
 
+    // -- deletedNode ------------------------------------------------------------------------------
+
+    module.prototype.deletedNode = function (nodeID, childName) {
+
+        vwf.logger.info(namespace + ".deletedNode " + nodeID + " " + childName);
+
+        vwf.logger.warn(namespace + ".deletedNode " + "unimplemented");
+
+    };
+
     module.prototype.addedChild = function (nodeID, childID, childName) {
 
         vwf.logger.info(namespace + ".addedChild " + nodeID + " " + childID + " " + childName);

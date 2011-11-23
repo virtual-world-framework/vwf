@@ -24,7 +24,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             childSource, childType, childName, callback /* ( ready ) */ ) {
         },
 
-        // TODO: deletingNode
+        // -- deletingNode -------------------------------------------------------------------------
+
+        deletingNode: function( nodeID, childName ) {
+        },
 
         // -- addingChild --------------------------------------------------------------------------
 

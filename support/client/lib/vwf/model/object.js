@@ -36,6 +36,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         },
 
+        // -- deletingNode -------------------------------------------------------------------------
+
+        deletingNode: function( nodeID, childName ) {
+            this.logger.warn( "deletingNode", "unimplemented" );
+        },
+
         // -- prototyping --------------------------------------------------------------------------
 
         prototyping: function( nodeID ) {  // TODO: not for global anchor node 0

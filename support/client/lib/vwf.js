@@ -681,6 +681,29 @@ vwf.addChild( nodeID, childNodeID, childName );
             this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + ( typeof childComponent == "string" || childComponent instanceof String ? childComponent : JSON.stringify( loggableComponent( childComponent ) ) ) ); /* must log something for group level to reset in WebKit */
         };
 
+        // -- deleteNode ---------------------------------------------------------------------------
+
+        this.deleteNode = function( nodeID, childName ) {
+
+            this.logger.group( "vwf.deleteNode " + nodeID + " " + childName );
+
+            // Call deletingNode() on each model. The node is considered deleted after each model
+            // has run.
+
+            vwf.models.forEach( function( model ) {
+                model.deletingNode && model.deletingNode( nodeID, childName );
+            } );
+
+            // Call deletedNode() on each view. The view is being notified that a node has been
+            // deleted.
+
+            vwf.views.forEach( function( view ) {
+                view.deletedNode && view.deletedNode( nodeID, childName );
+            } );
+
+            this.logger.groupEnd(); this.logger.debug( "vwf.deleteNode complete " + nodeID + " " + childName ); /* must log something for group level to reset in WebKit */
+        };
+
         // -- getType ------------------------------------------------------------------------------
 
         // Find or load a node that will serve as the prototype for a component specification. If

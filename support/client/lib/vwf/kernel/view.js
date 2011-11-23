@@ -17,11 +17,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         [ childComponent, childName ], callback /* ( result ) */ );  // TODO: swap childComponent & childName
                 };
 
-            // TODO: deleteNode
+            case "deleteNode":
+
+                return function( nodeID, childName, when, callback ) {
+                    this.kernel.send( when || 0, nodeID, kernelFunctionName, childName,
+                        undefined, callback /* ( result ) */ );
+                };
 
             case "addChild":
             
-                return function( nodeID, childID, childName, when, callback) {
+                return function( nodeID, childID, childName, when, callback ) {
                     this.kernel.send( when || 0, nodeID, kernelFunctionName, undefined,
                         [ childID, childName ], callback /* ( result ) */ );  // TODO: swap childID & childName?
                 };

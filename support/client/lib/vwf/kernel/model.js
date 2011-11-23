@@ -25,7 +25,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
 
-            // TODO: deleteNode
+            case "deleteNode":
+
+                return function( nodeID, childName, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, childName );
+                    } else {
+                        this.kernel.queue( when, nodeID, kernelFunctionName, childName,
+                            undefined, callback /* ( result ) */ );
+                    }
+
+                };
 
             case "addChild":
 
