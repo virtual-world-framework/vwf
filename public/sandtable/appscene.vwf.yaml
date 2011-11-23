@@ -3,12 +3,15 @@ extends: http://vwf.example.com/types/glge
 properties:
   orbitRadius: -1
   orbitObjectID: "http-vwf-example-com-types-group3-worldCenter"
+  lineWidth: 16
+  lineColor: [ 255, 0, 0 ]
   mouseMode: 
     set: |
       switch( value ) {
         case "look":
         case "orbit":
         case "draw":
+          if ( value != "draw" ) this.lastMouseUpInfo = undefined;
           this.mouseMode = value;
           break;
         default:
@@ -29,8 +32,19 @@ scripts:
     var pointerCoord = null;
     var phi, theta;
     var positionChanged = false;
+    var lineIndex = 1;
+    var line = {
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "definition/mesh",
+      "properties": { 
+        "meshDefinition": { positions: [], faces: [], color: [ 255, 0, 0 ] }
+      }
+    };
     
     // functions
+    this.initialize = function() {
+      this.lastMouseUpInfo = undefined;
+    }
     this.mouseDown = function( parms ){
       pointerDown = true;
       pointerCoord = { "x": parms.X, "y": parms.Y };
@@ -38,7 +52,113 @@ scripts:
     this.mouseUp = function( parms ){
       pointerDown = false;
       pointerCoord = null;
+      switch ( this.mouseMode ) {
+        case "draw": {
+          if ( parms.pickInfo && parms.pickInfo.coord ) {
+            if ( this.lastMouseUpInfo ) {
+              var x1, y1, z1, x2, y2, z2;
+              var start = this.lastMouseUpInfo.pickInfo.coord;
+              var end = parms.pickInfo.coord;
+              x1 = start[0];
+              y1 = start[1];
+              z1 = 0;
+              x2 = end[0];
+              y2 = end[1];
+              z2 = 0;              
+               
+              var pos = [];
+              var faces;
+              
+              var diff = [ x2 - x1, y2 - y1, z2 - z1 ];
+              var up = [ 0, 1, 0 ];
+              var right = [ 1, 0, 0 ];
+              var top = [ 0, 0, 0 ];
+              
+              this.normalize( diff );
+
+              if ( Math.abs( this.dotProduct( up, diff ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
+              { // then we can cross with up
+                right = this.crossProduct( diff, up );
+              }
+              else
+              { //too colinear with up, so start w/ a different axis
+                right = this.crossProduct( diff, right );
+              }
+              top = this.crossProduct( diff, right );
+              this.normalize( right );
+              this.normalize( top );
+              this.multiply( right, this.lineWidth );
+              this.multiply( top, this.lineWidth );              
+              
+              pos.push( x1 + right[0] );  // 0
+              pos.push( y1 + right[1] );  // 0
+              pos.push( z1 + right[2] );  // 0
+              
+              pos.push( x2 + right[0] );  // 1
+              pos.push( y2 + right[1] );  // 1
+              pos.push( z2 + right[2] );  // 1
+              
+              pos.push( x1 - right[0] );  // 2
+              pos.push( y1 - right[1] );  // 2
+              pos.push( z1 - right[2] );  // 2
+              
+              pos.push( x2 - right[0] );  // 3
+              pos.push( y2 - right[1] );  // 3
+              pos.push( z2 - right[2] );  // 3
+              
+              pos.push( x1 + top[0] );  // 4
+              pos.push( y1 + top[1] );  // 4
+              pos.push( z1 + top[2] );  // 4
+              
+              pos.push( x2 + top[0] );  // 5
+              pos.push( y2 + top[1] );  // 5
+              pos.push( z2 + top[2] );  // 5
+              
+              pos.push( x1 - top[0] );  // 6
+              pos.push( y1 - top[1] );  // 6
+              pos.push( z1 - top[2] );  // 6
+              
+              pos.push( x2 - top[0] );  // 7
+              pos.push( y2 - top[1] );  // 7
+              pos.push( z2 - top[2] );  // 7
+              
+              faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
+              
+              line.properties.meshDefinition.positions = pos;
+              line.properties.meshDefinition.faces = faces;
+              line.properties.meshDefinition.color = this.lineColor;
+              
+              vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+              lineIndex++;
+            }
+            this.lastMouseUpInfo = parms;
+          }
+        }
+        break;
+      }
     }
+    this.multiply = function( v, value ) {
+      for ( var i = 0; i < v.length; i++ ) {
+        v[i] *= value;
+      }
+    }
+    this.dotProduct = function( v1, v2 ) {
+      return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+    }
+    this.crossProduct = function( v1, v2 ) {
+      return [ v1[1] * v2[2] -v1[2] * v2[1], v1[2] * v2[0] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0], 0 ];
+    }
+    this.vectorLength = function( v ) {
+      var sq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+      return ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
+    }    
+    this.normalize = function( v ) {
+      f = this.vectorLength( v );
+      v[0] /= f;
+      v[1] /= f;
+      v[2] /= f;
+      return f;
+    }   
     this.mouseMove = function( parms ){
       if ( pointerDown && this.mouseMode != "draw" ) {
         this.mouseNav( parms );
@@ -209,10 +329,8 @@ scripts:
 
         this.activeCameraComp.position = [ x, y, z ];
         this.activeCameraComp.lookAt = this.orbitObjectID;
-      }  
-      this.draw = function( parms ) {
-        
       }
     }
-    
+    this.draw = function( parms ) {
+    }
   type: application/javascript

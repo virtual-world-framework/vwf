@@ -29,105 +29,19 @@ children:
           "black"
     events:
       selectedColorChanged:
-#  skydome:
-#    extends: http://vwf.example.com/types/node3
-#    source: models/skydome_textured.dae
-#    type: model/vnd.collada+xml
-#    properties:
-#      position: [ 0, 0, 0 ]
-#      eulers: [0, 0, 0 ]
-#      scale: [ 0.0005, 0.0005, 0.0005 ]
   flat_terrain:
     extends: http://vwf.example.com/types/node3
     source: models/vwf_terrain.dae
     type: model/vnd.collada+xml
     properties:
-      position: [ 0, 0, -500 ]
+      position: [ 0, 0, -150 ]
       eulers: [0, 0, 0 ]
-      scale: [ 0.004, 0.004, 0.004 ]
+      scale: [ 0.004, 0.004, 0.001 ]
   worldCenter:
     extends: http://vwf.example.com/types/group3
     properties:
       position: [ 0, 0, 0 ]
-#  NW_geotile1:
-#    extends: http://vwf.example.com/types/node3
-#    source: models/NW_geotile1.DAE
-#    type: model/vnd.collada+xml
-#    properties:
-#      position: [ 0, 0, 0 ]
-#      eulers: [0, 0, 0 ]
-#      scale: [ 0.001, 0.001, 0.001 ]
-#    scripts:
-#    - text: |
-#        this.initialize = function() {
-#          this.position = this.position;
-#          this.eulers = this.eulers;
-#          this.scale = this.scale;
-#        }
-#        this.loadComplete = function() {
-#          console.info( "== loadComplete == NW_geotile1.dae == loadComplete ==" );
-#          this.eulers = this.eulers;
-#        }
-#  NE_geotile2:
-#    extends: http://vwf.example.com/types/node3
-#    source: NE_geotile2.DAE
-#    type: model/vnd.collada+xml
-#    properties:
-#      position: [ 0, 0, 0 ]
-#      eulers: [0, 0, 0 ]
-#      scale: [ 0.001, 0.001, 0.001 ]
-#    scripts:
-#    - text: |
-#        this.initialize = function() {
-#          this.position = this.position;
-#          this.eulers = this.eulers;
-#          this.scale = this.scale;
-#        }
-#        this.loadComplete = function() {
-#          console.info( "== loadComplete == NE_geotile2.dae == loadComplete ==" );
-#          this.eulers = this.eulers;
-#        }
-#      type: application/javascript
-#  SW_geotile3:
-#    extends: http://vwf.example.com/types/node3
-#    source: SW_geotile3.DAE
-#    type: model/vnd.collada+xml
-#    properties:
-#      position: [ 0, 0, 0 ]
-#      eulers: [0, 0, 0 ]
-#      scale: [ 0.001, 0.001, 0.001 ]
-#    scripts:
-#    - text: |
-#        this.initialize = function() {
-#          this.position = this.position;
-#          this.eulers = this.eulers;
-#          this.scale = this.scale;
-#        }
-#        this.loadComplete = function() {
-#          console.info( "== loadComplete == SW_geotile3.dae == loadComplete ==" );
-#          this.eulers = this.eulers;
-#        }
-#      type: application/javascript
-#  SE_geotile4:
-#    extends: http://vwf.example.com/types/node3
-#    source: SE_geotile4.DAE
-#    type: model/vnd.collada+xml
-#    properties:
-#      position: [ 0, 0, 0 ]
-#      eulers: [0, 0, 0 ]
-#      scale: [ 0.001, 0.001, 0.001 ]
-#    scripts:
-#    - text: |
-#        this.initialize = function() {
-#          this.position = this.position;
-#          this.eulers = this.eulers;
-#          this.scale = this.scale;
-#        }
-#        this.loadComplete = function() {
-#          console.info( "== loadComplete == SE_geotile4.dae == loadComplete ==" );
-#          this.eulers = this.eulers;
-#        }
-#      type: application/javascript
+
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
@@ -151,9 +65,3 @@ children:
       position: [ 0, 0, 0 ]
       eulers: [0, 0, 0 ]
       scale: [ 10, 10, 10 ]
-#  test:
-#    extends: http://vwf.example.com/types/node3
-#    type: "definition/mesh"
-#    properties:
-#      scale: [ 50, 50, 50 ]
-#      position: [ 0, 0, 200 ]

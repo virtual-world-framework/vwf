@@ -67,6 +67,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             ID: childID,
                             parentID: nodeID,
                             glgeKeys: new GLGE.KeyInput(),
+                            type: childExtendsID,
                             camera: {
                                 ID: undefined,
                                 defaultCamID: "http-vwf-example-com-types-camera-defaultCamera",
@@ -133,6 +134,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 ID: childID,
                                 parentID: nodeID,
                                 sourceType: childType,
+                                type: childExtendsID,
                                 loadingCollada: callback 
                             };
                             loadCollada.call( this, parentNode, node ); 
@@ -146,6 +148,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 source: childSource,
                                 ID: childID,                                
                                 parentID: nodeID,
+                                type: childExtendsID,
                                 sourceType: childType 
                             };
                             
@@ -165,45 +168,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             }
                             break;
                         
-                        case "definition/mesh":
-                            node = this.state.nodes[childID] = {
-                                name: childName,  
-                                glgeObject: undefined,
-                                type: childExtendsID,
-                                source: childSource,
-                                ID: childID,                                
-                                parentID: nodeID,
-                                sourceType: childType 
-                            };
-                            var meshDefObject = {
-			                    positions: [ 1.000,1.000,1.000,1.000,1.000,-1.000,-1.000,1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,-1.000,-1.000,1.000,1.000,-1.000,-1.000,-1.000,-1.000,-1.000,1.000,-1.000,1.000,1.000,-1.000,-1.000,-1.000,-1.000,1.000,1.000,-1.000,1.000,-1.000,1.000,-1.000,-1.000,1.000,-1.000,1.000,-1.000,-1.000,-1.000,1.000,-1.000,1.000,-1.000,-1.000,1.000,-1.000,-1.000,-1.000,1.000,1.000,-1.000,1.000,1.000,1.000,1.000,-1.000,-1.000,1.000,1.000,1.000,1.000,-1.000,1.000,1.000,-1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,-1.000,1.000,1.000,-1.000,-1.000,1.000,1.000,-1.000,1.000,1.000,1.000,-1.000,1.000,-1.000,-1.000,-1.000,-1.000,-1.000,1.000,1.000,-1.000,-1.000,-1.000,-1.000,-1.000,1.000,-1.000 ],
-			                    normals: [ 0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,0.000,1.000,0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-0.000,-1.000,-0.000,-0.000,-1.000,-0.000,-0.000,-1.000,-0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,-0.000,0.000,1.000,-0.000,0.000,1.000,-0.000,0.000,-0.000,-0.000,1.000,-0.000,-0.000,1.000,-0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,-0.000,1.000,0.000,0.000,-1.000,0.000,0.000,-1.000,0.000,0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000,0.000,-0.000,-1.000 ],
-			                    //uv1: [ ],
-			                    faces: [ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35 ],
-                                //positions: [5,5,100, 5,-5,100, -5,-5,100, -5,5,100],
-                                //normals: [0,0,1, 0,0,1, 0,0,1, 0,0,1],
-                                //faces: [3,0,1,3,1,2],
-                            };
-
-                            if ( glgeParent ) {
-                                node.glgeObject = new GLGE.Group();
-                                glgeParent.addObject( node.glgeObject );
-                                var obj = new GLGE.Object();
-                                var mesh = new GLGE.Mesh();
-
-                                if ( meshDefObject.positions )
-                                    mesh.setPositions( meshDefObject.positions );
-                                if ( meshDefObject.normals )
-                                    mesh.setNormals( meshDefObject.normals );
-                                if ( meshDefObject.uv1 )
-                                    mesh.setUV( meshDefObject.uv1 );
-                                if ( meshDefObject.faces )
-                                    mesh.setFaces( meshDefObject.faces );
-
-                                obj.setMesh( mesh );
-                                node.glgeObject.addObject( obj );
+                        case "definition/mesh": {
+                                node = this.state.nodes[childID] = {
+                                    name: childName,  
+                                    glgeObject: undefined,
+                                    glgeParent: glgeParent,
+                                    type: childExtendsID,
+                                    source: childSource,
+                                    ID: childID,                                
+                                    parentID: nodeID,
+                                    type: childExtendsID,
+                                    sourceType: childType 
+                                };
                             }
-
                             break;
 
                         default:
@@ -212,7 +189,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 glgeObject: glgeChild,
                                 ID: childID,
                                 parentID: nodeID,
-                                type: childExtendsID
+                                type: childExtendsID,
+                                sourceType: childType, 
                             };
                             if ( node.glgeObject ) {
                                 //console.info( "childName: " + childName + " of type " + node.glgeObject.constructor );
@@ -242,7 +220,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     parentID: nodeID,
                     sceneID: this.state.sceneRootID,
                     glgeScene: sceneNode ? sceneNode.glgeScene : undefined,
-                    type: childExtendsID
+                    type: childExtendsID,
+                    sourceType: childType,
                 };
 
                 if ( !node.glgeObject ) {
@@ -272,7 +251,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     glgeObject: glgeChild,
                     ID: childID,
                     parentID: nodeID,
-                    type: childExtendsID
+                    type: childExtendsID,
+                    sourceType: childType,
                 };
                 if ( !node.glgeObject ) {
                     createLight.call( this, nodeID, childID, childName );
@@ -286,7 +266,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     glgeMaterial: true,
                     ID: childID,
                     parentID: nodeID,
-                    type: childExtendsID
+                    type: childExtendsID,
+                    sourceType: childType,
                 };
                 findMaterial.call( this, nodeID, childName, node );
                 break;
@@ -310,7 +291,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     glgeObject: new GLGE.Group(),
                     ID: childID,
                     parentID: nodeID,
-                    type: childExtendsID
+                    type: childExtendsID,
+                    sourceType: childType,
                 };
 
                 if ( parentNode ) {
@@ -331,7 +313,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     glgeObject: glgeChild,
                     ID: childID,
                     parentID: nodeID,
-                    type: childExtendsID
+                    type: childExtendsID,
+                    sourceType: childType,
                 }
 
                 if ( parentNode && parentNode.meshesCreated && parentNode.meshesCreated[childName] ) {
@@ -364,7 +347,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     glgeObject: glgeChild,
                     ID: childID,
                     parentID: nodeID,
-                    type: childExtendsID
+                    type: childExtendsID,
+                    sourceType: childType,
                 };
             }
                
@@ -427,29 +411,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( !( propertyValue === undefined ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( !node ) node = this.state.scenes[ nodeID ];
-                switch ( propertyName ) {
+                if ( node ) {
+                    switch ( propertyName ) {
 
-//                    case "physics":
-//                        if ( propertyValue == "mesh" || ( propertyValue.constructor == Array && propertyValue[0] == "mesh" ) ) {
-//                            var meshList = findAllMeshes.call( this, node.glgeObject );
+                        case "meshDefinition":
+                            createMesh( propertyValue, node );
+                            break;
 
-//                            if ( meshList && meshList.length ) {
-//                                node.meshesCreated = {};
-//                                console.info( "PHYSICS requires adding meshes to : " + nodeID );
-//                                for ( var k = 0; k < meshList.length; k++ ) {
-//                                    console.info( "      PHYSICS adding mesh");
-//                                    createModelNode.call( this, nodeID, meshList[k] );
-//                                    node.meshesCreated[ name( meshList[k] ) ] = meshList[k];
-//                                }
-//                            }
-//                        }                        
-//                        break;
-
-                    default:
-                        if ( node ) {
+                        default:
                             this.settingProperty( nodeID, propertyName, propertyValue );            
-                        }
-                        break;
+                            break;
+                    }
                 }
             }
         },
@@ -1993,10 +1965,40 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     }
 
+    function createMesh( def, node ) {
+        if ( !node.glgeParent ) {
+            node.glgeParent = this.state.nodes[ node.parentID ];    
+        }
+        
+        if ( node.glgeParent ) {
+            node.glgeObject = new GLGE.Group();
+            node.glgeParent.addObject( node.glgeObject );
+            var obj = new GLGE.Object();
+            var mat = new GLGE.Material();
+            var mesh = new GLGE.Mesh();
+
+            if ( def.color ) {
+                mat.setColor( def.color );
+            }
+            obj.setMaterial( mat );
+
+            if ( def.positions )
+                mesh.setPositions( def.positions );
+            if ( def.normals )
+                mesh.setNormals( def.normals );
+            if ( def.uv1 )
+                mesh.setUV( def.uv1 );
+            if ( def.faces )
+                mesh.setFaces( def.faces );
+
+            obj.setMesh( mesh );
+            node.glgeObject.addObject( obj );
+        }        
+    }
 
     function addGlgeChild( parentID, childID ) {
         
-        var glgeParent
+        var glgeParent;
         var parent = this.state.nodes[ parentID ];
         if ( !parent && this.state.scenes[ parentID ] ) {
             parent = this.state.scenes[ parentID ];
