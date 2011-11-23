@@ -46,6 +46,7 @@
       function highlightMode(mode) {
        	document.getElementById('orbit').style.border = "2px solid black";
        	document.getElementById('draw').style.border = "2px solid black";
+       	document.getElementById('pindrop').style.border = "2px solid black";
 
        	document.getElementById(mode).style.border = "3px solid red";
        	vwf_view.kernel.setProperty("index-vwf", "mouseMode", mode);
@@ -107,6 +108,7 @@
       <div class="toolstyle" id="toolbar">
         <img id="orbit" src="images/spin.png" style="border:3px solid red" alt="orbit" onclick="setMode('orbit')"/>
         <img id="draw" src="images/draw.png" style="border:3px solid red" alt="draw" onclick="setMode('draw')"/>
+        <img id="pindrop" src="images/pindrop.png" style="border:3px solid red" alt="pindrop" onclick="setMode('pindrop')"/>
         <img id="black" src="images/black.png" style="border:3px solid orange" alt="black" onclick="setColor('black')"/>
         <img id="red" src="images/red.png" style="border:2px solid black" alt="red" onclick="setColor('red')"/>
         <img id="yellow" src="images/yellow.png" style="border:2px solid black" alt="yellow" onclick="setColor('yellow')"/>
