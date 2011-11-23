@@ -85,7 +85,7 @@
         return false; 
       });
 
-      vwf_view.propertyChanged = function (nodeId, propertyName, propertyValue) {
+      vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
       	if (nodeId == "http-vwf-example-com-types-node-toolbar" ) {
       		switch (propertyName) {
       			case "selectedColor":
