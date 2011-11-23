@@ -44,9 +44,9 @@
 
     // -- deleteNode -------------------------------------------------------------------------------
 
-    module.prototype.deleteNode = function( nodeID, childName ) {
-        vwf.logger.info( namespace + ".deleteNode " + nodeID + " " + childName );
-        vwf.send( 0, nodeID, "deleteNode", childName );
+    module.prototype.deleteNode = function( nodeID ) {
+        vwf.logger.info( namespace + ".deleteNode " + nodeID );
+        vwf.send( 0, nodeID, "deleteNode" );
     };
 
     // -- addChild ---------------------------------------------------------------------------------
@@ -155,8 +155,8 @@
 
     // -- deletedNode ------------------------------------------------------------------------------
 
-    module.prototype.deletedNode = function( nodeID, childName ) {
-        vwf.logger.info( namespace + ".deletedNode " + nodeID + " " + childName );
+    module.prototype.deletedNode = function( nodeID ) {
+        vwf.logger.info( namespace + ".deletedNode " + nodeID );
     };
 
 

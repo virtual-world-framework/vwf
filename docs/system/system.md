@@ -8,7 +8,7 @@ Kernel
 
     Create a node from a component specification.
 
-*   deleteNode( nodeID, childName )
+*   deleteNode( nodeID )
 
 *   getNode( nodeID )
 
@@ -84,7 +84,7 @@ Model Drivers
 
 *   creatingNode( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /* ( ready ) */ )
 
-*   deletingNode( nodeID, childName )
+*   deletingNode( nodeID )
 
 *   prototyping( nodeID );
 
@@ -132,7 +132,7 @@ View Drivers
 
 *   createdNode( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /* ( ready ) */ )
 
-*   deletedNode( nodeID, childName )
+*   deletedNode( nodeID )
 
 *   addedChild( nodeID, childID, childName )
 

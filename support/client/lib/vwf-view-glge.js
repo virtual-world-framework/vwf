@@ -87,9 +87,9 @@
 
     // -- deletedNode ------------------------------------------------------------------------------
 
-    module.prototype.deletedNode = function( nodeID, childName ) {
+    module.prototype.deletedNode = function( nodeID ) {
 
-//        this.logger.info( "deletedNode", nodeID, childName );
+//        this.logger.info( "deletedNode", nodeID );
 
         vwf.logger.warn( namespace + ".deletedNode " + "unimplemented" );
 

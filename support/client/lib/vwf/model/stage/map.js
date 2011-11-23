@@ -34,9 +34,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- deleteNode ---------------------------------------------------------------------------
 
-        deleteNode: function( node, childName ) {
-            return this.kernel.deleteNode( this.model_to_kernel[this.object_id(node)] || node,
-                childName );
+        deleteNode: function( node ) {
+            return this.kernel.deleteNode( this.model_to_kernel[this.object_id(node)] || node );
         },
 
         // -- addChild -----------------------------------------------------------------------------
@@ -162,9 +161,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- deletingNode -------------------------------------------------------------------------
 
-        deletingNode: function( nodeID, childName ) {
-            return this.model.deletingNode && this.model.deletingNode( this.kernel_to_model[nodeID] || nodeID,
-                childName );
+        deletingNode: function( nodeID ) {
+            return this.model.deletingNode && this.model.deletingNode( this.kernel_to_model[nodeID] || nodeID );
         },
 
         // -- addingChild --------------------------------------------------------------------------

@@ -19,8 +19,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "deleteNode":
 
-                return function( nodeID, childName, when, callback ) {
-                    this.kernel.send( when || 0, nodeID, kernelFunctionName, childName,
+                return function( nodeID, when, callback ) {
+                    this.kernel.send( when || 0, nodeID, kernelFunctionName, undefined,
                         undefined, callback /* ( result ) */ );
                 };
 

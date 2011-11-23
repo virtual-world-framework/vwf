@@ -1,7 +1,7 @@
 define( {
 
     createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /- ( ready ) -/ */ ],
-    deletedNode: [ /* nodeID, childName */ ],
+    deletedNode: [ /* nodeID */ ],
 
     addedChild: [ /* nodeID, childID, childName */ ],
     removedChild: [ /* nodeID, childID */ ],

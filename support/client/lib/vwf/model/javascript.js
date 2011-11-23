@@ -179,7 +179,7 @@ node.id = childID; // TODO: move to a backstop model
 
         // -- deletingNode -------------------------------------------------------------------------
 
-        deletingNode: function( nodeID, childName ) {
+        deletingNode: function( nodeID ) {
 
             this.logger.warn( "deletingNode", "unimplemented" );
 
