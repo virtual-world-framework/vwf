@@ -155,7 +155,7 @@
 
               },
 
-            }, undefined, function( nodeID ) {
+            }, unique_name( "node" ), function( nodeID ) {
 
                 callback( nodeID );
 
@@ -172,14 +172,14 @@
               extends: "http://vwf.example.com/types/node",
               methods: { base: "return 'base' + this.id", },
 
-            }, undefined, function( baseID ) {
+            }, unique_name( "base" ), function( baseID ) {
 
               vwf.createNode( 0, {
 
                 extends: "@" + JSON.stringify( baseID ),
                 methods: { derived: "return 'derived' + this.id", },
 
-              }, undefined, function( derivedID ) {
+              }, unique_name( "derived" ), function( derivedID ) {
 
                 callback( derivedID, baseID );
 
@@ -187,6 +187,14 @@
 
             } );
 
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
           }
 
         } );

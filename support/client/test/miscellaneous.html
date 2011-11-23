@@ -110,14 +110,14 @@
             prototype.properties = prototype.properties || {};
             prototype.properties.test = prototype.properties.test || null;
 
-            vwf.createNode( 0, prototype, undefined, function( prototypeID ) {
+            vwf.createNode( 0, prototype, unique_name( "prototype" ), function( prototypeID ) {
 
                 node.extends = "@\"" + prototypeID + "\"";
 
                 node.properties = node.properties || {};
                 node.properties.test = node.properties.test || null;
 
-                vwf.createNode( 0, node, undefined, function( nodeID ) {
+                vwf.createNode( 0, node, unique_name( "node" ), function( nodeID ) {
                     callback( nodeID, prototypeID );
                 } );
 
@@ -150,6 +150,14 @@
 
             create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ );
 
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
           }
 
         } );
