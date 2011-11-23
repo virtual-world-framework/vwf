@@ -1,7 +1,7 @@
 define( {
 
     createNode: [ /* nodeID, childComponent, childName, callback /- ( childID ) -/ */ ],
-    deleteNode: [ /* nodeID, childName */ ],
+    deleteNode: [ /* nodeID */ ],
     setNode: [ /* nodeID, component */ ],
     getNode: [ /* nodeID */ ],
 

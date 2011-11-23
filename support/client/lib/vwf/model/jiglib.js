@@ -60,9 +60,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- deletingNode -------------------------------------------------------------------------
 
-        deletingNode: function( nodeID, childName ) {
+        deletingNode: function( nodeID ) {
 
-            this.logger.info( "deletingNode", nodeID, childName );
+            this.logger.info( "deletingNode", nodeID );
 
             this.logger.warn( "deletingNode", "unimplemented" );
 

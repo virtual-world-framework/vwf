@@ -683,25 +683,25 @@ vwf.addChild( nodeID, childNodeID, childName );
 
         // -- deleteNode ---------------------------------------------------------------------------
 
-        this.deleteNode = function( nodeID, childName ) {
+        this.deleteNode = function( nodeID ) {
 
-            this.logger.group( "vwf.deleteNode " + nodeID + " " + childName );
+            this.logger.group( "vwf.deleteNode " + nodeID );
 
             // Call deletingNode() on each model. The node is considered deleted after each model
             // has run.
 
             vwf.models.forEach( function( model ) {
-                model.deletingNode && model.deletingNode( nodeID, childName );
+                model.deletingNode && model.deletingNode( nodeID );
             } );
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
 
             vwf.views.forEach( function( view ) {
-                view.deletedNode && view.deletedNode( nodeID, childName );
+                view.deletedNode && view.deletedNode( nodeID );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.deleteNode complete " + nodeID + " " + childName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd(); this.logger.debug( "vwf.deleteNode complete " + nodeID ); /* must log something for group level to reset in WebKit */
         };
 
         // -- getType ------------------------------------------------------------------------------
