@@ -46,7 +46,7 @@ scripts:
         trans[1] = trans[1] / mag;
         if ( this.activeCameraComp && this.activeCameraComp.speed )
           speed = Number( this.activeCameraComp.speed );
-        for ( keyPress in keyMap ) {
+        for ( keyPress in keyMap.keys ) {
           switch ( Number( keyPress ) ) {
             case 87:  //w
             case 38:  //up

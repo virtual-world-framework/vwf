@@ -17,7 +17,7 @@
         this.rootSelector = rootSelector;
         this.canvasQuery = undefined;
  
-        this.keysDown = {};
+        this.keysDown = { keys: {}, mods: {} };
 
         this.canvasQuery = jQuery(this.rootSelector).append(
             "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='800' height='600'/>"
@@ -51,11 +51,31 @@
             
             var glgeView = this;
             window.onkeydown = function( event ) {
-                glgeView.keysDown[ event.keyCode ] = true;
+                switch ( event.keyCode ) {
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                        glgeView.keysDown.mods[ event.keyCode ] = true;
+                        break;                        
+                    default:
+                        glgeView.keysDown.keys[ event.keyCode ] = true;
+                        break;
+                }
             };
 
             window.onkeyup = function( event ) {
-                delete glgeView.keysDown[ event.keyCode ];
+                switch ( event.keyCode ) {
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                        delete glgeView.keysDown.mods[ event.keyCode ];
+                        break;                        
+                    default:
+                        delete glgeView.keysDown.keys[ event.keyCode ];
+                        break;
+                }
             };
 
             var sceneNode = this.state.scenes[ childID ];
@@ -166,7 +186,7 @@
         if ( sceneNode ) {
             var cameraNode = view.state.nodes[ sceneNode.camera.ID ];
             if ( cameraNode && cameraNode.glgeObject ) {
-                if ( view.keysDown && Object.keys( view.keysDown ).length ) {
+                if ( view.keysDown.keys && Object.keys( view.keysDown.keys ).length ) {
   
                   var mat = cameraNode.glgeObject.getRotMatrix();
                   var trans = GLGE.mulMat4Vec4( mat, [0, 0, -1, 1] );
@@ -174,13 +194,12 @@
  
                   // should only be sending the keysDown, now, lastime, but I'm going to
                   // inlcude the additional data for now to cut some corners
-                  var params = [ JSON.stringify(view.keysDown), 
+                  var params = [ JSON.stringify( view.keysDown ), 
                                     JSON.stringify(now), 
                                     JSON.stringify(lasttime), 
                                     JSON.stringify(mat),
                                     JSON.stringify(trans),
                                     JSON.stringify(mag) ];
-                  //view.callMethod( this.cameraID, "handleKeyEvents", strParams );
                   view.execute( sceneNode.ID, "this.handleKeyEvents && this.handleKeyEvents("+params.join(',')+")", "application/javascript" );
                 }
             }
@@ -304,7 +323,7 @@
                         if ( mi && mi.pickInfo ) {
                                 
                         }
-                        if( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_CTRL) ) {
+                        if( sceneNode.glgeKeys.isKeyPressed( GLGE.KI_CTRL ) ) {
                             if ( sceneView.state.nodes[mouseUpObjectID] ) {
                                 var colladaObj;
                                 var currentObj = glgeObj;
@@ -318,7 +337,7 @@
                                     recurseGroup( colladaObj, 0 );
                                 }
                             }                
-                        } else if ( sceneNode.glgeKeys.isKeyPressed(GLGE.KI_ALT) ) {
+                        } else if ( sceneNode.glgeKeys.isKeyPressed( GLGE.KI_ALT ) ) {
                             recurseGroup( glgeObj, 0 ); 
                         }
                     }

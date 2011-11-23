@@ -188,7 +188,7 @@ scripts:
         if ( mag == 0 ) mag = 1;
         trans[0] = trans[0] / mag;
         trans[1] = trans[1] / mag;
-        for ( keyPress in keyMap ) {
+        for ( keyPress in keyMap.keys ) {
           switch ( Number( keyPress ) ) {
             case 87:  //w
             case 38:  //up
