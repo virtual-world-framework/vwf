@@ -8,14 +8,27 @@ properties:
   backgroundColor: [ 83, 157, 194 ]
   loadDone: false
 scripts:
-- text:
+- text: |
     this.initialize = function() {
       console.info( "================ sandtable ================" );
       this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
       this.loadDone = true;
     }
-  type: application/javascript  
+    this.toolbar.selectedColorChanged.add( function( color ) {
+      // console.info( "selected color", color, this.toolbar.selectedColor );
+    }, this );
+  type: application/javascript
 children:
+  toolbar:
+    properties:
+      selectedColor:
+        set: |
+          this.selectedColor = value;
+          this.selectedColorChanged( value );
+        value:
+          "black"
+    events:
+      selectedColorChanged:
 #  skydome:
 #    extends: http://vwf.example.com/types/node3
 #    source: models/skydome_textured.dae

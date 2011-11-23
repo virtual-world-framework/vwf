@@ -1,15 +1,77 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Sandtable</title>
+  <head>
+    <title>Sandtable</title>
+    <link href="toolbar.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript">
+      function setColor(color) {
+        vwf_view.kernel.setProperty( "http-vwf-example-com-types-node-toolbar", "selectedColor", color );
+        highlightColor(color);
+      }
+      
+      function highlightColor(color) {
+        document.getElementById('black').style.border = "2px solid black";
+        document.getElementById('red').style.border = "2px solid black";
+        document.getElementById('yellow').style.border = "2px solid black";
+        document.getElementById('green').style.border = "2px solid black";
+        document.getElementById('blue').style.border = "2px solid black";
+        
+        document.getElementById(color).style.border = "3px solid orange";
+      }
+      
+      function clearOverlay() {
+        vwf_view.kernel.callMethod( "http-vwf-example-com-types-node-toolbar", "clear" );      
+        setColor('black');
+      }
+      
+      function showToolbar()
+      {
+        //$('#toolbar').slideDown('slow');
+        $('#toolbar').animate({
+          opacity:0.6
+        }, 1000);
+      }
+      
+      function hideToolbar(event)
+      {
+        //$('#toolbar').slideUp('slow');
+        $('#toolbar').animate({
+          opacity:0.0
+        }, 1000);
+      }
+      
+      jQuery('#toolbar').mouseleave( function(evt) { 
+        evt.stopPropagation(); 
+        hideToolbar(); 
+        return false; 
+      }); 
+      
+      jQuery('#toolbar').mouseenter( function(evt) { 
+        evt.stopPropagation(); 
+        showToolbar(); 
+        return false; 
+      }); 
 
+      vwf_view.propertyChanged = function (nodeId, propertyName, propertyValue) {
+        if(nodeId == "http-vwf-example-com-types-node-toolbar" && propertyName == "selectedColor")
+        {
+          highlightColor(propertyValue);   
+        }
+      }
 
-</head>
-<body>
-
-	<div class="vwf-main-content" align="center"></div>
-
-
-</body>
+    </script>
+  </head>
+  <body>
+    <div style="text-align:center">
+      <div class="toolstyle" id="toolbar">
+        <img id="black" src="images/black.png" style="border:3px solid orange" alt="black" onclick="setColor('black')"/>
+        <img id="red" src="images/red.png" style="border:2px solid black" alt="red" onclick="setColor('red')"/>
+        <img id="yellow" src="images/yellow.png" style="border:2px solid black" alt="yellow" onclick="setColor('yellow')"/>
+        <img id="green" src="images/green.png" style="border:2px solid black" alt="green" onclick="setColor('green')"/>
+        <img id="blue" src="images/blue.png" style="border:2px solid black" alt="blue" onclick="setColor('blue')"/>
+        <span id="clear"><img src="images/clear.png" style="border:2px solid black" alt="clear" onclick="clearOverlay()"/></span>
+      </div>
+    </div>
+    <div class="vwf-main-content" align="center"></div>
+  </body>
 </html>
