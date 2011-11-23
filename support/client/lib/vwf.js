@@ -660,7 +660,6 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
             var childNodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
 childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
-if ( ! childName ) childNodeID = childNodeID + "-" + Math.round( Math.random() * 1000000 );  // TODO: for single-user mode testing only; don't require the tests to provide the childName hack
 
             this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + childNodeID );
 

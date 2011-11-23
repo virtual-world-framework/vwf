@@ -160,7 +160,7 @@
                 "this.parameters.add( function() { this.test.event = 'parameters'; this.test.result = Array.prototype.slice.call( arguments ) }, this )",
               ],
 
-            }, undefined, function( nodeID ) {
+            }, unique_name( "node" ), function( nodeID ) {
 
                 callback( nodeID );
 
@@ -178,7 +178,7 @@
               events: { base: undefined },
               scripts: [ ],
 
-            }, undefined, function( baseID ) {
+            }, unique_name( "base" ), function( baseID ) {
 
               vwf.createNode( 0, {
 
@@ -186,7 +186,7 @@
                 events: { derived: undefined },
                 scripts: [ ],
 
-              }, undefined, function( derivedID ) {
+              }, unique_name( "derived" ), function( derivedID ) {
 
                 callback( derivedID, baseID );
 
@@ -196,7 +196,15 @@
 
           }
          
-        } );
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+       } );
 
       } );
 
