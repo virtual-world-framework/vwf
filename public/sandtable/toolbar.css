@@ -1,3 +1,6 @@
+body {
+    background-color: white;
+}
 div.toolstyle {
 	border-style:solid;
 	border-color:#000;
@@ -13,6 +16,10 @@ div.toolstyle {
 	margin:auto;
 	position:relative;
 	top:-588px;
+}
+div.logostyle {
+	top:-45px;
+	position:relative;
 }
 div.minstyle {
 	width:800px;
