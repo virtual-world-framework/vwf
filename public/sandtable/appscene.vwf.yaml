@@ -5,7 +5,8 @@ properties:
   orbitObjectID: "http-vwf-example-com-types-group3-worldCenter"
   lineWidth: 16
   lineColor: [ 0, 0, 0 ]
-  lineHeight: 150
+  lineHeight: 75
+  cubeSize: 60
   minDrawDistance:
     set: |
       this.minDrawDistance = value;
@@ -39,6 +40,7 @@ scripts:
     var phi, theta;
     var positionChanged = false;
     var lineIndex = 1;
+    var cubeIndex = 1;
     var line = {
       "extends": "http://vwf.example.com/types/node3",
       "type": "definition/mesh",
@@ -46,7 +48,13 @@ scripts:
         "meshDefinition": { positions: [], faces: [], color: [] }
       }
     };
-    
+    var cube = {
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "definition/mesh",
+      "properties": { 
+        "meshDefinition": { positions: [], faces: [], color: [] }
+      }
+    };    
     // functions
     this.initialize = function() {
       this.lastDrawPoint = undefined;
@@ -102,11 +110,13 @@ scripts:
             }
             break;
           case "orbit":
+            this.orbit( parms );
+            pointerCoord = { "x": parms.X, "y": parms.Y };
+            break;          
           case "look":
-            this.mouseNav( parms );
+            this.look( parms );
             pointerCoord = { "x": parms.X, "y": parms.Y };
             break;
-            
         }
       }
     }
@@ -199,16 +209,6 @@ scripts:
       
       //console.info( "=========================== UPDATE ============================" );
       //console.info( "= theta = " + theta + "     phi = " + phi );      
-    }
-    this.mouseNav = function( parms ) {
-      switch ( this.mouseMode ) {
-        case "orbit":
-          this.orbit( parms );
-          break;
-        case "look":
-          this.look( parms );
-          break;
-      }
     }
     this.look = function( parms ) {
       if (!this.activeCameraComp) this.getActiveCamera();
@@ -344,7 +344,12 @@ scripts:
       }
     }
     this.pindrop = function( parms ) {
-    
+      if ( parms.pickInfo && parms.pickInfo.coord ) {
+        var pt = parms.pickInfo.coord;
+        var dim = this.cubeSize;
+        this.createCube( pt[0], pt[1], pt[2]+this.lineHeight, dim, dim, dim, this.lineColor );
+        this.createLine( pt[0], pt[1], pt[2]+this.lineHeight, pt[0], pt[1], pt[2], [ 0, 0, 0 ] );
+      }
     }
     this.distanceFromLast = function( parms ) {
       var distSquared = 0;
@@ -355,6 +360,118 @@ scripts:
           distSquared = Math.pow( p1[0] - p2[0], 2 ) + Math.pow( p1[1] - p2[1], 2 );
         }
       }
+      //console.info( "   distSquared = " + distSquared );
       return distSquared;
     }
+    this.createCube = function( x, y, z, dx, dy, dz, color ) {
+      var pos = [];
+      var faces;
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) );  // 0
+      pos.push( z + ( 0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) );  // 1
+      pos.push( z + ( 0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) ); // 2
+      pos.push( z + ( 0.5 * dz ) ); 
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) ); // 3
+      pos.push( z + ( 0.5 * dz ) );
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) ); // 4
+      pos.push( z + ( -0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) );  // 5
+      pos.push( z + ( -0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) );  // 6
+      pos.push( z + ( -0.5 * dz ) );
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) ); // 7
+      pos.push( z + ( -0.5 * dz ) );      
+      
+      faces = [ 1, 0, 3, 1, 3, 2, 3, 0, 4, 3, 4, 7, 2, 3, 7, 2, 7, 6, 6, 7, 4, 6, 4, 5, 1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4 ];
+
+      cube.properties.meshDefinition.positions = pos;
+      cube.properties.meshDefinition.faces = faces;
+      cube.properties.meshDefinition.color = color;
+      
+      vwf.createNode( "index-vwf", cube, "cube"+cubeIndex, undefined );
+      cubeIndex++;
+    }
+    this.createLine = function( x1, y1, z1, x2, y2, z2, color ) {
+      var pos = [];
+      var faces;
+      
+      var diff = [ x2 - x1, y2 - y1, z2 - z1 ];
+      var up = [ 0, 1, 0 ];
+      var right = [ 1, 0, 0 ];
+      var top = [ 0, 0, 0 ];
+      
+      this.normalize( diff );
+
+      if ( Math.abs( this.dotProduct( up, diff ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
+      { // then we can cross with up
+        right = this.crossProduct( diff, up );
+      }
+      else
+      { //too colinear with up, so start w/ a different axis
+        right = this.crossProduct( diff, right );
+      }
+      top = this.crossProduct( diff, right );
+      this.normalize( right );
+      this.normalize( top );
+      this.multiply( right, this.lineWidth );
+      this.multiply( top, this.lineWidth );              
+      
+      pos.push( x1 + right[0] );  // 0
+      pos.push( y1 + right[1] );  // 0
+      pos.push( z1 + right[2] );  // 0
+      
+      pos.push( x2 + right[0] );  // 1
+      pos.push( y2 + right[1] );  // 1
+      pos.push( z2 + right[2] );  // 1
+      
+      pos.push( x1 - right[0] );  // 2
+      pos.push( y1 - right[1] );  // 2
+      pos.push( z1 - right[2] );  // 2
+      
+      pos.push( x2 - right[0] );  // 3
+      pos.push( y2 - right[1] );  // 3
+      pos.push( z2 - right[2] );  // 3
+      
+      pos.push( x1 + top[0] );  // 4
+      pos.push( y1 + top[1] );  // 4
+      pos.push( z1 + top[2] );  // 4
+      
+      pos.push( x2 + top[0] );  // 5
+      pos.push( y2 + top[1] );  // 5
+      pos.push( z2 + top[2] );  // 5
+      
+      pos.push( x1 - top[0] );  // 6
+      pos.push( y1 - top[1] );  // 6
+      pos.push( z1 - top[2] );  // 6
+      
+      pos.push( x2 - top[0] );  // 7
+      pos.push( y2 - top[1] );  // 7
+      pos.push( z2 - top[2] );  // 7
+      
+      faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
+      
+      line.properties.meshDefinition.positions = pos;
+      line.properties.meshDefinition.faces = faces;
+      line.properties.meshDefinition.color = color;
+      
+      vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+      lineIndex++;    
+    }    
   type: application/javascript
