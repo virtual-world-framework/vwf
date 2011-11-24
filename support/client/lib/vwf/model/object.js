@@ -38,7 +38,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
-            this.logger.warn( "deletingNode", "unimplemented" );
+            delete this.objects[nodeID];
         },
 
         // -- prototyping --------------------------------------------------------------------------
