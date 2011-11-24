@@ -27,6 +27,15 @@ properties:
       }
     value: "orbit"
   speed: 10.0
+methods:
+  clearing: |
+    if ( this.nodesCreated ) {
+      for ( var i = 0; i < this.nodesCreated.length; i++ ){
+        //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );
+        vwf.deleteNode( this.nodesCreated[i] );
+      }
+      this.nodesCreated = [];  
+    }
 scripts:
 - text: |
     var _piDiv180 = Math.PI / 180;
@@ -41,6 +50,7 @@ scripts:
     var positionChanged = false;
     var lineIndex = 1;
     var cubeIndex = 1;
+    var coneIndex = 1;
     var line = {
       "extends": "http://vwf.example.com/types/node3",
       "type": "definition/mesh",
@@ -54,11 +64,19 @@ scripts:
       "properties": { 
         "meshDefinition": { positions: [], faces: [], color: [] }
       }
-    };    
+    }; 
+    var cone = {
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "definition/mesh",
+      "properties": { 
+        "meshDefinition": { positions: [], faces: [], color: [] }
+      }
+    };
     // functions
     this.initialize = function() {
       this.lastDrawPoint = undefined;
       this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
+      this.nodesCreated = [];
     }
     this.mouseDown = function( parms ){
       pointerDown = true;
@@ -336,6 +354,7 @@ scripts:
           line.properties.meshDefinition.color = this.lineColor;
           
           vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+          this.nodesCreated.push( "http-vwf-example-com-types-node3-line"+lineIndex );
           lineIndex++;
           
           this.lastDrawPoint = parms;
@@ -347,8 +366,9 @@ scripts:
       if ( parms.pickInfo && parms.pickInfo.coord ) {
         var pt = parms.pickInfo.coord;
         var dim = this.cubeSize;
-        this.createCube( pt[0], pt[1], pt[2]+this.lineHeight, dim, dim, dim, this.lineColor );
-        this.createLine( pt[0], pt[1], pt[2]+this.lineHeight, pt[0], pt[1], pt[2], [ 0, 0, 0 ] );
+        //this.createCube( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), dim, dim, dim, this.lineColor, true );
+        this.createCone( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), (dim*0.4), dim, this.lineColor, 18, true );
+        this.createLine( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), pt[0], pt[1], pt[2], this.lineWidth*0.3, [ 0, 0, 0 ], true );
       }
     }
     this.distanceFromLast = function( parms ) {
@@ -363,7 +383,7 @@ scripts:
       //console.info( "   distSquared = " + distSquared );
       return distSquared;
     }
-    this.createCube = function( x, y, z, dx, dy, dz, color ) {
+    this.createCube = function( x, y, z, dx, dy, dz, color, temp ) {
       var pos = [];
       var faces;
       
@@ -406,9 +426,10 @@ scripts:
       cube.properties.meshDefinition.color = color;
       
       vwf.createNode( "index-vwf", cube, "cube"+cubeIndex, undefined );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-cube"+cubeIndex );
       cubeIndex++;
     }
-    this.createLine = function( x1, y1, z1, x2, y2, z2, color ) {
+    this.createLine = function( x1, y1, z1, x2, y2, z2, thickness, color, temp ) {
       var pos = [];
       var faces;
       
@@ -430,8 +451,8 @@ scripts:
       top = this.crossProduct( diff, right );
       this.normalize( right );
       this.normalize( top );
-      this.multiply( right, this.lineWidth );
-      this.multiply( top, this.lineWidth );              
+      this.multiply( right, thickness );
+      this.multiply( top, thickness );              
       
       pos.push( x1 + right[0] );  // 0
       pos.push( y1 + right[1] );  // 0
@@ -472,6 +493,38 @@ scripts:
       line.properties.meshDefinition.color = color;
       
       vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-line"+lineIndex );
       lineIndex++;    
-    }    
+    }
+    this.createCone = function( x, y, z, radius, height, color, accuracy, temp ) {
+      var pos = [];
+      var faces = [];
+      var pt = 1;
+      
+      pos.push( x );
+      pos.push( y );
+      pos.push( z + height );      
+      
+      for ( var theta = 0; theta <= 2 * Math.PI; theta += Math.PI / accuracy ) {
+        pos.push( x + ( radius * Math.cos( theta ) ) );
+        pos.push( y + ( radius * Math.sin( theta ) ) );
+        pos.push( z );
+        pos.push( x + ( radius * Math.cos( theta - Math.PI / accuracy ) ) );
+        pos.push( y + ( radius * Math.sin( theta - Math.PI / accuracy ) ) );
+        pos.push( z );
+        
+        faces.push( 0 );
+        faces.push( pt );
+        faces.push( pt + 1 );
+        pt += 2;
+      }
+      cone.properties.meshDefinition.positions = pos;
+      cone.properties.meshDefinition.faces = faces;
+      cone.properties.meshDefinition.color = color;
+      
+      vwf.createNode( "index-vwf", cone, "cone"+coneIndex, undefined );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-cone"+coneIndex );
+      coneIndex++; 
+      
+    }
   type: application/javascript

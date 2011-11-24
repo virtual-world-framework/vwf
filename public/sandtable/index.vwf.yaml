@@ -17,6 +17,9 @@ scripts:
     this.toolbar.selectedColorChanged.add( function( color ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
     }, this );
+    this.toolbar.inputModeChanged.add( function( mode ) {
+      // console.info( "selected color", color, this.toolbar.selectedColor );
+    }, this );    
   type: application/javascript
 children:
   toolbar:
@@ -34,8 +37,8 @@ children:
         value:
           "orbit"      
     methods:
-        clear: |
-            this.clearing();
+      clear: |
+        this.parent.clearing();
     events:
       selectedColorChanged:
       inputModeChanged:
@@ -47,7 +50,7 @@ children:
     properties:
       position: [ 0, 0, -150 ]
       eulers: [0, 0, 0 ]
-      scale: [ 0.005, 0.005, 0.004 ]
+      scale: [ 0.006, 0.006, 0.004 ]
   worldCenter:
     extends: http://vwf.example.com/types/group3
     properties:

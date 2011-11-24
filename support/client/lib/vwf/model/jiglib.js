@@ -63,8 +63,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         deletingNode: function( nodeID ) {
 
             this.logger.info( "deletingNode", nodeID );
+            
+            if ( this.nodes[ nodeID ] ) {
+                var node = this.nodes[ nodeID ];
+                var scene = this.scenes[ node.sceneID ];
+                if ( node.jigLibObj ) {
+                    if ( node.jigLibObj ) {
+                        if ( scene ) scene.system.removeBody( node.jigLibObj );
+                        node.jigLibObj = undefined;
+                    }
+                }
+                if ( node.jigLibMeshes ) {
+                    for ( var j = 0; j < node.jigLibMeshes.length; j++ ) {
+                        if ( scene ) scene.system.removeBody( node.jigLibMeshes[ j ] );
+                    }
+                    node.jigLibMeshes = undefined;
+                }
+                delete this.nodes[ nodeID ];
+            }
 
-            this.logger.warn( "deletingNode", "unimplemented" );
 
         },
 
@@ -688,7 +705,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function createJPlane( nodeID, physicsDef ) {
 
-         var node = this.nodes[ nodeID ];
+        var node = this.nodes[ nodeID ];
         if ( node ) {
             var scene = this.scenes[ node.sceneID ];
             if ( scene ) {
