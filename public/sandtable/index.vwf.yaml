@@ -33,9 +33,13 @@ children:
           this.inputModeChanged( value );
         value:
           "orbit"      
+	methods:
+		clear: |
+			this.clearing();
     events:
       selectedColorChanged:
       inputModeChanged:
+	  clearing:
   flat_terrain:
     extends: http://vwf.example.com/types/node3
     source: models/vwf_terrain.dae
