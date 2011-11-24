@@ -30,7 +30,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 type: childType,
 
                 properties: {},
-                children: [],
 
             };
 
@@ -51,7 +50,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- addingChild --------------------------------------------------------------------------
 
         addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-            nodeID != 0 && this.objects[nodeID].children.push( this.objects[childID] );
         },
 
         // TODO: creatingProperties
