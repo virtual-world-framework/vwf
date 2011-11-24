@@ -360,8 +360,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.logger.info( "deletingNode", nodeID );
 
-            this.logger.warn( "deletingNode", "unimplemented" );
-
+            if ( this.state.nodes[ nodeID ] ) {
+                var node = this.state.nodes[ nodeID ];
+                if ( node.glgeObject ) {
+                    var obj = node.glgeObject;
+                    var parent = obj.parent;
+                    if ( parent ) {
+                        if ( parent.removeChild ) parent.removeChild( obj );
+                        node.glgeObject = undefined;
+                        //delete obj;
+                    }
+                }
+                delete this.state.nodes[ nodeID ];
+            }
         },
 
         // -- addingChild ------------------------------------------------------------------------
