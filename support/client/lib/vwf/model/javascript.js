@@ -181,7 +181,28 @@ node.id = childID; // TODO: move to a backstop model
 
         deletingNode: function( nodeID ) {
 
-            this.logger.warn( "deletingNode", "unimplemented" );
+            var child = this.nodes[nodeID];
+            var node = child.parent;
+
+            if ( node ) {
+
+                var index = node.children.indexOf( child );
+
+                if ( index >= 0 ) {
+                    node.children.splice( index, 1 );
+                }
+
+                delete node.children[child.name];  // TODO: conflict if childName is parseable as a number
+
+                if ( node[child.name] === child ) {
+                    delete node[child.name];  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                }
+
+                child.parent = undefined;
+
+            }
+
+            delete this.nodes[nodeID];
 
         },
 
@@ -197,9 +218,10 @@ node.id = childID; // TODO: move to a backstop model
 
             if ( node ) {
                 node.children.push( child );
-                node.children[childName] = child;
+                node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
                 node[childName] = child;  // TODO: if no conflict with other names on node
             }
+
         },
 
         // TODO: removingChild
@@ -246,7 +268,7 @@ node.id = childID; // TODO: move to a backstop model
                 enumerable: true
             } );
 
-            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
 
             Object.defineProperty( node, propertyName, { // "this" is node in get/set
                 get: function() { return self.kernel.getProperty( this.id, propertyName ) },
@@ -343,7 +365,7 @@ node.id = childID; // TODO: move to a backstop model
                 enumerable: true,
             } );
 
-            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
 
             Object.defineProperty( node, methodName, { // "this" is node in get/set
                 get: function() {
@@ -428,7 +450,7 @@ node.id = childID; // TODO: move to a backstop model
                 enumerable: true,
             } );
 
-            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events are created and deleted; properties take precedence over methods over events, for example
+            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
 
             Object.defineProperty( node, eventName, { // "this" is node in get/set
                 value: proxyNode,  // TODO: invoked with this as derived when only defined on base?
