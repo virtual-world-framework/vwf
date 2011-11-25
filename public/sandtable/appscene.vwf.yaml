@@ -3,15 +3,15 @@ extends: http://vwf.example.com/types/glge
 properties:
   orbitRadius: -1
   orbitObjectID: "http-vwf-example-com-types-group3-worldCenter"
-  lineWidth: 16
+  lineWidth: 32
   lineColor: [ 0, 0, 0 ]
-  lineHeight: 75
-  cubeSize: 60
+  lineHeight: 100
+  objScale: 200
   minDrawDistance:
     set: |
       this.minDrawDistance = value;
       this.minDistanceSquared = value * value;  
-    value: 100    
+    value: 200    
   mouseMode: 
     set: |
       switch( value ) {
@@ -26,7 +26,7 @@ properties:
           break;
       }
     value: "orbit"
-  speed: 10.0
+  speed: 40.0
 methods:
   clearing: |
     if ( this.nodesCreated ) {
@@ -51,6 +51,8 @@ scripts:
     var lineIndex = 1;
     var cubeIndex = 1;
     var coneIndex = 1;
+    var pushpinIndex = 1;
+    var lastUpdateTime = undefined;
     var line = {
       "extends": "http://vwf.example.com/types/node3",
       "type": "definition/mesh",
@@ -72,11 +74,22 @@ scripts:
         "meshDefinition": { positions: [], faces: [], color: [] }
       }
     };
+    var pushpin = {
+      extends: "http://vwf.example.com/types/node3",
+      source: "models/pushpinblack.dae",
+      type: "model/vnd.collada+xml",
+      properties: { 
+        positions: [],
+        eulers: [ 0, 0, 0 ], 
+        scale: [ 6, 6, 6.6 ], 
+      },    
+    };
     // functions
     this.initialize = function() {
       this.lastDrawPoint = undefined;
       this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
       this.nodesCreated = [];
+      this.originalSpeed = this.speed;
     }
     this.mouseDown = function( parms ){
       pointerDown = true;
@@ -96,6 +109,71 @@ scripts:
       }
       pointerCoord = undefined;
       this.lastDrawPoint = undefined;    
+    }
+    this.mouseWheel = function( parms ) {
+      if (!this.activeCameraComp) {
+        this.getActiveCamera();
+      }
+      if ( this.activeCameraComp ) {
+        var camerapos = this.activeCameraComp.position;
+        var camerarot = this.activeCameraComp.rotation;
+        var yinc = 0;
+        var xinc = 0;
+        var zinc = 0;
+        if ( parms.mag == 0 ) parms.mag = 1;
+        parms.trans[0] = parms.trans[0] / parms.mag;
+        parms.trans[1] = parms.trans[1] / parms.mag;
+
+        var mult = 0;
+        if ( parms.wheelDeltaY ) {
+          mult = Math.abs( parms.wheelDeltaY / 20 );
+          if ( parms.wheelDeltaY < 0 ) {
+            // backwards
+            yinc = yinc - parseFloat( parms.trans[1] ); 
+            xinc = xinc - parseFloat( parms.trans[0] );
+          } else if ( parms.wheelDeltaY > 0 ) {
+            //forward
+            yinc = yinc + parseFloat( parms.trans[1] ); 
+            xinc = xinc + parseFloat( parms.trans[0] );
+          }
+        }
+
+        if ( this.orbitRadius == -1 || new Date().getTime() - lastUpdateTime > 500 ) {
+          this.update();
+        }
+        
+        if (xinc != 0 || yinc != 0 ) {
+          var origX, origY, origZ;
+          var x, y, z, atBounds = false;
+          
+          origX = camerapos[0];
+          origY = camerapos[1];
+          origZ = camerapos[2];
+        
+          x = origX + xinc * this.speed * mult;
+          if ( x > 25000 ) { x = 25000; atBounds = true; }
+          else if ( x < -25000 ) { x = -25000; atBounds = true; }
+          
+          y = origY + yinc * this.speed * mult;
+          if ( y > 25000 ) { y = 25000; atBounds = true; }
+          else if ( y < -25000 ) { y = -25000;  atBounds = true; }         
+          
+          z = origZ;
+          if ( atBounds ) { x = origX; y = origY; }
+          else {
+            var ratioHR = camerapos[2] / this.orbitRadius;
+            zinc = Math.sqrt( Math.pow( x-origX, 2 ) + Math.pow( y-origY, 2 ) ) * ratioHR;
+            if ( parms.wheelDeltaY > 0 ) zinc *= -1;
+            z = origZ + zinc;
+            if ( z > 25000 ) z = 25000;
+            else if ( z < 1000 ) z = origZ;
+          }
+
+          this.activeCameraComp.position = [ x, y, z ];
+          positionChanged = true;
+        }
+
+      }
     }
     this.multiply = function( v, value ) {
       for ( var i = 0; i < v.length; i++ ) {
@@ -140,11 +218,12 @@ scripts:
     }
     this.mouseOver = function( parms ){ }
     this.mouseEnter = function( parms ){ }
+    this.mouseHover = function( parms ){ }
     this.mouseLeave = function( parms ){
       pointerDown = false;
       pointerCoord = null;      
     }
-    this.mouseHover = function( parms ){ }
+    
     this.handleKeyEvents = function( keyMap, now, lasttime, mat, trans, mag ) {
       if (!this.activeCameraComp) {
         this.getActiveCamera();
@@ -161,27 +240,23 @@ scripts:
         trans[1] = trans[1] / mag;
         for ( keyPress in keyMap.keys ) {
           switch ( Number( keyPress ) ) {
-            case 87:  //w
-            case 38:  //up
+            case 87:  // w
+            case 38:  // up
               yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
               break;
-            case 83:  //s
-            case 40:  //down
+            case 83:  // s
+            case 40:  // down
               yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
-              break;
-            case 81:  //q
-              yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]);
-              break;
-            case 69:  //e
-              yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]);
               break;
             case 37: // left
             case 65: // a
-              yRot += 0.04;
+            case 81: // q
+              yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]);
               break;
             case 39: // right
             case 68: // d
-              yRot -= 0.04;
+            case 69: // e
+              yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]);
               break;
             case 90: // z
               console.info( "position: " + camerapos );
@@ -208,25 +283,60 @@ scripts:
               break;
           }
         }
+        
+        if ( new Date().getTime() - lastUpdateTime > 500 ) {
+          this.update();
+        }
+        
         if ( yRot != 0 ) {
           this.activeCameraComp.rotation = [ camerarot[0], camerarot[1] + yRot, camerarot[2] ];
         }
         if (xinc != 0 || yinc != 0 || zinc != 0) {
-          this.activeCameraComp.position = [ camerapos[0] + xinc * this.speed, camerapos[1] + yinc * this.speed, camerapos[2] + zinc * this.speed ];
+          var origX, origY, origZ;
+          var x, y, z, atBounds = false;
+          
+          origX = camerapos[0];
+          origY = camerapos[1];
+          origZ = camerapos[2];
+          
+          x = origX + xinc * this.speed;
+          if ( x > 25000 ) { x = 25000; atBounds = true; }
+          else if ( x < -25000 ) { x = -25000; atBounds = true; }
+          
+          y = origY + yinc * this.speed;
+          if ( y > 25000 ) { y = 25000; atBounds = true; }
+          else if ( y < -25000 ) { y = -25000;  atBounds = true; }         
+          
+          if ( atBounds ) { x = origX; y = origY; }
+          
+          z = origZ + zinc * this.speed;
+          if ( z > 25000 ) z = 25000;
+          else if ( z < 0 ) y = 0;          
+          
+          this.activeCameraComp.position = [ x, y, z ];
           positionChanged = true;
         }
       }
     }
     this.update = function() {
       var pos = this.activeCameraComp.position;
+      var oldRadius = this.orbitRadius;
       this.orbitRadius = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2]) );
       var dist2D = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) );
       phi = Math.acos( pos[2] / this.orbitRadius );
       if ( 0 <= pos[0] ) theta = Math.asin( pos[1]/dist2D );
       else theta = Math.PI - Math.asin( pos[1]/dist2D );
       
-      //console.info( "=========================== UPDATE ============================" );
-      //console.info( "= theta = " + theta + "     phi = " + phi );      
+      if ( oldRadius != -1 ) {
+        if ( this.orbitRadius > oldRadius )
+          this.speed += ( this.orbitRadius - oldRadius ) * 0.006;
+        else if ( this.orbitRadius < oldRadius )
+          this.speed -= ( oldRadius - this.orbitRadius ) * 0.006;
+        if ( this.speed > 600 ) this.speed = 500;
+        if ( this.speed < this.originalSpeed ) this.speed = this.originalSpeed;
+      }
+      
+      lastUpdateTime = new Date().getTime();
     }
     this.look = function( parms ) {
       if (!this.activeCameraComp) this.getActiveCamera();
@@ -254,9 +364,9 @@ scripts:
         this.activeCameraComp.lookAt = this.orbitObjectID;
         this.update();
         
-        var pixelToRadian = 5 / this.orbitRadius;
+        var pixelToRadian = 14 / this.orbitRadius;
         var phiDelta = yDelta * pixelToRadian;
-        var thetaDelta = xDelta * pixelToRadian * 4.0;
+        var thetaDelta = xDelta * pixelToRadian * 6.0;
 
         var pos = this.activeCameraComp.position;
         
@@ -364,11 +474,29 @@ scripts:
     }
     this.pindrop = function( parms ) {
       if ( parms.pickInfo && parms.pickInfo.coord ) {
-        var pt = parms.pickInfo.coord;
-        var dim = this.cubeSize;
+        pushpin.properties.position = parms.pickInfo.coord;
+        
+        if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
+          pushpin.source = "models/pushPinRed.dae";
+        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 255 && this.lineColor[2] == 0 ) 
+          pushpin.source = "models/pushPinGreen.dae";
+        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 255 ) 
+          pushpin.source = "models/pushPinBlue.dae";
+        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
+          pushpin.source = "models/pushPinBlack.dae";
+        else 
+          pushpin.source = "models/pushPinYellow.dae";
+        
+        var name = "pushpin"+pushpinIndex;
+        vwf.createNode( "index-vwf", pushpin, name, undefined );
+        this.nodesCreated.push( "http-vwf-example-com-types-node3-"+name );
+        pushpinIndex++;        
+        
+        //var pt = parms.pickInfo.coord;
+        //var dim = this.objScale;
         //this.createCube( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), dim, dim, dim, this.lineColor, true );
-        this.createCone( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), (dim*0.4), dim, this.lineColor, 18, true );
-        this.createLine( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), pt[0], pt[1], pt[2], this.lineWidth*0.3, [ 0, 0, 0 ], true );
+        //this.createCone( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), (dim*0.3), dim, this.lineColor, 18, true );
+        //this.createLine( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), pt[0], pt[1], pt[2], this.lineWidth*0.3, [ 0, 0, 0 ], true );
       }
     }
     this.distanceFromLast = function( parms ) {

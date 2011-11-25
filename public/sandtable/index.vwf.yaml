@@ -10,9 +10,10 @@ properties:
 scripts:
 - text: |
     this.initialize = function() {
-      console.info( "================ sandtable ================" );
+      //console.info( "================ sandtable ================" );
       this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
       this.loadDone = true;
+      vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-group3-worldCenter" );
     }
     this.toolbar.selectedColorChanged.add( function( color ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
@@ -50,7 +51,7 @@ children:
     properties:
       position: [ 0, 0, -150 ]
       eulers: [0, 0, 0 ]
-      scale: [ 0.006, 0.006, 0.004 ]
+      scale: [ 0.008, 0.008, 0.006 ]
   worldCenter:
     extends: http://vwf.example.com/types/group3
     properties:
@@ -60,21 +61,19 @@ children:
     properties:
       walkMode: "walk"
       cameraType: "perspective"
-      position: [ 0, 8000, 2000 ]
+      position: [ 0, 20000, 10000 ]
       rotation: [ 1.56, 3.14, 0 ]
       far: 500000
       near: 2
       lookAt: "http-vwf-example-com-types-group3-worldCenter"
+    scripts:
+    - text: |
+        this.initialize = function() {
+          this.lookAt = "http-vwf-example-com-types-group3-worldCenter";
+        }
+      type: application/javascript      
   light1:
     extends: http://vwf.example.com/types/light
     properties:
       lightType: "point"
       constantAttenuation: 1
-  center:
-    extends: http://vwf.example.com/types/node3
-    source: models/YellowSphere.dae
-    type: model/vnd.collada+xml
-    properties:
-      position: [ 0, 0, 0 ]
-      eulers: [0, 0, 0 ]
-      scale: [ 10, 10, 10 ]
