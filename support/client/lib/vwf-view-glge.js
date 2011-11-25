@@ -447,7 +447,18 @@
         }
 
         canvas.onmousewheel = function (e) {
-            console.info( "     onmousewheel() " );
+            var mi = mouseInfo( e, false );
+            if ( mi ) {
+                cameraInfo( mi );
+                mi.wheelDelta = e.wheelDelta;
+                mi.wheelDeltaX = e.wheelDeltaX;
+                mi.wheelDeltaY = e.wheelDeltaY;
+                
+                var strParams = JSON.stringify( mi );
+                sceneView.execute( sceneID, "this.mouseWheel && this.mouseWheel("+strParams+")", "application/javascript" );
+            }
+            lastXPos = mouseXPos( e );
+            lastYPos = mouseYPos( e );            
         }
 
     };
