@@ -587,7 +587,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             if ( lookAtNode && lookAtNode.glgeObject ) {
                                 glgeObject.setLookat( lookAtNode.glgeObject );
                             } else {
-                                if ( glgeObject.getLookAt && glgeObject.getLookAt() ) 
+                                if ( glgeObject.getLookat && glgeObject.getLookat() ) 
                                     glgeObject.setLookat( null );
                             }
                         }
@@ -637,6 +637,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
             var value = undefined;
+            var glgeModel = this;
 
             if ( node && node.glgeObject ) {
 
@@ -766,9 +767,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
  
                     case "lookAt": {
                             value = "";
-                            var lookAtObject = glgeObject.getLookAt();
+                            var lookAtObject = glgeObject.getLookat();
                             if ( lookAtObject ) {
-                                value = getObjectID( lookAtObject, this, false, false );
+                                value = getObjectID.call( glgeModel, lookAtObject, false, false );
                             }
                         }
                         break;                         
@@ -1316,7 +1317,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
-        var node = this.state.nodes[nodeID] 
+        var node = this.state.nodes[nodeID];
         var value = undefined;
         switch ( propertyName ) {
             default:
@@ -1445,6 +1446,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getCameraProperty(nodeID, propertyName, propertyValue) {
 
+        var node = this.state.nodes[nodeID];
         var value = undefined;
         switch( propertyName ) {
             case "cameraType":
