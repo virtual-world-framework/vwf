@@ -1044,13 +1044,23 @@ return component;
 
             // Call settingProperties() on each model.
 
-            properties = vwf.models.reduceRight( function( intermediate_properties, model ) {
+            properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
 
-                var model_properties = model.settingProperties &&
-                    model.settingProperties( nodeID, properties );  // TODO: if no settingProperties, call settingProperty on each (resolve include/exclude proto)
+                var model_properties = {};
 
-                for ( var propertyName in model_properties || {} ) {
-                    intermediate_properties[propertyName] = model_properties[propertyName];
+                if ( model.settingProperties ) {
+                    model_properties = model.settingProperties( nodeID, properties );
+                } else if ( model.settingProperty ) {
+                    for ( var propertyName in properties ) {
+                        model_properties[propertyName] =
+                            model.settingProperty( nodeID, propertyName, properties[propertyName] );
+                    }
+                }
+
+                for ( var propertyName in model_properties ) {
+                    if ( model_properties[propertyName] !== undefined ) {
+                        intermediate_properties[propertyName] = model_properties[propertyName];
+                    }
                 }
 
                 return intermediate_properties;
@@ -1065,8 +1075,7 @@ return component;
                     view.satProperties( nodeID, properties );
                 } else if ( view.satProperty ) {
                     for ( var propertyName in properties ) {
-                        view.satProperty( nodeID, propertyName, properties[propertyName] );
-
+                        view.satProperty( nodeID, propertyName, properties[propertyName] );  // TODO: be sure this is the value actually set, not the incoming value
                     }
                 }
 
@@ -1087,13 +1096,23 @@ return component;
 
             // Call gettingProperties() on each model.
 
-            var properties = vwf.models.reduceRight( function( intermediate_properties, model ) {
+            var properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
 
-                var model_properties = model.gettingProperties &&
-                    model.gettingProperties( nodeID, intermediate_properties );
+                var model_properties = {};
 
-                for ( var propertyName in model_properties || {} ) {
-                    intermediate_properties[propertyName] = model_properties[propertyName];
+                if ( model.gettingProperties ) {
+                    model_properties = model.gettingProperties( nodeID, properties );
+                } else if ( model.gettingProperty ) {
+                    for ( var propertyName in intermediate_properties ) {
+                        model_properties[propertyName] =
+                            model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );  // TODO: probably don't need propertyValue here
+                    }
+                }
+
+                for ( var propertyName in model_properties ) {
+                    if ( model_properties[propertyName] !== undefined ) {
+                        intermediate_properties[propertyName] = model_properties[propertyName];
+                    }
                 }
 
                 return intermediate_properties;
@@ -1103,7 +1122,15 @@ return component;
             // Call gotProperties() on each view.
 
             vwf.views.forEach( function( view ) {
-                view.gotProperties && view.gotProperties( nodeID, properties );
+
+                if ( view.gotProperties ) {
+                    view.gotProperties( nodeID, properties );
+                } else if ( view.gotProperty ) {
+                    for ( var propertyName in properties ) {
+                        view.gotProperty( nodeID, propertyName, properties[propertyName] );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
+                    }
+                }
+
             } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.gettingProperties complete " + nodeID ); /* must log something for group level to reset in WebKit */
@@ -1210,7 +1237,7 @@ return component;
                 // been set.  TODO: only want to call when actually set and with final value
 
                 vwf.views.forEach( function( view ) {
-                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
+                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
                 } );
 
             }
@@ -1260,7 +1287,7 @@ return component;
                     // Make the call.
 
                     var value = model.gettingProperty &&
-                        model.gettingProperty( nodeID, propertyName, propertyValue );
+                        model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
 
                     // Look for a return value potentially stored by a reentrant call here if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
@@ -1308,7 +1335,7 @@ return component;
                 // Call gotProperty() on each view.
 
                 vwf.views.forEach( function( view ) {
-                    view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );
+                    view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
 
             }
@@ -1362,7 +1389,7 @@ return component;
             // Call calledMethod() on each view.
 
             vwf.views.forEach( function( view ) {
-                view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );
+                view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
             } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.callMethod complete " + nodeID + " " + methodName + " " + methodParameters ); /* must log something for group level to reset in WebKit */
