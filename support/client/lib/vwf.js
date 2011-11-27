@@ -363,9 +363,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         vwf.dispatch( fields.time );
 
-                    } catch( e ) {
+                    } catch ( e ) {
 
-                        // Ignore invalid messages.
+                        vwf.logger.warn( fields.action, fields.node, fields.member, fields.parameters,
+                            "exception performing action:", e.stack );
 
                     }
 
@@ -1875,7 +1876,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             // Decode if JSON.
 
             if ( typeof component == "string" || component instanceof String ) {
-                try { component = JSON.parse( component ) } catch( e ) { }
+                try { component = JSON.parse( component ) } catch ( e ) { }
             }
 
             // Convert a component URI to an instance of that type. Convert an asset reference to

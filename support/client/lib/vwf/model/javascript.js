@@ -279,9 +279,9 @@ node.id = childID; // TODO: move to a backstop model
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
                     node.getters[propertyName] = eval( getterScript( propertyGet ) );
-                } catch( e ) {
+                } catch ( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating getter:", e );
+                        "exception evaluating getter:", e.stack );
                 }
             } else if ( propertyValue !== undefined ) {
                 node.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
@@ -290,9 +290,9 @@ node.id = childID; // TODO: move to a backstop model
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
                     node.setters[propertyName] = eval( setterScript( propertySet ) );
-                } catch( e ) {
+                } catch ( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating setter:", e );
+                        "exception evaluating setter:", e.stack );
                 }
             } else if ( propertyValue !== undefined ) {
                 node.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
@@ -317,9 +317,9 @@ node.id = childID; // TODO: move to a backstop model
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
                     return setter.call( node, propertyValue );
-                } catch( e ) {
+                } catch ( e ) {
                     this.logger.warn( "settingProperty", nodeID, propertyName, propertyValue,
-                        "exception in setter:", e );
+                        "exception in setter:", e.stack );
                 }
             }
 
@@ -336,9 +336,9 @@ node.id = childID; // TODO: move to a backstop model
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {
                     return getter.call( node );
-                } catch( e ) {
+                } catch ( e ) {
                     this.logger.warn( "gettingProperty", nodeID, propertyName, propertyValue,
-                        "exception in getter:", e );
+                        "exception in getter:", e.stack );
                 }
             }
 
@@ -382,9 +382,9 @@ node.id = childID; // TODO: move to a backstop model
 
             try {
                 node.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
-            } catch( e ) {
+            } catch ( e ) {
                 this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
-                    "exception evaluating body:", e );
+                    "exception evaluating body:", e.stack );
             }
         
         },
@@ -401,9 +401,9 @@ node.id = childID; // TODO: move to a backstop model
             if ( body ) {
                 try {
                     return body.apply( node, methodParameters );
-                } catch( e ) {
+                } catch ( e ) {
                     this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                        "exception:", e );
+                        "exception:", e.stack );
                 }
             }
 
@@ -471,9 +471,9 @@ node.id = childID; // TODO: move to a backstop model
             listeners && listeners.forEach( function( listener ) {
                 try {
                     return listener.handler.apply( listener.context, eventParameters );
-                } catch( e ) {
+                } catch ( e ) {
                     this.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
-                        "exception:", e );
+                        "exception:", e.stack );
                 }
             }, this );
 
@@ -489,9 +489,9 @@ node.id = childID; // TODO: move to a backstop model
             if ( scriptType == "application/javascript" ) {
                 try {
                     return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
-                } catch( e ) {
+                } catch ( e ) {
                     this.logger.warn( "executing", nodeID,
-                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", e );
+                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", e.stack );
                 }
             }
 
