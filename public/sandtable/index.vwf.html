@@ -4,10 +4,13 @@
     <title>Sandtable</title>
     <link href="toolbar.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript">
+    
+      mousePressed = false;
+    
       function setColor(color) {
         vwf_view.kernel.setProperty( "http-vwf-example-com-types-node-toolbar", "selectedColor", color );
         highlightColor(color);
-       }
+      }
 	        
       function highlightColor(color) {
         document.getElementById('black').style.border = "2px solid black";
@@ -19,21 +22,21 @@
         document.getElementById(color).style.border = "3px solid orange";
         var vColor;
 		switch( color ) {
-			case "red":
-				vColor = [255, 0, 0];
-				break;
-			case "yellow":
-				vColor = [255, 255, 0];
-				break;
-			case "green":
-				vColor = [0, 255, 0];
-				break;
-			case "blue":
-				vColor = [0, 0, 255];
-				break;
-			default:
-				vColor = [0, 0, 0];
-				break;
+		  case "red":
+		    vColor = [255, 0, 0];
+		    break;
+		  case "yellow":
+		    vColor = [255, 255, 0];
+		    break;
+		  case "green":
+		    vColor = [0, 255, 0];
+		    break;
+		  case "blue":
+	        vColor = [0, 0, 255];
+		    break;
+		  default:
+		    vColor = [0, 0, 0];
+		    break;
 		}
         vwf_view.kernel.setProperty("index-vwf", "lineColor", vColor);
       }
@@ -57,50 +60,45 @@
         setColor('black');
         setMode('orbit');
       }
+
+      document.body.onmousedown = function (e) { 
+        mousePressed = true;
+      } 
       
-      function showToolbar()
-      {
-        //$('#toolbar').slideDown('slow');
-        $('#toolbar').animate({
-          opacity:0.6
-        }, 1000);
-      }
-      
-      function hideToolbar(event)
-      {
-        //$('#toolbar').slideUp('slow');
-        $('#toolbar').animate({
-          opacity:0.0
-        }, 1000);
-      }
+      document.body.onmouseup = function (e) { 
+        mousePressed = false;
+      } 
       
       jQuery('#toolbar').mouseleave( function(evt) { 
         evt.stopPropagation(); 
-        hideToolbar(); 
+        $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
         return false; 
       }); 
       
       jQuery('#toolbar').mouseenter( function(evt) { 
         evt.stopPropagation(); 
-        showToolbar(); 
+        if(!mousePressed) 
+        {
+          $('#toolbar').stop().delay(200).animate({ opacity:0.6 }, 1500);
+        }
         return false; 
       });
+      
+      $('#toolbar').animate({ opacity:0.0 }, 1);
 
       vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
       	if (nodeId == "http-vwf-example-com-types-node-toolbar" ) {
-      		switch (propertyName) {
-      			case "selectedColor":
-      				highlightColor(propertyValue);
-      				break;
-      			case "inputMode":
-      				highlightMode( propertyValue );
-      				break;
-      		}
-      	 }
+      	  switch (propertyName) {
+      	    case "selectedColor":
+      		  highlightColor(propertyValue);
+      		  break;
+      		case "inputMode":
+      		  highlightMode( propertyValue );
+      		  break;
+          }
+        }
       }
-
-
-
+      
     </script>
   </head>
   <body>
