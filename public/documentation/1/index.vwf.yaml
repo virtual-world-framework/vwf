@@ -8,14 +8,15 @@ children:
     source: hello.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0.2, -2, 0 ]
-      rotation: [ -1, 0, 0 ]
-      scale: [ 0.65, 0.65, 0.65 ]
-    scripts:
-    - text: |
-        this.initialize = function() {
-          this.position = this.position;
-          this.rotation = this.rotation;
-          this.scale = this.scale;
-        }
-      type: application/javascript
+      position: [ -3, 1, 0 ]
+      rotation: [ 0, 0, 3.141 ]
+      scale: [ 1.8, 1.8, 1.8 ]
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "================ documentation example one ================" );
+      this.activeCamera = "http-vwf-example-com-types-camera-defaultCamera";
+      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "position", [ 0, 0, 10 ] );
+      this.loadDone = true;
+    }
+  type: application/javascript
