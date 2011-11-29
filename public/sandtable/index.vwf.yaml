@@ -81,26 +81,20 @@ children:
     extends: http://vwf.example.com/types/group3 
     methods:
       animate: |
-        //console.info( "================ animate ================" );
-        var time = 0.2;
+        //console.info( "== predator1 ===== animate ================" );
+        var time = vwf.time();
         var len = this.path.length;
-        this.timeSinceLast += time;
+        var timeElasped = time - this.timeSinceLast;
         var lastPathPoint = this.path[ this.lastPathIndex ];
         var nextPathPoint = this.path[ this.nextPathIndex ];
         var goalPointIndex = this.nextPathIndex + 1;
         if ( goalPointIndex >= this.path.length )
           goalPointIndex = 0;
         var goalPathPoint = this.path[ goalPointIndex ];
-        var percentDone = this.timeSinceLast / nextPathPoint.time;
+        var percentDone = timeElasped / nextPathPoint.time;
         if ( percentDone > 0.975 )
           percentDone = 1;
-        
-        //console.info( "this.timeSinceLast = " + this.timeSinceLast ); 
-        //console.info( "percentDone = " + percentDone );
-        //console.info( "this.lastPathIndex = " + this.lastPathIndex );
-        //console.info( "this.nextPathIndex = " + this.nextPathIndex );
-        //console.info( "goalPointIndex = " + goalPointIndex );
-        
+       
         function interpolate( beforeCoord, afterCoord, percent ) {
           return beforeCoord + percent * (afterCoord - beforeCoord);
         }
@@ -118,12 +112,11 @@ children:
         var vecLen = ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
         zRot[0] /= vecLen;
         zRot[1] /= vecLen;
-        //console.info(  )
         this.planeGroup1.rotation = [ 0, 0, Math.acos( zRot[0] ) ]; 
         
         if ( percentDone == 1 ) {
           this.lastPathIndex += 1;
-          this.timeSinceLast = 0;
+          this.timeSinceLast = time;
         }
         if ( this.animating ) {
           this.future( 0.1 ).animate();
@@ -142,15 +135,14 @@ children:
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 1 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }  
             
             this.nextPathIndex = this.lastPathIndex+1;
-            this.timeSinceLast = 0;
+            this.timeSinceLast = vwf.time();
             this.planeGroup1.position = this.path[ this.lastPathIndex ].position;
             this.goal1.position = this.path[ this.nextPathIndex ].position;
-            //this.planeGroup1.lookAt = "http-vwf-example-com-types-group3-goal1";
-            
+           
             this.animating = true;
           }
         type: application/javascript 
@@ -160,6 +152,7 @@ children:
       scale: [ 1, 1, 1 ] 
       lastPathIndex:
         set: |
+          console.info( "predator1.lastPathIndex.set   value = " + value );
           if ( value >= 0 ) {
             if ( value < this.path.length ) {
               this.lastPathIndex = value;
@@ -192,7 +185,6 @@ children:
           position: [ 0, 0, 1200 ]
           eulers: [0, 0, 0 ]
           scale: [ 1, 1, 1 ]
-#          lookAt: "http-vwf-example-com-types-group3-goal1"
         children:
           plane1:
             extends: http://vwf.example.com/types/node3
@@ -214,17 +206,17 @@ children:
     extends: http://vwf.example.com/types/group3 
     methods:
       animate: |
-        //console.info( "================ animate ================" );
-        var time = 0.2;
+        //console.info( "== predator2 =====  animate ================" );
+        var time = vwf.time();
         var len = this.path.length;
-        this.timeSinceLast += time;
+        var timeElasped = time - this.timeSinceLast;
         var lastPathPoint = this.path[ this.lastPathIndex ];
         var nextPathPoint = this.path[ this.nextPathIndex ];
         var goalPointIndex = this.nextPathIndex + 1;
         if ( goalPointIndex >= this.path.length )
           goalPointIndex = 0;
         var goalPathPoint = this.path[ goalPointIndex ];
-        var percentDone = this.timeSinceLast / nextPathPoint.time;
+        var percentDone = timeElasped / nextPathPoint.time;
         if ( percentDone > 0.975 )
           percentDone = 1;
       
@@ -261,7 +253,7 @@ children:
           
           //console.info( "============================================================" );
           
-          this.timeSinceLast = 0;
+          this.timeSinceLast = time;
         }
         if ( this.animating ) {
           this.future( 0.1 ).animate();
@@ -277,92 +269,92 @@ children:
             var step = 200;
             
             y = 0;
-            console.info( "START X === " + radius + " to -" + radius );
+            //console.info( "START X === " + radius + " to -" + radius );
             for ( var x = radius - 200; x > -radius; x -= step ) {
               pos = [ x, 0, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            console.info( "END X === " + radius + " to -" + radius );
+            //console.info( "END X === " + radius + " to -" + radius );
             
             
-            console.info( "START -X +Y === 270 to 90" );
+            //console.info( "START -X +Y === 270 to 90" );
             for ( var theta = 1.5 * Math.PI; theta > 0; theta -= Math.PI / 90 ) {
               x = -radius + ( radius * Math.cos( theta ) );
               y = radius + ( radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             } 
-            console.info( "END -X +Y === 270 to 90" );
+            //console.info( "END -X +Y === 270 to 90" );
   
             x = 0;
-            console.info( "START Y === " + radius + " to -" + radius );
+            //console.info( "START Y === " + radius + " to -" + radius );
             for ( var y = radius - step; y > -radius ; y -= step ) {
               pos = [ 0, y, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            console.info( "END Y === " + radius + " to -" + radius );
+            //console.info( "END Y === " + radius + " to -" + radius );
 
-            console.info( "START -X -Y === 0 to 90" );
+            //console.info( "START -X -Y === 0 to 90" );
             for ( var theta = 2 * Math.PI; theta > 0.5 * Math.PI; theta -= Math.PI / 90 ) {
               x = -radius + (radius * Math.cos( theta ) );
               y = -radius + (radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             } 
-            console.info( "END -X -Y === 0 to 90" );
+            //console.info( "END -X -Y === 0 to 90" );
 
             y = 0;
-            console.info( "START X === -" + radius + " to " + radius );
+            //console.info( "START X === -" + radius + " to " + radius );
             for ( var x = -radius + step; x < radius; x += step ) {
               pos = [ x, 0, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }            
-            console.info( "END X === -" + radius + " to " + radius );
+            //console.info( "END X === -" + radius + " to " + radius );
  
-            console.info( "START +X +Y === 270 to 180" );
+            //console.info( "START +X +Y === 270 to 180" );
             for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
               x = radius + (radius * Math.cos( theta ) );
               y = radius + (radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            console.info( "END +X +Y === 270 to 180" );
+            //console.info( "END +X +Y === 270 to 180" );
             
             x = 0;
-            console.info( "START Y === " + radius + " to -" + radius );
+            //console.info( "START Y === " + radius + " to -" + radius );
             for ( var y = radius - step; y > -radius; y -= step ) {
               pos = [ 0, y, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            console.info( "END Y === " + radius + " to -" + radius );
+            //console.info( "END Y === " + radius + " to -" + radius );
 
-            console.info( "START +X -Y === 180 to 90" );
+            //console.info( "START +X -Y === 180 to 90" );
             for ( var theta = 1.0 * Math.PI; theta < 2.5 * Math.PI; theta += Math.PI / 90 ) {
               x = radius + ( radius * Math.cos( theta ) );
               y = -radius + ( radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
-              console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
+              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }            
-            console.info( "END +X -Y === 180 to 90" );
+            //console.info( "END +X -Y === 180 to 90" );
            
             this.nextPathIndex = this.lastPathIndex+1;
-            this.timeSinceLast = 0;
+            this.timeSinceLast = vwf.time();
             this.planeGroup2.position = this.path[ this.lastPathIndex ].position;
             this.goal2.position = this.path[ this.nextPathIndex ].position;
             //this.planeGroup2.plane2.lookAt = "http-vwf-example-com-types-group3-goal2";
@@ -377,6 +369,7 @@ children:
       scale: [ 1, 1, 1 ] 
       lastPathIndex:
         set: |
+          console.info( "predator2.lastPathIndex.set   value = " + value );
           if ( value >= 0 ) {
             if ( value < this.path.length ) {
               this.lastPathIndex = value;
@@ -418,7 +411,6 @@ children:
               position: [ 0, 500, 1800 ]
               rotation: [0, 0, -1.57 ]
               scale: [ 8, 8, 8 ]
-#              lookAt: "http-vwf-example-com-types-group3-goal2"
           cone2:
             extends: http://vwf.example.com/types/node3
             source: models/cone.dae
@@ -427,4 +419,3 @@ children:
               position: [ 0, -300, -1100 ]
               eulers: [0, 0, 0 ]
               scale: [ 8, 8, 16 ]
-#              lookAt: "http-vwf-example-com-types-group3-goal2"

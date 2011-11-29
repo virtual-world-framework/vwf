@@ -355,6 +355,7 @@ scripts:
       }      
     }
     this.orbit = function( parms ){
+      //console.info( "   Orbit ---------------" );
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
 
@@ -389,6 +390,7 @@ scripts:
       }
     }
     this.draw = function( parms ) {
+      //console.info( "   Draw ---------------" );
       if ( parms.pickInfo && parms.pickInfo.coord ) {
         if ( this.lastDrawPoint ) {
           var x1, y1, z1, x2, y2, z2;
@@ -473,6 +475,12 @@ scripts:
       }
     }
     this.pindrop = function( parms ) {
+      //console.info( "   PinDrop ---------------" );
+      //if ( parms ) console.info( "     parms = " + parms );
+      //if ( parms.pickInfo ) console.info( "     parms.pickInfo = " + parms.pickInfo );
+      //else console.info( "     parms.pickInfo is undefined" );
+      //if ( parms.pickInfo && parms.pickInfo.coord ) console.info( "     parms.pickInfo.coord = " + parms.pickInfo.coord );
+      
       if ( parms.pickInfo && parms.pickInfo.coord ) {
         pushpin.properties.position = parms.pickInfo.coord;
         
