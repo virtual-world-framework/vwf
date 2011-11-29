@@ -82,7 +82,7 @@ children:
     methods:
       animate: |
         //console.info( "================ animate ================" );
-        var time = 0.1;
+        var time = 0.2;
         var len = this.path.length;
         this.timeSinceLast += time;
         var lastPathPoint = this.path[ this.lastPathIndex ];
@@ -113,11 +113,19 @@ children:
         newY = interpolate( lastPathPoint.position[1], nextPathPoint.position[1], percentDone );
         this.planeGroup1.position = [ newX, newY, 1200 ];
         
+        var zRot = [ goalPathPoint.position[0] - newX, goalPathPoint.position[1] - newY, 0 ];
+        var sq = zRot[0] * zRot[0] + zRot[1] * zRot[1];
+        var vecLen = ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
+        zRot[0] /= vecLen;
+        zRot[1] /= vecLen;
+        //console.info(  )
+        this.planeGroup1.rotation = [ 0, 0, Math.acos( zRot[0] ) ]; 
+        
         if ( percentDone == 1 ) {
           this.lastPathIndex += 1;
           this.timeSinceLast = 0;
         }
-        if ( this.animate ) {
+        if ( this.animating ) {
           this.future( 0.1 ).animate();
         }   
     scripts:
@@ -126,14 +134,14 @@ children:
             console.info( "================ predator1 ================" );
 
             this.path = [];
-            var len, pos, x, y, z = 1200;
+            var len = 0, pos, x, y, z = 1200;
             
-            for ( var theta = 0; theta < 2 * Math.PI; theta += Math.PI / 180 ) {
+            for ( var theta = 0; theta < 2 * Math.PI && len < (( 2*180 )-1); theta += Math.PI / 180 ) {
               x = 10000 * Math.cos( theta );
               y = 10000 * Math.sin( theta );
               len = this.path.length;
               pos = [ x, y, z ];
-              this.path.push( { position: pos, time: 4 } );
+              this.path.push( { position: pos, time: 1 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }  
             
@@ -192,7 +200,7 @@ children:
             type: model/vnd.collada+xml
             properties:
               position: [ 0, 500, 1800 ]
-              eulers: [0, 0, 0 ]
+              rotation: [0, 0, -1.57 ]
               scale: [ 8, 8, 8 ]
           cone1:
             extends: http://vwf.example.com/types/node3
@@ -231,7 +239,15 @@ children:
         newX = interpolate( lastPathPoint.position[0], nextPathPoint.position[0], percentDone );
         newY = interpolate( lastPathPoint.position[1], nextPathPoint.position[1], percentDone );
         this.planeGroup2.position = [ newX, newY, 1200 ];
-        
+ 
+        var zRot = [ goalPathPoint.position[0] - newX, goalPathPoint.position[1] - newY, 0 ];
+        var sq = zRot[0] * zRot[0] + zRot[1] * zRot[1];
+        var vecLen = ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
+        zRot[0] /= vecLen;
+        zRot[1] /= vecLen;
+        //console.info( " this.planeGroup2.rotation.Z = " + Math.acos( zRot[0] ) );
+        this.planeGroup2.rotation = [ 0, 0, Math.acos( zRot[0] ) ];
+ 
         if ( percentDone == 1 ) {
           this.lastPathIndex += 1;
           
@@ -245,88 +261,105 @@ children:
           
           //console.info( "============================================================" );
           
-          
           this.timeSinceLast = 0;
         }
-        if ( this.animate ) {
+        if ( this.animating ) {
           this.future( 0.1 ).animate();
         }   
     scripts:
       - text: |
           this.initialize = function() {
-            console.info( "================ predator1 ================" );
+            console.info( "================ predator2 ================" );
 
             this.path = [];
             var len, pos, x = 0, y = 0, z = 12000;
-            var raduis = 8000;
+            var radius = 5000;
+            var step = 200;
             
             y = 0;
-            for ( var x = raduis; x > -raduis + (0.001*raduis); x -= 100 ) {
+            console.info( "START X === " + radius + " to -" + radius );
+            for ( var x = radius - 200; x > -radius; x -= step ) {
               pos = [ x, 0, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-
+            console.info( "END X === " + radius + " to -" + radius );
+            
+            
+            console.info( "START -X +Y === 270 to 90" );
             for ( var theta = 1.5 * Math.PI; theta > 0; theta -= Math.PI / 90 ) {
-              x = -raduis + ( raduis * Math.cos( theta ) );
-              y = raduis + ( raduis * Math.sin( theta ) );
+              x = -radius + ( radius * Math.cos( theta ) );
+              y = radius + ( radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
-              this.path.push( { position: pos, time: 1 } );
+              this.path.push( { position: pos, time: 2 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             } 
+            console.info( "END -X +Y === 270 to 90" );
   
             x = 0;
-            for ( var y = raduis; y > -raduis + (0.001*raduis); y -= 100 ) {
+            console.info( "START Y === " + radius + " to -" + radius );
+            for ( var y = radius - step; y > -radius ; y -= step ) {
               pos = [ 0, y, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
+            console.info( "END Y === " + radius + " to -" + radius );
 
+            console.info( "START -X -Y === 0 to 90" );
             for ( var theta = 2 * Math.PI; theta > 0.5 * Math.PI; theta -= Math.PI / 90 ) {
-              x = -raduis + (raduis * Math.cos( theta ) );
-              y = -raduis + (raduis * Math.sin( theta ) );
+              x = -radius + (radius * Math.cos( theta ) );
+              y = -radius + (radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             } 
+            console.info( "END -X -Y === 0 to 90" );
 
             y = 0;
-            for ( var x = -raduis; x > raduis - (0.001*raduis); x += 100 ) {
+            console.info( "START X === -" + radius + " to " + radius );
+            for ( var x = -radius + step; x < radius; x += step ) {
               pos = [ x, 0, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }            
+            console.info( "END X === -" + radius + " to " + radius );
  
+            console.info( "START +X +Y === 270 to 180" );
             for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
-              x = raduis + (raduis * Math.cos( theta ) );
-              y = raduis + (raduis * Math.sin( theta ) );
+              x = radius + (radius * Math.cos( theta ) );
+              y = radius + (radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
+            console.info( "END +X +Y === 270 to 180" );
             
             x = 0;
-            for ( var y = raduis; y > -raduis + (0.001*raduis); y -= 100 ) {
+            console.info( "START Y === " + radius + " to -" + radius );
+            for ( var y = radius - step; y > -radius; y -= step ) {
               pos = [ 0, y, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
+            console.info( "END Y === " + radius + " to -" + radius );
 
+            console.info( "START +X -Y === 180 to 90" );
             for ( var theta = 1.0 * Math.PI; theta < 2.5 * Math.PI; theta += Math.PI / 90 ) {
-              x = raduis + ( raduis * Math.cos( theta ) );
-              y = -raduis + ( raduis * Math.sin( theta ) );
+              x = radius + ( radius * Math.cos( theta ) );
+              y = -radius + ( radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
               console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }            
+            console.info( "END +X -Y === 180 to 90" );
            
             this.nextPathIndex = this.lastPathIndex+1;
             this.timeSinceLast = 0;
@@ -383,7 +416,7 @@ children:
             type: model/vnd.collada+xml
             properties:
               position: [ 0, 500, 1800 ]
-              eulers: [0, 0, 0 ]
+              rotation: [0, 0, -1.57 ]
               scale: [ 8, 8, 8 ]
 #              lookAt: "http-vwf-example-com-types-group3-goal2"
           cone2:

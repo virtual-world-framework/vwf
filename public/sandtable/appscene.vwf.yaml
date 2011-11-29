@@ -300,18 +300,18 @@ scripts:
           origZ = camerapos[2];
           
           x = origX + xinc * this.speed;
-          if ( x > 25000 ) { x = 25000; atBounds = true; }
-          else if ( x < -25000 ) { x = -25000; atBounds = true; }
+          if ( x > 50000 ) { x = 50000; atBounds = true; }
+          else if ( x < -50000 ) { x = -50000; atBounds = true; }
           
           y = origY + yinc * this.speed;
-          if ( y > 25000 ) { y = 25000; atBounds = true; }
-          else if ( y < -25000 ) { y = -25000;  atBounds = true; }         
+          if ( y > 50000 ) { y = 50000; atBounds = true; }
+          else if ( y < -50000 ) { y = -50000;  atBounds = true; }         
           
           if ( atBounds ) { x = origX; y = origY; }
           
           z = origZ + zinc * this.speed;
-          if ( z > 25000 ) z = 25000;
-          else if ( z < 0 ) y = 0;          
+          if ( z > 50000 ) z = 50000;
+          else if ( z < 0 ) z = 0;          
           
           this.activeCameraComp.position = [ x, y, z ];
           positionChanged = true;
