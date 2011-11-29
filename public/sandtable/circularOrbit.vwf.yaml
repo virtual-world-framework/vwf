@@ -1,0 +1,21 @@
+---
+properties:
+  points:
+  - time: 0.0
+    position: [ -1, 0, 0 ]
+  - time: 1.0
+    position: [ -0.7, 0.7, 0 ]
+  - time: 2.0
+    position: [ 0, 1, 0 ]
+  - time: 3.0
+    position: [ 0.7, 0.7, 0 ]
+  - time: 4.0
+    position: [ 1, 0, 0 ]
+  - time: 5.0
+    position: [ 0.7, -0.7, 0 ]
+  - time: 6.0
+    position: [ 0, -1, 0 ]
+  - time: 7.0
+    position: [ -0.7, -0.7, 0 ]
+  - time: 8.0
+    position: [ -1, 0, 0 ]

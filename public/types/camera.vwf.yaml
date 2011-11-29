@@ -40,21 +40,6 @@ properties:
           break;
       }
     value: "perspective"
-  attachNodeID:
-    set: |
-      switch ( value ) {
-        case 'http-vwf-example-com-types-car-pick_up_truck02':
-          this.position = [ -52.29, -114.67, 100 ];
-          this.eulers = [ 90, 270, 0 ];
-          this.attachOffset = [ -60, 156, -6 ];
-          this.attachNodeID = value;
-          break;
-        default:
-          this.attachNodeID = value;
-          break;
-      }
-    value: ""
-  attachOffset: [ 0, 0, 0 ]
   speed: 2.0
   position: [ 0, 0, 0 ]
   eulers: [ 0, 0, 0 ]
@@ -62,6 +47,4 @@ properties:
   rotX: 0
   rotY: 0
   rotZ: 0
-  worldPosition: [ 0, 0, 0 ]
-  worldEulers: [ 0, 0, 0 ]
 
