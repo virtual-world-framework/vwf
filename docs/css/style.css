@@ -1,6 +1,7 @@
 body {
 	font: 12pt Arial;
 	text-align:center;
+	overflow-y:scroll;
 }
 .header {
 	font:22pt Arial;
@@ -61,7 +62,6 @@ body {
 	padding:10px;
 	width:560px;
 	overflow-y:scroll;
-	/*max-height:200px;*/
 }
 .content h1 {
 	font: 18pt Arial;
