@@ -51,7 +51,7 @@ children:
     properties:
       position: [ 0, 0, -150 ]
       eulers: [0, 0, 0 ]
-      scale: [ 0.008, 0.008, 0.006 ]
+      scale: [ 0.008, 0.008, 0.020 ]
   worldCenter:
     extends: http://vwf.example.com/types/group3
     properties:
