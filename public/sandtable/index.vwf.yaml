@@ -152,7 +152,7 @@ children:
       scale: [ 1, 1, 1 ] 
       lastPathIndex:
         set: |
-          console.info( "predator1.lastPathIndex.set   value = " + value );
+          // console.info( "predator1.lastPathIndex.set   value = " + value );
           if ( value >= 0 ) {
             if ( value < this.path.length ) {
               this.lastPathIndex = value;
@@ -369,7 +369,7 @@ children:
       scale: [ 1, 1, 1 ] 
       lastPathIndex:
         set: |
-          console.info( "predator2.lastPathIndex.set   value = " + value );
+          // console.info( "predator2.lastPathIndex.set   value = " + value );
           if ( value >= 0 ) {
             if ( value < this.path.length ) {
               this.lastPathIndex = value;
