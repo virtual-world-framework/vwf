@@ -6,7 +6,7 @@ properties:
   spheresCreated: 0
   colorIndex:
     set: |
-      if ( ( value >= 0 ) && ( value <= 2 ) ) {
+      if ( ( value >= 0 ) && ( value <= 6 ) ) {
         this.colorIndex = value;
       } else {
         this.colorIndex = 0;
@@ -18,7 +18,7 @@ scripts:
     var mouseIsDown = false;
     var mouseDownTime = -1;
     var idsToAddVelocity;
-    var materials = [ "red", "blue", "yellow" ];
+    var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
       "source": "Cube", 
       "extends": "http://vwf.example.com/types/node3",

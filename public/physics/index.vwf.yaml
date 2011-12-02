@@ -36,6 +36,13 @@ children:
       physics: [ "mesh" ]
       friction: 0.5
       restitution: 0.1
+  groundplane:
+    extends: "http://vwf.example.com/types/node3"
+    properties:
+      position: [ 0, 0, 0 ]
+      physics: [ "plane", [ 0, 0, 1, 0 ] ]
+      friction: 0.99
+      restitution: 0      
   light1:
     extends: "http://vwf.example.com/types/light"
     properties: 

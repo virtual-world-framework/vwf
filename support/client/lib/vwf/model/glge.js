@@ -733,7 +733,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
                         var scale = this.kernel.getProperty( nodeID, "scale", undefined );
-                        value = [ bbox.xMin * scale[0], bbox.xMax* scale[0], bbox.yMin* scale[1], bbox.yMax * scale[1], bbox.zMin * scale[2], bbox.zMax * scale[2] ];
+                        value = { min: [ bbox.xMin * scale[0], bbox.yMin* scale[1], bbox.zMin*scale[2] ], max: [ bbox.xMax * scale[0], bbox.yMax* scale[1], bbox.zMax*scale[2] ] };
                         break;
 
                     case "centerOffset":
@@ -1651,9 +1651,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var offset = [ 0, 0, 0 ];
         if ( glgeObject ) {
             var bBox = getLocalBoundingBox.call( this, glgeObject )
-            offset[0] = ( bBox.xMax - bBox.xMin ) * 0.50;
-            offset[1] = ( bBox.yMax - bBox.yMin ) * 0.50;
-            offset[2] = ( bBox.zMax - bBox.zMin ) * 0.50;
+            offset[0] = ( bBox.xMax + bBox.xMin ) * 0.50;
+            offset[1] = ( bBox.yMax + bBox.yMin ) * 0.50;
+            offset[2] = ( bBox.zMax + bBox.zMin ) * 0.50;
         }
         return offset;
 
