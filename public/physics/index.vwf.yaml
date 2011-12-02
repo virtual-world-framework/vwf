@@ -5,7 +5,7 @@ properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "http-vwf-example-com-types-camera-maincamera"
   gravity: [ 0, 0, -50.8, 0 ]
-  collisionSystem: [ true, -100, -100, -100, 200, 200, 200, 3, 3, 3 ]
+  collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
 type: model/x-glge
 scripts:
@@ -22,23 +22,18 @@ children:
     properties:
       walkMode: "walk"
       cameraType: "perspective"
-      position: [ 7.5, -93.93, 26 ]
-      rotation: [ 1.49, -0.0296, -0.0022 ]
-  groundplane:
-    extends: http://vwf.example.com/types/node3
-    properties:
-      physics: [ "plane", [ 0, 0, 1, 0 ] ]
-      friction: 0.99
-      restitution: 0
-      position: [ 0, 0, 0 ]
-  ramp:
+      position: [ 30, 138, 32 ]
+      rotation: [ 1.56, 3.14, 0 ]
+      far: 50000.0
+  box:
     extends: "http://vwf.example.com/types/node3"
-    source: "city"
-    type: "text/xml"
+    source: box.dae
+    type: model/vnd.collada+xml
     properties:
-      scale: [ 10, 10, 10 ]
+      position: [ 0, 0, 0 ]
+      rotation: [ 0, 0, 0 ]
+      scale: [ 1, 1, 1 ]
       physics: [ "mesh" ]
-      material: "grey"
       friction: 0.5
       restitution: 0.1
   light1:
@@ -50,12 +45,4 @@ children:
       constantAttenuation: 1.5
       linearAttenuation: 0.00000001
       quadraticAttenuation: 0.00001
-  light2:
-    extends: "http://vwf.example.com/types/light"
-    properties: 
-      lightType: "directional"
-      position: [ 60, 85, 70 ]
-      rotation: [ -0.5, -0.1, 0 ]
-      constantAttenuation: 1.5
-      linearAttenuation: 0.00000001
-      quadraticAttenuation: 0.00001       
+     

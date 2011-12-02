@@ -4,18 +4,27 @@ properties:
   createCube: true
   cubesCreated: 0
   spheresCreated: 0
+  colorIndex:
+    set: |
+      if ( ( value >= 0 ) && ( value <= 2 ) ) {
+        this.colorIndex = value;
+      } else {
+        this.colorIndex = 0;
+      }
+    value: 0  
 scripts:
 - text: |
     var lastTimeObjWasCreated;
     var mouseIsDown = false;
     var mouseDownTime = -1;
     var idsToAddVelocity;
+    var materials = [ "red", "blue", "yellow" ];
     var cube = { 
       "source": "Cube", 
       "extends": "http://vwf.example.com/types/node3",
       "type": "text/xml",
       "properties": { 
-        "material": [ "red", "blue", "yellow" ],
+        "material": "",
         "scale": [ 1.5, 1.5, 1.5 ], 
         "eulers": [ 0, 0, 0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
@@ -33,7 +42,7 @@ scripts:
       "extends": "http://vwf.example.com/types/node3",
       "type": "text/xml",
       "properties": { 
-        "material": [ "red", "blue", "yellow" ], 
+        "material": "", 
         "scale": [ 2.0, 2.0, 2.0 ], 
         "eulers": [ 0, 0, 0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
@@ -48,17 +57,17 @@ scripts:
       };
     this.mouseDown = function( parms ) {
       mouseIsDown = true;
-      mouseDownTime = new Date().getTime();
+      mouseDownTime = vwf.time();
       if ( this.__proto__ && this.__proto__.__proto__ && this.__proto__.__proto__.mouseDown ) {
         this.__proto__.__proto__.mouseDown.call( this, parms );  
       }     
     }
     this.mouseUp = function( parms ) {
       mouseIsDown = false;
-      var now = new Date().getTime();
-      //if ( now - mouseDownTime < 600 ) {
+      var now =  vwf.time();
+      if ( now - mouseDownTime < 700 ) {
         this.createObject( parms );
-      //}
+      }
       if ( this.__proto__ && this.__proto__.__proto__ && this.__proto__.__proto__.mouseUp ) {
         this.__proto__.__proto__.mouseUp.call( this, parms );  
       }
@@ -67,20 +76,24 @@ scripts:
     this.createObject = function( parms ) {
       var newObjName;
       if ( this.createCube ) {
-        this.cubesCreated = this.cubesCreated + 1;
+        this.cubesCreated += 1;
         newObjName = "cube" + this.cubesCreated;
         
+        cube.properties.material = materials[ this.colorIndex ];
         cube.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] ];
-        cube.properties.velocity = [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60];
+        cube.properties.velocity = [ parms.trans[0] * 90, parms.trans[1] * 90, parms.trans[2] * 60];
+        this.colorIndex += 1;
         
         vwf.createNode( "index-vwf", cube, newObjName, undefined );        
         this.createCube = false;
       } else {
-        this.spheresCreated = this.spheresCreated + 1;
+        this.spheresCreated += 1;
         newObjName = "sphere" + this.spheresCreated;
         
+        sphere.properties.material = materials[ this.colorIndex ];
         sphere.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] ];
-        sphere.properties.velocity = [ parms.trans[0] * 60, parms.trans[1] * 60, parms.trans[2] * 60 ];
+        sphere.properties.velocity = [ parms.trans[0] * 90, parms.trans[1] * 90, parms.trans[2] * 60 ];
+        this.colorIndex += 1;
         
         vwf.createNode( "index-vwf", sphere, newObjName, undefined );
         this.createCube = true;      
