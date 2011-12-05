@@ -250,6 +250,11 @@
         var mouseInfo = function( e, debug ) {
             var pickInfo = mousePick( e, sceneNode );
             if ( pickInfo ) {
+                if ( debug ) {
+                    if ( pickInfo.coord ) {    console.info( "     pickInfo.coord = " + pickInfo.coord ); }
+                    if ( pickInfo.distance ) { console.info( "     pickInfo.distance = " + pickInfo.distance ); }
+                    if ( pickInfo.normal ) {   console.info( "     pickInfo.distance = " + pickInfo.normal ); }
+                }
                 glgeActualObj = pickInfo.object;
                 var mouseOverID = getPickObjectID( pickInfo, sceneView, debug );
                 return { 
@@ -322,7 +327,8 @@
         }
 
         canvas.onmouseup = function( e ) {
-            var mi = mouseInfo( e, false );
+            var ctrlAndAltDown = sceneNode.glgeKeys.isKeyPressed( GLGE.KI_CTRL ) && sceneNode.glgeKeys.isKeyPressed( GLGE.KI_ALT );
+            var mi = mouseInfo( e, ctrlAndAltDown );
             if ( mi ) {
                 cameraInfo( mi );
                 var mouseUpObjectID =  mi.mouseOverID;
@@ -609,12 +615,19 @@
         }
     };
 
+    var objectIndex = 1;
     var outputObject = function(obj, iIndent) {
-        if (obj.multimaterials && obj.multimaterials.length > 0) {
-            console.info(indent(iIndent) + "children:");
+        var indentAdd = 0;
+        var objName = name( obj );
+        if ( objName != "" ) {
+            console.info(indent(iIndent) + "objName:");
+            indentAdd = 1;
+        }
+        if ( obj.multimaterials && obj.multimaterials.length > 0 ) {
+            console.info( indent( iIndent+indentAdd ) + "children:" );
             materialIndex = 1;
-            for (var i = 0; i < obj.multimaterials.length; i++) {
-                outputMaterial(obj.getMaterial(i), iIndent + 1);
+            for ( var i = 0; i < obj.multimaterials.length; i++ ) {
+                outputMaterial( obj.getMaterial(i), iIndent + 1 + indentAdd );
             }
         }
     };
