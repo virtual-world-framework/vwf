@@ -12025,6 +12025,7 @@ GLGE.Collada=function(){
 	this.children=[];
 	this.actions={};
 	this.boneIdx=0;
+    this.objIdx=0;
 	this.actionsIdx=0;
 };
 GLGE.augment(GLGE.Group,GLGE.Collada);
@@ -12975,7 +12976,10 @@ GLGE.Collada.prototype.setMaterialOntoMesh=function(meshes,node) {
 		objMaterials[materials[i].getAttribute("symbol")]=mat;
 	}
 	//create GLGE object
-	var obj=new GLGE.Object();
+	var obj = new GLGE.Object();
+    if ( !obj.name || obj.name == "" ) {
+        obj.name = "glgeObj" + ( ++this.objIdx );
+    }
 	for(i=0; i<meshes.length;i++){
 		if(objMaterials[meshes[i].matName] && objMaterials[meshes[i].matName].trans){
 			obj.setZtransparent(true);
@@ -13409,6 +13413,9 @@ GLGE.Collada.prototype.getColladaActions=function(){
 */
 GLGE.Collada.prototype.getInstanceController=function(node){
 	var obj=new GLGE.Object();
+    if ( !obj.name || obj.name == "" ) {
+        obj.name = "glgeObj" + ( ++this.objIdx );
+    }
 	var controller=this.xml.getElementById(node.getAttribute("url").substr(1));
 	var skeletons=node.getElementsByTagName("skeleton");
 	var joints=controller.getElementsByTagName("joints")[0];

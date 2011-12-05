@@ -16,6 +16,9 @@ scripts:
       this.loadDone = true;
     }
   type: application/javascript
+  
+events:
+  clearing:
 children:
   maincamera: 
     extends: http://vwf.example.com/types/camera
@@ -39,7 +42,7 @@ children:
   groundplane:
     extends: "http://vwf.example.com/types/node3"
     properties:
-      position: [ 0, 0, 0 ]
+      position: [ 0, 0, 11.06 ]
       physics: [ "plane", [ 0, 0, 1, 0 ] ]
       friction: 0.99
       restitution: 0      
