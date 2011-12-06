@@ -19,16 +19,16 @@
  
         this.keysDown = { keys: {}, mods: {} };
 
-        var height = 600;
-        var width = 800;
+        this.height = 600;
+        this.width = 800;
 
-        if ( window && window.innerHeight ) height = window.innerHeight - 40;
-        if ( window && window.innerWidth ) width = window.innerWidth - 40;
+        if ( window && window.innerHeight ) this.height = window.innerHeight - 40;
+        if ( window && window.innerWidth ) this.width = window.innerWidth - 40;
 
-        console.info( "aspectRatio = " + ( width / height ) );
+        console.info( "aspectRatio = " + (( this.width / this.height ) / 1.333 ) );
 
         this.canvasQuery = jQuery(this.rootSelector).append(
-            "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+width+"' height='"+height+"'/>"
+            "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
         ).children(":last");
            
         // Connect GLGE to the VWF timeline.
@@ -89,20 +89,24 @@
             };
 
             window.onresize = function() {
-                var height = 600;
-                var width = 800;
-                if ( domWin && domWin.innerHeight ) height = domWin.innerHeight - 40;
-                if ( domWin && domWin.innerWidth ) width = domWin.innerWidth - 40; 
-                canvas.height = height;
-                canvas.width = width;
-                var camID = glgeView.state.cameraInUseID                
-                if ( !camID && camID != "" ) {
-                    var cam = glgeView.state.cameraInUse;
-                    camID = getObjectID.call( this, cam, glgeView, false, false );
-                }
-                if ( camID && camID != "" ) {
-                    glgeView.settingProperty( camID, "aspect", width/height*0.90 );
-                }               
+                var origWidth = glgeView.width;
+                var origHeight = glgeView.height;
+                if ( domWin && domWin.innerHeight ) glgeView.height = domWin.innerHeight - 40;
+                if ( domWin && domWin.innerWidth ) glgeView.width = domWin.innerWidth - 40; 
+
+                if ( ( origWidth != glgeView.width ) || ( origHeight != glgeView.height ) ) {
+                    canvas.height = glgeView.height;
+                    canvas.width = glgeView.width;
+                    var camID = glgeView.state.cameraInUseID                
+                    if ( !camID && camID != "" ) {
+                        var cam = glgeView.state.cameraInUse;
+                        camID = getObjectID.call( this, cam, glgeView, false, false );
+                    }
+                    if ( camID && camID != "" ) {
+                        console.info( "aspectRatio = " + (( glgeView.width / glgeView.height ) / 1.333 ) );
+                        vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) / 1.333 );
+                    } 
+                }              
             }
 
             var sceneNode = this.state.scenes[ childID ];
@@ -153,15 +157,42 @@
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
 
 //        this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
-        return undefined;
+        var value = undefined;
+        if ( this.state.scenes[ nodeID ] ) {
+            var canvas = this.canvasQuery.get( 0 );
+            switch ( propertyName ) {
+                case "size":
+                   if ( canvas && propertyValue.constructor == Array && propertyValue.length > 1 ) {
+                       canvas.width = propertyValue[0];
+                       canvas.height = propertyValue[1];
+                       value = propertyValue;
+                   }
+                   break; 
+            }
+        }
+        return value;
 
     };
 
     // -- gotProperty ------------------------------------------------------------------------------
 
-    module.prototype.gotProperty = function (nodeID, propertyName, propertyValue) {
+    module.prototype.gotProperty = function ( nodeID, propertyName, propertyValue ) {
 
 //        this.logger.info( "gotProperty", nodeID, propertyName, propertyValue );
+        var value = undefined;
+        if ( this.state.scenes[ nodeID ] ) {
+            var canvas = this.canvasQuery.get( 0 );
+            switch ( propertyName ) {
+                case "size":
+                    if ( canvas ) {
+                        value = [ canvas.width, canvas.height ];
+                    } else {
+                        value = [ this.width, this.height ];
+                    }
+                    break; 
+            }
+        }
+        return value;
 
     };
 
@@ -180,6 +211,7 @@
             sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );
 
             this.state.cameraInUse = sceneNode.glgeScene.camera;
+            //this.state.cameraInUse.setAspect( ( canvas.width / canvas.height) / 1.333 );
 
             // set up all of the mouse event handlers
             initMouseEvents( canvas, this );
