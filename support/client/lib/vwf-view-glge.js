@@ -22,8 +22,8 @@
         this.height = 600;
         this.width = 800;
 
-        if ( window && window.innerHeight ) this.height = window.innerHeight - 40;
-        if ( window && window.innerWidth ) this.width = window.innerWidth - 40;
+        if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
+        if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
 
         console.info( "aspectRatio = " + (( this.width / this.height ) / 1.333 ) );
 
@@ -91,8 +91,8 @@
             window.onresize = function() {
                 var origWidth = glgeView.width;
                 var origHeight = glgeView.height;
-                if ( domWin && domWin.innerHeight ) glgeView.height = domWin.innerHeight - 40;
-                if ( domWin && domWin.innerWidth ) glgeView.width = domWin.innerWidth - 40; 
+                if ( domWin && domWin.innerHeight ) glgeView.height = domWin.innerHeight - 20;
+                if ( domWin && domWin.innerWidth ) glgeView.width = domWin.innerWidth - 20; 
 
                 if ( ( origWidth != glgeView.width ) || ( origHeight != glgeView.height ) ) {
                     canvas.height = glgeView.height;
