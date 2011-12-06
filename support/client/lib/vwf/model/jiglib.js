@@ -15,6 +15,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           this.lastTime = 0;
           this.delayedProperties = {};
           this.updating = false;
+
        },
 
        // == Model API ============================================================================
