@@ -25,7 +25,7 @@
         if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
         if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
 
-        console.info( "aspectRatio = " + (( this.width / this.height ) / 1.333 ) );
+        //console.info( "aspectRatio = " + (( this.width / this.height ) / 1.333 ) );
 
         this.canvasQuery = jQuery(this.rootSelector).append(
             "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
@@ -103,7 +103,7 @@
                         camID = getObjectID.call( this, cam, glgeView, false, false );
                     }
                     if ( camID && camID != "" ) {
-                        console.info( "aspectRatio = " + (( glgeView.width / glgeView.height ) / 1.333 ) );
+                        //console.info( "aspectRatio = " + (( glgeView.width / glgeView.height ) / 1.333 ) );
                         vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) / 1.333 );
                     } 
                 }              
@@ -679,14 +679,26 @@
         var indentAdd = 0;
         var objName = name( obj );
         if ( objName != "" ) {
-            console.info(indent(iIndent) + "objName:");
+            console.info( indent(iIndent) + objName + ":");
             indentAdd = 1;
         }
-        if ( obj.multimaterials && obj.multimaterials.length > 0 ) {
+
+        if ( ( obj.getMesh && obj.getMesh() ) || ( obj.multimaterials && obj.multimaterials.length > 0 ) ) {
             console.info( indent( iIndent+indentAdd ) + "children:" );
-            materialIndex = 1;
-            for ( var i = 0; i < obj.multimaterials.length; i++ ) {
-                outputMaterial( obj.getMaterial(i), iIndent + 1 + indentAdd );
+
+            if ( obj.getMesh && obj.getMesh() ) {
+                var mesh = obj.getMesh();
+                var meshName = name( mesh );
+                if ( meshName != "" ) {
+                    console.info( indent( iIndent + indentAdd + 1 ) + meshName + ":" );
+                    console.info( indent( iIndent + indentAdd + 2 ) + "extends: http://vwf.example.com/types/mesh" );
+                }
+            }
+            if ( obj.multimaterials && obj.multimaterials.length > 0 ) {
+                materialIndex = 1;
+                for ( var i = 0; i < obj.multimaterials.length; i++ ) {
+                    outputMaterial( obj.getMaterial(i), iIndent + 1 + indentAdd );
+                }
             }
         }
     };
@@ -694,8 +706,8 @@
     var outputMaterial = function(obj, iIndent) {
 
         var sOut = indent(iIndent + 1);
-        console.info(indent(iIndent) + lastGroupName + "Material" + materialIndex++ + ":");
-        console.info(sOut + "extends: http://vwf.example.com/types/material");
+        console.info( indent(iIndent) + lastGroupName + "Material" + materialIndex++ + ":" );
+        console.info( sOut + "extends: http://vwf.example.com/types/material");
 
     };
 
