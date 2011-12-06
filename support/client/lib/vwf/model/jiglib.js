@@ -65,7 +65,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         deletingNode: function( nodeID ) {
 
             this.logger.info( "deletingNode", nodeID );
-            
+
+            if ( this.active[ nodeID ] ) {
+                delete this.active[ nodeID ];
+            } 
+                       
             if ( this.nodes[ nodeID ] ) {
                 var node = this.nodes[ nodeID ];
                 var scene = this.scenes[ node.sceneID ];
@@ -83,7 +87,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
                 delete this.nodes[ nodeID ];
             }
-
 
         },
 

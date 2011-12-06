@@ -206,6 +206,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                             break;
                     }  
+                    //console.info( "============ " +childID+ " ============" );
+                    //console.info( "     LOCAL: " + JSON.stringify( this.gettingProperty( childID, "localMatrix", [] ) ) );
+                    //console.info( "     MODEL: " + JSON.stringify( this.gettingProperty( childID, "modelMatrix", [] ) ) );
 
                 }
                 break;
@@ -772,7 +775,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 value = getObjectID.call( glgeModel, lookAtObject, false, false );
                             }
                         }
+                        break;
+
+                    case "localMatrix": {
+                            if ( glgeObject.getLocalMatrix ) value = glgeObject.getLocalMatrix();
+                        }
                         break;                         
+
+                    case "modelMatrix": {
+                            if ( glgeObject.getModelMatrix ) value = glgeObject.getModelMatrix();
+                        }
+                        break;
 
                     default:
                         switch ( node.type ) {
@@ -1541,6 +1554,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             glgeCamera = this.state.nodes[ cameraID ].glgeObject;
             if ( glgeCamera ) {
                 this.state.cameraInUse = glgeCamera;
+                this.state.cameraInUseID = cameraID;
                 sceneNode.glgeScene.setCamera( glgeCamera );
                 sceneNode.camera.ID = cameraID;
             }
