@@ -28,7 +28,7 @@ properties:
     value: "orbit"
   speed: 40.0
 methods:
-  clearing: |
+  clear: |
     if ( this.nodesCreated ) {
       for ( var i = 0; i < this.nodesCreated.length; i++ ){
         //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );

@@ -112,7 +112,7 @@ private
 
     if clients.length == 1
       transport = session[:transport] = Transport.new
-      session[:timer] = EventMachine::PeriodicTimer.new( 0.1 ) do  # TODO: configuration parameter for update rate
+      session[:timer] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
         transport.playing and broadcast JSON.generate :time => transport.time
       end
       transport.play  # TODO: wait until first client has completed loading  # TODO: wait until all clients are ready for an instructor session

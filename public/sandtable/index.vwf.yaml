@@ -20,7 +20,10 @@ scripts:
     }, this );
     this.toolbar.inputModeChanged.add( function( mode ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
-    }, this );    
+    }, this );
+    this.toolbar.events.clearing.add( function() { 
+      this.clear(); 
+    }, this );
   type: application/javascript
 children:
   toolbar:
@@ -39,7 +42,7 @@ children:
           "orbit"      
     methods:
       clear: |
-        this.parent.clearing();
+        this.clearing();
     events:
       selectedColorChanged:
       inputModeChanged:

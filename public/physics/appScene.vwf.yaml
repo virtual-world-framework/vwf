@@ -12,12 +12,18 @@ properties:
         this.colorIndex = 0;
       }
     value: 0
-  tossStrength:
+  tossCubeStrength:
     set: |
       if ( value >= 0 ) {
-        this.tossStrength = value;
+        this.tossCubeStrength = value;
       }   
     value: 150
+  tossSphereStrength:
+    set: |
+      if ( value >= 0 ) {
+        this.tossSphereStrength = value;
+      }   
+    value: 250
 methods:
   clear: |
     if ( this.nodesCreated ) {
@@ -99,7 +105,7 @@ scripts:
         
         cube.properties.material = materials[ this.colorIndex ];
         cube.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] - 10 ];
-        cube.properties.velocity = [ parms.trans[0] * this.tossStrength, parms.trans[1] * this.tossStrength, parms.trans[2] * this.tossStrength];
+        cube.properties.velocity = [ parms.trans[0] * this.tossCubeStrength, parms.trans[1] * this.tossCubeStrength, parms.trans[2] * this.tossCubeStrength];
         this.colorIndex += 1;
         
         vwf.createNode( "index-vwf", cube, newObjName, undefined );        
@@ -110,7 +116,7 @@ scripts:
         
         sphere.properties.material = materials[ this.colorIndex ];
         sphere.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] - 10 ];
-        sphere.properties.velocity = [ parms.trans[0] * this.tossStrength, parms.trans[1] * this.tossStrength, parms.trans[2] * this.tossStrength ];
+        sphere.properties.velocity = [ parms.trans[0] * this.tossSphereStrength, parms.trans[1] * this.tossSphereStrength, parms.trans[2] * this.tossSphereStrength ];
         this.colorIndex += 1;
         
         vwf.createNode( "index-vwf", sphere, newObjName, undefined );

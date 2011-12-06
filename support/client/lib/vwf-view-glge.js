@@ -19,8 +19,16 @@
  
         this.keysDown = { keys: {}, mods: {} };
 
+        var height = 600;
+        var width = 800;
+
+        if ( window && window.innerHeight ) height = window.innerHeight - 40;
+        if ( window && window.innerWidth ) width = window.innerWidth - 40;
+
+        console.info( "aspectRatio = " + ( width / height ) );
+
         this.canvasQuery = jQuery(this.rootSelector).append(
-            "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='800' height='600'/>"
+            "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+width+"' height='"+height+"'/>"
         ).children(":last");
            
         // Connect GLGE to the VWF timeline.
@@ -50,6 +58,8 @@
         if ( childID == this.state.sceneRootID /*&& ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "appscene-vwf" )*/ ) {
             
             var glgeView = this;
+            var domWin = window;
+            var canvas = this.canvasQuery.get( 0 );
             window.onkeydown = function( event ) {
                 switch ( event.keyCode ) {
                     case 17:
@@ -77,6 +87,23 @@
                         break;
                 }
             };
+
+            window.onresize = function() {
+                var height = 600;
+                var width = 800;
+                if ( domWin && domWin.innerHeight ) height = domWin.innerHeight - 40;
+                if ( domWin && domWin.innerWidth ) width = domWin.innerWidth - 40; 
+                canvas.height = height;
+                canvas.width = width;
+                var camID = glgeView.state.cameraInUseID                
+                if ( !camID && camID != "" ) {
+                    var cam = glgeView.state.cameraInUse;
+                    camID = getObjectID.call( this, cam, glgeView, false, false );
+                }
+                if ( camID && camID != "" ) {
+                    glgeView.settingProperty( camID, "aspect", width/height*0.90 );
+                }               
+            }
 
             var sceneNode = this.state.scenes[ childID ];
             if ( sceneNode ) {
