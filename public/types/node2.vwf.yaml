@@ -2,3 +2,15 @@
 extends: http://vwf.example.com/types/node
 properties: 
   enabled: true
+  location: 
+    set: |
+      this.location = value;
+      if ( this.locationChanged ) this.locationChanged( value );
+    value: [ 0, 0 ]
+  size: 
+    set: |
+      this.size = value;
+      if ( this.sizeChanged ) this.sizeChanged( value );
+events:
+  resizing:
+  moving:

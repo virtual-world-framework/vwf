@@ -19,8 +19,6 @@ scripts:
       this.clear(); 
     }, this );    
   type: application/javascript
-events:
-  clearing:
 children:
   clearButton:
     extends: http://vwf.example.com/types/node2
