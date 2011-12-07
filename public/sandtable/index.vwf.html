@@ -71,7 +71,7 @@
       
       jQuery('#toolbar').mouseleave( function(evt) { 
         evt.stopPropagation(); 
-        $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
+        // $('#toolbar').stop().delay(200).animate({ opacity:0.0 }, 1500);
         return false; 
       }); 
       
@@ -79,12 +79,12 @@
         evt.stopPropagation(); 
         if(!mousePressed) 
         {
-          $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
+          // $('#toolbar').stop().delay(200).animate({ opacity:0.8 }, 1500);
         }
         return false; 
       });
       
-      $('#toolbar').animate({ opacity:0.0 }, 1);
+      // $('#toolbar').animate({ opacity:0.0 }, 1);
 
       vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
       	if (nodeId == "http-vwf-example-com-types-node-toolbar" ) {
