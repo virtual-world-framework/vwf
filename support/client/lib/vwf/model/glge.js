@@ -206,6 +206,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                             break;
                     }  
+
+                    this.settingProperty( childID, "playing", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                    this.settingProperty( childID, "looping", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                    this.settingProperty( childID, "speed", 1 );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+
                     //console.info( "============ " +childID+ " ============" );
                     //console.info( "     LOCAL: " + JSON.stringify( this.gettingProperty( childID, "localMatrix", [] ) ) );
                     //console.info( "     MODEL: " + JSON.stringify( this.gettingProperty( childID, "modelMatrix", [] ) ) );
@@ -480,11 +485,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         propertyValue = true;
     }
 
-    if ( !node.initialized ) {  // TODO: this is a hack to set the animation to frame 0 during initialization
-        //if ( glgeObject.animFrames == 100 ) { glgeObject.setFrames( 50 ); } // hack to use only the opening half of the door animation
-        glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
-        glgeObject.getInitialValues( glgeObject.animation, glgeObject.animationStart );
-    }
+//    if ( !node.initialized ) {  // TODO: this is a hack to set the animation to frame 0 during initialization
+//        //if ( glgeObject.animFrames == 100 ) { glgeObject.setFrames( 50 ); } // hack to use only the opening half of the door animation
+//        glgeObject.setStartFrame( 0, 0, glgeObject.getLoop() );
+//        glgeObject.getInitialValues( glgeObject.animation, glgeObject.animationStart );
+//    }
 
                             if ( Boolean( propertyValue ) ) {
                                 if ( glgeObject.animFinished ) {
