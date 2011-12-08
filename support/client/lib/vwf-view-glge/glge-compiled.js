@@ -2102,7 +2102,7 @@ GLGE.Animatable.prototype.getName=function(){
 		}
 	}
 	this.animationStart=starttime;
-    this.pauseTime=starttime;
+	this.pauseTime=starttime;
 	this.lastFrame=null;
 	this.animFinished=false;
 	this.startFrame=startFrame;
@@ -2252,7 +2252,7 @@ GLGE.Animatable.prototype.animate=function(now,nocache){
 			}
 		}
 	}
-	if(this.animation && !this.animFinished && this.blendTime==0 && this.animFrames==frame && !nocache){
+	if(!this.paused && this.animation && !this.animFinished && this.blendTime==0 && this.animFrames==frame && !nocache){
 		this.animFinished=true;
 		this.fireEvent("animFinished",{});
 	}
