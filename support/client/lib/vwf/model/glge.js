@@ -1420,13 +1420,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 value = node.glgeObject.getSpotExponent();
                 break;
 
-            case "diffuse":
-                value = node.glgeObject.getDiffuse();
-                break;
+//                  case "diffuse":
+//                    value = node.glgeObject.getDiffuse();
+//                    break;
 
-            case "specular":
-                value = node.glgeObject.getSpecular();
-                break;
+//                  case "specular":
+//                    value = node.glgeObject.getSpecular();
+//                    break;
 
             case "samples":
                 value = node.glgeObject.getShadowSamples();
