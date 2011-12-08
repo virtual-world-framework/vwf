@@ -2102,6 +2102,7 @@ GLGE.Animatable.prototype.getName=function(){
 		}
 	}
 	this.animationStart=starttime;
+    this.pauseTime=starttime;
 	this.lastFrame=null;
 	this.animFinished=false;
 	this.startFrame=startFrame;
@@ -2272,6 +2273,7 @@ GLGE.Animatable.prototype.setAnimation=function(animationVector,blendDuration,st
 	this.animFrames=null;
 	this.startFrame=null;
 	this.animationStart=starttime;
+    this.pauseTime=starttime;
 	this.lastFrame=null;
 	this.animation=animationVector;
 	this.animFinished=false;
@@ -2324,8 +2326,8 @@ GLGE.Animatable.prototype.isLooping=GLGE.Animatable.prototype.getLoop;
 * @param  {boolean} value 
 */
 GLGE.Animatable.prototype.setPaused=function(value){
-	if(value) this.pauseTime=GLGE.now();
-		else this.animationStart=this.animationStart+(GLGE.now()-this.pauseTime);
+	if(value && !this.paused) this.pauseTime=GLGE.now();
+		else if(!value && this.paused) this.animationStart=this.animationStart+(GLGE.now()-this.pauseTime);
 	this.paused=value;
 	return this;
 }
