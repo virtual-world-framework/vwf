@@ -60,26 +60,36 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 node.id = childID; // TODO: move to a backstop model
 
+            node.private = {}; // bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
+
             node.parent = undefined;
 
             node.source = childSource;
             node.type = childType;
 
             node.properties = {};  // TODO: make node.properties.__proto__ == node.__proto__.properties so that node.properties.p propagates correctly from node.__proto__ to node
-            node.getters = {};
-            node.setters = {};
+            node.private.getters = {};
+            node.private.setters = {};
+
+            Object.defineProperty( node.properties, "node", { // for node.properties accessors (non-enumerable)  // TODO: hide this better
+                value: node
+            } );
 
             node.methods = {};  // TODO: make node.methods.__proto__ == node.__proto__.methods so that node.methods.m propagates correctly from node.__proto__ to node
-            node.bodies = {};
+            node.private.bodies = {};
+
+            Object.defineProperty( node.methods, "node", { // for node.methods accessors (non-enumerable)  // TODO: hide this better
+                value: node
+            } );
 
             node.events = {};  // TODO: make node.events.__proto__ == node.__proto__.events so that node.events.e propagates correctly from node.__proto__ to node
-            node.listeners = {};
+            node.private.listeners = {};
+
+            Object.defineProperty( node.events, "node", { // for node.events accessors (non-enumerable)  // TODO: hide this better
+                value: node
+            } );
 
             node.children = [];
-
-            Object.defineProperty( node.properties, "node", { value: node } ); // for node.properties accessors (non-enumerable)
-            Object.defineProperty( node.methods, "node", { value: node } ); // for node.methods accessors (non-enumerable)
-            Object.defineProperty( node.events, "node", { value: node } ); // for node.events accessors (non-enumerable)
 
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
             // can reference this.future( when, callback ).property/method/event and have the
@@ -278,24 +288,24 @@ node.id = childID; // TODO: move to a backstop model
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.getters[propertyName] = eval( getterScript( propertyGet ) );
+                    node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
                 } catch ( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", e.stack );
                 }
             } else if ( propertyValue !== undefined ) {
-                node.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
+                node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
             }
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.setters[propertyName] = eval( setterScript( propertySet ) );
+                    node.private.setters[propertyName] = eval( setterScript( propertySet ) );
                 } catch ( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", e.stack );
                 }
             } else if ( propertyValue !== undefined ) {
-                node.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
+                node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
         },
@@ -362,7 +372,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 },
                 set: function( value ) {
                     this.node.methods.hasOwnProperty( methodName ) || self.kernel.createMethod( this.node.id, methodName );
-                    this.node.bodies[methodName] = value;
+                    this.node.private.bodies[methodName] = value;
                 },
                 enumerable: true,
             } );
@@ -377,13 +387,13 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 },
                 set: function( value ) {
                     this.methods.hasOwnProperty( methodName ) || self.kernel.createMethod( this.id, methodName );
-                    this.bodies[methodName] = value;
+                    this.private.bodies[methodName] = value;
                 },
                 enumerable: true,
             } );
 
             try {
-                node.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
+                node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
             } catch ( e ) {
                 this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", e.stack );
@@ -430,18 +440,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             proxyEvents.node = proxyNode.node = node; // for proxyEvents/proxyNode.add/remove/flush
 
             proxyEvents.add = proxyNode.add = function( handler, context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
-                var listeners = this.node.listeners[eventName] || ( this.node.listeners[eventName] = [] );  // TODO: verify created on first access if on base but not derived
+                var listeners = this.node.private.listeners[eventName] || ( this.node.private.listeners[eventName] = [] );  // TODO: verify created on first access if on base but not derived
                 listeners.push( { handler: handler, context: context } );
             };
 
             proxyEvents.remove = proxyNode.remove = function( handler ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
-                this.node.listeners[eventName] = ( this.node.listeners[eventName] || [] ).filter( function( listener ) {
+                this.node.private.listeners[eventName] = ( this.node.private.listeners[eventName] || [] ).filter( function( listener ) {
                     return listener.handler !== handler;
                 } );
             };
 
             proxyEvents.flush = proxyNode.flush = function( context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
-                this.node.listeners[eventName] = ( this.node.listeners[eventName] || [] ).filter( function( listener ) {
+                this.node.private.listeners[eventName] = ( this.node.private.listeners[eventName] || [] ).filter( function( listener ) {
                     return listener.context !== context;
                 } );
             };
@@ -460,7 +470,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 enumerable: true,
             } );
 
-            node.listeners[eventName] = [];
+            node.private.listeners[eventName] = [];
         },
 
         // -- firingEvent --------------------------------------------------------------------------
@@ -468,7 +478,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         firingEvent: function( nodeID, eventName, eventParameters ) {
 
             var node = this.nodes[nodeID];
-            var listeners = node.listeners[eventName];
+            var listeners = node.private.listeners[eventName];
 
             listeners && listeners.forEach( function( listener ) {
                 try {
@@ -539,22 +549,22 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
     // -- findGetter -------------------------------------------------------------------------------
 
     function findGetter( node, propertyName ) {
-        return node.getters && node.getters[propertyName] ||
-            Object.getPrototypeOf( node ) && findGetter( Object.getPrototypeOf( node ), propertyName );
+        return node.private.getters && node.private.getters[propertyName] ||
+            Object.getPrototypeOf( node ).private && findGetter( Object.getPrototypeOf( node ), propertyName );
     }
 
     // -- findSetter -------------------------------------------------------------------------------
 
     function findSetter( node, propertyName ) {
-        return node.setters && node.setters[propertyName] ||
-            Object.getPrototypeOf( node ) && findSetter( Object.getPrototypeOf( node ), propertyName );
+        return node.private.setters && node.private.setters[propertyName] ||
+            Object.getPrototypeOf( node ).private && findSetter( Object.getPrototypeOf( node ), propertyName );
     }
 
     // -- findBody ---------------------------------------------------------------------------------
 
     function findBody( node, methodName ) {
-        return node.bodies && node.bodies[methodName] ||
-            Object.getPrototypeOf( node ) && findBody( Object.getPrototypeOf( node ), methodName );
+        return node.private.bodies && node.private.bodies[methodName] ||
+            Object.getPrototypeOf( node ).private && findBody( Object.getPrototypeOf( node ), methodName );
     }
 
 
