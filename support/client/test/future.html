@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.5.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+
+      ], function() {
+
+        require.ready( function() {
+
+          vwf.initialize(
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
+            /*  views */ { }
+          );
+
+          var kernel = require( "vwf/kernel/model" ).create( vwf ); // connect through the kernel's model interface
+
+          // Immediate actions directly to the kernel
+
+          asyncTest( "Immediate kernel", function() {
+
+            createFixture( function( fixtureID ) {
+
+              kernel.setProperty( fixtureID, "property", "property", undefined );
+              equal( vwf.getProperty( fixtureID, "property" ), "property", "immediate property" );
+
+              kernel.callMethod( fixtureID, "method", [ "method" ], undefined );
+              equal( vwf.getProperty( fixtureID, "property" ), "method", "immediate method" );
+
+              kernel.fireEvent( fixtureID, "event", [ "event" ], undefined );
+              equal( vwf.getProperty( fixtureID, "property" ), "event", "immediate event" );
+
+              start();
+            } );
+
+          } );
+
+          // Immediate actions through JavaScript
+
+          asyncTest( "Immediate JavaScript", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.execute( fixtureID, "this.property = 'property'" );
+              equal( vwf.getProperty( fixtureID, "property" ), "property", "immediate property" );
+
+              vwf.execute( fixtureID, "this.method( 'method' )" );
+              equal( vwf.getProperty( fixtureID, "property" ), "method", "immediate method" );
+
+              vwf.execute( fixtureID, "this.event( 'event' )" );
+              equal( vwf.getProperty( fixtureID, "property" ), "event", "immediate event" );
+
+              start();
+            } );
+
+          } );
+
+          // Future actions directly to the kernel
+
+          asyncTest( "Future kernel", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.setProperty( fixtureID, "property", undefined );
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
+
+              kernel.setProperty( fixtureID, "property", "property", -0.1 );
+              kernel.callMethod( fixtureID, "method", [ "method" ], -0.2 );
+              kernel.fireEvent( fixtureID, "event", [ "event" ], -0.3 );
+
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" );
+              }, 150 );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" );
+              }, 250 );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" );
+                start();
+              }, 350 );
+
+            } );
+
+          } );
+
+          asyncTest( "Future JavaScript", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.setProperty( fixtureID, "property", undefined );
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
+
+              vwf.execute( fixtureID, "this.future( 0.1 ).property = 'property'" );
+              vwf.execute( fixtureID, "this.future( 0.2 ).method( 'method' )" );
+              vwf.execute( fixtureID, "this.future( 0.3 ).event( 'event' )" );
+
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" );
+              }, 150 );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" );
+              }, 250 );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" );
+                start();
+              }, 350 );
+
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create a node with two levels of inheritance and properties to manipulate.
+
+          function createFixture( callback ) {
+
+            vwf.createNode( 0, {
+
+              extends:
+                "http://vwf.example.com/types/node",
+              
+              properties: {
+                property: undefined,
+              },
+
+              methods: {
+                method: "this.property = arguments[0]",
+              },
+
+              events: {
+                event: undefined,
+              },
+
+              scripts: [
+                "this.event.add( function() { this.property = arguments[0] }, this )",
+              ],
+
+            }, unique_name( "fixture" ), function( fixtureID ) {
+
+              callback( fixtureID );
+
+            } );
+
+          }
+         
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>

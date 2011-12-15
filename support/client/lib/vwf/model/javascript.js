@@ -86,101 +86,28 @@ node.id = childID; // TODO: move to a backstop model
 
             node.private.listeners = {};
 
-            node.children = [];  // TODO: connect children's prototype like properties', methods' and events'? how, since it's an array? drop the ordered list support and just use an object?
+            node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.
-            
-            // TODO: every reference to future() generates a set of proxies for every property, method, and event on the object so performance is pretty horrible; look for ways to cache
 
             Object.defineProperty( node, "future", {
-
+                value: function( when, callback ) { // "this" is node
+                    return refreshedFuture.call( self, this, when, callback );
+                },
                 enumerable: true,
-                writable: false,
-
-                value: function( when, callback ) {
-
-                    var future = {
-                        properties: {},
-                        methods: {},
-                        events: {},
-                    };
-
-                    for ( var propertyName in this.properties ) {
-
-                        ( function( propertyName ) {
-
-                            Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                                get: function() { return self.kernel.getProperty( childID, propertyName, -when, callback ) },
-                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
-                                enumerable: true
-                            } );
-
-                            Object.defineProperty( future, propertyName, { // "this" is future in get/set
-                                get: function() { return self.kernel.getProperty( childID, propertyName, -when, callback ) },
-                                set: function( value ) { self.kernel.setProperty( childID, propertyName, value, -when, callback ) },
-                                enumerable: true
-                            } );
-
-                        } )( propertyName );
-
-                    }
-
-                    for ( var methodName in this.methods ) {
-
-                        ( function( methodName ) {
-
-                            Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
-                                get: function() {
-                                    return function( /* parameter1, parameter2, ... */ ) {
-                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
-                                    }
-                                },
-                                enumerable: true
-                            } );
-
-                            Object.defineProperty( future, methodName, { // "this" is future in get/set
-                                get: function() {
-                                    return function( /* parameter1, parameter2, ... */ ) {
-                                        return self.kernel.callMethod( childID, methodName, arguments, -when, callback );
-                                    }
-                                },
-                                enumerable: true
-                            } );
-
-                        } )( methodName );
-
-                    }
-
-                    for ( var eventName in this.events ) {
-
-                        ( function( eventName ) {
-
-                            Object.defineProperty( future.events, eventName, {
-                                value: function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    return self.kernel.fireEvent( childID, eventName, arguments, -when, callback );
-                                },
-                                writable: false,
-                                enumerable: true,
-                            } );
-
-                            Object.defineProperty( future, eventName, {
-                                value: function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.fireEvent( childID, eventName, arguments, -when, callback );
-                                },
-                                writable: false,
-                                enumerable: true,
-                            } );
-
-                        } )( eventName );
-
-                    }
-
-                    return future;
-                }
-
             } );
+
+            node.private.future = {};
+
+            node.private.future.private = {
+                when: 0,
+                callback: undefined,
+                change: 0,
+            };
+
+            node.change = 0; // incremented whenever "future"-related changes occur
 
         },
 
@@ -305,6 +232,8 @@ node.id = childID; // TODO: move to a backstop model
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
+            node.change++; // invalidate the "future" cache
+
         },
 
         // TODO: deletingProperty
@@ -396,6 +325,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     "exception evaluating body:", e.stack );
             }
         
+            node.change++; // invalidate the "future" cache
+
         },
 
         // TODO: deletingMethod
@@ -455,7 +386,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             Object.defineProperty( node.events, eventName, {
                 value: proxyEvents,  // TODO: invoked with this as derived when only defined on base?
-                writable: false,
                 enumerable: true,
             } );
 
@@ -463,11 +393,13 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             Object.defineProperty( node, eventName, { // "this" is node in get/set
                 value: proxyNode,  // TODO: invoked with this as derived when only defined on base?
-                writable: false,
                 enumerable: true,
             } );
 
             node.private.listeners[eventName] = [];
+
+            node.change++; // invalidate the "future" cache
+
         },
 
         // -- firingEvent --------------------------------------------------------------------------
@@ -510,6 +442,118 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
     } );
 
     // == Private functions ========================================================================
+
+    // -- refreshedFuture --------------------------------------------------------------------------
+
+    function refreshedFuture( node, when, callback ) { // invoke with the model as "this"
+
+        var self = this;
+
+        var future = node.private.future;
+
+        future.private.when = when;
+        future.private.callback = callback;  // TODO: would like to be able to remove this reference after the future call
+
+        if ( future.private.change < node.change ) { // only if out of date
+
+            future.private.nodeID = node.id;
+
+            future.properties = {};
+
+            for ( var propertyName in node.properties ) {
+
+                ( function( propertyName ) {
+
+                    Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
+                        get: function() { return self.kernel.getProperty( future.private.nodeID,
+                            propertyName, -future.private.when, future.private.callback
+                        ) },
+                        set: function( value ) { self.kernel.setProperty( future.private.nodeID,
+                            propertyName, value, -future.private.when, future.private.callback
+                        ) },
+                        enumerable: true
+                    } );
+
+                    Object.defineProperty( future, propertyName, { // "this" is future in get/set
+                        get: function() { return self.kernel.getProperty( future.private.nodeID,
+                            propertyName, -future.private.when, future.private.callback
+                        ) },
+                        set: function( value ) { self.kernel.setProperty( future.private.nodeID,
+                            propertyName, value, -future.private.when, future.private.callback
+                        ) },
+                        enumerable: true
+                    } );
+
+                } )( propertyName );
+
+            }
+
+            future.methods = {};
+
+            for ( var methodName in node.methods ) {
+
+                ( function( methodName ) {
+
+                    Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) {
+                                return self.kernel.callMethod( future.private.nodeID,
+                                    methodName, arguments, -future.private.when, future.private.callback
+                                );
+                            }
+                        },
+                        enumerable: true
+                    } );
+
+                    Object.defineProperty( future, methodName, { // "this" is future in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) {
+                                return self.kernel.callMethod( future.private.nodeID,
+                                    methodName, arguments, -future.private.when, future.private.callback
+                                );
+                            }
+                        },
+                        enumerable: true
+                    } );
+
+                } )( methodName );
+
+            }
+
+            future.events = {};
+
+            for ( var eventName in node.events ) {
+
+                ( function( eventName ) {
+
+                    Object.defineProperty( future.events, eventName, {
+                        value: function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
+                            return self.kernel.fireEvent( future.private.nodeID,
+                                eventName, arguments, -future.private.when, future.private.callback
+                            );
+                        },
+                        enumerable: true,
+                    } );
+
+                    Object.defineProperty( future, eventName, {
+                        value: function( /* parameter1, parameter2, ... */ ) { // "this" is future
+                            return self.kernel.fireEvent( future.private.nodeID,
+                                eventName, arguments, -future.private.when, future.private.callback
+                            );
+                        },
+                        enumerable: true,
+                    } );
+
+                } )( eventName );
+
+            }
+
+            future.private.change = node.change;
+
+        }
+
+        return future;
+    }
 
     // -- getterScript -----------------------------------------------------------------------------
 
