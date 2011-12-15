@@ -98,20 +98,22 @@
 
               setTimeout( function() {
                 equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" );
-              }, 150 );
+              }, 150 );  // TODO: trying to match timings like this is unreliable
 
               setTimeout( function() {
                 equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" );
-              }, 250 );
+              }, 250 );  // TODO: trying to match timings like this is unreliable
 
               setTimeout( function() {
                 equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" );
                 start();
-              }, 350 );
+              }, 350 );  // TODO: trying to match timings like this is unreliable
 
             } );
 
           } );
+
+          // Future actions through JavaScript
 
           asyncTest( "Future JavaScript", function() {
 
@@ -128,16 +130,78 @@
 
               setTimeout( function() {
                 equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" );
-              }, 150 );
+              }, 150 );  // TODO: trying to match timings like this is unreliable
 
               setTimeout( function() {
                 equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" );
-              }, 250 );
+              }, 250 );  // TODO: trying to match timings like this is unreliable
 
               setTimeout( function() {
                 equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" );
                 start();
-              }, 350 );
+              }, 350 );  // TODO: trying to match timings like this is unreliable
+
+            } );
+
+          } );
+
+          // Future inherited actions through JavaScript direct properties
+
+          asyncTest( "Future JavaScript inherited direct", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
+              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
+              equal( vwf.getProperty( baseID, "base" ), "base", "base in base" );
+
+              vwf.execute( derivedID, "this.future( 0.1 ).derived = 'derived updated'" );
+              vwf.execute( derivedID, "this.future( 0.2 ).base = 'base updated'" ); // inherit from base, assign to derived
+              
+              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
+              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
+              equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" );
+              }, 150 );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ); // no longer inherited
+                equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
+                start();
+              }, 250 );
+
+            } );
+
+          } );
+
+          // Future inherited actions through JavaScript collection properties
+
+          asyncTest( "Future JavaScript inherited collection", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
+              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
+              equal( vwf.getProperty( baseID, "base" ), "base", "base in base" );
+
+              vwf.execute( derivedID, "this.future( 0.1 ).properties.derived = 'derived updated'" );
+              vwf.execute( derivedID, "this.future( 0.2 ).properties.base = 'base updated'" ); // inherit from base, assign to derived
+              
+              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
+              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
+              equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" );
+              }, 150 );
+
+              setTimeout( function() {
+                equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ); // no longer inherited
+                equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
+                start();
+              }, 250 );
 
             } );
 
@@ -145,7 +209,7 @@
 
           // == Helper functions =====================================================================
 
-          // Create a node with two levels of inheritance and properties to manipulate.
+          // Create a node with a property, a method and an event.
 
           function createFixture( callback ) {
 
@@ -178,6 +242,40 @@
 
           }
          
+          // Create a node with two levels of inheritance and properties to manipulate.
+
+          function createFixtureDerivedBase( callback ) {
+
+            vwf.createNode( 0, {
+
+              extends:
+                "http://vwf.example.com/types/node",
+              
+              properties: {
+                base: "base",
+              },
+
+            }, unique_name( "base" ), function( baseID ) {
+
+              vwf.createNode( 0, {
+
+                extends:
+                  "@" + JSON.stringify( baseID ),
+                
+                properties: {
+                  derived: "derived",
+                },
+
+              }, unique_name( "derived" ), function( derivedID ) {
+
+                callback( derivedID, baseID );
+
+              } );
+
+            } );
+
+          }
+
           // Create a unique name from a base.
 
           var sequence = 0;
