@@ -318,7 +318,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 this.dispatch( 0 );
 
                 setInterval( function() {
-                    vwf.dispatch( vwf.now + 10 ); // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                    vwf.dispatch( vwf.now + 0.010 ); // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
                 }, 10 );
 
             }
