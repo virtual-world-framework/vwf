@@ -22,18 +22,18 @@
 
             require( [
 
+                "vwf/kernel/model",
                 "vwf/model/javascript",
-                "vwf/model/glge",
                 "vwf/model/object",
                 "vwf/model/stage/log",
-            
+                "vwf/kernel/view",
+
             ], function() {
 
                 require.ready( function() {
 
                     vwf.initialize( {
                         "vwf/model/javascript": [],
-                        "vwf/model/glge": [],
                         "vwf/model/object": [],
                     }, {
                         html: "#listing"
@@ -143,17 +143,22 @@
                         if ( fields.action == "createNode" ) {
 
                             command += "create";
-                            command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
+                            command += fields.parameters.length ? "( " + parameter_list( fields.parameters ) + " )" : "()";
 
                         } else if ( fields.action == "setProperty" ) {
 
-                            command += safe_identifier( fields.parameters.shift() ) + " = " +
-                                fields.parameters.shift();
+                            command += safe_identifier( fields.member ) + " = " +
+                                JSON.stringify( fields.parameters.shift() );
 
                         } else if ( fields.action == "callMethod" ) {
 
-                            command += safe_identifier( fields.parameters.shift() );
-                            command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
+                            command += safe_identifier( fields.member );
+                            command += fields.parameters.length ? "( " + parameter_list( fields.parameters ) + " )" : "()";
+
+                        } else {
+                            
+                            command += fields.action;
+                            command += fields.parameters.length ? "( " + parameter_list( fields.parameters ) + " )" : "()";
 
                         }
 
@@ -171,7 +176,9 @@
                     }
 
                     function parameter_list( parameters ) {
-                        return parameters.join( ", " );
+                        return parameters.map( function( parameter ) {
+                            return JSON.stringify( parameter ).substring( 0, 100 );
+                         } ).join( ", " );
                     }
 
                     // ---------------------------------------------------------------------------------
