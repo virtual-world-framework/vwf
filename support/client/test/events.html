@@ -53,9 +53,9 @@
 
           } );
 
-          // Event firing (kernel)
+          // Event firing directly to the kernel
 
-          asyncTest( "Event firing Kernel", function() {
+          asyncTest( "Event firing kernel", function() {
 
             createFixture( function( nodeID ) {
 
@@ -76,7 +76,7 @@
 
           } );
 
-          // Event firing (JavaScript binding)
+          // Event firing through JavaScript
 
           asyncTest( "Event firing JavaScript", function() {
 
@@ -99,7 +99,7 @@
 
           } );
 
-          // Event firing (JavaScript binding)
+          // Event listeners through JavaScript
 
           asyncTest( "Event listeners JavaScript", function() {
 
@@ -135,6 +135,8 @@
             } );
 
           } );
+
+          // TODO: event inheritance
 
           // == Helper functions =====================================================================
 
