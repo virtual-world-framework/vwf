@@ -671,7 +671,7 @@ childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id
                 construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID ) {
 if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
 vwf.addChild( nodeID, childNodeID, childName );
-                    if ( nodeID == 0 && component["extends"] && component["extends"][0] != "@" ) {  // TODO: const for root id  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
+                    if ( nodeID == 0 && component["extends"] && component["extends"] != nodeTypeURI && component["extends"][0] != "@" ) {  // TODO: const for root id  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
                         jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html", function() { // load the UI chrome if available
                             callback && callback.call( vwf, childNodeID );
                         } );
