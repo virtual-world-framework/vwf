@@ -117,7 +117,7 @@
               equal( vwf.execute( derivedID, "this.derived()" ), "derived" + derivedID, "derived method in derived" );
               equal( vwf.execute( derivedID, "this.base()" ), "base" + derivedID, "base method invoked on derived" );
 
-              equal( vwf.execute( baseID, "this.derived()" ), undefined, "derived method not visible in base" );
+              equal( vwf.execute( baseID, "this.derived && this.derived()" ), undefined, "derived method not visible in base" );
               equal( vwf.execute( baseID, "this.base()" ), "base" + baseID, "base method in base" );
               
               start();
@@ -134,7 +134,7 @@
               equal( vwf.execute( derivedID, "this.methods.derived()" ), "derived" + derivedID, "derived method in derived" );
               equal( vwf.execute( derivedID, "this.methods.base()" ), "base" + derivedID, "base method invoked on derived" );
 
-              equal( vwf.execute( baseID, "this.methods.derived()" ), undefined, "derived method not visible in base" );
+              equal( vwf.execute( baseID, "this.methods.derived && this.methods.derived()" ), undefined, "derived method not visible in base" );
               equal( vwf.execute( baseID, "this.methods.base()" ), "base" + baseID, "base method in base" );
               
               start();
