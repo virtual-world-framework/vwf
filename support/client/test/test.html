@@ -555,7 +555,7 @@
               accessor: function( tag ) {
                 return {
                   property: {
-                    get: "return this.property.toUpperCase()",
+                    get: "return this.property && this.property.toUpperCase()",
                     set: "this.property = value.toLowerCase()",
                     value: tag
                   }
