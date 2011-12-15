@@ -67,29 +67,26 @@ node.id = childID; // TODO: move to a backstop model
             node.source = childSource;
             node.type = childType;
 
-            node.properties = {};  // TODO: make node.properties.__proto__ == node.__proto__.properties so that node.properties.p propagates correctly from node.__proto__ to node
+            node.properties = Object.create( Object.getPrototypeOf( node ).properties || Object.prototype, {
+                node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
+            } );
+
             node.private.getters = {};
             node.private.setters = {};
 
-            Object.defineProperty( node.properties, "node", { // for node.properties accessors (non-enumerable)  // TODO: hide this better
-                value: node
+            node.methods = Object.create( Object.getPrototypeOf( node ).methods || Object.prototype, {
+                node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            node.methods = {};  // TODO: make node.methods.__proto__ == node.__proto__.methods so that node.methods.m propagates correctly from node.__proto__ to node
             node.private.bodies = {};
 
-            Object.defineProperty( node.methods, "node", { // for node.methods accessors (non-enumerable)  // TODO: hide this better
-                value: node
+            node.events = Object.create( Object.getPrototypeOf( node ).events || Object.prototype, {
+                node: { value: node } // for node.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            node.events = {};  // TODO: make node.events.__proto__ == node.__proto__.events so that node.events.e propagates correctly from node.__proto__ to node
             node.private.listeners = {};
 
-            Object.defineProperty( node.events, "node", { // for node.events accessors (non-enumerable)  // TODO: hide this better
-                value: node
-            } );
-
-            node.children = [];
+            node.children = [];  // TODO: connect children's prototype like properties', methods' and events'? how, since it's an array? drop the ordered list support and just use an object?
 
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
             // can reference this.future( when, callback ).property/method/event and have the

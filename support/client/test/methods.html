@@ -39,9 +39,9 @@
             /*  views */ { }
           );
 
-          // Method invocation (kernel)
+          // Method invocation directly to the kernel
 
-          asyncTest( "Method invocation Kernel", function() {
+          asyncTest( "Method invocation kernel", function() {
 
             createFixture( function( nodeID ) {
 
@@ -65,7 +65,7 @@
 
           } );
 
-          // Method invocation (JavaScript binding)
+          // Method invocation through JavaScript
 
           asyncTest( "Method invocation JavaScript", function() {
 
@@ -91,9 +91,9 @@
 
           } );
 
-          // Method inheritance (kernel)
+          // Method inheritance directly to the kernel
 
-          asyncTest( "Method inheritance Kernel", function() {
+          asyncTest( "Method inheritance kernel", function() {
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
@@ -108,9 +108,9 @@
 
           } );
 
-          // Method inheritance (JavaScript binding)
+          // Method inheritance through JavaScript direct properties
 
-          asyncTest( "Method inheritance JavaScript", function() {
+          asyncTest( "Method inheritance JavaScript direct", function() {
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
@@ -119,6 +119,23 @@
 
               equal( vwf.execute( baseID, "this.derived()" ), undefined, "derived method not visible in base" );
               equal( vwf.execute( baseID, "this.base()" ), "base" + baseID, "base method in base" );
+              
+              start();
+            } );
+
+          } );
+
+          // Method inheritance through JavaScript collection properties
+
+          asyncTest( "Method inheritance JavaScript collection", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.execute( derivedID, "this.methods.derived()" ), "derived" + derivedID, "derived method in derived" );
+              equal( vwf.execute( derivedID, "this.methods.base()" ), "base" + derivedID, "base method invoked on derived" );
+
+              equal( vwf.execute( baseID, "this.methods.derived()" ), undefined, "derived method not visible in base" );
+              equal( vwf.execute( baseID, "this.methods.base()" ), "base" + baseID, "base method in base" );
               
               start();
             } );
