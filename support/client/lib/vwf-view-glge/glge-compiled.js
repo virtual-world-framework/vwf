@@ -4665,7 +4665,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 (function(GLGE){
 
 
-
+var meshIndx = 0;
 
 
 /**
@@ -4683,6 +4683,7 @@ GLGE.Mesh=function(uid,windingOrder){
 	this.boneWeights=[];
 	this.setBuffers=[];
 	this.faces={};
+    this.name = "mesh"+ (++meshIndx);
     if (windingOrder!==undefined)
         this.windingOrder=windingOrder;
     else
