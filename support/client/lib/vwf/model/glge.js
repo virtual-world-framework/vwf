@@ -96,18 +96,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         xmlDocLoadedCallback = callback;
                         sceneNode.glgeDocument.onLoad = function () {
                             xmlDocLoadedCallback( true );
-//                            if ( sceneNode.glgeScene )
-//                                initScene.call( model, sceneNode );
-//                            else {
-//                                var intID;
-//                                function callInitScene() {
-//                                    if ( sceneNode.glgeScene ) {
-//                                        initScene.call( model, sceneNode );
-//                                        clearInterval( intID );
-//                                    }
-//                                }
-//                                intID = setInterval( callInitScene, 300 );                                
-//                            }
                         };
 
                         if ( childSource ) {
@@ -121,6 +109,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     } 
                     break;
 
+                case "http-vwf-example-com-types-object3":
                 case "http-vwf-example-com-types-node3": {
                     var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                     switch ( childType ) {
@@ -193,7 +182,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 sourceType: childType, 
                             };
                             if ( node.glgeObject ) {
-                                //console.info( "childName: " + childName + " of type " + node.glgeObject.constructor );
+                                //console.info( "BOUND to glgeObject childName: " + childName + " ID: " + childID );
                                 if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
                                     callback( false );
                                     node.glgeObject.vwfID = childID;
@@ -202,8 +191,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                     setupColladaCallback.call( this, node.glgeObject, sceneNode );
                                     node.loadingCollada = callback;                                    
                                 }
+                            } else {
+                                console.info( "WARNING: glgeObject was not found: " + childName + "  ID: " + childID );
                             }
-
                             break;
                     }  
 
@@ -794,6 +784,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     default:
                         switch ( node.type ) {
+                            case "http-vwf-example-com-types-object3":
+                                value = getObjectProperty.call( this, nodeID, propertyName, propertyValue );
+                                break;
                             case "http-vwf-example-com-types-material":
                                 value = getMaterialProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
@@ -1174,36 +1167,38 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var value = propertyValue;
         var txtr, mat;
 
-        switch ( propertyName ) {
-            case "texture": {
-                    if ( node.glgeMaterial && node.glgeMaterial.textures ) {
-                        mat = node.glgeMaterial;
-                        txtr = node.glgeMaterial.textures[0];
-                    } else if ( node.glgeObject && node.glgeObject.material ) {
-                        mat = node.glgeObject.material; 
-                        txtr = node.glgeObject.material.textures[0];
-                    }
+        if ( propertyValue ) {
+            switch ( propertyName ) {
+                case "texture": {
+                        if ( node.glgeMaterial && node.glgeMaterial.textures ) {
+                            mat = node.glgeMaterial;
+                            txtr = node.glgeMaterial.textures[0];
+                        } else if ( node.glgeObject && node.glgeObject.material ) {
+                            mat = node.glgeObject.material; 
+                            txtr = node.glgeObject.material.textures[0];
+                        }
 
-                    if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
-                        if ( txtr ) {
-                            //console.info( "Setting texture source: " + propertyValue );
-                            txtr.setSrc( propertyValue );
-                        } else if ( mat ) {
-					        var ml = new GLGE.MaterialLayer;
-					        ml.setMapto( GLGE.M_COLOR );
-					        ml.setMapinput( GLGE.UV1 );
-                            var txt = new GLGE.Texture();
-                            txt.setSrc( propertyValue );
-                            mat.addTexture( txt );
-					        ml.setTexture( txt );
-					        mat.addMaterialLayer( ml );
+                        if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
+                            if ( txtr ) {
+                                //console.info( "Setting texture source: " + propertyValue );
+                                txtr.setSrc( propertyValue );
+                            } else if ( mat ) {
+					            var ml = new GLGE.MaterialLayer;
+					            ml.setMapto( GLGE.M_COLOR );
+					            ml.setMapinput( GLGE.UV1 );
+                                var txt = new GLGE.Texture();
+                                txt.setSrc( propertyValue );
+                                mat.addTexture( txt );
+					            ml.setTexture( txt );
+					            mat.addMaterialLayer( ml );
+                            }
                         }
                     }
-                }
-                break;
-            default:
-                value = undefined;
-                break;
+                    break;
+                default:
+                    value = undefined;
+                    break;
+            }
         }
 
         return value;
@@ -1344,6 +1339,27 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
         return value;
 
+    }
+
+    // -- getObjectProperty ------------------------------------------------------------------------------
+
+    function getObjectProperty( nodeID, propertyName, propertyValue ) {
+
+        //console.info( "glge-model.getMaterialProperty( " + nodeID + ", " + propertyName + ", '" + propertyValue + "' )");
+        var node = this.state.nodes[ nodeID ]; 
+        var value = undefined;
+        var txtr, mat;
+
+        switch ( propertyName ) {
+            case "mesh0": {
+                    if ( node.glgeObject && node.glgeObject && node.glgeObject.getMesh ) {
+                        value = node.glgeObject.getMesh();
+                    }
+                }
+                break;
+        }
+
+        return value;
     }
 
     // -- getMaterialProperty ------------------------------------------------------------------------------
@@ -1513,6 +1529,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 //console.info( "            Checking: '" + glgeObjName + "' of type " + assetObj.constructor.name );
                 if ( glgeObjName == objName ) {
                     switch ( type ) {
+                        case "http-vwf-example-com-types-object3":
+                            if ( assetObj.constructor == GLGE.Object )
+                                obj = assetObj;
+                            break;
                         case "http-vwf-example-com-types-node3":
                             if ( ( assetObj.constructor == GLGE.Group ) || ( assetObj.constructor == GLGE.Object ) )
                                 obj = assetObj;
@@ -1928,34 +1948,40 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // groupParentName + 'Material' + indexOfTheMultiMaterial
 
         if ( parentNode ) {
-            materialStringIndex = materialName.lastIndexOf( "Material" );
-            materialIndex = Number( materialName.substr( materialStringIndex + 8 ) ) - 1;
-            childName = materialName.substr( 0, materialStringIndex );
-
             if ( parentNode.glgeObject ) {
-                var glgeObjs = [];
-                var found = false;
-
-                findAllGlgeObjects.call( this, parentNode.glgeObject, glgeObjs );
-
-                if ( glgeObjs && glgeObjs.length ) {
-                    //console.info( "findMaterial found " + glgeObjs.length + " children searching for: " + childName );
-                    for ( var i = 0; i < glgeObjs.length && !found; i++ ) {
-                        //console.info( "     objName: " + name( glgeObjs[i] ) + "    parentName: " + name( glgeObjs[i].parent ) );
-                        if ( name( glgeObjs[i].parent ) == childName ) {
-                            materialNode.glgeObject = glgeObjs[i];
-                            materialNode.glgeMaterial = glgeObjs[i].getMaterial( materialIndex );
-                            found = true;                        
-                        }                   
+                if ( parentNode.glgeObject.constructor == GLGE.Object ) {
+                    if ( materialName == "material" ) {
+                        materialNode.glgeObject = parentNode.glgeObject;
+                        materialNode.glgeMaterial = materialNode.glgeObject.material;                        
                     }
-                } else if ( parentNode.glgeObject.children.length == 1 && parentNode.glgeObject.children[0].constructor == GLGE.Object ) {
+                } else {
+                    materialStringIndex = materialName.lastIndexOf( "Material" );
+                    materialIndex = Number( materialName.substr( materialStringIndex + 8 ) ) - 1;
+                    childName = materialName.substr( 0, materialStringIndex );
+                    var glgeObjs = [];
+                    var found = false;
 
-                    var glgeChild = parentNode.glgeObject.children[0];
-                    materialNode.glgeObject = glgeChild;
-                    materialNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
+                    findAllGlgeObjects.call( this, parentNode.glgeObject, glgeObjs );
+
+                    if ( glgeObjs && glgeObjs.length ) {
+                        //console.info( "findMaterial found " + glgeObjs.length + " children searching for: " + childName );
+                        for ( var i = 0; i < glgeObjs.length && !found; i++ ) {
+                            //console.info( "     objName: " + name( glgeObjs[i] ) + "    parentName: " + name( glgeObjs[i].parent ) );
+                            if ( name( glgeObjs[i].parent ) == childName ) {
+                                materialNode.glgeObject = glgeObjs[i];
+                                materialNode.glgeMaterial = glgeObjs[i].getMaterial( materialIndex );
+                                found = true;                        
+                            }                   
+                        }
+                    } else if ( parentNode.glgeObject.children.length == 1 && parentNode.glgeObject.children[0].constructor == GLGE.Object ) {
+
+                        var glgeChild = parentNode.glgeObject.children[0];
+                        materialNode.glgeObject = glgeChild;
+                        materialNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
                 
-                    if ( !( materialNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
-                        materialNode.glgeMaterial = childNode.glgeObject.material;
+                        if ( !( materialNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
+                            materialNode.glgeMaterial = childNode.glgeObject.material;
+                        }
                     }
                 }
             }
