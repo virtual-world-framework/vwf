@@ -217,7 +217,7 @@ node.id = childID; // TODO: move to a backstop model
                     node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
                 } catch ( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating getter:", e.stack );
+                        "exception evaluating getter:", exceptionMessage( e ) );
                 }
             } else if ( propertyValue !== undefined ) {
                 node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
@@ -228,7 +228,7 @@ node.id = childID; // TODO: move to a backstop model
                     node.private.setters[propertyName] = eval( setterScript( propertySet ) );
                 } catch ( e ) {
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating setter:", e.stack );
+                        "exception evaluating setter:", exceptionMessage( e ) );
                 }
             } else if ( propertyValue !== undefined ) {
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
@@ -259,7 +259,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     return setter.call( node, propertyValue );
                 } catch ( e ) {
                     this.logger.warn( "settingProperty", nodeID, propertyName, propertyValue,
-                        "exception in setter:", e.stack );
+                        "exception in setter:", exceptionMessage( e ) );
                 }
             }
 
@@ -278,7 +278,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     return getter.call( node );
                 } catch ( e ) {
                     this.logger.warn( "gettingProperty", nodeID, propertyName, propertyValue,
-                        "exception in getter:", e.stack );
+                        "exception in getter:", exceptionMessage( e ) );
                 }
             }
 
@@ -326,7 +326,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
             } catch ( e ) {
                 this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
-                    "exception evaluating body:", e.stack );
+                    "exception evaluating body:", exceptionMessage( e ) );
             }
         
             node.change++; // invalidate the "future" cache
@@ -347,7 +347,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     return body.apply( node, methodParameters );
                 } catch ( e ) {
                     this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                        "exception:", e.stack );
+                        "exception:", exceptionMessage( e ) );
                 }
             }
 
@@ -418,7 +418,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     return listener.handler.apply( listener.context, eventParameters );
                 } catch ( e ) {
                     this.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
-                        "exception:", e.stack );
+                        "exception:", exceptionMessage( e ) );
                 }
             }, this );
 
@@ -436,7 +436,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
                 } catch ( e ) {
                     this.logger.warn( "executing", nodeID,
-                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", e.stack );
+                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", exceptionMessage( e ) );
                 }
             }
 
@@ -634,6 +634,35 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             Object.getPrototypeOf( node ).private && findBody( Object.getPrototypeOf( node ), methodName );
     }
 
+    // -- exceptionMessage -------------------------------------------------------------------------
+
+    // Format the stack trace for readability.
+
+    function exceptionMessage( exception ) {
+
+        // https://github.com/eriwen/javascript-stacktrace sniffs the browser type from the
+        // exception this way.
+
+        if ( exception.arguments && exception.stack ) { // Chrome
+
+            return "\n  " + exception.stack;
+
+        } else if ( window && window.opera ) { // Opera
+
+            return exception.toString();
+
+        } else if ( exception.stack ) { // Firefox
+
+            return "\n  " + exception.toString() + "\n" + // somewhat like Chrome's
+                exception.stack.replace( /^/mg, "    " );
+
+        } else { // default
+
+            return exception.toString();
+
+        }
+
+    }
 
     // == Node =====================================================================================
 
