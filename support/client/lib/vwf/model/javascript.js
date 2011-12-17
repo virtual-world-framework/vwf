@@ -58,7 +58,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var node = this.nodes[childID] = new type( childSource, childType );
 
-node.id = childID; // TODO: move to a backstop model
+node.id = childID; // TODO: move to vwf/model/object
 
             node.private = {}; // bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
 
@@ -168,7 +168,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
         // -- parenting ----------------------------------------------------------------------------
 
-        parenting: function( nodeID ) {  // TODO: move to a backstop model
+        parenting: function( nodeID ) {  // TODO: move to vwf/model/object
 
             var node = this.nodes[nodeID];
 
@@ -177,7 +177,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
         // -- childrening --------------------------------------------------------------------------
 
-        childrening: function( nodeID ) {  // TODO: move to a backstop model
+        childrening: function( nodeID ) {  // TODO: move to vwf/model/object
 
             var node = this.nodes[nodeID];
 
@@ -188,7 +188,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
         // -- naming -------------------------------------------------------------------------------
 
-        naming: function( nodeID ) {  // TODO: move to a backstop model
+        naming: function( nodeID ) {  // TODO: move to vwf/model/object
 
             var node = this.nodes[nodeID];
 
