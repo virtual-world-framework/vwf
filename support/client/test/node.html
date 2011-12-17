@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.5.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+
+      ], function() {
+
+        require.ready( function() {
+
+          vwf.initialize(
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
+            /*  views */ { }
+          );
+
+          // Member name priority on the node
+
+          asyncTest( "Member name priority", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.execute( fixtureID, "this.a" );
+              equal( vwf.execute( fixtureID, "this.test" ), "a-property", "properties override methods" );
+
+              vwf.execute( fixtureID, "this.b()" );
+              equal( vwf.execute( fixtureID, "this.test" ), "b-method", "methods override events" );
+
+              vwf.execute( fixtureID, "this.c()" );
+              equal( vwf.execute( fixtureID, "this.test" ), "c-event", "events override children" );
+
+              vwf.execute( fixtureID, "this.d.p" );
+              equal( vwf.execute( fixtureID, "this.test" ), "d-child", "children override nothing" );
+
+              start();
+            } );
+
+          } );
+
+          // Member name priority on the future node
+
+          asyncTest( "Future member name priority", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.execute( fixtureID, "this.future( 0.1 ).a" );
+              vwf.execute( fixtureID, "this.future( 0.2 ).b()" );
+              vwf.execute( fixtureID, "this.future( 0.3 ).c()" );
+              vwf.execute( fixtureID, "this.d.future( 0.4 ).p" );
+
+              setTimeout( function() {
+                equal( vwf.execute( fixtureID, "this.test" ), "a-property", "properties override methods" );
+              }, 150 );  // TODO: trying to match timings like this is unreliable
+
+              setTimeout( function() {
+                equal( vwf.execute( fixtureID, "this.test" ), "b-method", "methods override events" );
+              }, 250 );  // TODO: trying to match timings like this is unreliable
+
+              setTimeout( function() {
+                equal( vwf.execute( fixtureID, "this.test" ), "c-event", "events override children" );
+              }, 350 );  // TODO: trying to match timings like this is unreliable
+
+              setTimeout( function() {
+                equal( vwf.execute( fixtureID, "this.test" ), "d-child", "children override nothing" );
+                start();
+              }, 450 );  // TODO: trying to match timings like this is unreliable
+
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create a node with conflicting property, method, event and child names.
+
+          function createFixture( callback ) {
+
+            vwf.createNode( 0, {
+
+              extends:
+                "http://vwf.example.com/types/node",
+              
+              properties: {
+                a: {
+                  get: "return this.test = 'a-property'",
+                }
+              },
+
+              methods: {
+                a: "return this.test = 'a-method'",
+                b: "return this.test = 'b-method'",
+              },
+
+              events: {
+                a: undefined,
+                b: undefined,
+                c: undefined,
+              },
+
+              children: {
+                a: { properties: { p: { get: "return this.parent.test = 'a-child'" } } },
+                b: { properties: { p: { get: "return this.parent.test = 'b-child'" } } },
+                c: { properties: { p: { get: "return this.parent.test = 'c-child'" } } },
+                d: { properties: { p: { get: "return this.parent.test = 'd-child'" } } },
+              },
+
+              scripts: [
+                "this.a.add( function() { this.test = 'a-event' }, this )",
+                "this.b.add( function() { this.test = 'b-event' }, this )",
+                "this.c.add( function() { this.test = 'c-event' }, this )",
+                "this.test = undefined",
+              ],
+
+            }, unique_name( "fixture" ), function( fixtureID ) {
+
+              callback( fixtureID );
+
+            } );
+
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>
