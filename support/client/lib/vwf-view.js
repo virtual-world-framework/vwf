@@ -63,7 +63,7 @@
         vwf.send( 0, nodeID, "removeChild", undefined, [ childID ] );
     };
 
-    // -- createProperty ------------------------------------------------------------------------------
+    // -- createProperty ---------------------------------------------------------------------------
 
     module.prototype.createProperty = function( nodeID, propertyName, propertyValue ) {
         vwf.logger.info( namespace + ".createProperty " + nodeID + " " + propertyName + " " + propertyValue );
