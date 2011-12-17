@@ -153,9 +153,13 @@ node.id = childID; // TODO: move to a backstop model
             child.parent = node;
 
             if ( node ) {
+
                 node.children.push( child );
                 node.children[childName] = child;  // TODO: conflict if childName is parseable as a number
-                node[childName] = child;  // TODO: if no conflict with other names on node
+
+node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                ( node[childName] = child );
+
             }
 
         },
@@ -204,8 +208,7 @@ node.id = childID; // TODO: move to a backstop model
                 enumerable: true
             } );
 
-            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-
+node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, propertyName, { // "this" is node in get/set
                 get: function() { return self.kernel.getProperty( this.id, propertyName ) },
                 set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
@@ -306,8 +309,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 enumerable: true,
             } );
 
-            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-
+node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, methodName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) {
@@ -393,8 +395,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 enumerable: true,
             } );
 
-            // TODO: only if no conflict with other names on node  TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-
+node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, eventName, { // "this" is node in get/set
                 value: proxyNode,  // TODO: invoked with this as derived when only defined on base?
                 enumerable: true,
@@ -486,6 +487,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                             enumerable: true
                         } );
 
+future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, propertyName, { // "this" is future in get/set
                             get: function() { return self.kernel.getProperty( this.id,
                                 propertyName, -this.private.when, this.private.callback
@@ -523,6 +525,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                             enumerable: true
                         } );
 
+future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, methodName, { // "this" is future in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) {
@@ -559,6 +562,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                             enumerable: true,
                         } );
 
+future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, eventName, {
                             value: function( /* parameter1, parameter2, ... */ ) { // "this" is future
                                 return self.kernel.fireEvent( this.id,
