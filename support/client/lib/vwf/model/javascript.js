@@ -94,7 +94,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node, "future", {
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, when, callback );
+                    return refreshedFuture.call( self, this, -when, callback );
                 },
                 enumerable: true,
             } );
@@ -479,10 +479,10 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
                         Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
                             get: function() { return self.kernel.getProperty( this.future.id,
-                                propertyName, -this.future.private.when, this.future.private.callback
+                                propertyName, this.future.private.when, this.future.private.callback
                             ) },
                             set: function( value ) { self.kernel.setProperty( this.future.id,
-                                propertyName, value, -this.future.private.when, this.future.private.callback
+                                propertyName, value, this.future.private.when, this.future.private.callback
                             ) },
                             enumerable: true
                         } );
@@ -490,10 +490,10 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, propertyName, { // "this" is future in get/set
                             get: function() { return self.kernel.getProperty( this.id,
-                                propertyName, -this.private.when, this.private.callback
+                                propertyName, this.private.when, this.private.callback
                             ) },
                             set: function( value ) { self.kernel.setProperty( this.id,
-                                propertyName, value, -this.private.when, this.private.callback
+                                propertyName, value, this.private.when, this.private.callback
                             ) },
                             enumerable: true
                         } );
@@ -518,7 +518,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) {
                                     return self.kernel.callMethod( this.future.id,
-                                        methodName, arguments, -this.future.private.when, this.future.private.callback
+                                        methodName, arguments, this.future.private.when, this.future.private.callback
                                     );
                                 }
                             },
@@ -530,7 +530,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) {
                                     return self.kernel.callMethod( this.id,
-                                        methodName, arguments, -this.private.when, this.private.callback
+                                        methodName, arguments, this.private.when, this.private.callback
                                     );
                                 }
                             },
@@ -556,7 +556,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                         Object.defineProperty( future.events, eventName, {
                             value: function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
                                 return self.kernel.fireEvent( this.future.id,
-                                    eventName, arguments, -this.future.private.when, this.future.private.callback
+                                    eventName, arguments, this.future.private.when, this.future.private.callback
                                 );
                             },
                             enumerable: true,
@@ -566,7 +566,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
                         Object.defineProperty( future, eventName, {
                             value: function( /* parameter1, parameter2, ... */ ) { // "this" is future
                                 return self.kernel.fireEvent( this.id,
-                                    eventName, arguments, -this.private.when, this.private.callback
+                                    eventName, arguments, this.private.when, this.private.callback
                                 );
                             },
                             enumerable: true,
