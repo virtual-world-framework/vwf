@@ -117,6 +117,40 @@
 
           } );
 
+          // Future JavaScript API
+
+          asyncTest( "Future JavaScript", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.setProperty( fixtureID, "property", undefined );
+
+              var time0 = fixed3( vwf.time() );
+              var time1 = fixed3( time0 + 0.011 );
+              var time2 = fixed3( time0 + 0.012 );
+              var time3 = fixed3( time0 + 0.013 );
+
+              vwf.execute( fixtureID, this.in( " + "0.011" + " ).property = 'in'" );
+              vwf.execute( fixtureID, this.at( " + time2 + " ).property = 'at'" );
+              vwf.execute( fixtureID, "this.future( " + "0.013" + " ).property = 'future'" );
+
+              runFutureAssertions( [
+
+                { absolute: time1, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "in", "relative" ) } },
+
+                { absolute: time2, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "at", "absolute" ) } },
+
+                { absolute: time3, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "future", "relative alias" ) } },
+
+              ] );
+
+            } );
+
+          } );
+
           // Immediate actions directly to the kernel
 
           asyncTest( "Immediate kernel", function() {
