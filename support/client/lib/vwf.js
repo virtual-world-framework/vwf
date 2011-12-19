@@ -507,10 +507,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.receive = function( time, nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
 
-            // Advance the time.
-
-            this.now = time;
-
 // TODO: delegate parsing and validation to each action.
 
             // Look up the action handler and invoke it with the remaining parameters.
@@ -571,6 +567,10 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
                 var fields = queue.shift();
 
+                // Advance the time.
+
+                this.now = fields.time;
+
                 this.receive( fields.time, fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
                         vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
@@ -579,19 +579,24 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
                     }
                 } );
 
+                // Tick after the last message, or after the last message before the time advances.
+
+                if ( queue.ready && ( queue.length == 0 || queue[0].time != this.now ) ) {
+                    this.tick();
+                }
+
             }
 
-            // Set the simulation time to the new current time.
+            // Set the simulation time to the new current time. Tick if the time advances.
 
-            if ( queue.ready ) {
+            if ( queue.ready && queue.time != this.now ) {
                 this.now = queue.time;
+                this.tick();
             }
-
-            this.tick();
             
         };
 
-        // -- dispatch -----------------------------------------------------------------------------
+        // -- tick ---------------------------------------------------------------------------------
 
         // Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
         // simulation time that we should advance to and was taken from the time stamp of the last

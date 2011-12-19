@@ -29,6 +29,7 @@
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
+        "vwf/view/document",
 
       ], function() {
 
@@ -36,10 +37,85 @@
 
           vwf.initialize(
             /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
-            /*  views */ { }
+            /*  views */ { "vwf/view/document": undefined }
           );
 
           var kernel = require( "vwf/kernel/model" ).create( vwf ); // connect through the kernel's model interface
+
+          // Time passage from future actions and the periodic interval.
+
+          asyncTest( "Time passage", function() {
+
+            createFixture( function( fixtureID ) {
+
+              // Calculate times. We need to find two system tick times and additional times between
+              // the system ticks. This calculation will need to be adjusted if the single-user tick
+              // interval changes.
+
+              var interval = 10; // assumed periodic tick interval
+
+              var timeStart = ( Math.floor( Math.round( vwf.time() * 1000 ) / interval ) *
+                interval + interval ) / 1000; // next periodic tick
+
+              var timeStop = ( Math.floor( Math.round( vwf.time() * 1000 ) / interval ) *
+                interval + interval + interval ) / 1000; // the following periodic tick
+
+              var time1 = fixed3( timeStart + 0.001 );
+              var time2 = fixed3( timeStart + 0.002 );
+              var time3 = fixed3( timeStart + 0.003 );
+
+              timeStart = fixed3( timeStart );
+              timeStop = fixed3( timeStop );
+
+              // Create a function to drop tags by timestamp in this.property.
+
+              kernel.execute( fixtureID, "this.mark = function( tag ) { " +
+                "var time = this.time.toFixed(3); " +
+                "this.property[time] || ( this.property[time] = [] ); " +
+                "this.property[time].push( tag ); " +
+              "}" );
+
+              kernel.execute( fixtureID, "this.property = {}" );
+
+              // Schedule the actions.
+
+              kernel.execute( fixtureID, "", undefined, time1 ); // nothing
+
+              kernel.execute( fixtureID, "this.mark( 'one' )", undefined, time2 ); // one thing
+
+              kernel.execute( fixtureID, "this.mark( 'two' )", undefined, time3 ); // two things
+              kernel.execute( fixtureID, "this.mark( 'three' )", undefined, time3 );
+
+              kernel.execute( fixtureID, "", undefined, timeStop ); // nothing, exactly on the tick
+
+              // Wait and test.
+
+              runFutureAssertions( function( time ) {
+
+                vwf.execute( fixtureID, "this.mark( 'tick' )" ); // tick, just before assertions
+                
+              }, [
+
+                { absolute: timeStart, assertion: function() {
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ timeStart ], [ "tick" ], "tick at the periodic interval" ) } },
+
+                { absolute: time1, assertion: function() {
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time1 ], [ "tick" ], "tick when a future action executes" ) } },
+
+                { absolute: time2, assertion: function() {
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time2 ], [ "one", "tick" ], "tick is after the future action" ) } },
+
+                { absolute: time3, assertion: function() {
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time3 ], [ "two", "three", "tick" ], "one tick per group of future actions" ) } },
+
+                { absolute: timeStop, assertion: function() {
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ timeStop ], [ "tick" ], "one tick with the future action at the periodic interval time" ) } },
+
+              ] );
+
+            } );
+
+          } );
 
           // Immediate actions directly to the kernel
 
@@ -282,6 +358,69 @@
 
           function unique_name( base ) {
             return base + "-" + ( ++sequence );
+          }
+
+          // Run assertions against actions on the future queue.
+
+          function runFutureAssertions( ticked, assertions ) {
+
+            // Interpret runFutureAssertions( assertions ) as
+            // runFutureAssertions( undefined, assertions )
+
+            if ( typeof ticked != "function" && ! ticked instanceof Function ) {
+              assertions = ticked;
+              ticked = undefined;
+            }
+
+            // Listen for the kernel tick.
+
+            window.vwf_view.ticked = function( time ) {
+
+              // Call our caller's tick just before the assertions.
+
+              ticked && ticked( time );
+
+              // Run any assertions that are ready.
+
+              while ( next < assertions.length && ready( assertions[next], time ) ) {
+                assertions[next++].assertion();
+              }
+
+              // When finished, unlisten for the kernel tick and tell qunit that we're done.
+
+              if ( next == assertions.length ) {
+                window.vwf_view.ticked = undefined;
+                start();
+              }
+
+            }
+
+            var reference = vwf.time();
+            var next = 0;
+
+            // Time to run the next one?
+
+            function ready( assertion, time ) {
+
+              return assertion.absolute && time >= assertion.absolute ||
+                assertion.relative && time >= reference + assertions[next].relative;
+              
+            }
+            
+          }
+
+          // Convert a number to a Number object that expresses itself in 3-point fixed precision
+          // when referenced in string context.
+
+          function fixed3( number ) {
+
+            var number3 = new Number( number );
+
+            number3.toString = function() {
+              return this.toFixed( 3 )
+            }
+
+            return number3;            
           }
 
         } );
