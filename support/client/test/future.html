@@ -166,24 +166,24 @@
               vwf.setProperty( fixtureID, "property", undefined );
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
 
-              kernel.setProperty( fixtureID, "property", "property", -0.1 );
-              kernel.callMethod( fixtureID, "method", [ "method" ], -0.2 );
-              kernel.fireEvent( fixtureID, "event", [ "event" ], -0.3 );
+              kernel.setProperty( fixtureID, "property", "property", -0.001 );
+              kernel.callMethod( fixtureID, "method", [ "method" ], -0.002 );
+              kernel.fireEvent( fixtureID, "event", [ "event" ], -0.003 );
 
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
-              setTimeout( function() {
-                equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" );
-              }, 150 );  // TODO: trying to match timings like this is unreliable
+              runFutureAssertions( [
 
-              setTimeout( function() {
-                equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" );
-              }, 250 );  // TODO: trying to match timings like this is unreliable
+                { relative: 0.001, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
 
-              setTimeout( function() {
-                equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" );
-                start();
-              }, 350 );  // TODO: trying to match timings like this is unreliable
+                { relative: 0.002, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" ) } },
+
+                { relative: 0.003, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" ) } },
+
+              ] );
 
             } );
 
@@ -198,24 +198,24 @@
               vwf.setProperty( fixtureID, "property", undefined );
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
 
-              vwf.execute( fixtureID, "this.future( 0.1 ).property = 'property'" );
-              vwf.execute( fixtureID, "this.future( 0.2 ).method( 'method' )" );
-              vwf.execute( fixtureID, "this.future( 0.3 ).event( 'event' )" );
+              vwf.execute( fixtureID, "this.future( 0.001 ).property = 'property'" );
+              vwf.execute( fixtureID, "this.future( 0.002 ).method( 'method' )" );
+              vwf.execute( fixtureID, "this.future( 0.003 ).event( 'event' )" );
 
               equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
-              setTimeout( function() {
-                equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" );
-              }, 150 );  // TODO: trying to match timings like this is unreliable
+              runFutureAssertions( [
 
-              setTimeout( function() {
-                equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" );
-              }, 250 );  // TODO: trying to match timings like this is unreliable
+                { relative: 0.001, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
 
-              setTimeout( function() {
-                equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" );
-                start();
-              }, 350 );  // TODO: trying to match timings like this is unreliable
+                { relative: 0.002, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" ) } },
+
+                { relative: 0.003, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" ) } },
+
+              ] );
 
             } );
 
@@ -231,22 +231,23 @@
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base" );
 
-              vwf.execute( derivedID, "this.future( 0.1 ).derived = 'derived updated'" );
-              vwf.execute( derivedID, "this.future( 0.2 ).base = 'base updated'" ); // inherit from base, assign to derived
+              vwf.execute( derivedID, "this.future( 0.001 ).derived = 'derived updated'" );
+              vwf.execute( derivedID, "this.future( 0.002 ).base = 'base updated'" ); // inherit from base, assign to derived
               
               equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
-              setTimeout( function() {
-                equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" );
-              }, 150 );
+              runFutureAssertions( [
 
-              setTimeout( function() {
-                equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ); // no longer inherited
-                equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
-                start();
-              }, 250 );
+                { relative: 0.001, assertion: function() {
+                    equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
+
+                { relative: 0.002, assertion: function() {
+                    equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
+                    equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
+
+              ] );
 
             } );
 
@@ -262,22 +263,23 @@
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base" );
 
-              vwf.execute( derivedID, "this.future( 0.1 ).properties.derived = 'derived updated'" );
-              vwf.execute( derivedID, "this.future( 0.2 ).properties.base = 'base updated'" ); // inherit from base, assign to derived
+              vwf.execute( derivedID, "this.future( 0.001 ).properties.derived = 'derived updated'" );
+              vwf.execute( derivedID, "this.future( 0.002 ).properties.base = 'base updated'" ); // inherit from base, assign to derived
               
               equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
               equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
               equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
-              setTimeout( function() {
-                equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" );
-              }, 150 );
+              runFutureAssertions( [
 
-              setTimeout( function() {
-                equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ); // no longer inherited
-                equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
-                start();
-              }, 250 );
+                { relative: 0.001, assertion: function() {
+                    equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
+
+                { relative: 0.002, assertion: function() {
+                    equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
+                    equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
+
+              ] );
 
             } );
 
@@ -367,7 +369,7 @@
             // Interpret runFutureAssertions( assertions ) as
             // runFutureAssertions( undefined, assertions )
 
-            if ( typeof ticked != "function" && ! ticked instanceof Function ) {
+            if ( typeof ticked != "function" && ! ( ticked instanceof Function ) ) {
               assertions = ticked;
               ticked = undefined;
             }
