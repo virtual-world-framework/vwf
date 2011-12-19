@@ -1195,6 +1195,35 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                     }
                     break;
+
+                case "color":
+                    if ( mat ) { mat.setColor( propertyValue ); } 
+                    break;                
+                case "ambient":
+                    if ( mat ) { mat.setAmbient( propertyValue ); } 
+                    break;
+                case "specColor":
+                    if ( mat ) { mat.setSpecularColor( propertyValue ); } 
+                    break;
+                case "shininess":
+                    if ( mat ) { mat.setShininess( propertyValue ); } 
+                    break;  
+                case "reflect":
+                    if ( mat ) { mat.setReflectivity( propertyValue ); } 
+                    break;
+                case "specular":
+                    if ( mat ) { mat.setSpecular( propertyValue ); } 
+                    break;
+                case "emit":
+                    if ( mat ) { mat.setEmit( propertyValue ); } 
+                    break; 
+                case "alpha":
+                    if ( mat ) { mat.setAlpha( propertyValue ); } 
+                    break;                    
+                case "binaryAlpha":
+                    if ( mat ) { mat.setBinaryAlpha( propertyValue ); } 
+                    break; 
+
                 default:
                     value = undefined;
                     break;
@@ -1384,6 +1413,33 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                 }
                 break;
+            case "color":
+                if ( mat ) { value = mat.getColor(); } 
+                break;                
+            case "ambient":
+                if ( mat ) { value = mat.getAmbient(); } 
+                break;
+            case "specColor":
+                if ( mat ) { value = mat.getSpecularColor(); } 
+                break;
+            case "shininess":
+                if ( mat ) { value = mat.getShininess(); } 
+                break;  
+            case "reflect":
+                if ( mat ) { value = mat.getReflectivity(); } 
+                break;
+            case "specular":
+                if ( mat ) { value = mat.getSpecular(); } 
+                break;
+            case "emit":
+                if ( mat ) { value = mat.getEmit(); } 
+                break; 
+            case "alpha":
+                if ( mat ) { value = mat.getAlpha(); } 
+                break;                    
+            case "binaryAlpha":
+                if ( mat ) { value = mat.getBinaryAlpha(); } 
+                break;  
         }
 
         return value;

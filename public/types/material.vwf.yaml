@@ -17,9 +17,9 @@ properties:
     set: |
       this.reflect = value;
     value: 
-  shine:
+  shininess:
     set: |
-      this.shine = value;
+      this.shininess = value;
     value: 
   specular:
     set: |
@@ -33,3 +33,11 @@ properties:
     set: |
       this.alpha = value;
     value:  
+  ambient: 
+    set: |
+      this.ambient = value;
+    value:  
+binaryAlpha:
+    set: |
+      this.alpha = value;
+    value:
