@@ -101,10 +101,22 @@ node.id = childID; // TODO: move to vwf/model/object
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.
 
-            Object.defineProperty( node, "future", {
+            Object.defineProperty( node, "in", {
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, -when, callback );
+                    return refreshedFuture.call( self, this, -when, callback ); // relative time
                 },
+                enumerable: true,
+            } );
+
+            Object.defineProperty( node, "at", {
+                value: function( when, callback ) { // "this" is node
+                    return refreshedFuture.call( self, this, when, callback ); // absolute time
+                },
+                enumerable: true,
+            } );
+
+            Object.defineProperty( node, "future", { // same as "in"
+                get: function() { return this.in },
                 enumerable: true,
             } );
 
