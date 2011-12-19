@@ -88,6 +88,15 @@ node.id = childID; // TODO: move to vwf/model/object
 
             node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
+            // Define the "time" property.
+
+            Object.defineProperty( node, "time", {
+                get: function() {
+                    return self.kernel.time();
+                },
+                enumerable: true,
+            } );
+
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.
