@@ -2,7 +2,7 @@
 extends: http://vwf.example.com/types/glge
 properties:
   orbitRadius: -1
-  orbitObjectID: "http-vwf-example-com-types-group3-worldCenter"
+  orbitObjectID: "http-vwf-example-com-types-node3-worldCenter"
   lineWidth: 32
   lineColor: [ 0, 0, 0 ]
   lineHeight: 100
@@ -271,7 +271,7 @@ scripts:
               zinc = zinc - 1.0;
               break;
             case 16: // 0
-              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-group3-worldCenter");
+              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-worldCenter");
               break;
             case 17: // 1
               vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-predator1");

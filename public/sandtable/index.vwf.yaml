@@ -13,7 +13,7 @@ scripts:
       //console.info( "================ sandtable ================" );
       this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
       this.loadDone = true;
-      vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-group3-worldCenter" );
+      vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-worldCenter" );
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
@@ -56,7 +56,7 @@ children:
       eulers: [0, 0, 0 ]
       scale: [ 0.008, 0.008, 0.020 ]
   worldCenter:
-    extends: http://vwf.example.com/types/group3
+    extends: http://vwf.example.com/types/node3
     properties:
       position: [ 0, 0, 0 ]
   maincamera:
@@ -68,11 +68,11 @@ children:
       rotation: [ 1.56, 3.14, 0 ]
       far: 500000
       near: 2
-      lookAt: "http-vwf-example-com-types-group3-worldCenter"
+      lookAt: "http-vwf-example-com-types-node3-worldCenter"
     scripts:
     - text: |
         this.initialize = function() {
-          this.lookAt = "http-vwf-example-com-types-group3-worldCenter";
+          this.lookAt = "http-vwf-example-com-types-node3-worldCenter";
         }
       type: application/javascript      
   light1:
@@ -81,7 +81,7 @@ children:
       lightType: "point"
       constantAttenuation: 1
   predator1:
-    extends: http://vwf.example.com/types/group3 
+    extends: http://vwf.example.com/types/node3 
     methods:
       animate: |
         //console.info( "== predator1 ===== animate ================" );
@@ -177,13 +177,13 @@ children:
         value: false
     children:
       goal1:
-        extends: http://vwf.example.com/types/group3 
+        extends: http://vwf.example.com/types/node3 
         properties:
           position: [ 0, 0, 1200 ]
           eulers: [0, 0, 0 ]
           scale: [ 1, 1, 1 ]      
       planeGroup1:
-        extends: http://vwf.example.com/types/group3 
+        extends: http://vwf.example.com/types/node3 
         properties:
           position: [ 0, 0, 1200 ]
           eulers: [0, 0, 0 ]
@@ -206,7 +206,7 @@ children:
               eulers: [0, 0, 0 ]
               scale: [ 8, 8, 16 ]
   predator2:
-    extends: http://vwf.example.com/types/group3 
+    extends: http://vwf.example.com/types/node3 
     methods:
       animate: |
         //console.info( "== predator2 =====  animate ================" );
@@ -360,8 +360,8 @@ children:
             this.timeSinceLast = vwf.time();
             this.planeGroup2.position = this.path[ this.lastPathIndex ].position;
             this.goal2.position = this.path[ this.nextPathIndex ].position;
-            //this.planeGroup2.plane2.lookAt = "http-vwf-example-com-types-group3-goal2";
-            //this.planeGroup2.cone2.lookAt = "http-vwf-example-com-types-group3-goal2";
+            //this.planeGroup2.plane2.lookAt = "http-vwf-example-com-types-node3-goal2";
+            //this.planeGroup2.cone2.lookAt = "http-vwf-example-com-types-node3-goal2";
             
             this.animating = true;
           }
@@ -394,13 +394,13 @@ children:
         value: false
     children:
       goal2:
-        extends: http://vwf.example.com/types/group3 
+        extends: http://vwf.example.com/types/node3 
         properties:
           position: [ 0, 0, 1500 ]
           eulers: [0, 0, 0 ]
           scale: [ 1, 1, 1 ]      
       planeGroup2:
-        extends: http://vwf.example.com/types/group3 
+        extends: http://vwf.example.com/types/node3 
         properties:
           position: [ 0, 0, 1500 ]
           eulers: [0, 0, 0 ]

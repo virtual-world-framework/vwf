@@ -10882,6 +10882,9 @@ GLGE.ParticleSystem.prototype.setMaxVelocity=function(x,y,z){
 	this.startMaxVelocity={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxVelocity=function(){
+	return this.startMaxVelocity;
+}
 /**
 * Sets the min velocity in the X direction
 * @param {number} value the minimum velocity
@@ -10916,7 +10919,9 @@ GLGE.ParticleSystem.prototype.setMinVelocity=function(x,y,z){
 	this.startMinVelocity={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
-
+GLGE.ParticleSystem.prototype.getMinVelocity=function(){
+    return this.startMinVelocity;
+}
 /**
 * Sets the velocity in the X direction
 * @param {number} value the minimum velocity
@@ -10990,6 +10995,9 @@ GLGE.ParticleSystem.prototype.setMaxStartAccelertaion=function(x,y,z){
 	this.startMaxAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxStartAccelertaion=function(){
+	return this.startMaxAcceleration;
+}
 /**
 * Sets the min starting acceleration in the X direction
 * @param {number} value the minimum acceleration
@@ -11023,6 +11031,10 @@ GLGE.ParticleSystem.prototype.setMinStartAccZ=function(value){
 GLGE.ParticleSystem.prototype.setMinStartAccelertaion=function(x,y,z){
 	this.startMinAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
+}
+
+GLGE.ParticleSystem.prototype.getMinStartAccelertaion=function(){
+    return this.startMinAcceleration;
 }
 
 /**
@@ -11098,6 +11110,9 @@ GLGE.ParticleSystem.prototype.setMaxEndAccelertaion=function(x,y,z){
 	this.endMaxAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxEndAccelertaion=function(){
+	return this.endMaxAcceleration;
+}
 /**
 * Sets the minimum ending acceleration in the X direction
 * @param {number} value the minimum acceleration
@@ -11131,6 +11146,9 @@ GLGE.ParticleSystem.prototype.setMinEndAccZ=function(value){
 GLGE.ParticleSystem.prototype.setMinEndAccelertaion=function(x,y,z){
 	this.endMinAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
+}
+GLGE.ParticleSystem.prototype.getMinEndAccelertaion=function(){
+	return this.endMinAcceleration;
 }
 /**
 * Sets the ending acceleration in the X direction
@@ -11180,6 +11198,9 @@ GLGE.ParticleSystem.prototype.setStartColor=function(value){
 	this.startColor=color;
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getStartColor=function(){
+	return this.startColor;
+}
 /**
 * Sets the ending color of the particle
 * @param {number} value the end color
@@ -11189,6 +11210,9 @@ GLGE.ParticleSystem.prototype.setEndColor=function(value){
 	this.endColor=color;
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getEndColor=function(){
+	return this.endColor;
+}
 /**
 * Sets the starting size of the particle
 * @param {number} value the start size
@@ -11197,6 +11221,9 @@ GLGE.ParticleSystem.prototype.setStartSize=function(value){
 	this.startSize=parseFloat(value);
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getStartSize=function(){
+	return this.startSize;
+}
 /**
 * Sets the ending size of the particle
 * @param {number} value the end size
@@ -11204,6 +11231,9 @@ GLGE.ParticleSystem.prototype.setStartSize=function(value){
 GLGE.ParticleSystem.prototype.setEndSize=function(value){
 	this.endSize=parseFloat(value);
 	this.attribute=null;
+}
+GLGE.ParticleSystem.prototype.getEndSize=function(){
+	return this.endSize;
 }
 /**
 * Sets the particles lifetime
@@ -11222,6 +11252,9 @@ GLGE.ParticleSystem.prototype.setMaxLifeTime=function(value){
 	this.maxLifeTime=parseFloat(value);
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxLifeTime=function(){
+	return this.maxLifeTime;
+}
 /**
 * Sets the particles minimum lifetime
 * @param {number} value the particles life time
@@ -11229,6 +11262,9 @@ GLGE.ParticleSystem.prototype.setMaxLifeTime=function(value){
 GLGE.ParticleSystem.prototype.setMinLifeTime=function(value){
 	this.minLifeTime=parseFloat(value);
 	this.attribute=null;
+}
+GLGE.ParticleSystem.prototype.getMinLifeTime=function(){
+	return this.minLifeTime;
 }
 /**
 * Sets the total number of particles
@@ -11238,8 +11274,9 @@ GLGE.ParticleSystem.prototype.setNumParticles=function(value){
 	this.numParticles=parseFloat(value);
 	this.attribute=null;
 }
-
-
+GLGE.ParticleSystem.prototype.getNumParticles=function(){
+	return this.numParticles;
+}
 /**
 * The particles velocity function used to generate the initial particles velocities
 */

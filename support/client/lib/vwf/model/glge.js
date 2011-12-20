@@ -109,7 +109,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     } 
                     break;
 
-                case "http-vwf-example-com-types-object3":
+                case "http-vwf-example-com-types-mesh":
                 case "http-vwf-example-com-types-node3": {
                     var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                     switch ( childType ) {
@@ -192,7 +192,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                     node.loadingCollada = callback;                                    
                                 }
                             } else {
-                                console.info( "WARNING: glgeObject was not found: " + childName + "  ID: " + childID );
+                                node.glgeObject = new GLGE.Group();
+                                if ( parentNode ) {
+                                    if ( parentNode.glgeObject ) {
+                                        parentNode.glgeObject.addObject( node.glgeObject );
+                                    } else if ( parentNode.glgeScene ) {
+                                        parentNode.glgeScene.addObject( node.glgeObject );
+                                    }
+                                }
+                    
+                                node.gui = node.glgeObject.uid;
+                                node.glgeObject.name = childName;  
                             }
                             break;
                     }  
@@ -283,51 +293,29 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
                 break;
 
-            case "http-vwf-example-com-types-group3":
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: new GLGE.Group(),
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
+//            case "http-vwf-example-com-types-mesh":
+//                node = this.state.nodes[childID] = {
+//                    name: childName,
+//                    glgeObject: glgeChild,
+//                    ID: childID,
+//                    parentID: nodeID,
+//                    type: childExtendsID,
+//                    sourceType: childType,
+//                }
 
-                if ( parentNode ) {
-                    if ( parentNode.glgeObject ) {
-                        parentNode.glgeObject.addObject( node.glgeObject );
-                    } else if ( parentNode.glgeScene ) {
-                        parentNode.glgeScene.addObject( node.glgeObject );
-                    }
-                }
-                    
-                node.gui = node.glgeObject.uid;
-                node.glgeObject.name = childName;                    
-                break;
+//                if ( parentNode && parentNode.meshesCreated && parentNode.meshesCreated[childName] ) {
+//                    node.glgeObject = parentNode.meshesCreated[childName];
+//                    delete parentNode.meshesCreated[childName];
+//                } else if ( !node.glgeObject ) {
+//                    var meshList = findAllMeshes.call( this, parentNode.glgeObject );
+//                    for ( var i = 0; i < meshList.length && !node.glgeObject; i++ ) {
+//                        if ( name( meshList[i] ) == childName ) {
+//                            node.glgeObject = meshList[i];
+//                        }
+//                    }
+//                }
 
-            case "http-vwf-example-com-types-mesh":
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: glgeChild,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID,
-                    sourceType: childType,
-                }
-
-                if ( parentNode && parentNode.meshesCreated && parentNode.meshesCreated[childName] ) {
-                    node.glgeObject = parentNode.meshesCreated[childName];
-                    delete parentNode.meshesCreated[childName];
-                } else if ( !node.glgeObject ) {
-                    var meshList = findAllMeshes.call( this, parentNode.glgeObject );
-                    for ( var i = 0; i < meshList.length && !node.glgeObject; i++ ) {
-                        if ( name( meshList[i] ) == childName ) {
-                            node.glgeObject = meshList[i];
-                        }
-                    }
-                }
-
-                break;
+//                break;
 
             case "index-vwf":
             case "http-vwf-example-com-types-node":
@@ -455,7 +443,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            if ( node && node.glgeObject ) {
+            if ( node && node.glgeObject && propertyValue ) {
 
                 var glgeObject = node.glgeObject;
                 var isAnimatable = glgeObject.animate; // implements GLGE.Animatable?
@@ -784,7 +772,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     default:
                         switch ( node.type ) {
-                            case "http-vwf-example-com-types-object3":
+                            case "http-vwf-example-com-types-mesh":
                                 value = getObjectProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
                             case "http-vwf-example-com-types-material":
@@ -1046,7 +1034,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function setParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
-        //console.info(namespace + ".setParticleSystemProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )");
+        console.info( "glge.setParticleSystemProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )");
 
         var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
@@ -1074,7 +1062,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 break;
             case "velocity":
                 value = node.glgeObject.setVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
-                break;V
+                break;
             case "maxVelocity":
                 value = node.glgeObject.setMaxVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;            
@@ -1359,12 +1347,91 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
-        var node = this.state.nodes[nodeID];
         var value = undefined;
-        switch ( propertyName ) {
-            default:
-                this.logger.info( "getParticleSystemProperty", " WARNING: unable to get property ", nodeID, propertyName );
-                break;
+        var node = this.state.nodes[nodeID];
+        if ( node && node.glgeObject ) {
+            var ps = node.glgeObject;
+            switch ( propertyName ) {
+                case "numberParticles":
+                    if ( ps.getNumParticles )
+                        value = ps.getNumParticles();
+                    break;
+                case "lifeTime":
+                    if ( ps.getLifeTime )
+                        value = ps.getLifeTime();
+                    break;
+                case "maxLifeTime":
+                    if ( ps.getMaxLifeTime )
+                        value = ps.getMaxLifeTime();
+                    break;
+                case "minLifeTime":
+                    if ( ps.getMinLifeTime )
+                    value = ps.getMinLifeTime();
+                    break;
+                case "startSize":
+                    if ( ps.getStartSize )
+                        value = ps.getStartSize();
+                    break;
+                case "endSize":
+                    if ( ps.getEndSize )
+                        value = ps.getEndSize();
+                    break;
+                case "loop":
+                    if ( ps.getLoop )
+                        value = ps.getLoop();
+                    break;
+                case "velocity":
+                    if ( ps.getVelocity )
+                        value = ps.getVelocity();
+                    break;
+                case "maxVelocity":
+                    if ( ps.getMaxVelocity )
+                        value = ps.getMaxVelocity();
+                    break;            
+                case "minVelocity":
+                    if ( ps.getMinVelocity )
+                        value = ps.getMinVelocity();
+                    break;    
+                case "startAcceleration":
+                    if ( ps.getStartAccelertaion )
+                        value = ps.getStartAccelertaion();
+                    break;
+                case "endAcceleration":
+                    if ( ps.getEndAccelertaion )
+                        value = ps.getEndAccelertaion();
+                    break;
+                case "maxStartAcceleration":
+                    if ( ps.getMaxStartAccelertaion )
+                        value = ps.getMaxStartAccelertaion();
+                    break;
+                case "maxEndAcceleration":
+                    if ( ps.getMaxEndAccelertaion )
+                       value = ps.getMaxEndAccelertaion();
+                    break;
+                case "minStartAcceleration":
+                    if ( ps.getMinStartAccelertaion )
+                        value = ps.getMinStartAccelertaion();
+                    break;
+                case "minEndAcceleration":
+                    if ( ps.getMinEndAccelertaion )
+                        value = ps.getMinEndAccelertaion();
+                    break;
+                case "startColor":
+                    if ( ps.getStartColor )
+                        value = ps.getStartColor();
+                    break;
+                case "endColor":
+                    if ( ps.getEndColor )
+                        value = ps.getEndColor();
+                    break;
+                case "image":
+                    if ( ps.getImage )
+                        value = ps.getImage();
+                    break;
+                default:
+                    value = undefined;
+                    break;
+            }
         }
         return value;
 
@@ -1585,7 +1652,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 //console.info( "            Checking: '" + glgeObjName + "' of type " + assetObj.constructor.name );
                 if ( glgeObjName == objName ) {
                     switch ( type ) {
-                        case "http-vwf-example-com-types-object3":
+                        case "http-vwf-example-com-types-mesh":
                             if ( assetObj.constructor == GLGE.Object )
                                 obj = assetObj;
                             break;
@@ -1607,10 +1674,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             break;
                         case "http-vwf-example-com-types-particleSystem":
                             if ( assetObj.constructor == GLGE.ParticleSystem )
-                                obj = assetObj;
-                            break;
-                        case "http-vwf-example-com-types-mesh":
-                            if ( assetObj.constructor == GLGE.Mesh )
                                 obj = assetObj;
                             break;
                     }
@@ -1690,7 +1753,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
    // -- createParticleSystem ------------------------------------------------------------------------------
 
     function createParticleSystem( nodeID, childID, childName ) {
-    
+        var glgeParent = undefined;
+        var parentNode = this.state.nodes[ nodeID ];
+        if ( parentNode && parentNode.glgeObject && parentNode.glgeObject.getChildren ) {
+            glgeParent = parentNode.glgeObject;   
+        }
+        if ( !glgeParent ) {
+            parentNode = this.state.scenes[ this.state.sceneRootID ];
+            glgeParent = parentNode.glgeScene; 
+        }
+        if ( glgeParent ) {
+            var ps = new GLGE.ParticleSystem();
+            this.state.nodes[ childID ].glgeObject = ps; 
+            glgeParent.addObject( ps );
+        }
     }
 
    // -- initCamera ------------------------------------------------------------------------------

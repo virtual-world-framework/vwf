@@ -550,21 +550,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         return radius;
     }
 
-    // == findMeshChildren =================================================================
+//    // == findMeshChildren =================================================================
 
-    function findMeshChildren( nodeID, childList ) {
-        var children = this.kernel.children( nodeID );
+//    function findMeshChildren( nodeID, childList ) {
+//        var children = this.kernel.children( nodeID );
 
-        if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
-            childList.push( this.nodes[nodeID] ); 
-        }
+//        if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
+//            childList.push( this.nodes[nodeID] ); 
+//        }
 
-        if ( children && children.length ) {
-            for ( var i = 0; i < children.length; i++ ) {
-                findMeshChildren.call( this, children[i], childList );
-            }
-        }
-    }
+//        if ( children && children.length ) {
+//            for ( var i = 0; i < children.length; i++ ) {
+//                findMeshChildren.call( this, children[i], childList );
+//            }
+//        }
+//    }
 
     // == createJBox =====================================================================
 
