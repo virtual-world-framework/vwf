@@ -39,21 +39,7 @@
             /*  views */ { }
           );
 
-          // Events
-
-          asyncTest( "Events", function() {
-
-            createFixture( function( nodeID ) {
-
-              ok( vwf.execute( nodeID, "Boolean( this.events.empty )" ), "exists" );
-              ok( vwf.execute( nodeID, "Boolean( this.events.parameters )" ), "exists" );
-
-              start();
-            } );
-
-          } );
-
-          // Event firing directly to the kernel
+          // Event firing directly from the kernel
 
           asyncTest( "Event firing kernel", function() {
 
@@ -76,7 +62,7 @@
 
           } );
 
-          // Event firing through JavaScript
+          // Event firing from JavaScript
 
           asyncTest( "Event firing JavaScript", function() {
 
@@ -99,37 +85,138 @@
 
           } );
 
+          // Event inheritance directly from the kernel
+
+          asyncTest( "Event inheritance kernel", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              vwf.execute( derivedID, "this.derived = this.events.add( function( result ) { this.test = result }, this )" );
+              vwf.execute( derivedID, "this.base = this.events.add( function( result ) { this.test = result }, this )" );
+
+              vwf.execute( baseID, "this.derived = this.events.add( function( result ) { this.test = result }, this )" );
+              vwf.execute( baseID, "this.base = this.events.add( function( result ) { this.test = result }, this )" );
+
+              vwf.fireEvent( derivedID, "derived", [ 'derived-' + derivedID ] );
+              equal( vwf.execute( derivedID, "this.test" ), "derived-" + derivedID, "derived event from derived" );
+
+              vwf.fireEvent( derivedID, "base", [ 'base-' + derivedID ] );
+              equal( vwf.execute( derivedID, "this.test" ), "base-" + derivedID, "base event from derived" );
+
+              vwf.fireEvent( baseID, "derived", [ 'derived-' + baseID ] );
+              equal( vwf.execute( baseID, "this.test" ), undefined, "derived event not visible in base" );
+
+              vwf.fireEvent( baseID, "base", [ 'base-' + baseID ] );
+              equal( vwf.execute( baseID, "this.test" ), "base-" + baseID, "base event from base" );
+              
+              start();
+            } );
+
+          } );
+
+          // Event inheritance from JavaScript direct properties
+
+          asyncTest( "Event inheritance JavaScript direct", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              vwf.execute( derivedID, "this.derived = this.events.add( function( result ) { this.test = result }, this )" );
+              vwf.execute( derivedID, "this.base = this.events.add( function( result ) { this.test = result }, this )" );
+
+              vwf.execute( baseID, "this.derived && ( this.derived = this.events.add( function( result ) { this.test = result } ), this )" );
+              vwf.execute( baseID, "this.base = this.events.add( function( result ) { this.test = result }, this )" );
+
+              vwf.execute( derivedID, "this.derived( 'derived-' + this.id )" );
+              equal( vwf.execute( derivedID, "this.test" ), "derived-" + derivedID, "derived event from derived" );
+
+              vwf.execute( derivedID, "this.base( 'base-' + this.id )" );
+              equal( vwf.execute( derivedID, "this.test" ), "base-" + derivedID, "base event from derived" );
+
+              vwf.execute( baseID, "this.derived && this.derived( 'derived-' + this.id )" );
+              equal( vwf.execute( baseID, "this.test" ), undefined, "derived event not visible in base" );
+
+              vwf.execute( baseID, "this.base( 'base-' + this.id )" );
+              equal( vwf.execute( baseID, "this.test" ), "base-" + baseID, "base event from base" );
+              
+              start();
+            } );
+
+          } );
+
+          // Event inheritance from JavaScript collection properties
+
+          asyncTest( "Event inheritance JavaScript collection", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              vwf.execute( derivedID, "this.events.derived = this.events.add( function( result ) { this.test = result }, this )" );
+              vwf.execute( derivedID, "this.events.base = this.events.add( function( result ) { this.test = result }, this )" );
+
+              vwf.execute( baseID, "this.events.derived && ( this.events.derived = this.events.add( function( result ) { this.test = result } ), this )" );
+              vwf.execute( baseID, "this.events.base = this.events.add( function( result ) { this.test = result }, this )" );
+
+              vwf.execute( derivedID, "this.events.derived( 'derived-' + this.id )" );
+              equal( vwf.execute( derivedID, "this.test" ), "derived-" + derivedID, "derived event from derived" );
+
+              vwf.execute( derivedID, "this.events.base( 'base-' + this.id )" );
+              equal( vwf.execute( derivedID, "this.test" ), "base-" + derivedID, "base event from derived" );
+
+              vwf.execute( baseID, "this.events.derived && this.events.derived( 'derived-' + this.id )" );
+              equal( vwf.execute( baseID, "this.test" ), undefined, "derived event not visible in base" );
+
+              vwf.execute( baseID, "this.events.base( 'base-' + this.id )" );
+              equal( vwf.execute( baseID, "this.test" ), "base-" + baseID, "base event from base" );
+              
+              start();
+            } );
+
+          } );
+
           // Event listeners through JavaScript
 
           asyncTest( "Event listeners JavaScript", function() {
 
             createFixture( function( nodeID ) {
 
-              vwf.execute( nodeID, "this.empty.add( this.test.listener1 = function() { this.test.count1 = ( this.test.count1 || 0 ) + 5 }, this )" );
-              vwf.execute( nodeID, "this.empty.add( this.test.listener2 = function() { this.test.count2 = ( this.test.count2 || 0 ) + 7 }, this )" );
+              vwf.execute( nodeID, "this.empty = this.events.add( this.test.listener1 = function() { this.test.count1 = ( this.test.count1 || 0 ) + 5 }, this )" );
+              vwf.execute( nodeID, "this.empty = this.events.add( this.test.listener2 = function() { this.test.count2 = ( this.test.count2 || 0 ) + 7 }, this )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.test.count1" ), 5, "" );
               equal( vwf.execute( nodeID, "this.test.count2" ), 7, "" );
 
-              vwf.execute( nodeID, "this.empty.remove( this.test.listener1 )" );
+              vwf.execute( nodeID, "this.empty = this.events.remove( this.test.listener1 )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.test.count1" ), 5, "" );
               equal( vwf.execute( nodeID, "this.test.count2" ), 14, "" );
 
-              vwf.execute( nodeID, "this.empty.add( this.test.listener1, this )" );
+              vwf.execute( nodeID, "this.empty = this.events.add( this.test.listener1, this )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.test.count1" ), 10, "" );
               equal( vwf.execute( nodeID, "this.test.count2" ), 21, "" );
 
-              vwf.execute( nodeID, "this.empty.remove( this.test.listener2 )" );
+              vwf.execute( nodeID, "this.empty = this.events.remove( this.test.listener2 )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.test.count1" ), 15, "" );
               equal( vwf.execute( nodeID, "this.test.count2" ), 21, "" );
 
-              vwf.execute( nodeID, "this.empty.remove( this.test.listener1 )" );
+              vwf.execute( nodeID, "this.empty = this.events.remove( this.test.listener1 )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.test.count1" ), 15, "" );
               equal( vwf.execute( nodeID, "this.test.count2" ), 21, "" );
+
+              vwf.execute( nodeID, "this.empty = this.events.add( this.test.listener1, this )" );
+              vwf.execute( nodeID, "this.empty = this.events.add( this.test.listener2, this )" );
+              vwf.execute( nodeID, "this.empty()" );
+              equal( vwf.execute( nodeID, "this.test.count1" ), 20, "" );
+              equal( vwf.execute( nodeID, "this.test.count2" ), 28, "" );
+
+              vwf.execute( nodeID, "this.empty = this.events.flush( this )" );
+              vwf.execute( nodeID, "this.empty()" );
+              equal( vwf.execute( nodeID, "this.test.count1" ), 20, "" );
+              equal( vwf.execute( nodeID, "this.test.count2" ), 28, "" );
+
+              vwf.execute( nodeID, "this.empty = function() {}" );  // TODO: should invoke with this as the global object, but how to test?
+              vwf.execute( nodeID, "this.empty()" );
 
               start();
             } );
@@ -158,8 +245,8 @@
 
               scripts: [
                 "this.test = {}",
-                "this.empty.add( function() { this.test.event = 'empty'; this.test.result = Array.prototype.slice.call( arguments ) }, this )",
-                "this.parameters.add( function() { this.test.event = 'parameters'; this.test.result = Array.prototype.slice.call( arguments ) }, this )",
+                "this.empty = this.events.add( function() { this.test.event = 'empty'; this.test.result = Array.prototype.slice.call( arguments ) }, this )",
+                "this.parameters = this.events.add( function() { this.test.event = 'parameters'; this.test.result = Array.prototype.slice.call( arguments ) }, this )",
               ],
 
             }, unique_name( "node" ), function( nodeID ) {

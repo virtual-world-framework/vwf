@@ -343,7 +343,7 @@
               },
 
               scripts: [
-                "this.event.add( function() { this.property = arguments[0] }, this )",
+                "this.event = this.events.add( function() { this.property = arguments[0] }, this )",
               ],
 
             }, unique_name( "fixture" ), function( fixtureID ) {

@@ -130,9 +130,9 @@
               },
 
               scripts: [
-                "this.events.a.add( function() { this.test = 'a-event' }, this )",
-                "this.events.b.add( function() { this.test = 'b-event' }, this )",
-                "this.events.c.add( function() { this.test = 'c-event' }, this )",
+                "this.events.a = this.events.add( function() { this.test = 'a-event' }, this )",
+                "this.events.b = this.events.add( function() { this.test = 'b-event' }, this )",
+                "this.events.c = this.events.add( function() { this.test = 'c-event' }, this )",
                 "this.test = undefined",
               ],
 

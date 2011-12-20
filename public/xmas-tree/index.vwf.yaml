@@ -15,7 +15,7 @@ scripts:
       this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
       this.loadDone = true;
     }
-    this.clearButton.events.clearing.add( function() { 
+    this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 
     }, this );    
   type: application/javascript

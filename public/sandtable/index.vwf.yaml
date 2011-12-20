@@ -15,13 +15,13 @@ scripts:
       this.loadDone = true;
       vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-group3-worldCenter" );
     }
-    this.toolbar.selectedColorChanged.add( function( color ) {
+    this.toolbar.selectedColorChanged = this.events.add( function( color ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
     }, this );
-    this.toolbar.inputModeChanged.add( function( mode ) {
+    this.toolbar.inputModeChanged = this.events.add( function( mode ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
     }, this );
-    this.toolbar.events.clearing.add( function() { 
+    this.toolbar.events.clearing = this.events.add( function() { 
       this.clear(); 
     }, this );
   type: application/javascript
