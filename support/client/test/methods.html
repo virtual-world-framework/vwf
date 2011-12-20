@@ -97,11 +97,11 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.callMethod( derivedID, "derived" ), "derived" + derivedID, "derived method in derived" );
-              equal( vwf.callMethod( derivedID, "base" ), "base" + derivedID, "base method invoked on derived" );
+              equal( vwf.callMethod( derivedID, "derived" ), "derived-" + derivedID, "derived method in derived" );
+              equal( vwf.callMethod( derivedID, "base" ), "base-" + derivedID, "base method invoked on derived" );
 
               equal( vwf.callMethod( baseID, "derived" ), undefined, "derived method not visible in base" );
-              equal( vwf.callMethod( baseID, "base" ), "base" + baseID, "base method in base" );
+              equal( vwf.callMethod( baseID, "base" ), "base-" + baseID, "base method in base" );
               
               start();
             } );
@@ -114,11 +114,11 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.execute( derivedID, "this.derived()" ), "derived" + derivedID, "derived method in derived" );
-              equal( vwf.execute( derivedID, "this.base()" ), "base" + derivedID, "base method invoked on derived" );
+              equal( vwf.execute( derivedID, "this.derived()" ), "derived-" + derivedID, "derived method in derived" );
+              equal( vwf.execute( derivedID, "this.base()" ), "base-" + derivedID, "base method invoked on derived" );
 
               equal( vwf.execute( baseID, "this.derived && this.derived()" ), undefined, "derived method not visible in base" );
-              equal( vwf.execute( baseID, "this.base()" ), "base" + baseID, "base method in base" );
+              equal( vwf.execute( baseID, "this.base()" ), "base-" + baseID, "base method in base" );
               
               start();
             } );
@@ -131,11 +131,11 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.execute( derivedID, "this.methods.derived()" ), "derived" + derivedID, "derived method in derived" );
-              equal( vwf.execute( derivedID, "this.methods.base()" ), "base" + derivedID, "base method invoked on derived" );
+              equal( vwf.execute( derivedID, "this.methods.derived()" ), "derived-" + derivedID, "derived method in derived" );
+              equal( vwf.execute( derivedID, "this.methods.base()" ), "base-" + derivedID, "base method invoked on derived" );
 
               equal( vwf.execute( baseID, "this.methods.derived && this.methods.derived()" ), undefined, "derived method not visible in base" );
-              equal( vwf.execute( baseID, "this.methods.base()" ), "base" + baseID, "base method in base" );
+              equal( vwf.execute( baseID, "this.methods.base()" ), "base-" + baseID, "base method in base" );
               
               start();
             } );
@@ -187,14 +187,14 @@
             vwf.createNode( 0, {
 
               extends: "http://vwf.example.com/types/node",
-              methods: { base: "return 'base' + this.id", },
+              methods: { base: "return 'base-' + this.id", },
 
             }, unique_name( "base" ), function( baseID ) {
 
               vwf.createNode( 0, {
 
                 extends: "@" + JSON.stringify( baseID ),
-                methods: { derived: "return 'derived' + this.id", },
+                methods: { derived: "return 'derived-' + this.id", },
 
               }, unique_name( "derived" ), function( derivedID ) {
 

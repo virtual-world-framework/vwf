@@ -81,7 +81,10 @@ node.id = childID; // TODO: move to vwf/model/object
             node.private.bodies = {};
 
             node.events = Object.create( Object.getPrototypeOf( node ).events || Object.prototype, {
-                node: { value: node } // for node.events accessors (non-enumerable)  // TODO: hide this better
+                node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
+                add: { value: function( handler, context ) { return { add: true, handler: handler, context: context } } },
+                remove: { value: function( handler ) { return { remove: true, handler: handler } } },
+                flush: { value: function( context ) { return { flush: true, context: context } } },
             } );
 
             node.private.listeners = {};
@@ -116,7 +119,9 @@ node.id = childID; // TODO: move to vwf/model/object
             } );
 
             Object.defineProperty( node, "future", { // same as "in"
-                get: function() { return this.in },
+                get: function() {
+                    return this.in;
+                },
                 enumerable: true,
             } );
 
@@ -318,9 +323,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
-                    return function( /* parameter1, parameter2, ... */ ) {
+                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
                         return self.kernel.callMethod( this.node.id, methodName, arguments );
-                    }
+                    };
                 },
                 set: function( value ) {
                     this.node.methods.hasOwnProperty( methodName ) ||
@@ -333,9 +338,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, methodName, { // "this" is node in get/set
                 get: function() {
-                    return function( /* parameter1, parameter2, ... */ ) {
+                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node
                         return self.kernel.callMethod( this.id, methodName, arguments );
-                    }
+                    };
                 },
                 set: function( value ) {
                     this.methods.hasOwnProperty( methodName ) ||
@@ -384,41 +389,56 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             var node = this.nodes[nodeID];
             var self = this;
 
-            var proxyEvents = function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
-                return self.kernel.fireEvent( this.node.id, eventName, arguments );  // TODO: nodeID or this.node.id?
-            };
-
-            var proxyNode = function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                return self.kernel.fireEvent( this.id, eventName, arguments );  // TODO: nodeID or this.node.id?
-            };
-
-            proxyEvents.node = proxyNode.node = node; // for proxyEvents/proxyNode.add/remove/flush
-
-            proxyEvents.add = proxyNode.add = function( handler, context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
-                var listeners = this.node.private.listeners[eventName] || ( this.node.private.listeners[eventName] = [] );  // TODO: verify created on first access if on base but not derived
-                listeners.push( { handler: handler, context: context } );
-            };
-
-            proxyEvents.remove = proxyNode.remove = function( handler ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
-                this.node.private.listeners[eventName] = ( this.node.private.listeners[eventName] || [] ).filter( function( listener ) {
-                    return listener.handler !== handler;
-                } );
-            };
-
-            proxyEvents.flush = proxyNode.flush = function( context ) { // "this" is node.events[eventName]/node[eventName] == proxyEvents/proxyNode
-                this.node.private.listeners[eventName] = ( this.node.private.listeners[eventName] || [] ).filter( function( listener ) {
-                    return listener.context !== context;
-                } );
-            };
-
-            Object.defineProperty( node.events, eventName, {
-                value: proxyEvents,  // TODO: invoked with this as derived when only defined on base?
+            Object.defineProperty( node.events, eventName, { // "this" is node.events in get/set
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
+                        return self.kernel.fireEvent( this.node.id, eventName, arguments );
+                    };
+                },
+                set: function( value ) {
+                    var listeners = this.node.private.listeners[eventName] ||
+                        ( this.node.private.listeners[eventName] = [] );
+                    if ( typeof value == "function" || value instanceof Function ) {
+                        listeners.push( { handler: value, context: undefined } );  // TODO: context <= self.nodes[0]?
+                    } else if ( value.add ) {
+                        listeners.push( { handler: value.handler, context: value.context } );
+                    } else if ( value.remove ) {
+                        this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                            return listener.handler !== value.handler;
+                        } );
+                    } else if ( value.flush ) {
+                        this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                            return listener.context !== value.context;
+                        } );
+                    }
+                },
                 enumerable: true,
             } );
 
 node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty( node, eventName, { // "this" is node in get/set
-                value: proxyNode,  // TODO: invoked with this as derived when only defined on base?
+                get: function() {
+                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node
+                        return self.kernel.fireEvent( this.id, eventName, arguments );
+                    };
+                },
+                set: function( value ) {
+                    var listeners = this.private.listeners[eventName] ||
+                        ( this.private.listeners[eventName] = [] );
+                    if ( typeof value == "function" || value instanceof Function ) {
+                        listeners.push( { handler: value, context: undefined } );  // TODO: context <= self.nodes[0]?
+                    } else if ( value.add ) {
+                        listeners.push( { handler: value.handler, context: value.context } );
+                    } else if ( value.remove ) {
+                        this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                            return listener.handler !== value.handler;
+                        } );
+                    } else if ( value.flush ) {
+                        this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                            return listener.context !== value.context;
+                        } );
+                    }
+                },
                 enumerable: true,
             } );
 
@@ -537,7 +557,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
 
                         Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
                             get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) {
+                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
                                     return self.kernel.callMethod( this.future.id,
                                         methodName, arguments, this.future.private.when, this.future.private.callback
                                     );
@@ -549,7 +569,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
 future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, methodName, { // "this" is future in get/set
                             get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) {
+                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
                                     return self.kernel.callMethod( this.id,
                                         methodName, arguments, this.private.when, this.private.callback
                                     );
@@ -574,21 +594,25 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
 
                     ( function( eventName ) {
 
-                        Object.defineProperty( future.events, eventName, {
-                            value: function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                return self.kernel.fireEvent( this.future.id,
-                                    eventName, arguments, this.future.private.when, this.future.private.callback
-                                );
+                        Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
+                            get: function() {
+                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
+                                    return self.kernel.fireEvent( this.future.id,
+                                        eventName, arguments, this.future.private.when, this.future.private.callback
+                                    );
+                                };
                             },
                             enumerable: true,
                         } );
 
 future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, eventName, {
-                            value: function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                return self.kernel.fireEvent( this.id,
-                                    eventName, arguments, this.private.when, this.private.callback
-                                );
+                        Object.defineProperty( future, eventName, { // "this" is future in get/set
+                            get: function() {
+                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
+                                    return self.kernel.fireEvent( this.id,
+                                        eventName, arguments, this.private.when, this.private.callback
+                                    );
+                                };
                             },
                             enumerable: true,
                         } );
