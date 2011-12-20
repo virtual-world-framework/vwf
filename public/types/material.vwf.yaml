@@ -37,7 +37,7 @@ properties:
     set: |
       this.ambient = value;
     value:  
-binaryAlpha:
+  binaryAlpha:
     set: |
-      this.alpha = value;
+      this.binaryAlpha = value;
     value:
