@@ -130,8 +130,8 @@
               var time2 = fixed3( time0 + 0.012 );
               var time3 = fixed3( time0 + 0.013 );
 
-              vwf.execute( fixtureID, this.in( " + "0.011" + " ).property = 'in'" );
-              vwf.execute( fixtureID, this.at( " + time2 + " ).property = 'at'" );
+              vwf.execute( fixtureID, "this.in( " + "0.011" + " ).property = 'in'" );
+              vwf.execute( fixtureID, "this.at( " + time2 + " ).property = 'at'" );
               vwf.execute( fixtureID, "this.future( " + "0.013" + " ).property = 'future'" );
 
               runFutureAssertions( [
