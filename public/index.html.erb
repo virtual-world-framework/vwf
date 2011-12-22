@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>VWF Demos</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div class="header">
+      <img src="logo.jpg" alt="Virtual World Labs" width="100px" />
+      <div class="title">Virtual World Framework Demos</div>
+    </div>
+    <div>
+<% while applications.any? do %>
+      <div class="row">
+<%   3.times do %>
+<%     if applications.any? %>
+<%       application, image, name = *applications.shift %>
+        <div class="example">
+          <a href="<%= application %>">
+            <p><%= name %></p>
+            <img src="<%= image %>" alt="<%= name %>" />
+          </a>
+        </div>
+<%     end %>
+<%   end %>
+      </div>
+<% end %>
+    </div>
+  </body>
+</html>
