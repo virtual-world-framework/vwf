@@ -2,11 +2,11 @@
 extends: http://vwf.example.com/types/instruction
 properties: 
   activeInstruction:
-    - set: |
+    set: |
       this.activeInstruction = value;
     value: false
-  instructionIndex: 0
-    - set: |
+  instructionIndex:
+    set: |
       this.instructionIndex = value;
     value: 0
 scripts:
