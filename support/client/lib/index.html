@@ -42,6 +42,8 @@
 
         require( [
 
+            "domReady",
+
             // This is the common model implementation and an example model that connects the
             // simulation to a WebGL scene manager.
 
@@ -56,9 +58,9 @@
             "vwf/kernel/view",
             "vwf/view/document",
 
-        ], function() {
+        ], function( ready ) {
 
-            require.ready( function() {
+            ready( function() {
 
                 // With the scripts loaded, we must initialize the framework. vwf.initialize()
                 // accepts three parameters: a world specification, model configuration parameters,
