@@ -1,0 +1,19 @@
+( {
+
+    baseUrl: "lib",
+    dir: "libz",
+
+    optimize: "none", // "closure",
+
+    closure: {
+        CompilerOptions: {
+            "languageIn": java.lang.Class.forName( "com.google.javascript.jscomp.CompilerOptions$LanguageMode" ).
+                getEnumConstants()[1], // ECMASCRIPT5
+        },
+    },
+
+    modules: [<% modules.each do |path| %>
+        { name: "<%= path %>" },<% end %>
+    ]
+
+} )
