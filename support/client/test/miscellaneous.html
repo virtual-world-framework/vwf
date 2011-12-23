@@ -24,6 +24,8 @@
 
       }, [
 
+        "domReady",
+
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
 
@@ -33,9 +35,9 @@
         "vwf/model/stage/log",
         "vwf/kernel/view",
 
-      ], function() {
+      ], function( ready ) {
 
-        require.ready( function() {
+        ready( function() {
 
           vwf.initialize(
             /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },

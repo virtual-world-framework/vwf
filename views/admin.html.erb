@@ -22,15 +22,17 @@
 
             require( [
 
+                "domReady",
+
                 "vwf/kernel/model",
                 "vwf/model/javascript",
                 "vwf/model/object",
                 "vwf/model/stage/log",
                 "vwf/kernel/view",
 
-            ], function() {
+            ], function( ready ) {
 
-                require.ready( function() {
+                ready( function() {
 
                     vwf.initialize( {
                         "vwf/model/javascript": [],
@@ -259,7 +261,11 @@
 
             #tabs {
                 min-height: 1024px;
-                background-image: url(vwl800.jpg);                background-position: center top;                background-repeat: repeat-y;                background-attachment: scroll;            }
+                background-image: url(vwl800.jpg);
+                background-position: center top;
+                background-repeat: repeat-y;
+                background-attachment: scroll;
+            }
 
             #log > * {
                 margin: 0;

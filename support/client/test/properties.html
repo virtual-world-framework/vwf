@@ -24,15 +24,17 @@
 
       }, [
 
+        "domReady",
+
         "vwf/kernel/model",
         "vwf/model/javascript",
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
 
-      ], function() {
+      ], function( ready ) {
 
-        require.ready( function() {
+        ready( function() {
 
           vwf.initialize(
             /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
