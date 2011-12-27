@@ -19,7 +19,8 @@ set :mock_filesystem, nil
   end
 
   configure :development do
-    enable :logging
+    require "logger"
+    set :logging, ::Logger::DEBUG
   end
 
   configure :test do

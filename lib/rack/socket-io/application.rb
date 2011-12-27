@@ -23,8 +23,6 @@ module Rack
 
         @@sessions[resource] ||= {}
 
-puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array === ov ? ov.map { |v| v.to_s } : ov.to_s } }
-
       end
 
       def onmessage message
@@ -44,13 +42,11 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
           @@sessions.delete resource
         end
 
-puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array === ov ? ov.map { |v| v.to_s } : ov.to_s } }
-
       end
 
-      def send message
+      def send message, log = true
 
-        logger.debug "Rack::SocketIO::Application#send #{ object_id } #{ message_for_log message }"
+        log and logger.debug "Rack::SocketIO::Application#send #{ object_id } #{ message_for_log message }"
 
         # unless connected
         #   queue message  # TODO
@@ -64,12 +60,12 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
 
       end
   
-      def broadcast message
+      def broadcast message, log = true
 
-        logger.debug "Rack::SocketIO::Application#broadcast #{ object_id } #{ message_for_log message }"
+        log and logger.debug "Rack::SocketIO::Application#broadcast #{ object_id } #{ message_for_log message }"
 
         clients.each do |client|
-          client.send message unless client.closing
+          client.send message, false unless client.closing
         end
 
       end
@@ -129,6 +125,7 @@ puts YAML.dump @@sessions.merge(@@sessions) { |k,ov| ov.merge(ov) { |k,ov| Array
       def send_heartbeat message
 
         # logger.debug "Rack::SocketIO::Application#send_heartbeat #{ object_id } #{ message_for_log message }"
+
         send_serialization "~h~" + message
 
       end
