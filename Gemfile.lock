@@ -11,12 +11,15 @@ GEM
     json (1.5.3)
     monkey-lib (0.5.4)
       backports
-    rack (1.3.2)
+    rack (1.3.5)
+    rack-protection (1.1.4)
+      rack
     rack-test (0.6.1)
       rack (>= 1.0)
-    sinatra (1.2.6)
-      rack (~> 1.1)
-      tilt (< 2.0, >= 1.2.2)
+    sinatra (1.3.1)
+      rack (>= 1.3.4, ~> 1.3)
+      rack-protection (>= 1.1.2, ~> 1.1)
+      tilt (>= 1.3.3, ~> 1.3)
     sinatra-advanced-routes (0.5.1)
       monkey-lib (~> 0.5.0)
       sinatra (~> 1.0)
@@ -31,7 +34,7 @@ GEM
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
-    tilt (1.3.2)
+    tilt (1.3.3)
     websocket-rack (0.3.1)
       em-websocket (~> 0.3.1)
       rack
@@ -44,7 +47,7 @@ DEPENDENCIES
   eventmachine (>= 1.0.0.beta)
   json
   rack-test
-  sinatra
+  sinatra (>= 1.3)
   sinatra-reloader
   thin
   websocket-rack

@@ -85,7 +85,7 @@ private
         path == directory
       end
     else
-      File.directory? File.join( VWF.settings.public, path )
+      File.directory? File.join( VWF.settings.public_folder, path )
     end
   end
 
@@ -97,7 +97,7 @@ private
         end
       end
     else
-      File.file? File.join( VWF.settings.public, path )
+      File.file? File.join( VWF.settings.public_folder, path )
     end
   end
 
