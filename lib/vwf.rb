@@ -4,7 +4,7 @@ class VWF < Sinatra::Base
 
   configure do
 
-    set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
+    set :root, File.expand_path( File.join( File.dirname(__FILE__), ".." ) )
     set :static, false # we serve out of :public_folder, but only relative to vwf applications
 
     set :support, lambda { File.join( settings.root, "support" ) }
@@ -80,13 +80,48 @@ set :mock_filesystem, nil
 
   end
 
+  # Serve files not in any application as static content.
+
+  get "/*" do |path|
+
+    if path == ""
+      path = "index.html"
+    end
+
+    delegated_env = env.merge(
+      "PATH_INFO" => "/" + path
+    )
+
+    response = Rack::File.new( VWF.settings.public_folder ).call delegated_env
+
+    # index.html is normally rendered from a template during the build. As a special case for
+    # development mode, when index.html is missing, render from the template with null content.
+
+    if response[0] == 404
+
+      if path == "index.html" && VWF.development?
+        begin
+          response = erb path.to_sym, { :views => VWF.settings.public_folder }, { :applications => [] }
+        rescue Errno::ENOENT
+          pass
+        end
+      else
+        pass
+      end
+
+    end
+  
+    response
+
+  end
+
   helpers do
 
     def delegate_to_application public_path, application, session, private_path
 
       application_session = session ?
-          File.join( public_path, application, session ) :
-          File.join( public_path, application )
+        File.join( public_path, application, session ) :
+        File.join( public_path, application )
 
       delegated_env = env.merge(
         "SCRIPT_NAME" => application_session,

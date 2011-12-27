@@ -3,7 +3,7 @@ require "erb"
 class VWF::Application::Admin < Sinatra::Base
 
   configure do
-    set :app_file, VWF.settings.app_file
+    set :root, VWF.settings.root
   end
 
   get "/" do
