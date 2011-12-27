@@ -377,7 +377,7 @@ children:
                         extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj1:
-                            extends: http://vwf.example.com/types/object3
+                            extends: http://vwf.example.com/types/mesh
                   ic40_SpeakerPort:
                     extends: http://vwf.example.com/types/node3
                     children:
@@ -385,7 +385,7 @@ children:
                         extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj2:
-                            extends: http://vwf.example.com/types/object3
+                            extends: http://vwf.example.com/types/mesh
                   ic40Channel:
                     extends: http://vwf.example.com/types/node3
                     scripts:
@@ -422,7 +422,7 @@ children:
                     extends: http://vwf.example.com/types/node3
                     children:
                       glgeObj5:
-                        extends: http://vwf.example.com/types/object3
+                        extends: http://vwf.example.com/types/mesh
                   ic40P0:
                     extends: http://vwf.example.com/types/node3
                     scripts:
@@ -507,7 +507,7 @@ children:
                     extends: http://vwf.example.com/types/node3
                     children:
                       glgeObj14:
-                        extends: http://vwf.example.com/types/object3
+                        extends: http://vwf.example.com/types/mesh
                         children:
                           material:
                             extends: http://vwf.example.com/types/material
@@ -517,7 +517,7 @@ children:
                     extends: http://vwf.example.com/types/node3
                     children:
                       glgeObj15:
-                        extends: http://vwf.example.com/types/object3
+                        extends: http://vwf.example.com/types/mesh
                   BeltClip_1:
                     extends: http://vwf.example.com/types/node3
                     properties: 
@@ -539,7 +539,7 @@ children:
                             extends: http://vwf.example.com/types/node3
                             children:
                               glgeObj16:
-                                extends: http://vwf.example.com/types/object3
+                                extends: http://vwf.example.com/types/mesh
                       BeltClipBase:
                         extends: http://vwf.example.com/types/node3
                         children:
@@ -547,7 +547,7 @@ children:
                             extends: http://vwf.example.com/types/node3
                             children:
                               glgeObj17:
-                                extends: http://vwf.example.com/types/object3
+                                extends: http://vwf.example.com/types/mesh
                       BeltClip_Latch:
                         extends: http://vwf.example.com/types/node3
                         properties: 
@@ -569,7 +569,7 @@ children:
                                 extends: http://vwf.example.com/types/node3
                                 children:
                                   glgeObj18:
-                                    extends: http://vwf.example.com/types/object3
+                                    extends: http://vwf.example.com/types/mesh
                   Battery:
                     extends: http://vwf.example.com/types/node3
                     properties: 
@@ -591,7 +591,7 @@ children:
                             extends: http://vwf.example.com/types/node3
                             children:
                               glgeObj19:
-                                extends: http://vwf.example.com/types/object3
+                                extends: http://vwf.example.com/types/mesh
                   BatteryLatch:
                     extends: http://vwf.example.com/types/node3
                     properties: 
@@ -610,7 +610,7 @@ children:
                         extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj20:
-                            extends: http://vwf.example.com/types/object3
+                            extends: http://vwf.example.com/types/mesh
                   ic40Radio:
                     extends: http://vwf.example.com/types/node3
                     children:
@@ -618,7 +618,7 @@ children:
                         extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj21:
-                            extends: http://vwf.example.com/types/object3
+                            extends: http://vwf.example.com/types/mesh
               ic40Antennae:
                 extends: http://vwf.example.com/types/node3
                 scripts:
