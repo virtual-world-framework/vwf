@@ -322,6 +322,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "http-vwf-example-com-types-node2":
             case "http-vwf-example-com-types-scene":
             case "http-vwf-example-com-types-glge":
+            case "http-vwf-example-com-types-particlesystem":
             case "appscene-vwf":
             case undefined:
                 break;
@@ -443,7 +444,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            if ( node && node.glgeObject && propertyValue ) {
+            if ( node && node.glgeObject && propertyValue !== undefined ) {
 
                 var glgeObject = node.glgeObject;
                 var isAnimatable = glgeObject.animate; // implements GLGE.Animatable?
@@ -530,27 +531,41 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         break;
 
                     case "eulers":
-                        value = glgeObject.setRot( pv[0] * pieDiv180, pv[1]* pieDiv180, pv[2] * pieDiv180 );
+                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
+                            value = glgeObject.setRot( pv[0] * pieDiv180, pv[1]* pieDiv180, pv[2] * pieDiv180 );
+                        }
                         break;
                     case "rotation":
-                        value = glgeObject.setRot( pv[0], pv[1], pv[2] );
+                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
+                            value = glgeObject.setRot( pv[0], pv[1], pv[2] );
+                        }
                         break;
                     case "position":
-                        value = glgeObject.setLoc( pv[0], pv[1], pv[2] );
+                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
+                            value = glgeObject.setLoc( pv[0], pv[1], pv[2] );
+                        }
                         break;
                     case "posRotMatrix":
                         value = [];
-                        value.push( glgeObject.setLoc( pv[0], pv[1], pv[2] ) );
-                        value.push( glgeObject.setRotMatrix( pv[3] ) );
+                        if ( pv && pv.constructor == Array && pv.length > 3 ) {
+                            value.push( glgeObject.setLoc( pv[0], pv[1], pv[2] ) );
+                            value.push( glgeObject.setRotMatrix( pv[3] ) );
+                        }
                         break;                            
                     case "worldEulers":
-                        value = glgeObject.setDRot( pv[0] * pieDiv180, pv[1] * pieDiv180, pv[2] * pieDiv180 );
+                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
+                            value = glgeObject.setDRot( pv[0] * pieDiv180, pv[1] * pieDiv180, pv[2] * pieDiv180 );
+                        }
                         break;
                     case "worldPosition":
-                        value = glgeObject.setDLoc( pv[0], pv[1], pv[2] );
+                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
+                            value = glgeObject.setDLoc( pv[0], pv[1], pv[2] );
+                        }
                         break;
-                    case "scale":                            
-                        value = glgeObject.setScale( pv[0], pv[1], pv[2] );
+                    case "scale":
+                        if ( pv && pv.constructor == Array && pv.length > 2 ) {                            
+                            value = glgeObject.setScale( pv[0], pv[1], pv[2] );
+                        }
                         break;
                     case "transform":
                         break;
@@ -1034,7 +1049,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function setParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
-        console.info( "glge.setParticleSystemProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )");
+        //console.info( "glge.setParticleSystemProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )");
 
         var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
