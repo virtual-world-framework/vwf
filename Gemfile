@@ -1,6 +1,6 @@
 source :rubygems
 
-gem "sinatra", :require => "sinatra/base"
+gem "sinatra", ">= 1.3", :require => "sinatra/base"
 gem "json"
 
 gem "websocket-rack", :require => "rack/websocket"
