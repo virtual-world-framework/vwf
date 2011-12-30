@@ -118,7 +118,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             node = this.state.nodes[childID] = {
                                 name: childName,  
                                 glgeObject: undefined,
-                                type: childExtendsID,
                                 source: childSource,
                                 ID: childID,
                                 parentID: nodeID,
@@ -133,7 +132,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             node = this.state.nodes[childID] = {
                                 name: childName,  
                                 glgeObject: undefined,
-                                type: childExtendsID,
                                 source: childSource,
                                 ID: childID,                                
                                 parentID: nodeID,
@@ -162,7 +160,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                     name: childName,  
                                     glgeObject: undefined,
                                     glgeParent: glgeParent,
-                                    type: childExtendsID,
                                     source: childSource,
                                     ID: childID,                                
                                     parentID: nodeID,

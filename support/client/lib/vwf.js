@@ -830,24 +830,24 @@ Object.keys( component ).forEach( function( nodeID ) {
 
 return;
 
-            var prototypeID = this.prototype( nodeID );
-            var childrenIDs = this.children( nodeID );
+            // var prototypeID = this.prototype( nodeID );
+            // var childrenIDs = this.children( nodeID );
 
-            if ( prototypeID && component.extends ) {
-                this.setNode( prototypeID, component.extends );
-            }
+            // if ( prototypeID && component.extends ) {
+            //     this.setNode( prototypeID, component.extends );
+            // }
 
-            // implements: [ ? ]  // TODO
+            // // implements: [ ? ]  // TODO
 
-            component.properties && this.setProperties( nodeID, component.properties );
-            // component.methods  // TODO
-            // component.events  // TODO
+            // component.properties && this.setProperties( nodeID, component.properties );
+            // // component.methods  // TODO
+            // // component.events  // TODO
 
-            component.children && childrenIDs.forEach( function( childID, childIndex ) {
-                component.children[childIndex] && vwf.setNode( childID, component.children[childIndex] );
-            } );
+            // component.children && childrenIDs.forEach( function( childID, childIndex ) {
+            //     component.children[childIndex] && vwf.setNode( childID, component.children[childIndex] );
+            // } );
 
-            return component;
+            // return component;
         };
 
         // -- getNode ------------------------------------------------------------------------------
@@ -863,47 +863,47 @@ Object.keys( vwf.models.object.objects ).forEach( function( nodeID ) {
 
 return component;
 
-            var prototypeID = this.prototype( nodeID );
-            var childrenIDs = this.children( nodeID );
+            // var prototypeID = this.prototype( nodeID );
+            // var childrenIDs = this.children( nodeID );
 
-            if ( prototypeID !== undefined ) {
-                component.extends = this.getNode( prototypeID );
-                Object.keys( component.extends ).length || delete component.extends;
-            }
+            // if ( prototypeID !== undefined ) {
+            //     component.extends = this.getNode( prototypeID );
+            //     Object.keys( component.extends ).length || delete component.extends;
+            // }
 
-            // implements: [ ? ]  // TODO
+            // // implements: [ ? ]  // TODO
 
-            component.properties = this.getProperties( nodeID );
+            // component.properties = this.getProperties( nodeID );
 
-            for ( var propertyName in component.properties ) {
-                component.properties[propertyName] === undefined && delete component.properties[propertyName];
-            }
+            // for ( var propertyName in component.properties ) {
+            //     component.properties[propertyName] === undefined && delete component.properties[propertyName];
+            // }
 
-            Object.keys( component.properties ).length || delete component.properties;
+            // Object.keys( component.properties ).length || delete component.properties;
 
-            component.methods = {};  // TODO
+            // component.methods = {};  // TODO
 
-            for ( var methodName in component.methods ) {
-                component.methods[methodName] === undefined && delete component.methods[methodName];
-            }
+            // for ( var methodName in component.methods ) {
+            //     component.methods[methodName] === undefined && delete component.methods[methodName];
+            // }
 
-            Object.keys( component.methods ).length || delete component.methods;
+            // Object.keys( component.methods ).length || delete component.methods;
 
-            component.events = {};  // TODO
+            // component.events = {};  // TODO
 
-            for ( var eventName in component.events ) {
-                component.events[eventName] === undefined && delete component.events[eventName];
-            }
+            // for ( var eventName in component.events ) {
+            //     component.events[eventName] === undefined && delete component.events[eventName];
+            // }
 
-            Object.keys( component.events ).length || delete component.events;
+            // Object.keys( component.events ).length || delete component.events;
             
-            if ( childrenIDs.length ) {
-                component.children = childrenIDs.map( function( childID ) {
-                    return vwf.getNode( childID );
-                } );
-            }
+            // if ( childrenIDs.length ) {
+            //     component.children = childrenIDs.map( function( childID ) {
+            //         return vwf.getNode( childID );
+            //     } );
+            // }
 
-            return component;
+            // return component;
         };
 
 
