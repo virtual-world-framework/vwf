@@ -3,7 +3,10 @@ require "rake/testtask"
 require "tilt"
 
 
-# == test ==========================================================================================
+def rake *args
+  ruby "-S", "rake", *args
+end
+
 
 Rake::TestTask.new do |test_task| 
 
@@ -15,107 +18,60 @@ Rake::TestTask.new do |test_task|
 end
 
 
-# == build =========================================================================================
-
 desc "Build"
 
-task :build => [ :client, :public ]
-
-
-# == public ========================================================================================
-
-desc "Build public"
-
-task :public do |task|
-
-    chdir "public" do
-        Rake::Task["index.html"].invoke
-    end
-    
-end
-
-desc "Build public -- generate catalog"
-
-file "index.html" => "index.html.erb" do |task|
-
-    component_types = [ :json, :yaml ]
-    image_types = [ :png, :jpg, :gif ]
-
-    patterns = component_types.map { |type| "**/*.vwf.#{type}" }
-
-    applications = FileList.new( patterns ).sort.map do |file|
-
-        path, name = File.split file
-
-        ext = File.extname name
-        base = File.basename name, ext
-
-        type = image_types.find do |type|
-            File.exist? "#{path}/#{base}.#{type}"
-        end
-
-        [
-            ( base == "index.vwf" ? path : file ),
-            type && "#{path}/#{base}.#{type}",
-            path
-        ]
-
-    end .select do |application, image, name|
-
-        image
-
-    end
-
-    File.open( task.name, "w" ) do |io|
-        io.write Tilt.new( task.prerequisites.first ).
-            render Object.new, :applications => applications
-    end
-
-end
-
-
-# == support/client ================================================================================
-
-desc "Build client"
-
-task :client do |task|
+task :build do |task|
 
     chdir "support/client" do
-        Rake::Task["compile"].invoke
-    end
-    
-end
-
-desc "Build client -- compile"
-
-task :compile => "build.js" do |task|
-
-    sh <<-SH.strip.gsub %r{ +}, " "
-        java -classpath bin/js.jar\\;bin/compiler.jar \
-            org.mozilla.javascript.tools.shell.Main bin/r.js -o build.js
-    SH
-
-end
-
-desc "Build client -- generate compilation script"
-
-file "build.js" => "build.js.erb" do |task|
-
-    modules = []
-
-    chdir "lib" do
-        
-        patterns = [ "vwf.js", "vwf/*.js", "vwf/*/*.js", "vwf/*/stage/*.js" ]
-
-        modules = FileList.new( patterns ).sort.map do |file|
-            file.sub %r{\.js$}, ""
-        end
-
+        rake task.name
     end
 
-    File.open( task.name, "w" ) do |io|
-        io.write Tilt.new( task.prerequisites.first ).
-            render Object.new, :modules => modules
+    chdir "public" do
+        rake task.name
     end
 
 end
+
+
+desc "Clean"
+
+task :clean do |task|
+
+    chdir "support/client" do
+        rake task.name
+    end
+
+    chdir "public" do
+        rake task.name
+    end
+
+end
+
+
+
+
+# Test for trailing newline
+
+# vwf@vwf:~/vwf/branches/integration/public/types$ tail -c 1 material.vwf.yaml | od -a
+# 0000000  nl
+# 0000001
+
+
+# Test against server
+
+# curl --silent --head --fail "http://166.27.115.155:3000/types/material.vwf/77103a5888ada488/material.vwf" --output /dev/null
+
+# for i in `find . -name '*.vwf.yaml' -o -name '*.vwf.json' | perl -nle 'print $1 if m|\./(.*)\.(yaml\|json)$|'` ; do curl --silent --head --fail "http://166.27.115.155:3000/$i" --output /dev/null || echo "$i bad"; done
+
+
+# https://github.com/jrburke/r.js
+# OS X/Linux/Unix:
+# java -classpath path/to/rhino/js.jar:path/to/closure/compiler.jar org.mozilla.javascript.tools.shell.Main r.js main.js
+# Windows
+# java -classpath path/to/rhino/js.jar;path/to/closure/compiler.jar org.mozilla.javascript.tools.shell.Main r.js main.js
+
+# java -classpath bin/js.jar\;bin/compiler.jar org.mozilla.javascript.tools.shell.Main bin/r.js -o build.js
+
+
+# java -jar compiler.jar --js hello.js --js_output_file hello-compiled.js
+# java -jar compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --js hello.js

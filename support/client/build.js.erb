@@ -1,7 +1,12 @@
 ( {
 
-    baseUrl: "lib",
-    dir: "libz",
+    logLevel: 2, // logger.INFO
+
+    baseUrl: "<%= source %>",
+    dir: "<%= destination %>",
+
+    // Neither UglifyJS nor Closure can successfully run the optimizations on all of the files.
+    // Optimize one file at a time in a separate Rake task.
 
     optimize: "none", // "closure",
 
