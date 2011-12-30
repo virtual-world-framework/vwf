@@ -1,0 +1,61 @@
+require "rake"
+require 'rake/clean'
+require "tilt"
+
+
+SOURCE = "lib"
+DESTINATION = "libz"
+
+PATTERNS = [ "vwf.js", "vwf/*.js", "vwf/*/*.js", "vwf/*/stage/*.js" ]
+
+chdir SOURCE do
+    MODULES = FileList.new( PATTERNS ).sort.map do |file|
+        file.sub %r{\.js$}, ""
+    end
+end
+
+CLEAN.include "build.js", "#{DESTINATION}"
+
+
+desc "Build"
+
+task :build => [ :clean, :compile, :compress ]
+
+desc "Compile"
+
+task :compile => "build.js" do |task|  # TODO: classpath separator is ";" ("\\;") on Windows and ":" everywhere else
+
+    sh <<-SH.strip.gsub %r{ +}, " "
+        java -classpath bin/js.jar\\;bin/compiler.jar \
+            org.mozilla.javascript.tools.shell.Main bin/r.js -o build.js
+    SH
+
+end
+
+desc "Compress"
+
+task :compress => "build.js" do |task|
+    
+    MODULES.each do |path|
+        
+        sh <<-SH.strip.gsub %r{ +}, " "
+            java -jar bin/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 \
+                --js #{DESTINATION}/#{path}.js --js_output_file #{DESTINATION}/#{path}.js.z
+        SH
+
+        mv "#{DESTINATION}/#{path}.js.z", "#{DESTINATION}/#{path}.js"
+
+    end
+
+end
+
+desc "Generate compilation script"
+
+file "build.js" => "build.js.erb" do |task|
+
+    File.open( task.name, "w" ) do |io|
+        io.write Tilt.new( task.prerequisites.first ).
+            render Object.new, :source => SOURCE, :destination => DESTINATION, :modules => MODULES
+    end
+
+end
