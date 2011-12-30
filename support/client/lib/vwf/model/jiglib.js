@@ -250,9 +250,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "rotation":                       
                     break;                    
                 case "eulers":
-                    if ( activeNode ) { }
+//                    if ( activeNode ) { }
                     break;
-                case "scale": {
+                case "scale":
 //                        var physics = this.gettingProperty( nodeID, "physics", [] );
 //                        physicsType = ( physics.constructor == Array ) ? physics[0] : physics;
 //                        switch( physicsType ) {
@@ -267,7 +267,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 //                                break;                            
 //                        }
 
-                    }
                     break;
                 case "mass":
                     node.jigLibObj.set_mass( propertyValue );
@@ -452,9 +451,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- creatingMethod ------------------------------------------------------------------------
 
-        creatingMethod: function( nodeID, methodName, methodName, methodBody ) {
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
 
-            this.logger.info( "creatingMethod", nodeID, methodName, methodName, methodBody );
+            this.logger.info( "creatingMethod", nodeID, methodName, methodParameters, methodBody );
 
         },
 
