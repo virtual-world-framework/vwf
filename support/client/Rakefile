@@ -23,7 +23,7 @@ task :build => [ :clean, :compile, :compress ]
 
 desc "Compile"
 
-task :compile => "build.js" do |task|  # TODO: classpath separator is ";" ("\\;") on Windows and ":" everywhere else
+task :compile => "build.js" do |task|
 
     separator = RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/ ? "\\;" : ":"
 
