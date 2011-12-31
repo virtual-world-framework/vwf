@@ -14,7 +14,8 @@ chdir SOURCE do
     end
 end
 
-CLEAN.include "build.js", "#{DESTINATION}"
+CLEAN.include "build.js", "#{DESTINATION}/**/*.js.z", "#{DESTINATION}/build.txt"
+CLOBBER.include "#{DESTINATION}"
 
 
 desc "Build"
