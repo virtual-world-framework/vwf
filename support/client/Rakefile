@@ -25,8 +25,10 @@ desc "Compile"
 
 task :compile => "build.js" do |task|  # TODO: classpath separator is ";" ("\\;") on Windows and ":" everywhere else
 
+    separator = RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/ ? "\\;" : ":"
+
     sh <<-SH.strip.gsub %r{ +}, " "
-        java -classpath bin/js.jar\\;bin/compiler.jar \
+        java -classpath bin/js.jar#{separator}bin/compiler.jar \
             org.mozilla.javascript.tools.shell.Main bin/r.js -o build.js
     SH
 
