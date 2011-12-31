@@ -3,7 +3,7 @@ require 'rake/clean'
 require "tilt"
 
 
-CLEAN.include "index.html"
+CLOBBER.include "index.html"
 
 
 desc "Build"
