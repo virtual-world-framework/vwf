@@ -11,11 +11,16 @@ GEM
     json (1.5.3)
     monkey-lib (0.5.4)
       backports
+    mustache (0.99.4)
     rack (1.3.5)
     rack-protection (1.1.4)
       rack
     rack-test (0.6.1)
       rack (>= 1.0)
+    redcarpet (1.17.2)
+    rocco (0.8.2)
+      mustache
+      redcarpet
     sinatra (1.3.1)
       rack (>= 1.3.4, ~> 1.3)
       rack-protection (>= 1.1.2, ~> 1.1)
@@ -47,6 +52,7 @@ DEPENDENCIES
   eventmachine (>= 1.0.0.beta)
   json
   rack-test
+  rocco
   sinatra (>= 1.3)
   sinatra-reloader
   thin
