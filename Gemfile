@@ -9,6 +9,7 @@ gem "thin"
 
 group :development do
   gem "sinatra-reloader", :require => "sinatra/reloader"
+  gem "rocco" # for documentation builds
 end
 
 group :test do
