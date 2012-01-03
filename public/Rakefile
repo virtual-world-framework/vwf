@@ -1,16 +1,16 @@
 require "rake"
-require 'rake/clean'
+require "rake/clean"
 require "tilt"
 
 
 CLOBBER.include "index.html"
 
 
-desc "Build"
+desc "Generate the catalog."
 
 task :build => "index.html"
 
-desc "Generate catalog"
+desc "Generate the catalog."
 
 file "index.html" => "index.html.erb" do |task|
 

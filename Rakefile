@@ -1,6 +1,39 @@
 require "rake"
 require "rake/testtask"
-require 'rake/clean'
+require "rake/clean"
+
+
+# CLOBBER.include ""docs/**/*.html""  # TODO: not until the build and manual versions are resolved
+
+desc "Generate the documentation and build any child projects."
+
+task :build do
+
+    original_path = ENV["PATH"]
+    ENV["PATH"] = FileList[ "support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
+
+    FileList[ "docs/**/*.md" ].each do |md|
+        sh "Markdown.pl '#{md}' > '#{ md.ext ".html" }'"
+    end
+
+    sh "rocco docs/application/*.vwf.yaml"
+    sh "rocco docs/application/example.js"
+    
+    ENV["PATH"] = original_path
+
+end
+
+
+# Create the test task.
+
+Rake::TestTask.new do |task| 
+
+    task.libs << "test"
+    task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb" ]
+
+    task.verbose = true
+
+end
 
 
 # Delegate the standard tasks to any child projects.
@@ -41,18 +74,6 @@ end
 
 def rake *args
   ruby "-S", "rake", *args
-end
-
-
-# Create the test task.
-
-Rake::TestTask.new do |task| 
-
-    task.libs << "test"
-    task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb" ]
-
-    task.verbose = true
-
 end
 
 

@@ -1,5 +1,5 @@
 require "rake"
-require 'rake/clean'
+require "rake/clean"
 require "tilt"
 
 
@@ -18,11 +18,22 @@ CLEAN.include "build.js", "#{DESTINATION}/**/*.js.z", "#{DESTINATION}/build.txt"
 CLOBBER.include "#{DESTINATION}"
 
 
-desc "Build"
+desc "Run the RequireJS optimizer."
 
 task :build => [ :clean, :compile, :compress ]
 
-desc "Compile"
+desc "Generate the compilation script."
+
+file "build.js" => "build.js.erb" do |task|
+
+    File.open( task.name, "w" ) do |io|
+        io.write Tilt.new( task.prerequisites.first ).
+            render Object.new, :source => SOURCE, :destination => DESTINATION, :modules => MODULES
+    end
+
+end
+
+desc "Compile."
 
 task :compile => "build.js" do |task|
 
@@ -35,7 +46,7 @@ task :compile => "build.js" do |task|
 
 end
 
-desc "Compress"
+desc "Compress."
 
 task :compress => "build.js" do |task|
     
@@ -48,17 +59,6 @@ task :compress => "build.js" do |task|
 
         mv "#{DESTINATION}/#{path}.js.z", "#{DESTINATION}/#{path}.js"
 
-    end
-
-end
-
-desc "Generate compilation script"
-
-file "build.js" => "build.js.erb" do |task|
-
-    File.open( task.name, "w" ) do |io|
-        io.write Tilt.new( task.prerequisites.first ).
-            render Object.new, :source => SOURCE, :destination => DESTINATION, :modules => MODULES
     end
 
 end
