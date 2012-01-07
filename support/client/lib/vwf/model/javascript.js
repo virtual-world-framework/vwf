@@ -60,6 +60,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 node.id = childID; // TODO: move to vwf/model/object
 
+            node.name = childName;
+
             node.private = {}; // bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
 
             node.parent = undefined;
@@ -175,7 +177,6 @@ node.id = childID; // TODO: move to vwf/model/object
             var node = this.nodes[nodeID];
             var child = this.nodes[childID];
 
-            child.name = childName;
             child.parent = node;
 
             if ( node ) {
