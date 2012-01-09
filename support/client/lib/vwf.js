@@ -876,26 +876,32 @@ return component;
             // component.properties = this.getProperties( nodeID );
 
             // for ( var propertyName in component.properties ) {
-            //     component.properties[propertyName] === undefined && delete component.properties[propertyName];
+            //     component.properties[propertyName] === undefined &&
+            //         delete component.properties[propertyName];
             // }
 
-            // Object.keys( component.properties ).length || delete component.properties;
+            // Object.keys( component.properties ).length ||
+            //     delete component.properties;
 
             // component.methods = {};  // TODO
 
             // for ( var methodName in component.methods ) {
-            //     component.methods[methodName] === undefined && delete component.methods[methodName];
+            //     component.methods[methodName] === undefined &&
+            //         delete component.methods[methodName];
             // }
 
-            // Object.keys( component.methods ).length || delete component.methods;
+            // Object.keys( component.methods ).length ||
+            //     delete component.methods;
 
             // component.events = {};  // TODO
 
             // for ( var eventName in component.events ) {
-            //     component.events[eventName] === undefined && delete component.events[eventName];
+            //     component.events[eventName] === undefined &&
+            //         delete component.events[eventName];
             // }
 
-            // Object.keys( component.events ).length || delete component.events;
+            // Object.keys( component.events ).length ||
+            //     delete component.events;
             
             // if ( childrenIDs.length ) {
             //     component.children = childrenIDs.map( function( childID ) {
@@ -1374,7 +1380,7 @@ return component;
 
             vwf.views.forEach( function( view ) {
                 view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
-            });
+            } );
 
             this.logger.groupEnd(); this.logger.debug( "vwf.createMethod complete " + nodeID + " " + methodName + " " + methodParameters ); /* must log something for group level to reset in WebKit */
         };
