@@ -10,6 +10,8 @@ define( {
 
     addChild: [ /* nodeID, childID, childName */ ],
     removeChild: [ /* nodeID, childID */ ],
+
+    ancestors: [ /* nodeID */ ],
     parent: [ /* nodeID */ ],
     children: [ /* nodeID */ ],
     name: [ /* nodeID */ ],
@@ -28,6 +30,7 @@ define( {
     createEvent: [ /* nodeID, eventName, eventParameters */ ],
     /* TODO: deleteEvent, */
     fireEvent: [ /* nodeID, eventName, eventParameters */ ],
+    dispatchEvent: [ /* nodeID, eventName, eventParameters, eventNodeParameters */ ],
 
     execute: [ /* nodeID, scriptText, scriptType */ ],
 

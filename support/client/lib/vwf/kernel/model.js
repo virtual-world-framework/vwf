@@ -161,6 +161,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
     
+            case "dispatchEvent":
+
+                return function( nodeID, eventName, eventParameters, eventNodeParameters, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters, eventNodeParameters );
+                    } else {
+                        this.kernel.queue( when, nodeID, kernelFunctionName, eventName,
+                            [ eventParameters, eventNodeParameters ], callback /* ( result ) */ );
+                    }
+
+                };
+    
             case "execute":
 
                 return function( nodeID, scriptText, scriptType, when, callback ) {

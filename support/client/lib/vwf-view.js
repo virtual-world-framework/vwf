@@ -118,6 +118,13 @@
         vwf.send( 0, nodeID, "fireEvent", eventName, [ eventParameters ] );
     };
     
+    // -- dispatchEvent ----------------------------------------------------------------------------
+
+    module.prototype.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
+        vwf.logger.info( namespace + ".dispatchEvent " + nodeID + " " + eventName + " " + eventParameters + " " + eventNodeParameters );
+        vwf.send( 0, nodeID, "dispatchEvent", eventName, [ eventParameters, eventNodeParameters ] );
+    };
+    
     // -- execute ----------------------------------------------------------------------------------
 
     module.prototype.execute = function( nodeID, scriptText, scriptType ) {
