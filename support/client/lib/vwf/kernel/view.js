@@ -93,6 +93,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         [ eventParameters ], callback /* ( result ) */ );
                 };
     
+            case "dispatchEvent":
+
+                return function( nodeID, eventName, eventParameters, eventNodeParameters, when, callback ) {
+                    this.kernel.send( when || 0, nodeID, kernelFunctionName, eventName,
+                        [ eventParameters, eventNodeParameters ], callback /* ( result ) */ );
+                };
+    
             case "execute":
 
                 return function( nodeID, scriptText, scriptType, when, callback ) {

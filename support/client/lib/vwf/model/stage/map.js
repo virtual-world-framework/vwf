@@ -52,6 +52,12 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 this.model_to_kernel[this.object_id(child)] || child );
         },
 
+        // -- ancestors -------------------------------------------------------------------------------
+
+        ancestors: function( node ) {
+            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
         // -- parent -------------------------------------------------------------------------------
 
         parent: function( node ) {
@@ -123,6 +129,13 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
         fireEvent: function( node, eventName, eventParameters ) {
             return this.kernel.fireEvent( this.model_to_kernel[this.object_id(node)] || node,
                 eventName, eventParameters );
+        },
+
+        // -- dispatchEvent ------------------------------------------------------------------------
+
+        dispatchEvent: function( node, eventName, eventParameters, eventNodeParameters ) {
+            return this.kernel.dispatchEvent( this.model_to_kernel[this.object_id(node)] || node,
+                eventName, eventParameters, eventNodeParameters );  // TODO: remap any node references in eventParameters and eventNodeParameters (possible to do without knowing specific events?)
         },
 
         // -- execute ------------------------------------------------------------------------------

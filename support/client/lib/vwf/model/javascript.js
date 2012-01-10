@@ -84,9 +84,39 @@ node.id = childID; // TODO: move to vwf/model/object
 
             node.events = Object.create( Object.getPrototypeOf( node ).events || Object.prototype, {
                 node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
-                add: { value: function( handler, context ) { return { add: true, handler: handler, context: context } } },
-                remove: { value: function( handler ) { return { remove: true, handler: handler } } },
-                flush: { value: function( context ) { return { flush: true, context: context } } },
+            } );
+
+            // TODO: these only need to be on the base node's events object
+
+            // Provide helper functions to create the directives for adding, removing and flushing
+            // event handlers.
+
+            // Add: node.events.*eventName* = node.events.add( *handler* [, *phases* ] [, *context* ] )
+
+            Object.defineProperty( node.events, "add", {
+                value: function( handler, phases, context ) {
+                    if ( arguments.length != 2 || typeof phases == "string" || phases instanceof String || phases instanceof Array ) {
+                        return { add: true, handler: handler, phases: phases, context: context };
+                    } else { // interpret add( handler, context ) as add( handler, undefined, context )
+                        return { add: true, handler: handler, context: phases };
+                    }
+                }
+            } );
+
+            // Remove: node.events.*eventName* = node.events.remove( *handler* )
+
+            Object.defineProperty( node.events, "remove", {
+                value: function( handler ) {
+                    return { remove: true, handler: handler };
+                }
+            } );
+
+            // Flush: node.events.*eventName* = node.events.flush( *context* )
+
+            Object.defineProperty( node.events, "flush", {
+                value: function( context ) {
+                    return { flush: true, context: context };
+                }
             } );
 
             node.private.listeners = {};
@@ -398,11 +428,15 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 },
                 set: function( value ) {
                     var listeners = this.node.private.listeners[eventName] ||
-                        ( this.node.private.listeners[eventName] = [] );
+                        ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: undefined } );  // TODO: context <= self.nodes[0]?
+                        listeners.push( { handler: value, context: undefined } );  // TODO: use self.nodes[0] (global root) as default context?
                     } else if ( value.add ) {
-                        listeners.push( { handler: value.handler, context: value.context } );
+                        if ( ! value.phases || value.phases instanceof Array ) {
+                            listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
+                        } else {
+                            listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
+                        }
                     } else if ( value.remove ) {
                         this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
                             return listener.handler !== value.handler;
@@ -425,11 +459,15 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 },
                 set: function( value ) {
                     var listeners = this.private.listeners[eventName] ||
-                        ( this.private.listeners[eventName] = [] );
+                        ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: undefined } );  // TODO: context <= self.nodes[0]?
+                        listeners.push( { handler: value, context: undefined } );  // TODO: use self.nodes[0] (global root) as default context?
                     } else if ( value.add ) {
-                        listeners.push( { handler: value.handler, context: value.context } );
+                        if ( ! value.phases || value.phases instanceof Array ) {
+                            listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
+                        } else {
+                            listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
+                        }
                     } else if ( value.remove ) {
                         this.private.listeners[eventName] = listeners.filter( function( listener ) {
                             return listener.handler !== value.handler;
@@ -453,19 +491,37 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
         firingEvent: function( nodeID, eventName, eventParameters ) {
 
+            var phase = eventParameters && eventParameters.phase; // the phase is smuggled across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible
+
             var node = this.nodes[nodeID];
             var listeners = node.private.listeners[eventName];
 
-            listeners && listeners.forEach( function( listener ) {
+            var self = this;
+
+            // Call the handlers registered for the event, and calculate the logical OR of each
+            // result. Normally, callers to fireEvent() ignore the handler result, but dispatched
+            // events use the return value to determine when an event has been handled as it bubbles
+            // up from its target.
+
+            var handled = listeners && listeners.reduce( function( handled, listener ) {
+
+                // Call the handler. If a phase is provided, only call handlers tagged for that
+                // phase.
+
                 try {
-                    return listener.handler.apply( listener.context, eventParameters );
+                    if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
+                        return listener.handler.apply( listener.context, eventParameters ) || handled;  // TODO: use listener.context || node for context? may help with dispatched events, which are generally self-targeted. makes contamination of the source node by incorrectly-written handlers more likely though.
+                    }
                 } catch ( e ) {
-                    this.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+                    self.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
                         "exception:", exceptionMessage( e ) );
                 }
-            }, this );
 
-            return undefined;
+                return handled;
+
+            }, false );
+
+            return handled;
         },
 
         // -- executing ----------------------------------------------------------------------------

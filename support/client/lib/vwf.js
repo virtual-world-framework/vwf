@@ -994,6 +994,22 @@ return component;
             this.logger.groupEnd();
         };
 
+        // -- ancestors ----------------------------------------------------------------------------
+
+        this.ancestors = function( nodeID ) {
+
+            var ancestors = [];
+
+            nodeID = this.parent( nodeID );
+
+            while ( nodeID && nodeID !== 0 ) {
+                ancestors.push( nodeID );
+                nodeID = this.parent( nodeID );
+            }
+
+            return ancestors;
+        }
+
         // -- parent -------------------------------------------------------------------------------
 
         this.parent = function( nodeID ) {
@@ -1443,15 +1459,101 @@ return component;
 
             // Call firingEvent() on each model.
 
-            vwf.models.forEach( function( model ) {
-                model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters );
-            } );
+            var handled = this.models.reduce( function( handled, model ) {
+                return model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters ) || handled;
+            }, false );
 
             // Call firedEvent() on each view.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
             } );
+
+            this.logger.groupEnd();
+
+            return handled;
+        };
+
+        // -- dispatchEvent ------------------------------------------------------------------------
+
+        // Dispatch an event toward a node. Using fireEvent(), capture (down) and bubble (up) along
+        // the path from the global root to the node. Cancel when one of the handlers returns a
+        // truthy value to indicate that it has handled the event.
+
+        this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
+
+            this.logger.group( "vwf.dispatchEvent " + nodeID + " " + eventName + " " + eventParameters + " " + eventNodeParameters );
+
+            // Defaults for the parameter parameters.
+
+            eventParameters = eventParameters || [];
+            eventNodeParameters = eventNodeParameters || {};
+
+            // Find the inheritance path from the node to the root.
+
+            var ancestorIDs = this.ancestors( nodeID );
+            var lastAncestorID = "";
+
+            // Make space to record the parameters sent to each node. Parameters provided for upper
+            // node cascade down until another definition is found for a lower node. We'll remember
+            // these on the way down and replay them on the way back up.
+
+            var cascadedEventNodeParameters = {
+                "": eventNodeParameters[""] || [] // defaults come from the "" key in eventNodeParameters
+            };
+
+            // Parameters passed to the handlers are the concatention of the eventParameters array,
+            // the eventNodeParameters for the node (cascaded), and the phase.
+
+            var targetEventParameters = undefined;
+
+            var phase = undefined;
+            var handled = false;
+
+            // Capturing phase.
+
+            phase = "capture"; // only handlers tagged "capture" will be invoked
+
+            handled = handled || ancestorIDs.reverse().some( function( ancestorID ) {  // TODO: reverse updates the array in place every time and we'd rather not
+
+                cascadedEventNodeParameters[ancestorID] = eventNodeParameters[ancestorID] ||
+                    cascadedEventNodeParameters[lastAncestorID];
+
+                lastAncestorID = ancestorID;
+
+                targetEventParameters =
+                    eventParameters.concat( cascadedEventNodeParameters[ancestorID], phase );
+                
+                targetEventParameters.phase = phase; // smuggle the phase across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible
+
+                return this.fireEvent( ancestorID, eventName, targetEventParameters );
+
+            }, this );
+
+            // At target.
+
+            phase = undefined; // invoke all handlers
+
+            cascadedEventNodeParameters[nodeID] = eventNodeParameters[nodeID] ||
+                cascadedEventNodeParameters[lastAncestorID];
+
+            targetEventParameters =
+                eventParameters.concat( cascadedEventNodeParameters[nodeID], phase );
+
+            handled = handled || this.fireEvent( nodeID, eventName, targetEventParameters );
+
+            // Bubbling phase.
+
+            phase = undefined; // invoke all handlers
+
+            handled = handled || ancestorIDs.reverse().some( function( ancestorID ) {  // TODO: reverse updates the array in place every time and we'd rather not
+
+                targetEventParameters =
+                    eventParameters.concat( cascadedEventNodeParameters[ancestorID], phase );
+
+                return this.fireEvent( ancestorID, eventName, targetEventParameters );
+
+            }, this );
 
             this.logger.groupEnd();
         };

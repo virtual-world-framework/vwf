@@ -30,6 +30,8 @@ Kernel
 
 *   removeChild( nodeID, childID )
 
+*   ancestors( nodeID )
+
 *   parent( nodeID )
 
     Return a node's parent.
@@ -71,6 +73,8 @@ Kernel
 *   deleteEvent( nodeID, eventName )
 
 *   fireEvent( nodeID, eventName, eventParameters )
+
+*   dispatchEvent( nodeID, eventName, eventParameters, eventNodeParameters )
 
 *   execute( nodeID, scriptText, scriptType )
 
