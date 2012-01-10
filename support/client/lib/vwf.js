@@ -687,7 +687,7 @@ vwf.addChild( nodeID, childNodeID, childName );
 
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + ( typeof childComponent == "string" || childComponent instanceof String ? childComponent : JSON.stringify( loggableComponent( childComponent ) ) ) ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- deleteNode ---------------------------------------------------------------------------
@@ -710,7 +710,7 @@ vwf.addChild( nodeID, childNodeID, childName );
                 view.deletedNode && view.deletedNode( nodeID );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.deleteNode complete " + nodeID ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- getType ------------------------------------------------------------------------------
@@ -968,7 +968,7 @@ return component;
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.addChild complete " + nodeID + " " + childID + " " + childName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- removeChild --------------------------------------------------------------------------
@@ -991,7 +991,7 @@ return component;
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.removeChild complete " + nodeID + " " + childID ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- parent -------------------------------------------------------------------------------
@@ -1027,7 +1027,7 @@ return component;
                 Array.prototype.push.apply( children, modelChildren );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.children complete " + nodeID ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return children; // TODO: remove duplicates, hopefully without re-ordering.
         };
@@ -1096,7 +1096,7 @@ return component;
 
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.settingProperties complete " + nodeID ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return properties;
         };
@@ -1148,7 +1148,7 @@ return component;
 
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.gettingProperties complete " + nodeID ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return properties;
         };
@@ -1175,7 +1175,7 @@ return component;
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */  // TODO: add truncated propertyGet, propertySet to log
+            this.logger.groupEnd();
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -1257,7 +1257,7 @@ return component;
 
             }
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.setProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return propertyValue;
         };
@@ -1355,7 +1355,7 @@ return component;
 
             }
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.getProperty complete " + nodeID + " " + propertyName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return propertyValue;
         };
@@ -1382,7 +1382,7 @@ return component;
                 view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createMethod complete " + nodeID + " " + methodName + " " + methodParameters ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- callMethod ---------------------------------------------------------------------------
@@ -1407,7 +1407,7 @@ return component;
                 view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.callMethod complete " + nodeID + " " + methodName + " " + methodParameters ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return methodValue;
         };
@@ -1432,7 +1432,7 @@ return component;
                 view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createEvent complete " + nodeID + " " + eventName + " " + eventParameters ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- fireEvent ----------------------------------------------------------------------------
@@ -1453,7 +1453,7 @@ return component;
                 view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.fireEvent complete " + nodeID + " " + eventName + " " + eventParameters ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- execute ------------------------------------------------------------------------------
@@ -1485,7 +1485,7 @@ return component;
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.execute complete " + nodeID + " ... " + scriptType ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return scriptValue;
         };
@@ -1764,7 +1764,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
                 callback && callback.call( vwf, nodeID );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         }
 
         // -- objectIsComponent --------------------------------------------------------------------
