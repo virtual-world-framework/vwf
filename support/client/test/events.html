@@ -89,6 +89,51 @@
 
           } );
 
+          // JavaScript handler with explicit context
+
+          asyncTest( "JavaScript handler explicit context", function() {
+
+            createFixtureParentChild( function( parentID, childID, baseID ) {
+
+              vwf.execute( childID, "this.parent.base = this.events.add( function( result ) { this.test = result }, this )" );
+              vwf.fireEvent( parentID, "base", [ "explicit context" ] );
+              equal( vwf.execute( childID, "this.test" ), "explicit context", "invoked on child" );
+
+              start();
+            } );
+
+          } );
+
+          // JavaScript handler with no context
+
+          asyncTest( "JavaScript handler no context", function() {
+
+            createFixtureParentChild( function( parentID, childID, baseID ) {
+
+              vwf.execute( childID, "this.parent.base = this.events.add( function( result ) { this.test = result } )" );
+              vwf.fireEvent( parentID, "base", [ "no context" ] );
+              equal( vwf.execute( 0, "this.test" ), "no context", "invoked on global root" );
+
+              start();
+            } );
+
+          } );
+
+          // JavaScript handler with implicit context
+
+          asyncTest( "JavaScript handler implicit context", function() {
+
+            createFixtureParentChild( function( parentID, childID, baseID ) {
+
+              vwf.execute( childID, "this.parent.base = function( result ) { this.test = result }" );
+              vwf.fireEvent( parentID, "base", [ "implicit context" ] );
+              equal( vwf.execute( parentID, "this.test" ), "implicit context", "invoked on parent" ); // invoked on target
+
+              start();
+            } );
+
+          } );
+
           // Event inheritance directly from the kernel
 
           asyncTest( "Event inheritance kernel", function() {
@@ -261,6 +306,45 @@
 
           }
 
+          // Create a parent and two child nodes with events to fire.
+
+          function createFixtureParentChild( callback ) {
+
+            // Prototype for the nodes.
+
+            vwf.createNode( 0, {
+
+              extends: "http://vwf.example.com/types/node",
+              events: { base: undefined },
+
+            }, unique_name( "base" ), function( baseID ) {
+
+              // Parent node.
+
+              vwf.createNode( 0, {
+
+                extends: "@" + JSON.stringify( baseID ),
+
+              }, unique_name( "parent" ), function( parentID ) {
+
+                // Child node.
+
+                vwf.createNode( parentID, {
+
+                  extends: "@" + JSON.stringify( baseID ),
+
+                }, unique_name( "child" ), function( childID ) {
+
+                  callback( parentID, childID, baseID );
+
+                } );
+
+              } );
+
+            } );
+
+          }
+         
           // Create a node with two levels of inheritance and events to fire.
 
           function createFixtureDerivedBase( callback ) {
