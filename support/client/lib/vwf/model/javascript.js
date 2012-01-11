@@ -430,7 +430,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     var listeners = this.node.private.listeners[eventName] ||
                         ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: undefined } );  // TODO: use self.nodes[0] (global root) as default context?
+                        listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
                     } else if ( value.add ) {
                         if ( ! value.phases || value.phases instanceof Array ) {
                             listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
@@ -461,7 +461,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     var listeners = this.private.listeners[eventName] ||
                         ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: undefined } );  // TODO: use self.nodes[0] (global root) as default context?
+                        listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
                     } else if ( value.add ) {
                         if ( ! value.phases || value.phases instanceof Array ) {
                             listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
@@ -510,7 +510,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
                 try {
                     if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
-                        return listener.handler.apply( listener.context, eventParameters ) || handled;  // TODO: use listener.context || node for context? may help with dispatched events, which are generally self-targeted. makes contamination of the source node by incorrectly-written handlers more likely though.
+                        var result = listener.handler.apply( listener.context || self.nodes[0], eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        return handled || result || result === undefined; // interpret no return as "return true"
                     }
                 } catch ( e ) {
                     self.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log

@@ -104,27 +104,11 @@
 
           } );
 
-          // Explict "not handled" return value from the handlers.
-
-          asyncTest( "Explicit 'not handled'", function() {
-
-            createFixture( false, false, false, function( topID, middleID, bottomID, baseID ) {
-
-              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
-
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble", "top bubble" ],
-                "explicit false return same as implicit undefined return in handler" );
-
-              start();
-            } );
-
-          } );
-
           // Handled (cancelled) at target.
 
           asyncTest( "Handle at target", function() {
 
-            createFixture( false, false, { bubble: true }, function( topID, middleID, bottomID, baseID ) {
+            createFixture( false, false, { capture: false, bubble: true }, function( topID, middleID, bottomID, baseID ) {
 
               vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
@@ -156,12 +140,28 @@
 
           asyncTest( "Handle at middle bubble", function() {
 
-            createFixture( false, { bubble: true }, false, function( topID, middleID, bottomID, baseID ) {
+            createFixture( false, { capture:false, bubble: true }, false, function( topID, middleID, bottomID, baseID ) {
 
               vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
               deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble" ],
                 "handling at middle bubble prevents further bubbling" );
+
+              start();
+            } );
+
+          } );
+
+          // Implicit "handled" return value from the handlers.
+
+          asyncTest( "Implicit 'handled'", function() {
+
+            createFixture( {}, {}, {}, function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture" ],
+                "implicit undefined return in handler same as explicit true return" );
 
               start();
             } );
@@ -347,21 +347,25 @@
           // Create parent, child, and grandchild nodes with default and capture- and bubble-phase
           // event handlers.
 
-          function createFixture( /* topCancel, middleCancel, bottomCancel, callback */ ) {
+          function createFixture( /* topResult, middleResult, bottomResult, callback */ ) {
 
             var args = Array.prototype.slice.call(arguments);
 
             // Parse the arguments.
 
             var callback = args.pop(); // callback is the last argument, regardless
-            var cancel = {};
+            var result = {};
 
             [ "top", "middle", "bottom" ].forEach( function( which ) {
 
-              cancel[which] = args.shift() || {};
+              result[which] = args.shift();
 
-              if ( typeof cancel[which] == "boolean" ) {
-                cancel[which] = { capture: cancel[which], bubble: cancel[which] };
+              if ( result[which] === undefined ) {
+                result[which] = false; // explicitly return false ("not handled") by default
+              }
+
+              if ( typeof result[which] == "boolean" ) {
+                result[which] = { capture: result[which], bubble: result[which] };
               }
               
             } );
@@ -390,13 +394,13 @@
                     "return function( eventData, eventNodeData, phase ) { " +
 
                       "var tag = this.name.split( '-' )[0] + ' ' + ( phase || 'bubble' ); " +
-                      "var cancel = this.properties.cancel[ phase || 'bubble' ]; " +
+                      "var result = this.properties.result[ phase || 'bubble' ]; " +
 
                       "Object.getPrototypeOf( this ).properties.targets.push( tag ); " +
                       "Object.getPrototypeOf( this ).properties.argumentss.push( Array.prototype.slice.call( arguments ) ); " +
 
-                      "if ( cancel !== undefined ) { " +
-                        "return cancel; " + // do an explicit return if a value is provided
+                      "if ( result !== undefined ) { " +
+                        "return result; " + // do an explicit return if a value is provided
                       "} " + // otherwise fall out with a default return value of undefined
 
                     "}; " +
@@ -416,7 +420,7 @@
               vwf.createNode( 0, {
 
                 extends: "@" + JSON.stringify( baseID ),
-                properties: { cancel: cancel.top },
+                properties: { result: result.top },
 
               }, unique_name( "top" ), function( topID ) {
 
@@ -425,7 +429,7 @@
                 vwf.createNode( topID, {
 
                   extends: "@" + JSON.stringify( baseID ),
-                  properties: { cancel: cancel.middle },
+                  properties: { result: result.middle },
 
                 }, unique_name( "middle" ), function( middleID ) {
 
@@ -434,7 +438,7 @@
                   vwf.createNode( middleID, {
 
                     extends: "@" + JSON.stringify( baseID ),
-                    properties: { cancel: cancel.bottom },
+                    properties: { result: result.bottom },
 
                   }, unique_name( "bottom" ), function( bottomID ) {
 
