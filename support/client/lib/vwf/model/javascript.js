@@ -167,7 +167,7 @@ node.id = childID; // TODO: move to vwf/model/object
                 change: 0,
             };
 
-            node.change = 0; // incremented whenever "future"-related changes occur
+            node.private.change = 0; // incremented whenever "future"-related changes occur
 
         },
 
@@ -294,7 +294,7 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
-            node.change++; // invalidate the "future" cache
+            node.private.change++; // invalidate the "future" cache
 
         },
 
@@ -388,7 +388,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     "exception evaluating body:", exceptionMessage( e ) );
             }
         
-            node.change++; // invalidate the "future" cache
+            node.private.change++; // invalidate the "future" cache
 
         },
 
@@ -483,7 +483,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             node.private.listeners[eventName] = [];
 
-            node.change++; // invalidate the "future" cache
+            node.private.change++; // invalidate the "future" cache
 
         },
 
@@ -562,7 +562,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
         future.private.when = when;
         future.private.callback = callback;  // TODO: would like to be able to remove this reference after the future call has completed
 
-        if ( future.private.change < node.change ) { // only if out of date
+        if ( future.private.change < node.private.change ) { // only if out of date
 
             future.id = node.id;
 
@@ -681,7 +681,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
             }
 
-            future.private.change = node.change;
+            future.private.change = node.private.change;
 
         }
 
