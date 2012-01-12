@@ -396,8 +396,14 @@
                 // check for time??
                 if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
 //                    this.logger.info( "pointerClick: id: ", mouseDownObjectID, "   name: ", name( view.state.nodes[mouseDownObjectID].glgeObject ) );
-                    //this.throwEvent( "onMouseClick", mouseDownObjectID);
-                    view.callMethod( mouseUpObjectID, "pointerClick" );
+
+                    var eventData = { client: "123456789ABCDEFG", button: "left", clicks: 1, buttons: { left: true, right: false, middle: false }, modifiers: { shift: false, ctrl: false, alt: false, meta: false } }; // representative event data
+                    var eventNodeData = { position: [ 0, 0, 0 ], normal: [ 0, 0, 1 ], source: [ 0, 0, -1 ], distance: 1 }; // representative per-target event data
+
+                    var eventParameters = [ eventData ]; // parameters for every target
+                    var eventNodeParameters = { "": [ eventNodeData ] }; // additional per-target parameters
+
+                    view.dispatchEvent( mouseUpObjectID, "pointerClick", eventParameters, eventNodeParameters );
 
                     var glgeObj = sceneView.state.nodes[mouseUpObjectID].glgeObject;
                     if ( glgeObj ) {

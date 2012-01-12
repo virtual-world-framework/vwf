@@ -14,3 +14,10 @@ properties:
 events:
   resizing:
   moving:
+  pointerClick:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  pointerEnter:
+  pointerOver:
+  pointerLeave:
