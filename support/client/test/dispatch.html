@@ -140,7 +140,7 @@
 
           asyncTest( "Handle at middle bubble", function() {
 
-            createFixture( false, { capture:false, bubble: true }, false, function( topID, middleID, bottomID, baseID ) {
+            createFixture( false, { capture: false, bubble: true }, false, function( topID, middleID, bottomID, baseID ) {
 
               vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
@@ -387,29 +387,25 @@
 
               scripts: [
 
-                "this.initialize = function() { " +
+                "var handler = function() { " +
 
-                  "var handler = function() { " +
+                  "return function( eventData, eventNodeData, phase ) { " +
 
-                    "return function( eventData, eventNodeData, phase ) { " +
+                    "var tag = this.name.split( '-' )[0] + ' ' + ( phase || 'bubble' ); " +
+                    "var result = this.properties.result[ phase || 'bubble' ]; " +
 
-                      "var tag = this.name.split( '-' )[0] + ' ' + ( phase || 'bubble' ); " +
-                      "var result = this.properties.result[ phase || 'bubble' ]; " +
+                    "Object.getPrototypeOf( this ).properties.targets.push( tag ); " +
+                    "Object.getPrototypeOf( this ).properties.argumentss.push( Array.prototype.slice.call( arguments ) ); " +
 
-                      "Object.getPrototypeOf( this ).properties.targets.push( tag ); " +
-                      "Object.getPrototypeOf( this ).properties.argumentss.push( Array.prototype.slice.call( arguments ) ); " +
-
-                      "if ( result !== undefined ) { " +
-                        "return result; " + // do an explicit return if a value is provided
-                      "} " + // otherwise fall out with a default return value of undefined
-
-                    "}; " +
+                    "if ( result !== undefined ) { " +
+                      "return result; " + // do an explicit return if a value is provided
+                    "} " + // otherwise fall out with a default return value of undefined
 
                   "}; " +
 
-                  "this.events.test = this.events.add( handler(), 'capture', this ); " +
+                "}; " +
 
-                "}"
+                "this.events.test = this.events.add( handler(), 'capture', this );"
 
               ],
 

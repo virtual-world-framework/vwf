@@ -494,7 +494,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             var phase = eventParameters && eventParameters.phase; // the phase is smuggled across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible
 
             var node = this.nodes[nodeID];
-            var listeners = node.private.listeners[eventName];
+            var listeners = findListeners( node, eventName );
 
             var self = this;
 
@@ -739,6 +739,29 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     function findBody( node, methodName ) {
         return node.private.bodies && node.private.bodies[methodName] ||
             Object.getPrototypeOf( node ).private && findBody( Object.getPrototypeOf( node ), methodName );
+    }
+
+    // -- findListeners ----------------------------------------------------------------------------
+
+// TODO: this walks the full prototype chain and is probably horribly inefficient.
+
+    function findListeners( node, eventName, targetOnly ) {
+
+        var prototypeListeners = Object.getPrototypeOf( node ).private ? // get any self-targeted listeners from the prototypes
+            findListeners( Object.getPrototypeOf( node ), eventName, true ) : [];
+
+        var nodeListeners = node.private.listeners && node.private.listeners[eventName] || [];
+
+        if ( targetOnly ) {
+            return prototypeListeners.concat( nodeListeners.filter( function( listener ) {
+                return listener.context == node; // in the prototypes, select self-targeted listeners only
+            } ) );
+        } else {
+            return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node
+                return { handler: listener.handler, context: node, phases: listener.phases };
+            } ).concat( nodeListeners );
+        }
+
     }
 
     // -- exceptionMessage -------------------------------------------------------------------------
