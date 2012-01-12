@@ -1,6 +1,4 @@
---- 
-methods: 
-  pointerClick: 
+---
 extends: http://vwf.example.com/types/node
 properties: 
   enabled: true
@@ -34,3 +32,11 @@ properties:
   linVelocityDamping: [ 1, 1, 1, 0 ]
   velocity: [ 0, 0, 0 ]  
   lookAt: ""
+events:
+  pointerClick:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  pointerEnter:
+  pointerOver:
+  pointerLeave:
