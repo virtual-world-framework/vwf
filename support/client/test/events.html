@@ -221,6 +221,36 @@
 
           } );
 
+          // Event inheritance with self-targeted handlers
+
+          asyncTest( "Event inheritance self-targeted handlers", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              vwf.execute( derivedID, "this.derived = function( result ) { this.test = ( this.test || [] ).concat( result + '-derived' ) }" );
+              vwf.execute( derivedID, "this.base = function( result ) { this.test = ( this.test || [] ).concat( result + '-derived' ) }" );
+
+              vwf.execute( baseID, "this.derived = function( result ) { this.test = ( this.test || [] ).concat( result + '-base' ) }" );
+              vwf.execute( baseID, "this.base = function( result ) { this.test = ( this.test || [] ).concat( result + '-base' ) }" );
+
+              vwf.fireEvent( derivedID, "derived", [ 'derived-' + derivedID ] );
+              deepEqual( vwf.execute( derivedID, "this.test" ), [ "derived-" + derivedID + "-derived" ], "derived event from derived receives handlers from derived" );
+              vwf.execute( derivedID, "this.test = []" );
+
+              vwf.fireEvent( derivedID, "base", [ 'base-' + derivedID ] );
+              deepEqual( vwf.execute( derivedID, "this.test" ), [ "base-" + derivedID + "-base", "base-" + derivedID + "-derived" ], "base event from derived receives handlers from base and derived" );
+
+              vwf.fireEvent( baseID, "derived", [ 'derived-' + baseID ] );
+              deepEqual( vwf.execute( baseID, "this.test" ), undefined, "derived event not visible in base" );
+
+              vwf.fireEvent( baseID, "base", [ 'base-' + baseID ] );
+              deepEqual( vwf.execute( baseID, "this.test" ), [ "base-" + baseID + "-base" ], "base event from base receives handlers from base" );
+              
+              start();
+            } );
+
+          } );
+
           // Event listeners through JavaScript
 
           asyncTest( "Event listeners JavaScript", function() {
@@ -271,8 +301,6 @@
             } );
 
           } );
-
-          // TODO: event inheritance
 
           // == Helper functions =====================================================================
 
