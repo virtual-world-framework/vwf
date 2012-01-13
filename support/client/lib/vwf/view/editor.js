@@ -22,6 +22,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 jQuery('#topdowntree').append(
                     "<tr id='node-" + childID + "' class='child-of-node-0'><td style='padding-left: 20px'>" + childName + "</td></tr>"
                 );
+                
+                $('#topdowntree').treeTable();
             }
         },
         
@@ -35,9 +37,32 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     jQuery('#topdowntree').append(
                         "<tr id='node-" + nodeID + '-' + propertyName + "' class='child-of-node-" + nodeID + "'><td>" + propertyName + ": " + propertyValue + "</td></tr>"
                     );
+                    
+                    $('#topdowntree').treeTable();
+                    //$('#node-0').toggleBranch();
+                    //$('#node-0').collapse();
+                    //$('#node-0').expand();
                 }
             }
         },
+        
+        //deletedNode: [ /* nodeID */ ],
+
+        //addedChild: [ /* nodeID, childID, childName */ ],
+        //removedChild: [ /* nodeID, childID */ ],
+
+        //satProperty: [ /* nodeID, propertyName, propertyValue */ ],
+        //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
+
+        //createdMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
+        //calledMethod: [ /* nodeID, methodName, methodParameters */ ],
+
+        //createdEvent: [ /* nodeID, eventName, eventParameters */ ],
+        //firedEvent: [ /* nodeID, eventName, eventParameters */ ],
+
+        //executed: [ /* nodeID, scriptText, scriptType */ ],
+
+        //ticked: [ /* time */ ],
         
     } );
 } );
