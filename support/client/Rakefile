@@ -54,7 +54,7 @@ task :compress => "build.js" do |task|
         
         sh <<-SH.strip.gsub %r{ +}, " "
             java -jar bin/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 \
-                --js #{DESTINATION}/#{path}.js --js_output_file #{DESTINATION}/#{path}.js.z
+                --js '#{DESTINATION}/#{path}.js' --js_output_file '#{DESTINATION}/#{path}.js.z'
         SH
 
         mv "#{DESTINATION}/#{path}.js.z", "#{DESTINATION}/#{path}.js"
