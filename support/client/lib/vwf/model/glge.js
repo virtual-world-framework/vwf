@@ -1709,6 +1709,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         if ( this.state.nodes[ cameraID ] ) {
             glgeCamera = this.state.nodes[ cameraID ].glgeObject;
             if ( glgeCamera ) {
+                glgeCamera.setAspect( (window.innerWidth - 20) / (window.innerHeight - 20) );
                 this.state.cameraInUse = glgeCamera;
                 this.state.cameraInUseID = cameraID;
                 sceneNode.glgeScene.setCamera( glgeCamera );
