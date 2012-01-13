@@ -7,8 +7,6 @@ function openEditor()
         editorVisible = true;
         $('#topdown').animate({ opacity:1.0 }, 500);
         //$('#topdown').draggable();
-        $('#topdowntree').treeTable();
-
     }
     else
     {
