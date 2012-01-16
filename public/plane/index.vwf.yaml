@@ -1,0 +1,39 @@
+--- 
+extends: http://vwf.example.com/types/glge
+children:
+  seymourplane_triangulate.dae:
+    extends: http://vwf.example.com/types/node3
+    source: seymourplane_triangulate.dae
+    type: model/vnd.collada+xml
+    properties:
+      position: [ -1, -20, 0 ]
+      eulers: [ 90, 90, 0 ]
+    children:
+      bone1:
+        extends: http://vwf.example.com/types/node3
+        scripts:
+        - |
+          this.pointerClick = function() {
+            this.parent.prop.playing = !this.parent.prop.playing;
+          }
+      prop:
+        extends: http://vwf.example.com/types/node3
+        properties:
+          playing: true
+          looping: true
+  maincamera:
+    extends: http://vwf.example.com/types/camera
+    properties:
+      eulers: [ 90, 180, 0 ]
+  dir_duck_1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ -0.79, -3.34, -0.22 ]
+  dir_plane_1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 0.279, 0.9539, -0.08268 ]

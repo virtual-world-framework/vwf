@@ -1,0 +1,47 @@
+--- 
+extends: http://vwf.example.com/types/glge
+children:
+  duck.dae:
+    extends: http://vwf.example.com/types/node3
+    source: duck.dae
+    type: model/vnd.collada+xml
+    properties:
+      spinning: 
+        set: |
+          if ( value && !this.spinning ) {
+            this.future( 0.1 ).spin(); 
+          }
+          this.spinning = value;
+        value: false
+      position: [ -1, -35, -8 ]
+      eulers: [ 90, 0, 0 ]
+      scale: [ 0.05, 0.05, 0.05 ]
+    methods:
+      spin: |
+        var e = this.eulers;
+        e[1] += 2;
+        this.eulers = e;
+        if ( this.spinning ) {
+          this.future( 0.1 ).spin();
+        }
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          this.spinning = !this.spinning;
+        }
+  maincamera:
+    extends: http://vwf.example.com/types/camera
+    properties:
+      eulers: [ 90, 180, 0 ]
+  dir_duck_1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ -0.79, -3.34, -0.22 ]
+  dir_plane_1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 0.279, 0.9539, -0.08268 ]
