@@ -109,9 +109,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     } );
 
 
-    // -- getPropertiesValues -----------------------------------------------------------------
+    // -- getPropertyValues -----------------------------------------------------------------
 
-    function getPropertiesValues( node ) {
+    function getPropertyValues( node ) {
         var pv = {};
         if ( node ) {
             for ( var i = 0; i < node.properties.length; i++ ) {
