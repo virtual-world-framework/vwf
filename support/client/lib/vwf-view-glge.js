@@ -376,8 +376,7 @@
                 cameraInfo( mi );
                 mouseDownObjectID = mi.mouseOverID;
 
-                var strParams = JSON.stringify( mi );
-                sceneView.execute( sceneID, "this.mouseDown && this.mouseDown("+strParams+")", "application/javascript" );
+                sceneView.dispatchEvent( sceneID, "mouseDown", [ mi ] );
             }
             lastXPos = mouseXPos( e );
             lastYPos = mouseYPos( e );
@@ -428,8 +427,7 @@
                 }
 
                 //this.throwEvent( "onMouseUp", mouseDownObjectID);
-                var strParams = JSON.stringify( mi );
-                sceneView.execute( sceneID, "this.mouseUp && this.mouseUp("+strParams+")", "application/javascript" );
+                sceneView.dispatchEvent( sceneID, "mouseUp", [ mi ] );
 
             }
             mouseDownObjectID = undefined;
@@ -445,8 +443,7 @@
             var mi = mouseInfo( e, false );
             if ( mi ) {
                 cameraInfo( mi );
-                var strParams = JSON.stringify( mi );
-                sceneView.execute( sceneID, "this.mouseOver && this.mouseOver("+strParams+")", "application/javascript" );
+                sceneView.dispatchEvent( sceneID, "mouseOver", [ mi ] );
             }
 
             lastXPos = mouseXPos( e );
@@ -458,12 +455,11 @@
             var mi = mouseInfo( e, false );
             if ( mi ) {
                 cameraInfo( mi );
-                var strParams = JSON.stringify( mi );
                 if (mouseDown) {
                     //if (mouseDownObjectID) {
 
                         //this.throwEvent( "onMouseMove", mouseDownObjectID);
-                        sceneView.execute( sceneID, "this.mouseMove("+strParams+")", "application/javascript" );
+                        sceneView.dispatchEvent( sceneID, "mouseMove", [ mi ] );
                     //}
 
                     //view.callMethod( mouseDownObjectID, "onMouseMove" );
@@ -475,26 +471,26 @@
                                 //this.throwEvent( "onMouseLeave", mouseOverObjectID);
 
                                 mouseOverObjectID = mi.mouseOverID;
-                                sceneView.execute( sceneID, "this.mouseLeave("+strParams+")", "application/javascript" );
+                                sceneView.dispatchEvent( sceneID, "mouseLeave", [ mi ] );
 
                                 //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                                sceneView.execute( sceneID, "this.mouseEnter("+strParams+")", "application/javascript" );
+                                sceneView.dispatchEvent( sceneID, "mouseEnter", [ mi ] );
                             } else {
                                 //this.throwEvent( "onMouseHover", mouseOverObjectID);
-                                sceneView.execute( sceneID, "this.mouseHover("+strParams+")", "application/javascript" );
+                                sceneView.dispatchEvent( sceneID, "mouseHover", [ mi ] );
                             }
                         } else {
                             mouseOverObjectID = mi.mouseOverID;
 
                             //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                            sceneView.execute( sceneID, "this.mouseEnter("+strParams+")", "application/javascript" );
+                            sceneView.dispatchEvent( sceneID, "mouseEnter", [ mi ] );
                         }
 
                     } else {
                         if (mouseOverObjectID) {
                             //this.throwEvent( "onMouseLeave", mouseOverObjectID);
                             mouseOverObjectID = undefined;
-                            sceneView.execute( sceneID, "this.mouseLeave("+strParams+")", "application/javascript" );
+                            sceneView.dispatchEvent( sceneID, "mouseLeave", [ mi ] );
 
                         }
                     }
@@ -511,7 +507,7 @@
             if (mouseOverObjectID) {
                 //this.throwEvent( "onMouseLeave", mouseOverObjectID);
                 mouseOverObjectID = undefined;
-                //vwf.execute( sceneID, "this.mouseOut && this.mouseOut()", "application/javascript" );
+                //vwf.dispatchEvent( sceneID, "mouseOut" );
             }
             mouseOverCanvas = false;
         }
@@ -524,8 +520,7 @@
                 mi.wheelDeltaX = e.wheelDeltaX;
                 mi.wheelDeltaY = e.wheelDeltaY;
                 
-                var strParams = JSON.stringify( mi );
-                sceneView.execute( sceneID, "this.mouseWheel && this.mouseWheel("+strParams+")", "application/javascript" );
+                sceneView.dispatchEvent( sceneID, "mouseWheel", [ mi ] );
             }
             lastXPos = mouseXPos( e );
             lastYPos = mouseYPos( e );            

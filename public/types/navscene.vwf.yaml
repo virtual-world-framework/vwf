@@ -10,6 +10,16 @@ properties:
           break;
       }
     value: "walk"  
+events:
+  # TODO: remove, and use node2's pointer events when they're ready
+  mouseDown:
+  mouseUp:
+  mouseMove:
+  mouseOver:
+  mouseEnter:
+  mouseLeave:
+  mouseHover:
+  mouseWheel:
 scripts:
 - text: |
     var pointerDown = false;
