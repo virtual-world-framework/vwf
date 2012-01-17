@@ -267,13 +267,13 @@
  
                   // should only be sending the keysDown, now, lastime, but I'm going to
                   // inlcude the additional data for now to cut some corners
-                  var params = [ JSON.stringify( view.keysDown ), 
-                                    JSON.stringify(now), 
-                                    JSON.stringify(lasttime), 
-                                    JSON.stringify(mat),
-                                    JSON.stringify(trans),
-                                    JSON.stringify(mag) ];
-                  view.execute( sceneNode.ID, "this.handleKeyEvents && this.handleKeyEvents("+params.join(',')+")", "application/javascript" );
+                  var params = [ view.keysDown, 
+                                    now, 
+                                    lasttime, 
+                                    mat,
+                                    trans,
+                                    mag ];
+                  view.dispatchEvent( sceneNode.ID, "handleKeyEvents", params );
                 }
             }
         }
