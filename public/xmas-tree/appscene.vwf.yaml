@@ -79,20 +79,18 @@ scripts:
     this.initialize = function() {
       this.nodesCreated = [];
     }    
-    this.mouseDown = this.events.add( function( parms ) {
+    this.mouseDown = function( parms ) {
       mouseIsDown = true;
       mouseDownTime = vwf.time();
-      return false; // continue propagation
-    }, "capture", this );
-    this.mouseUp = this.events.add( function( parms ) {
+    }
+    this.mouseUp = function( parms ) {
       mouseIsDown = false;
       var now =  vwf.time();
       if ( now - mouseDownTime < 700 ) {
         this.createObject( parms );
       }
       mouseDownTime = -1;
-      return false; // continue propagation
-    }, "capture", this );
+    }
     this.createObject = function( parms ) {
       var newObjName;
       if ( this.createCube ) {
