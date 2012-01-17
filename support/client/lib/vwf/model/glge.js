@@ -2043,7 +2043,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var props = this.delayedProperties[id];
                 for ( var propertyName in props ) {
                     //console.info( id + " delayed property set: " + propertyName + " = " + props[propertyName] );
-                    this.__proto__.settingProperty.call( this, id, propertyName, props[propertyName] );
+                    Object.getPrototypeOf( this ).settingProperty.call( this, id, propertyName, props[propertyName] );
                 }
                 itemsToDelete.push( id );
             }

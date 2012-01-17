@@ -99,21 +99,21 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
             // Call viewize() on the driver.
 
             function viewize( view, view_api ) {
-                this.__proto__ && viewize.call( this.__proto__, view, view_api ); // depth-first recursion through the prototypes
+                Object.getPrototypeOf( this ) && viewize.call( Object.getPrototypeOf( this ), view, view_api ); // depth-first recursion through the prototypes
                 this.hasOwnProperty( "viewize" ) && this.viewize.call( instance, view, view_api ); // viewize() from the bottom up
             }
 
             // Call kernelize() on the driver.
 
             function kernelize( kernel, kernel_api ) {
-                this.__proto__ && kernelize.call( this.__proto__, kernel, kernel_api ); // depth-first recursion through the prototypes
+                Object.getPrototypeOf( this ) && kernelize.call( Object.getPrototypeOf( this ), kernel, kernel_api ); // depth-first recursion through the prototypes
                 this.hasOwnProperty( "kernelize" ) && this.kernelize.call( instance, kernel, kernel_api ); // kernelize() from the bottom up
             }
 
             // Call initialize() on the driver.
 
             function initialize() {
-                this.__proto__ && initialize.apply( this.__proto__, arguments ); // depth-first recursion through the prototypes
+                Object.getPrototypeOf( this ) && initialize.apply( Object.getPrototypeOf( this ), arguments ); // depth-first recursion through the prototypes
                 this.hasOwnProperty( "initialize" ) && this.initialize.apply( instance, arguments ); // initialize() from the bottom up
             }
 
