@@ -30,6 +30,12 @@
         this.canvasQuery = jQuery(this.rootSelector).append(
             "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
         ).children(":last");
+        
+        var dropbox = document.getElementById(this.state.sceneRootID);
+        dropbox.addEventListener("dragenter", dragEnter, false);
+        dropbox.addEventListener("dragexit", dragExit, false);
+        dropbox.addEventListener("dragover", dragOver, false);
+        dropbox.addEventListener("drop", dropObject, false);
            
         // Connect GLGE to the VWF timeline.
         GLGE.now = function() {
@@ -716,6 +722,51 @@
         console.info( sOut + "extends: http://vwf.example.com/types/material");
 
     };
+    
+    // == Draggable Content ========================================================================
+    
+    // -- dragEnter --------------------------------------------------------------------------------
+    
+    function dragEnter( evt ) {
+        evt.stopPropagation();
+        evt.preventDefault();  
+    }
+    
+    // -- dragExit ---------------------------------------------------------------------------------
+    
+    function dragExit( evt ) {
+        evt.stopPropagation();
+        evt.preventDefault();  
+    }
+    
+    // -- dragOver ---------------------------------------------------------------------------------
+    
+    function dragOver( evt ) {
+        evt.stopPropagation();
+        evt.preventDefault();  
+    }
+    
+    // -- dragObject --------------------------------------------------------------------------------
+    
+    function dropObject( evt ) {
+        evt.stopPropagation();
+        evt.preventDefault();  
+            
+        var files = evt.dataTransfer.files;
+        var file = files[0];
+        console.info(file.name);
+        
+        /*var object = {
+          extends: "http://vwf.example.com/types/node3",
+          source: file.name,
+          type: "model/vnd.collada+xml",
+          properties: { 
+            position: [ 0, 0, 0 ],
+            scale: [ 1, 1, 1 ], 
+          },   
+        };
+        vwf.createNode( "index-vwf", object, "draggedObject", undefined );*/
+    }
 
 })(window.vwf.modules, "vwf.view.glge");
 
