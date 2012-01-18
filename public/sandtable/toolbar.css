@@ -7,6 +7,7 @@ div.wrapper  {
 	text-align:center;
 	position:absolute;
 	top:20px;
+	pointer-events:none;
 }
 div.toolstyle {
 	border-style:solid;
@@ -21,6 +22,7 @@ div.toolstyle {
 	width:520px;
 	height:45px;
 	margin:auto;
+	pointer-events:all;
 }
 div.logostyle {
 	top:-45px;
