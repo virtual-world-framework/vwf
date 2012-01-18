@@ -499,7 +499,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                 }
 
-                var pieDiv180 = 3.14159/180.0;
+                var pieDiv180 = 3.14159 / 180.0;
                 var pv = propertyValue;
                 switch ( propertyName ) {
 
@@ -565,6 +565,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                         break;
                     case "transform":
+                        break;
+
+                    case "rotationMatrix":{
+                            if ( glgeObject.setRotMatrix ) 
+                                value = glgeObject.setRotMatrix( propertyValue );
+                        }
                         break;
 
                     case "material": {
@@ -779,6 +785,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     case "modelMatrix": {
                             if ( glgeObject.getModelMatrix ) value = glgeObject.getModelMatrix();
+                        }
+                        break;
+
+                    case "rotationMatrix":{
+                            if ( glgeObject.getRotMatrix ) value = glgeObject.getRotMatrix();
                         }
                         break;
 

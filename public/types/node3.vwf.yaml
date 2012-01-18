@@ -4,6 +4,7 @@ properties:
   enabled: true
   position: 
   rotation:
+  rotationMatrix:
   boundingbox: 
     set: |
       console.info( "WARNING: node3 boundingbox cannot be set" )

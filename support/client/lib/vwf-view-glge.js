@@ -164,18 +164,6 @@
 
 //        this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
         var value = undefined;
-        if ( this.state.scenes[ nodeID ] ) {
-            var canvas = this.canvasQuery.get( 0 );
-            switch ( propertyName ) {
-                case "size":
-                   if ( canvas && propertyValue.constructor == Array && propertyValue.length > 1 ) {
-                       canvas.width = propertyValue[0];
-                       canvas.height = propertyValue[1];
-                       value = propertyValue;
-                   }
-                   break; 
-            }
-        }
         return value;
 
     };
@@ -186,20 +174,7 @@
 
 //        this.logger.info( "gotProperty", nodeID, propertyName, propertyValue );
         var value = undefined;
-        if ( this.state.scenes[ nodeID ] ) {
-            var canvas = this.canvasQuery.get( 0 );
-            switch ( propertyName ) {
-                case "size":
-                    if ( canvas ) {
-                        value = [ canvas.width, canvas.height ];
-                    } else {
-                        value = [ this.width, this.height ];
-                    }
-                    break; 
-            }
-        }
         return value;
-
     };
 
     // == Private functions ========================================================================
@@ -266,19 +241,13 @@
                     shift: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_SHIFT ),
                     ctrl: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_CTRL ),
                   }; 
-                   
-                  var mat = cameraNode.glgeObject.getRotMatrix();
-                  var trans = GLGE.mulMat4Vec4( mat, [0, 0, -1, 1] );
-                  var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
  
                   // should only be sending the keysDown, now, lastime, but I'm going to
                   // inlcude the additional data for now to cut some corners
                   var params = [ view.keysDown, 
-                                    now, 
-                                    lasttime, 
-                                    mat,
-                                    trans,
-                                    mag ];
+                                 now, 
+                                 lasttime
+                                ];
                   view.dispatchEvent( sceneNode.ID, "handleKeyEvents", params );
                 }
             }
@@ -314,6 +283,8 @@
 
         var mouseInfo = function( e, debug ) {
             var pickInfo = mousePick( e, sceneNode );
+            var x = mouseXPos(e);
+            var y = mouseYPos(e);
             if ( pickInfo ) {
                 if ( debug ) {
                     if ( pickInfo.coord ) {    console.info( "     pickInfo.coord = " + pickInfo.coord ); }
@@ -325,8 +296,10 @@
                 return { 
                             "lastX": lastXPos,
                             "lastY": lastYPos,
-                            "X" : mouseXPos(e),
-                            "Y" : mouseYPos(e),
+                            "X" : x,
+                            "Y" : y,
+                            "xPercent": x / sceneCanvas.width,
+                            "yPercent": y / sceneCanvas.height,
                             "mouseDownID" : mouseDownObjectID,
                             "mouseOverID" : mouseOverID,
                             "pickInfo" : {
@@ -337,49 +310,30 @@
                                         },
                             "mouseDownTime": mouseDownTime,
                             "mouseEventTime": parseInt( new Date().getTime() ),
-                            "trans": undefined,
-                            "mag": undefined,
-                            "camPos": undefined, 
-                            "camRot": undefined,                             
                         };
             } else {
                 return { 
                             "lastX": lastXPos,
                             "lastY": lastYPos,
-                            "X" : mouseXPos(e),
-                            "Y" : mouseYPos(e),
+                            "X" : x,
+                            "Y" : y,
+                            "xPercent": x / sceneCanvas.width,
+                            "yPercent": y / sceneCanvas.height,
                             "mouseDownID" : mouseDownObjectID,
                             "mouseOverID" : undefined,
                             "pickInfo" : undefined,
                             "mouseDownTime": mouseDownTime,
                             "mouseEventTime": parseInt( new Date().getTime() ),
-                            "trans": undefined,
-                            "mag": undefined,
-                            "camPos": undefined, 
-                            "camRot": undefined,
                         };                
             }
                             
             return undefined;                
-        }
-        
-        var cameraInfo = function( info ) {
-            var camera = sceneView.state.cameraInUse;
-            if ( camera ) {
-                info.trans = GLGE.mulMat4Vec4(camera.getRotMatrix(), [0, 0, -1, 1]);
-                info.mag = Math.pow(Math.pow(info.trans[0], 2) + Math.pow(info.trans[1], 2), 0.5);
-                info.camPos = new Array;
-                info.camPos.push( camera.getLocX(), camera.getLocY(), camera.getLocZ() );
-                info.camRot = new Array;
-                info.camRot.push( camera.getRotX(), camera.getRotY(), camera.getRotZ() );
-            }
         }
 
         canvas.onmousedown = function (e) {
             mouseDown = true;
             var mi = mouseInfo( e, false );
             if ( mi ) {
-                cameraInfo( mi );
                 mouseDownObjectID = mi.mouseOverID;
 
                 sceneView.dispatchEvent( sceneID, "mouseDown", [ mi ] );
@@ -396,7 +350,6 @@
             var ctrlAndAltDown = ctrlDown && atlDown;
             var mi = mouseInfo( e, ctrlAndAltDown );
             if ( mi ) {
-                cameraInfo( mi );
                 var mouseUpObjectID =  mi.mouseOverID;
                 // check for time??
                 if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
@@ -448,7 +401,6 @@
             mouseOverCanvas = true;
             var mi = mouseInfo( e, false );
             if ( mi ) {
-                cameraInfo( mi );
                 sceneView.dispatchEvent( sceneID, "mouseOver", [ mi ] );
             }
 
@@ -460,7 +412,6 @@
         canvas.onmousemove = function (e) {
             var mi = mouseInfo( e, false );
             if ( mi ) {
-                cameraInfo( mi );
                 if (mouseDown) {
                     //if (mouseDownObjectID) {
 
@@ -521,7 +472,6 @@
         canvas.onmousewheel = function (e) {
             var mi = mouseInfo( e, false );
             if ( mi ) {
-                cameraInfo( mi );
                 mi.wheelDelta = e.wheelDelta;
                 mi.wheelDeltaX = e.wheelDeltaX;
                 mi.wheelDeltaY = e.wheelDeltaY;
