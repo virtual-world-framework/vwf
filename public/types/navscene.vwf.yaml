@@ -15,7 +15,7 @@ properties:
       }
     value: "walk"
   orbitRadius: -1  
-  orbitObjectID: "http-vwf-example-com-types-group3-sceneCenter"
+  orbitObjectID: "http-vwf-example-com-types-node3-sceneCenter"
   speed: 2.0
   maxSpeed: 500
   dragModeMove: false

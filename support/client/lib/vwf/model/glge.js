@@ -1179,31 +1179,30 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var txtr, mat;
 
         if ( propertyValue ) {
+            if ( node.glgeMaterial && node.glgeMaterial.textures ) {
+                mat = node.glgeMaterial;
+                txtr = node.glgeMaterial.textures[0];
+            } else if ( node.glgeObject && node.glgeObject.material ) {
+                mat = node.glgeObject.material; 
+                txtr = node.glgeObject.material.textures[0];
+            }            
             switch ( propertyName ) {
                 case "texture": {
-                        if ( node.glgeMaterial && node.glgeMaterial.textures ) {
-                            mat = node.glgeMaterial;
-                            txtr = node.glgeMaterial.textures[0];
-                        } else if ( node.glgeObject && node.glgeObject.material ) {
-                            mat = node.glgeObject.material; 
-                            txtr = node.glgeObject.material.textures[0];
+                    if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
+                        if ( txtr ) {
+                            //console.info( "Setting texture source: " + propertyValue );
+                            txtr.setSrc( propertyValue );
+                        } else if ( mat ) {
+					        var ml = new GLGE.MaterialLayer;
+					        ml.setMapto( GLGE.M_COLOR );
+					        ml.setMapinput( GLGE.UV1 );
+                            var txt = new GLGE.Texture();
+                            txt.setSrc( propertyValue );
+                            mat.addTexture( txt );
+					        ml.setTexture( txt );
+					        mat.addMaterialLayer( ml );
                         }
-
-                        if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
-                            if ( txtr ) {
-                                //console.info( "Setting texture source: " + propertyValue );
-                                txtr.setSrc( propertyValue );
-                            } else if ( mat ) {
-					            var ml = new GLGE.MaterialLayer;
-					            ml.setMapto( GLGE.M_COLOR );
-					            ml.setMapinput( GLGE.UV1 );
-                                var txt = new GLGE.Texture();
-                                txt.setSrc( propertyValue );
-                                mat.addTexture( txt );
-					            ml.setTexture( txt );
-					            mat.addMaterialLayer( ml );
-                            }
-                        }
+                    }
                     }
                     break;
 
@@ -1470,7 +1469,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var txtr, mat;
 
         switch ( propertyName ) {
-            case "mesh0": {
+            case "mesh": {
                     if ( node.glgeObject && node.glgeObject && node.glgeObject.getMesh ) {
                         value = node.glgeObject.getMesh();
                     }
