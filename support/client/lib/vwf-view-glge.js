@@ -141,7 +141,8 @@
                         vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/ );
                     }
                     vwf.setProperty( glgeView.state.sceneRootID, "size", [ glgeView.width, glgeView.height ] );
-                }              
+                    $('#topdown').height(canvas.height);
+                } 
             }
 
             var sceneNode = this.state.scenes[ childID ];

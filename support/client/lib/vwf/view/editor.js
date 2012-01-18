@@ -12,9 +12,32 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.nodes = {};
             this.scenes = {};
             
-            jQuery('body').append(
-                "<div id='editor' style='position:relative'><div style='width:100%;text-align:right;position:absolute;left:-10px;top:-20px' onclick='openEditor()'>+</div></div><div class='vwf-tree' id='topdown'><p style='text-align:center;font-weight:bold'>TREE VIEW<hr></p><div style='padding-left:10px'><table id='topdowntree'><tr id='node-0'><td>Scene</td></tr><tr id='node-1' class='child-of-node-0' style='display:none'><td>Child</td></tr></table></div></div>"
+            jQuery('body').prepend(
+                "<div id='editor' class='relClass'><div class='eImg'><img id='launchEditor' src='images/editor.png' style='pointer-events:all' alt='launchEditor' /></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown'></div></div></div>"
             );
+            
+            $('#launchEditor').stop().animate({ opacity:0.0 }, 0);
+            
+            jQuery('#launchEditor').mouseenter( function(evt) { 
+                evt.stopPropagation();
+                $('#launchEditor').stop().animate({ opacity:1.0 }, 500);
+                return false; 
+            });
+            
+            jQuery('#launchEditor').mouseleave( function(evt) { 
+                evt.stopPropagation(); 
+                $('#launchEditor').stop().animate({ opacity:0.0 }, 500);
+                return false; 
+            });
+            
+            jQuery('#launchEditor').click ( function(evt) {
+                openEditor();
+            });
+
+            $('#topdown').hide();
+            
+            var canvas = document.getElementById("index-vwf");
+            $('#topdown').height(canvas.height);
         },
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -41,48 +64,18 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( childExtendsID =="http-vwf-example-com-types-glge" || childExtendsID =="appscene-vwf" ) {
                 this.scenes[ childID ] = node;
             }
-
-            if( childExtendsID == 'http-vwf-example-com-types-node3' && childName != undefined )
-            {     
-                if ( nodeID == "index-vwf" ) {
-                    // this is a child of the scene, so hard code to attach 
-                    // to the root of tree
-                    jQuery('#topdowntree').append(
-                        "<tr id='node-" + childID + "' class='child-of-node-0'><td style='padding-left: 20px'>" + childName + "</td></tr>"
-                    );
-                } else {
-                    // child of something other than the root, so use the full
-                    // id to attach this child to the correct tree view
-                    jQuery('#topdowntree').append(
-                        "<tr id='node-" + childID + "' class='child-of-node-" + nodeID + "'><td style='padding-left: 20px'>" + childName + "</td></tr>"
-                    );                    
-                }
-                
-                $('#topdowntree').treeTable();
-            }
         },
         
         createdProperty: function (nodeID, propertyName, propertyValue) {
    
             var node = this.nodes[ nodeID ];
+            var property = node.properties[ propertyName ] = {
+                name: propertyName,
+                value: propertyValue,
+            };
+            
             if ( node ) {
-                node.properties.push[ propertyName ];
-            }
-
-            if(nodeID.indexOf("http-vwf-example-com-types-node3") != -1)
-            {
-                var nodeName = nodeID.substring(nodeID.lastIndexOf('-')+1);
-                if( nodeName != 'node3' )
-                {
-                    jQuery('#topdowntree').append(
-                        "<tr id='node-" + nodeID + '-' + propertyName + "' class='child-of-node-" + nodeID + "'><td>" + propertyName + ": " + propertyValue + "</td></tr>"
-                    );
-                    
-                    $('#topdowntree').treeTable();
-                    //$('#node-0').toggleBranch();
-                    //$('#node-0').collapse();
-                    //$('#node-0').expand();
-                }
+                node.properties.push( property );
             }
         },
         
@@ -91,9 +84,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         //addedChild: [ /* nodeID, childID, childName */ ],
         //removedChild: [ /* nodeID, childID */ ],
 
-        satProperty: function( nodeID, propertyName, propertyValue ) {
-            
+        satProperty: function (nodeID, propertyName, propertyValue) {
+            var node = this.nodes[ nodeID ];
+            node.properties[ propertyName ].value = propertyValue;
         },
+        
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
         
@@ -112,14 +107,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }         
         },
 
-        //firedEvent: [ /* nodeID, eventName, eventParameters */ ],
+        //firedEvent: function ( nodeID, eventName, eventParameters ) {
+        //},
 
         //executed: [ /* nodeID, scriptText, scriptType */ ],
 
         //ticked: [ /* time */ ],
         
     } );
-
 
     // -- getPropertyValues -----------------------------------------------------------------
 
@@ -132,7 +127,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
         return pv;
     };
-
+    
+    // -- getChildByName --------------------------------------------------------------------
+    
     function getChildByName( node, childName ) {
         var childNode = undefined;
         for ( var i = 0; i < node.children.length && childNode === undefined; i++ ) {
@@ -142,6 +139,51 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
         return childNode;
     };
+    
+    // -- openEditor ------------------------------------------------------------------------
+    
+    var editorVisible = false;
+        
+    function openEditor()
+    {
+        if(!editorVisible)
+        {
+            editorVisible = true;
+            drillDown.call(this, "index-vwf");
+            $('#topdown').show('slide', {direction: 'right'}, 500); 
+            $('#editor').animate({ 'left' : "-=260px" }, 500);
+        }
+        else
+        {
+            editorVisible = false;
+            $('#topdown').hide('slide', {direction: 'right'}, 500); 
+            $('#editor').animate({ 'left' : "+=260px" }, 500);
+        }
+    }
+    
+    // -- drillDown -------------------------------------------------------------------------
 
+    function drillDown(nodeID)
+    {
+        var node = window.vwf_view.nodes[ nodeID ];
+     
+        if(nodeID == "index-vwf") node.name = "index";
+        
+        $('#topdown').html("<p>" + node.name + "<hr noshade='noshade'></p>");
+        
+        for ( var i = 0; i < node.properties.length; i++ ) {
+            $('#topdown').append("<div><b>" + node.properties[i].name + " </b> " + node.properties[i].value + "</div>");
+            if(i != node.properties.length-1) $('#topdown').append("<hr>");
+        }
 
+        $('#topdown').append("<hr noshade='noshade'>");
+        
+        for ( var i = 0; i < node.children.length; i++ ) {
+            $('#topdown').append("<div id='" + node.children[i].ID + "'><b>" + node.children[i].name + "</b></div><hr>");
+            $('#' + node.children[i].ID).click( function(evt) {
+                drillDown($(this).attr("id"));
+            });            
+        }
+    }
+    
 } );
