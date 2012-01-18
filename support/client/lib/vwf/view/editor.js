@@ -42,11 +42,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 this.scenes[ childID ] = node;
             }
 
-            if(childExtendsID == 'http-vwf-example-com-types-node3' && childName != undefined)
-            {       
-                jQuery('#topdowntree').append(
-                    "<tr id='node-" + childID + "' class='child-of-node-0'><td style='padding-left: 20px'>" + childName + "</td></tr>"
-                );
+            if( childExtendsID == 'http-vwf-example-com-types-node3' && childName != undefined )
+            {     
+                if ( nodeID == "index-vwf" ) {
+                    // this is a child of the scene, so hard code to attach 
+                    // to the root of tree
+                    jQuery('#topdowntree').append(
+                        "<tr id='node-" + childID + "' class='child-of-node-0'><td style='padding-left: 20px'>" + childName + "</td></tr>"
+                    );
+                } else {
+                    // child of something other than the root, so use the full
+                    // id to attach this child to the correct tree view
+                    jQuery('#topdowntree').append(
+                        "<tr id='node-" + childID + "' class='child-of-node-" + nodeID + "'><td style='padding-left: 20px'>" + childName + "</td></tr>"
+                    );                    
+                }
                 
                 $('#topdowntree').treeTable();
             }
@@ -62,7 +72,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if(nodeID.indexOf("http-vwf-example-com-types-node3") != -1)
             {
                 var nodeName = nodeID.substring(nodeID.lastIndexOf('-')+1);
-                if(nodeName != 'node3')
+                if( nodeName != 'node3' )
                 {
                     jQuery('#topdowntree').append(
                         "<tr id='node-" + nodeID + '-' + propertyName + "' class='child-of-node-" + nodeID + "'><td>" + propertyName + ": " + propertyValue + "</td></tr>"
@@ -81,7 +91,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         //addedChild: [ /* nodeID, childID, childName */ ],
         //removedChild: [ /* nodeID, childID */ ],
 
-        //satProperty: [ /* nodeID, propertyName, propertyValue */ ],
+        satProperty: function( nodeID, propertyName, propertyValue ) {
+            
+        },
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
         
@@ -118,8 +130,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 pv[ node.properties[i] ] = vwf.getProperty( node.ID, node.properties[i], [] );
             }
         }
-
         return pv;
+    };
+
+    function getChildByName( node, childName ) {
+        var childNode = undefined;
+        for ( var i = 0; i < node.children.length && childNode === undefined; i++ ) {
+            if ( node.children[i].name == childName ) {
+                childNode = node.children[i];    
+            }
+        }
+        return childNode;
     };
 
 
