@@ -17,7 +17,7 @@
         this.rootSelector = rootSelector;
         this.canvasQuery = undefined;
  
-        this.keysDown = { keys: {}, mods: {} };
+        this.keyStates = { keysDown: {}, mods: {} };
 
         this.height = 600;
         this.width = 800;
@@ -67,6 +67,7 @@
             var domWin = window;
             var canvas = this.canvasQuery.get( 0 );
             window.onkeydown = function( event ) {
+                var key = undefined;
                 switch ( event.keyCode ) {
                     case 17:
                     case 16:
@@ -75,12 +76,26 @@
                     case 20:
                         break;                        
                     default:
-                        glgeView.keysDown.keys[ event.keyCode ] = true;
+                        key = getKeyValue( event.keyCode );
+                        glgeView.keyStates.keysDown[ key.key ] = key;
                         break;
+                }
+
+                if ( !glgeView.keyStates.mods ) glgeView.keyStates.mods = {};
+                glgeView.keyStates.mods.alt = event.altKey;
+                glgeView.keyStates.mods.shift = event.shiftKey;
+                glgeView.keyStates.mods.ctrl = event.ctrlKey;
+                glgeView.keyStates.mods.meta = event.metaKey;
+
+                var sceneNode = glgeView.state.scenes[ glgeView.state.sceneRootID ];
+                if ( sceneNode ) {
+                  //var params = JSON.stringify( glgeView.keyStates );
+                  glgeView.dispatchEvent( sceneNode.ID, "keyDown", [ glgeView.keyStates ] );
                 }
             };
 
             window.onkeyup = function( event ) {
+                var key = undefined;
                 switch ( event.keyCode ) {
                     case 16:
                     case 17:
@@ -89,9 +104,22 @@
                     case 20:
                         break;                        
                     default:
-                        delete glgeView.keysDown.keys[ event.keyCode ];
+                        key = getKeyValue( event.keyCode );
+                        delete glgeView.keyStates.keysDown[ key.key ];
                         break;
                 }
+
+                glgeView.keyStates.mods.alt = event.altKey;
+                glgeView.keyStates.mods.shift = event.shiftKey;
+                glgeView.keyStates.mods.ctrl = event.ctrlKey;
+                glgeView.keyStates.mods.meta = event.metaKey;
+
+                var sceneNode = glgeView.state.scenes[ glgeView.state.sceneRootID ];
+                if ( sceneNode ) {
+                  //var params = JSON.stringify( glgeView.keyStates );
+                  glgeView.dispatchEvent( sceneNode.ID, "keyUp", [ glgeView.keyStates ] );
+                }
+
             };
 
             window.onresize = function() {
@@ -111,7 +139,8 @@
                     if ( camID && camID != "" ) {
                         //console.info( "aspectRatio = " + (( glgeView.width / glgeView.height ) / 1.333 ) );
                         vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/ );
-                    } 
+                    }
+                    vwf.setProperty( glgeView.state.sceneRootID, "size", [ glgeView.width, glgeView.height ] );
                 }              
             }
 
@@ -164,6 +193,19 @@
 
 //        this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
         var value = undefined;
+//        if ( this.state.scenes[ nodeID ] ) {
+//            var canvas = this.canvasQuery.get( 0 );
+//            switch ( propertyName ) {
+//                case "size":
+//                   console.info( "satProperty " + propertyName ); 
+//                   if ( canvas && propertyValue.constructor == Array && propertyValue.length > 1 ) {
+//                       canvas.width = propertyValue[0];
+//                       canvas.height = propertyValue[1];
+//                       value = propertyValue;
+//                   }
+//                   break; 
+//            }
+//        }
         return value;
 
     };
@@ -174,7 +216,21 @@
 
 //        this.logger.info( "gotProperty", nodeID, propertyName, propertyValue );
         var value = undefined;
+//        if ( this.state.scenes[ nodeID ] ) {
+//            var canvas = this.canvasQuery.get( 0 );
+//            switch ( propertyName ) {
+//                case "size":
+//                    console.info( "gotProperty " + propertyName ); 
+//                    if ( canvas ) {
+//                        value = [ canvas.width, canvas.height ];
+//                    } else {
+//                        value = [ this.width, this.height ];
+//                    }
+//                    break; 
+//            }
+//        }
         return value;
+
     };
 
     // == Private functions ========================================================================
@@ -207,7 +263,6 @@
             function renderScene() {
                 now = parseInt( new Date().getTime() );
                 renderer.render();
-                checkKeys( view, now, lasttime );
                 lasttime = now;
             };
 
@@ -226,40 +281,9 @@
         }        
     }
 
-    // -- checkKeys ------------------------------------------------------------------------
-
-    var checkKeys = function( view, now, lasttime ) {
-        
-        var sceneNode = view.state.scenes[ view.state.sceneRootID ];
-        if ( sceneNode ) {
-            var cameraNode = view.state.nodes[ sceneNode.camera.ID ];
-            if ( cameraNode && cameraNode.glgeObject ) {
-                if ( view.keysDown.keys && Object.keys( view.keysDown.keys ).length ) {
-  
-                  view.keysDown.mods = {
-                    alt: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_ALT ),
-                    shift: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_SHIFT ),
-                    ctrl: sceneNode.glgeKeys.isKeyPressed( GLGE.KI_CTRL ),
-                  }; 
- 
-                  // should only be sending the keysDown, now, lastime, but I'm going to
-                  // inlcude the additional data for now to cut some corners
-                  var params = [ view.keysDown, 
-                                 now, 
-                                 lasttime
-                                ];
-                  view.dispatchEvent( sceneNode.ID, "handleKeyEvents", params );
-                }
-            }
-        }
-
-    }
-
     var mouse; 
     var sceneCanvas;
     var container;
-    var mouseDown = false;
-    var mouseDownTime = undefined;
     var mouseOverCanvas = false;
 
     // -- initMouseEvents ------------------------------------------------------------------------
@@ -270,98 +294,124 @@
         var sceneID = view.state.sceneRootID;
         var sceneView = view;
 
-        var mouseDownObjectID = undefined;
-        var mouseOverObjectID = undefined;
+        var pointerDownID = undefined;
+        var pointerOverID = undefined;
+        var pointerPickID = undefined;
+        var glgeActualObj = undefined;
 
         var lastXPos = -1;
         var lastYPos = -1;
-        var glgeActualObj = undefined;
+        var mouseRightDown = false;
+        var mouseLeftDown = false;
+        var mouseMiddleDown = false;
 
         container = document.getElementById("container");
         sceneCanvas = canvas;
         mouse = new GLGE.MouseInput( sceneCanvas );
 
-        var mouseInfo = function( e, debug ) {
+        var getEventData = function( e, debug ) {
+            var returnData = { eventData: undefined, eventNodeData: undefined };
             var pickInfo = mousePick( e, sceneNode );
-            var x = mouseXPos(e);
-            var y = mouseYPos(e);
+            pointerPickID = undefined;
+
+            glgeActualObj = pickInfo ? pickInfo.object : undefined;
+            pointerPickID = pickInfo ? getPickObjectID( pickInfo, sceneView, debug ) : undefined;
+            var mouseButton = "left";
+            switch( e.button ) {
+                case 2: 
+                    mouseButton = "right";
+                    break;
+                case 1: 
+                    mouseButton = "middle";
+                    break;
+                default:
+                    mouseButton = "left";
+                    break;
+            };
+
+            returnData.eventData = [ {
+                client: "123456789ABCDEFG",
+                button: mouseButton,
+                clicks: 1,
+                buttons: {
+                        left: mouseLeftDown,
+                        middle: mouseMiddleDown,
+                        right: mouseRightDown,
+                    },
+                modifiers: {
+                        alt: e.altKey,
+                        ctrl: e.ctrlKey,
+                        shift: e.shiftKey,
+                        meta: e.metaKey,
+                    },
+                position: [ mouseXPos(e)/sceneView.width, mouseYPos(e)/sceneView.height ],
+            } ];
+
+            returnData.eventNodeData = { "": [ {
+                normal: undefined,
+                source: undefined,
+                distance: undefined,
+                globalPosition: undefined,
+                globalNormal: undefined,
+                globalSource: undefined,            
+            } ] };
+
+
             if ( pickInfo ) {
-                if ( debug ) {
-                    if ( pickInfo.coord ) {    console.info( "     pickInfo.coord = " + pickInfo.coord ); }
-                    if ( pickInfo.distance ) { console.info( "     pickInfo.distance = " + pickInfo.distance ); }
-                    if ( pickInfo.normal ) {   console.info( "     pickInfo.distance = " + pickInfo.normal ); }
-                }
-                glgeActualObj = pickInfo.object;
-                var mouseOverID = getPickObjectID( pickInfo, sceneView, debug );
-                return { 
-                            "lastX": lastXPos,
-                            "lastY": lastYPos,
-                            "X" : x,
-                            "Y" : y,
-                            "xPercent": x / sceneCanvas.width,
-                            "yPercent": y / sceneCanvas.height,
-                            "mouseDownID" : mouseDownObjectID,
-                            "mouseOverID" : mouseOverID,
-                            "pickInfo" : {
-                                            "coord": pickInfo.coord,
-                                            "distance": pickInfo.distance,
-                                            "normal": pickInfo.normal,
-                                            "texture": { "u": pickInfo.texture[0], "v": pickInfo.texture[1] },
-                                        },
-                            "mouseDownTime": mouseDownTime,
-                            "mouseEventTime": parseInt( new Date().getTime() ),
-                        };
-            } else {
-                return { 
-                            "lastX": lastXPos,
-                            "lastY": lastYPos,
-                            "X" : x,
-                            "Y" : y,
-                            "xPercent": x / sceneCanvas.width,
-                            "yPercent": y / sceneCanvas.height,
-                            "mouseDownID" : mouseDownObjectID,
-                            "mouseOverID" : undefined,
-                            "pickInfo" : undefined,
-                            "mouseDownTime": mouseDownTime,
-                            "mouseEventTime": parseInt( new Date().getTime() ),
-                        };                
+                returnData.eventNodeData[""][0].position = pickInfo.coord;
+                returnData.eventNodeData[""][0].normal = pickInfo.normal;
+                returnData.eventNodeData[""][0].distance = pickInfo.distance;
             }
-                            
-            return undefined;                
-        }
-
-        canvas.onmousedown = function (e) {
-            mouseDown = true;
-            var mi = mouseInfo( e, false );
-            if ( mi ) {
-                mouseDownObjectID = mi.mouseOverID;
-
-                sceneView.dispatchEvent( sceneID, "mouseDown", [ mi ] );
+            var camera = sceneView.state.cameraInUse;
+            if ( camera ) {
+                returnData.eventNodeData[""][0].source = new Array;
+                returnData.eventNodeData[""][0].source.push( camera.getLocX(), camera.getLocY(), camera.getLocZ() );
             }
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
-            mouseDownTime = parseInt( new Date().getTime() );
 
+            return returnData;
+        }          
+
+        canvas.onmousedown = function( e ) {
+           switch( e.button ) {
+                case 2: 
+                    mouseRightDown = true;
+                    break;
+                case 1: 
+                    mouseMiddleDown = true;
+                    break;
+                case 0:
+                    mouseLeftDown = true;
+                    break;
+            };
+            var eData = getEventData( e, false );
+            if ( eData ) {
+                pointerDownID = pointerPickID ? pointerPickID : sceneID;
+                sceneView.dispatchEvent( pointerDownID, "pointerDown", eData.eventData, eData.eventNodeData );
+            }
         }
 
         canvas.onmouseup = function( e ) {
-            var ctrlDown = sceneNode.glgeKeys.isKeyPressed( GLGE.KI_CTRL );
-            var atlDown = sceneNode.glgeKeys.isKeyPressed( GLGE.KI_ALT );
+            var ctrlDown = e.ctrlKey;
+            var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;
-            var mi = mouseInfo( e, ctrlAndAltDown );
-            if ( mi ) {
-                var mouseUpObjectID =  mi.mouseOverID;
-                // check for time??
-                if ( mouseUpObjectID && mouseDownObjectID && mouseUpObjectID == mouseDownObjectID ) {
-//                    this.logger.info( "pointerClick: id: ", mouseDownObjectID, "   name: ", name( view.state.nodes[mouseDownObjectID].glgeObject ) );
 
-                    var eventData = { client: "123456789ABCDEFG", button: "left", clicks: 1, buttons: { left: true, right: false, middle: false }, modifiers: { shift: false, ctrl: false, alt: false, meta: false } }; // representative event data
-                    var eventNodeData = { position: [ 0, 0, 0 ], normal: [ 0, 0, 1 ], source: [ 0, 0, -1 ], distance: 1 }; // representative per-target event data
+            switch( e.button ) {
+                case 2: 
+                    mouseRightDown = false;
+                    break;
+                case 1: 
+                    mouseMiddleDown = false;
+                    break;
+                case 0:
+                    mouseLeftDown = false;
+                    break;
+            };
 
-                    var eventParameters = [ eventData ]; // parameters for every target
-                    var eventNodeParameters = { "": [ eventNodeData ] }; // additional per-target parameters
-
-                    view.dispatchEvent( mouseUpObjectID, "pointerClick", eventParameters, eventNodeParameters );
+            var eData = getEventData( e, ctrlAndAltDown );
+            if ( eData ) {
+                var mouseUpObjectID = pointerPickID;
+                if ( mouseUpObjectID && pointerDownID && mouseUpObjectID == pointerDownID ) {
+                    view.dispatchEvent( mouseUpObjectID, "pointerClick", eData.eventData, eData.eventNodeData );
 
                     var glgeObj = sceneView.state.nodes[mouseUpObjectID].glgeObject;
                     if ( glgeObj ) {
@@ -385,101 +435,73 @@
                     }
                 }
 
-                //this.throwEvent( "onMouseUp", mouseDownObjectID);
-                sceneView.dispatchEvent( sceneID, "mouseUp", [ mi ] );
-
+                sceneView.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
-            mouseDownObjectID = undefined;
-            mouseDownTime = undefined;
-            mouseDown = false;
-
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
+            pointerDownID = undefined;
         }
 
-        canvas.onmouseover = function (e) {
+        canvas.onmouseover = function( e ) {
             mouseOverCanvas = true;
-            var mi = mouseInfo( e, false );
-            if ( mi ) {
-                sceneView.dispatchEvent( sceneID, "mouseOver", [ mi ] );
+            var eData = getEventData( e, false );
+            if ( eData ) {
+                pointerOverID = pointerPickID ? pointerPickID : sceneID;
+                sceneView.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
             }
-
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
         }
 
-
-        canvas.onmousemove = function (e) {
-            var mi = mouseInfo( e, false );
-            if ( mi ) {
-                if (mouseDown) {
-                    //if (mouseDownObjectID) {
-
-                        //this.throwEvent( "onMouseMove", mouseDownObjectID);
-                        sceneView.dispatchEvent( sceneID, "mouseMove", [ mi ] );
-                    //}
-
-                    //view.callMethod( mouseDownObjectID, "onMouseMove" );
+        canvas.onmousemove = function( e ) {
+            var eData = getEventData( e, false );
+            if ( eData ) {
+                if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
+                    sceneView.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
                 } else {
-                    if ( mi.mouseOverID ) {
-                        if (mouseOverObjectID) {
-                            if (mi.mouseOverID != mouseOverObjectID) {
-
-                                //this.throwEvent( "onMouseLeave", mouseOverObjectID);
-
-                                mouseOverObjectID = mi.mouseOverID;
-                                sceneView.dispatchEvent( sceneID, "mouseLeave", [ mi ] );
-
-                                //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                                sceneView.dispatchEvent( sceneID, "mouseEnter", [ mi ] );
+                    if ( pointerPickID ) {
+                        if ( pointerOverID ) {
+                            if ( pointerPickID != pointerOverID ) {
+                                sceneView.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                                pointerOverID = pointerPickID;
+                                sceneView.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
                             } else {
-                                //this.throwEvent( "onMouseHover", mouseOverObjectID);
-                                sceneView.dispatchEvent( sceneID, "mouseHover", [ mi ] );
+                                sceneView.dispatchEvent( pointerOverID, "pointerHover", eData.eventData, eData.eventNodeData );
                             }
                         } else {
-                            mouseOverObjectID = mi.mouseOverID;
-
-                            //this.throwEvent( "onMouseEnter", mouseOverObjectID);
-                            sceneView.dispatchEvent( sceneID, "mouseEnter", [ mi ] );
+                            pointerOverID = pointerPickID;
+                            sceneView.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
                         }
-
                     } else {
-                        if (mouseOverObjectID) {
-                            //this.throwEvent( "onMouseLeave", mouseOverObjectID);
-                            mouseOverObjectID = undefined;
-                            sceneView.dispatchEvent( sceneID, "mouseLeave", [ mi ] );
-
+                        if ( pointerOverID ) {
+                            sceneView.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                            pointerOverID = undefined;
                         }
                     }
                 }
             }
-
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );
-
-            //this.mouseOverCanvas = true; 
         }
 
-        canvas.onmouseout = function (e) {
-            if (mouseOverObjectID) {
-                //this.throwEvent( "onMouseLeave", mouseOverObjectID);
-                mouseOverObjectID = undefined;
-                //vwf.dispatchEvent( sceneID, "mouseOut" );
+        canvas.onmouseout = function( e ) {
+            if ( pointerOverID ) {
+                sceneView.dispatchEvent( pointerOverID, "pointerLeave" );
+                pointerOverID = undefined;
             }
             mouseOverCanvas = false;
         }
 
-        canvas.onmousewheel = function (e) {
-            var mi = mouseInfo( e, false );
-            if ( mi ) {
-                mi.wheelDelta = e.wheelDelta;
-                mi.wheelDeltaX = e.wheelDeltaX;
-                mi.wheelDeltaY = e.wheelDeltaY;
-                
-                sceneView.dispatchEvent( sceneID, "mouseWheel", [ mi ] );
+        canvas.onmousewheel = function( e ) {
+            var eData = getEventData( e, false );
+            if ( eData ) {
+                eData.wheel = {
+                    delta: e.wheelDelta,
+                    deltaX: e.wheelDeltaX,
+                    deltaY: e.wheelDeltaY,
+                };
+                var id = sceneID;
+                if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                    id = pointerDownID;
+                else if ( pointerOverID )
+                    id = pointerOverID; 
+                    
+                sceneView.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
             }
-            lastXPos = mouseXPos( e );
-            lastYPos = mouseYPos( e );            
         }
 
     };
@@ -717,6 +739,372 @@
         };
         vwf.createNode( "index-vwf", object, "draggedObject", undefined );*/
     }
+
+    var getKeyValue = function( keyCode ) {
+        var key = { key: undefined, code: keyCode, char: undefined };
+        switch ( keyCode ) {
+            case 8:
+                key.key = "backspace";
+                break;
+            case 9:
+                key.key = "tab";
+                break;
+            case 13:
+                key.key = "enter";
+                break;
+            case 16:
+                key.key = "shift";
+                break;
+            case 17:
+                key.key = "ctrl";
+                break;
+            case 18:
+                key = "alt";
+                break;
+            case 19:
+                key.key = "pausebreak";
+                break;
+            case 20:
+                key.key = "capslock";
+                break;
+            case 27:
+                key.key = "escape";
+                break;
+            case 33:
+                key.key = "pageup";
+                break;
+            case 34:
+                key.key = "pagedown";
+                break;
+            case 35:
+                key.key = "end";
+                break;
+            case 36:
+                key.key = "home";
+                break;
+            case 37:
+                key.key = "leftarrow";
+                break;
+            case 38:
+                key.key = "uparrow";
+                break;
+            case 39:
+                key.key = "rightarrow";
+                break;
+            case 40:
+                key.key = "downarrow";
+                break;
+            case 45:
+                key.key = "insert";
+                break;
+            case 46:
+                key.key = "delete";
+                break;
+            case 48:
+                key.key = "0";
+                key.char = "0";
+                break;
+            case 49:
+                key.key = "1";
+                key.char = "1";
+                break;
+            case 50:
+                key.key = "2";
+                key.char = "2";
+                break;
+            case 51:
+                key.key = "3";
+                key.char = "3";
+                break;
+            case 52:
+                key.key = "4";
+                key.char = "4";
+                break;
+            case 53:
+                key.key = "5";
+                key.char = "5";
+                break;
+            case 54:
+                key.key = "6";
+                key.char = "6";
+                break;
+            case 55:
+                key.key = "7";
+                key.char = "&";
+                break;                
+            case 56:
+                key.key = "8";
+                key.char = "8";
+                break;
+            case 57:
+                key.key = "9";
+                key.char = "9";
+                break;  
+            case 65:
+                key.key = "A";
+                key.char = "A";
+                break;
+            case 66:
+                key.key = "B";
+                key.char = "B";
+                break;
+            case 67:
+                key.key = "C";
+                key.char = "C";
+                break;
+            case 68:
+                key.key = "D";
+                key.char = "D";
+                break;
+            case 69:
+                key.key = "E";
+                key.char = "E";
+                break;
+            case 70:
+                key.key = "F";
+                key.char = "F";
+                break;
+            case 71:
+                key.key = "G";
+                key.char = "G";
+                break;
+            case 72:
+                key.key = "H";
+                key.char = "H";
+                break;
+            case 73:
+                key.key = "I";
+                key.char = "I";
+                break;                
+            case 74:
+                key.key = "J";
+                key.char = "J";
+                break;
+            case 75:
+                key.key = "K";
+                key.char = "K";
+                break;                 
+            case 76:
+                key.key = "L";
+                key.char = "L";
+                break;
+            case 77:
+                key.key = "M";
+                key.char = "M";
+                break;
+            case 78:
+                key.key = "N";
+                key.char = "N";
+                break;
+            case 79:
+                key.key = "O";
+                key.char = "O";
+                break;
+            case 80:
+                key.key = "P";
+                key.char = "P";
+                break;
+            case 81:
+                key.key = "Q";
+                key.char = "Q";
+                break;
+            case 82:
+                key.key = "R";
+                key.char = "R";
+                break;
+            case 83:
+                key.key = "S";
+                key.char = "S";
+                break;                
+            case 84:
+                key.key = "T";
+                key.char = "T";
+                break;
+            case 85:
+                key.key = "U";
+                key.char = "U";
+                break;                  
+            case 86:
+                key.key = "V";
+                key.char = "V";
+                break;
+            case 87:
+                key.key = "W";
+                key.char = "W";
+                break;
+            case 88:
+                key.key = "X";
+                key.char = "X";
+                break;                
+            case 89:
+                key.key = "Y";
+                key.char = "Y";
+                break;
+            case 90:
+                key.key = "Z";
+                key.char = "Z";
+                break; 
+            case 91:
+                key.key = "leftwindow";
+                break;
+            case 92:
+                key.key = "rightwindow";
+                break;
+            case 93:
+                key.key = "select";
+                break;
+            case 96:
+                key.key = "numpad0";
+                key.char = "0";
+                break;
+            case 97:
+                key.key = "numpad1";
+                key.char = "1";
+                break;
+            case 98:
+                key.key = "numpad2";
+                key.char = "2";
+                break;
+            case 99:
+                key.key = "numpad3";
+                key.char = "3";
+                break;
+            case 100:
+                key.key = "numpad4";
+                key.char = "4";
+                break;
+            case 101:
+                key.key = "numpad5";
+                key.char = "5";
+                break;
+            case 102:
+                key.key = "numpad6";
+                key.char = "6";
+                break;
+            case 103:
+                key.key = "numpad7";
+                key.char = "7";
+                break;
+            case 104:
+                key.key = "numpad8";
+                key.char = "8";
+                break;
+            case 105:
+                key.key = "numpad9";
+                key.char = "9";
+                break;
+            case 106:
+                key.key = "multiply";
+                key.char = "*";
+                break;
+            case 107:
+                key.key = "add";
+                key.char = "+";
+                break;
+            case 109:
+                key.key = "subtract";
+                key.char = "-";
+                break;
+            case 110:
+                key.key = "decimalpoint";
+                key.char = ".";
+                break;
+            case 111:
+                key.key = "divide";
+                key.char = "/";
+                break;
+            case 112:
+                key.key = "f1";
+                break;
+            case 113:
+                key.key = "f2";
+                break;
+            case 114:
+                key.key = "f3";
+                break;
+            case 115:
+                key.key = "f4";
+                break;
+            case 116:
+                key.key = "f5";
+                break;
+            case 117:
+                key.key = "f6";
+                break;
+            case 118:
+                key.key = "f7";
+                break;
+            case 119:
+                key.key = "f8";
+                break;
+            case 120:
+                key.key = "f9";
+                break;
+            case 121:
+                key.key = "f10";
+                break;
+            case 122:
+                key.key = "f11";
+                break;
+            case 123:
+                key.key = "f12";
+                break;
+            case 144:
+                key.key = "numlock";
+                break;
+            case 145:
+                key.key = "scrolllock";
+                break;
+            case 186:
+                key.key = "semicolon";
+                key.char = ";";
+                break;
+            case 187:
+                key.key = "equal";
+                key.char = "=";
+                break;
+            case 188:
+                key.key = "comma";
+                key.char = ",";
+                break;
+            case 189:
+                key.key = "dash";
+                key.char = "-";
+                break;
+            case 190:
+                key.key = "period";
+                key.char = ".";
+                break;
+            case 191:
+                key.key = "forwardslash";
+                key.char = "/";
+                break;
+            case 192:
+                key.key = "graveaccent";
+                break;
+            case 219:
+                key.key = "openbraket";
+                key.char = "{";
+                break;
+            case 220:
+                key.key = "backslash";
+                key.char = "\\";
+                break;
+            case 221:
+                key.key = "closebraket";
+                key.char = "}";
+                break;
+            case 222:
+                key.key = "singlequote";
+                key.char = "'";
+                break;
+            case 32:
+                key.key = "space";
+                key.char = " ";
+                break;
+        }
+        return key;
+    };
 
 })(window.vwf.modules, "vwf.view.glge");
 

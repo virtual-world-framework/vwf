@@ -44,3 +44,4 @@ events:
   pointerEnter:
   pointerOver:
   pointerLeave:
+  pointerWheel:

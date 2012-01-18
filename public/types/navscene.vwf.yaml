@@ -20,20 +20,18 @@ properties:
   maxSpeed: 500
   dragModeMove: false
 events:
-  # TODO: remove, and use node2's key events when they're ready
-  handleKeyEvents:
-  # TODO: remove, and use node2's pointer events when they're ready
-  mouseDown:
-  mouseUp:
-  mouseMove:
-  mouseOver:
-  mouseEnter:
-  mouseLeave:
-  mouseHover:
-  mouseWheel:
+  keyUp:
+  keyDown:
+  pointerDown:
+  pointerUp:
+  pointerMove:
+  pointerOver:
+  pointerEnter:
+  pointerLeave:
+  pointerHover:
+  pointerWheel:
 scripts:
 - text: |
-    //var self = this;
     var counter = 1;
     var _piDiv180 = Math.PI / 180;
     var _180DivPI = 180 / Math.PI;
@@ -41,21 +39,32 @@ scripts:
     var _85 = 85.0 * _piDiv180;
     var _10 = 10.0 * _piDiv180;
     var phi, theta;
-    var lastUpdateTime = undefined; 
-    var positionChanged = false; 
-    //var lastPointerInfo = undefined;    
+
+    var positionChanged = false;
+ 
     this.initialize = function() {
       console.info( "== initialize == navscene == initialize ==" );
       this.input = { 
+        futureActive: function() {
+          return ( this.lookActive || this.moveActive || this.button1Down || this.button2Down || this.keysAreDown() ); 
+        },
+        timeSinceLastEvent: function() { return this.time - this.pointerEventTime; },
+        timeSinceDownEvent: function() { return this.time - this.pointerDownTime; },
+        keysAreDown: function() { return ( this.keyInfo && Object.keys( this.keyInfo.keysDown ).length > 0 ); },
+        keyInfo: undefined,
+        pointerInfo: undefined,
+        lastPointerInfo: undefined,
+        pointerDownTime: undefined,
+        pointerEventTime: undefined,
         lookActive: false, 
         moveActive: false, 
-        futureActive: function() { return this.lookActive || this.moveActive || this.button1Down || this.button2Down; },
         look: [ 0, 0 ],
         move: [ 0, 0 ],
-        previous: {},
-        pointerDown: false,
         button1Down: false,
         button2Down: false,
+        turnLeftDown: false,
+        turnRightDown: false,
+        lastUpdateTime: undefined,
       };
       this.originalSpeed = this.speed;
     }
@@ -76,9 +85,9 @@ scripts:
       }
     }
     this.changeNavMode = function( state ) {
-      console.info( "   this.changeNavMode( "+state+" )" );
+      //console.info( "   this.changeNavMode( "+state+" )" );
       if ( state == 1 ) {
-        console.info( "         this.navmode = " + this.navmode );
+        //console.info( "         this.navmode = " + this.navmode );
         if ( this.navmode == "walk" ) this.navmode = "orbit";
         else if ( this.navmode == "orbit" ) this.navmode = "walk"; 
       }
@@ -106,38 +115,58 @@ scripts:
       if ( state && !active ) {
          this.future( 0.1 ).update();
       }      
-    }    
-    this.mouseDown = function( parms ){
-      this.input.pointerDown = true;
-      this.input.previous = { "x": parms.X, "y": parms.Y, "xp": parms.xPercent, "yp": parms.yPercent };
     }
-    this.mouseUp = function( parms ){
-      //console.info( " navscene.mouseup()" );
-      this.input.previous = undefined;
-      this.input.pointerDown = false;
+    this.pointerIsDown = function() {
+      //console.info( "this.input.pointerInfo " + this.input.pointerInfo );
+      if ( this.input && this.input.pointerInfo ) {
+        var bInfo = this.input.pointerInfo.buttons;
+        if ( bInfo ) {
+          return bInfo.left || bInfo.right || bInfo.middle;        
+        }
+      }
+      return false;
+    }        
+    this.pointerDown = function( parms ){
+      //console.info( " navscene.pointerDown( "+parms.position[0]+", "+parms.position[1]+" )" );
+      this.input.lastPointerInfo = undefined;
+      this.input.pointerInfo = parms;
+      this.input.pointerDownTime = this.time;
     }
-    this.mouseMove = function( parms ){
-      //console.info( " navscene.mouseMove( "+parms.X+", "+parms.Y+" )" );
-      if ( this.input.pointerDown && parms.mouseEventTime - parms.mouseDownTime > 600 ) {
+    this.pointerUp = function( parms ){
+      //console.info( " navscene.pointerUp( "+parms.position[0]+", "+parms.position[1]+" )" );
+      this.input.lastPointerInfo = this.input.pointerInfo;
+      this.input.pointerInfo = undefined;      
+    }
+    this.pointerMove = function( parms ){
+      this.input.pointerEventTime = this.time;
+      this.input.lastPointerInfo = this.input.pointerInfo;
+      this.input.pointerInfo = parms;
+      //console.info( " navscene.mouseMove( "+parms.position[0]+", "+parms.position[1]+" )" );
+      if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
+        var pi = this.input.pointerInfo;
+        var lastPi = this.input.lastPointerInfo;
         var xDelta = 0;
         var yDelta = 0;
         var active = this.input.futureActive();
         
-        if ( this.input.previous ) {
-          xDelta = parms.X - this.input.previous.x;
-          yDelta = parms.Y - this.input.previous.y;
-        }
+        //console.info( "navmode " + this.navmode );
+        //console.info( "pi.position " + pi.position + "    lastPi.position " + lastPi.position );
+        //console.info( "dragModeMove " + this.dragModeMove );
+        
         switch( this.navmode ) {
           case "orbit":
+            if ( pi && lastPi ) {
+              xDelta = ( pi.position[0] - lastPi.position[0] ) * this.size[0];
+              yDelta = ( pi.position[1] - lastPi.position[1] ) * this.size[1];
+            }        
+            //console.info( "xDelta " + xDelta + "      yDelta " + yDelta );
             this.orbit( xDelta, yDelta );
-            this.input.previous = { "x": parms.X, "y": parms.Y, "xp": parms.xPercent, "yp": parms.yPercent };
             break;          
           case "walk":
             if ( this.dragModeMove )
-              this.move( (parms.xPercent*2.0)-1, (parms.yPercent*2.0)-1 );
+              this.move( ( pi.position[0]*2.0 )-1, ( pi.position[1]*2.0 )-1 );
             else
-              this.look( (parms.xPercent*2.0)-1, (parms.yPercent*2.0)-1 );
-            this.input.previous = { "x": parms.X, "y": parms.Y, "xp": parms.xPercent, "yp": parms.yPercent };
+              this.look( ( pi.position[0]*2.0 )-1, ( pi.position[1]*2.0 )-1 );
             break;
         }
         if ( !active ) {
@@ -145,17 +174,21 @@ scripts:
         }
       }    
     }
-    this.mouseOver = function( parms ){ 
+    this.pointerOver = function( parms ){ 
     }
-    this.mouseEnter = function( parms ){ 
+    this.pointerEnter = function( parms ){ 
     }
-    this.mouseLeave = function( parms ){
-      this.input.pointerDown = false;
-      this.input.previous = undefined;      
+    this.pointerLeave = function( parms ){
+      this.input.lastPointerInfo = this.input.pointerInfo;
+      this.input.pointerInfo = undefined;       
     }
-    this.mouseHover = function( parms ){ 
+    this.pointerHover = function( parms ){ 
     }
-    this.mouseWheel = function( parms ) {
+    this.pointerWheel = function( parms ) {
+      this.input.pointerEventTime = this.time;
+      this.input.lastPointerInfo = this.input.pointerInfo;
+      this.input.pointerInfo = parms[0];      
+
       if (!this.activeCameraComp) {
         this.getActiveCamera();
       }
@@ -174,9 +207,9 @@ scripts:
         trans[1] = trans[1] / mag;
 
         var mult = 0;
-        if ( parms.wheelDeltaY ) {
-          mult = Math.abs( parms.wheelDeltaY / 20 );
-          if ( parms.wheelDeltaY < 0 ) {
+        if ( this.input.pointerInfo.wheel.deltaY ) {
+          mult = Math.abs( this.input.pointerInfo.wheel.deltaY / 20 );
+          if ( this.input.pointerInfo.wheel.deltaY < 0 ) {
             // backwards
             yinc = yinc - parseFloat( trans[1] ); 
             xinc = xinc - parseFloat( trans[0] );
@@ -187,7 +220,7 @@ scripts:
           }
         }
 
-        if ( this.orbitRadius == -1 || new Date().getTime() - lastUpdateTime > 500 ) {
+        if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
         
@@ -222,37 +255,52 @@ scripts:
         }
       }
     }
-    this.handleKeyEvents = function( keyMap, now, lasttime ) {
+    this.keyDown = function( parms ) {
+      var active = this.input.futureActive();
+      this.input.keyInfo = parms;
+      this.handleKeyEvents();
+      if ( !active ) {
+        this.future( 0.1 ).update();
+      }
+    }
+    this.keyUp = function( parms ) {
+      this.input.keyInfo = parms;
+    }
+    this.handleKeyEvents = function() {
       if (!this.activeCameraComp) {
         this.getActiveCamera();
       }      
       if ( this.activeCameraComp ) {
-        var look = [ 0, 0 ];
-        var move = [ 0, 0 ]; 
+
         var deltaZ = 0;
-        for ( keyPress in keyMap.keys ) {
-          switch ( Number( keyPress ) ) {
+        var kd = this.input.keyInfo.keysDown;
+
+        this.input.look = [ 0, 0 ];
+        this.input.move = [ 0, 0 ];
+        
+        for ( keyPress in kd ) {
+          switch ( Number( kd[ keyPress ].code ) ) {
             case 87:  //w
             case 38:  //up
-              move[1] += -1;
+              this.input.move[1] += -1;
               break;
             case 83:  //s
             case 40:  //down
-              move[1] += 1;
+              this.input.move[1] += 1;
               break;
             case 65:  //a
-              move[0] += -1;
+              this.input.move[0] += -1;
               break;
             case 68:  //d
-              move[0] += 1;
+              this.input.move[0] += 1;
               break;
             case 37: // left
             case 81: // q
-              look[0] += -1;
+              this.input.look[0] += -1;
               break;
             case 39: // right
             case 69: // e
-              look[0] += 1;
+              this.input.look[0] += 1;
               break;
             case 90: // z
               console.info( "position: " + this.activeCameraComp.position );
@@ -272,11 +320,11 @@ scripts:
           }
         }
         
-        if ( look[0] != 0 || look[1] != 0 ) {
-          this.look( look[0], look[1] );
-        }          
-        if ( move[0] != 0 || move[1] != 0 ) {
-          this.move( move[0], move[1] );
+        if ( this.input.look[0] != 0 || this.input.look[1] != 0 ) {
+          this.look( this.input.look[0], this.input.look[1] );
+        }
+        if ( this.input.move[0] != 0 || this.input.move[1] != 0 ) {
+          this.move( this.input.move[0], this.input.move[1] );
         }
         if ( deltaZ != 0 ) {
           this.cameraZ( deltaZ );
@@ -396,7 +444,7 @@ scripts:
         yinc = yinc + parseFloat( trans[1] ) * speed; 
         xinc = xinc + parseFloat( trans[0] ) * speed;
 
-        if ( this.orbitRadius == -1 || new Date().getTime() - lastUpdateTime > 500 ) {
+        if ( this.orbitRadius == -1 || vwf.time() - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
         
@@ -477,7 +525,7 @@ scripts:
         if ( this.speed < this.originalSpeed ) this.speed = this.originalSpeed;
       }
       
-      lastUpdateTime = new Date().getTime();
+      this.input.lastUpdateTime = this.time;
     }    
     this.orbit = function( xDelta, yDelta ){
       if (!this.activeCameraComp) this.getActiveCamera();
@@ -509,7 +557,8 @@ scripts:
       }
     }
     this.translate= function( x, y ) {
-      if (!this.activeCameraComp) this.getActiveCamera();
+      if (!this.activeCameraComp) 
+      this.getActiveCamera();
       if ( this.activeCameraComp ) {
         var speed = this.speed;
         var pos = this.activeCameraComp.position;
@@ -536,22 +585,34 @@ scripts:
     }
 methods:
   update: |
+    //console.info( "update   this.input + " + this.input );
     if ( this.input ) {
-      if ( this.input.pointerDown ) {
+      //console.info( "update   calling pointerIsDown " );
+      if ( this.pointerIsDown() ) {
+        if ( this.input.pointerInfo.buttons.left ) {
+          var pi = this.input.pointerInfo;
+          var lastPi = this.input.lastPointerInfo;
           var xDelta = 0;
           var yDelta = 0;
           switch( this.navmode ) {
             case "orbit":
+              if ( pi && lastPi ) {
+                xDelta = ( pi.position[0] - lastPi.position[0] ) * this.width;
+                yDelta = ( pi.position[1] - lastPi.position[1] ) * this.height;
+              }            
               this.orbit( xDelta, yDelta );
               break;          
             case "walk":
               if ( this.dragModeMove )
-                this.move( (this.input.previous.xp*2.0)-1, (this.input.previous.yp*2.0)-1 );
+                this.move( (pi.position[0]*2.0)-1, (pi.position[1]*2.0)-1 );
               else
-                this.look( (this.input.previous.xp*2.0)-1, (this.input.previous.yp*2.0)-1 );
+                this.look( (pi.position[0]*2.0)-1, (pi.position[1]*2.0)-1 );
               break;
-          }    
-      }
+          } 
+        }
+      }   
+      if ( this.input.keysAreDown() )
+        this.handleKeyEvents();
       if ( this.input.lookActive ) {
         this.look( this.input.look[0], this.input.look[1] );
       }
