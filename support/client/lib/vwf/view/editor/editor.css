@@ -29,17 +29,29 @@
 	pointer-events:all;
 }
 
-.vwf-tree p {
-	font:16pt Arial;
-	font-weight:bold;
-	/*background:#153255;*/
-	margin:0px;
-}
-
-.vwf-tree td {
-	font-weight:normal;
-}
-
 .vwf-tree hr {
 	color:#000044;
+}
+
+.header 
+{
+	font:16pt Arial;
+	font-weight:bold;
+	padding-left:10px;
+	padding-right:10px;
+	padding-top:5px;
+	padding-bottom:10px;
+	margin-bottom:5px;
+	background:#153255;
+}
+
+.propEntry 
+{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.childEntry {
+	padding-left:10px;
+	padding-right:10px;
 }

@@ -87,6 +87,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         satProperty: function (nodeID, propertyName, propertyValue) {
             var node = this.nodes[ nodeID ];
             node.properties[ propertyName ].value = propertyValue;
+            
+            var divName = '#' + nodeID + '-' + propertyName;
+            $(divName).html("<b>" + propertyName + " </b> " + propertyValue);
         },
         
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
@@ -152,12 +155,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             drillDown.call(this, "index-vwf");
             $('#topdown').show('slide', {direction: 'right'}, 500); 
             $('#editor').animate({ 'left' : "-=260px" }, 500);
+            $('#launchEditor').attr('src', 'images/editorClose.png');
         }
         else
         {
             editorVisible = false;
             $('#topdown').hide('slide', {direction: 'right'}, 500); 
             $('#editor').animate({ 'left' : "+=260px" }, 500);
+            $('#launchEditor').attr('src', 'images/editor.png');
         }
     }
     
@@ -169,17 +174,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
      
         if(nodeID == "index-vwf") node.name = "index";
         
-        $('#topdown').html("<p>" + node.name + "<hr noshade='noshade'></p>");
+        $('#topdown').html("<div class='header'>" + node.name + "</div>");
         
         for ( var i = 0; i < node.properties.length; i++ ) {
-            $('#topdown').append("<div><b>" + node.properties[i].name + " </b> " + node.properties[i].value + "</div>");
+            $('#topdown').append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><b>" + node.properties[i].name + " </b> " + node.properties[i].value + "</div>");
             if(i != node.properties.length-1) $('#topdown').append("<hr>");
         }
 
         $('#topdown').append("<hr noshade='noshade'>");
         
         for ( var i = 0; i < node.children.length; i++ ) {
-            $('#topdown').append("<div id='" + node.children[i].ID + "'><b>" + node.children[i].name + "</b></div><hr>");
+            $('#topdown').append("<div id='" + node.children[i].ID + "' class='childEntry'><b>" + node.children[i].name + "</b></div><hr>");
             $('#' + node.children[i].ID).click( function(evt) {
                 drillDown($(this).attr("id"));
             });            
