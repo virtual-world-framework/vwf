@@ -1,0 +1,31 @@
+--- 
+extends: |
+  http://vwf.example.com/types/node3
+properties:
+  spin-spinning:
+    set: |
+      if ( value && ! this["spin-spinning"] ) {
+        this["spin-spinning"] = true;
+        this.spin();
+      } else if ( ! value && this["spin-spinning"] ) {
+        this["sway-start"] = false;
+      }
+    value: false
+  spin-rate: 1
+  spin-axis: [ 0, 0, 1 ]
+methods:
+  spin: |
+    if ( this["spin-spinning"] ) {
+      var rotation = this.rotation;
+      this.rotation = [
+        rotation[0] + this["spin-axis"][0] * 2 * Math.PI * 0.05 * this["spin-rate"],
+        rotation[1] + this["spin-axis"][1] * 2 * Math.PI * 0.05 * this["spin-rate"],
+        rotation[2] + this["spin-axis"][2] * 2 * Math.PI * 0.05 * this["spin-rate"],
+      ];
+      this.future( 0.05 ).spin();
+    }
+scripts:
+- |
+  this.pointerClick = function()  {
+    this["spin-spinning"] = ! this["spin-spinning"];
+  }
