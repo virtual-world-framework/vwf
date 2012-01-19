@@ -12,7 +12,7 @@ children:
       eulers: [ 90, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
       spin-rate: 0.1
-      spin-axis: [ 0, -1, 0 ]
+      spin-axis: [ 0, 1, 0 ]
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
