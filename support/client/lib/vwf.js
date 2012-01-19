@@ -673,16 +673,27 @@ childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id
             // component specification to construct().
     
             this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
-                construct.call( this, nodeID, childNodeID, childPrototypeID, component, childName, function( childNodeID ) {
+
+                async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
+
+                    vwf.getType( uri, function( childBehaviorID ) {
+                        callback( undefined, childBehaviorID );
+                    } );
+
+                }, function( err, childBehaviorIDs ) {
+
+                    construct.call( vwf, nodeID, childNodeID, childPrototypeID, childBehaviorIDs, component, childName, function( childNodeID ) {
 if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
 vwf.addChild( nodeID, childNodeID, childName );
-                    if ( nodeID == 0 && component["extends"] && component["extends"] != nodeTypeURI && component["extends"][0] != "@" ) {  // TODO: const for root id  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
-                        jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html", function() { // load the UI chrome if available
+                        if ( nodeID == 0 && component["extends"] && component["extends"] != nodeTypeURI && component["extends"][0] != "@" ) {  // TODO: const for root id  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
+                            jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html", function() { // load the UI chrome if available
+                                callback && callback.call( vwf, childNodeID );
+                            } );
+                        } else {
                             callback && callback.call( vwf, childNodeID );
-                        } );
-                    } else {
-                        callback && callback.call( vwf, childNodeID );
-                    }
+                        }
+                    } );
+
                 } );
 
             } );
@@ -764,7 +775,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                 this.logger.info( "vwf.getType: creating type " + uri );
 
-                construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID ) {
+                construct.call( this, 0, nodeID, prototypeID, [], component, undefined, function( nodeID ) {
 
                     var callbacks = types[nodeID];
                     types[nodeID] = component; // component specification once loaded
@@ -794,7 +805,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
 
-                            construct.call( this, 0, nodeID, prototypeID, component, undefined, function( nodeID ) {
+                            construct.call( this, 0, nodeID, prototypeID, [], component, undefined, function( nodeID ) {
 
                                 var callbacks = types[nodeID];
                                 types[nodeID] = component; // component specification once loaded
@@ -1430,7 +1441,7 @@ return component;
 
         // -- createEvent --------------------------------------------------------------------------
 
-        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)
+        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
 
             this.logger.group( "vwf.createEvent " + nodeID + " " + eventName + " " + eventParameters );
 
@@ -1495,7 +1506,7 @@ return component;
             var lastAncestorID = "";
 
             // Make space to record the parameters sent to each node. Parameters provided for upper
-            // node cascade down until another definition is found for a lower node. We'll remember
+            // nodes cascade down until another definition is found for a lower node. We'll remember
             // these on the way down and replay them on the way back up.
 
             var cascadedEventNodeParameters = {
@@ -1717,7 +1728,7 @@ return component;
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( parentID, nodeID, prototypeID, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
+        var construct = function( parentID, nodeID, prototypeID, behaviorIDs, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
 
             this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
 
@@ -1732,12 +1743,15 @@ return component;
 
                         var driver_ready = true;
 
-                        model.creatingNode && model.creatingNode( parentID, nodeID, prototypeID, [], nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+                        model.creatingNode && model.creatingNode( parentID, nodeID, prototypeID, behaviorIDs,
+                                nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                 vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
                                 driver_ready = ready;
                                 driver_ready && callback( undefined );
                             }
+
                         } );
 
                         driver_ready && callback( undefined );
@@ -1757,12 +1771,15 @@ return component;
 
                         var driver_ready = true;
 
-                        view.createdNode && view.createdNode( parentID, nodeID, prototypeID, [], nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+                        view.createdNode && view.createdNode( parentID, nodeID, prototypeID, behaviorIDs,
+                                nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                 vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
                                 driver_ready = ready;
                                 driver_ready && callback( undefined );
                             }
+
                         } );
 
                         driver_ready && callback( undefined );

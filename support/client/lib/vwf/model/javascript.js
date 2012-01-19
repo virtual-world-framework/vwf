@@ -41,17 +41,35 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var self = this;
 
+            // Get the prototype node.
+
             var prototype = this.nodes[childExtendsID] || Object.prototype;
 
+            // Get the behavior nodes.
+
+            var behaviors = ( childImplementsIDs || [] ).map( function( childImplementsID ) {
+                return self.nodes[childImplementsID];
+            } );
+
+            // For each behavior, create a proxy for this node to the behavior and attach it above
+            // the prototype, or above the most recently-attached behavior.
+
+            behaviors.forEach( function( behavior ) {
+                prototype = proxiedBehavior.call( self, prototype, behavior );
+            } );
+
+            // Create the node. It's prototype is the most recently-attached behavior, or the
+            // specific prototype if no behaviors are attached.
+
             var node = this.nodes[childID] = Object.create( prototype );
-
-node.id = childID; // TODO: move to vwf/model/object
-
-            node.name = childName;
 
             Object.defineProperty( node, "private", {
                 value: {} // for bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
             } );
+
+node.id = childID; // TODO: move to vwf/model/object
+
+            node.name = childName;
 
             node.parent = undefined;
 
@@ -538,6 +556,183 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
     // == Private functions ========================================================================
 
+    // -- proxiedBehavior --------------------------------------------------------------------------
+
+    function proxiedBehavior( prototype, behavior ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.
+
+        var self = this;
+
+        var proxy = Object.create( prototype );
+
+        Object.defineProperty( proxy, "private", {
+            value: Object.create( behavior.private || Object.prototype )
+        } );
+
+        proxy.private.origin = behavior; // the node we're the proxy for
+
+proxy.id = behavior.id; // TODO: move to vwf/model/object
+
+        proxy.name = behavior.name;
+
+        proxy.parent = behavior.parent;
+
+        proxy.source = behavior.source;
+        proxy.type = behavior.type;
+
+        proxy.properties = Object.create( prototype.properties || Object.prototype, {
+            node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
+        } );
+
+        for ( var propertyName in behavior.properties ) {
+
+            if ( behavior.properties.hasOwnProperty( propertyName ) ) {
+
+                ( function( propertyName ) {
+
+                    Object.defineProperty( proxy.properties, propertyName, { // "this" is proxy.properties in get/set
+                        get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
+                        set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
+                        enumerable: true
+                    } );
+
+proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                    Object.defineProperty( proxy, propertyName, { // "this" is proxy in get/set
+                        get: function() { return self.kernel.getProperty( this.id, propertyName ) },
+                        set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
+                        enumerable: true
+                    } );
+
+                } )( propertyName );
+            
+            }
+
+        }
+
+        proxy.methods = Object.create( prototype.methods || Object.prototype, {
+            node: { value: proxy } // for proxy.methods accessors (non-enumerable)  // TODO: hide this better
+        } );
+
+        for ( var methodName in behavior.methods ) {
+
+            if ( behavior.methods.hasOwnProperty( methodName ) ) {
+
+                ( function( methodName ) {
+
+                    Object.defineProperty( proxy.methods, methodName, { // "this" is proxy.methods in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
+                                return self.kernel.callMethod( this.node.id, methodName, arguments );
+                            };
+                        },
+                        set: function( value ) {
+                            this.node.methods.hasOwnProperty( methodName ) ||
+                                self.kernel.createMethod( this.node.id, methodName );
+                            this.node.private.bodies[methodName] = value;
+                        },
+                        enumerable: true,
+                    } );
+
+proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                    Object.defineProperty( proxy, methodName, { // "this" is proxy in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
+                                return self.kernel.callMethod( this.id, methodName, arguments );
+                            };
+                        },
+                        set: function( value ) {
+                            this.methods.hasOwnProperty( methodName ) ||
+                                self.kernel.createMethod( this.id, methodName );
+                            this.private.bodies[methodName] = value;
+                        },
+                        enumerable: true,
+                    } );
+
+                } )( methodName );
+            
+            }
+
+        }
+
+        proxy.events = Object.create( prototype.events || Object.prototype, {
+            node: { value: proxy } // for proxy.events accessors (non-enumerable)  // TODO: hide this better
+        } );
+
+        for ( var eventName in behavior.events ) {
+
+            if ( behavior.events.hasOwnProperty( eventName ) ) {
+
+                ( function( eventName ) {
+
+                    Object.defineProperty( proxy.events, eventName, { // "this" is proxy.events in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.events
+                                return self.kernel.fireEvent( this.node.id, eventName, arguments );
+                            };
+                        },
+                        set: function( value ) {
+                            var listeners = this.node.private.listeners[eventName] ||
+                                ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                            if ( typeof value == "function" || value instanceof Function ) {
+                                listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
+                            } else if ( value.add ) {
+                                if ( ! value.phases || value.phases instanceof Array ) {
+                                    listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
+                                } else {
+                                    listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
+                                }
+                            } else if ( value.remove ) {
+                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                    return listener.handler !== value.handler;
+                                } );
+                            } else if ( value.flush ) {
+                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                    return listener.context !== value.context;
+                                } );
+                            }
+                        },
+                        enumerable: true,
+                    } );
+
+proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+                    Object.defineProperty( proxy, eventName, { // "this" is proxy in get/set
+                        get: function() {
+                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
+                                return self.kernel.fireEvent( this.id, eventName, arguments );
+                            };
+                        },
+                        set: function( value ) {
+                            var listeners = this.private.listeners[eventName] ||
+                                ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                            if ( typeof value == "function" || value instanceof Function ) {
+                                listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
+                            } else if ( value.add ) {
+                                if ( ! value.phases || value.phases instanceof Array ) {
+                                    listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
+                                } else {
+                                    listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
+                                }
+                            } else if ( value.remove ) {
+                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                    return listener.handler !== value.handler;
+                                } );
+                            } else if ( value.flush ) {
+                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                    return listener.context !== value.context;
+                                } );
+                            }
+                        },
+                        enumerable: true,
+                    } );
+
+                } )( eventName );
+
+            }
+
+        }
+
+        return proxy;
+    }
+
     // -- refreshedFuture --------------------------------------------------------------------------
 
     function refreshedFuture( node, when, callback ) { // invoke with the model as "this"
@@ -745,7 +940,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
         if ( targetOnly ) {
             return prototypeListeners.concat( nodeListeners.filter( function( listener ) {
-                return listener.context == node; // in the prototypes, select self-targeted listeners only
+                return listener.context == node || listener.context == node.private.origin; // in the prototypes, select self-targeted listeners only
             } ) );
         } else {
             return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node
