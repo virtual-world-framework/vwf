@@ -28,8 +28,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
-            this.types = {}; // maps id => function() { }
-            this.root = undefined;
             this.nodes = {}; // maps id => new type()
             this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
@@ -43,46 +41,37 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var self = this;
 
-            var type = childExtendsID ? this.types[childExtendsID] : Object;
+            var prototype = this.nodes[childExtendsID] || Object.prototype;
 
-            if ( ! type ) {
-
-                var prototype = this.nodes[childExtendsID];
-
-                type = this.types[childExtendsID] = function() { };
-
-                type.prototype = prototype;
-                type.prototype.constructor = type; // resetting constructor breaks enumerables?
-
-            }
-
-            var node = this.nodes[childID] = new type( childSource, childType );
+            var node = this.nodes[childID] = Object.create( prototype );
 
 node.id = childID; // TODO: move to vwf/model/object
 
             node.name = childName;
 
-            node.private = {}; // bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
+            Object.defineProperty( node, "private", {
+                value: {} // for bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
+            } );
 
             node.parent = undefined;
 
             node.source = childSource;
             node.type = childType;
 
-            node.properties = Object.create( Object.getPrototypeOf( node ).properties || Object.prototype, {
+            node.properties = Object.create( prototype.properties || Object.prototype, {
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
             node.private.getters = {};
             node.private.setters = {};
 
-            node.methods = Object.create( Object.getPrototypeOf( node ).methods || Object.prototype, {
+            node.methods = Object.create( prototype.methods || Object.prototype, {
                 node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
             node.private.bodies = {};
 
-            node.events = Object.create( Object.getPrototypeOf( node ).events || Object.prototype, {
+            node.events = Object.create( prototype.events || Object.prototype, {
                 node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -125,7 +114,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
             // Define the "time" property.
 
-            Object.defineProperty( node, "time", {
+            Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return self.kernel.time();
                 },
@@ -136,36 +125,38 @@ node.id = childID; // TODO: move to vwf/model/object
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.
 
-            Object.defineProperty( node, "in", {
+            Object.defineProperty( node, "in", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
                     return refreshedFuture.call( self, this, -when, callback ); // relative time
                 },
                 enumerable: true,
             } );
 
-            Object.defineProperty( node, "at", {
+            Object.defineProperty( node, "at", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
                     return refreshedFuture.call( self, this, when, callback ); // absolute time
                 },
                 enumerable: true,
             } );
 
-            Object.defineProperty( node, "future", { // same as "in"
+            Object.defineProperty( node, "future", { // same as "in"  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return this.in;
                 },
                 enumerable: true,
             } );
 
-            node.private.future = Object.create( Object.getPrototypeOf( node ).private ?
-                Object.getPrototypeOf( node ).private.future : Object.prototype
+            node.private.future = Object.create( prototype.private ?
+                prototype.private.future : Object.prototype
             );
 
-            node.private.future.private = {
-                when: 0,
-                callback: undefined,
-                change: 0,
-            };
+            Object.defineProperty( node.private.future, "private", {
+                value: {
+                    when: 0,
+                    callback: undefined,
+                    change: 0,
+                }
+            } );
 
             node.private.change = 0; // incremented whenever "future"-related changes occur
 
