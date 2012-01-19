@@ -1,8 +1,6 @@
 ---
 extends: http://vwf.example.com/types/glge
 properties:
-  orbitRadius: -1
-  orbitObjectID: "http-vwf-example-com-types-node3-worldCenter"
   lineWidth: 32
   lineColor: [ 0, 0, 0 ]
   lineHeight: 100
@@ -19,7 +17,15 @@ properties:
         case "orbit":
         case "draw":
         case "pindrop":
-           this.mouseMode = value;
+          this.mouseMode = value;
+          if ( value == "orbit" ) {
+            this.navmode = "orbit";
+          } else if ( value == "look" ) {
+            this.navmode = "walk";
+            this.dragModeMove = false;
+          } else {
+            this.navmode = "none";
+          }          
           break;
         default:
           console.info( "WARNING: walk, look, and draw are the only supported mouseMode" );
@@ -38,21 +44,11 @@ methods:
     }
 scripts:
 - text: |
-    var _piDiv180 = Math.PI / 180;
-    var _180DivPI = 180 / Math.PI;
-    var _2PI = 2 * Math.PI;
-    var _85 = 85.0 * _piDiv180;
-    var _10 = 10.0 * _piDiv180;
-    var pointerDown = false;
     var counter = 1;
-    var pointerCoord = null;
-    var phi, theta;
-    var positionChanged = false;
     var lineIndex = 1;
     var cubeIndex = 1;
     var coneIndex = 1;
     var pushpinIndex = 1;
-    var lastUpdateTime = undefined;
     var line = {
       "extends": "http://vwf.example.com/types/node3",
       "type": "definition/mesh",
@@ -87,93 +83,41 @@ scripts:
     // functions
     this.initialize = function() {
       this.lastDrawPoint = undefined;
+      this.mouseMode = "orbit";
       this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
       this.nodesCreated = [];
       this.originalSpeed = this.speed;
     }
-    this.mouseDown = function( parms ){
-      pointerDown = true;
-      pointerCoord = { "x": parms.X, "y": parms.Y };
-      if ( parms.pickInfo && parms.pickInfo.coord ) {
-        this.lastDrawPoint = parms;
+    this.pointerDown = function( parms, pickInfo ){
+      //console.info( " appscene.pointerDown( "+parms.position[0]+", "+parms.position[1]+" )" );
+      if ( pickInfo ) {
+        this.lastDrawPoint = { pickInfo: pickInfo };
       } else {
         this.lastDrawPoint = undefined;
       }
     }
-    this.mouseUp = function( parms ){
-      pointerDown = false;
+    this.pointerMove = function( parms, pickInfo ){
+      //console.info( " appscene.pointerMove( "+parms.position[0]+", "+parms.position[1]+" )" );
+      //console.info( " appscene.pointerMove() this.mouseMode = " + this.mouseMode );
+      if ( this.pointerIsDown() ) {
+        //console.info( " appscene.pointerMove() pointerDown" );
+        switch( this.mouseMode ) {
+          case "draw":
+            if ( this.distanceFromLast( pickInfo ) > this.minDistanceSquared ) {
+              this.draw( pickInfo );
+            }
+            break;
+        }
+      }
+    }
+    this.pointerUp = function( parms, pickInfo ){
+      //console.info( " appscene.pointerUp( "+parms.position[0]+", "+parms.position[1]+" )" );
       switch ( this.mouseMode ) {
         case "pindrop":
-          this.pindrop( parms );
+          this.pindrop( pickInfo );
           break;  
       }
-      pointerCoord = undefined;
       this.lastDrawPoint = undefined;    
-    }
-    this.mouseWheel = function( parms ) {
-      if (!this.activeCameraComp) {
-        this.getActiveCamera();
-      }
-      if ( this.activeCameraComp ) {
-        var camerapos = this.activeCameraComp.position;
-        var camerarot = this.activeCameraComp.rotation;
-        var yinc = 0;
-        var xinc = 0;
-        var zinc = 0;
-        if ( parms.mag == 0 ) parms.mag = 1;
-        parms.trans[0] = parms.trans[0] / parms.mag;
-        parms.trans[1] = parms.trans[1] / parms.mag;
-
-        var mult = 0;
-        if ( parms.wheelDeltaY ) {
-          mult = Math.abs( parms.wheelDeltaY / 20 );
-          if ( parms.wheelDeltaY < 0 ) {
-            // backwards
-            yinc = yinc - parseFloat( parms.trans[1] ); 
-            xinc = xinc - parseFloat( parms.trans[0] );
-          } else if ( parms.wheelDeltaY > 0 ) {
-            //forward
-            yinc = yinc + parseFloat( parms.trans[1] ); 
-            xinc = xinc + parseFloat( parms.trans[0] );
-          }
-        }
-
-        if ( this.orbitRadius == -1 || new Date().getTime() - lastUpdateTime > 500 ) {
-          this.update();
-        }
-        
-        if (xinc != 0 || yinc != 0 ) {
-          var origX, origY, origZ;
-          var x, y, z, atBounds = false;
-          
-          origX = camerapos[0];
-          origY = camerapos[1];
-          origZ = camerapos[2];
-        
-          x = origX + xinc * this.speed * mult;
-          if ( x > 25000 ) { x = 25000; atBounds = true; }
-          else if ( x < -25000 ) { x = -25000; atBounds = true; }
-          
-          y = origY + yinc * this.speed * mult;
-          if ( y > 25000 ) { y = 25000; atBounds = true; }
-          else if ( y < -25000 ) { y = -25000;  atBounds = true; }         
-          
-          z = origZ;
-          if ( atBounds ) { x = origX; y = origY; }
-          else {
-            var ratioHR = camerapos[2] / this.orbitRadius;
-            zinc = Math.sqrt( Math.pow( x-origX, 2 ) + Math.pow( y-origY, 2 ) ) * ratioHR;
-            if ( parms.wheelDeltaY > 0 ) zinc *= -1;
-            z = origZ + zinc;
-            if ( z > 25000 ) z = 25000;
-            else if ( z < 1000 ) z = origZ;
-          }
-
-          this.activeCameraComp.position = [ x, y, z ];
-          positionChanged = true;
-        }
-
-      }
     }
     this.multiply = function( v, value ) {
       for ( var i = 0; i < v.length; i++ ) {
@@ -197,205 +141,13 @@ scripts:
       v[2] /= f;
       return f;
     }   
-    this.mouseMove = function( parms ){
-      if ( pointerDown ) {
-        switch( this.mouseMode ) {
-          case "draw":
-            if ( this.distanceFromLast( parms ) > this.minDistanceSquared ) {
-              this.draw( parms );
-            }
-            break;
-          case "orbit":
-            this.orbit( parms );
-            pointerCoord = { "x": parms.X, "y": parms.Y };
-            break;          
-          case "look":
-            this.look( parms );
-            pointerCoord = { "x": parms.X, "y": parms.Y };
-            break;
-        }
-      }
-    }
-    this.mouseOver = function( parms ){ }
-    this.mouseEnter = function( parms ){ }
-    this.mouseHover = function( parms ){ }
-    this.mouseLeave = function( parms ){
-      pointerDown = false;
-      pointerCoord = null;      
-    }
-    
-    this.handleKeyEvents = function( keyMap, now, lasttime, mat, trans, mag ) {
-      if (!this.activeCameraComp) {
-        this.getActiveCamera();
-      }
-      if ( this.activeCameraComp ) {
-        var camerapos = this.activeCameraComp.position;
-        var camerarot = this.activeCameraComp.rotation;
-        var yinc = 0;
-        var xinc = 0;
-        var zinc = 0;
-        var yRot = 0;
-        if ( mag == 0 ) mag = 1;
-        trans[0] = trans[0] / mag;
-        trans[1] = trans[1] / mag;
-        for ( keyPress in keyMap.keys ) {
-          switch ( Number( keyPress ) ) {
-            case 87:  // w
-            case 38:  // up
-              yinc = yinc + parseFloat(trans[1]); xinc = xinc + parseFloat(trans[0]);
-              break;
-            case 83:  // s
-            case 40:  // down
-              yinc = yinc - parseFloat(trans[1]); xinc = xinc - parseFloat(trans[0]);
-              break;
-            case 37: // left
-            case 65: // a
-            case 81: // q
-              yinc = yinc + parseFloat(trans[0]); xinc = xinc - parseFloat(trans[1]);
-              break;
-            case 39: // right
-            case 68: // d
-            case 69: // e
-              yinc = yinc - parseFloat(trans[0]); xinc = xinc + parseFloat(trans[1]);
-              break;
-            case 90: // z
-              console.info( "position: " + camerapos );
-              console.info( "rotation: " + camerarot );
-              break;
-            case 88: // x
-              break;
-            case 82: // r
-              zinc = zinc + 1.0;
-              break;
-            case 67: // c
-              zinc = zinc - 1.0;
-              break;
-            case 16: // 0
-              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-worldCenter");
-              break;
-            case 17: // 1
-              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-predator1");
-              break;
-            case 18: // 2
-              vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-predator2");
-              break;
-            default:
-              break;
-          }
-        }
-        
-        if ( new Date().getTime() - lastUpdateTime > 500 ) {
-          this.update();
-        }
-        
-        if ( yRot != 0 ) {
-          this.activeCameraComp.rotation = [ camerarot[0], camerarot[1] + yRot, camerarot[2] ];
-        }
-        if (xinc != 0 || yinc != 0 || zinc != 0) {
-          var origX, origY, origZ;
-          var x, y, z, atBounds = false;
-          
-          origX = camerapos[0];
-          origY = camerapos[1];
-          origZ = camerapos[2];
-          
-          x = origX + xinc * this.speed;
-          if ( x > 50000 ) { x = 50000; atBounds = true; }
-          else if ( x < -50000 ) { x = -50000; atBounds = true; }
-          
-          y = origY + yinc * this.speed;
-          if ( y > 50000 ) { y = 50000; atBounds = true; }
-          else if ( y < -50000 ) { y = -50000;  atBounds = true; }         
-          
-          if ( atBounds ) { x = origX; y = origY; }
-          
-          z = origZ + zinc * this.speed;
-          if ( z > 50000 ) z = 50000;
-          else if ( z < 0 ) z = 0;          
-          
-          this.activeCameraComp.position = [ x, y, z ];
-          positionChanged = true;
-        }
-      }
-    }
-    this.update = function() {
-      var pos = this.activeCameraComp.position;
-      var oldRadius = this.orbitRadius;
-      this.orbitRadius = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2]) );
-      var dist2D = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) );
-      phi = Math.acos( pos[2] / this.orbitRadius );
-      if ( 0 <= pos[0] ) theta = Math.asin( pos[1]/dist2D );
-      else theta = Math.PI - Math.asin( pos[1]/dist2D );
-      
-      if ( oldRadius != -1 ) {
-        if ( this.orbitRadius > oldRadius )
-          this.speed += ( this.orbitRadius - oldRadius ) * 0.006;
-        else if ( this.orbitRadius < oldRadius )
-          this.speed -= ( oldRadius - this.orbitRadius ) * 0.006;
-        if ( this.speed > 600 ) this.speed = 500;
-        if ( this.speed < this.originalSpeed ) this.speed = this.originalSpeed;
-      }
-      
-      lastUpdateTime = new Date().getTime();
-    }
-    this.look = function( parms ) {
-      if (!this.activeCameraComp) this.getActiveCamera();
-      if ( this.activeCameraComp ) {
-        var rot = this.activeCameraComp.rotation;
-        var viewCenter = [ 400, 300 ];
-        var incX = -( viewCenter[1] - parms.Y ) * 0.001;
-        var incY = ( viewCenter[0] - parms.X ) * 0.0002;
-        //console.info( "X = " + parms.X + "    Y = " + parms.Y + "   incX = " + incX + "    incY = " + incY );
-
-        if ( parms.mag == 0 ) parms.mag = 1;
-        parms.trans[0] = parms.trans[0] / parms.mag;
-        parms.trans[1] = parms.trans[1] / parms.mag;
-        
-        this.activeCameraComp.rotation = [ 1.56 - parms.trans[1] * incX, rot[1] + incY, -parms.trans[0] * incX ];
-      }      
-    }
-    this.orbit = function( parms ){
-      //console.info( "   Orbit ---------------" );
-      if (!this.activeCameraComp) this.getActiveCamera();
-      if ( this.activeCameraComp ) {
-
-        var xDelta = parms.X - pointerCoord.x;
-        var yDelta = parms.Y - pointerCoord.y;
-       
-        this.activeCameraComp.lookAt = this.orbitObjectID;
-        this.update();
-        
-        var pixelToRadian = 14 / this.orbitRadius;
-        var phiDelta = yDelta * pixelToRadian;
-        var thetaDelta = xDelta * pixelToRadian * 6.0;
-
-        var pos = this.activeCameraComp.position;
-        
-        phi = phi - phiDelta;
-        theta = theta - thetaDelta;
-        
-        if ( theta >= _2PI ) theta -= _2PI;
-        else if ( theta < 0 ) theta += _2PI;
-
-        if ( phi > _85 ) phi = _85;
-        else if ( phi < _10 ) phi = _10;
-          
-        // Spherical to Cartesian
-        var x = this.orbitRadius * Math.sin(phi) * Math.cos(theta);
-        var y = this.orbitRadius * Math.sin(phi) * Math.sin(theta);
-        var z = this.orbitRadius * Math.cos(phi);
-
-        this.activeCameraComp.position = [ x, y, z ];
-        this.activeCameraComp.lookAt = this.orbitObjectID;
-      }
-    }
-    this.draw = function( parms ) {
+    this.draw = function( pickInfo ) {
       //console.info( "   Draw ---------------" );
-      if ( parms.pickInfo && parms.pickInfo.coord ) {
+      if ( pickInfo && pickInfo.position ) {
         if ( this.lastDrawPoint ) {
           var x1, y1, z1, x2, y2, z2;
-          var start = this.lastDrawPoint.pickInfo.coord;
-          var end = parms.pickInfo.coord;
+          var start = this.lastDrawPoint.pickInfo.position;
+          var end = pickInfo.position;
           x1 = start[0];
           y1 = start[1];
           z1 = start[2] + this.lineHeight;
@@ -469,20 +221,16 @@ scripts:
           this.nodesCreated.push( "http-vwf-example-com-types-node3-line"+lineIndex );
           lineIndex++;
           
-          this.lastDrawPoint = parms;
+          this.lastDrawPoint.pickInfo = pickInfo;
         }
         
       }
     }
-    this.pindrop = function( parms ) {
+    this.pindrop = function( pickInfo ) {
       //console.info( "   PinDrop ---------------" );
-      //if ( parms ) console.info( "     parms = " + parms );
-      //if ( parms.pickInfo ) console.info( "     parms.pickInfo = " + parms.pickInfo );
-      //else console.info( "     parms.pickInfo is undefined" );
-      //if ( parms.pickInfo && parms.pickInfo.coord ) console.info( "     parms.pickInfo.coord = " + parms.pickInfo.coord );
       
-      if ( parms.pickInfo && parms.pickInfo.coord ) {
-        pushpin.properties.position = parms.pickInfo.coord;
+      if ( pickInfo && pickInfo.position ) {
+        pushpin.properties.position = pickInfo.position;
         
         if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
           pushpin.source = "models/pushPinRed.dae";
@@ -507,12 +255,12 @@ scripts:
         //this.createLine( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), pt[0], pt[1], pt[2], this.lineWidth*0.3, [ 0, 0, 0 ], true );
       }
     }
-    this.distanceFromLast = function( parms ) {
+    this.distanceFromLast = function( pickInfo ) {
       var distSquared = 0;
-      if ( parms.pickInfo && parms.pickInfo.coord ) {
+      if ( pickInfo && pickInfo.position ) {
         if ( this.lastDrawPoint ) {
-          var p1 = parms.pickInfo.coord;
-          var p2 = this.lastDrawPoint.pickInfo.coord;
+          var p1 = pickInfo.position;
+          var p2 = this.lastDrawPoint.pickInfo.position;
           distSquared = Math.pow( p1[0] - p2[0], 2 ) + Math.pow( p1[1] - p2[1], 2 );
         }
       }

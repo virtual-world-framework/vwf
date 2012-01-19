@@ -55,7 +55,7 @@ children:
       position: [ 0, 0, -150 ]
       eulers: [0, 0, 0 ]
       scale: [ 0.008, 0.008, 0.020 ]
-  worldCenter:
+  sceneCenter:
     extends: http://vwf.example.com/types/node3
     properties:
       position: [ 0, 0, 0 ]
@@ -68,11 +68,11 @@ children:
       rotation: [ 1.56, 3.14, 0 ]
       far: 500000
       near: 2
-      lookAt: "http-vwf-example-com-types-node3-worldCenter"
+      lookAt: "http-vwf-example-com-types-node3-sceneCenter"
     scripts:
     - text: |
         this.initialize = function() {
-          this.lookAt = "http-vwf-example-com-types-node3-worldCenter";
+          this.lookAt = "http-vwf-example-com-types-node3-sceneCenter";
         }
       type: application/javascript      
   light1:

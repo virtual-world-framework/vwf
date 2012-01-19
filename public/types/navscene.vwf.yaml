@@ -7,6 +7,7 @@ properties:
       switch ( value ) {
         case "walk":
         case "orbit":
+        case "none":
           if ( this.setNavMode ) {
             this.setNavMode( value );
           }
@@ -54,6 +55,8 @@ scripts:
         keyInfo: undefined,
         pointerInfo: undefined,
         lastPointerInfo: undefined,
+        pickInfo: undefined,
+        lastPickInfo: undefined,        
         pointerDownTime: undefined,
         pointerEventTime: undefined,
         lookActive: false, 
@@ -126,22 +129,28 @@ scripts:
       }
       return false;
     }        
-    this.pointerDown = function( parms ){
+    this.pointerDown = function( parms, pickInfo ){
       //console.info( " navscene.pointerDown( "+parms.position[0]+", "+parms.position[1]+" )" );
       this.input.lastPointerInfo = undefined;
       this.input.pointerInfo = parms;
+      this.input.lastPickInfo = undefined;
+      this.input.pickInfo = pickInfo;      
       this.input.pointerDownTime = this.time;
     }
-    this.pointerUp = function( parms ){
+    this.pointerUp = function( parms, pickInfo ){
       //console.info( " navscene.pointerUp( "+parms.position[0]+", "+parms.position[1]+" )" );
       this.input.lastPointerInfo = this.input.pointerInfo;
-      this.input.pointerInfo = undefined;      
+      this.input.pointerInfo = undefined;
+      this.input.lastPickInfo = this.input.pickInfo;
+      this.input.pickInfo = undefined;            
     }
-    this.pointerMove = function( parms ){
+    this.pointerMove = function( parms, pickInfo ){
       this.input.pointerEventTime = this.time;
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = parms;
-      //console.info( " navscene.mouseMove( "+parms.position[0]+", "+parms.position[1]+" )" );
+      this.input.lastPickInfo = this.input.pickInfo;
+      this.input.pickInfo = pickInfo;      
+      //console.info( " navscene.pointerMove( "+parms.position[0]+", "+parms.position[1]+" )" );
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
         var pi = this.input.pointerInfo;
         var lastPi = this.input.lastPointerInfo;
@@ -156,8 +165,8 @@ scripts:
         switch( this.navmode ) {
           case "orbit":
             if ( pi && lastPi ) {
-              xDelta = ( pi.position[0] - lastPi.position[0] ) * this.size[0];
-              yDelta = ( pi.position[1] - lastPi.position[1] ) * this.size[1];
+              xDelta = ( pi.position[0] - lastPi.position[0] )/* * this.size[0]*/;
+              yDelta = ( pi.position[1] - lastPi.position[1] )/* * this.size[1]*/;
             }        
             //console.info( "xDelta " + xDelta + "      yDelta " + yDelta );
             this.orbit( xDelta, yDelta );
@@ -174,20 +183,19 @@ scripts:
         }
       }    
     }
-    this.pointerOver = function( parms ){ 
-    }
-    this.pointerEnter = function( parms ){ 
-    }
     this.pointerLeave = function( parms ){
       this.input.lastPointerInfo = this.input.pointerInfo;
-      this.input.pointerInfo = undefined;       
+      this.input.pointerInfo = undefined;
+      this.input.lastPickInfo = this.input.pickInfo;
+      this.input.pickInfo = undefined;              
     }
-    this.pointerHover = function( parms ){ 
-    }
-    this.pointerWheel = function( parms ) {
+    this.pointerWheel = function( parms, pickInfo ) {
       this.input.pointerEventTime = this.time;
+
       this.input.lastPointerInfo = this.input.pointerInfo;
-      this.input.pointerInfo = parms[0];      
+      this.input.pointerInfo = parms;      
+      this.input.lastPickInfo = this.input.pickInfo;
+      this.input.pickInfo = pickInfo;
 
       if (!this.activeCameraComp) {
         this.getActiveCamera();
@@ -207,9 +215,9 @@ scripts:
         trans[1] = trans[1] / mag;
 
         var mult = 0;
-        if ( this.input.pointerInfo.wheel.deltaY ) {
-          mult = Math.abs( this.input.pointerInfo.wheel.deltaY / 20 );
-          if ( this.input.pointerInfo.wheel.deltaY < 0 ) {
+        if ( this.input.pickInfo.wheel.deltaY ) {
+          mult = Math.abs( this.input.pickInfo.wheel.deltaY / 20 );
+          if ( this.input.pickInfo.wheel.deltaY < 0 ) {
             // backwards
             yinc = yinc - parseFloat( trans[1] ); 
             xinc = xinc - parseFloat( trans[0] );
@@ -528,6 +536,7 @@ scripts:
       this.input.lastUpdateTime = this.time;
     }    
     this.orbit = function( xDelta, yDelta ){
+      console.info( "this.orbit( "+xDelta+", "+ yDelta + " )" );
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
     
@@ -597,8 +606,8 @@ methods:
           switch( this.navmode ) {
             case "orbit":
               if ( pi && lastPi ) {
-                xDelta = ( pi.position[0] - lastPi.position[0] ) * this.width;
-                yDelta = ( pi.position[1] - lastPi.position[1] ) * this.height;
+                xDelta = ( pi.position[0] - lastPi.position[0] )/* * this.size[0]*/;
+                yDelta = ( pi.position[1] - lastPi.position[1] )/* * this.size[1]*/;
               }            
               this.orbit( xDelta, yDelta );
               break;          
