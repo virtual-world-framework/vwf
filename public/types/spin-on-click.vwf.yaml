@@ -8,7 +8,7 @@ properties:
         this["spin-spinning"] = true;
         this.spin();
       } else if ( ! value && this["spin-spinning"] ) {
-        this["sway-start"] = false;
+        this["spin-spinning"] = false;
       }
     value: false
   spin-rate: 1
