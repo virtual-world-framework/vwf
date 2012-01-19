@@ -31,12 +31,7 @@
             "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
         ).children(":last");
         
-        var dropbox = document.getElementById(this.state.sceneRootID);
-        dropbox.addEventListener("dragenter", dragEnter, false);
-        dropbox.addEventListener("dragexit", dragExit, false);
-        dropbox.addEventListener("dragover", dragOver, false);
-        dropbox.addEventListener("drop", dropObject, false);
-           
+          
         // Connect GLGE to the VWF timeline.
         GLGE.now = function() {
             return vwf.time() * 1000;
@@ -68,6 +63,7 @@
             var canvas = this.canvasQuery.get( 0 );
             window.onkeydown = function( event ) {
                 var key = undefined;
+                var validKey = false;
                 switch ( event.keyCode ) {
                     case 17:
                     case 16:
@@ -78,6 +74,7 @@
                     default:
                         key = getKeyValue( event.keyCode );
                         glgeView.keyStates.keysDown[ key.key ] = key;
+                        validKey = true;
                         break;
                 }
 
@@ -88,7 +85,7 @@
                 glgeView.keyStates.mods.meta = event.metaKey;
 
                 var sceneNode = glgeView.state.scenes[ glgeView.state.sceneRootID ];
-                if ( sceneNode ) {
+                if ( validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/ ) {
                   //var params = JSON.stringify( glgeView.keyStates );
                   glgeView.dispatchEvent( sceneNode.ID, "keyDown", [ glgeView.keyStates ] );
                 }
@@ -96,6 +93,7 @@
 
             window.onkeyup = function( event ) {
                 var key = undefined;
+                var validKey = false;
                 switch ( event.keyCode ) {
                     case 16:
                     case 17:
@@ -106,6 +104,7 @@
                     default:
                         key = getKeyValue( event.keyCode );
                         delete glgeView.keyStates.keysDown[ key.key ];
+                        validKey = true;
                         break;
                 }
 
@@ -115,7 +114,7 @@
                 glgeView.keyStates.mods.meta = event.metaKey;
 
                 var sceneNode = glgeView.state.scenes[ glgeView.state.sceneRootID ];
-                if ( sceneNode ) {
+                if ( validKey && sceneNode ) {
                   //var params = JSON.stringify( glgeView.keyStates );
                   glgeView.dispatchEvent( sceneNode.ID, "keyUp", [ glgeView.keyStates ] );
                 }
@@ -144,6 +143,10 @@
                     $('#topdown').height(canvas.height);
                 } 
             }
+
+            //var dropbox = document.getElementById(this.state.sceneRootID);
+
+
 
             var sceneNode = this.state.scenes[ childID ];
             if ( sceneNode ) {
@@ -289,7 +292,7 @@
 
     // -- initMouseEvents ------------------------------------------------------------------------
 
-    var initMouseEvents = function (canvas, view) {
+    var initMouseEvents = function( canvas, view ) {
 
         var sceneNode = view.state.scenes[view.state.sceneRootID], child;
         var sceneID = view.state.sceneRootID;
@@ -305,6 +308,7 @@
         var mouseRightDown = false;
         var mouseLeftDown = false;
         var mouseMiddleDown = false;
+        var win = window;
 
         container = document.getElementById("container");
         sceneCanvas = canvas;
@@ -505,6 +509,54 @@
             }
         }
 
+        // == Draggable Content ========================================================================
+
+//        canvas.addEventListener( "dragenter", function( e ) {
+//            e.stopPropagation();
+//            e.preventDefault();             
+//        }, false );
+//        canvas.addEventListener( "dragexit", function( e ) {
+//            e.stopPropagation();
+//            e.preventDefault();             
+//        }, false );
+
+        // -- dragOver ---------------------------------------------------------------------------------
+
+        canvas.ondragover = function( e ) {
+            //console.info( "  +++++ dragover +++++" );
+            var eData = getEventData( e, false );
+            if ( eData ) {
+                e.dataTransfer.dropEffect = "copy";
+            //    console.info( "  +++++ over has valid info +++++" );
+            }
+            e.preventDefault();    
+        };
+
+        // -- drop ---------------------------------------------------------------------------------
+
+        canvas.ondrop = function( e ) {
+            var eData = getEventData( e, false );
+            if ( eData ) {
+            
+                var files = e.dataTransfer.files;
+                var file = files[0];
+                console.info(file.name);
+        
+                var object = {
+                  extends: "http://vwf.example.com/types/node3",
+                  source: file.name,
+                  type: "model/vnd.collada+xml",
+                  properties: { 
+                    position: eData.eventNodeData[""][0].position,
+                    scale: [ 1, 1, 1 ], 
+                  },   
+                };
+                vwf.createNode( "index-vwf", object, "draggedObject", undefined );
+            }
+            e.preventDefault();            
+        };
+         
+
     };
 
     function nameGlge(obj) {
@@ -695,51 +747,6 @@
         console.info( sOut + "extends: http://vwf.example.com/types/material");
 
     };
-    
-    // == Draggable Content ========================================================================
-    
-    // -- dragEnter --------------------------------------------------------------------------------
-    
-    function dragEnter( evt ) {
-        evt.stopPropagation();
-        evt.preventDefault();  
-    }
-    
-    // -- dragExit ---------------------------------------------------------------------------------
-    
-    function dragExit( evt ) {
-        evt.stopPropagation();
-        evt.preventDefault();  
-    }
-    
-    // -- dragOver ---------------------------------------------------------------------------------
-    
-    function dragOver( evt ) {
-        evt.stopPropagation();
-        evt.preventDefault();  
-    }
-    
-    // -- dragObject --------------------------------------------------------------------------------
-    
-    function dropObject( evt ) {
-        evt.stopPropagation();
-        evt.preventDefault();  
-            
-        var files = evt.dataTransfer.files;
-        var file = files[0];
-        console.info(file.name);
-        
-        /*var object = {
-          extends: "http://vwf.example.com/types/node3",
-          source: file.name,
-          type: "model/vnd.collada+xml",
-          properties: { 
-            position: [ 0, 0, 0 ],
-            scale: [ 1, 1, 1 ], 
-          },   
-        };
-        vwf.createNode( "index-vwf", object, "draggedObject", undefined );*/
-    }
 
     var getKeyValue = function( keyCode ) {
         var key = { key: undefined, code: keyCode, char: undefined };
