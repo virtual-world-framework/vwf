@@ -3,32 +3,16 @@ extends: http://vwf.example.com/types/glge
 children:
   duck.dae:
     extends: http://vwf.example.com/types/node3
+    implements:
+    - http://vwf.example.com/types/spin-on-click
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
-      spinning: 
-        set: |
-          if ( value && !this.spinning ) {
-            this.future( 0.1 ).spin(); 
-          }
-          this.spinning = value;
-        value: false
       position: [ -1, -35, -8 ]
       eulers: [ 90, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
-    methods:
-      spin: |
-        var e = this.eulers;
-        e[1] += 2;
-        this.eulers = e;
-        if ( this.spinning ) {
-          this.future( 0.1 ).spin();
-        }
-    scripts:
-    - text: |
-        this.pointerClick = function() {
-          this.spinning = !this.spinning;
-        }
+      spin-rate: 0.1
+      spin-axis: [ 0, -1, 0 ]
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
