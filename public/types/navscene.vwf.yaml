@@ -3,7 +3,7 @@ extends: http://vwf.example.com/types/scene
 properties: 
   navmode:
     set: |
-      console.info( "   navmode.set( "+value+" )" );
+      //console.info( "   navmode.set( "+value+" )" );
       switch ( value ) {
         case "walk":
         case "orbit":
@@ -40,9 +40,7 @@ scripts:
     var _85 = 85.0 * _piDiv180;
     var _10 = 10.0 * _piDiv180;
     var phi, theta;
-
     var positionChanged = false;
- 
     this.initialize = function() {
       console.info( "== initialize == navscene == initialize ==" );
       this.input = { 
@@ -51,6 +49,14 @@ scripts:
         },
         timeSinceLastEvent: function() { return this.time - this.pointerEventTime; },
         timeSinceDownEvent: function() { return this.time - this.pointerDownTime; },
+        pointerDelta: function() { 
+          if ( this.pointerInfo && this.lastPointerInfo ) {
+            return [ this.lastPointerInfo.position[0] - this.pointerInfo.position[0],
+                     this.lastPointerInfo.position[1] - this.pointerInfo.position[1] 
+                   ];
+          }
+          return undefined;
+        },        
         keysAreDown: function() { return ( this.keyInfo && Object.keys( this.keyInfo.keysDown ).length > 0 ); },
         keyInfo: undefined,
         pointerInfo: undefined,
@@ -70,6 +76,7 @@ scripts:
         lastUpdateTime: undefined,
       };
       this.originalSpeed = this.speed;
+      this.setNavMode( this.navmode );
     }
     this.setNavMode = function( mode ) {
       if (!this.activeCameraComp) {
@@ -152,34 +159,26 @@ scripts:
       this.input.pickInfo = pickInfo;      
       //console.info( " navscene.pointerMove( "+parms.position[0]+", "+parms.position[1]+" )" );
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
-        var pi = this.input.pointerInfo;
-        var lastPi = this.input.lastPointerInfo;
-        var xDelta = 0;
-        var yDelta = 0;
         var active = this.input.futureActive();
-        
-        //console.info( "navmode " + this.navmode );
-        //console.info( "pi.position " + pi.position + "    lastPi.position " + lastPi.position );
-        //console.info( "dragModeMove " + this.dragModeMove );
-        
-        switch( this.navmode ) {
-          case "orbit":
-            if ( pi && lastPi ) {
-              xDelta = ( pi.position[0] - lastPi.position[0] )/* * this.size[0]*/;
-              yDelta = ( pi.position[1] - lastPi.position[1] )/* * this.size[1]*/;
-            }        
-            //console.info( "xDelta " + xDelta + "      yDelta " + yDelta );
-            this.orbit( xDelta, yDelta );
-            break;          
-          case "walk":
-            if ( this.dragModeMove )
-              this.move( ( pi.position[0]*2.0 )-1, ( pi.position[1]*2.0 )-1 );
-            else
-              this.look( ( pi.position[0]*2.0 )-1, ( pi.position[1]*2.0 )-1 );
-            break;
-        }
-        if ( !active ) {
-          this.future( 0.1 ).update();
+        var delta = this.input.pointerDelta();
+        var valid = false;
+        if ( delta ) {
+          switch( this.navmode ) {
+            case "orbit":
+              this.orbit( delta[0], delta[1] );
+              valid = true;
+              break;          
+            case "walk":
+              if ( this.dragModeMove )
+                this.move( delta[0], delta[1] );
+              else
+                this.look( delta[0], delta[1] );
+              valid = true;
+              break;
+          }
+          if ( valid && !active ) {
+            this.future( 0.1 ).update();
+          }
         }
       }    
     }
@@ -227,11 +226,9 @@ scripts:
             xinc = xinc + parseFloat( trans[0] );
           }
         }
-
         if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
-        
         if (xinc != 0 || yinc != 0 ) {
           var origX, origY, origZ;
           var x, y, z, atBounds = false;
@@ -372,7 +369,7 @@ scripts:
       if ( this.navmode == "walk" ) {
         this.translate( x, y );
       } else if ( this.navmode == "orbit" ) {
-        this.orbit( x, y );
+        this.orbit( x * 0.1, y * 0.1 );
       }
     }
     this.onLook = function( x, y ) {
@@ -419,7 +416,7 @@ scripts:
           console.info( "" );
         }
       }
-    }
+    }    
     this.mulMat4Vec4 = function( mat1, vec2 ) {
       return [ mat1[0]*vec2[0] + mat1[1]*vec2[1] + mat1[2]*vec2[2] + mat1[3]*vec2[3],
                mat1[4]*vec2[0] + mat1[5]*vec2[1] + mat1[6]*vec2[2] + mat1[7]*vec2[3],
@@ -536,7 +533,7 @@ scripts:
       this.input.lastUpdateTime = this.time;
     }    
     this.orbit = function( xDelta, yDelta ){
-      console.info( "this.orbit( "+xDelta+", "+ yDelta + " )" );
+      //console.info( "this.orbit( "+xDelta+", "+ yDelta + " )" );
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
     
@@ -544,8 +541,8 @@ scripts:
         this.updateRadius();
         
         var pixelToRadian = this.orbitRadius / ( this.speed * 1000.0 );
-        var phiDelta = -yDelta * pixelToRadian * 0.1;
-        var thetaDelta = -xDelta * pixelToRadian * 0.4;
+        var phiDelta = -yDelta * pixelToRadian * 0.5;
+        var thetaDelta = -xDelta * pixelToRadian * 2.0;
 
         phi = phi - phiDelta;
         theta = theta - thetaDelta;
@@ -576,10 +573,10 @@ scripts:
         var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
         var incX = 0, incY = 0;
         
-        if ( mag == 0 ) 
-          mag = 1;
-        trans[0] = trans[0] / mag;
-        trans[1] = trans[1] / mag;
+        if ( mag != 0 ) { 
+          trans[0] = trans[0] / mag;
+          trans[1] = trans[1] / mag;
+        }
         
         // forward and back 
         incX = parseFloat( trans[0] ) * speed * -y;          
@@ -596,38 +593,34 @@ methods:
   update: |
     //console.info( "update   this.input + " + this.input );
     if ( this.input ) {
-      //console.info( "update   calling pointerIsDown " );
-      if ( this.pointerIsDown() ) {
-        if ( this.input.pointerInfo.buttons.left ) {
-          var pi = this.input.pointerInfo;
-          var lastPi = this.input.lastPointerInfo;
-          var xDelta = 0;
-          var yDelta = 0;
-          switch( this.navmode ) {
-            case "orbit":
-              if ( pi && lastPi ) {
-                xDelta = ( pi.position[0] - lastPi.position[0] )/* * this.size[0]*/;
-                yDelta = ( pi.position[1] - lastPi.position[1] )/* * this.size[1]*/;
-              }            
-              this.orbit( xDelta, yDelta );
-              break;          
-            case "walk":
-              if ( this.dragModeMove )
-                this.move( (pi.position[0]*2.0)-1, (pi.position[1]*2.0)-1 );
-              else
-                this.look( (pi.position[0]*2.0)-1, (pi.position[1]*2.0)-1 );
-              break;
-          } 
+      var delta = this.input.pointerDelta();
+      //console.info( "update   delta = " + delta );
+      if ( delta ) {
+        if ( this.pointerIsDown() ) {
+          if ( this.input.pointerInfo.buttons.left ) {
+            switch( this.navmode ) {
+              case "orbit":
+                this.orbit( delta[0], delta[1] );
+                break;          
+              case "walk":
+                if ( this.dragModeMove )
+                  this.move( delta[0], delta[1] );
+                else
+                  this.look( delta[0], delta[1] );
+                break;
+            } 
+          }
+        }   
+        if ( this.input.lookActive ) {
+          this.look( delta[0], delta[1] );
         }
-      }   
-      if ( this.input.keysAreDown() )
+        if ( this.input.moveActive ) {
+          this.move( delta[0], delta[1] );
+        }
+      }
+      if ( this.input.keysAreDown() ) {
         this.handleKeyEvents();
-      if ( this.input.lookActive ) {
-        this.look( this.input.look[0], this.input.look[1] );
-      }
-      if ( this.input.moveActive ) {
-        this.move( this.input.move[0], this.input.move[1] );
-      }
+      }        
       if ( this.input.button1Down ) {
         if ( this.navMode == "walk" ) {
           this.cameraZ( 1.0 );
