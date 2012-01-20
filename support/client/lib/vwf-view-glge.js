@@ -157,84 +157,30 @@
 
     // -- deletedNode ------------------------------------------------------------------------------
 
-    module.prototype.deletedNode = function( nodeID ) {
-
-       //this.logger.info( "deletedNode", nodeID );
-
-       //vwf.logger.warn( namespace + ".deletedNode " + "unimplemented" );
-
-    };
+    module.prototype.deletedNode = function( nodeID ) { };
 
     // -- addedChild -------------------------------------------------------------------------------
 
-    module.prototype.addedChild = function( nodeID, childID, childName ) {
-
-//        this.logger.info( "addedChild", nodeID, childID, childName );
-
-    };
+    module.prototype.addedChild = function( nodeID, childID, childName ) { };
 
     // -- removedChild -----------------------------------------------------------------------------
 
-    module.prototype.removedChild = function( nodeID, childID ) {
-
-//        this.logger.info( "removedChild", nodeID, childID );
-
-    };
+    module.prototype.removedChild = function( nodeID, childID ) { };
 
     // -- createdProperty --------------------------------------------------------------------------
 
-    module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) {
-
-//        this.logger.info( "createdProperty", nodeID, propertyName, propertyValue );
-
-    };
+    module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) { };
 
     // TODO: deletedProperty
 
     // -- satProperty ------------------------------------------------------------------------------
 
     module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
-
-//        this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
-        var value = undefined;
-//        if ( this.state.scenes[ nodeID ] ) {
-//            var canvas = this.canvasQuery.get( 0 );
-//            switch ( propertyName ) {
-//                case "size":
-//                   console.info( "satProperty " + propertyName ); 
-//                   if ( canvas && propertyValue.constructor == Array && propertyValue.length > 1 ) {
-//                       canvas.width = propertyValue[0];
-//                       canvas.height = propertyValue[1];
-//                       value = propertyValue;
-//                   }
-//                   break; 
-//            }
-//        }
-        return value;
-
     };
 
     // -- gotProperty ------------------------------------------------------------------------------
 
     module.prototype.gotProperty = function ( nodeID, propertyName, propertyValue ) {
-
-//        this.logger.info( "gotProperty", nodeID, propertyName, propertyValue );
-        var value = undefined;
-//        if ( this.state.scenes[ nodeID ] ) {
-//            var canvas = this.canvasQuery.get( 0 );
-//            switch ( propertyName ) {
-//                case "size":
-//                    console.info( "gotProperty " + propertyName ); 
-//                    if ( canvas ) {
-//                        value = [ canvas.width, canvas.height ];
-//                    } else {
-//                        value = [ this.width, this.height ];
-//                    }
-//                    break; 
-//            }
-//        }
-        return value;
-
     };
 
     // == Private functions ========================================================================
@@ -494,7 +440,7 @@
         canvas.onmousewheel = function( e ) {
             var eData = getEventData( e, false );
             if ( eData ) {
-                eData.wheel = {
+                eData.eventNodeData[""][0].wheel = {
                     delta: e.wheelDelta,
                     deltaX: e.wheelDeltaX,
                     deltaY: e.wheelDeltaY,
