@@ -137,9 +137,9 @@
                     }
                     if ( camID && camID != "" ) {
                         //console.info( "aspectRatio = " + (( glgeView.width / glgeView.height ) / 1.333 ) );
-                        vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/ );
+                        vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/ );  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
                     }
-                    vwf.setProperty( glgeView.state.sceneRootID, "size", [ glgeView.width, glgeView.height ] );
+                    vwf.setProperty( glgeView.state.sceneRootID, "size", [ glgeView.width, glgeView.height ] );  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
                     $('#topdown').height(canvas.height);
                 } 
             }
@@ -497,7 +497,7 @@
                     scale: [ 1, 1, 1 ], 
                   },   
                 };
-                vwf.createNode( "index-vwf", object, "draggedObject", undefined );
+                sceneView.createNode( "index-vwf", object, file.name, undefined );
             }
             e.preventDefault();            
         };
