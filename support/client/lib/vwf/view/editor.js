@@ -14,6 +14,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.editorVisible = false;
             this.topdownName = '#topdown_a';
             this.topdownTemp = '#topdown_b';
+            this.currentNodeID = '';
             
             jQuery('body').prepend(
                 "<div id='editor' class='relClass'><div class='eImg'><img id='launchEditor' src='images/editor.png' style='pointer-events:all' alt='launchEditor' /></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>"
@@ -69,6 +70,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( childExtendsID =="http-vwf-example-com-types-glge" || childExtendsID =="appscene-vwf" ) {
                 this.scenes[ childID ] = node;
             }
+            
+            if ( nodeID === this.currentNodeID )
+            {
+                $(window.vwf_view.topdownName).append("<div id='" + childID + "' class='childEntry'><b>" + childName + "</b></div><hr noshade='noshade'>");
+                $('#' + childID).click( function(evt) {
+                    drillDown($(this).attr("id"));
+                });
+            }
         },
         
         createdProperty: function (nodeID, propertyName, propertyValue) {
@@ -94,7 +103,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             node.properties[ propertyName ].value = propertyValue;
             
             var divName = '#' + nodeID + '-' + propertyName;
-            $(divName).html("<b>" + propertyName + " </b> " + propertyValue);
+            $(divName).html("<table><tr><td><b>" + propertyName + " </b></td><td><input type='text' id='input-" + nodeID + "-" + propertyName + "' value='" + propertyValue + "'></td></tr></table>");
+            
+            $('#input-' + nodeID + '-' + propertyName).change( function(evt) {
+                var inputID = ($(this).attr("id"));
+                var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
+                var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                var propValue = $(this).attr('value');
+                
+                propValue = JSON.parse( propValue );
+                vwf_view.kernel.setProperty(nodeID, propName, propValue);
+            } );
         },
         
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
@@ -160,9 +179,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 drillDown.call(this, "index-vwf");
             }
+            else
+            {
+                $(topdownName).show('slide', {direction: 'right'}, 500); 
+            }
 
             window.vwf_view.editorVisible = true;
-            $(topdownName).show('slide', {direction: 'right'}, 500); 
             $('#editor').animate({ 'left' : "-=260px" }, 500);
             $('#launchEditor').attr('src', 'images/editorClose.png');
         }
@@ -215,6 +237,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var topdownTemp = window.vwf_view.topdownTemp;
         
         var node = window.vwf_view.nodes[ nodeID ];
+        window.vwf_view.currentNodeID = nodeID;
      
         if(nodeID == "index-vwf") 
         {
@@ -229,11 +252,24 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
         
         for ( var i = 0; i < node.properties.length; i++ ) {
-            $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' value='" + node.properties[i].value + "'></td></tr></table></div>");
+            // JSON.stringify causing a cyclic object value message on some nodes
+            //node.properties[i].value = JSON.stringify( node.properties[i].value );
+            
+            $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div>");
             if(i != node.properties.length-1) 
             {
                 $(topdownTemp).append("<hr>");
             }
+            
+            $('#input-' + nodeID + '-' + node.properties[i].name).change( function(evt) {
+                var inputID = ($(this).attr("id"));
+                var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
+                var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                var propValue = $(this).attr('value');
+                
+                propValue = JSON.parse( propValue );
+                vwf_view.kernel.setProperty(nodeID, propName, propValue);
+            } );
         }
 
         if(node.properties.length != 0) $(topdownTemp).append("<hr style='height:3px'>");

@@ -42,6 +42,7 @@ td
 	width:120px;
 	max-width:120px;
 	padding:0px;
+	overflow:hidden;
 }
 
 input 
@@ -53,6 +54,11 @@ input
 	color:#153255;
 	/*background-color:#153255;*/
 	border:1px;
+}
+
+form
+{
+	margin:0px;
 }
 
 .header 
