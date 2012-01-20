@@ -79,47 +79,55 @@ scripts:
     this.initialize = function() {
       this.nodesCreated = [];
     }    
-    this.pointerDown = function( parms ) {
+    this.pointerDown = function( pointerInfo, pickInfo ) {
       mouseIsDown = true;
       mouseDownTime = this.time;
     }
-    this.pointerUp = function( parms ) {
+    this.pointerUp = function( pointerInfo, pickInfo ) {
       mouseIsDown = false;
       var now =  this.time;
       //if ( now - mouseDownTime < 7 ) {
-        this.createObject( parms );
+        this.createObject( pickInfo );
       //}
       mouseDownTime = -1;
     }
-    this.createObject = function( parms ) {
+    this.createObject = function( pickInfo ) {
       var newObjName;
-      if ( this.createCube ) {
-        this.cubesCreated += 1;
-        newObjName = "cube" + this.cubesCreated;
-        
-        cube.properties.material = materials[ this.colorIndex ];
-        cube.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] - 10 ];
-        cube.properties.velocity = [ parms.trans[0] * this.tossCubeStrength, parms.trans[1] * this.tossCubeStrength, parms.trans[2] * this.tossCubeStrength];
-        this.colorIndex += 1;
-        
-        vwf.createNode( "index-vwf", cube, newObjName, undefined );        
-        this.createCube = false;
-      } else {
-        this.spheresCreated += 1;
-        newObjName = "sphere" + this.spheresCreated;
-        
-        sphere.properties.material = materials[ this.colorIndex ];
-        sphere.properties.position = [ parms.camPos[0], parms.camPos[1], parms.camPos[2] - 10 ];
-        sphere.properties.velocity = [ parms.trans[0] * this.tossSphereStrength, parms.trans[1] * this.tossSphereStrength, parms.trans[2] * this.tossSphereStrength ];
-        this.colorIndex += 1;
-        
-        vwf.createNode( "index-vwf", sphere, newObjName, undefined );
-        this.createCube = true;      
+
+      if (!this.activeCameraComp) {
+        this.getActiveCamera();
       }
-      if ( newObjName && newObjName != "" ) {
-        this.nodesCreated.push( "http-vwf-example-com-types-node3-"+newObjName );
+      if ( this.activeCameraComp ) {
+        var mat = this.activeCameraComp.rotationMatrix;
+        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
+                
+        if ( this.createCube ) {
+          this.cubesCreated += 1;
+          newObjName = "cube" + this.cubesCreated;
+          
+          cube.properties.material = materials[ this.colorIndex ];
+          cube.properties.position = [ pickInfo.source[0], pickInfo.source[1], pickInfo.source[2] - 10 ];
+          cube.properties.velocity = [ trans[0] * this.tossCubeStrength, trans[1] * this.tossCubeStrength, trans[2] * this.tossCubeStrength];
+          this.colorIndex += 1;
+          
+          vwf.createNode( "index-vwf", cube, newObjName, undefined );        
+          this.createCube = false;
+        } else {
+          this.spheresCreated += 1;
+          newObjName = "sphere" + this.spheresCreated;
+          
+          sphere.properties.material = materials[ this.colorIndex ];
+          sphere.properties.position = [ pickInfo.source[0], pickInfo.source[1], pickInfo.source[2] - 10 ];
+          sphere.properties.velocity = [ trans[0] * this.tossSphereStrength, trans[1] * this.tossSphereStrength, trans[2] * this.tossSphereStrength ];
+          this.colorIndex += 1;
+          
+          vwf.createNode( "index-vwf", sphere, newObjName, undefined );
+          this.createCube = true;      
+        }
+        if ( newObjName && newObjName != "" ) {
+          this.nodesCreated.push( "http-vwf-example-com-types-node3-"+newObjName );
+        }
       }
-      
     }
 
   type: application/javascript    

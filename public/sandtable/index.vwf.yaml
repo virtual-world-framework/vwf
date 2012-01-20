@@ -13,7 +13,7 @@ scripts:
       //console.info( "================ sandtable ================" );
       this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
       this.loadDone = true;
-      vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-worldCenter" );
+      vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-sceneCenter" );
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
