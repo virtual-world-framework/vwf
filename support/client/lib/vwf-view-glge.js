@@ -140,7 +140,8 @@
                         vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/ );  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
                     }
                     vwf.setProperty( glgeView.state.sceneRootID, "size", [ glgeView.width, glgeView.height ] );  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
-                    $('#topdown').height(canvas.height);
+                    $('#topdown_a').height(canvas.height);
+                    $('#topdown_b').height(canvas.height);
                 } 
             }
 

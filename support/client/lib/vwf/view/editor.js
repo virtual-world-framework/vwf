@@ -11,9 +11,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             this.nodes = {};
             this.scenes = {};
+            this.editorVisible = false;
+            this.topdownName = '#topdown_a';
+            this.topdownTemp = '#topdown_b';
             
             jQuery('body').prepend(
-                "<div id='editor' class='relClass'><div class='eImg'><img id='launchEditor' src='images/editor.png' style='pointer-events:all' alt='launchEditor' /></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown'></div></div></div>"
+                "<div id='editor' class='relClass'><div class='eImg'><img id='launchEditor' src='images/editor.png' style='pointer-events:all' alt='launchEditor' /></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>"
             );
             
             $('#launchEditor').stop().animate({ opacity:0.0 }, 0);
@@ -34,10 +37,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 openEditor();
             });
 
-            $('#topdown').hide();
+            $('#topdown_a').hide();
+            $('#topdown_b').hide();
             
             var canvas = document.getElementById("index-vwf");
-            $('#topdown').height(canvas.height);
+            $('#topdown_a').height(canvas.height);
+            $('#topdown_b').height(canvas.height);
         },
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -144,23 +149,27 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     };
     
     // -- openEditor ------------------------------------------------------------------------
-    
-    var editorVisible = false;
-        
+
     function openEditor()
     {
-        if(!editorVisible)
+        var topdownName = window.vwf_view.topdownName;
+        
+        if(!window.vwf_view.editorVisible)
         {
-            editorVisible = true;
-            drillDown.call(this, "index-vwf");
-            $('#topdown').show('slide', {direction: 'right'}, 500); 
+            if( $('#topdown_a').html() == '')
+            {
+                drillDown.call(this, "index-vwf");
+            }
+
+            window.vwf_view.editorVisible = true;
+            $(topdownName).show('slide', {direction: 'right'}, 500); 
             $('#editor').animate({ 'left' : "-=260px" }, 500);
             $('#launchEditor').attr('src', 'images/editorClose.png');
         }
         else
         {
-            editorVisible = false;
-            $('#topdown').hide('slide', {direction: 'right'}, 500); 
+            window.vwf_view.editorVisible = false;
+            $(topdownName).hide('slide', {direction: 'right'}, 500); 
             $('#editor').animate({ 'left' : "+=260px" }, 500);
             $('#launchEditor').attr('src', 'images/editor.png');
         }
@@ -170,21 +179,67 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function drillDown(nodeID)
     {
+        var topdownName = window.vwf_view.topdownName;
+        var topdownTemp = window.vwf_view.topdownTemp;
+        
+        drill(nodeID);
+        
+        if(nodeID != "index-vwf") $(topdownName).hide('slide', {direction: 'left'}, 500); 
+        $(topdownTemp).show('slide', {direction: 'right'}, 500);    
+        
+        window.vwf_view.topdownName = topdownTemp;
+        window.vwf_view.topdownTemp = topdownName;
+    }
+    
+    // -- drillUp ---------------------------------------------------------------------------
+
+    function drillUp(nodeID)
+    {
+        var topdownName = window.vwf_view.topdownName;
+        var topdownTemp = window.vwf_view.topdownTemp;
+        
+        drill(nodeID);
+        
+        $(topdownName).hide('slide', {direction: 'right'}, 500); 
+        $(topdownTemp).show('slide', {direction: 'left'}, 500);    
+        
+        window.vwf_view.topdownName = topdownTemp;
+        window.vwf_view.topdownTemp = topdownName;
+    }
+    
+    // -- drill -----------------------------------------------------------------------------
+
+    function drill(nodeID)
+    {
+        var topdownName = window.vwf_view.topdownName;
+        var topdownTemp = window.vwf_view.topdownTemp;
+        
         var node = window.vwf_view.nodes[ nodeID ];
      
-        if(nodeID == "index-vwf") node.name = "index";
-        
-        $('#topdown').html("<div class='header'>" + node.name + "</div>");
+        if(nodeID == "index-vwf") 
+        {
+            $(topdownTemp).html("<div class='header'>index</div>");
+        }
+        else
+        {
+            $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + nodeID + "-back' alt='back'/> " + node.name + "</div>");
+            jQuery('#' + nodeID + '-back').click ( function(evt) {
+                drillUp(node.parentID);
+            });
+        }
         
         for ( var i = 0; i < node.properties.length; i++ ) {
-            $('#topdown').append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><b>" + node.properties[i].name + " </b> " + node.properties[i].value + "</div>");
-            if(i != node.properties.length-1) $('#topdown').append("<hr>");
+            $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' value='" + node.properties[i].value + "'></td></tr></table></div>");
+            if(i != node.properties.length-1) 
+            {
+                $(topdownTemp).append("<hr>");
+            }
         }
 
-        $('#topdown').append("<hr noshade='noshade'>");
+        if(node.properties.length != 0) $(topdownTemp).append("<hr style='height:3px'>");
         
         for ( var i = 0; i < node.children.length; i++ ) {
-            $('#topdown').append("<div id='" + node.children[i].ID + "' class='childEntry'><b>" + node.children[i].name + "</b></div><hr>");
+            $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childEntry'><b>" + node.children[i].name + "</b></div><hr noshade='noshade'>");
             $('#' + node.children[i].ID).click( function(evt) {
                 drillDown($(this).attr("id"));
             });            
