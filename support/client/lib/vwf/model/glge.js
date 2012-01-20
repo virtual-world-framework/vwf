@@ -24,6 +24,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.delayedProperties = {};
 
             this.meshIndex = 1;
+
+            //this.logger.enable = true;
  
         },
 
@@ -95,12 +97,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         var model = this;
                         xmlDocLoadedCallback = callback;
                         sceneNode.glgeDocument.onLoad = function () {
+//                            console.info( "== LOADING COLLADA complete       ==" );
+//                            console.info( "====================================" );
                             xmlDocLoadedCallback( true );
                         };
 
                         if ( childSource ) {
                             switch ( childType ) {
                                 case "model/x-glge":
+//                                    console.info( "====================================" );
+//                                    console.info( "== DELAY LOADING COLLADA ...."+childSource+".... "+childName+"==" );
                                     callback( false );
                                     sceneNode.glgeDocument.load( childSource );
                                     break;
@@ -114,6 +120,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                     switch ( childType ) {
                         case "model/vnd.collada+xml":
+//                            console.info( "====================================" );
+//                            console.info( "== DELAY LOADING COLLADA ...."+childSource+".... "+childName+"==" );
                             callback( false );
                             node = this.state.nodes[childID] = {
                                 name: childName,  
@@ -181,6 +189,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             if ( node.glgeObject ) {
                                 //console.info( "BOUND to glgeObject childName: " + childName + " ID: " + childID );
                                 if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
+//                                    console.info( "====================================" );
+//                                    console.info( "== DELAY LOADING COLLADA ...."+childSource+".... "+childName+"==" );
                                     callback( false );
                                     node.glgeObject.vwfID = childID;
                                     sceneNode.xmlColladaObjects.push( node.glgeObject );
@@ -228,6 +238,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     type: childExtendsID,
                     sourceType: childType,
                 };
+
+//                if ( !glgeChild ) {
+//                    console.info( "UNABLE TO BIND TO CAMERA: " + childName );
+//                }
 
                 if ( !node.glgeObject ) {
                     createCamera.call( this, nodeID, childID, childName );
@@ -439,7 +453,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             //console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
-            var value = undefined;
+            var value = propertyValue;
 
             if ( node && node.glgeObject && propertyValue !== undefined ) {
 
@@ -504,64 +518,63 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 switch ( propertyName ) {
 
                     case "roll":
-                        value = glgeObject.setRotX( pv * pieDiv180 );
+                        glgeObject.setRotX( pv * pieDiv180 );
                         break;
 
                     case "pitch":
-                        value = glgeObject.setRotY( pv * pieDiv180 );
+                        glgeObject.setRotY( pv * pieDiv180 );
                         break;
 
                     case "yaw":
-                        value = glgeObject.setRotZ( pv * pieDiv180 );
+                        glgeObject.setRotZ( pv * pieDiv180 );
                         break;
 
                     case "rotX":
-                        value = glgeObject.setRotX( pv );
+                        glgeObject.setRotX( pv );
                         break;
 
                     case "rotY":
-                        value = glgeObject.setRotY( pv );
+                        glgeObject.setRotY( pv );
                         break;
 
                     case "rotZ":
-                        value = glgeObject.setRotZ( pv );
+                        glgeObject.setRotZ( pv );
                         break;
 
                     case "eulers":
                         if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            value = glgeObject.setRot( pv[0] * pieDiv180, pv[1]* pieDiv180, pv[2] * pieDiv180 );
+                            glgeObject.setRot( pv[0] * pieDiv180, pv[1]* pieDiv180, pv[2] * pieDiv180 );
                         }
                         break;
                     case "rotation":
                         if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            value = glgeObject.setRot( pv[0], pv[1], pv[2] );
+                            glgeObject.setRot( pv[0], pv[1], pv[2] );
                         }
                         break;
                     case "position":
                         if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            value = glgeObject.setLoc( pv[0], pv[1], pv[2] );
+                            glgeObject.setLoc( pv[0], pv[1], pv[2] );
                         }
                         break;
                     case "posRotMatrix":
-                        value = [];
                         if ( pv && pv.constructor == Array && pv.length > 3 ) {
-                            value.push( glgeObject.setLoc( pv[0], pv[1], pv[2] ) );
-                            value.push( glgeObject.setRotMatrix( pv[3] ) );
+                             glgeObject.setLoc( pv[0], pv[1], pv[2] );
+                             glgeObject.setRotMatrix( pv[3] );
                         }
                         break;                            
                     case "worldEulers":
                         if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            value = glgeObject.setDRot( pv[0] * pieDiv180, pv[1] * pieDiv180, pv[2] * pieDiv180 );
+                            glgeObject.setDRot( pv[0] * pieDiv180, pv[1] * pieDiv180, pv[2] * pieDiv180 );
                         }
                         break;
                     case "worldPosition":
                         if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            value = glgeObject.setDLoc( pv[0], pv[1], pv[2] );
+                            glgeObject.setDLoc( pv[0], pv[1], pv[2] );
                         }
                         break;
                     case "scale":
                         if ( pv && pv.constructor == Array && pv.length > 2 ) {                            
-                            value = glgeObject.setScale( pv[0], pv[1], pv[2] );
+                            glgeObject.setScale( pv[0], pv[1], pv[2] );
                         }
                         break;
                     case "transform":
@@ -569,7 +582,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     case "rotationMatrix":{
                             if ( glgeObject.setRotMatrix ) 
-                                value = glgeObject.setRotMatrix( propertyValue );
+                                glgeObject.setRotMatrix( propertyValue );
                         }
                         break;
 
@@ -580,7 +593,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 if ( !propertyValue ) propertyValue = "grey";
                                 var mat = sceneNode.glgeDocument.getElement( propertyValue );
                                 if ( mat ) {
-                                    value = node.glgeObject.setMaterial( mat ); 
+                                    node.glgeObject.setMaterial( mat ); 
                                 }
                             } 
                         }                      
@@ -614,6 +627,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             case "http-vwf-example-com-types-glge":
                             case "appscene-vwf":
                                 value = setSceneProperty.call( this, nodeID, propertyName, propertyValue );
+                                break;
+                            default:
+                                value = undefined;
                                 break;
                         }
                         break;
@@ -903,6 +919,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( glgeModel.state.nodes[id] ) {
                         var colladaNode = glgeModel.state.nodes[id];
                         if ( colladaNode.loadingCollada ) {
+//                            console.info( "== LOADING COLLADA complete       ==" );
+//                            console.info( "====================================" );
                             colladaNode.loadingCollada( true );                    
                         }
                     }
@@ -987,6 +1005,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if ( glgeModel.state.nodes[id] ) {
                     var colladaNode = glgeModel.state.nodes[id];
                     if ( colladaNode.loadingCollada ) {
+//                        console.info( "== LOADING COLLADA complete       ==" );
+//                        console.info( "====================================" );
                         colladaNode.loadingCollada( true );                    
                     }
                 }
@@ -1142,6 +1162,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "orthographic":
                         value = node.glgeObject.setType( GLGE.C_ORTHO );
                         break;
+                    default:
+                        value = undefined;
+                        break;
                 }
                 break;
             case "far":
@@ -1266,6 +1289,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "spot":
                         node.glgeObject.setType( GLGE.L_SPOT );
                         break;
+                    default:
+                        value = undefined;
+                        break;
                 }
                 break;
 
@@ -1338,7 +1364,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     function getSceneProperty( nodeID, propertyName, propertyValue ) {
 
         var sceneNode = this.state.scenes[nodeID] // { name: childName, glgeObject: undefined }
-        var value = propertyValue;
+        var value = undefined;
         switch ( propertyName ) {
               case "ambientColor":
                 var color = sceneNode.glgeScene.getAmbientColor();
@@ -1356,6 +1382,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var color = sceneNode.glgeScene.getBackgroundColor();
                 value = [ color['r'], color['g'], color['b'] ];
                 break;
+            
             default:
                 value = undefined;
                 break;
@@ -1616,6 +1643,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "castShadows":
                 value = node.glgeObject.getCastShadows();
                 break;
+
+            default:
+                value = undefined;
+                break;
         }
         return value;    
     
@@ -1652,6 +1683,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 break;            
             case "orthoscale":
                 value = node.glgeObject.getOrthoScale();
+                break;
+            default:
+                value = undefined;
                 break;
         }
         return value;
@@ -1699,14 +1733,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 obj = assetObj;
                             break;
                     }
-
-                    if ( obj ) {
-                        //console.info( "=======   FOUND : " + objName );
-                        break;
-                    }
+                    if ( obj ) break;
                 }
             }
         }
+
+//        if ( obj ) {
+//            console.info( "     =======   FOUND : " + objName );
+//        } else {
+//            console.info( "**     WARNING ======= UNABLE TO FIND: " + objName );
+//        }
 
         return obj;
 
