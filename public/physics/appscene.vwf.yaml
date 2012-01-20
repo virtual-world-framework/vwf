@@ -79,16 +79,16 @@ scripts:
     this.initialize = function() {
       this.nodesCreated = [];
     }    
-    this.mouseDown = function( parms ) {
+    this.pointerDown = function( parms ) {
       mouseIsDown = true;
-      mouseDownTime = vwf.time();
+      mouseDownTime = this.time;
     }
-    this.mouseUp = function( parms ) {
+    this.pointerUp = function( parms ) {
       mouseIsDown = false;
-      var now =  vwf.time();
-      if ( now - mouseDownTime < 700 ) {
+      var now =  this.time;
+      //if ( now - mouseDownTime < 7 ) {
         this.createObject( parms );
-      }
+      //}
       mouseDownTime = -1;
     }
     this.createObject = function( parms ) {
