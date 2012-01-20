@@ -26,10 +26,7 @@ events:
   pointerDown:
   pointerUp:
   pointerMove:
-  pointerOver:
-  pointerEnter:
   pointerLeave:
-  pointerHover:
   pointerWheel:
 scripts:
 - text: |
@@ -263,7 +260,7 @@ scripts:
     this.keyDown = function( parms ) {
       var active = this.input.futureActive();
       this.input.keyInfo = parms;
-      this.handleKeyEvents();
+      this.handleKeyDown();
       if ( !active ) {
         this.future( 0.1 ).update();
       }
@@ -271,7 +268,7 @@ scripts:
     this.keyUp = function( parms ) {
       this.input.keyInfo = parms;
     }
-    this.handleKeyEvents = function() {
+    this.handleKeyDown = function() {
       if (!this.activeCameraComp) {
         this.getActiveCamera();
       }      
@@ -619,7 +616,7 @@ methods:
         }
       }
       if ( this.input.keysAreDown() ) {
-        this.handleKeyEvents();
+        this.handleKeyDown();
       }        
       if ( this.input.button1Down ) {
         if ( this.navMode == "walk" ) {
