@@ -89,6 +89,14 @@
                 name: propertyName,
                 value: propertyValue,
             };
+
+            try {
+                node.properties[ propertyName ].value = JSON.stringify( propertyValue );
+            } catch (e) {
+                this.logger.warn( "createdProperty", nodeID, propertyName, propertyValue,
+                    "stringify error:", e.message );
+                node.properties[ propertyName ].value = propertyValue;
+            }
             
             if ( node ) {
                 node.properties.push( property );
@@ -103,10 +111,18 @@
         satProperty: function (nodeID, propertyName, propertyValue) {
             var self = this;
             var node = this.nodes[ nodeID ];
-            node.properties[ propertyName ].value = propertyValue;
-            
+if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
+
+            try {
+                node.properties[ propertyName ].value = JSON.stringify( propertyValue );
+            } catch (e) {
+                this.logger.warn( "satProperty", nodeID, propertyName, propertyValue,
+                    "stringify error:", e.message );
+                node.properties[ propertyName ].value = propertyValue;
+            }
+
             var divName = '#' + nodeID + '-' + propertyName;
-            $(divName).html("<table><tr><td><b>" + propertyName + " </b></td><td><input type='text' id='input-" + nodeID + "-" + propertyName + "' value='" + propertyValue + "'></td></tr></table>");
+            $(divName).html("<table><tr><td><b>" + propertyName + " </b></td><td><input type='text' id='input-" + nodeID + "-" + propertyName + "' value='" + node.properties[ propertyName ].value + "'></td></tr></table>");
             
             $('#input-' + nodeID + '-' + propertyName).change( function(evt) {
                 var inputID = ($(this).attr("id"));
@@ -114,8 +130,12 @@
                 var propName = inputID.substring(inputID.lastIndexOf('-')+1);
                 var propValue = $(this).attr('value');
                 
-                propValue = JSON.parse( propValue );
-                self.kernel.setProperty(nodeID, propName, propValue);
+                try {
+                    propValue = JSON.parse(propValue);
+                    self.kernel.setProperty(nodeID, propName, propValue);
+                } catch (e) {
+                    // no update on error
+                }
             } );
         },
         
@@ -256,9 +276,6 @@
         }
         
         for ( var i = 0; i < node.properties.length; i++ ) {
-            // JSON.stringify causing a cyclic object value message on some nodes
-            //node.properties[i].value = JSON.stringify( node.properties[i].value );
-            
             $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div>");
             if(i != node.properties.length-1) 
             {
@@ -271,8 +288,12 @@
                 var propName = inputID.substring(inputID.lastIndexOf('-')+1);
                 var propValue = $(this).attr('value');
                 
-                propValue = JSON.parse( propValue );
-                self.kernel.setProperty(nodeID, propName, propValue);
+                try {
+                    propValue = JSON.parse(propValue);
+                    self.kernel.setProperty(nodeID, propName, propValue);
+                } catch (e) {
+                    // no update on error
+                }
             } );
         }
 
