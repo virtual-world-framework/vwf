@@ -167,9 +167,9 @@ scripts:
               break;          
             case "walk":
               if ( this.dragModeMove )
-                this.move( delta[0], delta[1] );
+                this.move( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
               else
-                this.look( delta[0], delta[1] );
+                this.look( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
               valid = true;
               break;
           }
@@ -591,28 +591,31 @@ methods:
     //console.info( "update   this.input + " + this.input );
     if ( this.input ) {
       var delta = this.input.pointerDelta();
+      var pi = this.input.pointerInfo;
       //console.info( "update   delta = " + delta );
       if ( delta ) {
         if ( this.pointerIsDown() ) {
           if ( this.input.pointerInfo.buttons.left ) {
+            var pi = this.input.pointerInfo;
             switch( this.navmode ) {
               case "orbit":
                 this.orbit( delta[0], delta[1] );
                 break;          
               case "walk":
+              
                 if ( this.dragModeMove )
-                  this.move( delta[0], delta[1] );
+                  this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
                 else
-                  this.look( delta[0], delta[1] );
+                  this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
                 break;
             } 
           }
         }   
         if ( this.input.lookActive ) {
-          this.look( delta[0], delta[1] );
+          this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
         }
         if ( this.input.moveActive ) {
-          this.move( delta[0], delta[1] );
+          this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
         }
       }
       if ( this.input.keysAreDown() ) {
