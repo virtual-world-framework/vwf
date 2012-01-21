@@ -1,4 +1,4 @@
-define( [ "module", "vwf/view" ], function( module, view ) {
+    define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/editor creates a view interface for editor functions. 
 
@@ -7,7 +7,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // == Module Definition ====================================================================
 
         initialize: function() {
-            window.vwf_view = this;
+
+            var self = this;
 
             this.nodes = {};
             this.scenes = {};
@@ -35,7 +36,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             });
             
             jQuery('#launchEditor').click ( function(evt) {
-                openEditor();
+                openEditor.call(self);
             });
 
             $('#topdown_a').hide();
@@ -49,6 +50,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childName, callback /* ( ready ) */ ) {
             
+            var self = this;
             var parent = this.nodes[ nodeID ];
             var node = this.nodes[ childID ] = {
                 children: [],
@@ -73,9 +75,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
             if ( nodeID === this.currentNodeID )
             {
-                $(window.vwf_view.topdownName).append("<div id='" + childID + "' class='childEntry'><b>" + childName + "</b></div><hr noshade='noshade'>");
+                $(this.topdownName).append("<div id='" + childID + "' class='childEntry'><b>" + childName + "</b></div><hr noshade='noshade'>");
                 $('#' + childID).click( function(evt) {
-                    drillDown($(this).attr("id"));
+                    drillDown.call(self, $(this).attr("id"));
                 });
             }
         },
@@ -99,6 +101,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         //removedChild: [ /* nodeID, childID */ ],
 
         satProperty: function (nodeID, propertyName, propertyValue) {
+            var self = this;
             var node = this.nodes[ nodeID ];
             node.properties[ propertyName ].value = propertyValue;
             
@@ -112,7 +115,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var propValue = $(this).attr('value');
                 
                 propValue = JSON.parse( propValue );
-                vwf_view.kernel.setProperty(nodeID, propName, propValue);
+                self.kernel.setProperty(nodeID, propName, propValue);
             } );
         },
         
@@ -169,11 +172,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     
     // -- openEditor ------------------------------------------------------------------------
 
-    function openEditor()
+    function openEditor() // invoke with the view as "this"
     {
-        var topdownName = window.vwf_view.topdownName;
+        var topdownName = this.topdownName;
         
-        if(!window.vwf_view.editorVisible)
+        if(!this.editorVisible)
         {
             if( $('#topdown_a').html() == '')
             {
@@ -184,13 +187,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 $(topdownName).show('slide', {direction: 'right'}, 500); 
             }
 
-            window.vwf_view.editorVisible = true;
+            this.editorVisible = true;
             $('#editor').animate({ 'left' : "-=260px" }, 500);
             $('#launchEditor').attr('src', 'images/editorClose.png');
         }
         else
         {
-            window.vwf_view.editorVisible = false;
+            this.editorVisible = false;
             $(topdownName).hide('slide', {direction: 'right'}, 500); 
             $('#editor').animate({ 'left' : "+=260px" }, 500);
             $('#launchEditor').attr('src', 'images/editor.png');
@@ -199,45 +202,46 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     
     // -- drillDown -------------------------------------------------------------------------
 
-    function drillDown(nodeID)
+    function drillDown(nodeID) // invoke with the view as "this"
     {
-        var topdownName = window.vwf_view.topdownName;
-        var topdownTemp = window.vwf_view.topdownTemp;
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
         
-        drill(nodeID);
+        drill.call(this, nodeID);
         
         if(nodeID != "index-vwf") $(topdownName).hide('slide', {direction: 'left'}, 500); 
         $(topdownTemp).show('slide', {direction: 'right'}, 500);    
         
-        window.vwf_view.topdownName = topdownTemp;
-        window.vwf_view.topdownTemp = topdownName;
+        this.topdownName = topdownTemp;
+        this.topdownTemp = topdownName;
     }
     
     // -- drillUp ---------------------------------------------------------------------------
 
-    function drillUp(nodeID)
+    function drillUp(nodeID) // invoke with the view as "this"
     {
-        var topdownName = window.vwf_view.topdownName;
-        var topdownTemp = window.vwf_view.topdownTemp;
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
         
-        drill(nodeID);
+        drill.call(this, nodeID);
         
         $(topdownName).hide('slide', {direction: 'right'}, 500); 
         $(topdownTemp).show('slide', {direction: 'left'}, 500);    
         
-        window.vwf_view.topdownName = topdownTemp;
-        window.vwf_view.topdownTemp = topdownName;
+        this.topdownName = topdownTemp;
+        this.topdownTemp = topdownName;
     }
     
     // -- drill -----------------------------------------------------------------------------
 
-    function drill(nodeID)
+    function drill(nodeID) // invoke with the view as "this"
     {
-        var topdownName = window.vwf_view.topdownName;
-        var topdownTemp = window.vwf_view.topdownTemp;
+        var self = this;
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
         
-        var node = window.vwf_view.nodes[ nodeID ];
-        window.vwf_view.currentNodeID = nodeID;
+        var node = this.nodes[ nodeID ];
+        this.currentNodeID = nodeID;
      
         if(nodeID == "index-vwf") 
         {
@@ -247,7 +251,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         {
             $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + nodeID + "-back' alt='back'/> " + node.name + "</div>");
             jQuery('#' + nodeID + '-back').click ( function(evt) {
-                drillUp(node.parentID);
+                drillUp.call(self, node.parentID);
             });
         }
         
@@ -268,7 +272,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var propValue = $(this).attr('value');
                 
                 propValue = JSON.parse( propValue );
-                vwf_view.kernel.setProperty(nodeID, propName, propValue);
+                self.kernel.setProperty(nodeID, propName, propValue);
             } );
         }
 
@@ -277,7 +281,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         for ( var i = 0; i < node.children.length; i++ ) {
             $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childEntry'><b>" + node.children[i].name + "</b></div><hr noshade='noshade'>");
             $('#' + node.children[i].ID).click( function(evt) {
-                drillDown($(this).attr("id"));
+                drillDown.call(self, $(this).attr("id"));
             });            
         }
     }
