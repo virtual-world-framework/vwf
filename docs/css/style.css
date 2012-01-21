@@ -16,9 +16,9 @@ body {
 .header .title {
 	color:#666678;
 	padding:20px;
-	display:inline;
-	position:relative;
-	top:-30px;
+	/* display:inline; */
+	/* position:relative; */
+	/* top:-30px; */
 }
 .navmenu {
 	color:#444456;
