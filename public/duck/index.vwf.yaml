@@ -1,5 +1,7 @@
 --- 
 extends: http://vwf.example.com/types/glge
+properties:
+  navmode: none
 children:
   duck.dae:
     extends: http://vwf.example.com/types/node3
