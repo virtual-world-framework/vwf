@@ -1,17 +1,5 @@
 --- 
 extends: http://vwf.example.com/types/glge
-properties:
-  ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-types-camera-maincamera"
-  loadDone: false
-scripts:
-- text:
-    this.initialize = function() {
-      console.info( "================ duck ================" );
-      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
-      this.loadDone = true;
-    }
-  type: application/javascript
 children:
   duck.dae:
     extends: http://vwf.example.com/types/node3
@@ -28,14 +16,21 @@ children:
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
-      walkMode: "walk"
-      cameraType: "perspective"
-      position: [ -0.3733, 12.29, 0 ]
       eulers: [ 90, 180, 0 ]
-      rotation: [ 1.56, 3.141, 0 ]
-  Omni01:
+  dir_duck_1:
     extends: http://vwf.example.com/types/light
     properties:
-      lightType: "point"
+      lightType: "directional"
       constantAttenuation: 1
-      position: [ 16.37, -18.15, 17.92 ]
+      rotation: [ -0.79, -3.34, -0.22 ]
+  dir_plane_1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 0.279, 0.9539, -0.08268 ]
+scripts:
+- text:
+    this.initialize = function() {
+      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+    }
