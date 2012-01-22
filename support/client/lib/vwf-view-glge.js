@@ -489,16 +489,44 @@
                 var file = files[0];
                 console.info(file.name);
         
-                var object = {
-                  extends: "http://vwf.example.com/types/node3",
-                  source: file.name,
-                  type: "model/vnd.collada+xml",
-                  properties: { 
-                    position: eData.eventNodeData[""][0].position,
-                    scale: [ 1, 1, 1 ], 
-                  },   
-                };
-                sceneView.createNode( "index-vwf", object, file.name, undefined );
+                var match, object;
+                
+                if ( file.name == "blackhawk.dae" ) {  // hack it since setting this data through components isn't working
+                    object = {
+                      extends: "http://vwf.example.com/types/node3",
+                      source: file.name,
+                      type: "model/vnd.collada+xml",
+                      properties: { 
+                        position: eData.eventNodeData[""][0].position,
+                        eulers: [ 1, 0, 0 ],
+                        scale: [ 0.2, 0.2, 0.2 ],
+                      },   
+                    };
+                } else if ( match = file.name.match( /\.dae$/i ) ) {  // assignment is intentional
+                    object = {
+                      extends: "http://vwf.example.com/types/node3",
+                      source: file.name,
+                      type: "model/vnd.collada+xml",
+                      properties: { 
+                        position: eData.eventNodeData[""][0].position,
+                        scale: [ 1, 1, 1 ], 
+                      },   
+                    };
+                } else if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+                    object = {
+                      extends: match[1],
+                      properties: { 
+                        position: eData.eventNodeData[""][0].position,
+                      },
+                      scripts: [
+                          "this.initialize = function() { this.eulers = this.eulers ; this.scale = this.scale }"
+                      ]
+                    };
+                }
+
+                if ( object ) {
+                    sceneView.createNode( "index-vwf", object, file.name, undefined );
+                }
             }
             e.preventDefault();            
         };
