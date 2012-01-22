@@ -4,28 +4,28 @@ extends: |
 properties:
   spin-spinning:
     set: |
-      if ( value && ! this["spin-spinning"] ) {
-        this["spin-spinning"] = true;
-        this.spin();
-      } else if ( ! value && this["spin-spinning"] ) {
-        this["spin-spinning"] = false;
+      if ( value && ! this["spin-spinning"] ) {  // starting
+        this["spin-spinning"] = true;  // set the internal value
+        this.spin();  // run the first step and schedule the next one
+      } else if ( ! value && this["spin-spinning"] ) { // stopping
+        this["spin-spinning"] = false;  // set the internal value
       }
     value: false
   spin-rate: 1
   spin-axis: [ 0, 0, 1 ]
 methods:
   spin: |
-    if ( this["spin-spinning"] ) {
+    if ( this["spin-spinning"] ) {  // if enabled
       var rotation = this.rotation;
-      this.rotation = [
+      this.rotation = [  // update the rotation
         rotation[0] + this["spin-axis"][0] * 2 * Math.PI * 0.05 * this["spin-rate"],
         rotation[1] + this["spin-axis"][1] * 2 * Math.PI * 0.05 * this["spin-rate"],
         rotation[2] + this["spin-axis"][2] * 2 * Math.PI * 0.05 * this["spin-rate"],
       ];
-      this.future( 0.05 ).spin();
+      this.future( 0.05 ).spin();  // schedule the next step
     }
 scripts:
 - |
-  this.pointerClick = function()  {
-    this["spin-spinning"] = ! this["spin-spinning"];
+  this.pointerClick = function()  {  // when clicked ...
+    this["spin-spinning"] = ! this["spin-spinning"];  // ... toggle the enabled flag
   }
