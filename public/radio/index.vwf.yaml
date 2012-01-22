@@ -26,22 +26,27 @@ children:
       eulers: [ 338, 0, 211 ]
       powerOn:
         set: |
-          this.powerOn = value;
-          if ( value ) {
-            this.menuMode = "channel";
-          } else { 
-            this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD.png";
-          } 
+          if ( this.powerOwn != Boolean( value ) ){
+            this.powerOn = Boolean( value );
+            if ( value ) {
+              this.volume = 10;
+              this.menuMode = "channel";
+            } else {
+              this.volume = 0;
+              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD.png";
+            } 
+          }
         value: false
       volume:
         set: |
-          if ( value >= 0 ){
+          if ( value >= 0 && value <= 10 ){
             if ( this.volume == 0 && value != 0 ) {
               this.powerOn = true;
             } else if ( this.volume != 0 && value == 0 ) {
               this.powerOn = false;
             }
             this.volume = value;
+            this.bone1.MaxScene.Radio.ic40Volume.rotZ = 12 * value;
           }
         value: 0
       speak: "up"
