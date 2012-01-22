@@ -196,7 +196,7 @@ children:
             properties:
               position: [ 0, 500, 1800 ]
               rotation: [0, 0, -1.57 ]
-              scale: [ 8, 8, 8 ]
+              scale: [ 15, 15, 15 ]
           cone1:
             extends: http://vwf.example.com/types/node3
             source: models/cone.dae
@@ -413,7 +413,7 @@ children:
             properties:
               position: [ 0, 500, 1800 ]
               rotation: [0, 0, -1.57 ]
-              scale: [ 8, 8, 8 ]
+              scale: [ 15, 15, 15 ]
           cone2:
             extends: http://vwf.example.com/types/node3
             source: models/cone.dae
