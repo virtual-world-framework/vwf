@@ -3,34 +3,45 @@ extends: http://vwf.example.com/types/glge
 properties:
   navmode: none
 children:
-  duck.dae:
+  duck:
     extends: http://vwf.example.com/types/node3
-    implements:
-    - http://vwf.example.com/types/spin-on-click
+    # # 2: Uncomment to apply the spin-on-click behavior
+    # # ... located in public/types/spin-on-click.vwf.yaml
+    # implements:
+    # - http://vwf.example.com/types/spin-on-click
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
       position: [ -1, -35, -8 ]
       eulers: [ 90, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
+      # spin-on-click configuration parameters
       spin-rate: 0.1
       spin-axis: [ 0, 1, 0 ]
+    # # 1: Uncomment to jump up on each click
+    # scripts:
+    # - |
+    #   this.pointerClick = function() {
+    #     this.position = [ this.position[0], this.position[1] , this.position[2] + 1 ];
+    #   }
+  # Camera boilerplate
   maincamera:
     extends: http://vwf.example.com/types/camera
     properties:
       eulers: [ 90, 180, 0 ]
-  dir_duck_1:
+  dir1:
     extends: http://vwf.example.com/types/light
     properties:
       lightType: "directional"
       constantAttenuation: 1
       rotation: [ -0.79, -3.34, -0.22 ]
-  dir_plane_1:
+  dir2:
     extends: http://vwf.example.com/types/light
     properties:
       lightType: "directional"
       constantAttenuation: 1
       rotation: [ 0.279, 0.9539, -0.08268 ]
+# Camera fix
 scripts:
 - text:
     this.initialize = function() {
