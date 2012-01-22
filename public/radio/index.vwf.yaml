@@ -6,6 +6,7 @@ properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "http-vwf-example-com-types-camera-maincamera"
   loadDone: false
+  navmode: none
 scripts:
 - text:
     this.initialize = function() {
