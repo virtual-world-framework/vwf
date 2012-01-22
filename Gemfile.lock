@@ -8,6 +8,7 @@ GEM
       addressable (>= 2.1.1)
       eventmachine (>= 0.12.9)
     eventmachine (1.0.0.beta.3)
+    eventmachine (1.0.0.beta.3-x86-mingw32)
     json (1.5.3)
     monkey-lib (0.5.4)
       backports
@@ -47,6 +48,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   eventmachine (>= 1.0.0.beta, != 1.0.0.beta.4)
