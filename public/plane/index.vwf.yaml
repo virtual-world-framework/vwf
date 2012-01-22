@@ -52,7 +52,7 @@ children:
       rotation: [ 0.279, 0.9539, -0.08268 ]
 # Camera fix
 scripts:
-- text:
-    this.initialize = function() {
-      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
-    }
+- |
+  this.initialize = function() {
+    this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+  }
