@@ -33,9 +33,6 @@ methods:
       }
       this.nodesCreated = [];  
     }
-events:
-  pointerDown
-  pointerUp    
 scripts:
 - text: |
     var lastTimeObjWasCreated;
