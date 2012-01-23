@@ -835,7 +835,7 @@
                 break;
             case 55:
                 key.key = "7";
-                key.char = "&";
+                key.char = "7";
                 break;                
             case 56:
                 key.key = "8";
