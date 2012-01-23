@@ -502,6 +502,28 @@
                         scale: [ 0.2, 0.2, 0.2 ],
                       },   
                     };
+                } else if ( file.name == "blackhawk2.dae" ) {  // hack it since setting this data through components isn't working
+                    object = {
+                      extends: "http://vwf.example.com/types/node3",
+                      source: file.name,
+                      type: "model/vnd.collada+xml",
+                      properties: { 
+                        position: eData.eventNodeData[""][0].position,
+                        eulers: [ 1, 0, 0 ],
+                        scale: [ 2, 2, 2 ],
+                      },   
+                    };
+                } else if ( file.name == "Predator15.dae" ) {  // hack it since setting this data through components isn't working
+                    object = {
+                      extends: "http://vwf.example.com/types/node3",
+                      source: file.name,
+                      type: "model/vnd.collada+xml",
+                      properties: { 
+                        position: eData.eventNodeData[""][0].position,
+                        eulers: [ 0, 0, 0 ],
+                        scale: [ 15, 15, 15 ],
+                      },   
+                    };
                 } else if ( match = file.name.match( /\.dae$/i ) ) {  // assignment is intentional
                     object = {
                       extends: "http://vwf.example.com/types/node3",
