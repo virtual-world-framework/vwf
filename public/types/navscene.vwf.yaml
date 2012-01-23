@@ -217,7 +217,7 @@ scripts:
             // backwards
             yinc = yinc - parseFloat( trans[1] ); 
             xinc = xinc - parseFloat( trans[0] );
-          } else if ( parms.wheelDeltaY > 0 ) {
+          } else if ( this.input.pickInfo.wheel.deltaY > 0 ) {
             //forward
             yinc = yinc + parseFloat( trans[1] ); 
             xinc = xinc + parseFloat( trans[0] );
@@ -247,7 +247,7 @@ scripts:
           else {
             var ratioHR = camerapos[2] / this.orbitRadius;
             zinc = Math.sqrt( Math.pow( x-origX, 2 ) + Math.pow( y-origY, 2 ) ) * ratioHR;
-            if ( parms.wheelDeltaY > 0 ) zinc *= -1;
+            if ( this.input.pickInfo.wheel.deltaY > 0 ) zinc *= -1;
             z = origZ + zinc;
             //if ( z > 25000 ) z = 25000;
             //else if ( z < 1000 ) z = origZ;
@@ -290,17 +290,17 @@ scripts:
             case 40:  //down
               this.input.move[1] += 1;
               break;
+            case 37: // left              
             case 65:  //a
               this.input.move[0] += -1;
               break;
+            case 39: // right              
             case 68:  //d
               this.input.move[0] += 1;
               break;
-            case 37: // left
             case 81: // q
               this.input.look[0] += -1;
               break;
-            case 39: // right
             case 69: // e
               this.input.look[0] += 1;
               break;
