@@ -111,11 +111,7 @@ children:
         this.planeGroup1.position = [ newX, newY, 1200 ];
         
         var zRot = [ goalPathPoint.position[0] - newX, goalPathPoint.position[1] - newY, 0 ];
-        var sq = zRot[0] * zRot[0] + zRot[1] * zRot[1];
-        var vecLen = ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
-        zRot[0] /= vecLen;
-        zRot[1] /= vecLen;
-        this.planeGroup1.rotation = [ 0, 0, Math.acos( zRot[0] ) ]; 
+        this.planeGroup1.rotation = [ 0, 0, Math.atan2( zRot[1], zRot[0] ) ]; 
         
         if ( percentDone == 1 ) {
           this.lastPathIndex += 1;
@@ -236,12 +232,7 @@ children:
         this.planeGroup2.position = [ newX, newY, 1200 ];
  
         var zRot = [ goalPathPoint.position[0] - newX, goalPathPoint.position[1] - newY, 0 ];
-        var sq = zRot[0] * zRot[0] + zRot[1] * zRot[1];
-        var vecLen = ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
-        zRot[0] /= vecLen;
-        zRot[1] /= vecLen;
-        //console.info( " this.planeGroup2.rotation.Z = " + Math.acos( zRot[0] ) );
-        this.planeGroup2.rotation = [ 0, 0, Math.acos( zRot[0] ) ];
+        this.planeGroup2.rotation = [ 0, 0, Math.atan2( zRot[1], zRot[0] ) ];
  
         if ( percentDone == 1 ) {
           this.lastPathIndex += 1;
