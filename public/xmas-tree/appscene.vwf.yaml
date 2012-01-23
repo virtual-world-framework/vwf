@@ -32,7 +32,10 @@ methods:
         vwf.deleteNode( this.nodesCreated[i] );
       }
       this.nodesCreated = [];  
-    }    
+    }
+events:
+  pointerDown
+  pointerUp    
 scripts:
 - text: |
     var lastTimeObjWasCreated;
@@ -79,16 +82,16 @@ scripts:
     this.initialize = function() {
       this.nodesCreated = [];
     }    
-    this.mouseDown = function( parms ) {
+    this.pointerDown = function( parms ) {
       mouseIsDown = true;
       mouseDownTime = vwf.time();
     }
-    this.mouseUp = function( parms ) {
+    this.pointerUp = function( parms ) {
       mouseIsDown = false;
       var now =  vwf.time();
-      if ( now - mouseDownTime < 700 ) {
+      //if ( now - mouseDownTime < 700 ) {
         this.createObject( parms );
-      }
+      //}
       mouseDownTime = -1;
     }
     this.createObject = function( parms ) {
