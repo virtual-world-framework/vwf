@@ -329,7 +329,9 @@ scripts:
           this.move( this.input.move[0], this.input.move[1] );
         }
         if ( deltaZ != 0 ) {
-          this.cameraZ( deltaZ );
+          if ( this.navmode == "walk" ) {
+            this.cameraZ( deltaZ );
+          }
         }
          
       } 
