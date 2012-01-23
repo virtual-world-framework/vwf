@@ -281,6 +281,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     $(this).val(node.properties[ propName ].value);
                 }
             } );
+
+            $('#input-' + nodeID + '-' + node.properties[i].name).keydown( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $('#input-' + nodeID + '-' + node.properties[i].name).keypress( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $('#input-' + nodeID + '-' + node.properties[i].name).keyup( function(evt) {
+                evt.stopPropagation();
+            });
         }
 
         if(node.properties.length != 0) $(topdownTemp).append("<hr style='height:3px'>");
