@@ -81,6 +81,15 @@ scripts:
       };
     this.initialize = function() {
       this.nodesCreated = [];
+    }
+    this.keyDown = function( keyInfo ) {
+      var key = undefined;
+      for ( kd in keyInfo.keysDown ) {
+        key = keyInfo.keysDown[kd];
+        if ( key.char == " " ) {
+          this.createObject();
+        }
+      }
     }    
     this.pointerDown = function( pointerInfo, pickInfo ) {
       mouseIsDown = true;
@@ -90,11 +99,11 @@ scripts:
       mouseIsDown = false;
       var now =  vwf.time();
       //if ( now - mouseDownTime < 700 ) {
-        this.createObject( pickInfo );
+        this.createObject();
       //}
       mouseDownTime = -1;
     }
-    this.createObject = function( pickInfo ) {
+    this.createObject = function() {
       var newObjName;
 
       if (!this.activeCameraComp) {
@@ -102,13 +111,14 @@ scripts:
       }
       if ( this.activeCameraComp ) {
         var mat = this.activeCameraComp.rotationMatrix;
+        var pos = this.activeCameraComp.position;
         var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
         if ( this.createCube ) {
           this.cubesCreated += 1;
           newObjName = "cube" + this.cubesCreated;
           
           cube.properties.material = materials[ this.colorIndex ];
-          cube.properties.position = [ pickInfo.source[0], pickInfo.source[1], pickInfo.source[2] - 10 ];
+          cube.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
           cube.properties.velocity = [ trans[0] * this.tossCubeStrength, trans[1] * this.tossCubeStrength, trans[2] * this.tossCubeStrength];
           this.colorIndex += 1;
           
@@ -119,7 +129,7 @@ scripts:
           newObjName = "sphere" + this.spheresCreated;
           
           sphere.properties.material = materials[ this.colorIndex ];
-          sphere.properties.position = [ pickInfo.source[0], pickInfo.source[1], pickInfo.source[2] - 10 ];
+          sphere.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
           sphere.properties.velocity = [ trans[0] * this.tossSphereStrength, trans[1] * this.tossSphereStrength, trans[2] * this.tossSphereStrength ];
           this.colorIndex += 1;
           
