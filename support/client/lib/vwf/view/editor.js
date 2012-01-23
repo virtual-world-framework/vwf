@@ -121,22 +121,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 node.properties[ propertyName ].value = propertyValue;
             }
 
-            var divName = '#' + nodeID + '-' + propertyName;
-            $(divName).html("<table><tr><td><b>" + propertyName + " </b></td><td><input type='text' id='input-" + nodeID + "-" + propertyName + "' value='" + node.properties[ propertyName ].value + "'></td></tr></table>");
-            
-            $('#input-' + nodeID + '-' + propertyName).change( function(evt) {
-                var inputID = ($(this).attr("id"));
-                var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
-                var propName = inputID.substring(inputID.lastIndexOf('-')+1);
-                var propValue = $(this).attr('value');
-                
-                try {
-                    propValue = JSON.parse(propValue);
-                    self.kernel.setProperty(nodeID, propName, propValue);
-                } catch (e) {
-                    // no update on error
-                }
-            } );
+            $('#input-' + nodeID + '-' + propertyName).val(node.properties[ propertyName ].value);
         },
         
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
@@ -286,13 +271,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 var inputID = ($(this).attr("id"));
                 var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
                 var propName = inputID.substring(inputID.lastIndexOf('-')+1);
-                var propValue = $(this).attr('value');
+                var propValue = $(this).val();
                 
                 try {
                     propValue = JSON.parse(propValue);
                     self.kernel.setProperty(nodeID, propName, propValue);
                 } catch (e) {
-                    // no update on error
+                    // restore the original value on error
+                    $(this).val(node.properties[ propName ].value);
                 }
             } );
         }
