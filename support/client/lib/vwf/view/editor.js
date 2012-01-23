@@ -25,13 +25,13 @@
             
             jQuery('#launchEditor').mouseenter( function(evt) { 
                 evt.stopPropagation();
-                $('#launchEditor').stop().animate({ opacity:1.0 }, 500);
+                $('#launchEditor').stop().animate({ opacity:1.0 }, 175);
                 return false; 
             });
             
             jQuery('#launchEditor').mouseleave( function(evt) { 
                 evt.stopPropagation(); 
-                $('#launchEditor').stop().animate({ opacity:0.0 }, 500);
+                $('#launchEditor').stop().animate({ opacity:0.0 }, 175);
                 return false; 
             });
             
@@ -189,18 +189,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
             else
             {
-                $(topdownName).show('slide', {direction: 'right'}, 500); 
+                $(topdownName).show('slide', {direction: 'right'}, 175);
             }
 
             this.editorVisible = true;
-            $('#editor').animate({ 'left' : "-=260px" }, 500);
+            $('#editor').animate({ 'left' : "-=260px" }, 175);
             $('#launchEditor').attr('src', 'images/editorClose.png');
         }
         else
         {
             this.editorVisible = false;
-            $(topdownName).hide('slide', {direction: 'right'}, 500); 
-            $('#editor').animate({ 'left' : "+=260px" }, 500);
+            $(topdownName).hide('slide', {direction: 'right'}, 175); 
+            $('#editor').animate({ 'left' : "+=260px" }, 175);
             $('#launchEditor').attr('src', 'images/editor.png');
         }
     }
@@ -214,8 +214,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         
         drill.call(this, nodeID);
         
-        if(nodeID != "index-vwf") $(topdownName).hide('slide', {direction: 'left'}, 500); 
-        $(topdownTemp).show('slide', {direction: 'right'}, 500);    
+        if(nodeID != "index-vwf") $(topdownName).hide('slide', {direction: 'left'}, 175); 
+        $(topdownTemp).show('slide', {direction: 'right'}, 175);    
         
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
@@ -230,8 +230,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         
         drill.call(this, nodeID);
         
-        $(topdownName).hide('slide', {direction: 'right'}, 500); 
-        $(topdownTemp).show('slide', {direction: 'left'}, 500);    
+        $(topdownName).hide('slide', {direction: 'right'}, 175); 
+        $(topdownTemp).show('slide', {direction: 'left'}, 175);    
         
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
