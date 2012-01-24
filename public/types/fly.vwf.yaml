@@ -15,13 +15,10 @@ properties:
   fly-speedOnGroundMax: 200
   fly-elevation: 1000
   fly-speedInAir: 250
-  fly-raduis: 4000
+  fly-raduis: 8000
   fly-speed: 62.5
 methods:
   fly: |
-    //console.info( "this.fly-speed: " + this["fly-speed"] );
-    //console.info( "this.pointIndex: " + this.pointIndex );
-    //console.info( "this.timeToNext: " + this.timeToNext );
     if ( this["fly-flying"] ) {  // if enabled
       if ( this["fly-speed"] < 63 ) {
         if (!this.points) {  
@@ -35,18 +32,13 @@ methods:
         var currentPoint = this.points[ this.pointIndex ].point;
         var nextPoint = this.points[ this.pointIndex+1 ].point;
         var percent = elapsedTime / this.timeToNext;
-        
-        //console.info( "currentPoint: " + currentPoint + "     nextPoint: " + nextPoint );
-        //console.info( "elapsedTime: " + elapsedTime  );
-        
         var newPos = this.interpolate( currentPoint, nextPoint, percent );
-        //sconsole.info( "percent: " + percent + "     newPos: " + newPos + "     " );
         this.position = newPos;
         if ( percent > 0.9875 ) {
           this.pointIndex++;
-          console.info( "this.pointIndex = " + this.pointIndex );
-          if ( this.pointIndex+1 > this.points.length ) {
+          if ( this.pointIndex+1 >= this.points.length ) {
             this.pointIndex = this.firstCiclePoint;
+            console.info( "this.pointIndex = " + this.pointIndex );
           }
           this.updateSpeed();
           this.timeToNext = this.points[ this.pointIndex+1 ].distance / this["fly-speed"];
@@ -105,15 +97,6 @@ scripts:
       this.pointsOnCircle = 36.0;
       this.lastTime = 0;
       var diffX, diffY, diffZ; 
-      
-      console.info( "this.position = " + this.position );
-      console.info( "mat = " + mat );      
-      console.info( "trans[0] = " + trans[0] );      
-      console.info( "trans[1] = " + trans[1] );
-      console.info( "trans = " + trans );
-      console.info( "this[fly-distanceOnGround] = " + this["fly-distanceOnGround"] ); 
-      console.info( "this.pointsOnGround = " + this.pointsOnGround ); 
-      
       if ( trans[0] == 0 && trans[1] == 0 ) {
         trans[1] = -1;
       }
@@ -131,7 +114,7 @@ scripts:
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "ground" } );
-        console.info( "this.points[ "+i+" ] = { point: "+newPoint+", distance: "+distance+", place: ground }" );
+        //console.info( "this.points[ "+i+" ] = { point: "+newPoint+", distance: "+distance+", place: ground }" );
         prevPt = newPoint;
         
       }
@@ -139,11 +122,6 @@ scripts:
       var hypLength = heightToTravel / Math.sin( Math.PI/6 );
       var adjLength = Math.cos( Math.PI/6 ) * hypLength;
       initPt = this.points[ this.points.length-1 ].point;
-
-      console.info( "heightToTravel = " + heightToTravel );
-      console.info( "hypLength = " + hypLength );
-      console.info( "adjLength = " + adjLength );
-      console.info( "initPt = " + initPt );
 
       for ( var i = 1; i <= this.pointsClimbing; i++ ) {
         newPoint = [];
@@ -154,32 +132,32 @@ scripts:
         console.info( "newPoint = " + newPoint );
         
         if ( prevPt ) {
-          console.info( "prevPt = " + prevPt );
+          //console.info( "prevPt = " + prevPt );
           diffX = prevPt[0] - newPoint[0];
           diffY = prevPt[1] - newPoint[1];          
           diffZ = prevPt[2] - newPoint[2];
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "rising" } );
-        console.info( "this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: rising }" );
+        //console.info( "this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: rising }" );
         prevPt = newPoint;
       }
 
+      prevPt = this.points[this.pointsOnCircle-1].point;
       var inc = ( 2.0 * Math.PI ) / this.pointsOnCircle;
-      var currentAngle = Math.atan( trans[1], trans[0] );
-      initPt = this.points[ this.points.length-1 ].point;
+      var currentAngle = Math.PI;
+      var center = this.points[ this.points.length-1 ].point;
+      center[0] += this["fly-raduis"];
 
-      console.info( "inc = " + inc );
-      console.info( "currentAngle = " + currentAngle );
-      console.info( "this[fly-raduis] = " + this["fly-raduis"] );
-      console.info( "this[fly-elevation] = " + this["fly-elevation"] );
-      
+      console.info( "center = " + center );
+      console.info( "prevPt = " + prevPt );
+     
       this.firstCiclePoint = this.points.length-1; 
-      for ( var i = 0; i < this.pointsOnCircle-1; i++ ) {
+      for ( var i = 0; i < this.pointsOnCircle; i++ ) {
         newPoint = [];
-        newPoint[0] = initPt[0] + this["fly-raduis"] * Math.cos( currentAngle );
-        newPoint[1] = initPt[1] + this["fly-raduis"] * Math.sin( currentAngle );
-        newPoint[2] = initPt[2] + this["fly-elevation"];        
+        newPoint[0] = center[0] + this["fly-raduis"] * Math.cos( currentAngle );
+        newPoint[1] = center[1] + this["fly-raduis"] * Math.sin( currentAngle );
+        newPoint[2] = center[2];        
         currentAngle += inc;
         
         if ( prevPt ) {
