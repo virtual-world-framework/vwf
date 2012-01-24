@@ -516,12 +516,14 @@
                 } else if ( file.name == "Predator15.dae" ) {  // hack it since setting this data through components isn't working
                     object = {
                       extends: "http://vwf.example.com/types/node3",
+                      implements: ["http://vwf.example.com/types/fly"],
                       source: file.name,
                       type: "model/vnd.collada+xml",
                       properties: { 
                         position: eData.eventNodeData[""][0].position,
-                        eulers: [ 0, 0, 0 ],
+                        eulers: [ 0, 0, 180 ],
                         scale: [ 15, 15, 15 ],
+                        "fly-flying": true,
                       },   
                     };
                 } else if ( match = file.name.match( /\.dae$/i ) ) {  // assignment is intentional
