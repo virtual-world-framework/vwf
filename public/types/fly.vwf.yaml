@@ -187,3 +187,6 @@ scripts:
                mat1[12]*vec2[0] + mat1[13]*vec2[1] + mat1[14]*vec2[2] + mat1[15]*vec2[3] ];
     }    
   }
+  this.pointerClick = function()  {  // when clicked ...
+    this["fly-flying"] = ! this["fly-flying"];  // ... toggle the enabled flag
+  }

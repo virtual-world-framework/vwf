@@ -515,7 +515,6 @@
 
                     case "Predator.dae": // from sandtable
                         object["implements"] = [ "http://vwf.example.com/types/fly" ];
-                        object.properties["fly-flying"] = true;
                         object.properties.position[2] += 20;
                         object.properties.eulers = [ 0, 0, 180 ];
                         object.properties.scale = [ 15, 15, 15 ];
