@@ -75,7 +75,7 @@
             
             if ( nodeID === this.currentNodeID )
             {
-                $(this.topdownName).append("<div id='" + childID + "' class='childEntry'><b>" + childName + "</b></div><hr noshade='noshade'>");
+                $(this.topdownName).append("<div id='" + childID + "' class='childContainer'><div class='childEntry'><b>" + childName + "</b></div><hr noshade='noshade'></div>");
                 $('#' + childID).click( function(evt) {
                     drillDown.call(self, $(this).attr("id"));
                 });
@@ -103,7 +103,11 @@
             }
         },
         
-        //deletedNode: [ /* nodeID */ ],
+        deletedNode: function (nodeID) {
+            var node = this.nodes[ nodeID ];
+            node.parent.children.splice( node );
+            $('#' + nodeID).remove();
+        },
 
         //addedChild: [ /* nodeID, childID, childName */ ],
         //removedChild: [ /* nodeID, childID */ ],
@@ -298,7 +302,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         if(node.properties.length != 0) $(topdownTemp).append("<hr style='height:3px'>");
         
         for ( var i = 0; i < node.children.length; i++ ) {
-            $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childEntry'><b>" + node.children[i].name + "</b></div><hr noshade='noshade'>");
+            $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div><hr noshade='noshade'></div>");
             $('#' + node.children[i].ID).click( function(evt) {
                 drillDown.call(self, $(this).attr("id"));
             });            

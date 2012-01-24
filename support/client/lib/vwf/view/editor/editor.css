@@ -80,9 +80,12 @@ form
 	padding-right:10px;
 }
 
+.childContainer {
+	background-image:url('images/toggle-expand-light.png');
+	background-repeat:no-repeat;
+}
+
 .childEntry {
 	padding-left:10px;
 	padding-right:10px;
-	background-image:url('images/toggle-expand-light.png');
-	background-repeat:no-repeat;
 }
