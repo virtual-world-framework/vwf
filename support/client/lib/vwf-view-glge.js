@@ -489,73 +489,120 @@
                 var file = files[0];
                 console.info(file.name);
         
-                var match, object;
-                
-                if ( file.name == "blackhawk.dae" ) {  // hack it since setting this data through components isn't working
-                    object = {
-                      extends: "http://vwf.example.com/types/node3",
-                      source: file.name,
-                      type: "model/vnd.collada+xml",
-                      properties: { 
-                        position: eData.eventNodeData[""][0].position,
-                        eulers: [ 1, 0, 0 ],
-                        scale: [ 0.2, 0.2, 0.2 ],
-                      },   
-                    };
-                } else if ( file.name == "blackhawk2.dae" ) {  // hack it since setting this data through components isn't working
-                    object = {
-                      extends: "http://vwf.example.com/types/node3",
-                      source: file.name,
-                      type: "model/vnd.collada+xml",
-                      properties: { 
-                        position: eData.eventNodeData[""][0].position,
-                        eulers: [ 1, 0, 0 ],
-                        scale: [ 2, 2, 2 ],
-                      },   
-                    };
-                } else if ( file.name == "Predator15.dae" ) {  // hack it since setting this data through components isn't working
-                    object = {
-                      extends: "http://vwf.example.com/types/node3",
-                      implements: ["http://vwf.example.com/types/fly"],
-                      source: file.name,
-                      type: "model/vnd.collada+xml",
-                      properties: { 
-                        position: eData.eventNodeData[""][0].position,
-                        eulers: [ 0, 0, 180 ],
-                        scale: [ 15, 15, 15 ],
-                        "fly-flying": true,
-                      },   
-                    };
-                } else if ( match = file.name.match( /\.dae$/i ) ) {  // assignment is intentional
-                    object = {
-                      extends: "http://vwf.example.com/types/node3",
-                      source: file.name,
-                      type: "model/vnd.collada+xml",
-                      properties: { 
-                        position: eData.eventNodeData[""][0].position,
-                        scale: [ 1, 1, 1 ], 
-                      },   
-                    };
-                } else if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
-                    object = {
-                      extends: match[1],
-                      properties: { 
-                        position: eData.eventNodeData[""][0].position,
-                      },
-                      scripts: [
-                          "this.initialize = function() { this.eulers = this.eulers ; this.scale = this.scale }"
-                      ]
-                    };
-                }
+                var object = {
+                  extends: "http://vwf.example.com/types/node3",
+                  source: file.name,
+                  type: "model/vnd.collada+xml",
+                  properties: { 
+                    position: eData.eventNodeData[""][0].position,
+                  },   
+                };
 
+                var match;
+
+                switch ( file.name ) { // hack it since setting this data through components isn't working
+
+                    case "blackhawk.dae": // from cityblock
+                        object.properties.eulers = [ 1, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    case "blackhawkGW.dae": // from sandtable
+                        object.properties.position[2] += 20;
+                        object.properties.eulers = [ 1, 0, 0 ];
+                        object.properties.scale = [ 2, 2, 2 ];
+                        break;
+
+                    case "Predator.dae": // from sandtable
+                        object["implements"] = [ "http://vwf.example.com/types/fly" ];
+                        object.properties["fly-flying"] = true;
+                        object.properties.position[2] += 20;
+                        object.properties.eulers = [ 0, 0, 180 ];
+                        object.properties.scale = [ 15, 15, 15 ];
+                        break;
+
+                    case "apache.DAE": // from sandtable
+                        object.properties.position[2] += 40;
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    case "awac.DAE": // from sandtable
+                        object.properties.position[2] += 100;
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.5, 0.5, 0.5 ];
+                        break;
+
+                    case "blackhawk.DAE": // from sandtable
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    case "cobra.DAE": // from sandtable
+                        object.properties.position[2] += 50;
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    case "f117.DAE": // from sandtable
+                        object.properties.position[2] += 40;
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    case "humvee.dae": // from sandtable
+                        object.properties.position[2] += 50;
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    case "lmtv.dae": // from sandtable
+                        object.properties.position[2] += 50;
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    case "mlrs.DAE": // from sandtable
+                        object.properties.position[2] += 50;
+                        object.properties.eulers = [ 90, 0, 0 ];
+                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                        break;
+
+                    default:
+
+                        if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+
+                            object = {
+                              extends: match[1],
+                              properties: { 
+                                position: eData.eventNodeData[""][0].position,
+                              },
+                              scripts: [
+                                  "this.initialize = function() { this.eulers = this.eulers ; this.scale = this.scale }"
+                              ]
+                            };
+
+                        } else if ( match = file.name.match( /\.dae$/i ) ) { // assignment is intentional
+
+                            object.properties.scale = [ 1, 1, 1 ];
+
+                        } else {
+
+                             object = undefined;
+                        }
+
+                        break;
+
+                }
+                
                 if ( object ) {
                     sceneView.createNode( "index-vwf", object, file.name, undefined );
                 }
             }
+
             e.preventDefault();            
         };
          
-
     };
 
     function nameGlge(obj) {
