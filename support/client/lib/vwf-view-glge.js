@@ -209,12 +209,12 @@
             var view = this;
             var scene = sceneNode.glgeScene;
             var renderer = sceneNode.glgeRenderer;
-            var lasttime = 0;
-            var now;
+
+            sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
+
             function renderScene() {
-                now = parseInt( new Date().getTime() );
+                sceneNode.frameCount++;
                 renderer.render();
-                lasttime = now;
             };
 
             setInterval( renderScene, 1 );
@@ -626,14 +626,23 @@
     var mousePick = function( e, sceneNode ) {
 
         if (sceneNode && sceneNode.glgeScene) {
-            var objectIDFound = -1;
-            var x = mouseXPos( e );
-            var y = mouseYPos( e );
 
-            return sceneNode.glgeScene.pick(x, y);
+            // GLGE won't calculate picks if we pick too soon after launch. The exact cause is
+            // unclear, but it appears to work if there isn't a pick before the first few frames
+            // or while deferred loads are occurring.
+
+            if ( sceneNode.frameCount > 10 && sceneNode.pendingLoads == 0 ) {
+
+                var objectIDFound = -1;
+                var x = mouseXPos( e );
+                var y = mouseYPos( e );
+
+                return sceneNode.glgeScene.pick(x, y);
+            }
+
         }
-        return undefined;
 
+        return undefined;
     };
 
     var recurseGroup = function( grp, iDepth ) {
