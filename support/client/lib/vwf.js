@@ -97,6 +97,8 @@
         queue.time = 0; // current server time
         queue.ready = true;
 
+        queue.sequence = 0; // message counter to ensure a stable sort
+
         // This is the connection to the conference server. In this sample implementation, "socket"
         // is a socket.io client that communicates over a channel provided by the server hosting the
         // client documents.
@@ -350,7 +352,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         // Add the message to the queue.
 
-                        vwf.queue( fields.time, fields.node, fields.action, fields.member, fields.parameters );
+                        vwf.queue( fields );
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -400,31 +402,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // -- queue --------------------------------------------------------------------------------
 
-        this.queue = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
+        this.queue = function( fields ) {
 
-            var time = when > 0 ? // absolute (+) or relative (-)
-                Math.max( this.now, when ) :
-                this.now + ( -when );
-
-            var fields = {
-                time: time,
-                sequence: undefined, // for stabilizing the sort
-                node: nodeID,
-                action: actionName,
-                member: memberName,
-                parameters: parameters,
-                // callback: callback,  // TODO
-            };
+            fields.sequence = ++queue.sequence; // to stabilize the sort
 
             queue.push( fields );
 
             // Sort by time then by sequence.  // TODO: use a better-performing priority queue
-
-            var sequence = 0;
-
-            queue.forEach( function( fields ) {
-                fields.sequence = ++sequence;
-            } );
 
             queue.sort( function( a, b ) {
                 return a.time != b.time ?
@@ -434,28 +418,42 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         };
 
-        // -- send ---------------------------------------------------------------------------------
+        // -- plan ---------------------------------------------------------------------------------
 
-        // Send a message to the conference server. The message will be reflected back to all
-        // participants in the conference.
-
-        this.send = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
+        this.plan = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
                 this.now + ( -when );
 
-            // For single-user mode, loop the message back to the incoming queue.
+            var fields = {
+                time: time,
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO
+            };
 
-            if ( ! socket ) {
-                return this.queue( time, nodeID, actionName, memberName, parameters, callback /* ( result ) */ );
-            }
+            this.queue( fields );
+
+        };
+
+        // -- send ---------------------------------------------------------------------------------
+
+        // Send a message to the conference server. The message will be reflected back to all
+        // participants in the conference.
+
+        this.send = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
+
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
                 time: time,
-                // sequence: undefined,  // TODO: use to identify on return from reflector?
                 node: nodeID,
                 action: actionName,
                 member: memberName,
@@ -463,10 +461,20 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
-            // Send the message.
+            if ( ! socket ) { // single-user mode
+    
+                // Loop the message back to the incoming queue.
 
-            var message = JSON.stringify( fields );
-            socket.send( message );
+                this.queue( fields );
+    
+            } else { // multi-user mode
+                
+                // Send the message.
+
+                var message = JSON.stringify( fields );
+                socket.send( message );
+
+            }
 
         };
 
@@ -474,7 +482,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // Return a result for a function invoked by the server.
 
-        this.respond = function( time, nodeID, actionName, memberName, parameters, result ) {
+        this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
             // Nothing to do in single-user mode.
 
@@ -485,7 +493,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
-                time: time,
                 // sequence: undefined,  // TODO: use to identify on return from reflector?
                 node: nodeID,
                 action: actionName,
@@ -505,7 +512,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( time, nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
+        this.receive = function( nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
 
 // TODO: delegate parsing and validation to each action.
 
@@ -541,7 +548,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             var result = this[actionName] && this[actionName].apply( this, args );
 
 if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
-    this.respond( time, nodeID, actionName, memberName, parameters, result );
+    this.respond( nodeID, actionName, memberName, parameters, result );
 }
             
         };
@@ -571,7 +578,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
                 this.now = fields.time;
 
-                this.receive( fields.time, fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
+                this.receive( fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
                         vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
                         queue.ready = ready;
@@ -1605,12 +1612,9 @@ return component;
 
         // -- time ---------------------------------------------------------------------------------
 
-        // Return the current simulation time.
+        // The current simulation time.
 
         this.time = function() {
-
-            // this.logger.debug( "vwf.time" );
-
             return this.now;
         };
 
