@@ -187,13 +187,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
 
-            // TODO: time
-
-            default:
+            case "time":
+            case "client":
+            case "moniker":
 
                 return function() {
-                    return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
-                }
+                    return this.kernel[kernelFunctionName]();
+                };
 
         }
 

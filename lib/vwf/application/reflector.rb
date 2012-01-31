@@ -58,11 +58,14 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     fields = JSON.parse message
 
-    # For a normal message, stamp it with the curent time and send it to each client.
+    # For a normal message, stamp it with the curent time and originating client and send it to each
+    # client.
 
     unless fields["result"]
 
-      fields["time"] = session[:transport].time
+      fields["time"] = session[:transport].time  # TODO: allow future times on incoming fields["time"] and queue until needed
+      fields["client"] = id
+
       broadcast JSON.generate fields
 
     # Handle messages where the client returned a result to the server.
@@ -74,6 +77,9 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # lossy, and this ensures that every client resumes from the same state.
 
       if fields["action"] == "getNode"
+
+        fields["time"] = session[:transport].time
+        fields.delete "client"
 
         fields["action"] = "setNode"
         fields["parameters"] = [ fields["result"] ]
