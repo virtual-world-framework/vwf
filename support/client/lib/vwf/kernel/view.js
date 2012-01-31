@@ -57,8 +57,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             case "getProperty":
 
                 return function( nodeID, propertyName, when, callback ) {
-                        this.kernel.send( nodeID, kernelFunctionName, propertyName,
-                            undefined, when || 0, callback /* ( result ) */ );
+                    this.kernel.send( nodeID, kernelFunctionName, propertyName,
+                        undefined, when || 0, callback /* ( result ) */ );
                 };
     
             case "createMethod":
@@ -107,7 +107,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         [ scriptText, scriptType ], when || 0, callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
                 };
 
-            // TODO: time
+            case "time":
+            case "client":
+            case "moniker":
+
+                return function() {
+                    return this.kernel[kernelFunctionName]();
+                };
 
         }
 

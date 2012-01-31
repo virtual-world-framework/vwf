@@ -64,6 +64,15 @@
 
         this.now = 0;
 
+        // The moniker of the client responsible for an action. Will be falsy for actions
+        // originating in the server, such as time ticks.
+
+        this.client_ = undefined;
+
+        // The identifer assigned to the client by the server.
+
+        this.moniker_ = undefined;
+
         // Nodes that are receiving ticks.
 
         this.tickable = {
@@ -327,7 +336,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             if ( socket ) {
 
-                socket.on( "connect", function() { vwf.logger.info( "vwf.socket connected" ) } );
+                socket.on( "connect", function() {
+
+                    vwf.logger.info( "vwf.socket connected" );
+
+                    vwf.moniker_ = this.transport.sessionid;
+
+                } );
 
                 // Configure a handler to receive messages from the server.
                 
@@ -435,6 +450,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // callback: callback,  // TODO
             };
 
+            if ( this.client_ ) {
+                fields.client = this.client_; // propagate the current originating client
+            }
+
             this.queue( fields );
 
         };
@@ -465,9 +484,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
     
                 // Loop the message back to the incoming queue.
 
+                fields.client = this.moniker_; // stamp with the originating client like the reflector does
                 this.queue( fields );
     
-            } else { // multi-user mode
+            } else {
                 
                 // Send the message.
 
@@ -577,6 +597,12 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
                 // Advance the time.
 
                 this.now = fields.time;
+
+                // Record the originating client.
+
+                this.client_ = fields.client;
+
+                // Perform the action.
 
                 this.receive( fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
@@ -1616,6 +1642,23 @@ return component;
 
         this.time = function() {
             return this.now;
+        };
+
+        // -- client -------------------------------------------------------------------------------
+
+        // The moniker of the client responsible for the current action. Will be falsy for actions
+        // originating in the server, such as time ticks.
+
+        this.client = function() {
+            return this.client_;
+        };
+
+        // -- moniker ------------------------------------------------------------------------------
+
+        // The identifer the server assigned to this client.
+
+        this.moniker = function() {
+            return this.moniker_;
         };
 
         // -- logger_for ---------------------------------------------------------------------------
