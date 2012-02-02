@@ -90,22 +90,22 @@
                     // As a single argument to the "html" view:
                     //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
      
-                    {
-                        "vwf/model/javascript": [],
-                        "vwf/model/jiglib": [],
-                        "vwf/model/glge": [],
-                        // "vwf/model/unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
-                        "vwf/model/object": [],
-                    },
+                    [
+                        "vwf/model/javascript",
+                        "vwf/model/jiglib",
+                        "vwf/model/glge",
+                        // { "vwf/model/unity": "#vwf-root" },  // TODO: resolve #vwf-root after ready()
+                        "vwf/model/object",
+                    ],
 
                     // These are the view configurations. They use the same format as the model
                     // configurations.
 
-                    {
-                        glge: "#vwf-root",
-                        "vwf/view/document": [],
-                        "vwf/view/editor": [],
-                    }
+                    [
+                        { "glge": "#vwf-root" },
+                        "vwf/view/document",
+                        "vwf/view/editor",
+                    ]
 
                 );
 

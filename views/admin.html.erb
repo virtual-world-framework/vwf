@@ -34,12 +34,12 @@
 
                 ready( function() {
 
-                    vwf.initialize( {
-                        "vwf/model/javascript": [],
-                        "vwf/model/object": [],
-                    }, {
-                        html: "#listing"
-                    } );
+                    vwf.initialize( [
+                        "vwf/model/javascript",
+                        "vwf/model/object",
+                    ], [
+                        { "html": "#listing" }
+                    ] );
 
                     $( "#tabs" ).tabs();
 
