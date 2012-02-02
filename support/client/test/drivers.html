@@ -45,8 +45,8 @@
         ready( function() {
 
           vwf.initialize(
-            /* models */ { "vwf/model/glge": undefined, "vwf/model/object": undefined },
-            /*  views */ { "glge": undefined }
+            /* models */ [ "vwf/model/glge", "vwf/model/object" ],
+            /*  views */ [ "glge" ]
           );
 
           test( "Models", function() {

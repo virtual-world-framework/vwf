@@ -40,8 +40,8 @@
         ready( function() {
 
           vwf.initialize(
-            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
-            /*  views */ { "vwf/view/document": undefined }
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ "vwf/view/document" ]
           );
 
           var kernel = require( "vwf/kernel/model" ).create( vwf ); // connect through the kernel's model interface

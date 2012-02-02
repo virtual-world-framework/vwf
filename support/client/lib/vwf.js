@@ -152,48 +152,42 @@
         //     [3] vwf.initialize( { extends: "http://vwf.example.com/applications/sample12345",
         //             source: "alternate-model.dae", type: "model/vnd.collada+xml" }, ... )
         // 
-        // modelArguments and viewArguments identify the model and view modules that should be
-        // attached to the simulation and provides their configuration parameters. Each argument set
-        // is specified as an object (hash) in which each key is the name of a model or view to
-        // construct, and the value is the set of arguments to pass to the constructor. The
-        // arguments may be specified as an array of values [4], or as a single value if there is
-        // only one [5].
+        // modelInitializers and viewInitializers identify the model and view modules that should be
+        // attached to the simulation. Each is specified as an array of objects that map the name of
+        // a model or view to construct to the set of arguments to pass to its constructor. Modules
+        // without parameters may be specified as a string [4]. Arguments may be specified as an
+        // array [5], or as a single value if there is only one [6].
         // 
-        //     [4] vwf.initialize( ..., { scenejs: "#scene" }, { ... } )
-        //     [5] vwf.initialize( ..., { ... }, { html: [ "#application", "second param" ] } )
+        //     [4] vwf.initialize( ..., [ "vwf/model/javascript" ], [ ... ] )
+        //     [5] vwf.initialize( ..., [ { "vwf/model/glge": [ "#scene, "second param" ] } ], [ ... ] )
+        //     [6] vwf.initialize( ..., [ { "vwf/model/glge": "#scene" } ], [ ... ] )
 
-        this.initialize = function( /* [ componentURI|componentObject ] [ modelArguments ]
-            [ viewArguments ] */ ) {
+        this.initialize = function( /* [ componentURI|componentObject ] [ modelInitializers ]
+            [ viewInitializers ] */ ) {
 
             var args = Array.prototype.slice.call( arguments );
 
             // Get the application specification if one is provided in the query string. Parse it
-            // into a application specification object if it's valid JSON, otherwise keep the query
+            // into an application specification object if it's valid JSON, otherwise keep the query
             // string and assume it's a URI.
 
             var application = getQueryString( "application" );
 
-            // Parse the function parameters. If the first parameter is a string or contains
-            // component properties, then treat it as the application specification. Otherwise, fall
-            // back to the "application" parameter in the query string.
+            // Parse the function parameters. If the first parameter is not an array, then treat it
+            // as the application specification. Otherwise, fall back to the "application" parameter
+            // in the query string.
 
-            if ( typeof args[0] == "string" || args[0] instanceof String || objectIsComponent( args[0] ) ) {
+            if ( typeof args[0] != "object" || ! ( args[0] instanceof Array ) ) {
                 application = args.shift();
             }
 
-            // Shift off the parameter containing the model argument lists.
+            // Shift off the parameter containing the model list and initializer arguments.
 
-            var modelArgumentLists = args.shift() || {};
+            var modelInitializers = args.shift() || [];
 
-            if ( typeof modelArgumentLists != "object" && ! modelArgumentLists instanceof Object )
-                modelArgumentLists = {};
+            // Shift off the parameter containing the view list and initializer arguments.
 
-            // Shift off the parameter containing the view argument lists.
-
-            var viewArgumentLists = args.shift() || {};
-
-            if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
-                viewArgumentLists = {};
+            var viewInitializers = args.shift() || [];
 
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
@@ -202,7 +196,17 @@
 
             // Create and attach each configured model.
 
-            jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
+            modelInitializers.forEach( function( modelInitializer ) {
+
+                // Accept either { "vwf/model/name": [ arguments] } or "vwf/model/name".
+
+                if ( typeof modelInitializer == "object" || modelInitializer instanceof Object ) {
+                    var modelName = Object.keys( modelInitializer )[0];
+                    var modelArguments = modelInitializer[modelName];
+                } else {
+                    var modelName = modelInitializer;
+                    var modelArguments = undefined;
+                }
 
                 var model = require( modelName ).create(
                     kernel_for_models,                          // model's kernel access
@@ -212,21 +216,21 @@
                 );
 
                 if ( model ) {
-                    vwf.models.push( model );
-                    vwf.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
+                    this.models.push( model );
+                    this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
 if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-    vwf.models.javascript = model;
-    while ( vwf.models.javascript.model ) vwf.models.javascript = vwf.models.javascript.model;
+    this.models.javascript = model;
+    while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
 }
 
 if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
-    vwf.models.object = model;
-    while ( vwf.models.object.model ) vwf.models.object = vwf.models.object.model;
+    this.models.object = model;
+    while ( this.models.object.model ) this.models.object = this.models.object.model;
 }
                 }
 
-            } );
+            }, this );
 
             // Create the view interface to the kernel. Views can only make replicated calls which
             // bounce off the reflection server, are placed on the queue when received, and executed
@@ -236,23 +240,33 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             // Create and attach each configured view.
 
-            jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
+            viewInitializers.forEach( function( viewInitializer ) {
+
+                // Accept either { "vwf/view/name": [ arguments] } or "vwf/view/name".
+
+                if ( typeof viewInitializer == "object" || viewInitializer instanceof Object ) {
+                    var viewName = Object.keys( viewInitializer )[0];
+                    var viewArguments = viewInitializer[viewName];
+                } else {
+                    var viewName = viewInitializer;
+                    var viewArguments = undefined;
+                }
 
                 if ( ! viewName.match( "^vwf/view/" ) ) { // old way
 
-                    var view = vwf.modules[viewName];
+                    var view = this.modules[viewName];
 
                     if ( view ) {
                         var instance = new view();
-                        instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
+                        instance.state = this.models.actual["vwf/model/"+viewName] && this.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
                         view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
-                        vwf.views.push( instance );
-                        vwf.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                        this.views.push( instance );
+                        this.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
                     }
 
                 } else { // new way
 
-                    var modelPeer = vwf.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: vwf.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
+                    var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
 
                     var view = require( viewName ).create(
                         kernel_for_views,                           // view's kernel access
@@ -262,17 +276,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     );
 
                     if ( view ) {
-                        vwf.views.push( view );
-                        vwf.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                        this.views.push( view );
+                        this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
                     }
 
                 }
 
-            } );
+            }, this );
 
             // Load the application.
 
-            vwf.ready( application );
+            this.ready( application );
 
         };
 
