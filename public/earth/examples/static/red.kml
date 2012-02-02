@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
+<Document>
+	<name>red.kml</name>
+	<Style id="sh_caution">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/caution.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<StyleMap id="msn_hospitals">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_hospitals</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_hospitals</styleUrl>
+		</Pair>
+	</StyleMap>
+	<StyleMap id="msn_earthquake">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_earthquake</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_earthquake</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_earthquake">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/earthquake.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sn_hospitals">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/hospitals.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<StyleMap id="msn_caution">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_caution</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_caution</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_hospitals">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/hospitals.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sn_caution">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/caution.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sn_earthquake">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/earthquake.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Folder>
+		<name>Red</name>
+		<open>1</open>
+		<Placemark>
+			<name>Red 1</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_caution</styleUrl>
+			<Point>
+				<coordinates>-122.0018218053078,37.00612121450768,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Red 2</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_hospitals</styleUrl>
+			<Point>
+				<coordinates>-121.9924312125212,37.00025095270595,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Red 3</name>
+			<LookAt>
+				<longitude>-121.9927168959608</longitude>
+				<latitude>36.99801184849887</latitude>
+				<altitude>0</altitude>
+				<range>6373.063774945887</range>
+				<tilt>26.93389154474472</tilt>
+				<heading>2.810122210703558</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_earthquake</styleUrl>
+			<Point>
+				<coordinates>-122.0067679196375,36.99783505460958,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

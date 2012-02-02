@@ -5,12 +5,27 @@ properties:
   spin-rate: 1
   spin-axis: [ 0, 0, 1 ]
   spin-inputDim: "x"
-  spin-value: 0
+  spin-min: 0
+  spin-max: 1
+  spin-value:
+    set: |
+      if ( value >= this["spin-min"] && value <= this["spin-max"] ) {
+        this[ "spin-value" ] = value;
+        this.setRotation( value * 360.0 )
+        this.valueChanged( value );        
+        console.info( value );
+      }
 events:
   valueChanged:
+methods:
+  initialize:
+  spin:
+  setRotation:
 scripts:
 - |
+  
   this.initialize = function() {
+    console.info( "== initialize == spin-on-move == initialize == " );
     this.input = {
       "pointerInfo": undefined,
       "pickInfo": undefined,
@@ -45,6 +60,8 @@ scripts:
     };
   }
   this.pointerDown = function( pointerInfo, pickInfo ) {
+    if ( !this.input ) { this.initialize(); }
+
     this.input.pointerDown.pointerInfo = pointerInfo;
     this.input.pointerDown.pointerInfo = pickInfo;
     this.input.clear();
@@ -65,13 +82,37 @@ scripts:
     }
   }
   this.spin = function( value ){
-      var rotation = this.rotation;
-      var newRot =[  
-        rotation[0] + this["spin-axis"][0] * 2 * Math.PI * value * this["spin-rate"],
-        rotation[1] + this["spin-axis"][1] * 2 * Math.PI * value * this["spin-rate"],
-        rotation[2] + this["spin-axis"][2] * 2 * Math.PI * value * this["spin-rate"],
-      ];  
-      this.rotation = newRot;
-      this["spin-value"] = (this["spin-axis"][0] * newRot[0]) + (this["spin-axis"][1] * newRot[1]) + (this["spin-axis"][2] * newRot[2]);  
+    console.info( "this.spin( "+value+" )" );
+    var rotation = this.rotation;
+    var orientation = this.orientation;
+    console.info( "       rotation = " + rotation );
+    console.info( "       orientation = " + orientation );
+    console.info( "       2 * Math.PI * value = " + (2 * Math.PI * value) );
+    var newRot =[  
+      rotation[0] + this["spin-axis"][0] * 2 * Math.PI * value * this["spin-rate"],
+      rotation[1] + this["spin-axis"][1] * 2 * Math.PI * value * this["spin-rate"],
+      rotation[2] + this["spin-axis"][2] * 2 * Math.PI * value * this["spin-rate"],
+    ]; 
+    console.info( "       newRot = " + newRot );
+    console.info( "       (this[spin-axis][0] * newRot[0]) = " + (this["spin-axis"][0] * newRot[0]) );
+    console.info( "       (this[spin-axis][1] * newRot[1]) = " + (this["spin-axis"][1] * newRot[1]) );
+    console.info( "       (this[spin-axis][2] * newRot[2]) = " + (this["spin-axis"][2] * newRot[2]) );
+    var rotationDegrees = ((this["spin-axis"][0] * newRot[0]) + (this["spin-axis"][1] * newRot[1]) + (this["spin-axis"][2] * newRot[2])) * 180/ Math.PI; 
+    var rotationPercent = rotationDegrees / 360;
+
+    console.info( "       rotationDegrees = " + rotationDegrees );
+    console.info( "       rotationPercent = " + rotationPercent );
+    
+    if ( rotationPercent >= this["spin-min"] && rotationPercent <= this["spin-max"] ) {
+      this["spin-value"] = rotationPercent;         
+    }      
+  }
+  this.setRotation = function( value ) {
+    var rotation = this.rotation;
+    this.rotation =[  
+      rotation[0] + this["spin-axis"][0] * value,
+      rotation[1] + this["spin-axis"][1] * value,
+      rotation[2] + this["spin-axis"][2] * value,
+    ];     
   }
 

@@ -1,0 +1,5 @@
+--- 
+extends: http://vwf.example.com/types/googleEarth
+children:
+  earth:
+    extends: http://vwf.example.com/types/node3
