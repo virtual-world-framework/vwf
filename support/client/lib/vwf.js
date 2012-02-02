@@ -211,8 +211,8 @@
                 var model = require( modelName ).create(
                     kernel_for_models,                          // model's kernel access
                     [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
-                    {}                                          // state shared with a paired view
-                    // TODO: configuration parameters (modelArguments)
+                    {},                                         // state shared with a paired view
+                    [].concat( modelArguments || [] )           // arguments for initialize()
                 );
 
                 if ( model ) {
@@ -271,8 +271,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     var view = require( viewName ).create(
                         kernel_for_views,                           // view's kernel access
                         [],                                         // stages between the kernel and view
-                        modelPeer && modelPeer.state || {}          // state shared with a paired model
-                        // TODO: configuration parameters (viewArguments)
+                        modelPeer && modelPeer.state || {},         // state shared with a paired model
+                        [].concat( viewArguments || [] )            // arguments for initialize()
                     );
 
                     if ( view ) {

@@ -20,6 +20,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
     var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+
     logger.info( "load" );
 
     return {
@@ -56,13 +57,14 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
             return instance;
         },
 
-        create: function( kernel, model, stages, state ) {  // TODO: configuration parameters
+        create: function( kernel, model, stages, state, parameters ) {
 
             this.logger.info( "create" );
 
-            // Interpret create( kernel, stages, state ) as create( kernel, undefined, stages, state )
+            // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 
-            if ( model && model.length !== undefined ) {
+            if ( model && model.length !== undefined ) { // is an array?
+                parameters = state;
                 state = stages;
                 stages = model;
                 model = undefined;
@@ -101,7 +103,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
             // Call the driver's initialize().
 
-            initialize.call( instance );  // TODO: configuration parameters
+            initialize.apply( instance, parameters );
 
             // Call modelize() on the driver.
 
@@ -119,7 +121,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
             // Call initialize() on the driver.
 
-            function initialize() {
+            function initialize( /* parameters */ ) {
                 Object.getPrototypeOf( this ) && initialize.apply( Object.getPrototypeOf( this ), arguments ); // depth-first recursion through the prototypes
                 this.hasOwnProperty( "initialize" ) && this.initialize.apply( instance, arguments ); // initialize() from the bottom up
             }
