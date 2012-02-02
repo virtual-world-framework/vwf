@@ -60,7 +60,7 @@
         } );
 
         // This is the simulation clock, which contains the current time in milliseconds. Time is
-        // controlled by the conference server and updates here as we receive control messages.
+        // controlled by the reflector and updates here as we receive control messages.
 
         this.now = 0;
 
@@ -98,8 +98,8 @@
 
         var nodeTypeURI = "http://vwf.example.com/types/node";
 
-        // Control messages from the conference server are stored here in a priority queue, ordered
-        // by execution time.
+        // Control messages from the reflector are stored here in a priority queue, ordered by
+        // execution time.
 
         var queue = this.private.queue = [];
 
@@ -108,8 +108,8 @@
 
         queue.sequence = 0; // message counter to ensure a stable sort
 
-        // This is the connection to the conference server. In this sample implementation, "socket"
-        // is a socket.io client that communicates over a channel provided by the server hosting the
+        // This is the connection to the reflector. In this sample implementation, "socket" is a
+        // socket.io client that communicates over a channel provided by the server hosting the
         // client documents.
 
         var socket = this.private.socket = undefined;
@@ -138,18 +138,18 @@
         // require.ready() or jQuery(document).ready() to call initialize() once the page has
         // loaded. initialize() accepts three parameters.
         
-        // A component specification identifies the world to be loaded. If a URI is provided, the
-        // specification is loaded from there [1]. Alternately, a JavaScript object literal
+        // A component specification identifies the application to be loaded. If a URI is provided,
+        // the specification is loaded from there [1]. Alternately, a JavaScript object literal
         // containing the specfication may be provided [2]. Since a component can extend and
         // specialize a prototype, using a simple object literal allows existing component to be
         // configured for special uses [3].
         // 
-        //     [1] vwf.initialize( "http://vwf.example.com/worlds/sample12345", ... )
+        //     [1] vwf.initialize( "http://vwf.example.com/applications/sample12345", ... )
         //
         //     [2] vwf.initialize( { source: "model.dae", type: "model/vnd.collada+xml",
         //             properties: { "p1": ... }, ... }, ... )
         //
-        //     [3] vwf.initialize( { extends: "http://vwf.example.com/worlds/sample12345",
+        //     [3] vwf.initialize( { extends: "http://vwf.example.com/applications/sample12345",
         //             source: "alternate-model.dae", type: "model/vnd.collada+xml" }, ... )
         // 
         // modelArguments and viewArguments identify the model and view modules that should be
@@ -160,22 +160,22 @@
         // only one [5].
         // 
         //     [4] vwf.initialize( ..., { scenejs: "#scene" }, { ... } )
-        //     [5] vwf.initialize( ..., { ... }, { html: [ "#world", "second param" ] } )
+        //     [5] vwf.initialize( ..., { ... }, { html: [ "#application", "second param" ] } )
 
         this.initialize = function( /* [ componentURI|componentObject ] [ modelArguments ]
             [ viewArguments ] */ ) {
 
             var args = Array.prototype.slice.call( arguments );
 
-            // Get the world specification if one is provided in the query string. Parse it into a
-            // world specification object if it's valid JSON, otherwise keep the query string and
-            // assume it's a URI.
+            // Get the application specification if one is provided in the query string. Parse it
+            // into a application specification object if it's valid JSON, otherwise keep the query
+            // string and assume it's a URI.
 
             var application = getQueryString( "application" );
 
             // Parse the function parameters. If the first parameter is a string or contains
-            // component properties, then treat it as the world specification. Otherwise, fall back
-            // to the "application" parameter in the query string.
+            // component properties, then treat it as the application specification. Otherwise, fall
+            // back to the "application" parameter in the query string.
 
             if ( typeof args[0] == "string" || args[0] instanceof String || objectIsComponent( args[0] ) ) {
                 application = args.shift();
@@ -270,7 +270,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             } );
 
-            // Load the world.
+            // Load the application.
 
             vwf.ready( application );
 
@@ -280,9 +280,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.ready = function( component_uri_or_json_or_object ) {
 
-            // Connect to the conference server. This implementation uses the socket.io library,
-            // which communicates using a channel back to the server that provided the client
-            // documents.
+            // Connect to the reflector. This implementation uses the socket.io library, which
+            // communicates using a channel back to the server that provided the client documents.
 
             try {
 
@@ -321,10 +320,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             } catch ( e ) {
 
-                // If a connection to the conference server is not available, then run in single-
-                // user mode. Messages intended for the conference server will loop directly back to
-                // us in this case. Start a timer to monitor the incoming queue and dispatch the
-                // messages as though they were received from the server.
+                // If a connection to the reflector is not available, then run in single-user mode.
+                // Messages intended for the reflector will loop directly back to us in this case.
+                // Start a timer to monitor the incoming queue and dispatch the messages as though
+                // they were received from the server.
 
                 this.dispatch( 0 );
 
@@ -375,8 +374,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     
                         // The simulation may perform immediate actions at the current time or it
                         // may post actions to the queue to be performed in the future. But we only
-                        // move time forward for items arriving in the queue from the conference
-                        // server.
+                        // move time forward for items arriving in the queue from the reflector.
 
                         vwf.dispatch( fields.time );
 
@@ -391,18 +389,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "disconnect", function() { vwf.logger.info( "vwf.socket disconnected" ) } );
 
-                // Start communication with the conference server. 
+                // Start communication with the reflector. 
 
                 socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
 
             } else if ( component_uri_or_json_or_object ) {
 
-                // Load the world. The world is a rooted in a single node constructed here as an
-                // instance of the component passed to initialize(). That component, its
+                // Load the application. The application is rooted in a single node constructed here
+                // as an instance of the component passed to initialize(). That component, its
                 // prototype(s), and its children, and their prototypes and children, flesh out the
-                // entire world.
+                // entire application.
 
-                // TODO: add note that this is only for a self-determined world; with socket, wait for reflection server to tell us.
+                // TODO: add note that this is only for a self-determined application; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
                 this.createNode( 0, component_uri_or_json_or_object, undefined );
@@ -460,8 +458,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // -- send ---------------------------------------------------------------------------------
 
-        // Send a message to the conference server. The message will be reflected back to all
-        // participants in the conference.
+        // Send a message to the reflector. The message will be reflected back to all participants
+        // in the instance.
 
         this.send = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
 
@@ -577,7 +575,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
         // Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
         // simulation time that we should advance to and was taken from the time stamp of the last
-        // message received from the conference server.
+        // message received from the reflector.
 
         this.dispatch = function( currentTime ) {
 
@@ -631,9 +629,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
         // -- tick ---------------------------------------------------------------------------------
 
-        // Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
-        // simulation time that we should advance to and was taken from the time stamp of the last
-        // message received from the conference server.
+        // Tick each tickable model, view, and node. Ticks are sent on each time change.
 
         this.tick = function() {
 
@@ -666,8 +662,8 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // A simple node consists of a set of properties, methods and events, but a node may
         // specialize a prototype component and may also contain multiple child nodes, any of which
         // may specialize a prototype component and contain child nodes, etc. So components cover a
-        // vast range of complexity. The world definition for the overall simulation is a single
-        // component instance.
+        // vast range of complexity. The application definition for the overall simulation is a
+        // single component instance.
         // 
         // A node is a component instance--a single, anonymous specialization of its component.
         // Nodes specialize components in the same way that any component may specialize a prototype
@@ -705,7 +701,7 @@ childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
     
-            this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
+            this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with application param?
 
                 async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
 
@@ -1924,8 +1920,8 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             ], function( err, results ) {
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
-                // ID of its prototype. If this was the root node for the world, the world is now
-                // fully initialized.
+                // ID of its prototype. If this was the root node for the application, the
+                // application is now fully initialized.
 
                 callback && callback.call( vwf, nodeID );
             } );
