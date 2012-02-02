@@ -38,6 +38,10 @@
 
     <!-- script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script -->
 
+
+    <script type="text/javascript" src="http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw"></script>
+
+
     <script type="text/javascript">
 
         require( [
@@ -58,6 +62,7 @@
             "vwf/kernel/view",
             "vwf/view/document",
             "vwf/view/editor",
+			"vwf/view/googleEarth",
 
         ], function( ready ) {
 
@@ -105,7 +110,9 @@
                         { "glge": "#vwf-root" },
                         "vwf/view/document",
                         "vwf/view/editor",
-                    ]
+						"vwf/view/googleEarth",
+					]
+
 
                 );
 
@@ -141,6 +148,10 @@
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
     <div id="vwf-root"></div>
+
+    <!-- div id="ui" style="position: relative;">
+      <div id="map3d" style="border: 1px solid silver; width: 800px; height: 600px;"></div>
+    </div -->
 
   </body>
 

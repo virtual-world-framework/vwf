@@ -3,7 +3,7 @@ extends: |
   http://vwf.example.com/types/node3
 properties:
   translate-vector: [ 0, 1, 0 ]
-  translate_value: 0
+  translate_value:
 methods:
   move:
 scripts:
@@ -22,14 +22,17 @@ scripts:
     this["translate_value"] = 0;
   }
   this.move = function( down ){
-      if ( down ){
-        var newPos = [  
-          initialPosition[0] + this["translate-vector"][0],
-          initialPosition[1] + this["translate-vector"][1],
-          initialPosition[2] + this["translate-vector"][2],
-        ]; 
-        this.position = newPos;
-      } else {
-        this.position = initialPosition;
-      }
+    if ( !initialPosition ) {
+      initialPosition = this.position;
+    }
+    if ( down ){
+      var newPos = [  
+        initialPosition[0] + this["translate-vector"][0],
+        initialPosition[1] + this["translate-vector"][1],
+        initialPosition[2] + this["translate-vector"][2],
+      ]; 
+      this.position = newPos;
+    } else {
+      this.position = initialPosition;
+    }
   }
