@@ -110,7 +110,6 @@
 //                        }
 
                         
-                        google.load( "earth", "1" );
                         var interval;
                         var view = this;
                         win = this.win;
