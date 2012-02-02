@@ -64,6 +64,32 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
 
+            case "setProperties":
+
+                return function( nodeID, properties, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, properties );
+                    } else {
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            [ properties ], when, callback /* ( result ) */ );
+                    }
+    
+                };
+
+            case "getProperties":
+
+                return function( nodeID, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID );
+                    } else {
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            undefined, when, callback /* ( result ) */ );
+                    }
+
+                };
+    
             case "createProperty":
 
                 return function( nodeID, propertyName, propertyValue, propertyGet, propertySet, when, callback ) {
