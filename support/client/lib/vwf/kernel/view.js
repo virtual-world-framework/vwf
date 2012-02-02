@@ -38,6 +38,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         [ childID ], when || 0, callback /* ( result ) */ );  // TODO: swap childID & childName?
                 };
 
+            case "setProperties":
+
+                return function( nodeID, properties, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, undefined,
+                        [ properties ], when || 0, callback /* ( result ) */ );
+                };
+
+            case "getProperties":
+
+                return function( nodeID, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, undefined,
+                        undefined, when || 0, callback /* ( result ) */ );
+                };
+
             case "createProperty":
 
                 return function( nodeID, propertyName, propertyValue, propertyGet, propertySet, when, callback ) {
