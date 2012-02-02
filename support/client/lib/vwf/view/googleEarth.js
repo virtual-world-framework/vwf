@@ -111,12 +111,13 @@
 
                         
                         google.load( "earth", "1" );
-                        win = this.win;
-                        var interval = win.setInterval( waitForLoad, 1000 );
+                        var interval;
                         var view = this;
-                        function waitForLoad() {
-                            if ( google.earth ) {
-                                function initCB(instance) {
+                        win = this.win;
+                        var gg = google;
+                        interval = win.setInterval( function() {
+                            if ( gg.earth ) {
+                                gg.earth.createInstance( "map3d", function(instance) {
                                     ge = instance;
                                     ge.getWindow().setVisibility(true);
     
@@ -133,17 +134,12 @@
     
                                     document.getElementById('installed-plugin-version').innerHTML =
                                     ge.getPluginVersion().toString();
-                                }
-  
-                                function failureCB(errorCode) {
+                                }, function(errorCode) {
                                     console.info( "google earth load error: " + errorCode );
-                                }
-
-//                                google.earth.createInstance( childID, initCB, failureCB );
-                                google.earth.createInstance( "map3d", initCB, failureCB );
+                                } );
                                 win.clearInterval( interval );
                             }
-                        }
+                        }, 1000 );
                     }
                     break;
 
