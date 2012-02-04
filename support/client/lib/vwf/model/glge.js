@@ -97,7 +97,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                         var model = this;
                         var xmlDocLoadedCallback = callback;
-                        sceneNode.pendingLoads++;
                         sceneNode.glgeDocument.onLoad = function () {
 //                            console.info( "== LOADING COLLADA complete       ==" );
 //                            console.info( "====================================" );
@@ -112,6 +111,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 //                                    console.info( "== DELAY LOADING COLLADA ...."+childSource+".... "+childName+"==" );
                                     callback( false );
                                     sceneNode.glgeDocument.load( childSource );
+                                    sceneNode.pendingLoads++;
                                     break;
                             }
                         }
