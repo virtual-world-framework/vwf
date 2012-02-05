@@ -12,8 +12,6 @@ class VWF::Pattern
 
     @captures = Match.new []
 
-    @mock_filesystem = VWF.settings.mock_filesystem
-
   end
 
   # incoming path                                       public_path             application     session         private_path            

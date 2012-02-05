@@ -10,7 +10,6 @@ class VWF < Sinatra::Base
     set :support, lambda { File.join( settings.root, "support" ) }
 
 set :component_template_types, [ :json, :yaml ]  # get from Component?
-set :mock_filesystem, nil
 
   end
 
@@ -21,20 +20,6 @@ set :mock_filesystem, nil
   configure :development do
     require "logger"
     set :logging, ::Logger::DEBUG
-  end
-
-  configure :test do
-
-    # For testing, assume that the filesystem consists of these directories containing these files.
-
-    MOCK_FILESYSTEM =
-    {
-      "/" =>                    [ "index.vwf", "component.vwf" ],
-      "/directory" =>           [ "index.vwf", "component.vwf" ],
-    }
-
-    set :mock_filesystem, MOCK_FILESYSTEM
-
   end
 
   get Pattern.new do |public_path, application, session, private_path|
