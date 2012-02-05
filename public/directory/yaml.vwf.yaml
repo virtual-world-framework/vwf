@@ -1,4 +1,4 @@
 ---
 extends: http://vwf.example.com/types/node
 properties:
-  abc: "yaml"
+  template: yaml

@@ -31,7 +31,6 @@ set :mock_filesystem, nil
     {
       "/" =>                    [ "index.vwf", "component.vwf" ],
       "/directory" =>           [ "index.vwf", "component.vwf" ],
-      "/types" =>               [ "abc.vwf" ]
     }
 
     set :mock_filesystem, MOCK_FILESYSTEM

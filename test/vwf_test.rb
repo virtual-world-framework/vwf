@@ -7,27 +7,52 @@ class VWFTest < Test::Unit::TestCase
     VWF
   end
 
-  def test_serves_types_as_json
+  def test_serves_components_as_json
 
-    get "/types/abc.vwf"
+    get "/directory/component.vwf"
     assert last_response.ok?
 
     component = JSON.parse last_response.body
     assert_not_nil component["extends"]
     assert_not_nil component["properties"]
-    assert_not_nil component["properties"]["abc"]
+    assert_equal "component", component["properties"]["file"]
     
   end
 
-  def test_serves_types_as_jsonp
+  def test_serves_components_as_jsonp
 
     callback = "test_callback_function_name"
 
-    get "/types/abc.vwf?callback=#{callback}"
+    get "/directory/component.vwf?callback=#{callback}"
     assert last_response.ok?
 
     assert_match /^#{callback}\(.*\)$/, last_response.body
 
+    component = JSON.parse last_response.body[ /#{callback}\s*\(\s*(.*)\s*\)/, 1 ]
+    assert_not_nil component["extends"]
+    assert_not_nil component["properties"]
+    assert_equal "component", component["properties"]["file"]
+
+  end
+
+  def test_renders_components_from_json
+
+    get "/directory/json.vwf" # /directory/json.vwf.json
+    assert last_response.ok?
+
+    component = JSON.parse last_response.body
+    assert_equal "json", component["properties"]["template"]
+    
+  end
+
+  def test_renders_components_from_yaml
+
+    get "/directory/yaml.vwf" # /directory/yaml.vwf.yaml
+    assert last_response.ok?
+
+    component = JSON.parse last_response.body
+    assert_equal "yaml", component["properties"]["template"]
+    
   end
 
   # Redirects the application at the root to a new session for that application.
