@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/types/node2
+extends: http://vwf.example.com/node2.vwf
 properties:
   activeCamera: 
     set: |
@@ -20,7 +20,7 @@ properties:
           }
         }
       }
-    value: "http-vwf-example-com-types-camera-maincamera"
+    value: "http-vwf-example-com-camera-vwf-maincamera"
   ambientColor: 
     set: |
       this.ambientColor = value;
@@ -31,7 +31,7 @@ scripts:
     var scene = this;
     this.initialize = function() {
       console.info( "==================== scene ====================" );
-      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
       this.ambientColor = this.ambientColor;
     }
     this.getChild = function( childName ) {

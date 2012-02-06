@@ -4,16 +4,16 @@ source: index.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  activeCamera: "http-vwf-example-com-camera-vwf-maincamera"
   backgroundColor: [ 83, 157, 194 ]
   loadDone: false
 scripts:
 - text: |
     this.initialize = function() {
       //console.info( "================ sandtable ================" );
-      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
       this.loadDone = true;
-      vwf.setProperty( "http-vwf-example-com-types-camera-maincamera", "lookAt", "http-vwf-example-com-types-node3-sceneCenter" );
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-maincamera", "lookAt", "http-vwf-example-com-node3-vwf-sceneCenter" );
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
@@ -48,7 +48,7 @@ children:
       inputModeChanged:
       clearing:
   flat_terrain:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: models/vwf_terrain.dae
     type: model/vnd.collada+xml
     properties:
@@ -56,11 +56,11 @@ children:
       eulers: [0, 0, 0 ]
       scale: [ 0.008, 0.008, 0.020 ]
   sceneCenter:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     properties:
       position: [ 0, 0, 0 ]
   maincamera:
-    extends: http://vwf.example.com/types/camera
+    extends: http://vwf.example.com/camera.vwf
     properties:
       walkMode: "walk"
       cameraType: "perspective"
@@ -68,20 +68,20 @@ children:
       rotation: [ 1.56, 3.14, 0 ]
       far: 500000
       near: 2
-      lookAt: "http-vwf-example-com-types-node3-sceneCenter"
+      lookAt: "http-vwf-example-com-node3-vwf-sceneCenter"
     scripts:
     - text: |
         this.initialize = function() {
-          this.lookAt = "http-vwf-example-com-types-node3-sceneCenter";
+          this.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
         }
       type: application/javascript      
   light1:
-    extends: http://vwf.example.com/types/light
+    extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "point"
       constantAttenuation: 1
   predator1:
-    extends: http://vwf.example.com/types/node3 
+    extends: http://vwf.example.com/node3.vwf 
     methods:
       animate: |
         //console.info( "== predator1 ===== animate ================" );
@@ -173,20 +173,20 @@ children:
         value: false
     children:
       goal1:
-        extends: http://vwf.example.com/types/node3 
+        extends: http://vwf.example.com/node3.vwf 
         properties:
           position: [ 0, 0, 1200 ]
           eulers: [0, 0, 0 ]
           scale: [ 1, 1, 1 ]      
       planeGroup1:
-        extends: http://vwf.example.com/types/node3 
+        extends: http://vwf.example.com/node3.vwf 
         properties:
           position: [ 0, 0, 1200 ]
           eulers: [0, 0, 0 ]
           scale: [ 1, 1, 1 ]
         children:
           plane1:
-            extends: http://vwf.example.com/types/node3
+            extends: http://vwf.example.com/node3.vwf
             source: models/Predator.dae
             type: model/vnd.collada+xml
             properties:
@@ -194,7 +194,7 @@ children:
               rotation: [0, 0, -1.57 ]
               scale: [ 15, 15, 15 ]
           cone1:
-            extends: http://vwf.example.com/types/node3
+            extends: http://vwf.example.com/node3.vwf
             source: models/cone.dae
             type: model/vnd.collada+xml
             properties:
@@ -202,7 +202,7 @@ children:
               eulers: [0, 0, 0 ]
               scale: [ 8, 8, 16 ]
   predator2:
-    extends: http://vwf.example.com/types/node3 
+    extends: http://vwf.example.com/node3.vwf 
     methods:
       animate: |
         //console.info( "== predator2 =====  animate ================" );
@@ -351,8 +351,8 @@ children:
             this.timeSinceLast = vwf.time();
             this.planeGroup2.position = this.path[ this.lastPathIndex ].position;
             this.goal2.position = this.path[ this.nextPathIndex ].position;
-            //this.planeGroup2.plane2.lookAt = "http-vwf-example-com-types-node3-goal2";
-            //this.planeGroup2.cone2.lookAt = "http-vwf-example-com-types-node3-goal2";
+            //this.planeGroup2.plane2.lookAt = "http-vwf-example-com-node3-vwf-goal2";
+            //this.planeGroup2.cone2.lookAt = "http-vwf-example-com-node3-vwf-goal2";
             
             this.animating = true;
           }
@@ -385,20 +385,20 @@ children:
         value: false
     children:
       goal2:
-        extends: http://vwf.example.com/types/node3 
+        extends: http://vwf.example.com/node3.vwf 
         properties:
           position: [ 0, 0, 1500 ]
           eulers: [0, 0, 0 ]
           scale: [ 1, 1, 1 ]      
       planeGroup2:
-        extends: http://vwf.example.com/types/node3 
+        extends: http://vwf.example.com/node3.vwf 
         properties:
           position: [ 0, 0, 1500 ]
           eulers: [0, 0, 0 ]
           scale: [ 1, 1, 1 ]
         children:
           plane2:
-            extends: http://vwf.example.com/types/node3
+            extends: http://vwf.example.com/node3.vwf
             source: models/Predator.dae
             type: model/vnd.collada+xml
             properties:
@@ -406,7 +406,7 @@ children:
               rotation: [0, 0, -1.57 ]
               scale: [ 15, 15, 15 ]
           cone2:
-            extends: http://vwf.example.com/types/node3
+            extends: http://vwf.example.com/node3.vwf
             source: models/cone.dae
             type: model/vnd.collada+xml
             properties:

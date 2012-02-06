@@ -1,6 +1,6 @@
 --- 
 extends: |
-  http://vwf.example.com/types/node3
+  http://vwf.example.com/node3.vwf
 properties:
   spin-rate: 1
   spin-axis: [ 0, 0, 1 ]

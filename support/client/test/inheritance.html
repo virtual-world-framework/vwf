@@ -574,7 +574,7 @@
             var middleProperties = factories[middle]( "middle" );
             var topProperties = factories[top]( "top" );
 
-            vwf.createNode( 0, { extends: "http://vwf.example.com/types/node", properties: bottomProperties }, unique_name( "bottom" ), function( bottomID ) {
+            vwf.createNode( 0, { extends: "http://vwf.example.com/node.vwf", properties: bottomProperties }, unique_name( "bottom" ), function( bottomID ) {
               vwf.execute( bottomID, "this.tag = 'bottom'" );
               vwf.createNode( 0, { extends: "@" + JSON.stringify( bottomID ), properties: middleProperties }, unique_name( "middle" ), function( middleID ) {
                 vwf.execute( middleID, "this.tag = 'middle'" );

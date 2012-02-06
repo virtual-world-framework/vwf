@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/types/navscene
+extends: http://vwf.example.com/navscene.vwf
 properties: 
   gravity:
     value: [ 0, 0, -50.8, 0 ]

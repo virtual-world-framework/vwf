@@ -64,6 +64,24 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   end
 
+  # Serve files at "/proxy/<host>" from ^/support/proxy/<host>. We're pretending these come from
+  # another host.
+
+  get "/proxy/:host/*" do |host, path|
+
+    delegated_env = env.merge(
+      "PATH_INFO" => "/" + path
+    )
+
+    cascade = Rack::Cascade.new [
+      Rack::File.new( File.join VWF.settings.support, "proxy", host ),          # Public content from ^/public  # TODO: will match public_path/index.html which we don't really want
+      Application::Component.new( File.join VWF.settings.support, "proxy", host ) # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
+    ]
+
+    cascade.call delegated_env
+
+  end
+
   # Serve files not in any application as static content.
 
   get "/*" do |path|
@@ -239,15 +257,15 @@ end
 
 # if any exist:
 
-# http://vwf.example.com/path/to/application                    Content: http://vwf.example.com/types/some-application
-# http://vwf.example.com/path/to/application.json               Content: { "extends": "http://vwf.example.com/types/some-application", "properties": ... }
-# http://vwf.example.com/path/to/application.yaml               Content: --- // extends: http://vwf.example.com/types/some-application // properties: // .. ....
+# http://vwf.example.com/path/to/application                    Content: http://vwf.example.com/some-application.vwf
+# http://vwf.example.com/path/to/application.json               Content: { "extends": "http://vwf.example.com/some-application.vwf", "properties": ... }
+# http://vwf.example.com/path/to/application.yaml               Content: --- // extends: http://vwf.example.com/some-application.vwf // properties: // .. ....
 
-# http://vwf.example.com/path/to/application/                   Content: http://vwf.example.com/types/some-application
+# http://vwf.example.com/path/to/application/                   Content: http://vwf.example.com/some-application.vwf
 
-# http://vwf.example.com/path/to/application/index              Content: http://vwf.example.com/types/some-application
-# http://vwf.example.com/path/to/application/index.json         Content: { "extends": "http://vwf.example.com/types/some-application", "properties": ... }
-# http://vwf.example.com/path/to/application/index.yaml         Content: --- // extends: http://vwf.example.com/types/some-application // properties: // .. ....
+# http://vwf.example.com/path/to/application/index              Content: http://vwf.example.com/some-application.vwf
+# http://vwf.example.com/path/to/application/index.json         Content: { "extends": "http://vwf.example.com/some-application.vwf", "properties": ... }
+# http://vwf.example.com/path/to/application/index.yaml         Content: --- // extends: http://vwf.example.com/some-application.vwf // properties: // .. ....
 
 # then:
 

@@ -1,6 +1,6 @@
 --- 
 extends: |
-  http://vwf.example.com/types/node3
+  http://vwf.example.com/node3.vwf
 scripts:
 - text: |
     this.pointerClick = function()  {

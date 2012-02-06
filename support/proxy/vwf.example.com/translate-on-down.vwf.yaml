@@ -1,6 +1,6 @@
 --- 
 extends: |
-  http://vwf.example.com/types/node3
+  http://vwf.example.com/node3.vwf
 properties:
   translate-vector: [ 0, 1, 0 ]
   translate_value: 0

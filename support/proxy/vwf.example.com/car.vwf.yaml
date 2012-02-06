@@ -1,14 +1,14 @@
 --- 
-extends: http://vwf.example.com/types/node3
+extends: http://vwf.example.com/node3.vwf
 properties:
   attachedToCamera: 
     set: |
         this.properties.attachedToCamera.setter = function( value ) {
           if ( vwf ) {
             if ( value ) {
-              vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', 'http-vwf-example-com-types-car-pick_up_truck02' );
+              vwf.setProperty( 'http-vwf-example-com-camera-vwf-maincamera', 'attachNodeID', 'http-vwf-example-com-car-vwf-pick_up_truck02' );
             } else {
-              vwf.setProperty( 'http-vwf-example-com-types-camera-maincamera', 'attachNodeID', '' );
+              vwf.setProperty( 'http-vwf-example-com-camera-vwf-maincamera', 'attachNodeID', '' );
             }
           }
           this.attachedToCamera = value;

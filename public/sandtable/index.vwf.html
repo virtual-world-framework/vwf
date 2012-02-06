@@ -8,7 +8,7 @@
       mousePressed = false;
     
       function setColor(color) {
-        vwf_view.kernel.setProperty( "http-vwf-example-com-types-node-toolbar", "selectedColor", color );
+        vwf_view.kernel.setProperty( "http-vwf-example-com-node-vwf-toolbar", "selectedColor", color );
         highlightColor(color);
       }
 	        
@@ -42,7 +42,7 @@
       }
 
       function setMode(mode) {
-		vwf_view.kernel.setProperty( "http-vwf-example-com-types-node-toolbar", "inputMode", mode );
+		vwf_view.kernel.setProperty( "http-vwf-example-com-node-vwf-toolbar", "inputMode", mode );
 		highlightMode(mode);
 	  }
 
@@ -56,7 +56,7 @@
       }
       
       function clearOverlay() {
-        vwf_view.kernel.callMethod( "http-vwf-example-com-types-node-toolbar", "clear" );
+        vwf_view.kernel.callMethod( "http-vwf-example-com-node-vwf-toolbar", "clear" );
         setColor('black');
         setMode('orbit');
       }
@@ -87,7 +87,7 @@
       // $('#toolbar').animate({ opacity:0.0 }, 1);
 
       vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-      	if (nodeId == "http-vwf-example-com-types-node-toolbar" ) {
+      	if (nodeId == "http-vwf-example-com-node-vwf-toolbar" ) {
       	  switch (propertyName) {
       	    case "selectedColor":
       		  highlightColor(propertyValue);

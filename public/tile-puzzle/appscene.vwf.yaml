@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 scripts:
 - text: |
     this.initialize = function() { this.navmode = "none"; }

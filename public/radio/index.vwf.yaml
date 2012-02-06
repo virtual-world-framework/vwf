@@ -1,17 +1,17 @@
 --- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 source: radio.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  activeCamera: "http-vwf-example-com-camera-vwf-maincamera"
   loadDone: false
   navmode: none
 scripts:
 - text:
     this.initialize = function() {
       console.info( "================ radio ================" );
-      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
       this.loadDone = true;
       this["radio.dae"].position = this["radio.dae"].position;
       this["radio.dae"].eulers = this["radio.dae"].eulers;      
@@ -19,7 +19,7 @@ scripts:
   type: application/javascript
 children: 
   radio.dae: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: Radio.DAE
     type: model/vnd.collada+xml
     properties:
@@ -362,38 +362,38 @@ children:
       type: application/javascript
     children:
       bone1:
-        extends: http://vwf.example.com/types/node3
+        extends: http://vwf.example.com/node3.vwf
         children:
           MaxScene:
-            extends: http://vwf.example.com/types/node3
+            extends: http://vwf.example.com/node3.vwf
             children:
               EnvironmentAmbientLight:
-                extends: http://vwf.example.com/types/node3
+                extends: http://vwf.example.com/node3.vwf
               Radio:
-                extends: http://vwf.example.com/types/node3
+                extends: http://vwf.example.com/node3.vwf
                 properties: 
                   playing: false
                   looping: false
                   speed: 1
                 children:
                   ic40_MicrophonePort:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     children:
                       bone6:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         children:
                           glgeObj1:
-                            extends: http://vwf.example.com/types/mesh
+                            extends: http://vwf.example.com/mesh.vwf
                   ic40_SpeakerPort:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     children:
                       bone8:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         children:
                           glgeObj2:
-                            extends: http://vwf.example.com/types/mesh
+                            extends: http://vwf.example.com/mesh.vwf
                   ic40Channel:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     scripts:
                     - text: |
                         this.channelDirectionUp = true; 
@@ -416,7 +416,7 @@ children:
                     properties:
                       rotZ: 0                      
                   ic40Down:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -425,14 +425,14 @@ children:
                         }
                       type: application/javascript
                   ic40Monitor:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     children:
                       glgeObj5:
-                        extends: http://vwf.example.com/types/mesh
+                        extends: http://vwf.example.com/mesh.vwf
                   ic40P0:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/types/translate-on-down
+                    - http://vwf.example.com/translate-on-down.vwf
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]
                     scripts:
@@ -443,9 +443,9 @@ children:
                         }
                       type: application/javascript                    
                   ic40P1:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/types/translate-on-down
+                    - http://vwf.example.com/translate-on-down.vwf
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]                    
                     scripts:
@@ -456,9 +456,9 @@ children:
                         }
                       type: application/javascript                    
                   ic40P2:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/types/translate-on-down
+                    - http://vwf.example.com/translate-on-down.vwf
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]
                     scripts:
@@ -469,9 +469,9 @@ children:
                         }
                       type: application/javascript                    
                   ic40P3:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/types/translate-on-down
+                    - http://vwf.example.com/translate-on-down.vwf
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]
                     scripts:
@@ -482,7 +482,7 @@ children:
                         }
                       type: application/javascript                    
                   ic40PTT:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -491,7 +491,7 @@ children:
                         }
                       type: application/javascript                    
                   ic40Red:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -500,7 +500,7 @@ children:
                         }
                       type: application/javascript                    
                   ic40Up:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -509,7 +509,7 @@ children:
                         }
                       type: application/javascript
                   ic40Volume:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     properties:
                       rotZ: 0
                     scripts:  
@@ -526,22 +526,22 @@ children:
                         }
                       type: application/javascript
                   LCD:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     children:
                       glgeObj14:
-                        extends: http://vwf.example.com/types/mesh
+                        extends: http://vwf.example.com/mesh.vwf
                         children:
                           material:
-                            extends: http://vwf.example.com/types/material
+                            extends: http://vwf.example.com/material.vwf
                             properties:
                               texture: 
                   LCD_Back:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     children:
                       glgeObj15:
-                        extends: http://vwf.example.com/types/mesh
+                        extends: http://vwf.example.com/mesh.vwf
                   BeltClip_1:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     properties: 
                       playing: false
                       looping: false
@@ -555,23 +555,23 @@ children:
                       type: application/javascript                    
                     children:
                       BeltClip:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         children:
                           bone25:
-                            extends: http://vwf.example.com/types/node3
+                            extends: http://vwf.example.com/node3.vwf
                             children:
                               glgeObj16:
-                                extends: http://vwf.example.com/types/mesh
+                                extends: http://vwf.example.com/mesh.vwf
                       BeltClipBase:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         children:
                           bone27:
-                            extends: http://vwf.example.com/types/node3
+                            extends: http://vwf.example.com/node3.vwf
                             children:
                               glgeObj17:
-                                extends: http://vwf.example.com/types/mesh
+                                extends: http://vwf.example.com/mesh.vwf
                       BeltClip_Latch:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         properties: 
                           playing: false
                           looping: false
@@ -585,15 +585,15 @@ children:
                           type: application/javascript                        
                         children:
                           BeltClipTab:
-                            extends: http://vwf.example.com/types/node3
+                            extends: http://vwf.example.com/node3.vwf
                             children:
                               bone30:
-                                extends: http://vwf.example.com/types/node3
+                                extends: http://vwf.example.com/node3.vwf
                                 children:
                                   glgeObj18:
-                                    extends: http://vwf.example.com/types/mesh
+                                    extends: http://vwf.example.com/mesh.vwf
                   Battery:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     properties: 
                       playing: false
                       looping: false
@@ -607,15 +607,15 @@ children:
                       type: application/javascript                    
                     children:
                       ic40Battery:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         children:
                           bone33:
-                            extends: http://vwf.example.com/types/node3
+                            extends: http://vwf.example.com/node3.vwf
                             children:
                               glgeObj19:
-                                extends: http://vwf.example.com/types/mesh
+                                extends: http://vwf.example.com/mesh.vwf
                   BatteryLatch:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     properties: 
                       playing: false
                       looping: false
@@ -629,20 +629,20 @@ children:
                       type: application/javascript                    
                     children:
                       ic40BatteryLatch:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         children:
                           glgeObj20:
-                            extends: http://vwf.example.com/types/mesh
+                            extends: http://vwf.example.com/mesh.vwf
                   ic40Radio:
-                    extends: http://vwf.example.com/types/node3
+                    extends: http://vwf.example.com/node3.vwf
                     children:
                       bone37:
-                        extends: http://vwf.example.com/types/node3
+                        extends: http://vwf.example.com/node3.vwf
                         children:
                           glgeObj21:
-                            extends: http://vwf.example.com/types/mesh
+                            extends: http://vwf.example.com/mesh.vwf
               ic40Antennae:
-                extends: http://vwf.example.com/types/node3
+                extends: http://vwf.example.com/node3.vwf
                 scripts:
                 - text: |
                     this.ic40Antennae = function() {
@@ -651,7 +651,7 @@ children:
                     }
                   type: application/javascript
   maincamera: 
-    extends: http://vwf.example.com/types/camera
+    extends: http://vwf.example.com/camera.vwf
     properties: 
       walkMode: "walk"
       cameraType: "perspective"
@@ -659,7 +659,7 @@ children:
       eulers: [ 90, 180, 0 ]
       rotation: [ 1.56, 3.141, 0 ]
   Omni01:
-    extends: http://vwf.example.com/types/light
+    extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "point"
       constantAttenuation: 1
