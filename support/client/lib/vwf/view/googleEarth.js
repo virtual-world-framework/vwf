@@ -66,73 +66,53 @@
                     this.state.scenes[ childID ] = node;
                     var outerDiv = jQuery('body').append(
                         "<div id='map3d' style='border: 1px solid silver; width: " + this.width + "px; height: " + this.height + "px;'></div>"
-                       //"<div id='ui' style='position: relative;'>" +
-                       //  "<div id='map3d' style='border: 1px solid silver; width: " + this.width + "px; height: " + this.height + "px;'></div>" +
-                       //"</div>"
                     );
-//                    ).children(":last");
                     break;
 
                 case "http-vwf-example-com-types-node3":
                     
                     this.state.nodes[ childID ] = node;
-
+                    var view = this;
                     if ( childID == "http-vwf-example-com-types-node3-earth" ) {
-//                        google.setOnLoadCallback( init );
-//                        google.load( "earth", "1" );
-//                        win = this.win;
-
-//                        function init() {
-//                            google.earth.createInstance( "map3d", initCB, failureCB );
-//                        }
-
-//                        function initCB( instance ) {
-//                            ge = instance;
-//                            ge.getWindow().setVisibility(true);
-//    
-//                            // add a navigation control
-//                            ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);
-//    
-//                            // add some layers
-//                            ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS, true);
-//                            ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS, true);
-
-//                            var la = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
-//                            la.setRange(100000);
-//                            ge.getView().setAbstractView(la);
-//    
-//                            document.getElementById('installed-plugin-version').innerHTML =
-//                            ge.getPluginVersion().toString();
-//                        }
-//  
-//                        function failureCB( errorCode ) {
-//                            console.info( "google earth load error: " + errorCode );
-//                        }
-
-                        
+                       
                         var interval;
                         var view = this;
                         win = this.win;
                         var gg = google;
                         interval = win.setInterval( function() {
                             if ( gg.earth ) {
+                                node.earth = gg.earth;
                                 gg.earth.createInstance( "map3d", function(instance) {
-                                    ge = instance;
-                                    ge.getWindow().setVisibility(true);
+                                    
+                                    node.earthInst = instance;
+                                    node.earthInst.getWindow().setVisibility(true);
     
                                     // add a navigation control
-                                    ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);
+                                    node.earthInst.getNavigationControl().setVisibility(node.earthInst.VISIBILITY_AUTO);
     
                                     // add some layers
-                                    ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS, true);
-                                    ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS, true);
+                                    node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_BORDERS, true);
+                                    node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_ROADS, true);
 
-                                    var la = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                                    var la = node.earthInst.getView().copyAsLookAt(node.earthInst.ALTITUDE_RELATIVE_TO_GROUND);
                                     la.setRange(100000);
-                                    ge.getView().setAbstractView(la);
+                                    node.earthInst.getView().setAbstractView(la);
     
-                                    document.getElementById('installed-plugin-version').innerHTML =
-                                    ge.getPluginVersion().toString();
+//                                    document.getElementById('installed-plugin-version').innerHTML =
+//                                    node.earthInst.getPluginVersion().toString();
+
+
+                                    view.sendCameraInfo = false;
+                                    // view changed event listener
+                                    gg.earth.addEventListener( node.earthInst.getView(), 'viewchange', function() {
+                                        view.sendCameraInfo = true;    
+                                    });
+
+                                    // view changed END event listener
+                                    gg.earth.addEventListener( node.earthInst.getView(), 'viewchangeend', function() {
+                                        sendCameraInfo = false;
+                                    });
+
                                 }, function(errorCode) {
                                     console.info( "google earth load error: " + errorCode );
                                 } );
@@ -153,10 +133,87 @@
         createdProperty: function (nodeID, propertyName, propertyValue) {
         },        
 
-        satProperty: function (nodeID, propertyName, propertyValue) {
+        satProperty: function( nodeID, propertyName, propertyValue ) {
+            
+            var value = undefined;
+            var lookAt, earth, ge;
+            var earth = this.state.nodes[ "http-vwf-example-com-types-node3-earth" ];
+            if ( propertyValue && this.kernel.client() != this.kernel.moniker() ) {
+                 this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
+                switch ( nodeID ) {
+                    case "http-vwf-example-com-types-node3-lookAt":
+                        if ( earth && earth.earthInst ) {
+                            ge = earth.earthInst;
+                            lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                            switch ( propertyName ) {
+                                case "longitude":
+                                    lookAt.setLongitude( propertyValue );
+                                    ge.getView().setAbstractView(lookAt);
+                                    value = propertyValue; 
+                                    break;
+                                case "latitude":
+                                    lookAt.setLatitude( propertyValue );
+                                    ge.getView().setAbstractView(lookAt);
+                                    value = propertyValue;  
+                                    break;
+                                case "longLat":
+                                    lookAt.setLongitude( propertyValue[0] );
+                                    lookAt.setLatitude( propertyValue[0] );
+                                    ge.getView().setAbstractView(lookAt);
+                                    value = propertyValue;  
+                            }
+                    } 
+                }
+            }
+            return value;
+
         },
 
         gotProperty: function (nodeID, propertyName, propertyValue) {
+
+            var value = undefined;
+            var lookAt, earth, ge;
+            var earth = this.state.nodes[ "http-vwf-example-com-types-node3-earth" ];
+            switch ( nodeID ) {
+                case "http-vwf-example-com-types-node3-lookAt":
+                    if ( earth && earth.earthInst ) {
+                        ge = earth.earthInst;
+                        lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                        switch ( propertyName ) {
+                            case "longitude":
+                                value = lookAt.getLongitude();
+                                break;
+                            case "latitude":
+                                value = lookAt.getLatitude();
+                                break;
+                            case "longLat":
+                                value = [ lookAt.getLongitude(), lookAt.getLatitude() ];
+                                break;
+                        }
+                } 
+            }
+            propertyValue = value;
+            return value;
+
+        },
+
+        ticked: function( time ) {
+            var node, ge;
+            if ( this.sendCameraInfo ) {
+                if ( this.state.nodes[ "http-vwf-example-com-types-node3-earth" ] ) {
+                    node = this.state.nodes[ "http-vwf-example-com-types-node3-earth" ];
+                    ge = node.earthInst;
+                    if ( ge ) {
+                        var lookAt = ge.getView().copyAsLookAt( ge.ALTITUDE_RELATIVE_TO_GROUND );
+                        var longLat = [ lookAt.getLongitude(), lookAt.getLatitude() ];                          
+
+                        this.kernel.setProperty( "http-vwf-example-com-types-node3-lookAt", "longLat", longLat );
+
+//                        vwf.setProperty( "http-vwf-example-com-types-node3-lookAt", "longitude", lookAt.getLongitude() );
+//                        vwf.setProperty( "http-vwf-example-com-types-node3-lookAt", "latitude", lookAt.getLatitude() );
+                    }
+                }  
+            }
         },
         
         
