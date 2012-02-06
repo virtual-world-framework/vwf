@@ -45,7 +45,7 @@ td
 	overflow:hidden;
 }
 
-input 
+.input_text
 {
 	height:11px;
 	width:120px;
@@ -54,6 +54,20 @@ input
 	color:#153255;
 	/*background-color:#153255;*/
 	border:1px;
+}
+
+.input_button
+{
+	width:50px;
+	font:8pt Arial;
+	padding:0px;
+}
+
+.input_button_call
+{
+	width:30px;
+	font:8pt Arial;
+	padding:0px;
 }
 
 form
@@ -86,6 +100,12 @@ form
 }
 
 .childEntry {
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.methodEntry 
+{
 	padding-left:10px;
 	padding-right:10px;
 }
