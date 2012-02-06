@@ -96,7 +96,7 @@
         // The proto-prototype of all nodes is "node", identified by this URI. This type is
         // intrinsic to the system and nothing is loaded from the URI.
 
-        var nodeTypeURI = "http://vwf.example.com/types/node";
+        var nodeTypeURI = "http://vwf.example.com/node.vwf";
 
         // Control messages from the reflector are stored here in a priority queue, ordered by
         // execution time.
@@ -2070,8 +2070,8 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             // an untyped reference to that asset.
 
             if ( typeof component == "string" || component instanceof String ) { // TODO: validate URI
-                component = component.match( /(^@)|(^http:\/\/vwf.example.com\/types\/)|(\.vwf$)/ ) ?
-                    { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?  // TODO: this only detects .../types/camera (without .vwf extension) in the http://vwf.example.com/types/... domain.
+                component = component.match( /(^@)|(\.vwf$)/ ) ?
+                    { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?
             }
 
             // Fill in the mime type from the source specification if not provided.
@@ -2101,10 +2101,10 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
                 switch ( component.type ) {
                     case "application/vnd.unity":
-                        component.extends = "http://vwf.example.com/types/scene";
+                        component.extends = "http://vwf.example.com/scene.vwf";
                         break;
                     case "model/vnd.collada+xml":
-                        component.extends = "http://vwf.example.com/types/glge";
+                        component.extends = "http://vwf.example.com/glge.vwf";
                         break;
                 }
 
@@ -2193,17 +2193,17 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
         // -- remappedURI --------------------------------------------------------------------------
 
-        // Remap a type identifier to its location in a local cache.
+        // Remap a component URI to its location in a local cache.
 
-        // http://vwf.example.com/types/sometype => http://localhost:8001/types/sometype.vwf
-        //                              ^------^                                ^------^
+        // http://vwf.example.com/component.vwf => http://localhost/proxy/vwf.example.com/component.vwf
 
         var remappedURI = function( uri ) {
 
-            var match = uri.match( RegExp( "http://vwf.example.com/types/(.*)" ) );
+            var match = uri.match( RegExp( "http://(vwf.example.com)/(.*)" ) );
 
             if ( match ) {
-                uri = window.location.protocol + "//" + window.location.host + "/types/" + match[1] + ".vwf";
+                uri = window.location.protocol + "//" + window.location.host +
+                    "/proxy/" + match[1] + "/" + match[2];
             }
 
             return uri;

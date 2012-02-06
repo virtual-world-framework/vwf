@@ -72,7 +72,7 @@ source: hello.dae
 <pre><code>--- 
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
 </code></pre>
@@ -88,12 +88,12 @@ children:
 <p>Code View: <em>index.vwf.yaml</em></p>
 
 <pre><code>--- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 source: index.xml
 type: model/x-glge
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
 </code></pre>
@@ -130,13 +130,13 @@ children:
 <pre><code>--- 
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties:
       position: [ 0, 5, 0 ]
   world:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: world.dae
     type: model/vnd.collada+xml
     properties:
@@ -158,12 +158,12 @@ children:
 <p>Code View: <em>helloworld.vwf.yaml</em></p>
 
 <pre><code>--- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 source: index.xml
 type: model/x-glge
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties:
@@ -184,12 +184,12 @@ children:
 <p>Code View: <em>helloworld.vwf.yaml</em></p>
 
 <pre><code>--- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 source: index.xml
 type: model/x-glge
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties:
@@ -211,25 +211,25 @@ children:
 <pre><code>---
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties:
       position: [ 0, 5, 0 ]
     children:
       HelloMaterial:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/red.png”
   world:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: world.dae
     type: model/vnd.collada+xml
     properties:
       position: [ 0, -5, 0 ]
     children:
       WorldMaterial:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/blue.png”
 </code></pre>
@@ -247,7 +247,7 @@ children:
 <pre><code>---
 children:
   maincamera:
-    extends: http://vwf.example.com/types/camera
+    extends: http://vwf.example.com/camera.vwf
     properties:
       rotation: [ 2.0, 0, 0]
 </code></pre>
@@ -265,11 +265,11 @@ children:
 <pre><code>--- 
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
   world:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: http://anotherserver.com/world.dae
     type: model/vnd.collada+xml
 </code></pre>
@@ -287,7 +287,7 @@ children:
 <pre><code>--- 
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties:
@@ -334,19 +334,19 @@ children:
 <p>Code View: <em>index.vwf.yaml</em></p>
 
 <pre><code>---
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 source: index.xml
 type: model/x-glge
 children:
   hello:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties:
       position: [ 0, 5, 0 ]
     children:
       HelloTextMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “”
     scripts:
@@ -363,14 +363,14 @@ children:
         }
       type: application/javascript
   world: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: world.dae
     type: model/vnd.collada+xml
     properties: 
       position: [ 0, -5, 0 ]
     children:
       WorldTextMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “”
     scripts:
@@ -401,10 +401,10 @@ children:
 <p>Code View: <em>index.vwf.yaml</em></p>
 
 <pre><code>--- 
-extends: http://vwf.example.com/types/node
+extends: http://vwf.example.com/node.vwf
 children: 
   game:
-    extends: http://vwf.example.com/types/node
+    extends: http://vwf.example.com/node.vwf
     properties:
       position01: [ 0, 0 ]
 </code></pre>
@@ -417,16 +417,16 @@ children:
     &lt;script type="text/javascript"&gt;
       function sample() {
         // Get property value from the application
-        var pos = vwf.getProperty("http-vwf-example-com-types-node-game", 
+        var pos = vwf.getProperty("http-vwf-example-com-node-vwf-game", 
                                   “position01”);
 
         // Set property value in the application
-        vwf.views[0].setProperty( "http-vwf-example-com-types-node-game", 
+        vwf.views[0].setProperty( "http-vwf-example-com-node-vwf-game", 
                                   " position01", some_position );
       }
 
       // Defines a function to execute upon an application property
-      vwf.property( "http-vwf-example-com-types-node-game", "position01",         
+      vwf.property( "http-vwf-example-com-node-vwf-game", "position01",         
         function() { doSomething(); } );
     &lt;/script&gt;
   &lt;/head&gt;

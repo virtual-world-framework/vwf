@@ -58,7 +58,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             switch ( childExtendsID ) {
-                case "http-vwf-example-com-types-glge":
+                case "http-vwf-example-com-glge-vwf":
                 case "appscene-vwf":
                     if ( childID == this.state.sceneRootID ) {
 
@@ -72,7 +72,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             type: childExtendsID,
                             camera: {
                                 ID: undefined,
-                                defaultCamID: "http-vwf-example-com-types-camera-defaultCamera",
+                                defaultCamID: "http-vwf-example-com-camera-vwf-defaultCamera",
                                 glgeCameras: {},
                             },
                             xmlColladaObjects: [],
@@ -92,7 +92,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         sceneNode.glgeScene.camera.name = "defaultCamera";
                         this.state.cameraInUse = sceneNode.glgeScene.camera;
 
-                        var camType = "http://vwf.example.com/types/camera";
+                        var camType = "http://vwf.example.com/camera.vwf";
                         vwf.createNode( childID, { "extends": camType }, "defaultCamera", undefined );    
 
                         var model = this;
@@ -118,8 +118,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     } 
                     break;
 
-                case "http-vwf-example-com-types-mesh":
-                case "http-vwf-example-com-types-node3": {
+                case "http-vwf-example-com-mesh-vwf":
+                case "http-vwf-example-com-node3-vwf": {
                     var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                     switch ( childType ) {
                         case "model/vnd.collada+xml":
@@ -228,7 +228,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
                 break;
 
-                case "http-vwf-example-com-types-camera":
+                case "http-vwf-example-com-camera-vwf":
                     var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
                     var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                     node = this.state.nodes[childID] = {
@@ -267,7 +267,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     break;
 
 
-                case "http-vwf-example-com-types-light":
+                case "http-vwf-example-com-light-vwf":
                     node = this.state.nodes[childID] = {
                         name: childName,
                         glgeObject: glgeChild,
@@ -281,7 +281,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                     break;
 
-                case "http-vwf-example-com-types-material":
+                case "http-vwf-example-com-material-vwf":
                     node = this.state.nodes[childID] = {
                         name: childName,
                         glgeObject: undefined,
@@ -294,7 +294,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     findMaterial.call( this, nodeID, childName, node );
                     break;
 
-                case "http-vwf-example-com-types-particlesystem":
+                case "http-vwf-example-com-particlesystem-vwf":
                     node = this.state.nodes[childID] = {
                         name: childName,
                         glgeObject: glgeChild,
@@ -307,7 +307,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                     break;
 
-//                case "http-vwf-example-com-types-mesh":
+//                case "http-vwf-example-com-mesh-vwf":
 //                    node = this.state.nodes[childID] = {
 //                        name: childName,
 //                        glgeObject: glgeChild,
@@ -332,11 +332,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 //                    break;
 
                 case "index-vwf":
-                case "http-vwf-example-com-types-node":
-                case "http-vwf-example-com-types-node2":
-                case "http-vwf-example-com-types-scene":
-                case "http-vwf-example-com-types-glge":
-                case "http-vwf-example-com-types-particlesystem":
+                case "http-vwf-example-com-node-vwf":
+                case "http-vwf-example-com-node2-vwf":
+                case "http-vwf-example-com-scene-vwf":
+                case "http-vwf-example-com-glge-vwf":
+                case "http-vwf-example-com-particlesystem-vwf":
                 case "appscene-vwf":
                 case undefined:
                     break;
@@ -622,19 +622,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     default:
                         switch ( node[ "type" ] ) {
-                            case "http-vwf-example-com-types-material":
+                            case "http-vwf-example-com-material-vwf":
                                 value = setMaterialProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
-                            case "http-vwf-example-com-types-light":
+                            case "http-vwf-example-com-light-vwf":
                                 value = setLightProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
-                            case "http-vwf-example-com-types-camera":
+                            case "http-vwf-example-com-camera-vwf":
                                 value = setCameraProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
-                            case "http-vwf-example-com-types-particlesystem":
+                            case "http-vwf-example-com-particlesystem-vwf":
                                 value = setParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;                        
-                            case "http-vwf-example-com-types-glge":
+                            case "http-vwf-example-com-glge-vwf":
                             case "appscene-vwf":
                                 value = setSceneProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
@@ -823,22 +823,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     default:
                         switch ( node.type ) {
-                            case "http-vwf-example-com-types-mesh":
+                            case "http-vwf-example-com-mesh-vwf":
                                 value = getObjectProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
-                            case "http-vwf-example-com-types-material":
+                            case "http-vwf-example-com-material-vwf":
                                 value = getMaterialProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
-                            case "http-vwf-example-com-types-light":
+                            case "http-vwf-example-com-light-vwf":
                                 value = getLightProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
-                            case "http-vwf-example-com-types-camera":
+                            case "http-vwf-example-com-camera-vwf":
                                 value = getCameraProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
-                            case "http-vwf-example-com-types-particlesystem":
+                            case "http-vwf-example-com-particlesystem-vwf":
                                 value = getParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;                        
-                            case "http-vwf-example-com-types-scene":
+                            case "http-vwf-example-com-scene-vwf":
                                 value = getSceneProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
                         }
@@ -1725,27 +1725,27 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 //console.info( "            Checking: '" + glgeObjName + "' of type " + assetObj.constructor.name );
                 if ( glgeObjName == objName ) {
                     switch ( type ) {
-                        case "http-vwf-example-com-types-mesh":
+                        case "http-vwf-example-com-mesh-vwf":
                             if ( assetObj.constructor == GLGE.Object )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-types-node3":
+                        case "http-vwf-example-com-node3-vwf":
                             if ( ( assetObj.constructor == GLGE.Group ) || ( assetObj.constructor == GLGE.Object ) )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-types-light":
+                        case "http-vwf-example-com-light-vwf":
                             if ( assetObj.constructor == GLGE.Light )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-types-camera":
+                        case "http-vwf-example-com-camera-vwf":
                             if ( assetObj.constructor == GLGE.Camera )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-types-scene":
+                        case "http-vwf-example-com-scene-vwf":
                             if ( assetObj.constructor == GLGE.Scene )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-types-particleSystem":
+                        case "http-vwf-example-com-particleSystem-vwf":
                             if ( assetObj.constructor == GLGE.ParticleSystem )
                                 obj = assetObj;
                             break;
@@ -2083,7 +2083,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         
         //console.info( "createModelNode( " + parentID + ", " + glgeObject + " )" );
 
-        var extendType = "http://vwf.example.com/types/node3";
+        var extendType = "http://vwf.example.com/node3.vwf";
         var objName = name( glgeObject );
 
         if ( glgeObject.constructor == GLGE.Mesh ) {
@@ -2092,7 +2092,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 objName = "Mesh" + this.meshIndex++;
                 mesh.name = objName;
             }             
-            extendType = "http://vwf.example.com/types/mesh";
+            extendType = "http://vwf.example.com/mesh.vwf";
         } 
 
         this.kernel.createNode( parentID, { "extends": extendType }, objName, undefined );

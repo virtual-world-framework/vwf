@@ -155,7 +155,7 @@
             vwf.createNode( 0, {
 
               extends:
-                "http://vwf.example.com/types/node",
+                "http://vwf.example.com/node.vwf",
 
               methods: {
 
@@ -190,7 +190,7 @@
 
             vwf.createNode( 0, {
 
-              extends: "http://vwf.example.com/types/node",
+              extends: "http://vwf.example.com/node.vwf",
               methods: { base: "return 'base-' + this.id", },
 
             }, unique_name( "base" ), function( baseID ) {

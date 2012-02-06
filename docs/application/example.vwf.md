@@ -3,7 +3,7 @@ example.vwf.yaml
 
 This example component describes the specification format.
 
-URI of the prototype component to extend. The default is *http://vwf.example.com/types/node*. All relative paths are resolved using the current component as the base.
+URI of the prototype component to extend. The default is *http://vwf.example.com/node.vwf*. All relative paths are resolved using the current component as the base.
 
 	---
 	extends:

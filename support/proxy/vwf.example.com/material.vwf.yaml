@@ -1,5 +1,5 @@
 ﻿--- 
-extends: http://vwf.example.com/types/node
+extends: http://vwf.example.com/node.vwf
 properties:
   texture:
     set: |

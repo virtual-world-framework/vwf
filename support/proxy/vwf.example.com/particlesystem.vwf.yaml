@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/types/node3
+extends: http://vwf.example.com/node3.vwf
 properties:
   numberParticles:
   lifeTime:
