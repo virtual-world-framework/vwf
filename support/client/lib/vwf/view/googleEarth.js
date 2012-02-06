@@ -39,6 +39,10 @@
             
             this.logger.enable = true;
             this.win = window;
+            this.pointerDown = false;
+            this.viewChanged = false;
+            this.receivedChange = true;
+            this.elapsedTime = 0;
 
         },
   
@@ -62,18 +66,18 @@
             var win;
     
             switch ( childExtendsID.toLowerCase() ) {
-                case "http-vwf-example-com-types-googleearth":
+                case "http-vwf-example-com-googleearth-vwf":
                     this.state.scenes[ childID ] = node;
                     var outerDiv = jQuery('body').append(
                         "<div id='map3d' style='border: 1px solid silver; width: " + this.width + "px; height: " + this.height + "px;'></div>"
                     );
                     break;
 
-                case "http-vwf-example-com-types-node3":
+                case "http-vwf-example-com-node3-vwf":
                     
                     this.state.nodes[ childID ] = node;
                     var view = this;
-                    if ( childID == "http-vwf-example-com-types-node3-earth" ) {
+                    if ( childID == "http-vwf-example-com-node3-vwf-earth" ) {
                        
                         var interval;
                         var view = this;
@@ -93,6 +97,8 @@
                                     // add some layers
                                     node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_BORDERS, true);
                                     node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_ROADS, true);
+                                    node.earthInst.getOptions().setFlyToSpeed( node.earthInst.SPEED_TELEPORT );
+
 
                                     var la = node.earthInst.getView().copyAsLookAt(node.earthInst.ALTITUDE_RELATIVE_TO_GROUND);
                                     la.setRange(100000);
@@ -102,15 +108,25 @@
 //                                    node.earthInst.getPluginVersion().toString();
 
 
-                                    view.sendCameraInfo = false;
+                                    view.viewChanged = false;
+                                    view.pointerDown = false;
+
+                                    gg.earth.addEventListener( node.earthInst.getWindow(), 'mousedown', function() {
+                                        view.pointerDown = true; 
+                                        view.receivedChange = false;   
+                                    });
+                                    gg.earth.addEventListener( node.earthInst.getWindow(), 'mouseup', function() {
+                                        view.pointerDown = false;    
+                                    });
+
                                     // view changed event listener
                                     gg.earth.addEventListener( node.earthInst.getView(), 'viewchange', function() {
-                                        view.sendCameraInfo = true;    
+                                        view.viewChanged = true;    
                                     });
 
                                     // view changed END event listener
                                     gg.earth.addEventListener( node.earthInst.getView(), 'viewchangeend', function() {
-                                        sendCameraInfo = false;
+                                        view.viewChanged = false;
                                     });
 
                                 }, function(errorCode) {
@@ -137,11 +153,12 @@
             
             var value = undefined;
             var lookAt, earth, ge;
-            var earth = this.state.nodes[ "http-vwf-example-com-types-node3-earth" ];
+            var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             if ( propertyValue && this.kernel.client() != this.kernel.moniker() ) {
-                 this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
+                this.receivedChange = true;
+                //this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
                 switch ( nodeID ) {
-                    case "http-vwf-example-com-types-node3-lookAt":
+                    case "http-vwf-example-com-node3-vwf-lookAt":
                         if ( earth && earth.earthInst ) {
                             ge = earth.earthInst;
                             lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
@@ -156,9 +173,14 @@
                                     ge.getView().setAbstractView(lookAt);
                                     value = propertyValue;  
                                     break;
-                                case "longLat":
+                                case "cameraData":
                                     lookAt.setLongitude( propertyValue[0] );
-                                    lookAt.setLatitude( propertyValue[0] );
+                                    lookAt.setLatitude( propertyValue[1] );
+                                    lookAt.setAltitude( propertyValue[2] );
+                                    lookAt.setAltitudeMode( propertyValue[3] );
+                                    lookAt.setHeading( propertyValue[4] );
+                                    lookAt.setTilt( propertyValue[5] );
+                                    lookAt.setRange( propertyValue[6] );
                                     ge.getView().setAbstractView(lookAt);
                                     value = propertyValue;  
                             }
@@ -172,22 +194,23 @@
         gotProperty: function (nodeID, propertyName, propertyValue) {
 
             var value = undefined;
-            var lookAt, earth, ge;
-            var earth = this.state.nodes[ "http-vwf-example-com-types-node3-earth" ];
+            var la, earth, ge;
+            var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             switch ( nodeID ) {
-                case "http-vwf-example-com-types-node3-lookAt":
+                case "http-vwf-example-com-node3-vwf-lookAt":
                     if ( earth && earth.earthInst ) {
                         ge = earth.earthInst;
-                        lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                        la = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
                         switch ( propertyName ) {
                             case "longitude":
-                                value = lookAt.getLongitude();
+                                value = la.getLongitude();
                                 break;
                             case "latitude":
-                                value = lookAt.getLatitude();
+                                value = la.getLatitude();
                                 break;
-                            case "longLat":
-                                value = [ lookAt.getLongitude(), lookAt.getLatitude() ];
+                            case "cameraData":
+                                value = [ la.getLongitude(), la.getLatitude(), la.getAltitude(),
+                                               la.getAltitudeMode(), la.getHeading(), la.getTilt(), la.getRange()  ];
                                 break;
                         }
                 } 
@@ -199,18 +222,23 @@
 
         ticked: function( time ) {
             var node, ge;
-            if ( this.sendCameraInfo ) {
-                if ( this.state.nodes[ "http-vwf-example-com-types-node3-earth" ] ) {
-                    node = this.state.nodes[ "http-vwf-example-com-types-node3-earth" ];
+            if ( this.pointerDown || ( this.viewChanged && !this.receivedChange ) ) {
+                if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ] ) {
+                    node = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
                     ge = node.earthInst;
                     if ( ge ) {
-                        var lookAt = ge.getView().copyAsLookAt( ge.ALTITUDE_RELATIVE_TO_GROUND );
-                        var longLat = [ lookAt.getLongitude(), lookAt.getLatitude() ];                          
+                        this.elapsedTime += time * 0.001;
+                        if ( this.elapsedTime >= 0.0333 ) {
+                            var la = ge.getView().copyAsLookAt( ge.ALTITUDE_RELATIVE_TO_GROUND );
+                            var cameraData = [ la.getLongitude(), la.getLatitude(), la.getAltitude(),
+                                               la.getAltitudeMode(), la.getHeading(), la.getTilt(), la.getRange()  ];                          
 
-                        this.kernel.setProperty( "http-vwf-example-com-types-node3-lookAt", "longLat", longLat );
+                            this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "cameraData", cameraData );
+                            this.elapsedTime = 0;
+                        }
 
-//                        vwf.setProperty( "http-vwf-example-com-types-node3-lookAt", "longitude", lookAt.getLongitude() );
-//                        vwf.setProperty( "http-vwf-example-com-types-node3-lookAt", "latitude", lookAt.getLatitude() );
+//                        this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "longitude", lookAt.getLongitude() );
+//                        this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "latitude", lookAt.getLatitude() );
                     }
                 }  
             }
