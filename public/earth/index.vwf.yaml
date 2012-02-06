@@ -1,10 +1,10 @@
 --- 
-extends: http://vwf.example.com/types/googleEarth
+extends: http://vwf.example.com/googleEarth.vwf
 children:
   earth:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
   lookAt:
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     properties:
       longitude:
       latitude:

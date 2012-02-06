@@ -4,7 +4,7 @@ source: physics.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  activeCamera: "http-vwf-example-com-camera-vwf-maincamera"
   gravity: [ 0, 0, -50.8, 0 ]
   collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
@@ -12,7 +12,7 @@ scripts:
 - text: |
     this.initialize = function() {
       console.info( "==================== index.vwf ====================" );
-      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
       this.loadDone = true;
     }
     this.clearButton.events.clearing = this.events.add( function() { 
@@ -21,14 +21,14 @@ scripts:
   type: application/javascript
 children:
   clearButton:
-    extends: http://vwf.example.com/types/node2
+    extends: http://vwf.example.com/node2.vwf
     methods:
       clear: |
         this.clearing();
     events:
       clearing:
   maincamera: 
-    extends: http://vwf.example.com/types/camera
+    extends: http://vwf.example.com/camera.vwf
     properties:
       walkMode: "walk"
       cameraType: "perspective"
@@ -36,7 +36,7 @@ children:
       rotation: [ 1.56, 3.14, 0 ]
       far: 50000.0
   box:
-    extends: "http://vwf.example.com/types/node3"
+    extends: "http://vwf.example.com/node3.vwf"
     source: treeScene.dae
     type: model/vnd.collada+xml
     properties:
@@ -47,14 +47,14 @@ children:
       friction: 0.5
       restitution: 0.1
   groundplane:
-    extends: "http://vwf.example.com/types/node3"
+    extends: "http://vwf.example.com/node3.vwf"
     properties:
       position: [ 0, 0, 11.06 ]
       physics: [ "plane", [ 0, 0, 1, 0 ] ]
       friction: 0.99
       restitution: 0      
   light1:
-    extends: "http://vwf.example.com/types/light"
+    extends: "http://vwf.example.com/light.vwf"
     properties: 
       lightType: "directional"
       position: [ 60, 85, 70 ]

@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 properties:
   createCube: true
   cubesCreated: 0
@@ -42,7 +42,7 @@ scripts:
     var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
       "source": "Cube", 
-      "extends": "http://vwf.example.com/types/node3",
+      "extends": "http://vwf.example.com/node3.vwf",
       "type": "text/xml",
       "properties": { 
         "material": "",
@@ -60,7 +60,7 @@ scripts:
       };
     var sphere = { 
       "source": "Sphere", 
-      "extends": "http://vwf.example.com/types/node3",
+      "extends": "http://vwf.example.com/node3.vwf",
       "type": "text/xml",
       "properties": { 
         "material": "", 
@@ -135,7 +135,7 @@ scripts:
           this.createCube = true;      
         }
         if ( newObjName && newObjName != "" ) {
-          this.nodesCreated.push( "http-vwf-example-com-types-node3-"+newObjName );
+          this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
         }
       }
     }

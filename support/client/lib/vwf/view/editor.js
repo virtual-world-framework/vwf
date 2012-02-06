@@ -71,7 +71,7 @@
                 parent.children.push( node );
             }
 
-            if ( childExtendsID =="http-vwf-example-com-types-glge" || childExtendsID =="appscene-vwf" ) {
+            if ( childExtendsID =="http-vwf-example-com-glge-vwf" || childExtendsID =="appscene-vwf" ) {
                 this.scenes[ childID ] = node;
             }
             

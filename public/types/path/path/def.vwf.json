@@ -1,1 +1,0 @@
-{ "extends": "http://vwf.example.com/types/node", "properties": { "def": "json" } }

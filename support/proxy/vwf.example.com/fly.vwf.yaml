@@ -1,0 +1,214 @@
+--- 
+extends: |
+  http://vwf.example.com/node3.vwf
+properties:
+  fly-flying:
+    set: |
+      if ( value && ! this["fly-flying"] ) {  // starting
+        this["fly-flying"] = true;  // set the internal value
+        this.fly();  // run the first step and schedule the next one
+      } else if ( ! value && this["spin-spinning"] ) { // stopping
+        this["fly-flying"] = false;  // set the internal value
+      }
+    value: false
+  fly-distanceOnGround: 2000
+  fly-speedOnGroundMax: 200
+  fly-elevation: 1000
+  fly-speedInAir: 250
+  fly-raduis: 8000
+  fly-speed: 62.5
+  fly-pointIndex: 0
+methods:
+  fly: |
+    if ( this["fly-flying"] ) {  // if enabled
+      if ( this["fly-speed"] < 63 ) {
+        if (!this.points) {  
+          this.initialize();
+        }
+        this.updateSpeed();
+        this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
+        this.timeAtLastPoint = this.time;
+      } else {
+        var elapsedTime = this.time - this.timeAtLastPoint; 
+        var currentPoint = this.points[ this["fly-pointIndex"] ].point;
+        var nextPoint = this.points[ this["fly-pointIndex"]+1 ].point;
+        var percent = elapsedTime / this.timeToNext;
+        var newPos = this.interpolate( currentPoint, nextPoint, percent );
+        this.position = newPos;
+        if ( percent > 0.9875 ) {
+          this["fly-pointIndex"]++;
+          if ( this["fly-pointIndex"]+1 >= this.points.length ) {
+            this["fly-pointIndex"] = this.firstCiclePoint;
+          }
+          // update rotation
+          var goalPathPoint = this.points[ this["fly-pointIndex"]+1 ].point;
+
+          //console.info( "goalPathPoint = " + goalPathPoint );
+          //console.info( "newPos = " + newPos );
+
+          var zRot = [ goalPathPoint[0] - newPos[0], goalPathPoint[1] - newPos[1], 0 ];
+          //console.info( "zRot = " + zRot );
+
+          this.rotation = [ 0, 0, Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5) ];
+
+          this.updateSpeed();
+          this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
+          this.timeAtLastPoint = this.time;          
+        }
+      }
+      this.future( 0.05 ).fly();  // schedule the next step
+    }
+  updateSpeed:
+  isOnGround:
+  isRising:
+  initialize:
+  interpolate:
+  mulMat4Vec4:
+scripts:
+- |
+  var index = 0;
+  var lastTime = undefined;
+  var onGround = true;
+  this.isOnGround = function() {
+    if ( this.points[ this["fly-pointIndex"] ].place == "ground" ) {
+      return true;
+    }
+    return false;    
+  }
+  this.isRising = function() {
+    if ( this.points[ this["fly-pointIndex"] ].place == "rising" ) {a
+      return true;
+    }
+    return false;    
+  }
+  this.updateSpeed = function() {
+    if ( this.isOnGround() ) {
+      if ( this["fly-speed"] < this["fly-speedOnGroundMax"] ) {
+        this["fly-speed"] = this["fly-speed"] + this["fly-speedOnGroundMax"] / this.pointsOnGround;
+      }
+      if ( this["fly-speed"] >= this["fly-speedOnGroundMax"] ) {
+        this["fly-speed"] = this["fly-speedOnGroundMax"];
+      }
+    } else {
+      this["fly-speed"] = this["fly-speedInAir"];
+    }
+  }
+  this.initialize = function(){
+    var mat = this.rotationMatrix;
+    if ( mat ) { 
+      var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
+      var initPt = this.position;
+      var newPoint;
+      var distance = 0;
+      var prevPt = undefined;
+      this.points = [];
+      this["fly-pointIndex"] = 0;
+      this.pointsOnGround = 16.0;
+      this.pointsClimbing = 24.0;
+      this.pointsOnCircle = 36.0;
+      this.lastTime = 0;
+      var diffX, diffY, diffZ; 
+      if ( trans[0] == 0 && trans[1] == 0 ) {
+        trans[1] = -1;
+      }
+      
+      for ( var i = 0; i < this.pointsOnGround; i++ ) {
+        newPoint = [];
+        newPoint[0] = initPt[0] + trans[0] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
+        newPoint[1] = initPt[1] + trans[1] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
+        newPoint[2] = initPt[2];
+        
+        if ( prevPt ) {
+          diffX = prevPt[0] - newPoint[0];
+          diffY = prevPt[1] - newPoint[1];          
+          diffZ = prevPt[2] - newPoint[2];
+          distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
+        }
+        this.points.push( { point: newPoint, distance: distance, place: "ground" } );
+        //console.info( "   this.points[ "+i+" ] = { point: "+newPoint+", distance: "+distance+", place: ground }" );
+        prevPt = newPoint;
+        
+      }
+      var heightToTravel = this["fly-elevation"];
+      var hypLength = heightToTravel / Math.sin( Math.PI/6 );
+      var adjLength = Math.cos( Math.PI/6 ) * hypLength;
+      initPt = this.points[ this.points.length-1 ].point;
+
+      for ( var i = 1; i <= this.pointsClimbing; i++ ) {
+        newPoint = [];
+        newPoint[0] = initPt[0] + trans[0] * i * adjLength / this.pointsClimbing;
+        newPoint[1] = initPt[1] + trans[1] * i * adjLength / this.pointsClimbing;
+        newPoint[2] = initPt[2] + i * heightToTravel / this.pointsClimbing;
+        
+        //console.info( "newPoint = " + newPoint + "   number of points: " + this.points.length );
+        
+        if ( prevPt ) {
+          //console.info( "prevPt = " + prevPt );
+          diffX = prevPt[0] - newPoint[0];
+          diffY = prevPt[1] - newPoint[1];          
+          diffZ = prevPt[2] - newPoint[2];
+          distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
+        }
+        this.points.push( { point: newPoint, distance: distance, place: "rising" } );
+        //console.info( "   this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: rising }" );
+        prevPt = newPoint;
+      }
+
+      //prevPt = this.points[ this.points.length-1 ].point;
+      var inc = ( 2.0 * Math.PI ) / this.pointsOnCircle;
+      var currentAngle = Math.PI + inc;
+      var center = [];
+      center[0] = prevPt[0] + this["fly-raduis"];;
+      center[1] = prevPt[1];    
+      center[2] = prevPt[2];       
+
+      //console.info( "++    center = " + center );
+      //console.info( "++    prevPt = " + prevPt );
+     
+      this.firstCiclePoint = this.points.length-1; 
+      for ( var i = 0; i < this.pointsOnCircle; i++ ) {
+        newPoint = [];
+        newPoint[0] = center[0] + this["fly-raduis"] * Math.cos( currentAngle );
+        newPoint[1] = center[1] + this["fly-raduis"] * Math.sin( currentAngle );
+        newPoint[2] = center[2];        
+        currentAngle += inc;
+        
+        //console.info( "newPoint = " + newPoint );
+        //console.info( "++    prevPt = " + prevPt );
+        if ( prevPt ) {
+          diffX = prevPt[0] - newPoint[0];
+          diffY = prevPt[1] - newPoint[1];          
+          diffZ = prevPt[2] - newPoint[2];
+          distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
+        }
+        this.points.push( { point: newPoint, distance: distance, place: "circling" } );
+        //console.info( "   this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: circling }" );
+
+        prevPt = newPoint;        
+      }
+      
+      //var pt;
+      //for ( var i = 0; i < this.points.length; i++ ) {
+      //  pt = this.points[i];
+      //  console.info( "point["+i+"] { point: "+pt.point+ " distance: "+pt.distance+" place: "+pt.place+" }" );
+      //}
+      
+    }
+    this.interpolate = function( beforeCoord, afterCoord, percent ) {
+      var newPos = [];
+      newPos.push( beforeCoord[0] + percent * (afterCoord[0] - beforeCoord[0]) );
+      newPos.push( beforeCoord[1] + percent * (afterCoord[1] - beforeCoord[1]) );    
+      newPos.push( beforeCoord[2] + percent * (afterCoord[2] - beforeCoord[2]) );  
+      
+      return newPos;
+    }
+    this.mulMat4Vec4 = function( mat1, vec2 ) {
+      return [ mat1[0]*vec2[0] + mat1[1]*vec2[1] + mat1[2]*vec2[2] + mat1[3]*vec2[3],
+               mat1[4]*vec2[0] + mat1[5]*vec2[1] + mat1[6]*vec2[2] + mat1[7]*vec2[3],
+               mat1[8]*vec2[0] + mat1[9]*vec2[1] + mat1[10]*vec2[2] + mat1[11]*vec2[3],
+               mat1[12]*vec2[0] + mat1[13]*vec2[1] + mat1[14]*vec2[2] + mat1[15]*vec2[3] ];
+    }    
+  }
+  this.pointerClick = function()  {  // when clicked ...
+    this["fly-flying"] = ! this["fly-flying"];  // ... toggle the enabled flag
+  }

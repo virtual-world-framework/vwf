@@ -1,0 +1,47 @@
+---
+extends: http://vwf.example.com/node.vwf
+properties: 
+  enabled: true
+  position: 
+  rotation:
+  rotationMatrix:
+  boundingbox: 
+    set: |
+      console.info( "WARNING: node3 boundingbox cannot be set" )
+  centerOffset: 
+    set: |
+      console.info( "WARNING: node3 centerOffset cannot be set" )
+  transform:
+  vertices: 
+    set: |
+      console.info( "WARNING: node3 vertices cannot be set" )
+    value: 
+  vertexIndices: 
+    set: |
+      console.info( "WARNING: node3 vertexIndices cannot be set" )
+    value: 
+  transform:
+  speed: 1
+  playing: false
+  looping: false
+  physics: "none"
+  physicsDef: 0
+  mass: 1
+  restitution: 0.1
+  friction: 0.5
+  rotVelocityDamping: [ 0.5, 0.5, 0.5 ]
+  linVelocityDamping: [ 1, 1, 1, 0 ]
+  velocity: [ 0, 0, 0 ]  
+  lookAt: ""
+events:
+  keyDown:
+  keyPress:
+  keyUp:
+  pointerClick:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  pointerEnter:
+  pointerOver:
+  pointerLeave:
+  pointerWheel:

@@ -1,13 +1,13 @@
 --- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 source: level.xml
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  activeCamera: "http-vwf-example-com-camera-vwf-maincamera"
 type: model/x-glge
 children: 
   dir_duck_1:
-    extends: http://vwf.example.com/types/light
+    extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       constantAttenuation: 1
@@ -25,7 +25,7 @@ children:
       distance: 100.0
       castShadows: false
   dir_plane_1:
-    extends: http://vwf.example.com/types/light
+    extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       constantAttenuation: 1
