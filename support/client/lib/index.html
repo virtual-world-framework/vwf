@@ -15,9 +15,12 @@
 
     <script type="text/javascript" src="require.js"></script>
 
-    <script type="text/javascript" src="jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="jquery-1.7.1.js"></script>
     <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
     <script type="text/javascript" src="async.js"></script>
+
+    <script type="text/javascript" src="closure/base.js"></script>
+    <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
 
     <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
     <script type="text/javascript" src="socket.io.js"></script>
@@ -79,10 +82,10 @@
                     // index page.
      
                     // As a literal:
-                    //     { extends: "http://vwf.example.com/types/example-type", properties: { ... }, ... }
+                    //     { extends: "http://vwf.example.com/example-type.vwf", properties: { ... }, ... }
      
                     // As a string:
-                    //     "http://vwf.example.com/types/example-type",
+                    //     "http://vwf.example.com/example-type.vwf",
      
                     // These are the model configurations. Each key within the configuration object
                     // is a model name, and each value is an argument or an array of arguments to be

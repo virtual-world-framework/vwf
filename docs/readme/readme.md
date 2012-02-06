@@ -27,7 +27,7 @@ Code View: *hello.vwf.yaml*
 	--- 
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 
@@ -40,12 +40,12 @@ An application scene can extend the glge type with an xml scene file.
 Code View: *index.vwf.yaml*
 
 	--- 
-	extends: http://vwf.example.com/types/glge
+	extends: http://vwf.example.com/glge.vwf
 	source: index.xml
 	type: model/x-glge
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 	  
@@ -75,13 +75,13 @@ Code View: *index.vwf.yaml*
 	--- 
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 		properties:
 		  position: [ 0, 5, 0 ]
 	  world:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: world.dae
 		type: model/vnd.collada+xml
 		properties:
@@ -98,12 +98,12 @@ Define properties of application and children with or without accessors.
 Code View: *helloworld.vwf.yaml*
 
 	--- 
-	extends: http://vwf.example.com/types/glge
+	extends: http://vwf.example.com/glge.vwf
 	source: index.xml
 	type: model/x-glge
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 	    properties:
@@ -121,12 +121,12 @@ Specifying set or get as null prevents writing and/or reading, respectively.
 Code View: *helloworld.vwf.yaml*
 
 	--- 
-	extends: http://vwf.example.com/types/glge
+	extends: http://vwf.example.com/glge.vwf
 	source: index.xml
 	type: model/x-glge
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 	    properties:
@@ -145,25 +145,25 @@ Code View: *index.vwf.yaml*
 	---
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 		properties:
 		  position: [ 0, 5, 0 ]
 		children:
 		  HelloMaterial:
-			extends: http://vwf.example.com/types/material
+			extends: http://vwf.example.com/material.vwf
 			properties: 
 			  texture: “images/red.png”
 	  world:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: world.dae
 		type: model/vnd.collada+xml
 		properties:
 		  position: [ 0, -5, 0 ]
 		children:
 		  WorldMaterial:
-			extends: http://vwf.example.com/types/material
+			extends: http://vwf.example.com/material.vwf
 			properties: 
 			  texture: “images/blue.png”
 		  
@@ -178,7 +178,7 @@ Code View: *helloworld.vwf.yaml*
 	---
 	children:
 	  maincamera:
-        extends: http://vwf.example.com/types/camera
+        extends: http://vwf.example.com/camera.vwf
 		properties:
 		  rotation: [ 2.0, 0, 0]
 
@@ -193,11 +193,11 @@ Code View: *helloworld.vwf.yaml*
 	--- 
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 	  world:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: http://anotherserver.com/world.dae
 		type: model/vnd.collada+xml
 
@@ -212,7 +212,7 @@ Code View: *helloworld.vwf.yaml*
 	--- 
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 		properties:
@@ -252,19 +252,19 @@ Add JavaScript functions to application components by defining scripts as a chil
 Code View: *index.vwf.yaml*
 
 	---
-	extends: http://vwf.example.com/types/glge
+	extends: http://vwf.example.com/glge.vwf
 	source: index.xml
 	type: model/x-glge
 	children:
 	  hello:
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: hello.dae
 		type: model/vnd.collada+xml
 		properties:
 		  position: [ 0, 5, 0 ]
 		children:
 		  HelloTextMaterial1:
-            extends: http://vwf.example.com/types/material
+            extends: http://vwf.example.com/material.vwf
             properties: 
               texture: “”
         scripts:
@@ -281,14 +281,14 @@ Code View: *index.vwf.yaml*
             }
           type: application/javascript
 	  world: 
-		extends: http://vwf.example.com/types/node3
+		extends: http://vwf.example.com/node3.vwf
 		source: world.dae
 		type: model/vnd.collada+xml
 		properties: 
 		  position: [ 0, -5, 0 ]
 		children:
 		  WorldTextMaterial1:
-			extends: http://vwf.example.com/types/material
+			extends: http://vwf.example.com/material.vwf
 			properties: 
 			  texture: “”
 	    scripts:
@@ -316,10 +316,10 @@ Define additional HTML and jQuery components in an index.vwf.html file. The appl
 Code View: *index.vwf.yaml*
 
 	--- 
-	extends: http://vwf.example.com/types/node
+	extends: http://vwf.example.com/node.vwf
 	children: 
 	  game:
-		extends: http://vwf.example.com/types/node
+		extends: http://vwf.example.com/node.vwf
 		properties:
 		  position01: [ 0, 0 ]
 
@@ -331,16 +331,16 @@ Code View: *index.vwf.html*
 		<script type="text/javascript">
 		  function sample() {
 			// Get property value from the application
-			var pos = vwf.getProperty("http-vwf-example-com-types-node-game", 
+			var pos = vwf.getProperty("http-vwf-example-com-node-vwf-game", 
 									  “position01”);
 
 			// Set property value in the application
-			vwf.views[0].setProperty( "http-vwf-example-com-types-node-game", 
+			vwf.views[0].setProperty( "http-vwf-example-com-node-vwf-game", 
 									  " position01", some_position );
 		  }
 
 		  // Defines a function to execute upon an application property
-		  vwf.property( "http-vwf-example-com-types-node-game", "position01",         
+		  vwf.property( "http-vwf-example-com-node-vwf-game", "position01",         
 			function() { doSomething(); } );
 		</script>
 	  </head>

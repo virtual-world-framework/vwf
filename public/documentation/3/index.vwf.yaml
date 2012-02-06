@@ -1,10 +1,10 @@
 --- 
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 source: index.xml
 type: model/x-glge
 children: 
   hello: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties: 
@@ -13,11 +13,11 @@ children:
       scale: [ 1, 1, 1 ]
     children:
       HelloTextMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/red.png”
   world: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: world.dae
     type: model/vnd.collada+xml
     properties: 
@@ -26,15 +26,15 @@ children:
       scale: [ 1, 1, 1 ]
     children:
       WorldTextMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties: 
           texture: “images/blue.png”
 scripts:
 - text: |
     this.initialize = function() {
       console.info( "================ documentation example three ================" );
-      this.activeCamera = "http-vwf-example-com-types-camera-defaultCamera";
-      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "position", [ 0, 0, 10 ] );
+      this.activeCamera = "http-vwf-example-com-camera-vwf-defaultCamera";
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-defaultCamera", "position", [ 0, 0, 10 ] );
       this.hello.HelloTextMaterial1.texture = "images/red.png";
       this.world.WorldTextMaterial1.texture = "images/blue.png";
       this.loadDone = true;
