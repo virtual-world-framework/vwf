@@ -1,30 +1,38 @@
 define( {
 
-    createNode: [],
-    /* TODO: deleteNode, */
+    createNode: [ /* nodeID, childComponent, childName, callback /- ( childID ) -/ */ ],
+    deleteNode: [ /* nodeID */ ],
+    setNode: [ /* nodeID, component */ ],
+    getNode: [ /* nodeID */ ],
 
-    addChild: [],
-    removeChild: [],
-    parent: [],
-    children: [],
-    name: [],
+    prototype: [ /* nodeID */ ],
+    prototypes: [ /* nodeID */ ],
 
-    createProperty: [],
+    addChild: [ /* nodeID, childID, childName */ ],
+    removeChild: [ /* nodeID, childID */ ],
+
+    ancestors: [ /* nodeID */ ],
+    parent: [ /* nodeID */ ],
+    children: [ /* nodeID */ ],
+    name: [ /* nodeID */ ],
+
+    setProperties: [ /* nodeID, properties */ ],
+    getProperties: [ /* nodeID */ ],
+    createProperty: [ /* nodeID, propertyName, propertyValue, propertyGet, propertySet */ ],
     /* TODO: deleteProperty, */
-    setProperty: [],
-    getProperty: [],
+    setProperty: [ /* nodeID, propertyName, propertyValue */ ],
+    getProperty: [ /* nodeID, propertyName */ ],
 
-    createMethod: [],
+    createMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
     /* TODO: deleteMethod, */
-    callMethod: [],
+    callMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-    /* TODO: createEvent, */
+    createEvent: [ /* nodeID, eventName, eventParameters */ ],
     /* TODO: deleteEvent, */
-    /* TODO: addEventListener, */
-    /* TODO: removeEventListener, */
-    /* TODO: fireEvent, */
+    fireEvent: [ /* nodeID, eventName, eventParameters */ ],
+    dispatchEvent: [ /* nodeID, eventName, eventParameters, eventNodeParameters */ ],
 
-    execute: [],
+    execute: [ /* nodeID, scriptText, scriptType */ ],
 
     time: [],
 

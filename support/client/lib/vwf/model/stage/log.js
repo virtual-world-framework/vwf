@@ -18,8 +18,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             switch ( kernelFunctionName ) {
 
-                case "createNode":
-                    objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // component_uri_or_json_or_object
+                case "createNode": // nodeID, childComponent, childName, callback /* ( childID ) */
+                    objectIsComponent( logees[1] ) && ( logees[1] = JSON.stringify( loggableComponent( logees[0] ) ) ); // childComponent
                     break;
 
                 case "createProperty":
@@ -55,6 +55,10 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 var logees = Array.prototype.slice.call( arguments );
 
                 switch ( modelFunctionName ) {
+
+                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /* ( ready ) */
+                        logees[7] = undefined; // callback /* ( ready ) */
+                        break;
 
                     case "creatingProperty":
                         logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet

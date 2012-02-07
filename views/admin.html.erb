@@ -4,8 +4,8 @@
 
         <title>Admin</title>
 
-        <script type="text/javascript" src="../jquery-1.5.1.js"></script>
-        <script type="text/javascript" src="../jquery-ui-1.8.14.custom.js"></script>
+        <script type="text/javascript" src="../jquery-1.6.2.js"></script>
+        <script type="text/javascript" src="../jquery-ui-1.8.16.custom.js"></script>
         <script type="text/javascript" src="../async.js"></script>
 
         <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
@@ -22,18 +22,20 @@
 
             require( [
 
+                "domReady",
+
+                "vwf/kernel/model",
                 "vwf/model/javascript",
-                "vwf/model/glge",
                 "vwf/model/object",
                 "vwf/model/stage/log",
-            
-            ], function() {
+                "vwf/kernel/view",
 
-                require.ready( function() {
+            ], function( ready ) {
+
+                ready( function() {
 
                     vwf.initialize( {
                         "vwf/model/javascript": [],
-                        "vwf/model/glge": [],
                         "vwf/model/object": [],
                     }, {
                         html: "#listing"
@@ -142,18 +144,23 @@
 
                         if ( fields.action == "createNode" ) {
 
-                            command += "@" + safe_identifier( fields.parameters.shift() ) + ".new"
-                            command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
+                            command += "create";
+                            command += fields.parameters.length ? "( " + parameter_list( fields.parameters ) + " )" : "()";
 
                         } else if ( fields.action == "setProperty" ) {
 
-                            command += safe_identifier( fields.parameters.shift() ) + " = " +
-                                fields.parameters.shift();
+                            command += safe_identifier( fields.member ) + " = " +
+                                JSON.stringify( fields.parameters.shift() );
 
                         } else if ( fields.action == "callMethod" ) {
 
-                            command += safe_identifier( fields.parameters.shift() );
-                            command += fields.parameters.length ? "( " + parameter_list( parameters ) + " )" : "()";
+                            command += safe_identifier( fields.member );
+                            command += fields.parameters.length ? "( " + parameter_list( fields.parameters ) + " )" : "()";
+
+                        } else {
+                            
+                            command += fields.action;
+                            command += fields.parameters.length ? "( " + parameter_list( fields.parameters ) + " )" : "()";
 
                         }
 
@@ -171,7 +178,9 @@
                     }
 
                     function parameter_list( parameters ) {
-                        return parameters.join( ", " );
+                        return parameters.map( function( parameter ) {
+                            return JSON.stringify( parameter ).substring( 0, 100 );
+                         } ).join( ", " );
                     }
 
                     // ---------------------------------------------------------------------------------
@@ -242,7 +251,7 @@
         </script>
 
         <link rel="stylesheet" type="text/css" href="index.css" />
-        <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.14.custom.css" />
+        <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.16.custom.css" />
 
         <style type="text/css">
 
@@ -252,7 +261,11 @@
 
             #tabs {
                 min-height: 1024px;
-                background-image: url(vwl800.jpg);                background-position: center top;                background-repeat: repeat-y;                background-attachment: scroll;            }
+                // background-image: url(vwl800.jpg);
+                background-position: center top;
+                background-repeat: repeat-y;
+                background-attachment: scroll;
+            }
 
             #log > * {
                 margin: 0;

@@ -4,8 +4,8 @@ class VWF < Sinatra::Base
 
   configure do
 
-    set :app_file, File.expand_path( File.join( File.dirname(__FILE__), "..", "init.rb" ) )
-    set :static, false # we serve out of :public, but only relative to vwf applications
+    set :root, File.expand_path( File.join( File.dirname(__FILE__), ".." ) )
+    set :static, false # we serve out of :public_folder, but only relative to vwf applications
 
     set :support, lambda { File.join( settings.root, "support" ) }
 
@@ -15,18 +15,15 @@ set :mock_filesystem, nil
   end
 
   configure :production do
-    use Rack::Logger, ::Logger::WARN  # TODO: remove after Sinatra 1.3
     enable :logging
   end
 
   configure :development do
-    use Rack::Logger, ::Logger::INFO  # TODO: remove after Sinatra 1.3
-    set :logging, ::Logger::INFO
+    require "logger"
+    set :logging, ::Logger::DEBUG
   end
 
   configure :test do
-
-    use Rack::NullLogger  # TODO: remove after Sinatra 1.3
 
     # For testing, assume that the filesystem consists of these directories containing these files.
 
@@ -49,19 +46,19 @@ set :mock_filesystem, nil
     # to "/path/to/application/session/". But XHR calls to "/path/to/application" get the component
     # data.
 
-    if request.route[-1,1] != "/" && private_path.nil?
+    if request.path_info[-1,1] != "/" && private_path.nil?
 
       if session.nil? && ! request.accept.include?( mime_type :html )  # TODO: pass component request through to normal delegation below?
-        Application::Component.new( settings.public ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
+        Application::Component.new( settings.public_folder ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
       else
-        redirect to request.route + "/"
+        redirect to request.path_info + "/"
       end
 
     # For "/path/to/application/", create a session and redirect to "/path/to/application/session/".
 
     elsif session.nil? && private_path.nil?
 
-      redirect to request.route + random_session_id + "/"
+      redirect to request.path_info + random_session_id + "/"
 
     # Delegate everything else to the application.
 
@@ -83,13 +80,48 @@ set :mock_filesystem, nil
 
   end
 
+  # Serve files not in any application as static content.
+
+  get "/*" do |path|
+
+    if path == ""
+      path = "index.html"
+    end
+
+    delegated_env = env.merge(
+      "PATH_INFO" => "/" + path
+    )
+
+    response = Rack::File.new( VWF.settings.public_folder ).call delegated_env
+
+    # index.html is normally rendered from a template during the build. As a special case for
+    # development mode, when index.html is missing, render from the template with null content.
+
+    if response[0] == 404
+
+      if path == "index.html" && VWF.development?
+        begin
+          response = erb path.to_sym, { :views => VWF.settings.public_folder }, { :applications => [] }
+        rescue Errno::ENOENT
+          pass
+        end
+      else
+        pass
+      end
+
+    end
+  
+    response
+
+  end
+
   helpers do
 
     def delegate_to_application public_path, application, session, private_path
 
       application_session = session ?
-          File.join( public_path, application, session ) :
-          File.join( public_path, application )
+        File.join( public_path, application, session ) :
+        File.join( public_path, application )
 
       delegated_env = env.merge(
         "SCRIPT_NAME" => application_session,
@@ -107,10 +139,6 @@ set :mock_filesystem, nil
 
     def random_session_id  # TODO: don't count on this for security; migrate to a proper session id, in a cookie, at least twice as long, and with verified randomness
       "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
-    end
-
-    def logger  # TODO: remove after Sinatra 1.3
-      request.logger
     end
 
   end

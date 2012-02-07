@@ -5,7 +5,7 @@ properties:
     set: |
       this.success = value;
     value: false
-  instructionText: ""
+  instructionText:
     set: |
       this.instructionText = value;
     value: ""
@@ -33,4 +33,4 @@ scripts:
       }
       console.info( "update " )
     }
-  type: application/javascript  
+  type: application/javascript

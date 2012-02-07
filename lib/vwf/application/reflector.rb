@@ -12,32 +12,123 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
   end
 
   def onconnect
+
     super
-    send JSON.generate :time => 0, :node => nil, :action => "createNode", :parameters => [ env["vwf.application"] ]  # TODO: get current time, also current application state
+
+    # Start the timer on the first connection to this session.
+
     schedule_tick
+
+    # Register as a not-yet-synchronized client.
+
+    session[:pending_clients] ||= {}
+    session[:pending_clients][self] = true
+
+    # Initialize to the application starting state.
+
+    fields = {
+      "time" => session[:transport].time,
+      "node" => 0,
+      "action" => "createNode",
+      "parameters" => [ env["vwf.application"], nil ]
+    }
+
+    send JSON.generate fields
+
+    # Request the current state from a synchronized client.
+
+    fields = {
+      "time" => session[:transport].time,
+      "node" => 0,
+      "action" => "getNode",
+      "parameters" => []
+    }
+
+    if clients.length > session[:pending_clients].size
+      clients.first.send JSON.generate fields
+    else
+      session[:pending_clients].delete self
+    end
+
   end
   
   def onmessage message
+
     super
-    broadcast message
+
+    fields = JSON.parse message
+
+    # For a normal message, stamp it with the curent time and send it to each client.
+
+    unless fields["result"]
+
+      fields["time"] = session[:transport].time
+      broadcast JSON.generate fields
+
+    # Handle messages where the client returned a result to the server.
+
+    else
+
+      # When the request for the current state is received, update all unsynchronized clients to the
+      # current state. Refresh the synchronized clients as well since the get/set operation may be
+      # lossy, and this ensures that every client resumes from the same state.
+
+      if fields["action"] == "getNode"
+
+        fields["action"] = "setNode"
+        fields["parameters"] = [ fields["result"] ]
+        fields.delete "result"
+
+        clients.each do |client| # session[:pending_clients].each do |client, dummy|
+          client.send JSON.generate fields
+        end
+
+        session[:pending_clients].clear
+
+      end
+
+    end
+
   end
   
   def ondisconnect
+
+    # Unregister from the not-yet-synchronized list if we're still there.
+
+    session[:pending_clients].delete self
+    # TODO: resend getNode if this was the reference client and a getNode was pending
+
+    # Stop the timer and clear the state on the last disconnection from this session.
+
+    cancel_tick
+
     super
+
   end
 
 private
 
   def schedule_tick
 
-    unless session[:transport]
+    if clients.length == 1
       transport = session[:transport] = Transport.new
-      session[:timer] = EventMachine::PeriodicTimer.new( 0.1 ) do  # TODO: configuration parameter for update rate
-        transport.playing and broadcast JSON.generate :time => transport.time
+      session[:timer] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
+        transport.playing and broadcast JSON.generate( :time => transport.time ), false
       end
-      transport.play
+      transport.play  # TODO: wait until first client has completed loading  # TODO: wait until all clients are ready for an instructor session
     end
 
+  end
+  
+  def cancel_tick
+
+    if clients.length == 1
+      session[:timer].cancel
+      session.delete :timer
+      session[:transport].stop
+      session.delete :transport
+    end
+    
   end
 
 public

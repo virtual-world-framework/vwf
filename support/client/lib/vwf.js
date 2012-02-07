@@ -30,12 +30,33 @@
         // useful for debugging.
 
         Object.defineProperty( this.models, "actual", {  // TODO: for this.views too once that's converted to use the RequireJS loader
+
             get: function() {
-                return this.map( function( model ) {
+
+                // Map the array to the result.
+
+                var actual = this.map( function( model ) {
+                    return last( model );
+                } );
+
+                // Map the non-integer properties too.
+
+                for ( var propertyName in this ) {
+                    if ( isNaN( Number( propertyName ) ) ) {
+                        actual[propertyName] = last( this[propertyName] );
+                    }
+                }
+
+                // Follow a pipeline to the last stage.
+
+                function last( model ) {
                     while ( model.model ) model = model.model;
                     return model;
-                } );
+                }
+
+                return actual;
             }
+
         } );
 
         // This is the simulation clock, which contains the current time in milliseconds. Time is
@@ -72,6 +93,9 @@
         // by execution time.
 
         var queue = this.private.queue = [];
+
+        queue.time = 0; // current server time
+        queue.ready = true;
 
         // This is the connection to the conference server. In this sample implementation, "socket"
         // is a socket.io client that communicates over a channel provided by the server hosting the
@@ -160,33 +184,77 @@
             if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
                 viewArgumentLists = {};
 
+            // Create the model interface to the kernel. Models can make direct calls that execute
+            // immediately or future calls that are placed on the queue and executed when removed.
+
+            var kernel_for_models = require( "vwf/kernel/model" ).create( vwf );
+
             // Create and attach each configured model.
 
             jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
-                var model = require( modelName ).create( vwf, [ require( "vwf/model/stage/log" ) ] );
+                var model = require( modelName ).create(
+                    kernel_for_models,                          // model's kernel access
+                    [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
+                    {}                                          // state shared with a paired view
+                    // TODO: configuration parameters (modelArguments)
+                );
 
                 if ( model ) {
                     vwf.models.push( model );
+                    vwf.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
 if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
     vwf.models.javascript = model;
     while ( vwf.models.javascript.model ) vwf.models.javascript = vwf.models.javascript.model;
 }
+
+if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
+    vwf.models.object = model;
+    while ( vwf.models.object.model ) vwf.models.object = vwf.models.object.model;
+}
                 }
 
             } );
+
+            // Create the view interface to the kernel. Views can only make replicated calls which
+            // bounce off the reflection server, are placed on the queue when received, and executed
+            // when removed.
+
+            var kernel_for_views = require( "vwf/kernel/view" ).create( vwf );
 
             // Create and attach each configured view.
 
             jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
 
-                var view = vwf.modules[viewName];
+                if ( ! viewName.match( "^vwf/view/" ) ) { // old way
 
-                if ( view ) {
-                    var instance = new view();
-                    view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
-                    vwf.views.push( instance );
+                    var view = vwf.modules[viewName];
+
+                    if ( view ) {
+                        var instance = new view();
+                        instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
+                        view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
+                        vwf.views.push( instance );
+                        vwf.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                    }
+
+                } else { // new way
+
+                    var modelPeer = vwf.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: vwf.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
+
+                    var view = require( viewName ).create(
+                        kernel_for_views,                           // view's kernel access
+                        [],                                         // stages between the kernel and view
+                        modelPeer && modelPeer.state || {}          // state shared with a paired model
+                        // TODO: configuration parameters (viewArguments)
+                    );
+
+                    if ( view ) {
+                        vwf.views.push( view );
+                        vwf.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                    }
+
                 }
 
             } );
@@ -250,7 +318,7 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
                 this.dispatch( 0 );
 
                 setInterval( function() {
-                    vwf.dispatch( vwf.now + 10 ); // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                    vwf.dispatch( vwf.now + 0.010 ); // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
                 }, 10 );
 
             }
@@ -275,14 +343,14 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
                         // Unpack the arguments.
 
-                        fields = JSON.parse( message );
+                        var fields = JSON.parse( message );
+
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
 
-                        // Add the message to the queue and keep it ordered by time.
+                        // Add the message to the queue.
 
-                        queue.push( fields );
-                        queue.sort( function( a, b ) { return a.time - b.time } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive
+                        vwf.queue( fields.time, fields.node, fields.action, fields.member, fields.parameters );
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -295,9 +363,10 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
                         vwf.dispatch( fields.time );
 
-                    } catch( e ) {
+                    } catch ( e ) {
 
-                        // Ignore invalid messages.
+                        vwf.logger.warn( fields.action, fields.node, fields.member, fields.parameters,
+                            "exception performing action:", e.stack );
 
                     }
 
@@ -319,9 +388,7 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
                 // TODO: add note that this is only for a self-determined world; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
-                this.createNode( component_uri_or_json_or_object, function( rootID, rootTypeID ) {
-                    vwf.addChild( 0, rootID, undefined );
-                } );
+                this.createNode( 0, component_uri_or_json_or_object, undefined );
 
             } else {  // TODO: also do this if component_uri_or_json_or_object was invalid and createNode() failed
 
@@ -331,54 +398,114 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
 
         };
 
+        // -- queue --------------------------------------------------------------------------------
+
+        this.queue = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
+
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
+
+            var fields = {
+                time: time,
+                sequence: undefined, // for stabilizing the sort
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO
+            };
+
+            queue.push( fields );
+
+            // Sort by time then by sequence.  // TODO: use a better-performing priority queue
+
+            var sequence = 0;
+
+            queue.forEach( function( fields ) {
+                fields.sequence = ++sequence;
+            } );
+
+            queue.sort( function( a, b ) {
+                return a.time != b.time ?
+                    a.time - b.time :
+                    a.sequence - b.sequence;
+            } );
+
+        };
+
         // -- send ---------------------------------------------------------------------------------
 
         // Send a message to the conference server. The message will be reflected back to all
         // participants in the conference.
 
-        this.send = function( /* nodeID, actionName, parameters ... */ ) {
+        this.send = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
 
-            var args = Array.prototype.slice.call( arguments );
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
+
+            // For single-user mode, loop the message back to the incoming queue.
+
+            if ( ! socket ) {
+                return this.queue( time, nodeID, actionName, memberName, parameters, callback /* ( result ) */ );
+            }
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
-                time: this.now,
-                node: args.shift(),
-                action: args.shift(),
-                parameters: args
+                time: time,
+                // sequence: undefined,  // TODO: use to identify on return from reflector?
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
-            if ( socket ) {
+            // Send the message.
 
-                // Send the message if the connection is available.
-
-                var message = JSON.stringify( fields );
-                socket.send( message );
-
-            } else {
-                
-                // Otherwise, for single-user mode, loop it immediately back to the incoming queue.
-
-                queue.push( fields );
-                queue.sort( function( a, b ) { return a.time - b.time } );  // TODO: sort must be stable so that messages with the same time are evaluated in the order that they arrive
-
-            }
+            var message = JSON.stringify( fields );
+            socket.send( message );
 
         };
+
+        // -- respond ------------------------------------------------------------------------------
+
+        // Return a result for a function invoked by the server.
+
+        this.respond = function( time, nodeID, actionName, memberName, parameters, result ) {
+
+            // Nothing to do in single-user mode.
+
+            if ( ! socket ) {
+                return;
+            }
+
+            // Attach the current simulation time and pack the message as an array of the arguments.
+
+            var fields = {
+                time: time,
+                // sequence: undefined,  // TODO: use to identify on return from reflector?
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                result: result,
+            };
+
+            // Send the message.
+
+            var message = JSON.stringify( fields );
+            socket.send( message );
+
+        }
 
         // -- receive ------------------------------------------------------------------------------
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( fields ) {
-
-            // Advance the time and locate the node ID and action name.
-
-            this.now = fields.time;
-
-            var nodeID = fields.node;
-            var actionName = fields.action;
+        this.receive = function( time, nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
 
 // TODO: delegate parsing and validation to each action.
 
@@ -387,8 +514,35 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = nodeID || nodeID === 0 ? [ nodeID ].concat( fields.parameters ) : fields.parameters;
-            this[actionName] && this[actionName].apply( this, args );
+            var args = [];
+
+            if ( nodeID || nodeID === 0 ) args.push( nodeID );  // TODO: don't bother testing anymore? createNode() before parentID didn't have a nodeID but now I think all functions do ... except time()?
+            if ( memberName ) args.push( memberName );
+            if ( parameters ) args = args.concat( parameters ); // flatten
+
+            // Insert the ready callback for potentially-asynchronous actions.
+
+            switch ( actionName ) {
+
+                case "createNode": // nodeID, childComponent, childName, callback /* ( childID ) */
+
+                    callback( false ); // suspend the queue
+
+                    args[3] = function( childID ) {
+                        callback( true ); // resume the queue when the action completes
+                    };
+
+                    break;
+
+            }
+
+            // Invoke the action.
+
+            var result = this[actionName] && this[actionName].apply( this, args );
+
+if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
+    this.respond( time, nodeID, actionName, memberName, parameters, result );
+}
             
         };
 
@@ -404,18 +558,45 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // remove the message and perform the action. The simulation time is advanced to the
             // message time as each one is processed.
 
-            while ( queue.length > 0 && queue[0].time <= currentTime ) {
-                this.receive( queue.shift() );
+            queue.time = Math.max( queue.time, currentTime ); // save current server time for pause/resume
+
+            // Actions may use receive's ready function to suspend the queue for asynchronous
+            // operations, and to resume it when the operation is complete.
+
+            while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time ) {
+
+                var fields = queue.shift();
+
+                // Advance the time.
+
+                this.now = fields.time;
+
+                this.receive( fields.time, fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
+                    if ( Boolean( ready ) != Boolean( queue.ready ) ) {
+                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
+                        queue.ready = ready;
+                        queue.ready && vwf.dispatch( queue.time );
+                    }
+                } );
+
+                // Tick after the last message, or after the last message before the time advances.
+
+                if ( queue.ready && ( queue.length == 0 || queue[0].time != this.now ) ) {
+                    this.tick();
+                }
+
             }
 
-            // Set the simulation time to the new current time.
+            // Set the simulation time to the new current time. Tick if the time advances.
 
-            this.now = currentTime;
-            this.tick();
+            if ( queue.ready && queue.time != this.now ) {
+                this.now = queue.time;
+                this.tick();
+            }
             
         };
 
-        // -- dispatch -----------------------------------------------------------------------------
+        // -- tick ---------------------------------------------------------------------------------
 
         // Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
         // simulation time that we should advance to and was taken from the time stamp of the last
@@ -438,7 +619,7 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
             // Call tick() on each tickable node.
 
             vwf.tickable.nodeIDs.forEach( function( nodeID ) {
-                vwf.callMethod( nodeID, "tick", vwf.now );
+                vwf.callMethod( nodeID, "tick", [ vwf.now ] );
             } );
 
         };
@@ -468,43 +649,79 @@ if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to foll
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( component_uri_or_json_or_object, callback, childName /* TODO: hack */ ) {
+        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID ) */ ) {  // TODO: swap childComponent & childName for consistency with createProperty( nodeID, memberName, memberDescription ), etc.  // TODO: consider renaming to createChild(), or switch node/child => parent/node
 
             this.logger.group( "vwf.createNode " + (
-                typeof component_uri_or_json_or_object == "string" || component_uri_or_json_or_object instanceof String ?
-                    component_uri_or_json_or_object : JSON.stringify( loggableComponent( component_uri_or_json_or_object ) )
+                typeof childComponent == "string" || childComponent instanceof String ?
+                    childComponent : JSON.stringify( loggableComponent( childComponent ) )
             ) );
 
             // Any component specification may be provided as either a URI identifying a network
             // resource containing the specification or as an object literal that provides the data
             // directly.
 
-            var component = normalizedComponent( component_uri_or_json_or_object );
+            var component = normalizedComponent( childComponent );
 
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
 
-            var nodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
-nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
-// nodeID = nodeID + "-" + Math.round( Math.random() * 1000000 );  // TODO: for single-user mode testing only; don't require the tests to provide the childName hack
+            var childNodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
+childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
 
-            this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + nodeID );
+            this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + childNodeID );
 
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
-
-if ( ! callback ) { // TODO: this is a hack to get the multiuser application createNode to addChild to the root
-    callback = function( nodeID, prototypeID ) {
-        vwf.addChild( 0, nodeID, undefined );
-    };
-}
-
-// nodeID = nodeID + "-" + Date.now();  // TODO: hack on a hack to allow (single-user mode) client tests to work
     
-            this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
-                construct.call( this, component, nodeID, prototypeID, callback /* ( nodeID, prototypeID ) */ );
+            this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
+
+                async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
+
+                    vwf.getType( uri, function( childBehaviorID ) {
+                        callback( undefined, childBehaviorID );
+                    } );
+
+                }, function( err, childBehaviorIDs ) {
+
+                    construct.call( vwf, nodeID, childNodeID, childPrototypeID, childBehaviorIDs, component, childName, function( childNodeID ) {
+if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
+vwf.addChild( nodeID, childNodeID, childName );
+                        if ( nodeID == 0 && component["extends"] && component["extends"] != nodeTypeURI && component["extends"][0] != "@" ) {  // TODO: const for root id  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
+                            jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html", function() { // load the UI chrome if available
+                                callback && callback.call( vwf, childNodeID );
+                            } );
+                        } else {
+                            callback && callback.call( vwf, childNodeID );
+                        }
+                    } );
+
+                } );
+
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createNode complete " + component_uri_or_json_or_object ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
+        };
+
+        // -- deleteNode ---------------------------------------------------------------------------
+
+        this.deleteNode = function( nodeID ) {
+
+            this.logger.group( "vwf.deleteNode " + nodeID );
+
+            // Call deletingNode() on each model. The node is considered deleted after each model
+            // has run.
+
+            vwf.models.forEach( function( model ) {
+                model.deletingNode && model.deletingNode( nodeID );
+            } );
+
+            // Call deletedNode() on each view. The view is being notified that a node has been
+            // deleted.
+
+            vwf.views.forEach( function( view ) {
+                view.deletedNode && view.deletedNode( nodeID );
+            } );
+
+            this.logger.groupEnd();
         };
 
         // -- getType ------------------------------------------------------------------------------
@@ -515,7 +732,7 @@ if ( ! callback ) { // TODO: this is a hack to get the multiuser application cre
         // save a reference in the database (since no other component can refer to it), and just
         // create it as an anonymous type.
 
-        this.getType = function( uri, callback ) {
+        this.getType = function( uri, callback /* nodeID */ ) {
 
             var nodeID = uri; // TODO: hash uri => nodeID to shorten for faster lookups? // TODO: canonicalize uri
 nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
@@ -525,10 +742,17 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
     types[nodeID] = "dummy";
 }
 
+            // If the type is being loaded, add the callback to the list to be invoked when the load
+            // completes.
+
+            if ( types[nodeID] instanceof Array ) {
+
+                types[nodeID].push( callback );
+
             // If the URI is in the database, invoke the callback with the ID of the previously-
             // loaded prototype node.
             
-            if ( types[nodeID] ) {
+            } else if ( types[nodeID] ) {
 
                 callback && callback.call( this, nodeID );
 
@@ -544,14 +768,22 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             } else if ( uri == nodeTypeURI ) {
 
+                types[nodeID] = [ callback ]; // array of callbacks while loading
+
                 var component = {};
                 var prototypeID = undefined;
 
                 this.logger.info( "vwf.getType: creating type " + uri );
 
-                construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
-                    types[nodeID] = component;
-                    callback && callback.call( this, nodeID );
+                construct.call( this, 0, nodeID, prototypeID, [], component, undefined, function( nodeID ) {
+
+                    var callbacks = types[nodeID];
+                    types[nodeID] = component; // component specification once loaded
+
+                    callbacks.forEach( function( callback ) {
+                        callback && callback.call( vwf, nodeID );
+                    } );
+
                 } );
 
             // For any other URI, load the document. Once it loads, call getType() to locate or
@@ -562,27 +794,170 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                 this.logger.info( "vwf.getType: creating type " + uri );
 
+                types[nodeID] = [ callback ]; // array of callbacks while loading
+
                 jQuery.ajax( {
+
                     url: remappedURI( uri ),
                     dataType: "jsonp",
+
                     success: function( component ) {
+
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
-                            if ( ! types[nodeID] ) {
-                                construct.call( this, component, nodeID, prototypeID, function( nodeID, prototypeID ) {
-                                    types[nodeID] = component;
-                                    callback && callback.call( this, nodeID );
+
+                            construct.call( this, 0, nodeID, prototypeID, [], component, undefined, function( nodeID ) {
+
+                                var callbacks = types[nodeID];
+                                types[nodeID] = component; // component specification once loaded
+
+                                callbacks.forEach( function( callback ) {
+                                    callback && callback.call( vwf, nodeID );
                                 } );
-                            } else { // TODO: handle multiple loads of same type better
-                                callback && callback.call( this, nodeID );
-                            }
+
+                            } );
+
                         } )
+
                     },
+
                     context: this
+
                 } );
 
             }
 
         };
+
+
+
+
+        // -- setNode ------------------------------------------------------------------------------
+
+        this.setNode = function( nodeID, component ) {
+
+Object.keys( component ).forEach( function( nodeID ) {
+    vwf.setProperties( nodeID, component[nodeID] );
+} );
+
+return;
+
+            // var prototypeID = this.prototype( nodeID );
+            // var childrenIDs = this.children( nodeID );
+
+            // if ( prototypeID && component.extends ) {
+            //     this.setNode( prototypeID, component.extends );
+            // }
+
+            // // implements: [ ? ]  // TODO
+
+            // component.properties && this.setProperties( nodeID, component.properties );
+            // // component.methods  // TODO
+            // // component.events  // TODO
+
+            // component.children && childrenIDs.forEach( function( childID, childIndex ) {
+            //     component.children[childIndex] && vwf.setNode( childID, component.children[childIndex] );
+            // } );
+
+            // return component;
+        };
+
+        // -- getNode ------------------------------------------------------------------------------
+
+        this.getNode = function( nodeID ) {
+
+            var component = {};
+
+Object.keys( vwf.models.object.objects ).forEach( function( nodeID ) {
+    component[nodeID] = vwf.getProperties( nodeID );
+    Object.keys( component[nodeID] ).length || delete component[nodeID];
+} );
+
+return component;
+
+            // var prototypeID = this.prototype( nodeID );
+            // var childrenIDs = this.children( nodeID );
+
+            // if ( prototypeID !== undefined ) {
+            //     component.extends = this.getNode( prototypeID );
+            //     Object.keys( component.extends ).length || delete component.extends;
+            // }
+
+            // // implements: [ ? ]  // TODO
+
+            // component.properties = this.getProperties( nodeID );
+
+            // for ( var propertyName in component.properties ) {
+            //     component.properties[propertyName] === undefined &&
+            //         delete component.properties[propertyName];
+            // }
+
+            // Object.keys( component.properties ).length ||
+            //     delete component.properties;
+
+            // component.methods = {};  // TODO
+
+            // for ( var methodName in component.methods ) {
+            //     component.methods[methodName] === undefined &&
+            //         delete component.methods[methodName];
+            // }
+
+            // Object.keys( component.methods ).length ||
+            //     delete component.methods;
+
+            // component.events = {};  // TODO
+
+            // for ( var eventName in component.events ) {
+            //     component.events[eventName] === undefined &&
+            //         delete component.events[eventName];
+            // }
+
+            // Object.keys( component.events ).length ||
+            //     delete component.events;
+            
+            // if ( childrenIDs.length ) {
+            //     component.children = childrenIDs.map( function( childID ) {
+            //         return vwf.getNode( childID );
+            //     } );
+            // }
+
+            // return component;
+        };
+
+
+        // -- prototype ----------------------------------------------------------------------------
+
+        this.prototype = function( nodeID ) {
+
+            // Call prototyping() on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var prototypeID = undefined;
+
+            vwf.models.some( function( model ) {
+                prototypeID = model.prototyping && model.prototyping( nodeID );
+                return prototypeID !== undefined;
+            } );
+
+            return prototypeID;
+        }
+
+        // -- prototypes ---------------------------------------------------------------------------
+
+        this.prototypes = function( nodeID ) {
+
+            var prototypeIDs = [];
+            var prototypeID = undefined;
+            
+            while ( nodeID !== undefined ) {
+                if ( ( prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                    prototypeIDs.push( prototypeID );
+                }
+                nodeID = prototypeID;
+            }
+            
+            return prototypeIDs;
+        }
+
 
         // -- addChild -----------------------------------------------------------------------------
 
@@ -604,7 +979,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.addChild complete " + nodeID + " " + childID + " " + childName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- removeChild --------------------------------------------------------------------------
@@ -627,8 +1002,24 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.removeChild complete " + nodeID + " " + childID ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
+
+        // -- ancestors ----------------------------------------------------------------------------
+
+        this.ancestors = function( nodeID ) {
+
+            var ancestors = [];
+
+            nodeID = this.parent( nodeID );
+
+            while ( nodeID && nodeID !== 0 ) {
+                ancestors.push( nodeID );
+                nodeID = this.parent( nodeID );
+            }
+
+            return ancestors;
+        }
 
         // -- parent -------------------------------------------------------------------------------
 
@@ -663,7 +1054,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 Array.prototype.push.apply( children, modelChildren );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.children complete " + nodeID ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return children; // TODO: remove duplicates, hopefully without re-ordering.
         };
@@ -683,6 +1074,110 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
             } );
 
             return name;
+        };
+
+        // -- setProperties ------------------------------------------------------------------------
+
+        // Set all of the properties for a node.
+
+        this.setProperties = function( nodeID, properties ) {
+
+            this.logger.group( "vwf.setProperties " + nodeID + " " + properties );
+
+            // Call settingProperties() on each model.
+
+            properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
+
+                var model_properties = {};
+
+                if ( model.settingProperties ) {
+                    model_properties = model.settingProperties( nodeID, properties );
+                } else if ( model.settingProperty ) {
+                    for ( var propertyName in properties ) {
+                        model_properties[propertyName] =
+                            model.settingProperty( nodeID, propertyName, properties[propertyName] );
+                    }
+                }
+
+                for ( var propertyName in model_properties ) {
+                    if ( model_properties[propertyName] !== undefined ) {
+                        intermediate_properties[propertyName] = model_properties[propertyName];
+                    }
+                }
+
+                return intermediate_properties;
+
+            }, {} );
+
+            // Call satProperties() on each view.
+
+            vwf.views.forEach( function( view ) {
+
+                if ( view.satProperties ) {
+                    view.satProperties( nodeID, properties );
+                } else if ( view.satProperty ) {
+                    for ( var propertyName in properties ) {
+                        view.satProperty( nodeID, propertyName, properties[propertyName] );  // TODO: be sure this is the value actually set, not the incoming value
+                    }
+                }
+
+            } );
+
+            this.logger.groupEnd();
+
+            return properties;
+        };
+
+        // -- getProperties ------------------------------------------------------------------------
+
+        // Get all of the properties for a node.
+
+        this.getProperties = function( nodeID ) {
+
+            this.logger.group( "vwf.getProperties " + nodeID );
+
+            // Call gettingProperties() on each model.
+
+            var properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+
+                var model_properties = {};
+
+                if ( model.gettingProperties ) {
+                    model_properties = model.gettingProperties( nodeID, properties );
+                } else if ( model.gettingProperty ) {
+                    for ( var propertyName in intermediate_properties ) {
+                        model_properties[propertyName] =
+                            model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );  // TODO: probably don't need propertyValue here
+                    }
+                }
+
+                for ( var propertyName in model_properties ) {
+                    if ( model_properties[propertyName] !== undefined ) {
+                        intermediate_properties[propertyName] = model_properties[propertyName];
+                    }
+                }
+
+                return intermediate_properties;
+
+            }, {} );
+
+            // Call gotProperties() on each view.
+
+            vwf.views.forEach( function( view ) {
+
+                if ( view.gotProperties ) {
+                    view.gotProperties( nodeID, properties );
+                } else if ( view.gotProperty ) {
+                    for ( var propertyName in properties ) {
+                        view.gotProperty( nodeID, propertyName, properties[propertyName] );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
+                    }
+                }
+
+            } );
+
+            this.logger.groupEnd();
+
+            return properties;
         };
 
         // -- createProperty -----------------------------------------------------------------------
@@ -707,7 +1202,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */  // TODO: add truncated propertyGet, propertySet to log
+            this.logger.groupEnd();
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -784,12 +1279,12 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 // been set.  TODO: only want to call when actually set and with final value
 
                 vwf.views.forEach( function( view ) {
-                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );
+                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
                 } );
 
             }
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.setProperty complete " + nodeID + " " + propertyName + " " + propertyValue ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return propertyValue;
         };
@@ -834,7 +1329,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                     // Make the call.
 
                     var value = model.gettingProperty &&
-                        model.gettingProperty( nodeID, propertyName, propertyValue );
+                        model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
 
                     // Look for a return value potentially stored by a reentrant call here if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
@@ -882,12 +1377,12 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 // Call gotProperty() on each view.
 
                 vwf.views.forEach( function( view ) {
-                    view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );
+                    view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
 
             }
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.getProperty complete " + nodeID + " " + propertyName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return propertyValue;
         };
@@ -896,34 +1391,32 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
         // -- createMethod -------------------------------------------------------------------------
 
-        this.createMethod = function ( nodeID, methodName ) {
+        this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 
-            this.logger.group( "vwf.createMethod " + nodeID + " " + methodName );
+            this.logger.group( "vwf.createMethod " + nodeID + " " + methodName + " " + methodParameters );
 
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
 
             vwf.models.forEach( function( model ) {
-                model.creatingMethod && model.creatingMethod( nodeID, methodName );
+                model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
             // Call createdMethod() on each view. The view is being notified that a method has been
             // created.
 
             vwf.views.forEach( function( view ) {
-                view.createdMethod && view.createdMethod( nodeID, methodName );
-            });
+                view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
+            } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.createMethod complete " + nodeID + " " + methodName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         };
 
         // -- callMethod ---------------------------------------------------------------------------
 
-        this.callMethod = function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName ); // TODO: parameters
-
-            var args = Array.prototype.slice.call( arguments );
+            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName + " " + methodParameters );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -931,19 +1424,149 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
             var methodValue = undefined;
 
             vwf.models.forEach( function( model ) {
-                var value = model.callingMethod && model.callingMethod.apply( model, args ); // TODO: parameters
+                var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
                 methodValue = value !== undefined ? value : methodValue;
             } );
 
             // Call calledMethod() on each view.
 
             vwf.views.forEach( function( view ) {
-                view.calledMethod && view.calledMethod.apply( view, args ); // TODO: parameters
+                view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.callMethod complete " + nodeID + " " + methodName ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return methodValue;
+        };
+
+        // -- createEvent --------------------------------------------------------------------------
+
+        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
+
+            this.logger.group( "vwf.createEvent " + nodeID + " " + eventName + " " + eventParameters );
+
+            // Call creatingEvent() on each model. The event is considered created after each model
+            // has run.
+
+            vwf.models.forEach( function( model ) {
+                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
+            } );
+
+            // Call createdEvent() on each view. The view is being notified that a event has been
+            // created.
+
+            vwf.views.forEach( function( view ) {
+                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+            } );
+
+            this.logger.groupEnd();
+        };
+
+        // -- fireEvent ----------------------------------------------------------------------------
+
+        this.fireEvent = function( nodeID, eventName, eventParameters ) {
+
+            this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " + eventParameters );
+
+            // Call firingEvent() on each model.
+
+            var handled = this.models.reduce( function( handled, model ) {
+                return model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters ) || handled;
+            }, false );
+
+            // Call firedEvent() on each view.
+
+            this.views.forEach( function( view ) {
+                view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
+            } );
+
+            this.logger.groupEnd();
+
+            return handled;
+        };
+
+        // -- dispatchEvent ------------------------------------------------------------------------
+
+        // Dispatch an event toward a node. Using fireEvent(), capture (down) and bubble (up) along
+        // the path from the global root to the node. Cancel when one of the handlers returns a
+        // truthy value to indicate that it has handled the event.
+
+        this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
+
+            this.logger.group( "vwf.dispatchEvent " + nodeID + " " + eventName + " " + eventParameters + " " + eventNodeParameters );
+
+            // Defaults for the parameter parameters.
+
+            eventParameters = eventParameters || [];
+            eventNodeParameters = eventNodeParameters || {};
+
+            // Find the inheritance path from the node to the root.
+
+            var ancestorIDs = this.ancestors( nodeID );
+            var lastAncestorID = "";
+
+            // Make space to record the parameters sent to each node. Parameters provided for upper
+            // nodes cascade down until another definition is found for a lower node. We'll remember
+            // these on the way down and replay them on the way back up.
+
+            var cascadedEventNodeParameters = {
+                "": eventNodeParameters[""] || [] // defaults come from the "" key in eventNodeParameters
+            };
+
+            // Parameters passed to the handlers are the concatention of the eventParameters array,
+            // the eventNodeParameters for the node (cascaded), and the phase.
+
+            var targetEventParameters = undefined;
+
+            var phase = undefined;
+            var handled = false;
+
+            // Capturing phase.
+
+            phase = "capture"; // only handlers tagged "capture" will be invoked
+
+            handled = handled || ancestorIDs.reverse().some( function( ancestorID ) {  // TODO: reverse updates the array in place every time and we'd rather not
+
+                cascadedEventNodeParameters[ancestorID] = eventNodeParameters[ancestorID] ||
+                    cascadedEventNodeParameters[lastAncestorID];
+
+                lastAncestorID = ancestorID;
+
+                targetEventParameters =
+                    eventParameters.concat( cascadedEventNodeParameters[ancestorID], phase );
+                
+                targetEventParameters.phase = phase; // smuggle the phase across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible
+
+                return this.fireEvent( ancestorID, eventName, targetEventParameters );
+
+            }, this );
+
+            // At target.
+
+            phase = undefined; // invoke all handlers
+
+            cascadedEventNodeParameters[nodeID] = eventNodeParameters[nodeID] ||
+                cascadedEventNodeParameters[lastAncestorID];
+
+            targetEventParameters =
+                eventParameters.concat( cascadedEventNodeParameters[nodeID], phase );
+
+            handled = handled || this.fireEvent( nodeID, eventName, targetEventParameters );
+
+            // Bubbling phase.
+
+            phase = undefined; // invoke all handlers
+
+            handled = handled || ancestorIDs.reverse().some( function( ancestorID ) {  // TODO: reverse updates the array in place every time and we'd rather not
+
+                targetEventParameters =
+                    eventParameters.concat( cascadedEventNodeParameters[ancestorID], phase );
+
+                return this.fireEvent( ancestorID, eventName, targetEventParameters );
+
+            }, this );
+
+            this.logger.groupEnd();
         };
 
         // -- execute ------------------------------------------------------------------------------
@@ -952,9 +1575,9 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
 
-            // Assume javascript if the type is not specified.
+            // Assume JavaScript if the type is not specified and the text is a string.
 
-            if ( ! scriptType && scriptText ) {
+            if ( ! scriptType && ( typeof scriptText == "string" || scriptText instanceof String ) ) {
                 scriptType = "application/javascript";
             }
 
@@ -975,14 +1598,14 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.execute complete " + nodeID + " ... " + scriptType ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
 
             return scriptValue;
         };
 
         // -- time ---------------------------------------------------------------------------------
 
-        // Return the current simulation time;
+        // Return the current simulation time.
 
         this.time = function() {
 
@@ -1105,38 +1728,75 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( component, nodeID, prototypeID, callback_nodeID_prototypeID ) {
+        var construct = function( parentID, nodeID, prototypeID, behaviorIDs, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
 
-            this.logger.group( "vwf.construct " + nodeID + " " + component.source + " " + component.type );
+            this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
 
             async.series( [
 
-                function( callback_err_results ) {
+                function( callback /* ( err, results ) */ ) {
 
                     // Call creatingNode() on each model. The node is considered to be constructed after
                     // each model has run.
 
-                    vwf.models.forEach( function( model ) {
-                        model.creatingNode && model.creatingNode( nodeID, prototypeID, [], component.source, component.type );
+                    async.forEachSeries( vwf.models, function( model, callback /* ( err ) */ ) {
+
+                        var driver_ready = true;
+
+                        model.creatingNode && model.creatingNode( parentID, nodeID, prototypeID, behaviorIDs,
+                                nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+
+                            if ( Boolean( ready ) != Boolean( driver_ready ) ) {
+                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
+                                driver_ready = ready;
+                                driver_ready && callback( undefined );
+                            }
+
+                        } );
+
+                        driver_ready && callback( undefined );
+
+                    }, function( err ) {
+                        callback( err, undefined );
                     } );
+
+                },
+
+                function( callback /* ( err, results ) */ ) {
 
                     // Call createdNode() on each view. The view is being notified of a node that has
                     // been constructed.
 
-                    vwf.views.forEach( function( view ) {
-                        view.createdNode && view.createdNode( nodeID, prototypeID, [], component.source, component.type );
+                    async.forEach( vwf.views, function( view, callback /* ( err ) */ ) {
+
+                        var driver_ready = true;
+
+                        view.createdNode && view.createdNode( parentID, nodeID, prototypeID, behaviorIDs,
+                                nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+
+                            if ( Boolean( ready ) != Boolean( driver_ready ) ) {
+                                vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
+                                driver_ready = ready;
+                                driver_ready && callback( undefined );
+                            }
+
+                        } );
+
+                        driver_ready && callback( undefined );
+
+                    }, function( err ) {
+                        callback( err, undefined );
                     } );
 
-                    callback_err_results( undefined, undefined );
                 },
 
-                function( callback_err_results ) {
+                function( callback /* ( err, results ) */ ) {
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
                     // delegates to the models and views as above.
 
-                    component.properties && jQuery.each( component.properties, function( propertyName, propertyValue ) {
+                    nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {
                         if ( valueHasAccessors( propertyValue ) ) {
                             vwf.createProperty( nodeID, propertyName, propertyValue.value, propertyValue.get, propertyValue.set );
                         } else {
@@ -1144,44 +1804,42 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                         }
                     } );
 
-                    component.methods && jQuery.each( component.methods, function( methodName ) {
-                        vwf.createMethod( nodeID, methodName );
+                    nodeComponent.methods && jQuery.each( nodeComponent.methods, function( methodName, methodValue ) {
+                        if ( valueHasBody( methodValue ) ) {
+                            vwf.createMethod( nodeID, methodName, methodValue.parameters, methodValue.body );
+                        } else {
+                            vwf.createMethod( nodeID, methodName, undefined, methodValue );
+                        }
                     } );
 
-                    component.events && jQuery.each( component.events, function( eventName ) {
-                        vwf.createEvent( nodeID, eventName );
+                    nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName, eventValue ) {
+                        if ( valueHasBody( eventValue ) ) {
+                            vwf.createEvent( nodeID, eventName, eventValue.parameters );
+                        } else {
+                            vwf.createEvent( nodeID, eventName, undefined );
+                        }
                     } );
 
-                    callback_err_results( undefined, undefined );
+                    callback( undefined, undefined );
                 },
 
-                function( callback_err_results ) {
+                function( callback /* ( err, results ) */ ) {
 
                     // Create and attach the children. For each child, call createNode() with the
                     // child's component specification, then once loaded, call addChild() to attach the
                     // new node as a child. addChild() delegates to the models and views as before.
 
-                    async.parallel(
-
-                        Object.keys( component.children || {} ).map( function( childName ) {
-                            return function( callback_err_results2 ) {
-                                vwf.createNode( component.children[childName] || {}, function( childID, childTypeID ) {
-                                    vwf.addChild( nodeID, childID, childName ); // TODO: add in original order from component.children
-                                    callback_err_results2( undefined, undefined );
-                                },
-childName /* TODO: hack */ );
-                            };
-                        } ),
-
-                        function( err, results ) {
-                            callback_err_results( err, results );
-                        }
-
-                    );
+                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, callback /* ( err ) */ ) {
+                        vwf.createNode( nodeID, nodeComponent.children[childName], childName, function( childID ) {  // TODO: add in original order from nodeComponent.children
+                            callback( undefined );
+                        } );
+                    }, function( err ) {
+                        callback( err, undefined );
+                    } );
 
                 },
 
-                function( callback_err_results ) {
+                function( callback /* ( err, results ) */ ) {
 
                     // Attach the scripts. For each script, load the network resource if the script is
                     // specified as a URI, then once loaded, call execute() to direct any model that
@@ -1189,14 +1847,18 @@ childName /* TODO: hack */ );
                     // perform any immediate actions and retain any callbacks as appropriate for the
                     // script type.
 
-                    component.scripts && component.scripts.forEach( function( script ) {
-                        script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                    nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
+                        if ( valueHasType( script ) ) {
+                            script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                        } else {
+                            script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
+                        }
                     } );
 
-                    callback_err_results( undefined, undefined );
+                    callback( undefined, undefined );
                 },
 
-                function( callback_err_results ) {
+                function( callback /* ( err, results ) */ ) {
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
@@ -1209,7 +1871,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
                     vwf.execute( nodeID, "this.initialize && this.initialize()",
                         "application/javascript" ); 
 
-                    callback_err_results( undefined, undefined );
+                    callback( undefined, undefined );
                 },
 
             ], function( err, results ) {
@@ -1218,11 +1880,10 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
                 // ID of its prototype. If this was the root node for the world, the world is now
                 // fully initialized.
 
-                callback_nodeID_prototypeID &&
-                    callback_nodeID_prototypeID.call( vwf, nodeID, prototypeID ); // TODO: not until children and scripts have loaded
+                callback && callback.call( vwf, nodeID );
             } );
 
-            this.logger.groupEnd(); this.logger.debug( "vwf.construct complete " + nodeID + " " + component.source + " " + component.type ); /* must log something for group level to reset in WebKit */
+            this.logger.groupEnd();
         }
 
         // -- objectIsComponent --------------------------------------------------------------------
@@ -1284,6 +1945,58 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             return hasAccessors; 
         };
 
+        // -- valueHasBody -------------------------------------------------------------------------
+
+        // Determine if a method or event initializer is a detailed initializer containing a
+        // parameter list along with the body text (method initializers only) by searching for the
+        // parameter and body attributes in the candidate object.
+
+        var valueHasBody = function( candidate ) {  // TODO: refactor and share with valueHasAccessors and possibly objectIsComponent  // TODO: unlike a property initializer, we really only care if it's an object vs. text; text == use as body; object == presume o.parameters and o.body  // TODO: except that a script in the unnamed-list format would appear as an object but should be used as the body
+
+            var bodyAttributes = [
+                "parameters",
+                "body",
+            ];
+
+            var hasBody = false;  // TODO: "body" term is confusing, but that's the current terminology used in vwf/model/javascript
+
+            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+
+                bodyAttributes.forEach( function( attributeName ) {
+                    hasBody = hasBody || Boolean( candidate[attributeName] );
+                } );
+
+            }
+            
+            return hasBody; 
+        };
+
+        // -- valueHasType -------------------------------------------------------------------------
+
+        // Determine if a script initializer is a detailed initializer containing explicit text and
+        // type parameters (rather than being a simple text specification) by searching for the
+        // attributes in the candidate object.
+
+        var valueHasType = function( candidate ) {  // TODO: refactor and share with valueHasBody, valueHasAccessors and possibly objectIsComponent
+
+            var typeAttributes = [
+                "text",
+                "type",
+            ];
+
+            var hasType = false;
+
+            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+
+                typeAttributes.forEach( function( attributeName ) {
+                    hasType = hasType || Boolean( candidate[attributeName] );
+                } );
+
+            }
+            
+            return hasType; 
+        };
+
         // -- normalizedComponent ------------------------------------------------------------------
 
         var normalizedComponent = function( /* component */ ) {
@@ -1293,7 +2006,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             // Decode if JSON.
 
             if ( typeof component == "string" || component instanceof String ) {
-                try { component = JSON.parse( component ) } catch( e ) { }
+                try { component = JSON.parse( component ) } catch ( e ) { }
             }
 
             // Convert a component URI to an instance of that type. Convert an asset reference to

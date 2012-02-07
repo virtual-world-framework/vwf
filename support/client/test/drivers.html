@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view-glge.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view-glge/glge-compiled.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        // This is the common model implementation and an example model that connects the
+        // simulation to a WebGL scene manager.
+
+        "vwf/kernel/model",
+        "vwf/model/glge",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+
+      ], function( ready ) {
+
+        // Test the kernel-driver interface.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ { "vwf/model/glge": undefined, "vwf/model/object": undefined },
+            /*  views */ { "glge": undefined }
+          );
+
+          test( "Models", function() {
+
+            equal( vwf.models.actual[0].module.id, "vwf/model/glge", "GLGE Model by number" );
+            equal( vwf.models.actual["vwf/model/glge"].module.id, "vwf/model/glge", "GLGE Model by name" );
+            equal( vwf.models.actual[0].module.id, vwf.models.actual["vwf/model/glge"].module.id, "GLGE Model by number and name" );
+
+            equal( vwf.models.actual[1].module.id, "vwf/model/object", "Object Model by number" );
+            equal( vwf.models.actual["vwf/model/object"].module.id, "vwf/model/object", "Object Model by name" );
+            equal( vwf.models.actual[1].module.id, vwf.models.actual["vwf/model/object"].module.id, "Object Model by number and name" );
+
+          } );
+
+          test( "Views", function() {
+            // equal( vwf.views.actual[0].module.id, "vwf/view/glge", "GLGE View" );  // TODO: waiting on views to convert to RequireJS loader
+          } );
+
+          test( "Shared state", function() {
+
+            var model_glge = vwf.models.actual["vwf/model/glge"];
+            var view_glge = vwf.views[0]; // vwf.views.actual["vwf/view/glge"];  // TODO: waiting on views to convert to RequireJS loader
+
+            // The GLGE model and view share state.
+
+            strictEqual( model_glge.state, view_glge.state, "GLGE shared state" );
+
+            // But they don't share it with any other model stage.
+
+            vwf.models.forEach( function( model ) {
+                while ( model ) {
+                    model === model_glge || notStrictEqual( model.state, model_glge.state, "GLGE state" );
+                    model = model.model;
+                }
+            } );
+
+            // Or with any other view stage.
+
+            // vwf.views.every( function( view ) {  // TODO: waiting on views to convert to RequireJS loader
+            //     while ( view ) {
+            //         notStrictEqual( view.state, view_glge.state, "GLGE state" );
+            //         view = view.view;
+            //     }
+            // } );
+
+          } );
+         
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>

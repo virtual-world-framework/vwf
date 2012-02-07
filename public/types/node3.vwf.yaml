@@ -1,27 +1,26 @@
---- 
-methods: 
-  pointerClick: 
+---
 extends: http://vwf.example.com/types/node
 properties: 
   enabled: true
-  position: [ 0, 0, 0 ]
-  rotation: [ 0, 0, 0 ]
+  position: 
+  rotation:
+  rotationMatrix:
   boundingbox: 
     set: |
       console.info( "WARNING: node3 boundingbox cannot be set" )
   centerOffset: 
     set: |
       console.info( "WARNING: node3 centerOffset cannot be set" )
-  transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ]
+  transform:
   vertices: 
     set: |
       console.info( "WARNING: node3 vertices cannot be set" )
-    value: []
+    value: 
   vertexIndices: 
     set: |
       console.info( "WARNING: node3 vertexIndices cannot be set" )
-    value: []
-  transform: [ 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 ]
+    value: 
+  transform:
   speed: 1
   playing: false
   looping: false
@@ -31,21 +30,18 @@ properties:
   restitution: 0.1
   friction: 0.5
   rotVelocityDamping: [ 0.5, 0.5, 0.5 ]
-  linVelocityDamping: [ 1, 1, 1, 0 ]  
-scripts:
-- text: |
-    var self = this;
-    this.initialize = function() {
-      //console.info( "==================== node3 ====================" );
-      //console.info( "== looping == "+this.looping+" ====================" );
-      //console.info( "== speed == "+this.speed+" ====================" );
-      //console.info( "== playing == "+this.playing+" ====================" );
-      this.looping = this.looping;
-      this.speed = this.speed;
-      this.playing = this.playing;
-    }
-    this.loadComplete = function() {
-      //console.info( "== loadComplete == node3 == loadComplete ==" );
-      this.eulers = this.eulers;
-    }    
-  type: application/javascript
+  linVelocityDamping: [ 1, 1, 1, 0 ]
+  velocity: [ 0, 0, 0 ]  
+  lookAt: ""
+events:
+  keyDown:
+  keyPress:
+  keyUp:
+  pointerClick:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  pointerEnter:
+  pointerOver:
+  pointerLeave:
+  pointerWheel:

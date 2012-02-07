@@ -8,7 +8,7 @@
 
     <script type="text/javascript" src="qunit.js"></script>
 
-    <script type="text/javascript" src="../lib/jquery-1.5.1.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
@@ -24,15 +24,20 @@
 
       }, [
 
+        "domReady",
+
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
 
+        "vwf/kernel/model",
         "vwf/model/javascript",
         "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
 
-      ], function() {
+      ], function( ready ) {
 
-        require.ready( function() {
+        ready( function() {
 
           vwf.initialize(
             /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
@@ -102,20 +107,20 @@
           // Create a VWF object with two levels of inheritance using the given initializers. Add a
           // "test" property to each.
 
-          function create_node_prototype( node, prototype, callback_nodeID_prototypeID ) {
+          function create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ ) {
 
             prototype.properties = prototype.properties || {};
             prototype.properties.test = prototype.properties.test || null;
 
-            vwf.createNode( prototype, function( prototypeID ) {
+            vwf.createNode( 0, prototype, unique_name( "prototype" ), function( prototypeID ) {
 
                 node.extends = "@\"" + prototypeID + "\"";
 
                 node.properties = node.properties || {};
                 node.properties.test = node.properties.test || null;
 
-                vwf.createNode( node, function( nodeID ) {
-                    callback_nodeID_prototypeID( nodeID, prototypeID );
+                vwf.createNode( 0, node, unique_name( "node" ), function( nodeID ) {
+                    callback( nodeID, prototypeID );
                 } );
 
             } );
@@ -125,7 +130,7 @@
           // Create a node with a prototype. Add initialize() methods as specified to set the "test"
           // property.
 
-          function create_node_prototype_with_initializers( node_init, prototype_init, callback_nodeID_prototypeID ) {
+          function create_node_prototype_with_initializers( node_init, prototype_init, callback /* ( nodeID, prototypeID ) */ ) {
 
             var node = {};
 
@@ -145,8 +150,16 @@
                 } ];
             }
 
-            create_node_prototype( node, prototype, callback_nodeID_prototypeID );
+            create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ );
 
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
           }
 
         } );

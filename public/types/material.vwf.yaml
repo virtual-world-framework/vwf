@@ -4,32 +4,40 @@ properties:
   texture:
     set: |
       this.texture = value;
-    value: ""
+    value:   
   color: 
     set: |
       this.color = value;
-    value: [ 255, 255, 255, 255 ]
+    value: 
   specColor:
     set: |
       this.specColor = value;
-    value: [ 255, 255, 255, 255 ]
+    value: 
   reflect:
     set: |
       this.reflect = value;
-    value: 0.8
-  shine:
+    value: 
+  shininess:
     set: |
-      this.shine = value;
-    value: 10
+      this.shininess = value;
+    value: 
   specular:
     set: |
       this.specular = value;
-    value: 1
+    value: 
   emit:
     set: |
       this.emit = value;
-    value: 0
+    value: 
   alpha:
     set: |
       this.alpha = value;
-    value: 1 
+    value:  
+  ambient: 
+    set: |
+      this.ambient = value;
+    value:  
+  binaryAlpha:
+    set: |
+      this.binaryAlpha = value;
+    value:
