@@ -1,5 +1,7 @@
 --- 
 extends: http://vwf.example.com/googleEarth.vwf
+properties:
+  controlClient: "NONE"
 children:
   earth:
     extends: http://vwf.example.com/node3.vwf
@@ -8,4 +10,20 @@ children:
     properties:
       longitude:
       latitude:
+      altitude: 
+      altitudeMode: 
+      heading: 
+      tilt: 
+      range: 
+      cameraData:
+  camera:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      longitude:
+      latitude:
+      altitude: 
+      altitudeMode: 
+      heading: 
+      tilt: 
+      range: 
       cameraData: 

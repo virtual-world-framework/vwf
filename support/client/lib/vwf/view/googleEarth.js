@@ -34,15 +34,13 @@
             this.height = 600;
             this.width = 800;
 
-            if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
-            if ( window && window.innerWidth ) this.width = window.innerWidth - 20; 
-            
+            if ( window ) {
+                if ( window.innerHeight ) this.height = window.innerHeight - 20;
+                if ( window.innerWidth ) this.width = window.innerWidth - 20;
+                this.window = window;
+            } 
+            this.controlClient = "NONE";
             this.logger.enable = true;
-            this.win = window;
-            this.pointerDown = false;
-            this.viewChanged = false;
-            this.receivedChange = true;
-            this.elapsedTime = 0;
 
         },
   
@@ -71,7 +69,9 @@
                     var outerDiv = jQuery('body').append(
                         "<div id='map3d' style='border: 1px solid silver; width: " + this.width + "px; height: " + this.height + "px;'></div>"
                     );
-                    break;
+
+                   window.onresize = function( event ) { console.info( "WINDOW: onresize" ); }
+                   break;
 
                 case "http-vwf-example-com-node3-vwf":
                     
@@ -81,7 +81,7 @@
                        
                         var interval;
                         var view = this;
-                        win = this.win;
+                        win = this.window;
                         var gg = google;
                         interval = win.setInterval( function() {
                             if ( gg.earth ) {
@@ -101,32 +101,50 @@
 
 
                                     var la = node.earthInst.getView().copyAsLookAt(node.earthInst.ALTITUDE_RELATIVE_TO_GROUND);
-                                    la.setRange(100000);
+                                    la.setRange( 100000 );
                                     node.earthInst.getView().setAbstractView(la);
     
 //                                    document.getElementById('installed-plugin-version').innerHTML =
 //                                    node.earthInst.getPluginVersion().toString();
 
 
-                                    view.viewChanged = false;
-                                    view.pointerDown = false;
+                                    //view.viewChanged = false;
+                                    //view.pointerDown = false;
+                                    view.control = false;
 
                                     gg.earth.addEventListener( node.earthInst.getWindow(), 'mousedown', function() {
-                                        view.pointerDown = true; 
-                                        view.receivedChange = false;   
+                                        //view.pointerDown = true; 
+                                        //console.info( "GOOGLE EARTH: mousedown" );
+                                        //console.info( "setting http-vwf-example-com-googleEarth-vwf.controlClient = " + view.kernel.moniker() ); 
+                                        //if ( view.controlClient == "NONE" ) {
+                                            view.kernel.setProperty( "http-vwf-example-com-googleEarth-vwf", "controlClient", view.kernel.moniker() );
+                                        //}
                                     });
-                                    gg.earth.addEventListener( node.earthInst.getWindow(), 'mouseup', function() {
-                                        view.pointerDown = false;    
-                                    });
+//                                    gg.earth.addEventListener( node.earthInst.getWindow(), 'mousemove', function() {
+//                                        //view.pointerDown = false;    
+//                                    });
+
+//                                    gg.earth.addEventListener( node.earthInst.getWindow(), 'mouseup', function() {
+//                                        //view.pointerDown = false;    
+//                                    });
 
                                     // view changed event listener
                                     gg.earth.addEventListener( node.earthInst.getView(), 'viewchange', function() {
-                                        view.viewChanged = true;    
+                                        //console.info( "view.controlClient = " + view.controlClient + "      view.kernel.client() = " + view.kernel.client() );
+                                        if ( view.controlClient == view.kernel.moniker() ) {
+                                            broadcastCameraData.call( view );
+                                        }  
                                     });
 
                                     // view changed END event listener
                                     gg.earth.addEventListener( node.earthInst.getView(), 'viewchangeend', function() {
-                                        view.viewChanged = false;
+                                        //console.info( "viewchangeend ==> view.controlClient = " + view.controlClient + "      view.kernel.client() = " + view.kernel.client() );
+                                        if ( view.controlClient == view.kernel.moniker() ) {
+                                            broadcastCameraData.call( view );
+                                            //console.info( "setting http-vwf-example-com-googleEarth-vwf.controlClient = ''" );
+                                            //view.kernel.setProperty( "http-vwf-example-com-googleEarth-vwf", "controlClient", "NONE" );
+                                        }  
+
                                     });
 
                                 }, function(errorCode) {
@@ -152,40 +170,87 @@
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
             var value = undefined;
-            var lookAt, earth, ge;
+            var obj, earth, ge;
             var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
-            if ( propertyValue && this.kernel.client() != this.kernel.moniker() ) {
-                this.receivedChange = true;
+            if ( propertyValue ) {
+                //console.info( "this.kernel.moniker() = " + this.kernel.moniker() + "      view.kernel.client() = " + this.kernel.client() );                
                 //this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
-                switch ( nodeID ) {
-                    case "http-vwf-example-com-node3-vwf-lookAt":
-                        if ( earth && earth.earthInst ) {
-                            ge = earth.earthInst;
-                            lookAt = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
-                            switch ( propertyName ) {
-                                case "longitude":
-                                    lookAt.setLongitude( propertyValue );
-                                    ge.getView().setAbstractView(lookAt);
-                                    value = propertyValue; 
-                                    break;
-                                case "latitude":
-                                    lookAt.setLatitude( propertyValue );
-                                    ge.getView().setAbstractView(lookAt);
-                                    value = propertyValue;  
-                                    break;
-                                case "cameraData":
-                                    lookAt.setLongitude( propertyValue[0] );
-                                    lookAt.setLatitude( propertyValue[1] );
-                                    lookAt.setAltitude( propertyValue[2] );
-                                    lookAt.setAltitudeMode( propertyValue[3] );
-                                    lookAt.setHeading( propertyValue[4] );
-                                    lookAt.setTilt( propertyValue[5] );
-                                    lookAt.setRange( propertyValue[6] );
-                                    ge.getView().setAbstractView(lookAt);
-                                    value = propertyValue;  
+                if ( this.kernel.client() != this.kernel.moniker() ) { 
+
+                    switch ( nodeID ) {
+                        case "http-vwf-example-com-node3-vwf-camera":
+                        case "http-vwf-example-com-node3-vwf-lookAt":
+                            if ( earth && earth.earthInst ) {
+                                ge = earth.earthInst;
+                                if ( nodeID == "http-vwf-example-com-node3-vwf-lookAt" ) {
+                                    obj = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                                } else {
+                                    obj = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                                }
+                                switch ( propertyName ) {
+                                    case "longitude":
+                                        obj.setLongitude( propertyValue );
+                                        ge.getView().setAbstractView(obj);
+                                        value = propertyValue; 
+                                        break;
+                                    case "latitude":
+                                        obj.setLatitude( propertyValue );
+                                        ge.getView().setAbstractView(obj);
+                                        value = propertyValue;  
+                                        break;
+                                    case "altitude":
+                                        obj.setAltitude( propertyValue );
+                                        ge.getView().setAbstractView(obj);
+                                        value = propertyValue;
+                                        break; 
+                                    case "altitudeMode":
+                                        obj.setAltitudeMode( propertyValue );
+                                        ge.getView().setAbstractView(obj);
+                                        value = propertyValue;
+                                        break;
+                                    case "heading":
+                                        obj.setHeading( propertyValue );
+                                        ge.getView().setAbstractView(obj);
+                                        value = propertyValue;
+                                        break;
+                                    case "tilt":
+                                        obj.setTilt( propertyValue );
+                                        ge.getView().setAbstractView(obj);
+                                        value = propertyValue;
+                                        break; 
+                                    case "range":
+                                        obj.setRange( propertyValue );
+                                        ge.getView().setAbstractView(obj);
+                                        value = propertyValue;
+                                        break;                                                                                                                                                                                      
+                                    case "cameraData":
+                                        obj.setLongitude( propertyValue[0] );
+                                        obj.setLatitude( propertyValue[1] );
+                                        obj.setAltitude( propertyValue[2] );
+                                        obj.setAltitudeMode( propertyValue[3] );
+                                        obj.setHeading( propertyValue[4] );
+                                        obj.setTilt( propertyValue[5] );
+                                        obj.setRange( propertyValue[6] );
+                                        ge.getView().setAbstractView( obj );
+                                        value = propertyValue;
+                                        break; 
+                                }
                             }
-                    } 
+                            break;
+                        
+                    }
+                } else {
+                    switch ( propertyName ) {
+                        case "controlClient":
+                            //if ( this.controlClient == "" ) {
+                                //console.info( "  SETTING CONTROL CLIENT: " + propertyValue );
+                                this.controlClient = propertyValue;
+                                value = propertyValue;
+                            //}                            
+                            break;
+                    }    
                 }
+
             }
             return value;
 
@@ -194,60 +259,77 @@
         gotProperty: function (nodeID, propertyName, propertyValue) {
 
             var value = undefined;
-            var la, earth, ge;
+            var obj, earth, ge;
             var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             switch ( nodeID ) {
+                case "http-vwf-example-com-node3-vwf-camera":
                 case "http-vwf-example-com-node3-vwf-lookAt":
                     if ( earth && earth.earthInst ) {
                         ge = earth.earthInst;
-                        la = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                        if ( nodeID == "http-vwf-example-com-node3-vwf-lookAt" ) {
+                            obj = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                        } else {
+                            obj = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                        }                        
                         switch ( propertyName ) {
                             case "longitude":
-                                value = la.getLongitude();
+                                value = obj.getLongitude();
                                 break;
                             case "latitude":
-                                value = la.getLatitude();
+                                value = obj.getLatitude();
+                                break;
+                            case "altitude":
+                                value = obj.getAltitude();
+                                break;
+                            case "altitudeMode":
+                                value = obj.getAltitudeMode();
+                                break;
+                            case "heading":
+                                value = obj.getHeading();
+                                break;
+                            case "tilt":
+                                value = obj.getTilt();
+                                break;
+                            case "range":
+                                if ( obj.getRange )
+                                    value = obj.getRange();
                                 break;
                             case "cameraData":
-                                value = [ la.getLongitude(), la.getLatitude(), la.getAltitude(),
-                                               la.getAltitudeMode(), la.getHeading(), la.getTilt(), la.getRange()  ];
+                                value = [ obj.getLongitude(), obj.getLatitude(), obj.getAltitude(),
+                                          obj.getAltitudeMode(), obj.getHeading(), obj.getTilt(),
+                                          obj.getRange ? obj.getRange() : undefined ];
                                 break;
                         }
-                } 
+                    }
+                    break;
+                default:
+                    switch ( propertyName ) { 
+                        case "controlClient":
+                            value = this.controlClient;
+                            break;
+                    }
+                    break; 
+
             }
             propertyValue = value;
             return value;
-
         },
+    } );
 
-        ticked: function( time ) {
-            var node, ge;
-            if ( this.pointerDown || ( this.viewChanged && !this.receivedChange ) ) {
-                if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ] ) {
-                    node = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
-                    ge = node.earthInst;
-                    if ( ge ) {
-                        this.elapsedTime += time * 0.001;
-                        if ( this.elapsedTime >= 0.0333 ) {
-                            var la = ge.getView().copyAsLookAt( ge.ALTITUDE_RELATIVE_TO_GROUND );
-                            var cameraData = [ la.getLongitude(), la.getLatitude(), la.getAltitude(),
-                                               la.getAltitudeMode(), la.getHeading(), la.getTilt(), la.getRange()  ];                          
+    function broadcastCameraData() {
+        var node, ge;   
+        //console.info( "broadcastCameraData  ======================>>>>> " );
+        if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ] ) {
+            node = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
+            ge = node.earthInst;
+            if ( ge ) {
+                var la = ge.getView().copyAsLookAt( ge.ALTITUDE_RELATIVE_TO_GROUND );
+                var cameraData = [ la.getLongitude(), la.getLatitude(), la.getAltitude(),
+                                    la.getAltitudeMode(), la.getHeading(), la.getTilt(), la.getRange()  ];                          
 
-                            this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "cameraData", cameraData );
-                            this.elapsedTime = 0;
-                        }
-
-//                        this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "longitude", lookAt.getLongitude() );
-//                        this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "latitude", lookAt.getLatitude() );
-                    }
-                }  
+                this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "cameraData", cameraData );
             }
-        },
-        
-        
-
-     } );
-
-
+        }
+    }
 
 } );
