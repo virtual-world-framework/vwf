@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "vwf/view/document",
+
+      ], function( ready ) {
+
+        // Test the JavaScript node proxy.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
+            /*  views */ { "vwf/view/document": undefined }
+          );
+
+          // Member name priority on the node
+
+          asyncTest( "Member name priority", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.execute( fixtureID, "this.a" );
+              equal( vwf.execute( fixtureID, "this.test" ), "a-property", "properties override methods" );
+
+              vwf.execute( fixtureID, "this.b()" );
+              equal( vwf.execute( fixtureID, "this.test" ), "b-method", "methods override events" );
+
+              vwf.execute( fixtureID, "this.c()" );
+              equal( vwf.execute( fixtureID, "this.test" ), "c-event", "events override children" );
+
+              vwf.execute( fixtureID, "this.d.p" );
+              equal( vwf.execute( fixtureID, "this.test" ), "d-child", "children override nothing" );
+
+              start();
+            } );
+
+          } );
+
+          // Member name priority on the future node
+
+          asyncTest( "Future member name priority", function() {
+
+            createFixture( function( fixtureID ) {
+
+              vwf.execute( fixtureID, "this.future( 0.001 ).a" );
+              vwf.execute( fixtureID, "this.future( 0.002 ).b()" );
+              vwf.execute( fixtureID, "this.future( 0.003 ).c()" );
+              vwf.execute( fixtureID, "this.d.future( 0.004 ).p" );
+
+              runFutureAssertions( [
+
+                { relative: 0.001, assertion: function() {
+                    equal( vwf.execute( fixtureID, "this.test" ), "a-property", "properties override methods" ) } },
+
+                { relative: 0.002, assertion: function() {
+                    equal( vwf.execute( fixtureID, "this.test" ), "b-method", "methods override events" ) } },
+
+                { relative: 0.003, assertion: function() {
+                    equal( vwf.execute( fixtureID, "this.test" ), "c-event", "events override children" ) } },
+
+                { relative: 0.004, assertion: function() {
+                    equal( vwf.execute( fixtureID, "this.test" ), "d-child", "children override nothing" ) } },
+
+              ] );
+
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create a node with conflicting property, method, event and child names.
+
+          function createFixture( callback ) {
+
+            vwf.createNode( 0, {
+
+              extends:
+                "http://vwf.example.com/types/node",
+              
+              properties: {
+                a: {
+                  get: "return this.test = 'a-property'",
+                }
+              },
+
+              methods: {
+                a: "return this.test = 'a-method'",
+                b: "return this.test = 'b-method'",
+              },
+
+              events: {
+                a: undefined,
+                b: undefined,
+                c: undefined,
+              },
+
+              children: {
+                a: { properties: { p: { get: "return this.parent.test = 'a-child'" } } },
+                b: { properties: { p: { get: "return this.parent.test = 'b-child'" } } },
+                c: { properties: { p: { get: "return this.parent.test = 'c-child'" } } },
+                d: { properties: { p: { get: "return this.parent.test = 'd-child'" } } },
+              },
+
+              scripts: [
+                "this.events.a = this.events.add( function() { this.test = 'a-event' }, this )",
+                "this.events.b = this.events.add( function() { this.test = 'b-event' }, this )",
+                "this.events.c = this.events.add( function() { this.test = 'c-event' }, this )",
+                "this.test = undefined",
+              ],
+
+            }, unique_name( "fixture" ), function( fixtureID ) {
+
+              callback( fixtureID );
+
+            } );
+
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+          // Run assertions against actions on the future queue.
+
+          function runFutureAssertions( ticked, assertions ) {
+
+            // Interpret runFutureAssertions( assertions ) as
+            // runFutureAssertions( undefined, assertions )
+
+            if ( typeof ticked != "function" && ! ( ticked instanceof Function ) ) {
+              assertions = ticked;
+              ticked = undefined;
+            }
+
+            // Listen for the kernel tick.
+
+            window.vwf_view.ticked = function( time ) {
+
+              // Call our caller's tick just before the assertions.
+
+              ticked && ticked( time );
+
+              // Run any assertions that are ready.
+
+              while ( next < assertions.length && ready( assertions[next], time ) ) {
+                assertions[next++].assertion();
+              }
+
+              // When finished, unlisten for the kernel tick and tell qunit that we're done.
+
+              if ( next == assertions.length ) {
+                window.vwf_view.ticked = undefined;
+                start();
+              }
+
+            }
+
+            var reference = vwf.time();
+            var next = 0;
+
+            // Time to run the next one?
+
+            function ready( assertion, time ) {
+
+              return assertion.absolute && time >= assertion.absolute ||
+                assertion.relative && time >= reference + assertions[next].relative;
+              
+            }
+            
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>

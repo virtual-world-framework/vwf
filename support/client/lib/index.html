@@ -13,8 +13,10 @@
 
     <!-- The Virtual World Framework makes use of the jQuery library.                            -->
 
-    <script type="text/javascript" src="jquery-1.5.1.js"></script>
-    <script type="text/javascript" src="jquery-ui-1.8.14.custom.js"></script>
+    <script type="text/javascript" src="require.js"></script>
+
+    <script type="text/javascript" src="jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
     <script type="text/javascript" src="async.js"></script>
 
     <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
@@ -34,28 +36,32 @@
     <!-- directives from a connection to an outside engine that is not visible to all users- but -->
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
-    <script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script>
-
-    <script type="text/javascript" src="require.js"></script>
+    <!-- script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script -->
 
     <script type="text/javascript">
 
         require( [
 
+            "domReady",
+
             // This is the common model implementation and an example model that connects the
             // simulation to a WebGL scene manager.
 
+            "vwf/kernel/model",
             "vwf/model/javascript",
             "vwf/model/jiglib",
             "vwf/model/glge",
             "vwf/model/scenejs",
-            "vwf/model/unity",
+            // "vwf/model/unity",
             "vwf/model/object",
             "vwf/model/stage/log",
+            "vwf/kernel/view",
+            "vwf/view/document",
+            "vwf/view/editor",
 
-        ], function() {
+        ], function( ready ) {
 
-            require.ready( function() {
+            ready( function() {
 
                 // With the scripts loaded, we must initialize the framework. vwf.initialize()
                 // accepts three parameters: a world specification, model configuration parameters,
@@ -88,7 +94,7 @@
                         "vwf/model/javascript": [],
                         "vwf/model/jiglib": [],
                         "vwf/model/glge": [],
-                        "vwf/model/unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
+                        // "vwf/model/unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
                         "vwf/model/object": [],
                     },
 
@@ -97,6 +103,8 @@
 
                     {
                         glge: "#vwf-root",
+                        "vwf/view/document": [],
+                        "vwf/view/editor": [],
                     }
 
                 );
@@ -119,7 +127,8 @@
     <script type="text/javascript" src="vwf-view-html.js"></script>
 
     <link rel="stylesheet" type="text/css" href="index.css" />
-    <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.14.custom.css" />
+    <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.16.custom.css" />
 
   </head>
 

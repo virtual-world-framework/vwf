@@ -17,7 +17,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- creatingNode -------------------------------------------------------------------------
 
-        creatingNode: function( nodeID, nodeExtendsID, nodeImplementsIDs, nodeSource, nodeType ) {
+        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childName, callback /* ( ready ) */ ) {
+        },
+
+        // -- deletingNode -------------------------------------------------------------------------
+
+        deletingNode: function( nodeID ) {
         },
 
         // -- settingProperty ----------------------------------------------------------------------

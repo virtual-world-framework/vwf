@@ -3,7 +3,6 @@ extends: http://vwf.example.com/types/node2
 properties:
   activeCamera: 
     set: |
-      console.info( "ATTEMPTING TO set the activeCamera to: " + value );
       if ( this.activeCameraComp ) {
         if ( this.getChild ) {
           var cam = this.getChild( value );
@@ -13,10 +12,12 @@ properties:
           }
         }        
       } else {
-        this.activeCamera = value;
-        if ( this.getChild ) {
-          var temp = this.getChild( value );
-          if ( temp ) this.activeCameraComp = temp;
+        if ( this.activeCamera != value ) {
+          this.activeCamera = value;
+          if ( this.getChild ) {
+            var temp = this.getChild( value );
+            if ( temp ) this.activeCameraComp = temp;
+          }
         }
       }
     value: "http-vwf-example-com-types-camera-maincamera"
@@ -30,9 +31,7 @@ scripts:
     var scene = this;
     this.initialize = function() {
       console.info( "==================== scene ====================" );
-      //console.info( "== activeCamera == "+this.activeCamera+" ====================" );
-      //console.info( "== ambientColor == "+this.ambientColor+" ====================" );
-      this.activeCamera = this.activeCamera;
+      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
       this.ambientColor = this.ambientColor;
     }
     this.getChild = function( childName ) {
@@ -58,8 +57,6 @@ scripts:
       return this.activeCameraComp;
     }
     this.load = function( obj, objName ){
-      vwf.createNode( obj, function( nodeID, prototypeID ){
-        vwf.addChild( "index-vwf", nodeID, objName );
-      }, objName );
+      vwf.createNode( "index-vwf", obj, objName );
     }
   type: application/javascript

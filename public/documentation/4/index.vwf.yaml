@@ -1,0 +1,68 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: index.xml
+type: model/x-glge
+children: 
+  hello: 
+    extends: http://vwf.example.com/types/node3
+    source: hello.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ -2.4, 1.6, 0 ]
+      rotation: [ 0, 0, 3.141 ]
+      scale: [ 1, 1, 1 ]
+    children:
+      HelloTextMaterial1:
+        extends: http://vwf.example.com/types/material
+        properties: 
+          texture: “images/red.png”
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          if( this.HelloTextMaterial1.texture == "images/red.png" )
+          {
+            this.HelloTextMaterial1.texture = "images/blue.png";
+          }
+          else
+          {
+            this.HelloTextMaterial1.texture = "images/red.png";
+          }
+        }
+      type: application/javascript
+  world: 
+    extends: http://vwf.example.com/types/node3
+    source: world.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ -2.6, 0.6, 0 ]
+      rotation: [ 0, 0, 3.141 ]
+      scale: [ 1, 1, 1 ]
+    children:
+      WorldTextMaterial1:
+        extends: http://vwf.example.com/types/material
+        properties: 
+          texture: “images/blue.png”
+    scripts:
+    - text: |
+        this.pointerClick = function() {
+          if( this.WorldTextMaterial1.texture == "images/red.png" )
+          {
+            this.WorldTextMaterial1.texture = "images/blue.png";
+          }
+          else
+          {
+            this.WorldTextMaterial1.texture = "images/red.png";
+          }
+        }
+      type: application/javascript
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "================ documentation example four ================" );
+      this.activeCamera = "http-vwf-example-com-types-camera-defaultCamera";
+      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "position", [ 0, 0, 10 ] );
+      this.hello.HelloTextMaterial1.texture = "images/red.png";
+      this.world.WorldTextMaterial1.texture = "images/blue.png";
+      this.loadDone = true;
+    }
+  type: application/javascript

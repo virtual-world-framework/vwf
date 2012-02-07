@@ -2102,6 +2102,7 @@ GLGE.Animatable.prototype.getName=function(){
 		}
 	}
 	this.animationStart=starttime;
+	this.pauseTime=starttime;
 	this.lastFrame=null;
 	this.animFinished=false;
 	this.startFrame=startFrame;
@@ -2251,7 +2252,7 @@ GLGE.Animatable.prototype.animate=function(now,nocache){
 			}
 		}
 	}
-	if(this.animation && !this.animFinished && this.blendTime==0 && this.animFrames==frame && !nocache){
+	if(!this.paused && this.animation && !this.animFinished && this.blendTime==0 && this.animFrames==frame && !nocache){
 		this.animFinished=true;
 		this.fireEvent("animFinished",{});
 	}
@@ -2272,6 +2273,7 @@ GLGE.Animatable.prototype.setAnimation=function(animationVector,blendDuration,st
 	this.animFrames=null;
 	this.startFrame=null;
 	this.animationStart=starttime;
+    this.pauseTime=starttime;
 	this.lastFrame=null;
 	this.animation=animationVector;
 	this.animFinished=false;
@@ -2324,8 +2326,8 @@ GLGE.Animatable.prototype.isLooping=GLGE.Animatable.prototype.getLoop;
 * @param  {boolean} value 
 */
 GLGE.Animatable.prototype.setPaused=function(value){
-	if(value) this.pauseTime=GLGE.now();
-		else this.animationStart=this.animationStart+(GLGE.now()-this.pauseTime);
+	if(value && !this.paused) this.pauseTime=GLGE.now();
+		else if(!value && this.paused) this.animationStart=this.animationStart+(GLGE.now()-this.pauseTime);
 	this.paused=value;
 	return this;
 }
@@ -4663,7 +4665,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 (function(GLGE){
 
 
-
+var meshIndx = 0;
 
 
 /**
@@ -4681,6 +4683,7 @@ GLGE.Mesh=function(uid,windingOrder){
 	this.boneWeights=[];
 	this.setBuffers=[];
 	this.faces={};
+    this.name = "mesh"+ (++meshIndx);
     if (windingOrder!==undefined)
         this.windingOrder=windingOrder;
     else
@@ -6860,7 +6863,7 @@ GLGE.Texture.prototype.setSrc=function(url){
 	this.image=new Image();
 	var texture=this;
 	this.image.onload = function(){
-		texture.state=1;
+ 		texture.state=1;
 	}	
 	this.image.src=url;	
 	if(this.glTexture && this.gl){
@@ -7690,7 +7693,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * @augments GLGE.JSONLoader
 */
 GLGE.ObjectLod=function(uid){
-	GLGE.Assets.registerAsset(this,uid);
+	GLGE.Assets.registerAsset( this, uid );
 }
 GLGE.augment(GLGE.QuickNotation,GLGE.ObjectLod);
 GLGE.augment(GLGE.JSONLoader,GLGE.ObjectLod);
@@ -7740,11 +7743,11 @@ GLGE.ObjectLod.prototype.setMaterial=function(material){
 	if(typeof material=="string")  material=GLGE.Assets.get(material);
 	
 	//remove event listener from current material
-	if(this.material){
+	if ( this.material ) {
 		this.material.removeEventListener("shaderupdate",this.materialupdated);
 	}
 	var ObjectLOD=this;
-	this.materialupdated=function(event){
+	this.materialupdated = function( event ) {
 		ObjectLOD.GLShaderProgram=null;
 	};
 	//set event listener for new material
@@ -9869,7 +9872,7 @@ GLGE.Light.prototype.setShadowSoftness=function(value){
 * Gets the shadow softness
 * @returns {number} The softness of the shadows
 */
-GLGE.Light.prototype.getShadowSamples=function(){
+GLGE.Light.prototype.getShadowSoftness=function(){
 	return this.softness;
 }
 /**
@@ -9937,11 +9940,11 @@ GLGE.Light.prototype.getSpotExponent=function(){
 * Sets the light sources Attenuation
 * @returns {Object} The components of the light sources attenuation
 */
-GLGE.Light.prototype.getAttenuation=function(constant,linear,quadratic){
+GLGE.Light.prototype.getAttenuation=function(){
 	var attenuation={};
-	attenuation.constant=this.constantAttenuation;
-	attenuation.linear=this.linearAttenuation;
-	attenuation.quadratic=this.quadraticAttenuation;
+	attenuation.constant = this.constantAttenuation;
+	attenuation.linear = this.linearAttenuation;
+	attenuation.quadratic = this.quadraticAttenuation;
 	return attenuation;
 }
 /**
@@ -10879,6 +10882,9 @@ GLGE.ParticleSystem.prototype.setMaxVelocity=function(x,y,z){
 	this.startMaxVelocity={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxVelocity=function(){
+	return this.startMaxVelocity;
+}
 /**
 * Sets the min velocity in the X direction
 * @param {number} value the minimum velocity
@@ -10913,7 +10919,9 @@ GLGE.ParticleSystem.prototype.setMinVelocity=function(x,y,z){
 	this.startMinVelocity={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
-
+GLGE.ParticleSystem.prototype.getMinVelocity=function(){
+    return this.startMinVelocity;
+}
 /**
 * Sets the velocity in the X direction
 * @param {number} value the minimum velocity
@@ -10987,6 +10995,9 @@ GLGE.ParticleSystem.prototype.setMaxStartAccelertaion=function(x,y,z){
 	this.startMaxAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxStartAccelertaion=function(){
+	return this.startMaxAcceleration;
+}
 /**
 * Sets the min starting acceleration in the X direction
 * @param {number} value the minimum acceleration
@@ -11020,6 +11031,10 @@ GLGE.ParticleSystem.prototype.setMinStartAccZ=function(value){
 GLGE.ParticleSystem.prototype.setMinStartAccelertaion=function(x,y,z){
 	this.startMinAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
+}
+
+GLGE.ParticleSystem.prototype.getMinStartAccelertaion=function(){
+    return this.startMinAcceleration;
 }
 
 /**
@@ -11095,6 +11110,9 @@ GLGE.ParticleSystem.prototype.setMaxEndAccelertaion=function(x,y,z){
 	this.endMaxAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxEndAccelertaion=function(){
+	return this.endMaxAcceleration;
+}
 /**
 * Sets the minimum ending acceleration in the X direction
 * @param {number} value the minimum acceleration
@@ -11128,6 +11146,9 @@ GLGE.ParticleSystem.prototype.setMinEndAccZ=function(value){
 GLGE.ParticleSystem.prototype.setMinEndAccelertaion=function(x,y,z){
 	this.endMinAcceleration={x:parseFloat(x),y:parseFloat(y),z:parseFloat(z)};
 	this.attribute=null;
+}
+GLGE.ParticleSystem.prototype.getMinEndAccelertaion=function(){
+	return this.endMinAcceleration;
 }
 /**
 * Sets the ending acceleration in the X direction
@@ -11177,6 +11198,9 @@ GLGE.ParticleSystem.prototype.setStartColor=function(value){
 	this.startColor=color;
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getStartColor=function(){
+	return this.startColor;
+}
 /**
 * Sets the ending color of the particle
 * @param {number} value the end color
@@ -11186,6 +11210,9 @@ GLGE.ParticleSystem.prototype.setEndColor=function(value){
 	this.endColor=color;
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getEndColor=function(){
+	return this.endColor;
+}
 /**
 * Sets the starting size of the particle
 * @param {number} value the start size
@@ -11194,6 +11221,9 @@ GLGE.ParticleSystem.prototype.setStartSize=function(value){
 	this.startSize=parseFloat(value);
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getStartSize=function(){
+	return this.startSize;
+}
 /**
 * Sets the ending size of the particle
 * @param {number} value the end size
@@ -11201,6 +11231,9 @@ GLGE.ParticleSystem.prototype.setStartSize=function(value){
 GLGE.ParticleSystem.prototype.setEndSize=function(value){
 	this.endSize=parseFloat(value);
 	this.attribute=null;
+}
+GLGE.ParticleSystem.prototype.getEndSize=function(){
+	return this.endSize;
 }
 /**
 * Sets the particles lifetime
@@ -11219,6 +11252,9 @@ GLGE.ParticleSystem.prototype.setMaxLifeTime=function(value){
 	this.maxLifeTime=parseFloat(value);
 	this.attribute=null;
 }
+GLGE.ParticleSystem.prototype.getMaxLifeTime=function(){
+	return this.maxLifeTime;
+}
 /**
 * Sets the particles minimum lifetime
 * @param {number} value the particles life time
@@ -11226,6 +11262,9 @@ GLGE.ParticleSystem.prototype.setMaxLifeTime=function(value){
 GLGE.ParticleSystem.prototype.setMinLifeTime=function(value){
 	this.minLifeTime=parseFloat(value);
 	this.attribute=null;
+}
+GLGE.ParticleSystem.prototype.getMinLifeTime=function(){
+	return this.minLifeTime;
 }
 /**
 * Sets the total number of particles
@@ -11235,8 +11274,9 @@ GLGE.ParticleSystem.prototype.setNumParticles=function(value){
 	this.numParticles=parseFloat(value);
 	this.attribute=null;
 }
-
-
+GLGE.ParticleSystem.prototype.getNumParticles=function(){
+	return this.numParticles;
+}
 /**
 * The particles velocity function used to generate the initial particles velocities
 */
@@ -12025,6 +12065,7 @@ GLGE.Collada=function(){
 	this.children=[];
 	this.actions={};
 	this.boneIdx=0;
+    this.objIdx=0;
 	this.actionsIdx=0;
 };
 GLGE.augment(GLGE.Group,GLGE.Collada);
@@ -12975,7 +13016,10 @@ GLGE.Collada.prototype.setMaterialOntoMesh=function(meshes,node) {
 		objMaterials[materials[i].getAttribute("symbol")]=mat;
 	}
 	//create GLGE object
-	var obj=new GLGE.Object();
+	var obj = new GLGE.Object();
+    if ( !obj.name || obj.name == "" ) {
+        obj.name = "glgeObj" + ( ++this.objIdx );
+    }
 	for(i=0; i<meshes.length;i++){
 		if(objMaterials[meshes[i].matName] && objMaterials[meshes[i].matName].trans){
 			obj.setZtransparent(true);
@@ -13409,6 +13453,9 @@ GLGE.Collada.prototype.getColladaActions=function(){
 */
 GLGE.Collada.prototype.getInstanceController=function(node){
 	var obj=new GLGE.Object();
+    if ( !obj.name || obj.name == "" ) {
+        obj.name = "glgeObj" + ( ++this.objIdx );
+    }
 	var controller=this.xml.getElementById(node.getAttribute("url").substr(1));
 	var skeletons=node.getElementsByTagName("skeleton");
 	var joints=controller.getElementsByTagName("joints")[0];
@@ -13422,7 +13469,7 @@ GLGE.Collada.prototype.getInstanceController=function(node){
 	}
 
 	var inverseBindMatrix=[bindShapeMatrix];
-	var base=new GLGE.Group;
+	var base= this.newGroup( undefined );
 	this.addGroup(base);
 	var joints=[base];
 	var mat;
@@ -13615,6 +13662,17 @@ GLGE.Collada.prototype.getInstanceLight=function(node){
 	return light;
 }
 
+GLGE.Collada.prototype.newGroup=function( node ){
+	var newGroup = new GLGE.Group();
+	var name="bone"+(++this.boneIdx);
+	newGroup.setName(name);
+    if ( node ) {
+        newGroup.colladaId = node.getAttribute( "id" );
+        newGroup.colladaName = node.getAttribute( "name" );
+    }
+    return newGroup;
+}
+
 
 /**
 * Creates a new group and parses it's children
@@ -13635,12 +13693,8 @@ GLGE.Collada.prototype.getNode=function(node,ref){
 	if(ref && node && node.GLGEObjects){
 		return node.GLGEObjects[0];
 	}
-	
-	var newGroup=new GLGE.Group();
-	var name="bone"+(++this.boneIdx);
-	newGroup.setName(name);
-    newGroup.colladaId = node.getAttribute( "id" );
-    newGroup.colladaName = node.getAttribute( "name" );
+	var newGroup = this.newGroup( node );
+
 	if (!node) {
         return newGroup;
     }
@@ -13717,7 +13771,7 @@ GLGE.Collada.prototype.initVisualScene=function(){
     }
     var transformRoot=this;
     if (up_axis[0]!="Y"&&up_axis[0]!="y") {
-        transformRoot = new GLGE.Group();
+        transformRoot = this.newGroup( undefined );
         this.addChild(transformRoot);
         if (up_axis[0]!="Z"&&up_axis[0]!="z") {
             this.setRotMatrix(GLGE.Mat4([0, -1 , 0,  0,
@@ -14678,7 +14732,7 @@ GLGE.Wavefront.prototype.parseMaterials=function(file){
 					var ml=new GLGE.MaterialLayer;
 					ml.setMapto(GLGE.M_COLOR);
 					ml.setMapinput(GLGE.UV1);
-					var tex=new GLGE.Texture;
+					var tex=new GLGE.Texture();
 					var k=1;
 					while(data[k][0]=="-") k=k+2;
 					tex.setSrc(this.getAbsolutePath(data[k],this.relativeTo));
@@ -14690,7 +14744,7 @@ GLGE.Wavefront.prototype.parseMaterials=function(file){
 					var ml=new GLGE.MaterialLayer;
 					ml.setMapto(GLGE.M_SPECULAR);
 					ml.setMapinput(GLGE.UV1);
-					var tex=new GLGE.Texture;
+					var tex=new GLGE.Texture();
 					var k=1;
 					while(data[k][0]=="-") k=k+2;
 					tex.setSrc(this.getAbsolutePath(data[k],this.relativeTo));
@@ -14702,7 +14756,7 @@ GLGE.Wavefront.prototype.parseMaterials=function(file){
 					var ml=new GLGE.MaterialLayer;
 					ml.setMapto(GLGE.M_NOR);
 					ml.setMapinput(GLGE.UV1);
-					var tex=new 3;
+					var tex=new GLGE.Texture();
 					var k=1;
 					while(data[k][0]=="-") k=k+2;
 					tex.setSrc(this.getAbsolutePath(data[k],this.relativeTo));

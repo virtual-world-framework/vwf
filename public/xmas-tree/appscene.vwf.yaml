@@ -1,0 +1,143 @@
+--- 
+extends: http://vwf.example.com/types/glge
+properties:
+  createCube: true
+  cubesCreated: 0
+  spheresCreated: 0
+  colorIndex:
+    set: |
+      if ( ( value >= 0 ) && ( value <= 6 ) ) {
+        this.colorIndex = value;
+      } else {
+        this.colorIndex = 0;
+      }
+    value: 0
+  tossCubeStrength:
+    set: |
+      if ( value >= 0 ) {
+        this.tossCubeStrength = value;
+      }   
+    value: 150
+  tossSphereStrength:
+    set: |
+      if ( value >= 0 ) {
+        this.tossSphereStrength = value;
+      }   
+    value: 250
+methods:
+  clear: |
+    if ( this.nodesCreated ) {
+      for ( var i = 0; i < this.nodesCreated.length; i++ ){
+        //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );
+        vwf.deleteNode( this.nodesCreated[i] );
+      }
+      this.nodesCreated = [];  
+    }
+scripts:
+- text: |
+    var lastTimeObjWasCreated;
+    var mouseIsDown = false;
+    var mouseDownTime = -1;
+    var idsToAddVelocity;
+    var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
+    var cube = { 
+      "source": "Cube", 
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "text/xml",
+      "properties": { 
+        "material": "",
+        "scale": [ 1.5, 1.5, 1.5 ], 
+        "eulers": [ 0, 0, 0 ], 
+        "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
+        "physics": [ "box", 3.0, 3.0, 3.0 ], 
+        "friction": 0.5, 
+        "mass": 400, 
+        "position": [ 0, 0, 0 ], 
+        "linVelocityDamping": [ 1, 1, 1, 0 ], 
+        "restitution": 0.10, 
+        "velocity": [ 0, 0, 0 ], 
+        } 
+      };
+    var sphere = { 
+      "source": "Sphere", 
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "text/xml",
+      "properties": { 
+        "material": "", 
+        "scale": [ 2.0, 2.0, 2.0 ], 
+        "eulers": [ 0, 0, 0 ], 
+        "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
+        "physics": [ "sphere", 2.0 ], 
+        "friction": 0.5, 
+        "mass": 100, 
+        "position": [ 0, 0, 0 ], 
+        "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
+        "restitution": 0.10, 
+        "velocity": [ 0, 0, 0 ], 
+        } 
+      };
+    this.initialize = function() {
+      this.nodesCreated = [];
+    }
+    this.keyDown = function( keyInfo ) {
+      var key = undefined;
+      for ( kd in keyInfo.keysDown ) {
+        key = keyInfo.keysDown[kd];
+        if ( key.char == " " ) {
+          this.createObject();
+        }
+      }
+    }    
+    this.pointerDown = function( pointerInfo, pickInfo ) {
+      mouseIsDown = true;
+      mouseDownTime = vwf.time();
+    }
+    this.pointerUp = function( pointerInfo, pickInfo ) {
+      mouseIsDown = false;
+      var now =  vwf.time();
+      //if ( now - mouseDownTime < 700 ) {
+        this.createObject();
+      //}
+      mouseDownTime = -1;
+    }
+    this.createObject = function() {
+      var newObjName;
+
+      if (!this.activeCameraComp) {
+        this.getActiveCamera();
+      }
+      if ( this.activeCameraComp ) {
+        var mat = this.activeCameraComp.rotationMatrix;
+        var pos = this.activeCameraComp.position;
+        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
+        if ( this.createCube ) {
+          this.cubesCreated += 1;
+          newObjName = "cube" + this.cubesCreated;
+          
+          cube.properties.material = materials[ this.colorIndex ];
+          cube.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
+          cube.properties.velocity = [ trans[0] * this.tossCubeStrength, trans[1] * this.tossCubeStrength, trans[2] * this.tossCubeStrength];
+          this.colorIndex += 1;
+          
+          vwf.createNode( "index-vwf", cube, newObjName, undefined );        
+          this.createCube = false;
+        } else {
+          this.spheresCreated += 1;
+          newObjName = "sphere" + this.spheresCreated;
+          
+          sphere.properties.material = materials[ this.colorIndex ];
+          sphere.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
+          sphere.properties.velocity = [ trans[0] * this.tossSphereStrength, trans[1] * this.tossSphereStrength, trans[2] * this.tossSphereStrength ];
+          this.colorIndex += 1;
+          
+          vwf.createNode( "index-vwf", sphere, newObjName, undefined );
+          this.createCube = true;      
+        }
+        if ( newObjName && newObjName != "" ) {
+          this.nodesCreated.push( "http-vwf-example-com-types-node3-"+newObjName );
+        }
+      }
+      
+    }
+
+  type: application/javascript    

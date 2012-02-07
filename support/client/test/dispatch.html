@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+
+      ], function( ready ) {
+
+        // Test dispatching events.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
+            /*  views */ { }
+          );
+
+          var emptyParameters = [ {} ]; // eventData == {}
+          var emptyNodeParameters = { "": [ {} ] }; // eventNodeData == {} for all nodes
+
+          // Regular, non-dispatching event to the top.
+
+          asyncTest( "Regular event top", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              vwf.fireEvent( topID, "test" );
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top bubble" ], "top fireEvent only visits top" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching event to the top.
+
+          asyncTest( "Dispatching event top", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( topID, "test", emptyParameters, emptyNodeParameters );
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top bubble" ], "top dispatchEvent only visits top" );
+
+              start();
+            } );
+
+          } );
+
+          // Regular, non-dispatching event to the bottom.
+
+          asyncTest( "Regular event bottom", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              vwf.fireEvent( bottomID, "test" );
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "bottom bubble" ], "bottom fireEvent only visits bottom" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching event to the bottom.
+
+          asyncTest( "Dispatching event bottom", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble", "top bubble" ],
+                "bottom fireEvent captures from and bubbles to top" );
+
+              start();
+            } );
+
+          } );
+
+          // Handled (cancelled) at target.
+
+          asyncTest( "Handle at target", function() {
+
+            createFixture( false, false, { capture: false, bubble: true }, function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble" ],
+                "handling at target prevents bubbling" );
+
+              start();
+            } );
+
+          } );
+
+          // Handled (cancelled) at middle during capture.
+
+          asyncTest( "Handle at middle capture", function() {
+
+            createFixture( false, { capture: true }, false, function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture" ],
+                "handling at middle capture prevents further capture and bubbling" );
+
+              start();
+            } );
+
+          } );
+
+          // Handled (cancelled) at middle during bubbling.
+
+          asyncTest( "Handle at middle bubble", function() {
+
+            createFixture( false, { capture: false, bubble: true }, false, function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble" ],
+                "handling at middle bubble prevents further bubbling" );
+
+              start();
+            } );
+
+          } );
+
+          // Implicit "handled" return value from the handlers.
+
+          asyncTest( "Implicit 'handled'", function() {
+
+            createFixture( {}, {}, {}, function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+
+              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture" ],
+                "implicit undefined return in handler same as explicit true return" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching to the top with no arguments.
+
+          asyncTest( "Dispatching with no parameters", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( topID, "test" );
+
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0]" ), [ undefined ],
+                "no parameters, no node-parameters, phase" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching to the top with parameters.
+
+          asyncTest( "Dispatching with parameters", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( topID, "test", [ { parameters: true } ] );
+
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0]" ), [ { parameters: true }, undefined ],
+                "parameters, no node-parameters, phase" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching to the top with parameters and node-parameters.
+
+          asyncTest( "Dispatching with parameters and node-parameters", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              vwf.dispatchEvent( topID, "test", [ { parameters: true } ], { "": [ { nodeParameters: true } ] } );
+
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0]" ), [ { parameters: true }, { nodeParameters: true }, undefined ],
+                "parameters, node-parameters, phase" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching to the bottom with default node-parameters.
+
+          asyncTest( "Default node-parameters cascade to every target", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              var nodeParameters = {
+                "": [ { nodeParameters: true, default: true } ] // default
+              };
+
+              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+
+              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at top capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at middle capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at bottom bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at middle bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at top bubble" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching to the bottom with default and top node-parameters.
+
+          asyncTest( "Top node-parameters replace default and cascade to targets below", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              var nodeParameters = {
+                "": [ { nodeParameters: true, default: true } ] // default
+              };
+
+              nodeParameters[topID] = [ { nodeParameters: true, top: true } ]; // for top
+
+              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+
+              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+                { nodeParameters: true, top: true }, "top node-parameters at top capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+                { nodeParameters: true, top: true }, "top node-parameters at middle capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+                { nodeParameters: true, top: true }, "top node-parameters at bottom bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+                { nodeParameters: true, top: true }, "top node-parameters at middle bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+                { nodeParameters: true, top: true }, "top node-parameters at top bubble" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching to the bottom with default and middle node-parameters.
+
+          asyncTest( "Middle node-parameters replace default and cascade to targets below", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              var nodeParameters = {
+                "": [ { nodeParameters: true, default: true } ] // default
+              };
+
+              nodeParameters[middleID] = [ { nodeParameters: true, middle: true } ]; // for middle
+
+              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+
+              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at top capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+                { nodeParameters: true, middle: true }, "middle node-parameters at middle capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+                { nodeParameters: true, middle: true }, "middle node-parameters at bottom bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+                { nodeParameters: true, middle: true }, "middle node-parameters at middle bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at top bubble" );
+
+              start();
+            } );
+
+          } );
+
+          // Dispatching to the bottom with default and bottom node-parameters.
+
+          asyncTest( "Bottom node-parameters replace default", function() {
+
+            createFixture( function( topID, middleID, bottomID, baseID ) {
+
+              var nodeParameters = {
+                "": [ { nodeParameters: true, default: true } ] // default
+              };
+
+              nodeParameters[bottomID] = [ { nodeParameters: true, bottom: true } ]; // for bottom
+
+              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+
+              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at top capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at middle capture" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+                { nodeParameters: true, bottom: true }, "bottom node-parameters at bottom bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at middle bubble" );
+              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+                { nodeParameters: true, default: true }, "default node-parameters at top bubble" );
+
+              start();
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create parent, child, and grandchild nodes with default and capture- and bubble-phase
+          // event handlers.
+
+          function createFixture( /* topResult, middleResult, bottomResult, callback */ ) {
+
+            var args = Array.prototype.slice.call(arguments);
+
+            // Parse the arguments.
+
+            var callback = args.pop(); // callback is the last argument, regardless
+            var result = {};
+
+            [ "top", "middle", "bottom" ].forEach( function( which ) {
+
+              result[which] = args.shift();
+
+              if ( result[which] === undefined ) {
+                result[which] = false; // explicitly return false ("not handled") by default
+              }
+
+              if ( typeof result[which] == "boolean" ) {
+                result[which] = { capture: result[which], bubble: result[which] };
+              }
+              
+            } );
+
+            // Prototype for the three nodes.
+
+            vwf.createNode( 0, {
+
+              extends: "http://vwf.example.com/types/node",
+
+              properties: {
+                targets: [],
+                argumentss: [],
+              },
+
+              events: {
+                test: undefined
+              },
+
+              scripts: [
+
+                "var handler = function() { " +
+
+                  "return function( eventData, eventNodeData, phase ) { " +
+
+                    "var tag = this.name.split( '-' )[0] + ' ' + ( phase || 'bubble' ); " +
+                    "var result = this.properties.result[ phase || 'bubble' ]; " +
+
+                    "Object.getPrototypeOf( this ).properties.targets.push( tag ); " +
+                    "Object.getPrototypeOf( this ).properties.argumentss.push( Array.prototype.slice.call( arguments ) ); " +
+
+                    "if ( result !== undefined ) { " +
+                      "return result; " + // do an explicit return if a value is provided
+                    "} " + // otherwise fall out with a default return value of undefined
+
+                  "}; " +
+
+                "}; " +
+
+                "this.events.test = this.events.add( handler(), 'capture', this );"
+
+              ],
+
+            }, unique_name( "base" ), function( baseID ) {
+
+              // Parent node.
+
+              vwf.createNode( 0, {
+
+                extends: "@" + JSON.stringify( baseID ),
+                properties: { result: result.top },
+
+              }, unique_name( "top" ), function( topID ) {
+
+                // Child node.
+
+                vwf.createNode( topID, {
+
+                  extends: "@" + JSON.stringify( baseID ),
+                  properties: { result: result.middle },
+
+                }, unique_name( "middle" ), function( middleID ) {
+
+                  // Grandchild node.
+
+                  vwf.createNode( middleID, {
+
+                    extends: "@" + JSON.stringify( baseID ),
+                    properties: { result: result.bottom },
+
+                  }, unique_name( "bottom" ), function( bottomID ) {
+
+                    callback( topID, middleID, bottomID, baseID );
+
+                  } );
+
+                } );
+
+              } );
+
+            } );
+
+          }
+         
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+       } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>

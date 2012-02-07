@@ -1,0 +1,58 @@
+--- 
+extends: http://vwf.example.com/types/glge
+properties:
+  navmode: none
+children:
+  plane:
+    extends: http://vwf.example.com/types/node3
+    implements:
+    - http://vwf.example.com/types/sway-on-click
+    source: seymourplane_triangulate.dae
+    type: model/vnd.collada+xml
+    properties:
+      position: [ -1, -20, 0 ]
+      eulers: [ 90, 90, 0 ]
+      # sway-on-click configuration parameters
+      sway-axis: [ 1, 0, 0 ]
+    children:
+      prop:
+        extends: http://vwf.example.com/types/node3
+        # # 1: Uncomment to apply the spin-on-click behavior to the prop
+        # # ... located in public/types/spin-on-click.vwf.yaml
+        # implements:
+        # - http://vwf.example.com/types/spin-on-click
+    # # 2: Uncomment to enable/disable sway and rotate the prop on click
+    # scripts:
+    # - |
+    #   this.pointerClick = function() {
+    #     if ( this["sway-swaying"] ) {
+    #       this["sway-swaying"] = false;
+    #       this.prop["spin-spinning"] = false;
+    #     } else {
+    #       this["sway-swaying"] = true;
+    #       this.prop["spin-spinning"] = true;
+    #     }
+    #   }
+  # Camera boilerplate
+  maincamera:
+    extends: http://vwf.example.com/types/camera
+    properties:
+      eulers: [ 90, 180, 0 ]
+  dir1:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ -0.79, -3.34, -0.22 ]
+  dir2:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 0.279, 0.9539, -0.08268 ]
+# Camera fix
+scripts:
+- |
+  this.initialize = function() {
+    this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+  }

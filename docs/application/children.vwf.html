@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>VWF DOCUMENTATION</title>
+		<link rel="stylesheet" type="text/css" href="../css/style.css" />
+	</head>
+	<body>
+		<div class="header">
+			<!-- img src="../images/vwl_logo.jpg" alt="Virtual World Labs" width="100px" / -->
+			<div class="title">Virtual World Framework</div>
+		</div>
+		<div style="width:800px;margin:auto;text-align:left;padding-top:10px">
+			<div class="navmenu">
+				<ul>
+				    <li><a href="../install/install.html" title="Installation Guide">Installation Guide</a></li>
+					    <li><span style="position:relative;left:20px"><a href="../install/install.html" title="For Windows">For Windows</a></span></li>
+					    <li><span style="position:relative;left:20px"><a href="../install/install.html#linux" title="For Linux">For Linux</a></span></li>
+					<li><a href="../readme/readme.html" title="Getting Started with VWF">Getting Started</a></li>
+					<li><a href="../application/application.html" title="Application">Application</a></li>
+					    <li><span style="position:relative;left:20px"><a href="../application/example.vwf.html" title="Format">Format</a></span></li>
+					        <li><span style="position:relative;left:40px"><a href="../application/properties.vwf.html" title="Properties">Properties</a></span></li>
+					        <li><span style="position:relative;left:40px"><a href="../application/methods.vwf.html" title="Methods">Methods</a></span></li>
+					        <li><span style="position:relative;left:40px"><a href="../application/events.vwf.html" title="Events">Events</a></span></li>
+					        <li><span style="position:relative;left:40px"><a href="../application/children.vwf.html" title="Children">Children</a></span></li>
+					        <li><span style="position:relative;left:40px"><a href="../application/scripts.vwf.html" title="Scripts">Scripts</a></span></li>
+					    <li><span style="position:relative;left:20px"><a href="../application/example.html" title="Bindings">Bindings</a></span></li>
+					<li><a href="../system/system.html" title="System">System</a></li>
+				</ul>
+			</div>
+			<div class="content"><br>
+				<!-- Convert source.txt using markdown converter: http://daringfireball.net/projects/markdown/dingus -->
+				
+				<!-- INSERT MARKDOWN HERE -->
+				
+				
+<h1>children.vwf.yaml</h1>
+
+<p>Children are instances of other components to be attached to this component.</p>
+
+<pre><code>---
+children:
+</code></pre>
+
+<p>Some simply reference a separate component.</p>
+
+<pre><code>component:
+</code></pre>
+
+<p>Most reference a component and configure it.</p>
+
+<pre><code>  configured:
+    extends:
+      http://vwf.example.com/path/to/component.vwf
+    properties:
+      something: value
+</code></pre>
+
+<p>Some provide a detailed configuration. The format for a child specification is the same as for a component. It may be converted to a component by cutting out the value (from <code>extends</code> though <code>scripts</code>), placing it in an addressable file, and replacing it with the URI of the new file.</p>
+
+<pre><code>  literal:
+    extends: 
+      http://vwf.example.com/path/to/prototype.vwf
+    implements:
+    - http://vwf.example.com/path/to/behavior.vwf
+    - http://vwf.example.com/a/different/behavior.vwf
+    source:
+      asset.dat
+    type:
+      mime/type
+    properties:
+      name:
+        initializer
+      another:
+        initializer
+    methods:
+      name:
+        initializer
+      another:
+        initializer
+    events:
+      name:
+        initializer
+      another:
+        initializer
+    children:
+    - name:
+        component
+    - another:
+        component
+    scripts:
+    - specifier
+    - specifier
+</code></pre>
+
+			
+				
+				
+				<!-- END MARKDOWN -->
+			</div>		
+		</div>
+	</body>
+</html>

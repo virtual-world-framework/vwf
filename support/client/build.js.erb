@@ -1,0 +1,24 @@
+( {
+
+    logLevel: 2, // logger.INFO
+
+    baseUrl: "<%= source %>",
+    dir: "<%= destination %>",
+
+    // Neither UglifyJS nor Closure can successfully run the optimizations on all of the files.
+    // Optimize one file at a time in a separate Rake task.
+
+    optimize: "none", // "closure",
+
+    closure: {
+        CompilerOptions: {
+            "languageIn": java.lang.Class.forName( "com.google.javascript.jscomp.CompilerOptions$LanguageMode" ).
+                getEnumConstants()[1], // ECMASCRIPT5
+        },
+    },
+
+    modules: [<% modules.each do |path| %>
+        { name: "<%= path %>" },<% end %>
+    ]
+
+} )

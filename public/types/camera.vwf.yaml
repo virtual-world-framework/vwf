@@ -31,7 +31,6 @@ properties:
         this.fovy = value;
       }
   aspect: 1.0
-  orthoscale: 5
   cameraType:
     set: |
       switch ( value ) {
@@ -41,56 +40,11 @@ properties:
           break;
       }
     value: "perspective"
-  attachNodeID:
-    set: |
-      switch ( value ) {
-        case 'http-vwf-example-com-types-car-pick_up_truck02':
-          this.position = [ -52.29, -114.67, 100 ];
-          this.eulers = [ 90, 270, 0 ];
-          this.attachOffset = [ -60, 156, -6 ];
-          this.attachNodeID = value;
-          break;
-        case '':
-          this.attachNodeID = value;
-          break;
-      }
-    value: ""
-  attachOffset: [ 0, 0, 0 ]
   speed: 2.0
-  position:
-    set: |
-      //if ( this.attachNodeID != '' ) {
-      //  var newPos = [ 0, 0, 0 ];
-      //  var offset = this.attachOffset;
-      //  var wPos = this.position;
-      //  console.info( '===========  offset = ' + offset );
-      //  console.info( '===========  wPos = ' + wPos );
-      //  newPos[0] = wPos[0] + offset[0];
-      //  newPos[1] = wPos[1] + offset[1];
-      //  newPos[2] = wPos[2] + offset[2];
-      //  vwf.setProperty( this.attachNodeID, 'position', newPos );
-      //}
-      this.position = value;
-    value: [ 0, 0, 0 ]
+  position: [ 0, 0, 0 ]
   eulers: [ 0, 0, 0 ]
   rotation: [ 0, 0, 0 ]
   rotX: 0
   rotY: 0
   rotZ: 0
-  worldPosition: [ 0, 0, 0 ]
-  worldEulers: [ 0, 0, 0 ]
-scripts:
-- text: |
-    var cam = this;
-    this.initialize = function() {
-      console.info( "==================== camera ====================" );
-      this.walkMode = this.walkMode;
-      this.far = this.far;
-      this.near = this.near;
-      this.fovy = this.fovy;
-      this.aspect = this.aspect;
-      this.cameraType = this.cameraType;      
-      this.position = this.position;
-      this.eulers = this.eulers;  
-    }
-  type: application/javascript
+

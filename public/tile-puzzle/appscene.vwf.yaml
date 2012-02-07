@@ -2,7 +2,5 @@
 extends: http://vwf.example.com/types/glge
 scripts:
 - text: |
-    this.handleKeyEvents = function( keyMap, now, lasttime, mat, trans, mag ) { }
-    this.mouseDown = function() { }
-    this.mouseUp = function() { }
+    this.initialize = function() { this.navmode = "none"; }
   type: application/javascript    

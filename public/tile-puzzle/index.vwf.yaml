@@ -21,8 +21,9 @@ properties:
   tilePosition16: [ -16.5,   0, 0 ]
   openTilePosition: [ -16.5, 0, 0 ]
   tileDistance: 12
+  loadDone: false  
 methods:
-  setPositions: 
+  setPositions:
 children: 
   shuffleBtn: 
     extends: http://vwf.example.com/types/node3
@@ -34,11 +35,6 @@ children:
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |
-        this.initialize = function() {
-          this.position = this.position;
-          this.eulers = this.eulers;
-          this.scale = this.scale;
-        }
         this.pointerClick = function() {
           this.parent.shuffle();        	
         }
@@ -47,11 +43,11 @@ children:
       ShuffleCubeMaterial1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/red.png"
       ShuffleTextMaterial1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""  
+          texture: "images/black.png"  
   solveBtn: 
     extends: http://vwf.example.com/types/node3
     source: solveBtn.dae
@@ -62,11 +58,6 @@ children:
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |
-        this.initialize = function() {
-          this.position = this.position;
-          this.eulers = this.eulers;
-          this.scale = this.scale;
-        }
         this.pointerClick = function() {
           this.parent.solve();     	
         }
@@ -75,11 +66,11 @@ children:
       SolveCubeMaterial1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/green.png"
       SolveTextMaterial1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""  
+          texture: "images/black.png"  
   tile1: 
     extends: http://vwf.example.com/types/node3
     source: tile01.dae
@@ -97,11 +88,11 @@ children:
       Cube01Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text01Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""        
+          texture: "images/dkBlue.png"        
   tile2: 
     extends: http://vwf.example.com/types/node3
     source: tile02.dae
@@ -119,11 +110,11 @@ children:
       Cube02Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text02Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""  
+          texture: "images/dkBlue.png"  
   tile3: 
     extends: http://vwf.example.com/types/node3
     source: tile03.dae
@@ -141,11 +132,11 @@ children:
       Cube03Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text03Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""        
+          texture: "images/dkBlue.png"        
   tile4: 
     extends: http://vwf.example.com/types/node3
     source: tile04.dae
@@ -163,11 +154,11 @@ children:
       Cube04Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text04Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: "" 
+          texture: "images/dkBlue.png" 
   tile5: 
     extends: http://vwf.example.com/types/node3
     source: tile05.dae
@@ -185,11 +176,11 @@ children:
       Cube05Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text05Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
   tile6: 
     extends: http://vwf.example.com/types/node3
     source: tile06.dae
@@ -207,11 +198,11 @@ children:
       Cube06Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text06Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
   tile7: 
     extends: http://vwf.example.com/types/node3
     source: tile07.dae
@@ -229,11 +220,11 @@ children:
       Cube07Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text07Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
   tile8: 
     extends: http://vwf.example.com/types/node3
     source: tile08.dae
@@ -251,11 +242,11 @@ children:
       Cube08Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text08Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
   tile9: 
     extends: http://vwf.example.com/types/node3
     source: tile09.dae
@@ -273,11 +264,11 @@ children:
       Cube09Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text09Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
   tile10: 
     extends: http://vwf.example.com/types/node3
     source: tile10.dae
@@ -295,15 +286,15 @@ children:
       Cube10Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text10_1Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
       Text10_2Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
   tile11: 
     extends: http://vwf.example.com/types/node3
     source: tile11.dae
@@ -321,15 +312,15 @@ children:
       Cube11Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text11_1Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
       Text11_2Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
   tile12: 
     extends: http://vwf.example.com/types/node3
     source: tile12.dae
@@ -347,15 +338,15 @@ children:
       Cube12Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text12_1Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
       Text12_2Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""      
+          texture: "images/dkBlue.png"      
   tile13: 
     extends: http://vwf.example.com/types/node3
     source: tile13.dae
@@ -373,15 +364,15 @@ children:
       Cube13Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text13_1Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
       Text13_2Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""        
+          texture: "images/dkBlue.png"        
   tile14: 
     extends: http://vwf.example.com/types/node3
     source: tile14.dae
@@ -399,15 +390,15 @@ children:
       Cube14Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text14_1Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
       Text14_2Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""  
+          texture: "images/dkBlue.png"  
   tile15: 
     extends: http://vwf.example.com/types/node3
     source: tile15.dae
@@ -425,34 +416,20 @@ children:
       Cube15Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/ltBlue.png"
       Text15_1Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""
+          texture: "images/dkBlue.png"
       Text15_2Material1:
         extends: http://vwf.example.com/types/material
         properties:
-          texture: ""      
+          texture: "images/dkBlue.png"      
 scripts:
 - text: |
     this.initialize = function() {
-      this.tile1.scale = this.tile1.scale;
-      this.tile2.scale = this.tile2.scale;
-      this.tile3.scale = this.tile3.scale;
-      this.tile4.scale = this.tile4.scale;
-      this.tile5.scale = this.tile5.scale;
-      this.tile6.scale = this.tile6.scale;
-      this.tile7.scale = this.tile7.scale;
-      this.tile8.scale = this.tile8.scale;
-      this.tile9.scale = this.tile9.scale;
-      this.tile10.scale = this.tile10.scale;
-      this.tile11.scale = this.tile11.scale;
-      this.tile12.scale = this.tile12.scale;
-      this.tile13.scale = this.tile13.scale;
-      this.tile14.scale = this.tile14.scale;
-      this.tile15.scale = this.tile15.scale;
-    
+      console.info( "================ tile puzzle ================" );
+
       this.tile1.position = this.tilePosition1;
       this.tile2.position = this.tilePosition2;
       this.tile3.position = this.tilePosition3;
@@ -470,49 +447,10 @@ scripts:
       this.tile15.position = this.tilePosition15;
       this.openTilePosition = this.tilePosition16;
       
-      this.tile1.Text01Material1.texture = "images/dkBlue.png";
-      this.tile2.Text02Material1.texture = "images/dkBlue.png";
-      this.tile3.Text03Material1.texture = "images/dkBlue.png";
-      this.tile4.Text04Material1.texture = "images/dkBlue.png";
-      this.tile5.Text05Material1.texture = "images/dkBlue.png";
-      this.tile6.Text06Material1.texture = "images/dkBlue.png";
-      this.tile7.Text07Material1.texture = "images/dkBlue.png";
-      this.tile8.Text08Material1.texture = "images/dkBlue.png";
-      this.tile9.Text09Material1.texture = "images/dkBlue.png";
-      this.tile10.Text10_1Material1.texture = "images/dkBlue.png";
-      this.tile10.Text10_2Material1.texture = "images/dkBlue.png";
-      this.tile11.Text11_1Material1.texture = "images/dkBlue.png";
-      this.tile11.Text11_2Material1.texture = "images/dkBlue.png";
-      this.tile12.Text12_1Material1.texture = "images/dkBlue.png";
-      this.tile12.Text12_2Material1.texture = "images/dkBlue.png";
-      this.tile13.Text13_1Material1.texture = "images/dkBlue.png";
-      this.tile13.Text13_2Material1.texture = "images/dkBlue.png";
-      this.tile14.Text14_1Material1.texture = "images/dkBlue.png";
-      this.tile14.Text14_2Material1.texture = "images/dkBlue.png";
-      this.tile15.Text15_1Material1.texture = "images/dkBlue.png";
-      this.tile15.Text15_2Material1.texture = "images/dkBlue.png";
-      
-      this.tile1.Cube01Material1.texture = "images/ltBlue.png";
-      this.tile2.Cube02Material1.texture = "images/ltBlue.png";
-      this.tile3.Cube03Material1.texture = "images/ltBlue.png";
-      this.tile4.Cube04Material1.texture = "images/ltBlue.png";
-      this.tile5.Cube05Material1.texture = "images/ltBlue.png";
-      this.tile6.Cube06Material1.texture = "images/ltBlue.png";
-      this.tile7.Cube07Material1.texture = "images/ltBlue.png";
-      this.tile8.Cube08Material1.texture = "images/ltBlue.png";
-      this.tile9.Cube09Material1.texture = "images/ltBlue.png";
-      this.tile10.Cube10Material1.texture = "images/ltBlue.png";
-      this.tile11.Cube11Material1.texture = "images/ltBlue.png";
-      this.tile12.Cube12Material1.texture = "images/ltBlue.png";
-      this.tile13.Cube13Material1.texture = "images/ltBlue.png";
-      this.tile14.Cube14Material1.texture = "images/ltBlue.png";
-      this.tile15.Cube15Material1.texture = "images/ltBlue.png";
-      
-      this.shuffleBtn.ShuffleCubeMaterial1.texture = "images/red.png";
-      this.shuffleBtn.ShuffleTextMaterial1.texture = "images/black.png";
-      this.solveBtn.SolveCubeMaterial1.texture = "images/green.png";
-      this.solveBtn.SolveTextMaterial1.texture = "images/black.png";
-     
+      this.activeCamera = "http-vwf-example-com-types-camera-defaultCamera";
+      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "rotation", [ 2.6, 3.11, 0.004 ] );
+      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "position", [ 2.8, 28.32, 63 ] );
+      this.loadDone = true;
     }
     
     this.shuffle = function() {
@@ -520,9 +458,9 @@ scripts:
                        this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
                        this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
                        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
-      tilePositions.sort(function() { return (Math.round(Math.random())-0.5); }); 
+      tilePositions.sort( function(){ return (Math.round( Math.random() )-0.5); } ); 
       // this.setPositions(tilePositions);
-      vwf.send(this.id, "callMethod", "setPositions", tilePositions);
+      vwf.send(0, this.id, "callMethod", "setPositions", [[tilePositions]]);
     }
     
     this.solve = function() {
@@ -562,19 +500,28 @@ scripts:
         this.tile13.position = tilePositions[12];
         this.tile14.position = tilePositions[13];
         this.tile15.position = tilePositions[14];
+        console.info( "Open Tile Position: " + this.openTilePosition );
+        console.info( "   setting Open Tile Position to: " + tilePositions[15] );
         this.openTilePosition = tilePositions[15];
+        console.info( "   new Open Tile Position: " + this.openTilePosition );
       }
     }
 
     this.moveTile = function(obj) {
+      console.info( "moveTile Open Tile Position: " + this.openTilePosition );
       dx = Math.abs(obj.position[0] - this.openTilePosition[0]);
       dy = Math.abs(obj.position[1] - this.openTilePosition[1]);
+      
+      console.info( "  dx: " + dx + "   dy: " + dy );
+      
       if((dx < this.tileDistance && dy == 0) ||
          (dy < this.tileDistance && dx == 0))
       {
-        currentPosition = obj.position;
+        currentPosition = [ obj.position[0], obj.position[1], obj.position[2] ];
+        console.info( "   currentPosition: " + currentPosition );
         obj.position = this.openTilePosition;
-        this.openTilePosition = currentPosition;
+        this.openTilePosition = [ currentPosition[0], currentPosition[1], currentPosition[2] ];
+        console.info( "   new Open Tile Position: " + this.openTilePosition );
       }           	
     }
   type: application/javascript

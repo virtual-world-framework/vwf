@@ -1,7 +1,9 @@
 define( {
 
-    creatingNode: [],
-    /* TODO: deletingNode, */
+    creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /- ( ready ) -/ */ ],
+    deletingNode: [ /* nodeID */ ],
+
+    prototyping: [],
 
     addingChild: [],
     removingChild: [],
@@ -9,18 +11,20 @@ define( {
     childrening: [],
     naming: [],
 
+    settingProperties: [],
+    gettingProperties: [],
     creatingProperty: [],
     /* TODO: deletingProperty, */
     settingProperty: [],
     gettingProperty: [],
 
-    creatingMethod: [],
+    creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
     /* TODO: deletingMethod, */
-    callingMethod: [],
+    callingMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-    /* TODO: creatingEvent, */
+    creatingEvent: [ /* nodeID, eventName, eventParameters */ ],
     /* TODO: deletingEvent, */
-    /* TODO: firingEvent, */
+    firingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
     executing: [],
 

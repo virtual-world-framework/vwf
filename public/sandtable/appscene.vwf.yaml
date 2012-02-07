@@ -1,0 +1,414 @@
+---
+extends: http://vwf.example.com/types/glge
+properties:
+  lineWidth: 32
+  lineColor: [ 0, 0, 0 ]
+  lineHeight: 100
+  objScale: 200
+  minDrawDistance:
+    set: |
+      this.minDrawDistance = value;
+      this.minDistanceSquared = value * value;  
+    value: 200    
+  mouseMode: 
+    set: |
+      switch( value ) {
+        case "look":
+        case "orbit":
+        case "draw":
+        case "pindrop":
+          this.mouseMode = value;
+          if ( value == "orbit" ) {
+            this.navmode = "orbit";
+          } else if ( value == "look" ) {
+            this.navmode = "walk";
+            this.dragModeMove = false;
+          } else {
+            this.navmode = "none";
+          }          
+          break;
+        default:
+          console.info( "WARNING: walk, look, and draw are the only supported mouseMode" );
+          break;
+      }
+    value: "orbit"
+  speed: 40.0
+methods:
+  clear: |
+    if ( this.nodesCreated ) {
+      for ( var i = 0; i < this.nodesCreated.length; i++ ){
+        //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );
+        vwf.deleteNode( this.nodesCreated[i] );
+      }
+      this.nodesCreated = [];  
+    }
+scripts:
+- text: |
+    var counter = 1;
+    var lineIndex = 1;
+    var cubeIndex = 1;
+    var coneIndex = 1;
+    var pushpinIndex = 1;
+    var line = {
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "definition/mesh",
+      "properties": { 
+        "meshDefinition": { positions: [], faces: [], color: [] }
+      }
+    };
+    var cube = {
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "definition/mesh",
+      "properties": { 
+        "meshDefinition": { positions: [], faces: [], color: [] }
+      }
+    }; 
+    var cone = {
+      "extends": "http://vwf.example.com/types/node3",
+      "type": "definition/mesh",
+      "properties": { 
+        "meshDefinition": { positions: [], faces: [], color: [] }
+      }
+    };
+    var pushpin = {
+      extends: "http://vwf.example.com/types/node3",
+      source: "models/pushpinblack.dae",
+      type: "model/vnd.collada+xml",
+      properties: { 
+        positions: [],
+        eulers: [ 0, 0, 0 ], 
+        scale: [ 6, 6, 6.6 ], 
+      },    
+    };
+    // functions
+    this.initialize = function() {
+      this.lastDrawPoint = undefined;
+      this.mouseMode = "orbit";
+      this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
+      this.nodesCreated = [];
+      this.originalSpeed = this.speed;
+    }
+    this.pointerDown = function( parms, pickInfo ){
+      //console.info( " appscene.pointerDown( "+parms.position[0]+", "+parms.position[1]+" )" );
+      if ( pickInfo ) {
+        this.lastDrawPoint = { pickInfo: pickInfo };
+      } else {
+        this.lastDrawPoint = undefined;
+      }
+    }
+    this.pointerMove = function( parms, pickInfo ){
+      //console.info( " appscene.pointerMove( "+parms.position[0]+", "+parms.position[1]+" )" );
+      //console.info( " appscene.pointerMove() this.mouseMode = " + this.mouseMode );
+      if ( this.pointerIsDown() ) {
+        //console.info( " appscene.pointerMove() pointerDown" );
+        switch( this.mouseMode ) {
+          case "draw":
+            if ( this.distanceFromLast( pickInfo ) > this.minDistanceSquared ) {
+              this.draw( pickInfo );
+            }
+            break;
+        }
+      }
+    }
+    this.pointerUp = function( parms, pickInfo ){
+      //console.info( " appscene.pointerUp( "+parms.position[0]+", "+parms.position[1]+" )" );
+      switch ( this.mouseMode ) {
+        case "pindrop":
+          this.pindrop( pickInfo );
+          break;  
+      }
+      this.lastDrawPoint = undefined;    
+    }
+    this.multiply = function( v, value ) {
+      for ( var i = 0; i < v.length; i++ ) {
+        v[i] *= value;
+      }
+    }
+    this.dotProduct = function( v1, v2 ) {
+      return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+    }
+    this.crossProduct = function( v1, v2 ) {
+      return [ v1[1] * v2[2] -v1[2] * v2[1], v1[2] * v2[0] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0], 0 ];
+    }
+    this.vectorLength = function( v ) {
+      var sq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+      return ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
+    }    
+    this.normalize = function( v ) {
+      f = this.vectorLength( v );
+      v[0] /= f;
+      v[1] /= f;
+      v[2] /= f;
+      return f;
+    }   
+    this.draw = function( pickInfo ) {
+      //console.info( "   Draw ---------------" );
+      if ( pickInfo && pickInfo.position ) {
+        if ( this.lastDrawPoint ) {
+          var x1, y1, z1, x2, y2, z2;
+          var start = this.lastDrawPoint.pickInfo.position;
+          var end = pickInfo.position;
+          x1 = start[0];
+          y1 = start[1];
+          z1 = start[2] + this.lineHeight;
+          x2 = end[0];
+          y2 = end[1];
+          z2 = end[2] + this.lineHeight;              
+           
+          var pos = [];
+          var faces;
+          
+          var diff = [ x2 - x1, y2 - y1, z2 - z1 ];
+          var up = [ 0, 1, 0 ];
+          var right = [ 1, 0, 0 ];
+          var top = [ 0, 0, 0 ];
+          
+          this.normalize( diff );
+
+          if ( Math.abs( this.dotProduct( up, diff ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
+          { // then we can cross with up
+            right = this.crossProduct( diff, up );
+          }
+          else
+          { //too colinear with up, so start w/ a different axis
+            right = this.crossProduct( diff, right );
+          }
+          top = this.crossProduct( diff, right );
+          this.normalize( right );
+          this.normalize( top );
+          this.multiply( right, this.lineWidth );
+          this.multiply( top, this.lineWidth );              
+          
+          pos.push( x1 + right[0] );  // 0
+          pos.push( y1 + right[1] );  // 0
+          pos.push( z1 + right[2] );  // 0
+          
+          pos.push( x2 + right[0] );  // 1
+          pos.push( y2 + right[1] );  // 1
+          pos.push( z2 + right[2] );  // 1
+          
+          pos.push( x1 - right[0] );  // 2
+          pos.push( y1 - right[1] );  // 2
+          pos.push( z1 - right[2] );  // 2
+          
+          pos.push( x2 - right[0] );  // 3
+          pos.push( y2 - right[1] );  // 3
+          pos.push( z2 - right[2] );  // 3
+          
+          pos.push( x1 + top[0] );  // 4
+          pos.push( y1 + top[1] );  // 4
+          pos.push( z1 + top[2] );  // 4
+          
+          pos.push( x2 + top[0] );  // 5
+          pos.push( y2 + top[1] );  // 5
+          pos.push( z2 + top[2] );  // 5
+          
+          pos.push( x1 - top[0] );  // 6
+          pos.push( y1 - top[1] );  // 6
+          pos.push( z1 - top[2] );  // 6
+          
+          pos.push( x2 - top[0] );  // 7
+          pos.push( y2 - top[1] );  // 7
+          pos.push( z2 - top[2] );  // 7
+          
+          faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
+          
+          line.properties.meshDefinition.positions = pos;
+          line.properties.meshDefinition.faces = faces;
+          line.properties.meshDefinition.color = this.lineColor;
+          
+          vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+          this.nodesCreated.push( "http-vwf-example-com-types-node3-line"+lineIndex );
+          lineIndex++;
+          
+          this.lastDrawPoint.pickInfo = pickInfo;
+        }
+        
+      }
+    }
+    this.pindrop = function( pickInfo ) {
+      //console.info( "   PinDrop ---------------" );
+      
+      if ( pickInfo && pickInfo.position ) {
+        pushpin.properties.position = pickInfo.position;
+        
+        if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
+          pushpin.source = "models/pushPinRed.dae";
+        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 255 && this.lineColor[2] == 0 ) 
+          pushpin.source = "models/pushPinGreen.dae";
+        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 255 ) 
+          pushpin.source = "models/pushPinBlue.dae";
+        else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
+          pushpin.source = "models/pushPinBlack.dae";
+        else 
+          pushpin.source = "models/pushPinYellow.dae";
+        
+        var name = "pushpin"+pushpinIndex;
+        vwf.createNode( "index-vwf", pushpin, name, undefined );
+        this.nodesCreated.push( "http-vwf-example-com-types-node3-"+name );
+        pushpinIndex++;        
+        
+        //var pt = parms.pickInfo.coord;
+        //var dim = this.objScale;
+        //this.createCube( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), dim, dim, dim, this.lineColor, true );
+        //this.createCone( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), (dim*0.3), dim, this.lineColor, 18, true );
+        //this.createLine( pt[0], pt[1], pt[2]+this.lineHeight+(dim*0.3), pt[0], pt[1], pt[2], this.lineWidth*0.3, [ 0, 0, 0 ], true );
+      }
+    }
+    this.distanceFromLast = function( pickInfo ) {
+      var distSquared = 0;
+      if ( pickInfo && pickInfo.position ) {
+        if ( this.lastDrawPoint ) {
+          var p1 = pickInfo.position;
+          var p2 = this.lastDrawPoint.pickInfo.position;
+          distSquared = Math.pow( p1[0] - p2[0], 2 ) + Math.pow( p1[1] - p2[1], 2 );
+        }
+      }
+      //console.info( "   distSquared = " + distSquared );
+      return distSquared;
+    }
+    this.createCube = function( x, y, z, dx, dy, dz, color, temp ) {
+      var pos = [];
+      var faces;
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) );  // 0
+      pos.push( z + ( 0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) );  // 1
+      pos.push( z + ( 0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) ); // 2
+      pos.push( z + ( 0.5 * dz ) ); 
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) ); // 3
+      pos.push( z + ( 0.5 * dz ) );
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) ); // 4
+      pos.push( z + ( -0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( 0.5 * dy ) );  // 5
+      pos.push( z + ( -0.5 * dz ) );
+      
+      pos.push( x + ( -0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) );  // 6
+      pos.push( z + ( -0.5 * dz ) );
+      
+      pos.push( x + ( 0.5 * dx ) );
+      pos.push( y + ( -0.5 * dy ) ); // 7
+      pos.push( z + ( -0.5 * dz ) );      
+      
+      faces = [ 1, 0, 3, 1, 3, 2, 3, 0, 4, 3, 4, 7, 2, 3, 7, 2, 7, 6, 6, 7, 4, 6, 4, 5, 1, 2, 6, 1, 6, 5, 0, 1, 5, 0, 5, 4 ];
+
+      cube.properties.meshDefinition.positions = pos;
+      cube.properties.meshDefinition.faces = faces;
+      cube.properties.meshDefinition.color = color;
+      
+      vwf.createNode( "index-vwf", cube, "cube"+cubeIndex, undefined );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-cube"+cubeIndex );
+      cubeIndex++;
+    }
+    this.createLine = function( x1, y1, z1, x2, y2, z2, thickness, color, temp ) {
+      var pos = [];
+      var faces;
+      
+      var diff = [ x2 - x1, y2 - y1, z2 - z1 ];
+      var up = [ 0, 1, 0 ];
+      var right = [ 1, 0, 0 ];
+      var top = [ 0, 0, 0 ];
+      
+      this.normalize( diff );
+
+      if ( Math.abs( this.dotProduct( up, diff ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
+      { // then we can cross with up
+        right = this.crossProduct( diff, up );
+      }
+      else
+      { //too colinear with up, so start w/ a different axis
+        right = this.crossProduct( diff, right );
+      }
+      top = this.crossProduct( diff, right );
+      this.normalize( right );
+      this.normalize( top );
+      this.multiply( right, thickness );
+      this.multiply( top, thickness );              
+      
+      pos.push( x1 + right[0] );  // 0
+      pos.push( y1 + right[1] );  // 0
+      pos.push( z1 + right[2] );  // 0
+      
+      pos.push( x2 + right[0] );  // 1
+      pos.push( y2 + right[1] );  // 1
+      pos.push( z2 + right[2] );  // 1
+      
+      pos.push( x1 - right[0] );  // 2
+      pos.push( y1 - right[1] );  // 2
+      pos.push( z1 - right[2] );  // 2
+      
+      pos.push( x2 - right[0] );  // 3
+      pos.push( y2 - right[1] );  // 3
+      pos.push( z2 - right[2] );  // 3
+      
+      pos.push( x1 + top[0] );  // 4
+      pos.push( y1 + top[1] );  // 4
+      pos.push( z1 + top[2] );  // 4
+      
+      pos.push( x2 + top[0] );  // 5
+      pos.push( y2 + top[1] );  // 5
+      pos.push( z2 + top[2] );  // 5
+      
+      pos.push( x1 - top[0] );  // 6
+      pos.push( y1 - top[1] );  // 6
+      pos.push( z1 - top[2] );  // 6
+      
+      pos.push( x2 - top[0] );  // 7
+      pos.push( y2 - top[1] );  // 7
+      pos.push( z2 - top[2] );  // 7
+      
+      faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
+      
+      line.properties.meshDefinition.positions = pos;
+      line.properties.meshDefinition.faces = faces;
+      line.properties.meshDefinition.color = color;
+      
+      vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-line"+lineIndex );
+      lineIndex++;    
+    }
+    this.createCone = function( x, y, z, radius, height, color, accuracy, temp ) {
+      var pos = [];
+      var faces = [];
+      var pt = 1;
+      
+      pos.push( x );
+      pos.push( y );
+      pos.push( z + height );      
+      
+      for ( var theta = 0; theta <= 2 * Math.PI; theta += Math.PI / accuracy ) {
+        pos.push( x + ( radius * Math.cos( theta ) ) );
+        pos.push( y + ( radius * Math.sin( theta ) ) );
+        pos.push( z );
+        pos.push( x + ( radius * Math.cos( theta - Math.PI / accuracy ) ) );
+        pos.push( y + ( radius * Math.sin( theta - Math.PI / accuracy ) ) );
+        pos.push( z );
+        
+        faces.push( 0 );
+        faces.push( pt );
+        faces.push( pt + 1 );
+        pt += 2;
+      }
+      cone.properties.meshDefinition.positions = pos;
+      cone.properties.meshDefinition.faces = faces;
+      cone.properties.meshDefinition.color = color;
+      
+      vwf.createNode( "index-vwf", cone, "cone"+coneIndex, undefined );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-cone"+coneIndex );
+      coneIndex++; 
+      
+    }
+  type: application/javascript
