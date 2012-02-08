@@ -37,9 +37,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childName, callback ) {
 
-            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, 
-                                childSource, childType, childName );
-
             var node, parentNode, glgeChild;
 
             // find the parent node
@@ -360,8 +357,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         deletingNode: function( nodeID ) {
 
-            this.logger.info( "deletingNode", nodeID );
-
             if ( this.state.nodes[ nodeID ] ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node.glgeObject ) {
@@ -380,57 +375,37 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- addingChild ------------------------------------------------------------------------
         
         addingChild: function( nodeID, childID, childName ) {
-
-            this.logger.info( "addingChild", nodeID, childID, childName );
-
         },
 
         // -- movingChild ------------------------------------------------------------------------
         
         movingChild: function( nodeID, childID, childName ) {
-
-            this.logger.info( "movingChild", nodeID, childID, childName );
-
         },
 
         // -- removingChild ------------------------------------------------------------------------
         
         removingChild: function( nodeID, childID, childName ) {
-
-            this.logger.info( "removingChild", nodeID, childID, childName );
-
         },
 
         // -- parenting ----------------------------------------------------------------------------
 
         parenting: function( nodeID ) {  // TODO: move to a backstop model
-
-            this.logger.info( "parenting", nodeID );
-
         },
 
         // -- childrening --------------------------------------------------------------------------
 
         childrening: function( nodeID ) {  // TODO: move to a backstop model
-
-            this.logger.info( "childrening", nodeID );
-
         },
 
         // -- naming -------------------------------------------------------------------------------
 
         naming: function( nodeID ) {  // TODO: move to a backstop model
-
-            this.logger.info( "naming", nodeID );
-
         },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
-            
             if ( !( propertyValue === undefined ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( !node ) node = this.state.scenes[ nodeID ];
@@ -452,8 +427,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
 
             //console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
@@ -665,8 +638,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
-
             var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
             var value = undefined;
             var glgeModel = this;
@@ -858,10 +829,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- callingMethod --------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-
-            this.logger.info( "callingMethod", nodeID, methodName );
             return undefined;
-        
         },
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
@@ -869,10 +837,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- executing ------------------------------------------------------------------------------
 
         executing: function( nodeID, scriptText, scriptType ) {
-
-            this.logger.info( "executing", nodeID, scriptText, scriptType );
             return undefined;
-
         },
 
         // == ticking =============================================================================
