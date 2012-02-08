@@ -417,10 +417,6 @@ children:
                       rotZ: 0                      
                   ic40Down:
                     extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/types/translate-on-down
-                    properties:
-                      translate-vector: [ 0.03, 0, 0 ]                    
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -487,10 +483,6 @@ children:
                       type: application/javascript                    
                   ic40PTT:
                     extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/types/translate-on-down
-                    properties:
-                      translate-vector: [ 0.04, 0, 0 ]                    
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -500,10 +492,6 @@ children:
                       type: application/javascript                    
                   ic40Red:
                     extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/types/translate-on-down
-                    properties:
-                      translate-vector: [ 0, 0, -0.02 ]                    
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -513,10 +501,6 @@ children:
                       type: application/javascript                    
                   ic40Up:
                     extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/types/translate-on-down
-                    properties:
-                      translate-vector: [ 0.04, 0, 0 ]                    
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -526,11 +510,6 @@ children:
                       type: application/javascript
                   ic40Volume:
                     extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/types/spin-on-move
-                    properties:
-                      spin-axis: [ 0, 0, 1 ]
-                      spin-rate: 2                     
                     properties:
                       rotZ: 0
                     scripts:  
