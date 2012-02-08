@@ -104,21 +104,10 @@
                                     la.setRange( 100000 );
                                     node.earthInst.getView().setAbstractView(la);
     
-//                                    document.getElementById('installed-plugin-version').innerHTML =
-//                                    node.earthInst.getPluginVersion().toString();
-
-
-                                    //view.viewChanged = false;
-                                    //view.pointerDown = false;
                                     view.control = false;
 
                                     gg.earth.addEventListener( node.earthInst.getWindow(), 'mousedown', function() {
-                                        //view.pointerDown = true; 
-                                        //console.info( "GOOGLE EARTH: mousedown" );
-                                        //console.info( "setting http-vwf-example-com-googleEarth-vwf.controlClient = " + view.kernel.moniker() ); 
-                                        //if ( view.controlClient == "NONE" ) {
-                                            view.kernel.setProperty( "http-vwf-example-com-googleEarth-vwf", "controlClient", view.kernel.moniker() );
-                                        //}
+                                        view.kernel.setProperty( "http-vwf-example-com-googleEarth-vwf", "controlClient", view.kernel.moniker() );
                                     });
 //                                    gg.earth.addEventListener( node.earthInst.getWindow(), 'mousemove', function() {
 //                                        //view.pointerDown = false;    
@@ -130,7 +119,6 @@
 
                                     // view changed event listener
                                     gg.earth.addEventListener( node.earthInst.getView(), 'viewchange', function() {
-                                        //console.info( "view.controlClient = " + view.controlClient + "      view.kernel.client() = " + view.kernel.client() );
                                         if ( view.controlClient == view.kernel.moniker() ) {
                                             broadcastCameraData.call( view );
                                         }  
@@ -138,11 +126,8 @@
 
                                     // view changed END event listener
                                     gg.earth.addEventListener( node.earthInst.getView(), 'viewchangeend', function() {
-                                        //console.info( "viewchangeend ==> view.controlClient = " + view.controlClient + "      view.kernel.client() = " + view.kernel.client() );
                                         if ( view.controlClient == view.kernel.moniker() ) {
                                             broadcastCameraData.call( view );
-                                            //console.info( "setting http-vwf-example-com-googleEarth-vwf.controlClient = ''" );
-                                            //view.kernel.setProperty( "http-vwf-example-com-googleEarth-vwf", "controlClient", "NONE" );
                                         }  
 
                                     });
@@ -173,9 +158,12 @@
             var obj, earth, ge;
             var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             if ( propertyValue ) {
-                //console.info( "this.kernel.moniker() = " + this.kernel.moniker() + "      view.kernel.client() = " + this.kernel.client() );                
                 //this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
-                if ( this.kernel.client() != this.kernel.moniker() ) { 
+                if ( propertyName == "controlClient" ) {
+                    //console.info( "  SETTING CONTROL CLIENT: " + propertyValue );
+                    this.controlClient = propertyValue;
+                    value = propertyValue;
+                } else if ( this.kernel.client() != this.kernel.moniker() ) { 
 
                     switch ( nodeID ) {
                         case "http-vwf-example-com-node3-vwf-camera":
@@ -237,20 +225,8 @@
                                 }
                             }
                             break;
-                        
                     }
-                } else {
-                    switch ( propertyName ) {
-                        case "controlClient":
-                            //if ( this.controlClient == "" ) {
-                                //console.info( "  SETTING CONTROL CLIENT: " + propertyValue );
-                                this.controlClient = propertyValue;
-                                value = propertyValue;
-                            //}                            
-                            break;
-                    }    
-                }
-
+                } 
             }
             return value;
 
