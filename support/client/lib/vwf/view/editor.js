@@ -43,10 +43,8 @@
             $('#topdown_b').hide();
             
             var canvas = document.getElementById("index-vwf");
-            if ( canvas ) {
-                $('#topdown_a').height(canvas.height);
-                $('#topdown_b').height(canvas.height);
-            }
+            $('#topdown_a').height(canvas.height);
+            $('#topdown_b').height(canvas.height);
         },
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
