@@ -34,7 +34,7 @@ children:
               this.menuMode = "channel";
             } else {
               this.volume = 0;
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD.png";
+              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/lcd.png";
             } 
           }
         value: false
