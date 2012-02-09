@@ -25,12 +25,7 @@
         if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
         if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
 
-        //console.info( "aspectRatio = " + (( this.width / this.height ) / 1.333 ) );
-
-        this.canvasQuery = jQuery(this.rootSelector).append(
-            "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
-        ).children(":last");
-        
+        this.canvasQuery = jQuery( this.rootSelector );
           
         // Connect GLGE to the VWF timeline.
         GLGE.now = function() {
@@ -53,13 +48,19 @@
     module.prototype.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
         childSource, childType, childName, callback /* ( ready ) */) {
 
-//        this.logger.info( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs,
-//                            childSource, childType, childName );
+        if ( childExtendsID === undefined /* || childName === undefined */ ) 
+            return;
 
-        if ( childID == this.state.sceneRootID /*&& ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "appscene-vwf" )*/ ) {
+        if ( this.state.scenes[ childID ] ) {
             
+            // this is the scene definition so go ahead and create the canvas and setup the view
             var glgeView = this;
             var domWin = window;
+
+            this.canvasQuery = jQuery( this.rootSelector ).append(
+                "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
+            ).children(":last");
+
             var canvas = this.canvasQuery.get( 0 );
             window.onkeydown = function( event ) {
                 var key = undefined;
