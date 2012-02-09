@@ -8,6 +8,9 @@ properties:
   spin-value: 0
 events:
   valueChanged:
+methods:
+  spin:
+  initialize:
 scripts:
 - |
   this.initialize = function() {
@@ -45,6 +48,8 @@ scripts:
     };
   }
   this.pointerDown = function( pointerInfo, pickInfo ) {
+    if ( !this.input ) this.initialize();
+
     this.input.pointerDown.pointerInfo = pointerInfo;
     this.input.pointerDown.pointerInfo = pickInfo;
     this.input.clear();
