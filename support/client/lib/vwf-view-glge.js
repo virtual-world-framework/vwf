@@ -628,7 +628,7 @@
     }
 
     var mouseXPos = function(e) {
-        return e.clientX - e.currentTarget.offsetLeft + window.scrollX;
+        return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
     }
 
     var mouseYPos = function(e) {

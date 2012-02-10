@@ -9,6 +9,7 @@
         initialize: function() {
 
             var self = this;
+            window.slideOffset = 0;
 
             this.nodes = {};
             this.scenes = {};
@@ -17,7 +18,7 @@
             this.topdownTemp = '#topdown_b';
             this.currentNodeID = '';
             
-            jQuery('body').prepend(
+            jQuery('body').append(
                 "<div id='editor' class='relClass'><div class='eImg'><img id='launchEditor' src='images/editor.png' style='pointer-events:all' alt='launchEditor' /></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>"
             );
             
@@ -46,6 +47,11 @@
             if ( canvas ) {
                 $('#topdown_a').height(canvas.height);
                 $('#topdown_b').height(canvas.height);
+            }
+            else
+            {    
+                $('#topdown_a').height(window.innerHeight-20);
+                $('#topdown_b').height(window.innerHeight-20);
             }
         },
         
@@ -209,13 +215,17 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
 
             this.editorVisible = true;
+            window.slideOffset = 260;
+            $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
             $('#editor').animate({ 'left' : "-=260px" }, 175);
             $('#launchEditor').attr('src', 'images/editorClose.png');
         }
         else
         {
             this.editorVisible = false;
-            $(topdownName).hide('slide', {direction: 'right'}, 175); 
+            window.slideOffset = 0;
+            $(topdownName).hide('slide', {direction: 'right'}, 175);
+            $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
             $('#editor').animate({ 'left' : "+=260px" }, 175);
             $('#launchEditor').attr('src', 'images/editor.png');
         }
@@ -320,12 +330,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         for ( var key in node.methods ) {
             var method = node.methods[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><input type='button' class='input_button' id='param-" + key + "' value='Params'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'></td></tr></table></div><hr>");
-            $('#param-' + key).click( function(evt) {
-                setParams.call(self, key, method, nodeID);                
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><div id='rollover-" + key + "'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#rollover-' + key).mouseover( function(evt) {
+                $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
+            });
+            $('#rollover-' + key).mouseleave( function(evt) {
+                $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
             });
             $('#call-' + key).click( function(evt) {
-                callDefault.call(self, key, nodeID);
+                self.kernel.callMethod( nodeID, $(this).attr("id").substring(5) );
+            });
+            $('#param-' + key).click( function(evt) {
+                setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
             });
         }
 
@@ -333,12 +349,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         for ( var key in node.events ) {
             var nodeEvent = node.events[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'></td></tr></table></div><hr>");
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><div id='rollover-" + key + "'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#rollover-' + key).mouseover( function(evt) {
+                $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
+            });
+            $('#rollover-' + key).mouseleave( function(evt) {
+                $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
+            });
             $('#fire-' + key).click( function(evt) {
-                setArgs.call(self, key, nodeEvent, nodeID);
-                //callDefault.call(self, key, nodeID);
-                //var arguments = '';
-                //self.kernel.fireEvent( nodeID, key, arguments );
+                self.kernel.fireEvent( nodeID, $(this).attr("id").substring(5) );
+            });
+            $('#arg-' + key).click( function(evt) {
+                setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
             });
         }
 
@@ -353,7 +375,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
      
-        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodName + "-back' alt='back'/> " + methodName + "</div>");
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodName + "-back' alt='back'/> " + methodName + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:22px'></input></div>");
         jQuery('#' + methodName + '-back').click ( function(evt) {
             
             drillUp.call(self, nodeID);
@@ -364,19 +386,24 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(topdownTemp).append("<div id='param" + i + "' class='propEntry'><table><tr><td><b>Parameter " + i + ": </b></td><td><input type='text' class='input_text' id='input-param" + i + "'></td></tr></table></div>");
         }
 
-        $(topdownTemp).append("<div style='font-weight:bold;text-align:right;padding-right:10px'><input type='button' class='input_button_call' id='call' value='Call'></input></div>");
         $('#call').click ( function (evt) {
 
             var parameters = new Array();
-            for(var i=0; i<16; i++)
+            for(var i=1; i<=16; i++)
             {
                 if( $('#input-param'+ i).val() )
                 {
-                    parameters.push( $('#input-param'+ i).val() );
+                    var prmtr = $('#input-param'+ i).val();
+                    try {
+                        prmtr = JSON.parse(prmtr);
+                        parameters.push( prmtr );
+                    } catch (e) {
+                        console.error('Invalid Value');
+                    }
                 }
             }
 
-            self.kernel.callMethod(nodeID, methodName, parameters);
+            self.kernel.callMethod(nodeID, methodName, [parameters]);
         });
 
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
@@ -384,16 +411,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
-
-    }
-    
-    // -- callDefault -----------------------------------------------------------------------
-
-    function callDefault (methodName, nodeID) // invoke with the view as "this"
-    {
-        var self = this;
-
-        self.kernel.callMethod(nodeID, methodName);
     }
 
     // -- setArgs ---------------------------------------------------------------------------
@@ -404,7 +421,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
      
-        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + eventName + "-back' alt='back'/> " + eventName + "</div>");
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + eventName + "-back' alt='back'/> " + eventName + "<input type='button' class='input_button_call' id='fire' value='Fire' style='float:right;position:relative;top:5px;right:22px'></input></div>");
         jQuery('#' + eventName + '-back').click ( function(evt) {
             drillUp.call(self, nodeID);
         });
@@ -414,19 +431,25 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(topdownTemp).append("<div id='arg" + i + "' class='propEntry'><table><tr><td><b>Argument " + i + ": </b></td><td><input type='text' class='input_text' id='input-arg" + i + "'></td></tr></table></div>");
         }
 
-        $(topdownTemp).append("<div style='font-weight:bold;text-align:right;padding-right:10px'><input type='button' class='input_button_call' id='fire' value='Fire'></input></div>");
+        $(topdownTemp).append("<div style='font-weight:bold;text-align:right;padding-right:10px'></div>");
         $('#fire').click ( function (evt) {
 
             var arguments = new Array();
-            for(var i=0; i<8; i++)
+            for(var i=1; i<=8; i++)
             {
                 if( $('#input-arg'+ i).val() )
                 {
-                    arguments.push( $('#input-arg'+ i).val() );
+                    var arg = $('#input-arg'+ i).val();
+                    try {
+                        arg = JSON.parse(arg);
+                        arguments.push( arg );
+                    } catch (e) {
+                        console.error('Invalid Value');
+                    }
                 }
             }
 
-            self.kernel.fireEvent(nodeID, eventName, arguments);
+            self.kernel.fireEvent(nodeID, eventName, [arguments]);
         });
 
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
