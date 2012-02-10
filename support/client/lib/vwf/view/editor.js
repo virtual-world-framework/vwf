@@ -434,7 +434,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         $(topdownTemp).append("<div style='font-weight:bold;text-align:right;padding-right:10px'></div>");
         $('#fire').click ( function (evt) {
 
-            var arguments = new Array();
+            var args = new Array();
             for(var i=1; i<=8; i++)
             {
                 if( $('#input-arg'+ i).val() )
@@ -442,14 +442,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     var arg = $('#input-arg'+ i).val();
                     try {
                         arg = JSON.parse(arg);
-                        arguments.push( arg );
+                        args.push( arg );
                     } catch (e) {
                         console.error('Invalid Value');
                     }
                 }
             }
 
-            self.kernel.fireEvent(nodeID, eventName, [arguments]);
+            self.kernel.fireEvent(nodeID, eventName, [args]);
         });
 
         $(topdownName).hide('slide', {direction: 'left'}, 175); 

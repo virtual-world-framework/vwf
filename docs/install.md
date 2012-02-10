@@ -1,5 +1,8 @@
-Installing the Ruby server on Windows
-=====================================
+Installing the Ruby Server
+==========================
+ 
+For Windows
+==============
  
 Install Cygwin
 --------------
