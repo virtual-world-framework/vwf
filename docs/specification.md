@@ -1,1 +1,1 @@
-<iframe src="application/example.vwf.html">Specification</iframe>
+<iframe src="application/example.vwf.html" style="height:600px">Specification</iframe>

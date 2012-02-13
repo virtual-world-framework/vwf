@@ -49,9 +49,9 @@ Code View: *index.vwf.yaml*
 		source: hello.dae
 		type: model/vnd.collada+xml
 	  
-URL: *http://vwf.example.com/documentation/1/index.vwf*
+URL: *http://vwf.orl.lmco.com:80/documentation/1/*
 
-<iframe src="http://localhost:3000/documentation/1/">index.vwf</iframe>
+<iframe src="http://vwf.orl.lmco.com:80/documentation/1/">Example 1</iframe>
 _____________________________________________________________________________________
 Nodes inherit data from their prototype, including the following:
 
@@ -87,9 +87,9 @@ Code View: *index.vwf.yaml*
 		properties:
 		  position: [ 0, -5, 0 ]
 
-URL: *http://vwf.example.com/documentation/2/index.vwf*
+URL: *http://vwf.orl.lmco.com:80/documentation/2/*
 
-<iframe src="http://localhost:3000/documentation/2/">index.vwf</iframe>
+<iframe src="http://vwf.orl.lmco.com:80/documentation/2/">Example 2</iframe>
 _____________________________________________________________________________________
 **Note:** A component specification may be an object literal, an uniform resource identifier (URI) to a .vwf or another type such as .dae, or a JSON-encoded object (primarily for use in the single-user mode application= URI parameter). Components may appear as an extends, implements, or child within the application or another component. 
 _____________________________________________________________________________________
@@ -154,7 +154,7 @@ Code View: *index.vwf.yaml*
 		  HelloMaterial:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
-			  texture: “images/red.png”
+			  texture: "images/red.png"
 	  world:
 		extends: http://vwf.example.com/node3.vwf
 		source: world.dae
@@ -165,11 +165,11 @@ Code View: *index.vwf.yaml*
 		  WorldMaterial:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
-			  texture: “images/blue.png”
+			  texture: "images/blue.png"
 		  
-URL: *http://vwf.example.com/documentation/3/index.vwf*
+URL: *http://vwf.orl.lmco.com:80/documentation/3/*
 
-<iframe src="http://localhost:3000/documentation/3/">index.vwf</iframe>
+<iframe src="http://vwf.orl.lmco.com:80/documentation/3/">Example 3</iframe>
 _____________________________________________________________________________________
 The properties of the default lighting and navigation can be specified within the application file.
 
@@ -266,7 +266,7 @@ Code View: *index.vwf.yaml*
 		  HelloTextMaterial1:
             extends: http://vwf.example.com/material.vwf
             properties: 
-              texture: “”
+              texture: ""
         scripts:
         - text: |
             this.pointerClick = function() {
@@ -290,7 +290,7 @@ Code View: *index.vwf.yaml*
 		  WorldTextMaterial1:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
-			  texture: “”
+			  texture: ""
 	    scripts:
 	    - text: |
 		    this.pointerClick = function() {
@@ -305,11 +305,11 @@ Code View: *index.vwf.yaml*
             }
 	      type: application/javascript
 
-URL: *http://vwf.example.com/documentation/4/index.vwf*
+URL: *http://vwf.orl.lmco.com:80/documentation/4/*
 
 In this example, clicking on an object will run the pointerClick function, changing the color of the object's material. 
 
-<iframe src="http://localhost:3000/documentation/4/">helloworld.vwf</iframe>
+<iframe src="http://vwf.orl.lmco.com:80/documentation/4/">Example 4</iframe>
 _____________________________________________________________________________________
 Define additional HTML and jQuery components in an index.vwf.html file. The application will look for a file of this name on load, and will load any scripts or two dimensional components identified. This HTML file interaction can bind user interface components to children and properties defined in the application file. The following example shows the JavaScript defined in the HTML file interacting with the property defined in the YAML file.
 
@@ -332,11 +332,11 @@ Code View: *index.vwf.html*
 		  function sample() {
 			// Get property value from the application
 			var pos = vwf.getProperty("http-vwf-example-com-node-vwf-game", 
-									  “position01”);
+									  "position01");
 
 			// Set property value in the application
 			vwf.views[0].setProperty( "http-vwf-example-com-node-vwf-game", 
-									  " position01", some_position );
+									  "position01", some_position );
 		  }
 
 		  // Defines a function to execute upon an application property
