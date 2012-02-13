@@ -1,1 +1,1 @@
-<iframe style='height:800' src="application/example.html">JavaScript Binding</iframe>
+<iframe src="application/example.html" style="height:600px">JavaScript Binding</iframe>

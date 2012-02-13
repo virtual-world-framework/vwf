@@ -1,5 +1,6 @@
 Installing the Ruby Server
 ==========================
+_____________________________________________________________________________________
  
 For Windows
 ==============
@@ -11,7 +12,7 @@ Download and run setup.exe from [Cygwin](http://www.cygwin.com/install.html).
 
 Accept the default settings, except for:
 
-Set **Root Directory** to C:\Cygwin (with a capital C) if you’re a pedant like me and want it to look right among the other top-level directories.
+Set **Root Directory** to C:\Cygwin (with a capital C) if you're a pedant like me and want it to look right among the other top-level directories.
 
 *	Consider changing **Local Package Directory** to your browser downloads folder to avoid cluttering your desktop.
 *   If connected to the LMI, for **Select Your Internet Connection**, choose *Use Internet Explorer Proxy Settings*.
@@ -35,7 +36,7 @@ ________________________________________________________________________________
 Install RubyGems
 ----------------
 
-Cygwin’s ruby installs without the library manager, so we have to install it from source. Open a new Cygwin terminal session and issue the following commands. Don’t use the previous session since it hadn’t loaded the proxy settings.
+Cygwin's ruby installs without the library manager, so we have to install it from source. Open a new Cygwin terminal session and issue the following commands. Don't use the previous session since it hadn't loaded the proxy settings.
 
 	curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.5.tgz | tar xzcd rubygems-1.8.5ruby setup.rb install 
 
@@ -73,7 +74,7 @@ ________________________________________________________________________________
 Connect
 -------
 
-The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck-and-plane](http://localhost:3000/duck-and-plane). View the excellent duck and the fascinating plane. Other applications may be available at other paths.
+The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). View the excellent duck and the fascinating plane. Other applications may be available at other paths.
 
 _____________________________________________________________________________________
 
@@ -147,7 +148,7 @@ ________________________________________________________________________________
 Connect
 -------
 
-The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck-and-plane](http://localhost:3000/duck-and-plane). 
+The server runs on port 3000 in development mode by default. Use Google Chrome to connect to [http://localhost:3000/duck](http://localhost:3000/duck) and [http://localhost:3000/plane](http://localhost:3000/plane). 
 
 _____________________________________________________________________________________
 
