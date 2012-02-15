@@ -10,7 +10,7 @@ class VWF::Application::Admin < Sinatra::Base
     erb :"admin.html"
   end
 
-  # get "/state" do
+  # get "/state" do  # TODO: restore when next handler is switched back to post
   # 
   #   if transport = Rack::SocketIO::Application.session( env )[:transport]
   #     transport.state.to_json

@@ -75,7 +75,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
     )
 
     cascade = Rack::Cascade.new [
-      Rack::File.new( File.join VWF.settings.support, "proxy", host ),          # Public content from ^/public  # TODO: will match public_path/index.html which we don't really want
+      Rack::File.new( File.join VWF.settings.support, "proxy", host ),          # Proxied content from ^/support/proxy  # TODO: will match public_path/index.html which we don't really want
       Application::Component.new( File.join VWF.settings.support, "proxy", host ) # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
     ]
 
@@ -175,11 +175,11 @@ end
 # From static files:
 
 # http://vwf.example.com/path/to/component/                     Serves index.html to browser, index.vwf to VWF client
-  
+
 # http://vwf.example.com/path/to/component/index.html           Served from ^/.../public/path/to/component/index.html if client copied into component directory
 # http://vwf.example.com/path/to/component/index.css            Served from ^/.../public/path/to/component/index.css if client copied into component directory
 # http://vwf.example.com/path/to/component/vwf.js               Served from ^/.../public/path/to/component/vwf.js if client copied into component directory
-  
+
 # http://vwf.example.com/path/to/component/index.vwf            Served from ^/.../public/path/to/component/index.vwf as JSON only (not JSONP)
 # http://vwf.example.com/path/to/component/model.dae            Served from ^/.../public/path/to/component/model.dae
 # http://vwf.example.com/path/to/component/texture.png          Served from ^/.../public/path/to/component/texture.png
