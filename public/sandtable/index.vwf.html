@@ -102,7 +102,7 @@
     </script>
   </head>
   <body>
-    <div class="wrapper">
+    <div id="wrapper" class="wrapper">
       <div class="toolstyle" id="toolbar">
         <img id="orbit" src="images/spin.png" style="border:3px solid red" alt="orbit" onclick="setMode('orbit')"/>
         <img id="draw" src="images/draw.png" style="border:2px solid black" alt="draw" onclick="setMode('draw')"/>
@@ -116,5 +116,8 @@
       </div>
     </div>
     <div class="vwf-main-content" align="center"></div>
+    <script type="text/javascript">
+      $('#wrapper').appendTo('#vwf-root'); 
+    </script>
   </body>
 </html>
