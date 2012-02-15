@@ -238,16 +238,16 @@ module Rack
       # The socket.io resource for a given environment.
       
       def self.resource env
-        env["vwf.session"] ?
-          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.session"] ) :
+        env["vwf.instance"] ?
+          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
           ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
       end
 
       # The socket.io resource this instance connects to.
   
       def resource
-        env["vwf.session"] ?
-          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.session"] ) :
+        env["vwf.instance"] ?
+          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
           ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
       end
 
