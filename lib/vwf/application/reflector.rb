@@ -15,7 +15,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    # Start the timer on the first connection to this session.
+    # Start the timer on the first connection to this instance.
 
     schedule_tick
 
@@ -104,7 +104,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     session[:pending_clients].delete self
     # TODO: resend getNode if this was the reference client and a getNode was pending
 
-    # Stop the timer and clear the state on the last disconnection from this session.
+    # Stop the timer and clear the state on the last disconnection from this instance.
 
     cancel_tick
 
