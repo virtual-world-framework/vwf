@@ -83,7 +83,7 @@ scripts:
       var key = undefined;
       for ( kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
-        if ( key.char == " " ) {
+        if ( key.char == " " || key.key == "space" ) {
           this.createObject();
         }
       }
@@ -96,7 +96,7 @@ scripts:
       mouseIsDown = false;
       var now =  this.time;
       //if ( now - mouseDownTime < 7 ) {
-        this.createObject();
+      //  this.createObject();
       //}
       mouseDownTime = -1;
     }
