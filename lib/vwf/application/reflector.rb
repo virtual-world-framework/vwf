@@ -112,6 +112,27 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
   end
 
+  # Instances derived from the given resource, and clients connected to those instances.
+
+  def self.instances env
+    Hash[ *
+      instance_sessions( env ).map do |resource, session|
+        [ resource, Hash[ :clients => clients( resource ) ] ]
+      end .flatten( 1 )
+    ]
+  end
+
+  # Instances derived from the resource that this client connects to, and clients connected to those
+  # instances.
+
+  def instances
+    Hash[ *
+      instance_sessions.map do |resource, session|
+        [ resource, Hash[ :clients => self.class.clients( resource ) ] ]
+      end .flatten( 1 )
+    ]
+  end
+
 private
 
   def schedule_tick
