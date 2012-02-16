@@ -58,6 +58,7 @@
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childName, callback /* ( ready ) */ ) {
             
+            var kernel = this.kernel.kernel;
             var self = this;
             var parent = this.nodes[ nodeID ];
             var node = this.nodes[ childID ] = {
@@ -73,11 +74,14 @@
                 name: childName,
             };
 
+            //console.info( "editor.createdNode( "+nodeID+", " +childID+", "+childExtendsID+", "+childImplementsIDs+", "+childSource+", "+childType+", "+childName+" )" );
+
             if ( parent ) {
                 parent.children.push( node );
             }
 
-            if ( childExtendsID =="http-vwf-example-com-glge-vwf" || childExtendsID =="appscene-vwf" ) {
+            var prototypes = getPrototypes.call( this, kernel, childExtendsID );
+            if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == "index-vwf" ) {
                 this.scenes[ childID ] = node;
             }
             
@@ -99,6 +103,8 @@
                 name: propertyName,
                 value: propertyValue,
             };
+
+            //console.info( "editor.createdProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
 
             try {
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
@@ -459,4 +465,28 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         this.topdownTemp = topdownName;
 
     }
+
+    function getPrototypes( kernel, extendsID ) {
+        var prototypes = [];
+        var id = extendsID;
+
+        while ( id !== undefined ) {
+            prototypes.push( id );
+            id = kernel.prototype( id );
+        }
+                
+        return prototypes;
+    }
+
+    function isGlgeSceneDefinition( prototypes ) {
+        var foundGlge = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-glge-vwf" );    
+            }
+        }
+
+        return foundGlge;
+    }
+
 } );

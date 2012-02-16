@@ -1,0 +1,11 @@
+--- 
+extends: http://vwf.example.com/node3.vwf
+properties:
+  editMode: "translate"
+implements:
+- http://vwf.example.com/node3edit.vwf
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "== initialize == editable3 == initialize ==" );
+    }

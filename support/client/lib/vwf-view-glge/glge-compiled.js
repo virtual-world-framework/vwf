@@ -3108,6 +3108,11 @@ GLGE.Placeable.prototype.setRotY=function(value){this.mode=GLGE.P_EULER;this.rot
 */
 GLGE.Placeable.prototype.setRotZ=function(value){this.mode=GLGE.P_EULER;this.rotZ=value;this.staticMatrix=null;this.rotmatrix=null;this.updateMatrix();return this;}
 /**
+* Sets the z rotation mode of the object
+* @param {number or string} mode The value to assign to the rotation mode
+*/
+GLGE.Placeable.prototype.setRotMode=function(mode){if(mode=="euler"||mode==GLGE.P_EULER){this.mode=GLGE.P_EULER;}else{this.mode=GLGE.P_QUAT;}this.updateMatrix();}
+/**
 * Sets the rotation of the object
 * @param {number} x The value to assign to the x rotation
 * @param {number} y The value to assign to the y rotation

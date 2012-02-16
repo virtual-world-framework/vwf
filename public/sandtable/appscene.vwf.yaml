@@ -143,11 +143,11 @@ scripts:
     }   
     this.draw = function( pickInfo ) {
       //console.info( "   Draw ---------------" );
-      if ( pickInfo && pickInfo.position ) {
+      if ( pickInfo && pickInfo.globalPosition ) {
         if ( this.lastDrawPoint ) {
           var x1, y1, z1, x2, y2, z2;
-          var start = this.lastDrawPoint.pickInfo.position;
-          var end = pickInfo.position;
+          var start = this.lastDrawPoint.pickInfo.globalPosition;
+          var end = pickInfo.globalPosition;
           x1 = start[0];
           y1 = start[1];
           z1 = start[2] + this.lineHeight;
@@ -229,8 +229,8 @@ scripts:
     this.pindrop = function( pickInfo ) {
       //console.info( "   PinDrop ---------------" );
       
-      if ( pickInfo && pickInfo.position ) {
-        pushpin.properties.position = pickInfo.position;
+      if ( pickInfo && pickInfo.globalPosition ) {
+        pushpin.properties.position = pickInfo.globalPosition;
         
         if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
           pushpin.source = "models/pushPinRed.dae";
@@ -257,10 +257,10 @@ scripts:
     }
     this.distanceFromLast = function( pickInfo ) {
       var distSquared = 0;
-      if ( pickInfo && pickInfo.position ) {
+      if ( pickInfo && pickInfo.globalPosition ) {
         if ( this.lastDrawPoint ) {
-          var p1 = pickInfo.position;
-          var p2 = this.lastDrawPoint.pickInfo.position;
+          var p1 = pickInfo.globalPosition;
+          var p2 = this.lastDrawPoint.pickInfo.globalPosition;
           distSquared = Math.pow( p1[0] - p2[0], 2 ) + Math.pow( p1[1] - p2[1], 2 );
         }
       }
