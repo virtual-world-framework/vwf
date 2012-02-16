@@ -74,4 +74,17 @@ class VWF::Application::Admin < Sinatra::Base
 
   end
 
+  # Instances derived from this application, clients connected to those instances, and client
+  # details (none currently).
+
+  get "/instances" do
+
+    Hash[ *
+      VWF::Application::Reflector.instances( env ).map do |resource, instance|
+        [ resource, Hash[ :clients => Hash[ * instance[:clients].map { |client| [ client.id, nil ] } .flatten( 1 ) ] ] ]
+      end .flatten( 1 )
+    ] .to_json
+
+  end
+
 end

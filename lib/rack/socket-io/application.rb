@@ -209,10 +209,26 @@ module Rack
         @@sessions[resource env]
       end
 
-      # The session data for the resource that this instance connects to.
+      # The session data for the resource that this client connects to.
 
       def session
         @@sessions[resource]
+      end
+
+      # Session data for the instances derived from the given resource.
+
+      def self.instance_sessions env
+        @@sessions.select do |resource, session|
+          resource.start_with? self.resource env
+        end
+      end
+
+      # Session data for the instances derived from the resource that this client connects to.
+
+      def instance_sessions
+        @@sessions.select do |resource, session|
+          resource.start_with? resource
+        end
       end
 
       # This client's id. Generate it when first accessed.
@@ -229,7 +245,7 @@ module Rack
         @@clients[resource env]
       end
 
-      # The clients connected to the resource that this instance connects to.
+      # The clients connected to the resource that this client connects to.
 
       def clients
         @@clients[resource]
@@ -238,12 +254,16 @@ module Rack
       # The socket.io resource for a given environment.
       
       def self.resource env
-        env["vwf.instance"] ?
-          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
-          ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
+        unless env.kind_of? String
+          env["vwf.instance"] ?
+            ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
+            ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
+        else
+          env # pass through if the parameter is already a resource
+        end
       end
 
-      # The socket.io resource this instance connects to.
+      # The socket.io resource this client connects to.
   
       def resource
         env["vwf.instance"] ?
