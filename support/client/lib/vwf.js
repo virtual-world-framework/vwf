@@ -848,18 +848,28 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
 
-                            construct.call( this, 0, nodeID, prototypeID, [], component, undefined, function( nodeID ) {
+                            async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
 
-                                var callbacks = types[nodeID];
-                                types[nodeID] = component; // component specification once loaded
+                                vwf.getType( uri, function( behaviorID ) {
+                                    callback( undefined, behaviorID );
+                                } );
 
-                                callbacks.forEach( function( callback ) {
-                                    callback && callback.call( vwf, nodeID );
+                            }, function( err, behaviorIDs ) {
+
+                                construct.call( vwf, 0, nodeID, prototypeID, behaviorIDs, component, undefined, function( nodeID ) {
+
+                                    var callbacks = types[nodeID];
+                                    types[nodeID] = component; // component specification once loaded
+
+                                    callbacks.forEach( function( callback ) {
+                                        callback && callback.call( vwf, nodeID );
+                                    } );
+
                                 } );
 
                             } );
 
-                        } )
+                        } );
 
                     },
 
