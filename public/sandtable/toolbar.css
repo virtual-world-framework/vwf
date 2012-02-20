@@ -6,6 +6,7 @@ div.wrapper {
 	width:99%;
 	position:absolute;
 	bottom:30px;
+	pointer-events:none;
 }
 div.toolstyle {
 	border-style:solid;

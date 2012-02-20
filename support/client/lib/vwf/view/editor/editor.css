@@ -48,7 +48,7 @@ td
 .input_text
 {
 	height:11px;
-	width:120px;
+	width:90px;
 	font:9pt Arial;
 	padding:3px;
 	color:#153255;
@@ -108,4 +108,12 @@ form
 {
 	padding-left:10px;
 	padding-right:10px;
+}
+
+.methodEntry td
+{
+	font:10pt Arial;
+	width:130px;
+	padding:0px;
+	overflow:hidden;
 }
