@@ -13,7 +13,7 @@ task :build do
     ENV["PATH"] = FileList[ "support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
 
     FileList[ "docs/**/*.md" ].each do |md|
-        sh "Markdown.pl '#{md}' > '#{ md.ext ".html" }'"
+        sh "( cat docs/format/preamble ; Markdown.pl '#{md}' ; cat docs/format/postamble ) > '#{ md.ext ".html" }'"
     end
 
     sh "rocco docs/application/*.vwf.yaml"
