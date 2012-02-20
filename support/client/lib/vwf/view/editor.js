@@ -336,7 +336,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         for ( var key in node.methods ) {
             var method = node.methods[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><div id='rollover-" + key + "'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -355,7 +355,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         for ( var key in node.events ) {
             var nodeEvent = node.events[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><div id='rollover-" + key + "'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -381,7 +381,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
      
-        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodName + "-back' alt='back'/> " + methodName + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:22px'></input></div>");
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodName + "-back' alt='back'/> " + methodName + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:33px'></input></div>");
         jQuery('#' + methodName + '-back').click ( function(evt) {
             
             drillUp.call(self, nodeID);
@@ -409,7 +409,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 }
             }
 
-            self.kernel.callMethod(nodeID, methodName, [parameters]);
+            self.kernel.callMethod(nodeID, methodName, parameters);
         });
 
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
@@ -427,7 +427,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
      
-        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + eventName + "-back' alt='back'/> " + eventName + "<input type='button' class='input_button_call' id='fire' value='Fire' style='float:right;position:relative;top:5px;right:22px'></input></div>");
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + eventName + "-back' alt='back'/> " + eventName + "<input type='button' class='input_button_call' id='fire' value='Fire' style='float:right;position:relative;top:5px;right:33px'></input></div>");
         jQuery('#' + eventName + '-back').click ( function(evt) {
             drillUp.call(self, nodeID);
         });
@@ -455,7 +455,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 }
             }
 
-            self.kernel.fireEvent(nodeID, eventName, [args]);
+            self.kernel.fireEvent(nodeID, eventName, args);
         });
 
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
