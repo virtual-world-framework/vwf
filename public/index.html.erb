@@ -71,7 +71,7 @@
 <%       application, image, name = *applications.shift %>
         <!-- <%= application %> -->
         <div class="example">
-          <a href="<%= application %>">
+          <a href="<%= application + ( application == "earth" ? "?connected=1" : "" ) %>">
             <p><%= name %></p>
             <img src="<%= image %>" alt="<%= name %>" />
           </a>

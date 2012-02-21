@@ -41,8 +41,9 @@
 
     <!-- script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script -->
 
-    <script type="text/javascript" src="http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw"></script>
-    <script type="text/javascript">google.load( "earth", "1" )</script>
+    <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
+    <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
+    <script type="text/javascript">connected && google.load( "earth", "1" )</script>
 
     <script type="text/javascript">
 
@@ -149,7 +150,6 @@
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
     <div id="vwf-root"></div>
-
 
   </body>
 
