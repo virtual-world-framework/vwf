@@ -3,6 +3,7 @@ require "rake/testtask"
 require "rake/clean"
 
 
+CLEAN.include "support/build/Pygments-1.4/**/*.pyc"
 CLOBBER.include "bin/*", "docs/**/*.html"
 
 
