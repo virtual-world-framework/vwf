@@ -8,6 +8,27 @@
       {
         $('.overlay').css('visibility', 'visible');
         $('.overlay').html($('#'+ app + '-content').html());
+        function update(app) {
+          var instances$ = $('.overlay').children('.instances');
+          var match;
+          if ( $('.overlay').children('.app-title').attr('id') == app && $('.overlay').css('visibility') == 'visible' ) {
+            jQuery.getJSON( app + "/admin/instances", function( data ) {
+              if ( $('.overlay').children('.app-title').attr('id') == app && $('.overlay').css('visibility') == 'visible' ) {
+                instances$.empty();
+                instances$.html("<p><b>Instances</b></p>");
+                jQuery.each( data, function( key, value ) {
+                  if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
+                    var instanceHTML = htmlEscape( match[1] );
+                    var size = Object.size(value.clients); 
+                    instances$.append( "<a href='" + app + "/" + instanceHTML + "'>" + instanceHTML + "</a>" + " (" + size + ")" + "<br />" );
+                  }
+                } );
+                setTimeout(update, 1000, app);
+              }
+            } );
+          }
+        };
+        update(app);
       }
       function closeInfo()
       {
@@ -15,30 +36,6 @@
       }
     </script>
     <script>
-
-      setInterval( function() {
-
-        jQuery( "div.content" ).each( function() {
-
-          var applicationHTML = jQuery( this ).children( ".app-title" ).attr( "id" );
-          var instances$ = jQuery( this ).children( ".instances" );
-          var match;
-
-          jQuery.getJSON( applicationHTML + "/admin/instances", function( data ) {
-            instances$.empty();
-            instances$.html("<p><b>Instances</b></p>");
-            jQuery.each( data, function( key, value ) {
-              if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
-                var instanceHTML = htmlEscape( match[1] );
-                var size = Object.size(value.clients); 
-                instances$.append( "<a href='" + applicationHTML + "/" + instanceHTML + "'>" + instanceHTML + " (" + size + ")" + "</a><br />" );
-              }
-            } );
-          } );
-          
-        } );
-
-      }, 5000 );
 
       // From http://stackoverflow.com/a/7124052
 
@@ -72,7 +69,7 @@
 <%   3.times do %>
 <%     if applications.any? %>
 <%       application, image, name = *applications.shift %>
-        <!-- <%= name %> -->
+        <!-- <%= application %> -->
         <div class="example">
           <a href="<%= application %>">
             <p><%= name %></p>
@@ -80,12 +77,12 @@
           </a>
 
           <!-- Info Button -->
-          <div style="position:relative"><img style="position:absolute;right:2px;bottom:-12px" src="info.png" alt="i" onclick="showInfo('<%= name %>')" /></div>
+          <div style="position:relative"><img style="position:absolute;right:2px;bottom:-12px" src="info.png" alt="i" onclick="showInfo('<%= application %>')" /></div>
 
           <!-- Content for Overlay -->
-          <div id='<%= name %>-content' class='content'>
+          <div id='<%= application %>-content' class='content'>
             <p class="exit-button"><img src="exit.png" alt="x" onclick="closeInfo()"/></p>
-            <span class="app-title" id="<%= name %>"><b><%= name %></b></span>
+            <span class="app-title" id="<%= application %>"><b><%= name %></b></span>
             <hr>
             <div class="description">
               <p><b>Description</b></p>
@@ -98,7 +95,7 @@
           </div>
           <!-- End Overlay Content -->
         </div>
-        <!-- END <%= name %> -->
+        <!-- END <%= application %> -->
 <%     end %>
 <%   end %>
       </div>
