@@ -35,7 +35,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
       if instance.nil? && ! request.accept.include?( mime_type :html )  # TODO: pass component request through to normal delegation below?
         Application::Component.new( settings.public_folder ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
       else
-        redirect to request.path_info + "/"
+        redirect to request.path_info + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
       end
 
     # For "/path/to/application/", create an instance and redirect to
@@ -43,7 +43,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
     elsif instance.nil? && private_path.nil?
 
-      redirect to request.path_info + random_instance_id + "/"
+      redirect to request.path_info + random_instance_id + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
 
     # Delegate everything else to the application.
 
