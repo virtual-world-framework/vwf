@@ -432,7 +432,7 @@
             if ( eData ) {
                 var mouseUpObjectID = pointerPickID;
                 if ( mouseUpObjectID && pointerDownID && mouseUpObjectID == pointerDownID ) {
-                    //view.dispatchEvent( mouseUpObjectID, "pointerClick", eData.eventData, eData.eventNodeData );
+                    view.dispatchEvent( mouseUpObjectID, "pointerClick", eData.eventData, eData.eventNodeData );
 
                     var glgeObj = sceneView.state.nodes[mouseUpObjectID].glgeObject;
                     if ( glgeObj ) {
