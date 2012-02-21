@@ -3,11 +3,14 @@ require "rake/testtask"
 require "rake/clean"
 
 
-# CLOBBER.include ""docs/**/*.html""  # TODO: not until the build and manual versions are resolved
+CLOBBER.include "bin/*", "docs/**/*.html"
 
-desc "Generate the documentation and build any child projects."
+
+desc "Update the gems (generating bin/*), and generate the documentation."
 
 task :build do
+
+    sh "bundle install --binstubs"
 
     original_path = ENV["PATH"]
     ENV["PATH"] = FileList[ "support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
@@ -16,8 +19,8 @@ task :build do
         sh "( cat docs/format/preamble ; Markdown.pl '#{md}' ; cat docs/format/postamble ) > '#{ md.ext ".html" }'"
     end
 
-    sh "rocco docs/application/*.vwf.yaml"
-    sh "rocco docs/application/example.js"
+    sh "bundle exec rocco docs/application/*.vwf.yaml"
+    sh "bundle exec rocco docs/application/example.js"
     
     ENV["PATH"] = original_path
 
