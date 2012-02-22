@@ -30,13 +30,26 @@ file "index.html" => "index.html.erb" do |task|
             File.exist? "#{path}/#{base}.#{type}"
         end
 
+        descr = ""
+        begin
+            file = File.new("#{path}/info.vwf.yaml", "r")
+            while (line = file.gets)
+                descr = descr + line
+            end
+            file.close
+        rescue => err
+            # puts "Generating catalog... #{err}"
+            err
+        end
+
         [
             ( base == "index.vwf" ? path : file ),
             type && "#{path}/#{base}.#{type}",
-            path
+            path, 
+            descr
         ]
 
-    end .select do |application, image, name|
+    end .select do |application, image, name, description|
 
         image
 

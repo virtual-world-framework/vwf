@@ -68,7 +68,7 @@
       <div class="row">
 <%   3.times do %>
 <%     if applications.any? %>
-<%       application, image, name = *applications.shift %>
+<%       application, image, name, description = *applications.shift %>
         <!-- <%= application %> -->
         <div class="example">
           <a href="<%= application + ( application == "earth" ? "?connected=1" : "" ) %>">
@@ -86,7 +86,7 @@
             <hr>
             <div class="description">
               <p><b>Description</b></p>
-              <p><%= name %></p>
+              <p><%= description %></p>
             </div>
             <div class='instances'>
               <p><b>Instances</b></p>
