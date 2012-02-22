@@ -32,7 +32,7 @@ file "index.html" => "index.html.erb" do |task|
 
         descr = ""
         begin
-            file = File.new("#{path}/info.vwf.yaml", "r")
+            file = File.new("#{path}/application.vwf.yaml", "r")
             while (line = file.gets)
                 descr = descr + line
             end
