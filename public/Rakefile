@@ -27,12 +27,12 @@ file "index.html" => "index.html.erb" do |task|
         base = File.basename name, ext
 
         type = image_types.find do |type|
-            File.exist? "#{path}/#{base}.#{type}"
+            File.exist? "#{path}/#{base}.catalog.#{type}"
         end
 
         descr = ""
         begin
-            file = File.new("#{path}/application.vwf.yaml", "r")
+            file = File.new("#{path}/#{base}.catalog.yaml", "r")
             while (line = file.gets)
                 descr = descr + line
             end
@@ -44,7 +44,7 @@ file "index.html" => "index.html.erb" do |task|
 
         [
             ( base == "index.vwf" ? path : file ),
-            type && "#{path}/#{base}.#{type}",
+            type && "#{path}/#{base}.catalog.#{type}",
             path, 
             descr
         ]
