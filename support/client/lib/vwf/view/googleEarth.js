@@ -40,7 +40,6 @@
                 this.window = window;
             } 
             this.controlClient = "NONE";
-            this.logger.enable = true;
 
         },
   
