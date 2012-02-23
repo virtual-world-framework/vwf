@@ -1,6 +1,7 @@
 require "rake"
 require "rake/clean"
 require "tilt"
+require "yaml"
 
 
 CLOBBER.include "index.html"
@@ -32,13 +33,9 @@ file "index.html" => "index.html.erb" do |task|
 
         descr = ""
         begin
-            file = File.new("#{path}/#{base}.catalog.yaml", "r")
-            while (line = file.gets)
-                descr = descr + line
-            end
-            file.close
+            descrFile = YAML.load( File.read( "#{path}/#{base}.catalog.yaml" ) )
+            descr = descrFile["description"]
         rescue => err
-            # puts "Generating catalog... #{err}"
             err
         end
 
