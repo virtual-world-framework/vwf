@@ -162,6 +162,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         createdEvent: function( nodeID, eventName, eventParameters ) {
             var node = this.nodes[ nodeID ];
+
+            //console.info( "     EVENT editor.createdEvent( "+nodeID+", " +eventName+", "+eventParameters+ " )" );
             if ( node ) {
                 node.events[ eventName ] = eventParameters;
             }         
@@ -292,6 +294,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
         }
         
+        // Add node properties
         for ( var i = 0; i < node.properties.length; i++ ) {
             $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div><hr>");
             
@@ -324,7 +327,45 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         $(topdownTemp + ' hr:last').css('height', '3px');
+
+        // Add prototype properties
+        var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
+        for ( var key in prototypeProperties ) {
+            var prop = prototypeProperties[key];
+
+            $(topdownTemp).append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
+            
+            $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
+                var inputID = ($(this).attr("id"));
+                var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
+                var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                var propValue = $(this).val();
+                
+                try {
+                    propValue = JSON.parse(propValue);
+                    self.kernel.setProperty(nodeID, propName, propValue);
+                } catch (e) {
+                    // restore the original value on error
+                    $(this).val(node.properties[ propName ].value);
+                }
+            } );
+
+            $('#input-' + nodeID + '-' + prop.name).keydown( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $('#input-' + nodeID + '-' + prop.name).keypress( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $('#input-' + nodeID + '-' + prop.name).keyup( function(evt) {
+                evt.stopPropagation();
+            });
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
         
+        // Add node children
         for ( var i = 0; i < node.children.length; i++ ) {
             $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div><hr></div>");
             $('#' + node.children[i].ID).click( function(evt) {
@@ -334,6 +375,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
+        // Add node methods
         for ( var key in node.methods ) {
             var method = node.methods[key];
             $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
@@ -353,8 +395,51 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
+        // Add prototype methods
+        var prototypeMethods = getMethods.call( this, this.kernel.kernel, node.extendsID );
+        for ( var key in prototypeMethods ) {
+            var method = prototypeMethods[key];
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#rollover-' + key).mouseover( function(evt) {
+                $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
+            });
+            $('#rollover-' + key).mouseleave( function(evt) {
+                $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
+            });
+            $('#call-' + key).click( function(evt) {
+                self.kernel.callMethod( nodeID, $(this).attr("id").substring(5) );
+            });
+            $('#param-' + key).click( function(evt) {
+                setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
+            });
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
+
+        // Add node events
         for ( var key in node.events ) {
             var nodeEvent = node.events[key];
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#rollover-' + key).mouseover( function(evt) {
+                $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
+            });
+            $('#rollover-' + key).mouseleave( function(evt) {
+                $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
+            });
+            $('#fire-' + key).click( function(evt) {
+                self.kernel.fireEvent( nodeID, $(this).attr("id").substring(5) );
+            });
+            $('#arg-' + key).click( function(evt) {
+                setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
+            });
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
+
+        // Add prototype events
+        var prototypeEvents = getEvents.call( this, this.kernel.kernel, node.extendsID );
+        for ( var key in prototypeEvents ) {
+            var nodeEvent = prototypeEvents[key];
             $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
@@ -476,6 +561,54 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
                 
         return prototypes;
+    }
+
+    function getProperties( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var pProperties = {};
+        if ( pTypes ) {
+            for ( var i=0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if ( nd && nd.properties ) {
+                    for ( var key in nd.properties ) {
+                        pProperties[ key ] = nd.properties[ key ];
+                    }
+                }
+            }
+        }
+        return pProperties;
+    }
+
+    function getEvents( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var events = {};
+        if ( pTypes ) {
+            for ( var i = 0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if  ( nd && nd.events ) {
+                    for ( var key in nd.events ) {
+                        events[ key ] = nd.events[key];
+                    }
+                }
+            }
+        }
+        return events;
+    }
+
+    function getMethods( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var methods = {};
+        if ( pTypes ) {
+            for ( var i = 0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if  ( nd && nd.methods ) {
+                    for ( var key in nd.methods ) {
+                        methods[ key ] = nd.methods[key];
+                    }
+                }
+            }
+        }
+        return methods;
     }
 
     function isGlgeSceneDefinition( prototypes ) {
