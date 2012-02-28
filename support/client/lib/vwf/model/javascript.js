@@ -190,7 +190,7 @@ node.id = childID; // TODO: move to vwf/model/object
                 }
             } );
 
-            node.private.change = 0; // incremented whenever "future"-related changes occur
+            node.private.change = 1; // incremented whenever "future"-related changes occur
 
         },
 
