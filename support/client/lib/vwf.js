@@ -1202,7 +1202,11 @@ return component;
 
                 for ( var propertyName in model_properties ) {
                     if ( model_properties[propertyName] !== undefined ) {
-                        intermediate_properties[propertyName] = model_properties[propertyName];
+                        if ( objectIsTypedArray( model_properties[propertyName] ) ) {
+                            intermediate_properties[propertyName] = Array.prototype.slice.call( model_properties[propertyName] ); // convert typed arrays to regular arrays for proper JSON serialization
+                        } else {
+                            intermediate_properties[propertyName] = model_properties[propertyName];
+                        }
                     }
                 }
 
@@ -2019,6 +2023,38 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             }
             
             return isComponent; 
+        };
+
+        // -- objectIsTypedArray  ------------------------------------------------------------------
+
+        // Determine if a JavaScript object is a component specification by searching for component
+        // specification attributes in the candidate object.
+
+        var objectIsTypedArray = function( candidate ) {
+
+            var typedArrayTypes = [
+                Int8Array,
+                Uint8Array,
+                // Uint8ClampedArray,
+                Int16Array,
+                Uint16Array,
+                Int32Array,
+                Uint32Array,
+                Float32Array,
+                Float64Array,
+            ];
+
+            var isTypedArray = false;
+
+            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+
+                typedArrayTypes.forEach( function( typedArrayType ) {
+                    isTypedArray = isTypedArray || candidate instanceof typedArrayType;
+                } );
+
+            }
+            
+            return isTypedArray; 
         };
 
         // -- valueHasAccessors --------------------------------------------------------------------
