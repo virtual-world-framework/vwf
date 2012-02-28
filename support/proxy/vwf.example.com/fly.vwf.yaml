@@ -211,4 +211,4 @@ scripts:
   }
   this.pointerClick = function()  {  // when clicked ...
     this["fly-flying"] = ! this["fly-flying"];  // ... toggle the enabled flag
-  }
+  }  //@ sourceURL=fly.vwf

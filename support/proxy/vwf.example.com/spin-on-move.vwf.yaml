@@ -78,5 +78,5 @@ scripts:
       ];  
       this.rotation = newRot;
       this["spin-value"] = (this["spin-axis"][0] * newRot[0]) + (this["spin-axis"][1] * newRot[1]) + (this["spin-axis"][2] * newRot[2]);  
-  }
+  } //@ sourceURL=spin-on-move.vwf
 

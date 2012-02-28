@@ -28,6 +28,8 @@ events:
   pointerMove:
   pointerLeave:
   pointerWheel:
+methods:
+  update:  
 scripts:
 - text: |
     var counter = 1;
@@ -588,29 +590,28 @@ scripts:
         this.activeCameraComp.position = [ pos[0] + incX, pos[1] + incY, pos[2] ];      
       }      
     }
-methods:
-  update: |
-    //console.info( "update   this.input + " + this.input );
-    if ( this.input ) {
-      var delta = this.input.pointerDelta();
-      var pi = this.input.pointerInfo;
-      //console.info( "update   delta = " + delta );
-      if ( delta ) {
+    this.update = function() {
+      //console.info( "update   this.input + " + this.input );
+      if ( this.input ) {
+        var delta = this.input.pointerDelta();
+        var pi = this.input.pointerInfo;
+        //console.info( "update   delta = " + delta );
+        if ( delta ) {
         if ( this.pointerIsDown() ) {
           if ( this.input.pointerInfo.buttons.left ) {
-            var pi = this.input.pointerInfo;
-            switch( this.navmode ) {
-              case "orbit":
-                this.orbit( delta[0], delta[1] );
-                break;          
-              case "walk":
-              
-                if ( this.dragModeMove )
-                  this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
-                else
-                  this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
-                break;
-            } 
+          var pi = this.input.pointerInfo;
+          switch( this.navmode ) {
+            case "orbit":
+            this.orbit( delta[0], delta[1] );
+            break;          
+            case "walk":
+            
+            if ( this.dragModeMove )
+              this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
+            else
+              this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
+            break;
+          } 
           }
         }   
         if ( this.input.lookActive ) {
@@ -619,25 +620,27 @@ methods:
         if ( this.input.moveActive ) {
           this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
         }
-      }
-      if ( this.input.keysAreDown() ) {
+        }
+        if ( this.input.keysAreDown() ) {
         this.handleKeyDown();
-      }        
-      if ( this.input.button1Down ) {
+        }        
+        if ( this.input.button1Down ) {
         if ( this.navMode == "walk" ) {
           this.cameraZ( 1.0 );
         } else if ( this.navMode == "orbit" ) {
           this.zoom( true );
         }     
-      }    
-      if ( this.input.button2Down ) {
+        }    
+        if ( this.input.button2Down ) {
         if ( this.navMode == "walk" ) {
           this.cameraZ( -1.0 );
         } else if ( this.navMode == "orbit" ) {
           this.zoom( false );
         }     
-      }     
-      if ( this.input.futureActive() ) {
+        }     
+        if ( this.input.futureActive() ) {
         this.future( 0.1 ).update();
-      }
-    }
+        }
+      }	
+    } //@ sourceURL=navScene.vwf
+

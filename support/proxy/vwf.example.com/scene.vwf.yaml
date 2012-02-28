@@ -20,7 +20,7 @@ properties:
           }
         }
       }
-    value: "http-vwf-example-com-camera-vwf-maincamera"
+    value: "http-vwf-example-com-camera-vwf-camera"
   ambientColor: 
     set: |
       this.ambientColor = value;
@@ -31,7 +31,7 @@ scripts:
     var scene = this;
     this.initialize = function() {
       console.info( "==================== scene ====================" );
-      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
+      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.ambientColor = this.ambientColor;
     }
     this.getChild = function( childName ) {
@@ -50,7 +50,7 @@ scripts:
         if ( this.getChild ) {
           this.activeCameraComp = this.getChild( this.activeCamera );
           if ( !this.activeCameraComp ) {
-             this.activeCameraComp = this.maincamera;
+             this.activeCameraComp = this.camera;
           }
         }
       }
@@ -58,5 +58,4 @@ scripts:
     }
     this.load = function( obj, objName ){
       vwf.createNode( "index-vwf", obj, objName );
-    }
-  type: application/javascript
+    } //@ sourceURL=scene.vwf
