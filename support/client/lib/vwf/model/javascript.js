@@ -319,6 +319,15 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
 
             node.private.change++; // invalidate the "future" cache
 
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
+        },
+
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            return propertyValue !== undefined ?
+                this.settingProperty( nodeID, propertyName, propertyValue ) : undefined;
         },
 
         // TODO: deletingProperty
@@ -330,10 +339,6 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
             var node = this.nodes[nodeID];
 
 if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
-
-            if ( ! node.properties.hasOwnProperty( propertyName ) ) {
-                this.kernel.createProperty( nodeID, propertyName, undefined );
-            }
 
             var setter = findSetter( node, propertyName );
 

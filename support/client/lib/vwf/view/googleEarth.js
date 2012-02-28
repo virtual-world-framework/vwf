@@ -151,6 +151,9 @@
         createdProperty: function (nodeID, propertyName, propertyValue) {
         },        
 
+        initializedProperty: function (nodeID, propertyName, propertyValue) {
+        },        
+
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
             var value = undefined;

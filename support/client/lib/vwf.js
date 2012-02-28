@@ -1252,6 +1252,8 @@ return component;
             } );
 
             this.logger.groupEnd();
+
+            return propertyValue;
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -1261,6 +1263,8 @@ return component;
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
             this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
+
+            var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
 
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
@@ -1287,8 +1291,13 @@ return component;
 
                     // Make the call.
 
-                    var value = model.settingProperty &&
-                        model.settingProperty( nodeID, propertyName, propertyValue );
+                    if ( initializing ) {
+                        var value = model.initializingProperty &&
+                            model.initializingProperty( nodeID, propertyName, propertyValue );
+                    } else {
+                        var value = model.settingProperty &&
+                            model.settingProperty( nodeID, propertyName, propertyValue );
+                    }
 
                     // Look for a return value potentially stored by a reentrant call here if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
@@ -1328,7 +1337,11 @@ return component;
                 // been set.  TODO: only want to call when actually set and with final value
 
                 this.views.forEach( function( view ) {
-                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
+                    if ( initializing ) {
+                        view.initializedProperty && view.initializedProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
+                    } else {
+                        view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
+                    }
                 } );
 
             }
@@ -1417,7 +1430,7 @@ return component;
                 // Delegate to the prototype if we didn't get a result from the current node.
 
                 if ( propertyValue === undefined ) {
-                    var prototypeID = Object.getPrototypeOf( vwf.models.javascript.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+                    var prototypeID = nodePrototypeID.call( this, nodeID );
                     if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
                         propertyValue = this.getProperty( prototypeID, propertyName );
                     }
@@ -1860,27 +1873,42 @@ return component;
                     // delegates to the models and views as above.
 
                     nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {
+
                         if ( valueHasAccessors( propertyValue ) ) {
-                            vwf.createProperty( nodeID, propertyName, propertyValue.value, propertyValue.get, propertyValue.set );
+                            if ( propertyValue.get !== undefined || propertyValue.set !== undefined ||
+                                    ! nodeHasProperty.call( vwf, nodeID, propertyName ) ) {
+                                vwf.createProperty( nodeID, propertyName, propertyValue.value, propertyValue.get, propertyValue.set );
+                            } else {
+                                vwf.setProperty( nodeID, propertyName, propertyValue.value );
+                            }
                         } else {
-                            vwf.createProperty( nodeID, propertyName, propertyValue );
+                            if ( ! nodeHasProperty.call( vwf, nodeID, propertyName ) ) {
+                                vwf.createProperty( nodeID, propertyName, propertyValue );
+                            } else {
+                                vwf.setProperty( nodeID, propertyName, propertyValue );
+                            }
                         }
+
                     } );
 
                     nodeComponent.methods && jQuery.each( nodeComponent.methods, function( methodName, methodValue ) {
+
                         if ( valueHasBody( methodValue ) ) {
                             vwf.createMethod( nodeID, methodName, methodValue.parameters, methodValue.body );
                         } else {
                             vwf.createMethod( nodeID, methodName, undefined, methodValue );
                         }
+
                     } );
 
                     nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName, eventValue ) {
+
                         if ( valueHasBody( eventValue ) ) {
                             vwf.createEvent( nodeID, eventName, eventValue.parameters );
                         } else {
                             vwf.createEvent( nodeID, eventName, undefined );
                         }
+
                     } );
 
                     callback( undefined, undefined );
@@ -1947,6 +1975,18 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             } );
 
             this.logger.groupEnd();
+        };
+
+        var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"
+            return propertyName in Object.getPrototypeOf( this.models.javascript.nodes[nodeID] ).properties;  // TODO: this is peeking inside of vwf-model-javascript
+        };
+
+        var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"
+            return this.models.object.objects[nodeID].properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-object
+        };
+
+        var nodePrototypeID = function( nodeID ) { // invoke with the kernel as "this"
+            return Object.getPrototypeOf( this.models.javascript.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
         };
 
         // -- objectIsComponent --------------------------------------------------------------------

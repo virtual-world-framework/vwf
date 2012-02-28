@@ -173,6 +173,10 @@
 
     module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) { };
 
+    // -- initializedProperty ----------------------------------------------------------------------
+
+    module.prototype.initializedProperty = function (nodeID, propertyName, propertyValue) { };
+
     // TODO: deletedProperty
 
     // -- satProperty ------------------------------------------------------------------------------
