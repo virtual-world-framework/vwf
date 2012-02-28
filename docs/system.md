@@ -104,6 +104,8 @@ Model Drivers
 
 *   creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet )
 
+*   initializingProperty( nodeID, propertyName, propertyValue )
+
 *   deletingProperty( nodeID, propertyName )
 
 *   gettingProperty( nodeID, propertyName, propertyValue )
@@ -143,6 +145,8 @@ View Drivers
 *   removedChild( nodeID, childID )
 
 *   createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet )
+
+*   initializedProperty( nodeID, propertyName, propertyValue )
 
 *   deletingProperty( nodeID, propertyName )
 

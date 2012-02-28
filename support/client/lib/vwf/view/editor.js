@@ -1,4 +1,4 @@
-    define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/editor creates a view interface for editor functions. 
 
@@ -97,8 +97,15 @@
         },
         
         createdProperty: function (nodeID, propertyName, propertyValue) {
+
+            return this.initializedProperty(nodeID, propertyName, propertyValue);   
+        },
+        
+        initializedProperty: function (nodeID, propertyName, propertyValue) {
    
             var node = this.nodes[ nodeID ];
+if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
+
             var property = node.properties[ propertyName ] = {
                 name: propertyName,
                 value: propertyValue,
@@ -130,7 +137,7 @@
         //removedChild: [ /* nodeID, childID */ ],
 
         satProperty: function (nodeID, propertyName, propertyValue) {
-            var self = this;
+
             var node = this.nodes[ nodeID ];
 if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 

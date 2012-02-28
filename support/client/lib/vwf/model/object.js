@@ -84,7 +84,13 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-            return this.objects[nodeID].properties[propertyName] = propertyValue;
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
+        },
+
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.settingProperty( nodeID, propertyName, propertyValue );
         },
 
         // TODO: deletingProperty

@@ -217,6 +217,13 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 propertyName, propertyValue );
         },
 
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.model.initializingProperty && this.model.initializingProperty( this.kernel_to_model[nodeID] || nodeID,
+                propertyName, propertyValue );
+        },
+
         // TODO: deletingProperty
 
         // -- settingProperty ----------------------------------------------------------------------

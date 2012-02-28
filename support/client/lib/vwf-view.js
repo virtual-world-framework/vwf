@@ -185,6 +185,12 @@
         vwf.logger.info( namespace + ".createdProperty " + nodeID + " " + propertyName + " " + propertyValue );
     };
 
+    // -- initializedProperty ----------------------------------------------------------------------
+
+    module.prototype.initializedProperty = function( nodeID, propertyName, propertyValue ) {
+        vwf.logger.info( namespace + ".initializedProperty " + nodeID + " " + propertyName + " " + propertyValue );
+    };
+
     // TODO: deletedProperty
 
     // -- satProperty ------------------------------------------------------------------------------

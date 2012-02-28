@@ -370,6 +370,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
 
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
+        },
+
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            var value = undefined;
+
             if ( !( propertyValue === undefined ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( !node ) node = this.state.scenes[ nodeID ];
@@ -381,11 +390,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             break;
 
                         default:
-                            this.settingProperty( nodeID, propertyName, propertyValue );            
+                            value = this.settingProperty( nodeID, propertyName, propertyValue );            
                             break;
                     }
                 }
             }
+
+            return value;
         },
 
         // -- settingProperty ----------------------------------------------------------------------

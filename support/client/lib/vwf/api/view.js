@@ -7,6 +7,7 @@ define( {
     removedChild: [ /* nodeID, childID */ ],
 
     createdProperty: [ /* nodeID, propertyName, propertyValue */ ],
+    initializedProperty: [ /* nodeID, propertyName, propertyValue */ ],
     /* TODO: deletedProperty, */
     satProperty: [ /* nodeID, propertyName, propertyValue */ ],
     gotProperty: [ /* nodeID, propertyName, propertyValue */ ],

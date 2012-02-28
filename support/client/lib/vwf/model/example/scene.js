@@ -61,6 +61,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             return object[propertyName] = propertyValue;
         },
 
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+            var object = this.objects[nodeID] || ( this.objects[nodeID] = {} );
+            return object[propertyName] = propertyValue;
+        },
+
         // TODO: deletingProperty
 
         // -- settingProperty ----------------------------------------------------------------------

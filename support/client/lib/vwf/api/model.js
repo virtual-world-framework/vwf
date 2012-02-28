@@ -14,6 +14,7 @@ define( {
     settingProperties: [],
     gettingProperties: [],
     creatingProperty: [],
+    initializingProperty: [],
     /* TODO: deletingProperty, */
     settingProperty: [],
     gettingProperty: [],

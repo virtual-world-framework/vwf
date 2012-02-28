@@ -122,7 +122,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
+        },
 
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            var value = undefined;
             //this.logger.enable = true;
             //this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enable = false;
@@ -173,6 +180,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             }
 
+            return value;
         },
 
         // TODO: deletingProperty
