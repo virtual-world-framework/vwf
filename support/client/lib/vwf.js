@@ -171,7 +171,7 @@
             // into an application specification object if it's valid JSON, otherwise keep the query
             // string and assume it's a URI.
 
-            var application = getQueryString( "application" );
+            var application = getQueryString( "application" );  // TODO: move to index.html; don't reach out to the window from the kernel
 
             // Parse the function parameters. If the first parameter is not an array, then treat it
             // as the application specification. Otherwise, fall back to the "application" parameter
@@ -330,7 +330,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // "jsonp-polling": { timeout: 90000 },
                     // }
 
-    			} );
+                } );
 
             } catch ( e ) {
 
@@ -649,21 +649,21 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
             // Call ticking() on each model.
 
-            vwf.models.forEach( function( model ) {
-                model.ticking && model.ticking( vwf.now ); // TODO: maintain a list of tickable models and only call those
-            } );
+            this.models.forEach( function( model ) {
+                model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
+            }, this );
 
             // Call ticked() on each view.
 
-            vwf.views.forEach( function( view ) {
-                view.ticked && view.ticked( vwf.now ); // TODO: maintain a list of tickable views and only call those
-            } );
+            this.views.forEach( function( view ) {
+                view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
+            }, this );
 
             // Call tick() on each tickable node.
 
-            vwf.tickable.nodeIDs.forEach( function( nodeID ) {
-                vwf.callMethod( nodeID, "tick", [ vwf.now ] );
-            } );
+            this.tickable.nodeIDs.forEach( function( nodeID ) {
+                this.callMethod( nodeID, "tick", [ this.now ] );
+            }, this );
 
         };
 
@@ -753,14 +753,14 @@ vwf.addChild( nodeID, childNodeID, childName );
             // Call deletingNode() on each model. The node is considered deleted after each model
             // has run.
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
             } );
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.deletedNode && view.deletedNode( nodeID );
             } );
 
@@ -881,16 +881,13 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
         };
 
-
-
-
         // -- setNode ------------------------------------------------------------------------------
 
         this.setNode = function( nodeID, component ) {
 
 Object.keys( component ).forEach( function( nodeID ) {
-    vwf.setProperties( nodeID, component[nodeID] );
-} );
+    this.setProperties( nodeID, component[nodeID] );
+}, this );
 
 return;
 
@@ -920,10 +917,10 @@ return;
 
             var component = {};
 
-Object.keys( vwf.models.object.objects ).forEach( function( nodeID ) {
-    component[nodeID] = vwf.getProperties( nodeID );
+Object.keys( this.models.object.objects ).forEach( function( nodeID ) {
+    component[nodeID] = this.getProperties( nodeID );
     Object.keys( component[nodeID] ).length || delete component[nodeID];
-} );
+}, this );
 
 return component;
 
@@ -986,7 +983,7 @@ return component;
 
             var prototypeID = undefined;
 
-            vwf.models.some( function( model ) {
+            this.models.some( function( model ) {
                 prototypeID = model.prototyping && model.prototyping( nodeID );
                 return prototypeID !== undefined;
             } );
@@ -1011,7 +1008,6 @@ return component;
             return prototypeIDs;
         }
 
-
         // -- addChild -----------------------------------------------------------------------------
 
         this.addChild = function( nodeID, childID, childName ) {
@@ -1021,14 +1017,14 @@ return component;
             // Call addingChild() on each model. The child is considered added after each model has
             // run.
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 model.addingChild && model.addingChild( nodeID, childID, childName );
             } );
 
             // Call addedChild() on each view. The view is being notified that a child has been
             // added.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
@@ -1044,14 +1040,14 @@ return component;
             // Call removingChild() on each model. The child is considered removed after each model
             // has run.
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 model.removingChild && model.removingChild( nodeID, childID );
             } );
 
             // Call removedChild() on each view. The view is being notified that a child has been
             // removed.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
@@ -1083,7 +1079,7 @@ return component;
 
             var parent = undefined;
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 var modelParent = model.parenting && model.parenting( nodeID );
                 parent = modelParent !== undefined ? modelParent  : parent;
             } );
@@ -1102,7 +1098,7 @@ return component;
 
             var children = [];
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 var modelChildren = model.childrening && model.childrening( nodeID ) || [];
                 Array.prototype.push.apply( children, modelChildren );
             } );
@@ -1121,7 +1117,7 @@ return component;
 
             var name = undefined;
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 var modelName = model.naming && model.naming( nodeID );
                 name = modelName !== undefined ? modelName : name;
             } );
@@ -1139,7 +1135,7 @@ return component;
 
             // Call settingProperties() on each model.
 
-            properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
+            properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
 
                 var model_properties = {};
 
@@ -1164,7 +1160,7 @@ return component;
 
             // Call satProperties() on each view.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
 
                 if ( view.satProperties ) {
                     view.satProperties( nodeID, properties );
@@ -1191,7 +1187,7 @@ return component;
 
             // Call gettingProperties() on each model.
 
-            var properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+            var properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
 
                 var model_properties = {};
 
@@ -1200,7 +1196,7 @@ return component;
                 } else if ( model.gettingProperty ) {
                     for ( var propertyName in intermediate_properties ) {
                         model_properties[propertyName] =
-                            model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );  // TODO: probably don't need propertyValue here
+                            model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );
                     }
                 }
 
@@ -1216,7 +1212,7 @@ return component;
 
             // Call gotProperties() on each view.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
 
                 if ( view.gotProperties ) {
                     view.gotProperties( nodeID, properties );
@@ -1244,14 +1240,14 @@ return component;
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
             // Call createdProperty() on each view. The view is being notified that a property has
             // been created.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
@@ -1279,7 +1275,7 @@ return component;
             // has performed the set and dictates the return value. The property is considered set
             // after each model has run.
 
-            vwf.models.some( function( model, index ) {
+            this.models.some( function( model, index ) {
 
                 // Skip models up through the one making the most recent call here (if any).
 
@@ -1331,7 +1327,7 @@ return component;
                 // Call satProperty() on each view. The view is being notified that a property has
                 // been set.  TODO: only want to call when actually set and with final value
 
-                vwf.views.forEach( function( view ) {
+                this.views.forEach( function( view ) {
                     view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
                 } );
 
@@ -1369,7 +1365,7 @@ return component;
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
-            vwf.models.some( function( model, index ) {
+            this.models.some( function( model, index ) {
 
                 // Skip models up through the one making the most recent call here (if any).
 
@@ -1423,13 +1419,13 @@ return component;
                 if ( propertyValue === undefined ) {
                     var prototypeID = Object.getPrototypeOf( vwf.models.javascript.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
                     if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
-                        propertyValue = vwf.getProperty( prototypeID, propertyName );
+                        propertyValue = this.getProperty( prototypeID, propertyName );
                     }
                 }
 
                 // Call gotProperty() on each view.
 
-                vwf.views.forEach( function( view ) {
+                this.views.forEach( function( view ) {
                     view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
 
@@ -1451,14 +1447,14 @@ return component;
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
             // Call createdMethod() on each view. The view is being notified that a method has been
             // created.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
@@ -1476,14 +1472,14 @@ return component;
 
             var methodValue = undefined;
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
                 methodValue = value !== undefined ? value : methodValue;
             } );
 
             // Call calledMethod() on each view.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
             } );
 
@@ -1501,14 +1497,14 @@ return component;
             // Call creatingEvent() on each model. The event is considered created after each model
             // has run.
 
-            vwf.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
             } );
 
             // Call createdEvent() on each view. The view is being notified that a event has been
             // created.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
             } );
 
@@ -1639,7 +1635,7 @@ return component;
 
             var scriptValue = undefined;
 
-            vwf.models.some( function( model ) {
+            this.models.some( function( model ) {
                 scriptValue = model.executing && model.executing( nodeID, scriptText, scriptType );
                 return scriptValue !== undefined;
             } );
@@ -1647,7 +1643,7 @@ return component;
             // Call executed() on each view. The view is being notified that a script has been
             // executed.
 
-            vwf.views.forEach( function( view ) {
+            this.views.forEach( function( view ) {
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
@@ -1691,25 +1687,25 @@ return component;
 
             return {
 
-				enable: false,
+                enable: false,
 
                 log: function( /* function_name, ... */ ) {
                     if ( this.enable ) {
-						window.console && console.log && console.log.apply( console, prefixed_arguments.apply( this, arguments ) );
-					}
+                        window.console && console.log && console.log.apply( console, prefixed_arguments.apply( this, arguments ) );
+                    }
                 },
 
                 debug: function( /* function_name, ... */ ) {
                     if ( this.enable ) {
-						window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
-					}
+                        window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
+                    }
                     // window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
                 },
 
                 info: function( /* function_name, ... */ ) {
                     if ( this.enable ) {
-						window.console && console.info && console.info.apply( console, prefixed_arguments.apply( this, arguments ) );
-					}
+                        window.console && console.info && console.info.apply( console, prefixed_arguments.apply( this, arguments ) );
+                    }
                 },
 
                 warn: function( /* function_name, ... */ ) {
@@ -1722,20 +1718,20 @@ return component;
 
                 group: function( /* function_name, ... */ ) {
                     if ( this.enable ) {
-						window.console && console.group && console.group.apply( console, prefixed_arguments.apply( this, arguments ) );
-					}
+                        window.console && console.group && console.group.apply( console, prefixed_arguments.apply( this, arguments ) );
+                    }
                 },
 
                 groupCollapsed: function( /* function_name, ... */ ) {
                     if ( this.enable ) {
-						window.console && console.groupCollapsed && console.groupCollapsed.apply( console, prefixed_arguments.apply( this, arguments ) );
-					}
+                        window.console && console.groupCollapsed && console.groupCollapsed.apply( console, prefixed_arguments.apply( this, arguments ) );
+                    }
                 },
 
                 groupEnd: function( /* function_name, ... */ ) {
                     if ( this.enable ) {
-						window.console && console.groupEnd && console.groupEnd.apply( console, prefixed_arguments.apply( this, arguments ) );
-					}
+                        window.console && console.groupEnd && console.groupEnd.apply( console, prefixed_arguments.apply( this, arguments ) );
+                    }
                 },
 
             };
@@ -1768,7 +1764,7 @@ return component;
 
         this.logger = {
 
-			enable: false,
+            enable: false,
             log: function() { if ( this.enable ) { window.console && console.log && console.log.apply( console, arguments ) } },
             debug: function() { if ( this.enable ) { window.console && console.debug && console.debug.apply( console, arguments ) } },
             info: function() { if ( this.enable ) { window.console && console.info && console.info.apply( console, arguments ) } },
@@ -1951,7 +1947,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             } );
 
             this.logger.groupEnd();
-        }
+        };
 
         // -- objectIsComponent --------------------------------------------------------------------
 
