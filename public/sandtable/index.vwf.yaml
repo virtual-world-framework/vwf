@@ -4,16 +4,19 @@ source: index.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-camera-vwf-maincamera"
+  activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
   loadDone: false
 scripts:
 - text: |
     this.initialize = function() {
       //console.info( "================ sandtable ================" );
-      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
-      this.loadDone = true;
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-maincamera", "lookAt", "http-vwf-example-com-node3-vwf-sceneCenter" );
+      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "position", [ 0, 20000, 10000 ] );
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "rotation", [ 1.56, 3.141, 0 ] );
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "far", 500000 );
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "near", 2 );                        
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "lookAt", "http-vwf-example-com-node3-vwf-sceneCenter" );
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
       // console.info( "selected color", color, this.toolbar.selectedColor );
@@ -39,7 +42,7 @@ children:
           this.inputMode = value;
           this.inputModeChanged( value );
         value:
-          "orbit"      
+          "orbit"
     methods:
       clear: |
         this.clearing();
@@ -59,22 +62,6 @@ children:
     extends: http://vwf.example.com/node3.vwf
     properties:
       position: [ 0, 0, 0 ]
-  maincamera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
-      walkMode: "walk"
-      cameraType: "perspective"
-      position: [ 0, 20000, 10000 ]
-      rotation: [ 1.56, 3.14, 0 ]
-      far: 500000
-      near: 2
-      lookAt: "http-vwf-example-com-node3-vwf-sceneCenter"
-    scripts:
-    - text: |
-        this.initialize = function() {
-          this.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
-        }
-      type: application/javascript      
   light1:
     extends: http://vwf.example.com/light.vwf
     properties:

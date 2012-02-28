@@ -75,7 +75,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     type: childExtendsID,
                     camera: {
                         ID: undefined,
-                        defaultCamID: "http-vwf-example-com-camera-vwf-defaultCamera",
+                        defaultCamID: "http-vwf-example-com-camera-vwf-camera",
                         glgeCameras: {},
                     },
                     xmlColladaObjects: [],
@@ -92,11 +92,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     sceneNode.glgeScene.setCamera( cam );
                     sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = cam;
                 }
-                sceneNode.glgeScene.camera.name = "defaultCamera";
+                sceneNode.glgeScene.camera.name = "camera";
                 this.state.cameraInUse = sceneNode.glgeScene.camera;
 
                 var camType = "http://vwf.example.com/camera.vwf";
-                vwf.createNode( childID, { "extends": camType }, "defaultCamera", undefined );    
+                vwf.createNode( childID, { "extends": camType }, "camera", undefined );    
 
                 var model = this;
                 var xmlDocLoadedCallback = callback;

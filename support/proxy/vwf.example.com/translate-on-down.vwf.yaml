@@ -32,4 +32,4 @@ scripts:
       } else {
         this.position = initialPosition;
       }
-  }
+  } //@ sourceURL=translate-on-down.vwf

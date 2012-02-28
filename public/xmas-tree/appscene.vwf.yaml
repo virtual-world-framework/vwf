@@ -79,15 +79,15 @@ scripts:
     this.initialize = function() {
       this.nodesCreated = [];
     }
-    this.keyDown = function( keyInfo ) {
+    this.keyDown = this.events.add( function( keyInfo ) {
       var key = undefined;
       for ( kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
-        if ( key.char == " " ) {
+        if ( key.char == " " || key.key == "space" ) {
           this.createObject();
         }
       }
-    }    
+    }, this );   
     this.pointerDown = function( pointerInfo, pickInfo ) {
       mouseIsDown = true;
       mouseDownTime = vwf.time();
@@ -96,7 +96,7 @@ scripts:
       mouseIsDown = false;
       var now =  vwf.time();
       //if ( now - mouseDownTime < 700 ) {
-        this.createObject();
+      //  this.createObject();
       //}
       mouseDownTime = -1;
     }
@@ -137,7 +137,4 @@ scripts:
           this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
         }
       }
-      
-    }
-
-  type: application/javascript    
+    }  //@ sourceURL=appScene.vwf
