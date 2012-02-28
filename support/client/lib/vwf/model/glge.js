@@ -542,9 +542,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                         break;
                     case "transform":
-                        // var matrixGLGE = goog.vec.Mat4.create();
-                        // goog.vec.Mat4.transpose( propertyValue, matrixGLGE );
-                        // glgeObject.setStaticMatrix( matrixGLGE );
                         glgeObject.setStaticMatrix( goog.vec.Mat4.transpose( propertyValue || [], goog.vec.Mat4.create() ) );
                         break;
 
@@ -729,9 +726,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         break;
 
                     case "transform":
-                        var mat4 = goog.vec.Mat4.createFromArray( glgeObject.getLocalMatrix() );
-                        goog.vec.Mat4.transpose( mat4, mat4 );
-                        value = mat4;
+                        // We would use glgeObject.getLocalMatrix(), but glgeObject.localMatrix
+                        // isn't always recalculated. So, we need to replicate the calculations from
+                        // glgeObject.getModelMatrix().
+                        value = goog.vec.Mat4.transpose( glgeObject.staticMatrix ||
+                            GLGE.mulMat4(
+                                glgeObject.getTranslateMatrix(),
+                                GLGE.mulMat4(
+                                    glgeObject.getRotMatrix(),
+                                    glgeObject.getScaleMatrix()
+                                )
+                            ),
+                            goog.vec.Mat4.create()
+                        );
                         break;
                 
                     case "boundingbox":
