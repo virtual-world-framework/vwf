@@ -85,7 +85,7 @@
                     var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
                     if (validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
                         //var params = JSON.stringify( glgeView.keyStates );
-                        glgeView.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
+                        glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
                     }
                 };
 
@@ -114,7 +114,7 @@
                     var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
                     if (validKey && sceneNode) {
                         //var params = JSON.stringify( glgeView.keyStates );
-                        glgeView.dispatchEvent(sceneNode.ID, "keyUp", [glgeView.keyStates]);
+                        glgeView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [glgeView.keyStates]);
                     }
 
                 };
