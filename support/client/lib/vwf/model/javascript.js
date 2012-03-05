@@ -287,20 +287,6 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
-
-            Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
-                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
-                enumerable: true
-            } );
-
-node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, propertyName, { // "this" is node in get/set
-                get: function() { return self.kernel.getProperty( this.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
-                enumerable: true
-            } );
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
@@ -324,14 +310,30 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
-            node.private.change++; // invalidate the "future" cache
-
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
         // -- initializingProperty -----------------------------------------------------------------
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            var node = this.nodes[nodeID];
+            var self = this;
+
+            Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
+                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
+                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
+                enumerable: true
+            } );
+
+node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+            Object.defineProperty( node, propertyName, { // "this" is node in get/set
+                get: function() { return self.kernel.getProperty( this.id, propertyName ) },
+                set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
+                enumerable: true
+            } );
+
+            node.private.change++; // invalidate the "future" cache
 
             return propertyValue !== undefined ?
                 this.settingProperty( nodeID, propertyName, propertyValue ) : undefined;
