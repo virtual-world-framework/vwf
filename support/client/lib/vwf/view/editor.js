@@ -13,45 +13,63 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             this.nodes = {};
             this.scenes = {};
-            this.editorVisible = false;
+
+            // EDITOR CLOSED  --> 0
+            // HIERARCHY OPEN --> 1
+            // USER LIST OPEN --> 2
+            this.editorView = 0;
+            this.editorOpen = false;
+
             this.topdownName = '#topdown_a';
             this.topdownTemp = '#topdown_b';
+            this.clientList = '#client_list';
             this.currentNodeID = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='eImg'><img id='launchEditor' src='images/editor.png' style='pointer-events:all' alt='launchEditor' /></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>"
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>"
             );
             
-            $('#launchEditor').stop().animate({ opacity:0.0 }, 0);
+            $('#tabs').stop().animate({ opacity:0.0 }, 0);
             
-            jQuery('#launchEditor').mouseenter( function(evt) { 
+            jQuery('#tabs').mouseenter( function(evt) { 
                 evt.stopPropagation();
-                $('#launchEditor').stop().animate({ opacity:1.0 }, 175);
+                $('#tabs').stop().animate({ opacity:1.0 }, 175);
                 return false; 
             });
             
-            jQuery('#launchEditor').mouseleave( function(evt) { 
+            jQuery('#tabs').mouseleave( function(evt) { 
                 evt.stopPropagation(); 
-                $('#launchEditor').stop().animate({ opacity:0.0 }, 175);
+                $('#tabs').stop().animate({ opacity:0.0 }, 175);
                 return false; 
             });
             
-            jQuery('#launchEditor').click ( function(evt) {
-                openEditor.call(self);
+            jQuery('#hierarchy').click ( function(evt) {
+                openEditor.call(self, 1);
+            });
+
+            jQuery('#userlist').click ( function(evt) {
+                openEditor.call(self, 2);
+            });
+
+            jQuery('#x').click ( function(evt) {
+                closeEditor.call(self);
             });
 
             $('#topdown_a').hide();
             $('#topdown_b').hide();
+            $('#client_list').hide();
             
             var canvas = document.getElementById("index-vwf");
             if ( canvas ) {
                 $('#topdown_a').height(canvas.height);
                 $('#topdown_b').height(canvas.height);
+                $('#client_list').height(canvas.height);
             }
             else
             {    
                 $('#topdown_a').height(window.innerHeight-20);
                 $('#topdown_b').height(window.innerHeight-20);
+                $('#client_list').height(window.innerHeight-20);
             }
         },
         
@@ -214,38 +232,141 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
     
     // -- openEditor ------------------------------------------------------------------------
 
-    function openEditor() // invoke with the view as "this"
+    function openEditor(eView) // invoke with the view as "this"
     {
-        var topdownName = this.topdownName;
-        
-        if(!this.editorVisible)
+        if(eView == 0)
         {
-            if( $('#topdown_a').html() == '')
+            closeEditor.call(this);
+        }
+        
+        if(this.editorView != eView)
+        {
+            // Hierarchy
+            if(eView == 1)
             {
-                drillDown.call(this, "index-vwf");
-            }
-            else
-            {
-                $(topdownName).show('slide', {direction: 'right'}, 175);
+                var topdownName = this.topdownName;
+                var topdownTemp = this.topdownTemp;
+
+                if( this.currentNodeID == '' )
+                {
+                    this.currentNodeID = "index-vwf";
+                }
+
+                drill.call(this, this.currentNodeID);
+                $(this.clientList).hide();
+
+                if(this.editorOpen)
+                {
+                    $(topdownName).hide();
+                    $(topdownTemp).show();
+                }
+
+                else
+                {
+                    $(topdownTemp).show('slide', {direction: 'right'}, 175);    
+                }
+
+                this.topdownName = topdownTemp;
+                this.topdownTemp = topdownName;
             }
 
-            this.editorVisible = true;
-            window.slideOffset = 260;
-            $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
-            $('#editor').animate({ 'left' : "-=260px" }, 175);
-            $('#launchEditor').attr('src', 'images/editorClose.png');
+            // User List
+            if(eView == 2)
+            {
+                showUserList.call(this);
+            }
+
+            if(this.editorView == 0)
+            {
+                window.slideOffset = 260;
+                $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
+                $('#editor').animate({ 'left' : "-=260px" }, 175);
+                $('#x').delay(1000).css({ 'display' : 'inline' });
+            }
+
+            this.editorView = eView;
+            this.editorOpen = true;
+        }
+    }
+
+    // -- closeEditor -----------------------------------------------------------------------
+
+    function closeEditor() // invoke with the view as "this"
+    {
+        var topdownName = this.topdownName;
+
+        window.slideOffset = 0;
+
+        if (this.editorOpen && this.editorView == 1) // Hierarchy view open
+        {
+            $(topdownName).hide('slide', {direction: 'right'}, 175);
+            $(this.clientList).hide();
+        }
+
+        else if (this.editorOpen && this.editorView == 2) // Client list open
+        {
+            $(this.clientList).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).hide();
+        }
+        
+        $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
+        $('#editor').animate({ 'left' : "+=260px" }, 175);
+        $('#x').css({ 'display' : 'none' });
+        this.editorView = 0;
+        this.editorOpen = false;
+    }
+
+    // -- showUserList ----------------------------------------------------------------------
+
+    function showUserList() // invoke with the view as "this"
+    {
+        var clientList = this.clientList;
+
+        updateClients.call(this);
+
+        if (!this.editorOpen)
+        {
+            $(clientList).show('slide', {direction: 'right'}, 175);    
         }
         else
         {
-            this.editorVisible = false;
-            window.slideOffset = 0;
-            $(topdownName).hide('slide', {direction: 'right'}, 175);
-            $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
-            $('#editor').animate({ 'left' : "+=260px" }, 175);
-            $('#launchEditor').attr('src', 'images/editor.png');
+            $(clientList).show();
         }
     }
-    
+
+    // -- updateClients ---------------------------------------------------------------------
+
+    function updateClients() {
+        var app = window.location.pathname;
+        var match;
+
+        var clients$ = $(this.clientList);
+
+        jQuery.getJSON( "/" + app.substring(1, app.indexOf('/', 1)) + "/admin/instances", function( data ) {
+            jQuery.each( data, function( key, value ) {
+                if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
+
+                    var instanceHTML = String( match[1] ).
+                      replace( /&/g, "&amp;" ).
+                      replace( /"/g, "&quot;" ).
+                      replace( /'/g, "&#39;" ).
+                      replace( /</g, "&lt;" ).
+                      replace( />/g, "&gt;" );
+
+                    if(instanceHTML == app.substring(app.indexOf('/', 1)+1, app.lastIndexOf('/')))
+                    {
+                        clients$.html("<div class='header'>Current User IDs</div>");
+                        for (var clientID in value.clients) { 
+                            clients$.append("<div class='clientEntry'>" + clientID + "</div><hr>"); 
+                        }
+                    }
+                }
+            } );
+        } );
+
+        //setTimeout(updateClients.call(this), 5000);
+    };
+
     // -- drillDown -------------------------------------------------------------------------
 
     function drillDown(nodeID) // invoke with the view as "this"
