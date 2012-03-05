@@ -1287,7 +1287,7 @@ return component;
 
                 // Skip models up through the one making the most recent call here (if any).
 
-                if ( index > entry.index || entry.index === undefined ) {
+                if ( entry.index === undefined || index > entry.index ) {
 
                     // Record the active model number.
  
@@ -1303,31 +1303,38 @@ return component;
                             model.settingProperty( nodeID, propertyName, propertyValue );
                     }
 
-                    // Look for a return value potentially stored by a reentrant call here if the
+                    // Look for a return value potentially stored here by a reentrant call if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
                     // method).
 
-                    if ( value === undefined )
+                    if ( value === undefined ) {
                         value = reentry.value;
+                    }
 
-                    delete reentry.value;
-
-                    // If we have a return value, save it and exit from Array.some().
+                    // Record the value actually assigned. This may differ from the incoming value
+                    // if it was range limited, quantized, etc. by the model. This is the value
+                    // passed to the views.
 
                     if ( value !== undefined ) {
                         propertyValue = value;
-                        return true;
                     }
 
+                    // If we are setting, exit from the this.models.some() iterator once the value
+                    // has been set. Don't exit early if we are initializing since every model needs
+                    // the opportunity to register the property.
+
+                    return ! initializing && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
                 }
 
             } );
 
             if ( entry.index !== undefined ) {
 
-                // For a reentrant call, restore the previous state and record the current result.
+                // For a reentrant call, restore the previous state, move the index forward to cover
+                // the models we called, and record the current result.
 
                 entrants[nodeID+'-'+propertyName] = entry;
+                entry.index = reentry.index;
                 entry.value = propertyValue;
 
             } else {
@@ -1386,7 +1393,7 @@ return component;
 
                 // Skip models up through the one making the most recent call here (if any).
 
-                if ( index > entry.index || entry.index === undefined ) {
+                if ( entry.index === undefined || index > entry.index ) {
 
                     // Record the active model number.
  
@@ -1397,31 +1404,34 @@ return component;
                     var value = model.gettingProperty &&
                         model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
 
-                    // Look for a return value potentially stored by a reentrant call here if the
+                    // Look for a return value potentially stored here by a reentrant call if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
                     // method).
 
-                    if ( value === undefined )
+                    if ( value === undefined ) {
                         value = reentry.value;
+                    }
 
-                    delete reentry.value;
-
-                    // If we have a return value, save it and exit from Array.some().
+                    // Record the value retrieved.
 
                     if ( value !== undefined ) {
                         propertyValue = value;
-                        return true;
                     }
 
+                    // Exit from the this.models.some() iterator once we have a return value.
+
+                    return value !== undefined;
                 }
 
             } );
 
             if ( entry.index !== undefined ) {
 
-                // For a reentrant call, restore the previous state and record the current result.
+                // For a reentrant call, restore the previous state, move the index forward to cover
+                // the models we called, and record the current result.
 
                 entrants[nodeID+'-'+propertyName] = entry;
+                entry.index = reentry.index;
                 entry.value = propertyValue;
 
             } else {
