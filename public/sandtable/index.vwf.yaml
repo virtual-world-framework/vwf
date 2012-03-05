@@ -140,7 +140,7 @@ children:
         set: |
           // console.info( "predator1.lastPathIndex.set   value = " + value );
           if ( value >= 0 ) {
-            if ( value < this.path.length ) {
+            if ( this.path && value < this.path.length ) {
               this.lastPathIndex = value;
               this.nextPathIndex = value+1;
               if ( this.nextPathIndex == this.path.length )
@@ -352,7 +352,7 @@ children:
         set: |
           // console.info( "predator2.lastPathIndex.set   value = " + value );
           if ( value >= 0 ) {
-            if ( value < this.path.length ) {
+            if ( this.path && value < this.path.length ) {
               this.lastPathIndex = value;
               this.nextPathIndex = value+1;
               if ( this.nextPathIndex == this.path.length )
