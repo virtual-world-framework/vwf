@@ -64,7 +64,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.nodes[childID] = Object.create( prototype );
 
             Object.defineProperty( node, "private", {
-                value: {} // for bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
+                value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
             } );
 
 node.id = childID; // TODO: move to vwf/model/object
@@ -80,14 +80,21 @@ node.id = childID; // TODO: move to vwf/model/object
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            node.private.getters = {};
-            node.private.setters = {};
+            node.private.getters = Object.create( prototype.private ?
+                prototype.private.getters : Object.prototype
+            );
+
+            node.private.setters = Object.create( prototype.private ?
+                prototype.private.setters : Object.prototype
+            );
 
             node.methods = Object.create( prototype.methods || Object.prototype, {
                 node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            node.private.bodies = {};
+            node.private.bodies = Object.create( prototype.private ?
+                prototype.private.bodies : Object.prototype
+            );
 
             node.events = Object.create( prototype.events || Object.prototype, {
                 node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
@@ -126,7 +133,7 @@ node.id = childID; // TODO: move to vwf/model/object
                 }
             } );
 
-            node.private.listeners = {};
+            node.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
             node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
@@ -340,7 +347,7 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
 
 if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 
-            var setter = findSetter( node, propertyName );
+            var setter = node.private.setters && node.private.setters[propertyName];
 
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
@@ -359,7 +366,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.nodes[nodeID];
-            var getter = findGetter( node, propertyName );
+            var getter = node.private.getters && node.private.getters[propertyName];
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {
@@ -427,7 +434,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
         callingMethod: function( nodeID, methodName, methodParameters ) {
 
             var node = this.nodes[nodeID];
-            var body = findBody( node, methodName );
+            var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
                 try {
@@ -923,27 +930,6 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             var bodyString = body.length ? " " + body + " " : "";
             return prefix + bodyString + suffix;
         }
-    }
-
-    // -- findGetter -------------------------------------------------------------------------------
-
-    function findGetter( node, propertyName ) {
-        return node.private.getters && node.private.getters[propertyName] ||
-            Object.getPrototypeOf( node ).private && findGetter( Object.getPrototypeOf( node ), propertyName );
-    }
-
-    // -- findSetter -------------------------------------------------------------------------------
-
-    function findSetter( node, propertyName ) {
-        return node.private.setters && node.private.setters[propertyName] ||
-            Object.getPrototypeOf( node ).private && findSetter( Object.getPrototypeOf( node ), propertyName );
-    }
-
-    // -- findBody ---------------------------------------------------------------------------------
-
-    function findBody( node, methodName ) {
-        return node.private.bodies && node.private.bodies[methodName] ||
-            Object.getPrototypeOf( node ).private && findBody( Object.getPrototypeOf( node ), methodName );
     }
 
     // -- findListeners ----------------------------------------------------------------------------
