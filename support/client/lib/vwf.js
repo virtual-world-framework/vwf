@@ -1334,7 +1334,6 @@ return component;
                 // the models we called, and record the current result.
 
                 entrants[nodeID+'-'+propertyName] = entry;
-                entry.index = reentry.index;
                 entry.value = propertyValue;
 
             } else {
@@ -1431,7 +1430,6 @@ return component;
                 // the models we called, and record the current result.
 
                 entrants[nodeID+'-'+propertyName] = entry;
-                entry.index = reentry.index;
                 entry.value = propertyValue;
 
             } else {
