@@ -1820,6 +1820,8 @@ return component;
 
             this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
 
+            var deferredInitializations = {};
+
             async.series( [
 
                 function( callback /* ( err, results ) */ ) {
@@ -1886,19 +1888,44 @@ return component;
 
                     nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {
 
+                        var value = propertyValue, get, set, create;
+
                         if ( valueHasAccessors( propertyValue ) ) {
-                            if ( propertyValue.get !== undefined || propertyValue.set !== undefined ||
-                                    ! nodeHasProperty.call( vwf, nodeID, propertyName ) ) {
-                                vwf.createProperty( nodeID, propertyName, propertyValue.value, propertyValue.get, propertyValue.set );
-                            } else {
-                                vwf.setProperty( nodeID, propertyName, propertyValue.value );
-                            }
+                            value = propertyValue.value;
+                            get = propertyValue.get;
+                            set = propertyValue.set;
+                            create = propertyValue.create;
+                        }
+
+                        // Is the property specification directing us to create a new property, or
+                        // initialize a property already defined on a prototype?
+
+                        // Create a new property if an explicit getter or setter are provided or if
+                        // the property is not defined on a prototype. Initialize the property when
+                        // the property is already defined on a prototype and no explicit getter or
+                        // setter are provided.
+
+                        var creating = create || // explicit create directive, or
+                            get !== undefined || set !== undefined || // explicit accessor, or
+                            ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on prototype
+
+                        // Are we assigning the value here, or deferring assignment until the node
+                        // is constructed because setters will run?
+
+                        var assigning = value === undefined || // no value, or
+                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, nodeID, propertyName ) ); // no setter
+
+                        if ( ! assigning ) {
+                            deferredInitializations[propertyName] = value;
+                            value = undefined;
+                        }
+
+                        // Create or initialize the property.
+
+                        if ( creating ) {
+                            vwf.createProperty( nodeID, propertyName, value, get, set );
                         } else {
-                            if ( ! nodeHasProperty.call( vwf, nodeID, propertyName ) ) {
-                                vwf.createProperty( nodeID, propertyName, propertyValue );
-                            } else {
-                                vwf.setProperty( nodeID, propertyName, propertyValue );
-                            }
+                            vwf.setProperty( nodeID, propertyName, value );
                         }
 
                     } );
@@ -1963,6 +1990,10 @@ return component;
 
                 function( callback /* ( err, results ) */ ) {
 
+                    Object.keys( deferredInitializations ).forEach( function( propertyName ) {
+                        vwf.setProperty( nodeID, propertyName, deferredInitializations[propertyName] );
+                    }, this );
+
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
 if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
@@ -1989,16 +2020,31 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             this.logger.groupEnd();
         };
 
-        var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"
-            return propertyName in Object.getPrototypeOf( this.models.javascript.nodes[nodeID] ).properties;  // TODO: this is peeking inside of vwf-model-javascript
+        var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
+            var node = this.models.javascript.nodes[nodeID];
+            return propertyName in node.properties;
         };
 
-        var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"
-            return this.models.object.objects[nodeID].properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-object
+        var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
+            var node = this.models.javascript.nodes[nodeID];
+            return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
+        };
+
+        var nodePropertyHasSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
+            var node = this.models.javascript.nodes[nodeID];
+            var setter = node.private.setters && node.private.setters[propertyName];
+            return typeof setter == "function" || setter instanceof Function;
+        };
+
+        var nodePropertyHasOwnSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
+            var node = this.models.javascript.nodes[nodeID];
+            var setter = node.private.setters && node.private.setters.hasOwnProperty( propertyName ) && node.private.setters[propertyName];
+            return typeof setter == "function" || setter instanceof Function;
         };
 
         var nodePrototypeID = function( nodeID ) { // invoke with the kernel as "this"
-            return Object.getPrototypeOf( this.models.javascript.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+            var node = this.models.javascript.nodes[nodeID];
+            return Object.getPrototypeOf( node ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
         };
 
         // -- objectIsComponent --------------------------------------------------------------------

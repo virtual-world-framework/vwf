@@ -295,7 +295,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", exceptionMessage( e ) );
                 }
-            } else if ( propertyValue !== undefined ) {
+            } else {
                 node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
             }
         
@@ -306,7 +306,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                     this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", exceptionMessage( e ) );
                 }
-            } else if ( propertyValue !== undefined ) {
+            } else {
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
