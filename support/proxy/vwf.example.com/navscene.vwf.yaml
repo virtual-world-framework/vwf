@@ -286,11 +286,11 @@ scripts:
           switch ( Number( kd[ keyPress ].code ) ) {
             case 87:  //w
             case 38:  //up
-              this.input.move[1] += -1;
+              this.input.move[1] += 1;
               break;
             case 83:  //s
             case 40:  //down
-              this.input.move[1] += 1;
+              this.input.move[1] += -1;
               break;
             case 37: // left              
             case 65:  //a
@@ -563,31 +563,30 @@ scripts:
         //this.activeCameraComp.lookAt = this.orbitObjectID;
       }
     }
-    this.translate= function( x, y ) {
+    this.translate = function( x, y ) {
       if (!this.activeCameraComp) 
-      this.getActiveCamera();
-      if ( this.activeCameraComp ) {
-        var speed = this.speed;
-        var pos = this.activeCameraComp.position;
-        var mat = this.activeCameraComp.rotationMatrix;
-        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
-        var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
-        var incX = 0, incY = 0;
-        
-        if ( mag != 0 ) { 
-          trans[0] = trans[0] / mag;
-          trans[1] = trans[1] / mag;
-        }
-        
-        // forward and back 
-        incX = parseFloat( trans[0] ) * speed * -y;          
-        incY = parseFloat( trans[1] ) * speed * -y;
+        this.getActiveCamera();
 
-        // left and right
-        incX += parseFloat( trans[1] )* speed * x;
-        incY -= parseFloat( trans[0] ) * speed * x; 
-        
-        this.activeCameraComp.position = [ pos[0] + incX, pos[1] + incY, pos[2] ];      
+      if ( this.activeCameraComp ) {
+        var trans = goog.vec.Mat4.multVec4(
+          this.activeCameraComp.rotationMatrixnew,
+          goog.vec.Vec4.createFromValues( x, y, 0, 1 ),
+          goog.vec.Vec3.create()
+        );
+
+        trans[2] = 0;
+
+        if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
+          this.activeCameraComp.translationnew = goog.vec.Vec3.add(
+            this.activeCameraComp.translationnew,
+            goog.vec.Vec3.scale(
+              goog.vec.Vec3.normalize( trans, trans ),
+              this.speed,
+              trans
+            ),
+            trans
+          );
+        }
       }      
     }
     this.update = function() {
