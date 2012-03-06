@@ -541,8 +541,39 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             glgeObject.setScale( pv[0], pv[1], pv[2] );
                         }
                         break;
+
                     case "transform":
-                        glgeObject.setStaticMatrix( goog.vec.Mat4.transpose( propertyValue || [], goog.vec.Mat4.create() ) );
+
+                        var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
+
+                        // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
+
+                        if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
+                            var columny = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( transform, 1, columny );
+                            var columnz = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( transform, 2, columnz );
+                            goog.vec.Mat4.setColumn( transform, 1, columnz );
+                            goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
+                        }
+
+                        // Assign the transform. GLGE matrices are transposed compared to VWF.
+                        // setStaticMatrix() doesn't propagate correctly for cameras, so we have to
+                        // decompose camera assignments.
+
+                        if ( glgeObject instanceof GLGE.Camera ) { // setStaticMatrix doesn't work for cameras
+                            var translation = goog.vec.Vec3.create();
+                            goog.vec.Mat4.getColumn( transform, 3, translation );
+                            goog.vec.Mat4.setColumnValues( transform, 3, 0, 0, 0, 1 );
+                            goog.vec.Mat4.transpose( transform, transform );
+                            glgeObject.setRotMatrix( transform );
+                            glgeObject.setLoc( translation[0], translation[1], translation[2] );
+                        } else {
+                            glgeObject.setStaticMatrix(
+                                goog.vec.Mat4.transpose( transform, goog.vec.Mat4.create() )
+                            );
+                        }
+
                         break;
 
                     case "rotationMatrix":{
@@ -726,9 +757,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         break;
 
                     case "transform":
+
                         // We would use glgeObject.getLocalMatrix(), but glgeObject.localMatrix
                         // isn't always recalculated. So, we need to replicate the calculations from
-                        // glgeObject.getModelMatrix().
+                        // glgeObject.getModelMatrix(). VWF matrices are transposed compared to GLGE.
+
                         value = goog.vec.Mat4.transpose( glgeObject.staticMatrix ||
                             GLGE.mulMat4(
                                 glgeObject.getTranslateMatrix(),
@@ -739,6 +772,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             ),
                             goog.vec.Mat4.create()
                         );
+
+                        // Rotate -90 degress around X to convert from GLGE Y-up to VWF Z-up.
+
+                        if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
+                            var columny = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 1, columny );
+                            var columnz = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 2, columnz );
+                            goog.vec.Mat4.setColumn( value, 2, columny );
+                            goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                        }
+
                         break;
                 
                     case "boundingbox":
@@ -1836,7 +1881,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         if ( glgeCamera ) {
             glgeCamera.setLoc( 0, 0, 0 );
-            glgeCamera.setRot( 0, 0, 0 );
+            glgeCamera.setRot( Math.PI/2, 0, 0 ); // rotate to look at +Y, VWF's default orientation
             glgeCamera.setType( GLGE.C_PERSPECTIVE );
             glgeCamera.setRotOrder( GLGE.ROT_XZY );
         }
