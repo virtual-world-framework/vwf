@@ -422,73 +422,82 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
         }
         
+        var displayedProperties = {};
         // Add node properties
         for ( var i = 0; i < node.properties.length; i++ ) {
-            $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div><hr>");
+            if ( !displayedProperties[ node.properties[i].name ] ) {
+                displayedProperties[ node.properties[i].name ] = "instance";
+                $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div><hr>");
             
-            $('#input-' + nodeID + '-' + node.properties[i].name).change( function(evt) {
-                var inputID = ($(this).attr("id"));
-                var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
-                var propName = inputID.substring(inputID.lastIndexOf('-')+1);
-                var propValue = $(this).val();
+                $('#input-' + nodeID + '-' + node.properties[i].name).change( function(evt) {
+                    var inputID = ($(this).attr("id"));
+                    var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
+                    var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                    var propValue = $(this).val();
                 
-                try {
-                    propValue = JSON.parse(propValue);
-                    self.kernel.setProperty(nodeID, propName, propValue);
-                } catch (e) {
-                    // restore the original value on error
-                    $(this).val(node.properties[ propName ].value);
-                }
-            } );
+                    try {
+                        propValue = JSON.parse(propValue);
+                        self.kernel.setProperty(nodeID, propName, propValue);
+                    } catch (e) {
+                        // restore the original value on error
+                        $(this).val(node.properties[ propName ].value);
+                    }
+                } );
 
-            $('#input-' + nodeID + '-' + node.properties[i].name).keydown( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + node.properties[i].name).keydown( function(evt) {
+                    evt.stopPropagation();
+                });
 
-            $('#input-' + nodeID + '-' + node.properties[i].name).keypress( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + node.properties[i].name).keypress( function(evt) {
+                    evt.stopPropagation();
+                });
 
-            $('#input-' + nodeID + '-' + node.properties[i].name).keyup( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + node.properties[i].name).keyup( function(evt) {
+                    evt.stopPropagation();
+                });
+            }
         }
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
+        console.info(self + "    " + nodeID);
+
         // Add prototype properties
         var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeProperties ) {
-            var prop = prototypeProperties[key];
+            var prop = prototypeProperties[key].prop;
+            if ( !displayedProperties[ prop.name ]  ) {
+                displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
 
-            $(topdownTemp).append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
+                $(topdownTemp).append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
             
-            $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
-                var inputID = ($(this).attr("id"));
-                var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
-                var propName = inputID.substring(inputID.lastIndexOf('-')+1);
-                var propValue = $(this).val();
+                $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
+                    var inputID = ($(this).attr("id"));
+                    var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
+                    var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                    var propValue = $(this).val();
                 
-                try {
-                    propValue = JSON.parse(propValue);
-                    self.kernel.setProperty(nodeID, propName, propValue);
-                } catch (e) {
-                    // restore the original value on error
-                    $(this).val(node.properties[ propName ].value);
-                }
-            } );
+                    try {
+                        propValue = JSON.parse(propValue);
+                        self.kernel.setProperty(nodeID, propName, propValue);
+                    } catch (e) {
+                        // restore the original value on error
+                        $(this).val(node.properties[ propName ].value);
+                    }
+                } );
 
-            $('#input-' + nodeID + '-' + prop.name).keydown( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + prop.name).keydown( function(evt) {
+                    evt.stopPropagation();
+                });
 
-            $('#input-' + nodeID + '-' + prop.name).keypress( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + prop.name).keypress( function(evt) {
+                    evt.stopPropagation();
+                });
 
-            $('#input-' + nodeID + '-' + prop.name).keyup( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + prop.name).keyup( function(evt) {
+                    evt.stopPropagation();
+                });
+            }
         }
 
         $(topdownTemp + ' hr:last').css('height', '3px');
@@ -699,7 +708,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 var nd = this.nodes[ pTypes[i] ];
                 if ( nd && nd.properties ) {
                     for ( var key in nd.properties ) {
-                        pProperties[ key ] = nd.properties[ key ];
+                        pProperties[ key ] = { "prop": nd.properties[ key ], "prototype": pTypes[i]  };
                     }
                 }
             }
