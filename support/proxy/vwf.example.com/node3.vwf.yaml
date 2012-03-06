@@ -38,6 +38,13 @@ properties:
         rotation
       ) * 180 / Math.PI;
       return rotation;
+  rotationMatrixnew:
+    get: |
+      return this.unscaledTransform(
+        this.transform,
+        goog.vec.Vec3.create(),
+        goog.vec.Mat4.create()
+      );
   quaternionnew:
     # node.quaternion <= [ x, y, z, w ]
     set: |
