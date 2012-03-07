@@ -307,9 +307,9 @@ scripts:
               this.input.look[0] += 1;
               break;
             case 90: // z
-              console.info( "position: " + this.activeCameraComp.position );
-              console.info( "rotation: " + this.activeCameraComp.rotation );
-              console.info( "  eulers: " + this.activeCameraComp.eulers );
+              console.info( "translationnew: [ " + Array.prototype.slice.call( this.activeCameraComp.translationnew ) + " ]" );
+              console.info( "   rotationnew: [ " + Array.prototype.slice.call( this.activeCameraComp.rotationnew ) + " ]" );
+              console.info( "     transform: [ " + Array.prototype.slice.call( this.activeCameraComp.transform )  + " ]" );
               break;
             case 88: // x
               break;
