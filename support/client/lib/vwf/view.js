@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( module, kernel_api, view_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
 
     // vwf/view.js is the common implementation of all Virtual World Framework views. Views
