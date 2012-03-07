@@ -1,3 +1,4 @@
+"use strict";
 define( {
 
     createNode: [ /* nodeID, childComponent, childName, callback /- ( childID ) -/ */ ],
