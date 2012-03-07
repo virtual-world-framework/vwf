@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
     return stage.load( module, {

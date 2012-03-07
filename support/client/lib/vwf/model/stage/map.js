@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
     // vwf/model/stage/map.js translates between kernel-side nodeIDs and model-side objects or ids.
