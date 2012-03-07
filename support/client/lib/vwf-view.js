@@ -1,3 +1,4 @@
+"use strict";
 ( function( modules, namespace ) {
 
     window.console && console.info && console.info( "loading " + namespace );
