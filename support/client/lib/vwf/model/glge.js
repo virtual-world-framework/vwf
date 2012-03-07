@@ -94,6 +94,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
                 sceneNode.glgeScene.camera.name = "camera";
                 this.state.cameraInUse = sceneNode.glgeScene.camera;
+                initCamera.call( this, sceneNode.glgeScene.camera );
 
                 var camType = "http://vwf.example.com/camera.vwf";
                 vwf.createNode( childID, { "extends": camType }, "camera", undefined );    
@@ -407,6 +408,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
+//            switch ( nodeID ) {
+//                case "http-vwf-example-com-node3-vwf-cityblock":
+//                case "http-vwf-example-com-node3-vwf-duck":
+//                case "http-vwf-example-com-camera-vwf-camera":
+//                case "http-vwf-example-com-camera-vwf-plane":
+//                    if ( propertyName == "transform" ) {
+//                        console.info( "SETTING transform" );
+//                    }
+
+//                    if ( propertyValue instanceof Float32Array )
+//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+Array.prototype.slice.call( propertyValue )+" )" );
+//                    else
+//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" ); 
+//                    break;
+//            
+//                default:
+//                    break;            
+//            } 
+
             if ( node && node.glgeObject && propertyValue !== undefined ) {
 
                 var validProperty = false;
@@ -548,20 +568,20 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                         // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
 
-                        if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
+                        //if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
                             var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 1, columny );
                             var columnz = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 2, columnz );
                             goog.vec.Mat4.setColumn( transform, 1, columnz );
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
-                        }
+                        //}
 
                         // Assign the transform. GLGE matrices are transposed compared to VWF.
                         // setStaticMatrix() doesn't propagate correctly for cameras, so we have to
                         // decompose camera assignments.
 
-                        if ( glgeObject instanceof GLGE.Camera ) { // setStaticMatrix doesn't work for cameras
+                        if ( glgeObject instanceof GLGE.Camera || glgeObject instanceof GLGE.ParticleSystem ) { // setStaticMatrix doesn't work for cameras
                             var translation = goog.vec.Vec3.create();
                             goog.vec.Mat4.getColumn( transform, 3, translation );
                             goog.vec.Mat4.setColumnValues( transform, 3, 0, 0, 0, 1 );
@@ -775,14 +795,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                         // Rotate -90 degress around X to convert from GLGE Y-up to VWF Z-up.
 
-                        if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
+                        //if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
                             var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( value, 1, columny );
                             var columnz = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( value, 2, columnz );
                             goog.vec.Mat4.setColumn( value, 2, columny );
                             goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                        }
+                        //}
 
                         break;
                 
