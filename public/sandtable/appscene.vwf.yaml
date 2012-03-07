@@ -49,6 +49,7 @@ scripts:
     var cubeIndex = 1;
     var coneIndex = 1;
     var pushpinIndex = 1;
+    var f;
     var line = {
       "extends": "http://vwf.example.com/node3.vwf",
       "type": "definition/mesh",
