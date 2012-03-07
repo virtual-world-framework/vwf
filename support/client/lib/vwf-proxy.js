@@ -1,3 +1,4 @@
+"use strict";
 define( function() {
 
     // This is a placeholder module that allows the vwf/model/* modules to pretend that they are
