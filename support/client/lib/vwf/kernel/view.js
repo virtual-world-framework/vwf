@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/view" ], function( module, view ) {
 
     return view.load( module, {
