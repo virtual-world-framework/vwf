@@ -679,12 +679,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                         }
                         if ( object ) {
-                            sceneView.createNode( "index-vwf", object, file.name, undefined );
+                            sceneView.kernel.createNode( "index-vwf", object, file.name, undefined );
                         }
                         break;
                     case "yaml":
                         fn = file.name.substr( 0, file.name.length - 5 );
-                        sceneView.createNode( "index-vwf", fn, fn, undefined );                
+                        sceneView.kernel.createNode( "index-vwf", fn, fn, undefined );                
                         break;
                 }
                 
