@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/scenejs.js is a placeholder for a 3-D scene manager.

@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {
@@ -750,6 +751,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function initializeScene( scene ) {
         var pm;
+        var nodeID;
         for ( nodeID in scene.propertyMap ) {
             pm = scene.propertyMap[ nodeID ];
             if ( pm.hasPhysics ) {
@@ -764,6 +766,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function initializeObject( nodeID, props ) {
         var physicsDef, physicsType, scale;
+        var propertyName;
         if ( props.physics ) {
             physicsDef = props.physics;
             physicsType = ( physicsDef.constructor == Array ) ? physicsDef[0] : physicsDef;

@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
