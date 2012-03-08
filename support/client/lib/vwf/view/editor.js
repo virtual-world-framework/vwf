@@ -355,7 +355,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
                     if(instanceHTML == app.substring(app.indexOf('/', 1)+1, app.lastIndexOf('/')))
                     {
-                        clients$.html("<div class='header'>Current User IDs</div>");
+                        clients$.html("<div class='header'>Users</div>");
                         for (var clientID in value.clients) { 
                             clients$.append("<div class='clientEntry'>" + clientID + "</div><hr>"); 
                         }
