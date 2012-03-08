@@ -568,14 +568,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                         // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
 
-                        //if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
+                        if ( glgeObject instanceof GLGE.Camera ) {
                             var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 1, columny );
                             var columnz = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 2, columnz );
                             goog.vec.Mat4.setColumn( transform, 1, columnz );
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
-                        //}
+                        }
 
                         // Assign the transform. GLGE matrices are transposed compared to VWF.
                         // setStaticMatrix() doesn't propagate correctly for cameras, so we have to
@@ -795,14 +795,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                         // Rotate -90 degress around X to convert from GLGE Y-up to VWF Z-up.
 
-                        //if ( glgeObject instanceof GLGE.Camera ) {  // TODO: do this for all nodes
+                        if ( glgeObject instanceof GLGE.Camera ) {
                             var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( value, 1, columny );
                             var columnz = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( value, 2, columnz );
                             goog.vec.Mat4.setColumn( value, 2, columny );
                             goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                        //}
+                        }
 
                         break;
                 
@@ -956,6 +956,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         function colladaLoaded( collada ) { 
             sceneNode.pendingLoads--;
+            collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             var removed = false;
             if ( nodeCopy && nodeCopy.colladaLoaded ) {
                 nodeCopy.colladaLoaded( true );
@@ -1048,6 +1049,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var sceneNode = scene;
         function colladaLoaded( collada ) { 
             sceneNode.pendingLoads--;
+            collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             var bRemoved = false;
             //console.info( "++ XML Loaded ++        colladaLoaded( "+ collada.docURL +" )" );
             for ( var j = 0; j < sceneNode.xmlColladaObjects.length; j++ ) {
