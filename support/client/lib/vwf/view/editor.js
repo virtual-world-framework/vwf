@@ -17,16 +17,23 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             // EDITOR CLOSED  --> 0
             // HIERARCHY OPEN --> 1
             // USER LIST OPEN --> 2
+            // TIMELINE OPEN  --> 3
             this.editorView = 0;
             this.editorOpen = false;
+            this.timelineInit = false;
 
             this.topdownName = '#topdown_a';
             this.topdownTemp = '#topdown_b';
             this.clientList = '#client_list';
+            this.timeline = '#time_control';
             this.currentNodeID = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>"
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /></div></div></div>" + 
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='time_control'></div></div></div>"
             );
             
             $('#tabs').stop().animate({ opacity:0.0 }, 0);
@@ -51,6 +58,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 openEditor.call(self, 2);
             });
 
+            jQuery('#timeline').click ( function(evt) {
+                openEditor.call(self, 3);
+            });
+
             jQuery('#x').click ( function(evt) {
                 closeEditor.call(self);
             });
@@ -58,18 +69,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             $('#topdown_a').hide();
             $('#topdown_b').hide();
             $('#client_list').hide();
+            $('#time_control').hide();
             
             var canvas = document.getElementById("index-vwf");
             if ( canvas ) {
                 $('#topdown_a').height(canvas.height);
                 $('#topdown_b').height(canvas.height);
                 $('#client_list').height(canvas.height);
+                $('#time_control').height(canvas.height);
             }
             else
             {    
                 $('#topdown_a').height(window.innerHeight-20);
                 $('#topdown_b').height(window.innerHeight-20);
                 $('#client_list').height(window.innerHeight-20);
+                $('#time_control').height(window.innerHeight-20);
             }
         },
         
@@ -254,6 +268,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
                 drill.call(this, this.currentNodeID);
                 $(this.clientList).hide();
+                $(this.timeline).hide();
 
                 if(this.editorOpen)
                 {
@@ -271,10 +286,23 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
 
             // User List
-            if(eView == 2)
+            else if(eView == 2)
             {
+                $(this.topdownName).hide();
+                $(this.topdownTemp).hide();
+                $(this.timeline).hide();
                 showUserList.call(this);
             }
+
+            // Timeline
+            else if(eView == 3)
+            {
+                $(this.topdownName).hide();
+                $(this.topdownTemp).hide();
+                $(this.clientList).hide();
+                showTimeline.call(this);
+            }
+
 
             if(this.editorView == 0)
             {
@@ -301,12 +329,21 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         {
             $(topdownName).hide('slide', {direction: 'right'}, 175);
             $(this.clientList).hide();
+            $(this.timeline).hide();
         }
 
         else if (this.editorOpen && this.editorView == 2) // Client list open
         {
             $(this.clientList).hide('slide', {direction: 'right'}, 175);
             $(topdownName).hide();
+            $(this.timeline).hide();
+        }
+
+        else if (this.editorOpen && this.editorView == 3) // Timeline open
+        {
+            $(this.timeline).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).hide();
+            $(this.clientList).hide();
         }
         
         $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
@@ -757,6 +794,140 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         return foundGlge;
+    }
+
+    // -- showTimeline ----------------------------------------------------------------------
+
+    function showTimeline() // invoke with the view as "this"
+    {
+        var timeline = this.timeline;
+
+        if(!this.timelineInit)
+        {
+            jQuery('#time_control').append("<div class='header'>Timeline</div>" + 
+                "<div style='text-align:center;padding-top:10px'><span><button id='play'></button><button id='stop'></button></span>" +
+                "<span><span class='rate slider'></span>&nbsp;" + 
+                "<span class='rate vwf-label' style='display: inline-block; width:8ex'></span></span></div>");
+
+            var options = {};
+
+            [ "play", "pause", "stop" ].forEach( function( state ) {
+                options[state] = { icons: { primary: "ui-icon-" + state }, label: state, text: false };
+            } );
+
+            options.rate = { value: 0, min: -2, max: 2, step: 0.1, };
+
+            var state = {};
+
+            jQuery.get(
+                "admin/state", 
+                undefined, 
+                function( data ) {
+                    state = data;
+
+                    jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                    jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+
+                    jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+
+                    if ( state.rate < 1.0 ) {
+                        var label_rate = 1.0 / state.rate;
+                    } 
+                    else {
+                        var label_rate = state.rate;
+                    }
+
+                    var label = label_rate.toFixed(2).toString().replace( /(\.\d*?)0+$/, "$1" ).replace( /\.$/, "" );
+
+                    if ( state.rate < 1.0 ) {
+                        label = "&#x2215; " + label;
+                    } else {
+                        label = label + " &times;";
+                    }
+
+                    jQuery( ".rate.vwf-label" ).html( label );
+                }, 
+                "json" 
+            );
+
+            jQuery( "button#play" ).button(
+                options.pause
+            ). click( function() {
+                jQuery.post(
+                    state.playing ? "admin/pause" : "admin/play", 
+                    undefined, 
+                    function( data ) {
+                        state = data;
+
+                        jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                        jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+                    },
+                    "json" 
+                );
+            } );
+
+
+            jQuery( "button#stop" ).button(
+                options.stop
+            ). click( function() {
+                jQuery.post(
+                    "admin/stop", 
+                    undefined, 
+                    function( data ) {
+                        state = data;
+
+                        jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                        jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+                    }, 
+                    "json" 
+                );
+            } );
+
+            jQuery( ".rate.slider" ).slider(
+                options.rate
+            ) .bind( "slide", function( event, ui ) {
+                jQuery.get( 
+                    "admin/state", 
+
+                    { "rate": Math.pow( 10, Number(ui.value) ) }, 
+
+                    function( data ) {
+                        state = data;
+
+                        jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+
+                        if ( state.rate < 1.0 ) {
+                            var label_rate = 1.0 / state.rate;
+                        } 
+                        else {
+                            var label_rate = state.rate;
+                        }
+
+                        var label = label_rate.toFixed(2).toString().replace( /(\.\d*?)0+$/, "$1" ).replace( /\.$/, "" );
+
+                        if ( state.rate < 1.0 ) {
+                            label = "&#x2215; " + label;
+                        } else {
+                            label = label + " &times;";
+                        }
+
+                        jQuery( ".rate.vwf-label" ).html( label );
+                    }, 
+                    "json"
+                );
+            } );
+
+            this.timelineInit = true;
+        }
+
+        if (!this.editorOpen)
+        {
+            $(timeline).show('slide', {direction: 'right'}, 175);    
+        }
+        else
+        {
+            $(timeline).show();
+        }
     }
 
 } );

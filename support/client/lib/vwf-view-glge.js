@@ -143,6 +143,8 @@
                     vwf.setProperty( glgeView.state.sceneRootID, "size", [ glgeView.width, glgeView.height ] );  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
                     $('#topdown_a').height(canvas.height);
                     $('#topdown_b').height(canvas.height);
+                    $('#client_list').height(canvas.height);
+                    $('#time_control').height(canvas.height);
                 } 
             }
 
