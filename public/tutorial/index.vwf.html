@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VWF Tutorial</title>
+    <link href="toolbar.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript">
+
+      function setMode(mode) {
+    		highlightMode(mode);
+        vwf_view.kernel.setProperty("index-vwf", "mouseMode", mode);
+  	  }
+
+      function highlightMode(mode) {
+       	document.getElementById('orbit').style.border = "2px solid black";
+       	document.getElementById('pindrop').style.border = "2px solid black";
+
+       	document.getElementById(mode).style.border = "3px solid red";
+      }
+
+      vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
+      	if (nodeId == "index-vwf" ) {
+      	  switch (propertyName) {
+      		case "mouseMode":
+      		  highlightMode( propertyValue );
+      		  break;
+          }
+        }
+      }
+      
+    </script>
+  </head>
+  <body>
+    <div id="wrapper" class="wrapper">
+      <div class="toolstyle" id="toolbar">
+        <img id="orbit" src="images/spin.png" style="border:3px solid red" alt="orbit" onclick="setMode('orbit')"/>
+        <img id="pindrop" src="images/pindrop.png" style="border:2px solid black" alt="pindrop" onclick="setMode('pindrop')"/>
+      </div>
+    </div>
+    <script type="text/javascript">
+      $('#wrapper').appendTo('#vwf-root'); 
+    </script>
+  </body>
+</html>
