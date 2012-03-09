@@ -8,7 +8,7 @@ properties:
         this.transform = transform;
         this.transformChanged( transform );
       }
-  translationnew:
+  translation:
     # node.translation <= [ x, y, z ]
     set: |
       var translation = this.translationFromValue( value ); // parse incoming value
@@ -20,11 +20,11 @@ properties:
       var translation = goog.vec.Vec3.create();
       goog.vec.Mat4.getColumn( this.transform, 3, translation );
       return translation;
-  rotationnew:
+  rotation:
     # node.rotation <= [ x, y, z, angle ]
     set: |
       var rotation = this.rotationFromValue( value ); // parse incoming value
-      this.quaternionnew =
+      this.quaternion =
         goog.vec.Quaternion.fromAngleAxis(
           rotation[3] * Math.PI / 180,
           goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
@@ -34,18 +34,18 @@ properties:
     get: |
       var rotation = goog.vec.Vec4.create();
       rotation[3] = goog.vec.Quaternion.toAngleAxis(
-        this.quaternionnew,
+        this.quaternion,
         rotation
       ) * 180 / Math.PI;
       return rotation;
-  rotationMatrixnew:
+  rotationMatrix:
     get: |
       return this.unscaledTransform(
         this.transform,
         goog.vec.Vec3.create(),
         goog.vec.Mat4.create()
       );
-  quaternionnew:
+  quaternion:
     # node.quaternion <= [ x, y, z, w ]
     set: |
       var transform = this.transform;
@@ -91,10 +91,6 @@ properties:
         goog.vec.Vec3.create()
       );
   enabled: true
-  position:
-  rotation:
-  orientation:
-  rotationMatrix:
   boundingbox: 
     set: |
       console.info( "WARNING: node3 boundingbox cannot be set" )
@@ -109,8 +105,6 @@ properties:
     set: |
       console.info( "WARNING: node3 vertexIndices cannot be set" )
     value: 
-  modelMatrix:
-  localMatrix:
   speed: 1
   playing: false
   looping: false
@@ -130,7 +124,7 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translationnew;
+      var startTranslation = this.translation;
       var deltaTranslation = this.translationFromValue( translation );
       var stopTranslation = goog.vec.Vec3.add(
         startTranslation,
@@ -141,7 +135,7 @@ methods:
         startTranslation,
         stopTranslation,
         this.time,
-        this.time + ( duration || 1 )
+        this.time + ( duration || 0 )
       );
   # Translate to translation over duration.
   translateTo:
@@ -149,13 +143,13 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translationnew;
+      var startTranslation = this.translation;
       var stopTranslation = this.translationFromValue( translation );
       this.translationWorker(
         startTranslation,
         stopTranslation,
         this.time,
-        this.time + ( duration || 1 )
+        this.time + ( duration || 0 )
       );
   # Perform a translation animation.
   translationWorker:
@@ -165,9 +159,9 @@ methods:
       - startTime
       - stopTime
     body: |
-      this.translationnew = goog.vec.Vec3.lerp(
+      this.translation = goog.vec.Vec3.lerp(
         startTranslation, stopTranslation,
-        ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
+        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Vec3.create()
       );
       if ( this.time < stopTime ) {
@@ -210,7 +204,7 @@ methods:
       - quaternion
       - duration
     body: |
-      var startQuaternion = this.quaternionnew;
+      var startQuaternion = this.quaternion;
       var deltaQuaternion = this.quaternionFromValue( quaternion );
       var stopQuaternion = goog.vec.Quaternion.concat(
         deltaQuaternion,
@@ -221,7 +215,7 @@ methods:
         startQuaternion,
         stopQuaternion,
         this.time,
-        this.time + ( duration || 1 )
+        this.time + ( duration || 0 )
       );
   # Rotate to quaternion over duration.
   quaterniateTo:
@@ -229,13 +223,13 @@ methods:
       - quaternion
       - duration
     body: |
-      var startQuaternion = this.quaternionnew;
+      var startQuaternion = this.quaternion;
       var stopQuaternion = this.quaternionFromValue( quaternion );
       this.quaternionWorker(
         startQuaternion,
         stopQuaternion,
         this.time,
-        this.time + ( duration || 1 )
+        this.time + ( duration || 0 )
       );
   # Perform a quaternion animation.
   quaternionWorker:
@@ -245,11 +239,12 @@ methods:
       - startTime
       - stopTime
     body: |
-      this.quaternionnew = goog.vec.Quaternion.slerp(
+      this.quaternion = goog.vec.Quaternion.slerp(
         startQuaternion, stopQuaternion,
-        ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
+        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Quaternion.create()
       );
+      //console.info( "   this.quaternion: " + Array.prototype.slice.call( this.quaternion ) );
       if ( this.time < stopTime ) {
         this.in( 0.04 ).quaternionWorker(
           startQuaternion,
@@ -275,7 +270,7 @@ methods:
         startScale,
         stopScale,
         this.time,
-        this.time + ( duration || 1 )
+        this.time + ( duration || 0 )
       );
   # Scale to scale over duration.
   scaleTo:
@@ -289,7 +284,7 @@ methods:
         startScale,
         stopScale,
         this.time,
-        this.time + ( duration || 1 )
+        this.time + ( duration || 0 )
       );
   # Perform a scale animation.
   scaleWorker:
@@ -301,7 +296,7 @@ methods:
     body: |
       this.scalenew = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
         startScale, stopScale,
-        ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
+        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Vec3.create()
       );
       if ( this.time < stopTime ) {
@@ -396,14 +391,14 @@ scripts:
   };
   this.state = function( test ) {
     console.info( test, "x", Array.prototype.slice.apply( this.transform ) );
-    console.info( test, "t", Array.prototype.slice.apply( this.translationnew ) );
-    console.info( test, "o", Array.prototype.slice.apply( this.rotationnew ) );
+    console.info( test, "t", Array.prototype.slice.apply( this.translation ) );
+    console.info( test, "o", Array.prototype.slice.apply( this.rotation ) );
     console.info( test, "s", Array.prototype.slice.apply( this.scalenew ) );
-    console.info( test, "q", Array.prototype.slice.apply( this.quaternionnew ) );
+    console.info( test, "q", Array.prototype.slice.apply( this.quaternion ) );
   };
   this.test1 = function() {
     this.transform = [];
-    this.translationnew = [ 50, 0, 0 ];
+    this.translation = [ 50, 0, 0 ];
     this.scalenew = 2;
     this.state( "test1" );
   };
@@ -412,11 +407,11 @@ scripts:
     this.state( "test2 scale 2" );
     this.scalenew = 1;
     this.state( "test2 scale 1" );
-    this.rotationnew = [ 0, 0, 1, 30 ];
+    this.rotation = [ 0, 0, 1, 30 ];
     this.state( "test2 rotation 30" );
     this.scalenew = 3;
     this.state( "test2 scale 3" );
-    this.rotationnew = [ 0, 0, 1, -30 ];
+    this.rotation = [ 0, 0, 1, -30 ];
     this.state( "test2 rotation -30" );
     this.scalenew = 1;
     this.state( "test2 scale 1" );

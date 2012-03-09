@@ -408,24 +408,25 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-//            switch ( nodeID ) {
-//                case "http-vwf-example-com-node3-vwf-cityblock":
-//                case "http-vwf-example-com-node3-vwf-duck":
-//                case "http-vwf-example-com-camera-vwf-camera":
-//                case "http-vwf-example-com-camera-vwf-plane":
-//                    if ( propertyName == "transform" ) {
-//                        console.info( "SETTING transform" );
-//                    }
+            switch ( nodeID ) {
+                case "http-vwf-example-com-node3-vwf-cityblock":
+                case "http-vwf-example-com-node3-vwf-duck":
+                case "http-vwf-example-com-camera-vwf-camera":
+                case "http-vwf-example-com-camera-vwf-plane":
+                case "http-vwf-example-com-camera-vwf-radio":
+                    if ( propertyName == "transform" ) {
+                        console.info( "SETTING transform" );
+                    }
 
-//                    if ( propertyValue instanceof Float32Array )
-//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+Array.prototype.slice.call( propertyValue )+" )" );
-//                    else
-//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" ); 
-//                    break;
-//            
-//                default:
-//                    break;            
-//            } 
+                    if ( propertyValue instanceof Float32Array )
+                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+Array.prototype.slice.call( propertyValue )+" )" );
+                    else
+                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" ); 
+                    break;
+            
+                default:
+                    break;            
+            } 
 
             if ( node && node.glgeObject && propertyValue !== undefined ) {
 
@@ -466,9 +467,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                     value = false;
                                     validProperty = true;
                                 }
-                            }
-
-                            else {
+                            } else {
                                 glgeObject.setPaused( GLGE.TRUE );
                                 value = true;
                                 validProperty = true;
@@ -495,72 +494,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var pv = propertyValue;
                 switch ( propertyName ) {
 
-                    case "roll":
-                        glgeObject.setRotX( pv * pieDiv180 );
-                        break;
-
-                    case "pitch":
-                        glgeObject.setRotY( pv * pieDiv180 );
-                        break;
-
-                    case "yaw":
-                        glgeObject.setRotZ( pv * pieDiv180 );
-                        break;
-
-                    case "rotX":
-                        glgeObject.setRotX( pv );
-                        break;
-
-                    case "rotY":
-                        glgeObject.setRotY( pv );
-                        break;
-
-                    case "rotZ":
-                        glgeObject.setRotZ( pv );
-                        break;
-
-                    case "eulers":
-                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            glgeObject.setRot( pv[0] * pieDiv180, pv[1]* pieDiv180, pv[2] * pieDiv180 );
-                        }
-                        break;
-                    case "rotation":
-                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            glgeObject.setRot( pv[0], pv[1], pv[2] );
-                        }
-                        break;
-                    case "orientation":
-                        value = new Array;
-                        if ( pv && pv.constructor == Array && pv.length > 3 ) {
-                            glgeObject.setQuat( pv[0], pv[1], pv[2], pv[3] );
-                        }
-                        break;
-                    case "position":
-                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            glgeObject.setLoc( pv[0], pv[1], pv[2] );
-                        }
-                        break;
-                    case "posRotMatrix":
-                        if ( pv && pv.constructor == Array && pv.length > 3 ) {
-                             glgeObject.setLoc( pv[0], pv[1], pv[2] );
-                             glgeObject.setRotMatrix( pv[3] );
-                        }
-                        break;                            
-                    case "worldEulers":
-                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            glgeObject.setDRot( pv[0] * pieDiv180, pv[1] * pieDiv180, pv[2] * pieDiv180 );
-                        }
-                        break;
-                    case "worldPosition":
-                        if ( pv && pv.constructor == Array && pv.length > 2 ) {
-                            glgeObject.setDLoc( pv[0], pv[1], pv[2] );
-                        }
-                        break;
-                    case "scale":
-                        if ( pv && pv.constructor == Array && pv.length > 2 ) {                            
-                            glgeObject.setScale( pv[0], pv[1], pv[2] );
-                        }
-                        break;
 
                     case "transform":
 
@@ -594,12 +527,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             );
                         }
 
-                        break;
-
-                    case "rotationMatrix":{
-                            if ( glgeObject.setRotMatrix ) 
-                                glgeObject.setRotMatrix( propertyValue );
-                        }
                         break;
 
                     case "material": {
@@ -703,79 +630,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 			    var _180divPi = ( 180.0/3.14159 );
                 switch ( propertyName ) {
 
-                    case "roll":
-                        value = glgeObject.getRotX() * _180divPi;
-                        break;
-
-                    case "pitch":
-                        value = glgeObject.getRotY() * _180divPi;
-                        break;
-
-                    case "yaw":
-                        value = glgeObject.getRotZ() * _180divPi;
-                        break;
-
-                    case "rotX":
-                        value = glgeObject.getRotX();
-                        break;
-
-                    case "rotY":
-                        value = glgeObject.getRotY();
-                        break;
-
-                    case "rotZ":
-                        value = glgeObject.getRotZ();
-                        break;
-
-                    case "eulers":
-                        value = new Array;
-                        if ( glgeObject.setRotMode ){
-                            glgeObject.setRotMode( 1 );
-                            value.push( glgeObject.getRotX() * _180divPi, glgeObject.getRotY()* _180divPi, glgeObject.getRotZ()* _180divPi );
-                        }
-                        break;
-                    case "rotation":
-                        value = new Array;
-                        if ( glgeObject.setRotMode ){
-                            glgeObject.setRotMode( 1 );
-                            value.push( glgeObject.getRotX(), glgeObject.getRotY(), glgeObject.getRotZ() );
-                        }
-                        break;
-                    case "orientation":
-                        value = new Array;
-                        if ( glgeObject.setRotMode ){
-                            glgeObject.setRotMode( 2 );
-                            value.push( glgeObject.getQuatX(), glgeObject.getQuatY(), glgeObject.getQuatZ(), glgeObject.getQuatW() );
-                        }
-                        break;
-                    case "position":
-                        value = new Array;
-                        value.push( glgeObject.getLocX(), glgeObject.getLocY(), glgeObject.getLocZ() );
-                        break;
-                    case "posRotMatrix":
-                        value = new Array;
-                        value.push( glgeObject.getLocX() );
-                        value.push( glgeObject.getLocY() );
-                        value.push( glgeObject.getLocZ() );
-                        value.push( glgeObject.getRotMatrix() );
-                        break;
-                    case "worldEulers":
-                        value = new Array;
-                        value.push( glgeObject.getDRotX()* _180divPi, glgeObject.getDRotY()* _180divPi, glgeObject.getDRotZ()* _180divPi );
-                        break;
-                    case "worldPosition":
-                        value = new Array;
-                        value.push( glgeObject.getDLocX(), glgeObject.getDLocY(), glgeObject.getDLocZ() );
-                        break;
-                    case "scale":
-                        value = new Array;                            
-                        value.push( glgeObject.getScaleX(), glgeObject.getScaleY(), glgeObject.getScaleZ() );
-                        break;
-
-                    case "visible":
-                        value = glgeObject.getModelMatrix();   
-                        break;
-
                     case "transform":
 
                         // We would use glgeObject.getLocalMatrix(), but glgeObject.localMatrix
@@ -846,31 +700,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             var lookAtObject = glgeObject.getLookat();
                             if ( lookAtObject ) {
                                 value = getObjectID.call( glgeModel, lookAtObject, false, false );
-                            }
-                        }
-                        break;
-
-                    case "localMatrix": {
-                            if ( glgeObject.getLocalMatrix ) {
-                                var mat4 = goog.vec.Mat4.createFromArray( glgeObject.getLocalMatrix() );
-                                goog.vec.Mat4.transpose( mat4, mat4 );
-                                value = mat4;
-                            }
-                        }
-                        break;                         
-
-                    case "modelMatrix": {
-                            if ( glgeObject.getModelMatrix ) {
-                                var mat4 = goog.vec.Mat4.createFromArray( glgeObject.getModelMatrix() );
-                                goog.vec.Mat4.transpose( mat4, mat4 );
-                                value = mat4;
-                            }
-                        }
-                        break;
-
-                    case "rotationMatrix":{
-                            if ( glgeObject.getRotMatrix ) {
-                                value = glgeObject.getRotMatrix();
                             }
                         }
                         break;
