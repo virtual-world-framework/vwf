@@ -152,9 +152,6 @@ scripts:
       if ( !this.input.initialValue ) {
         this.input.initialValue = {
           transform: this.transform,
-          rotation: this.rotation,
-          position: this.position,
-          scale: this.scale,
         }
       }
       var pc = this.input.pointChange();
@@ -171,33 +168,29 @@ scripts:
       if ( !this.input.initialValue ) {
         this.input.initialValue = {
           transform: this.transform,
-          rotation: this.rotation,
-          position: this.position,
-          scale: this.scale,
         }
       }
       var diff = this.input.change();
       var rot = this.rotation;
       switch( this.rotationAxis ) {
         case "x":
-          rot[0]+= diff[0] * 4;
+          this.rotateBy( [ 1, 0, 0, rot[3] + (diff[0] * 4) ], 0 );
           break;
         case "y":
-          rot[1]+= diff[0] * 4;
+          this.rotateBy( [ 0, 1, 0, rot[3] + (diff[0] * 4) ], 0 );
           break;
         case "z":
-          rot[2]+= diff[0] * 4;
+          this.rotateBy( [ 0, 0, 1, rot[3] + (diff[0] * 4) ], 0 );
+          break;
+        default:
+          this.rotateBy( [ this.axis[0], this.axis[1], this.axis[2], rot[3] + (diff[0] * 4) ], 0 );
           break;
       }
-      this.rotation = rot;
     }
     this.scaling = function() {
       if ( !this.input.initialValue ) {
         this.input.initialValue = {
           transform: this.transform,
-          rotation: this.rotation,
-          position: this.position,
-          scale: this.scale,
         }
       }
       var diff = this.input.change();

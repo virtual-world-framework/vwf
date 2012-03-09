@@ -30,8 +30,8 @@ children:
     source: shuffleBtn.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 7.2, 10, 0 ]
-      eulers: [90, 0, 180]
+      translation: [ 7.2, 10, 0 ]
+      eulersOLD: [90, 0, 180]
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |
@@ -53,8 +53,8 @@ children:
     source: solveBtn.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ -7.2, 10, 0 ]
-      eulers: [90, 0, 180]
+      translation: [ -7.2, 10, 0 ]
+      eulersOLD: [90, 0, 180]
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |
@@ -76,7 +76,7 @@ children:
     source: tile01.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -98,7 +98,7 @@ children:
     source: tile02.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -120,7 +120,7 @@ children:
     source: tile03.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -142,7 +142,7 @@ children:
     source: tile04.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -164,7 +164,7 @@ children:
     source: tile05.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -186,7 +186,7 @@ children:
     source: tile06.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -208,7 +208,7 @@ children:
     source: tile07.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -230,7 +230,7 @@ children:
     source: tile08.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -252,7 +252,7 @@ children:
     source: tile09.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -274,7 +274,7 @@ children:
     source: tile10.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -300,7 +300,7 @@ children:
     source: tile11.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -326,7 +326,7 @@ children:
     source: tile12.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -352,7 +352,7 @@ children:
     source: tile13.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -378,7 +378,7 @@ children:
     source: tile14.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -404,7 +404,7 @@ children:
     source: tile15.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -430,26 +430,26 @@ scripts:
     this.initialize = function() {
       console.info( "================ tile puzzle ================" );
 
-      this.tile1.position = this.tilePosition1;
-      this.tile2.position = this.tilePosition2;
-      this.tile3.position = this.tilePosition3;
-      this.tile4.position = this.tilePosition4;
-      this.tile5.position = this.tilePosition5;
-      this.tile6.position = this.tilePosition6;
-      this.tile7.position = this.tilePosition7;
-      this.tile8.position = this.tilePosition8;
-      this.tile9.position = this.tilePosition9;
-      this.tile10.position = this.tilePosition10;
-      this.tile11.position = this.tilePosition11;
-      this.tile12.position = this.tilePosition12;
-      this.tile13.position = this.tilePosition13;
-      this.tile14.position = this.tilePosition14;
-      this.tile15.position = this.tilePosition15;
-      this.openTilePosition = this.tilePosition16;
+      this.tile1.translation = this.tilePosition1;
+      this.tile2.translation = this.tilePosition2;
+      this.tile3.translation = this.tilePosition3;
+      this.tile4.translation = this.tilePosition4;
+      this.tile5.translation = this.tilePosition5;
+      this.tile6.translation = this.tilePosition6;
+      this.tile7.translation = this.tilePosition7;
+      this.tile8.translation = this.tilePosition8;
+      this.tile9.translation = this.tilePosition9;
+      this.tile10.translation = this.tilePosition10;
+      this.tile11.translation = this.tilePosition11;
+      this.tile12.translation = this.tilePosition12;
+      this.tile13.translation = this.tilePosition13;
+      this.tile14.translation = this.tilePosition14;
+      this.tile15.translation = this.tilePosition15;
+      this.openTiletranslation = this.tilePosition16;
       
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "rotation", [ 2.6, 3.11, 0.004 ] );
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "position", [ 2.8, 28.32, 63 ] );
+      //this.camera.rotation = [ 2.6, 3.11, 0.004 ];
+      this.camera.translation = [ 2.8, 28.32, 63 ];
       this.loadDone = true;
     }
     
@@ -464,42 +464,42 @@ scripts:
     }
     
     this.solve = function() {
-      this.tile1.position = this.tilePosition1;
-      this.tile2.position = this.tilePosition2;
-      this.tile3.position = this.tilePosition3;
-      this.tile4.position = this.tilePosition4;
-      this.tile5.position = this.tilePosition5;
-      this.tile6.position = this.tilePosition6;
-      this.tile7.position = this.tilePosition7;
-      this.tile8.position = this.tilePosition8;
-      this.tile9.position = this.tilePosition9;
-      this.tile10.position = this.tilePosition10;
-      this.tile11.position = this.tilePosition11;
-      this.tile12.position = this.tilePosition12;
-      this.tile13.position = this.tilePosition13;
-      this.tile14.position = this.tilePosition14;
-      this.tile15.position = this.tilePosition15;
+      this.tile1.translation = this.tilePosition1;
+      this.tile2.translation = this.tilePosition2;
+      this.tile3.translation = this.tilePosition3;
+      this.tile4.translation = this.tilePosition4;
+      this.tile5.translation = this.tilePosition5;
+      this.tile6.translation = this.tilePosition6;
+      this.tile7.translation = this.tilePosition7;
+      this.tile8.translation = this.tilePosition8;
+      this.tile9.translation = this.tilePosition9;
+      this.tile10.translation = this.tilePosition10;
+      this.tile11.translation = this.tilePosition11;
+      this.tile12.translation = this.tilePosition12;
+      this.tile13.translation = this.tilePosition13;
+      this.tile14.translation = this.tilePosition14;
+      this.tile15.translation = this.tilePosition15;
       this.openTilePosition = this.tilePosition16;
     }
     
     this.setPositions = function(tilePositions) {
       if (vwf.time() >= (this.lastSetPositionTime || 0) + 0.1) {
         this.lastSetPositionTime = vwf.time();
-        this.tile1.position = tilePositions[0];
-        this.tile2.position = tilePositions[1];
-        this.tile3.position = tilePositions[2];
-        this.tile4.position = tilePositions[3];
-        this.tile5.position = tilePositions[4];
-        this.tile6.position = tilePositions[5];
-        this.tile7.position = tilePositions[6];
-        this.tile8.position = tilePositions[7];
-        this.tile9.position = tilePositions[8];
-        this.tile10.position = tilePositions[9];
-        this.tile11.position = tilePositions[10];
-        this.tile12.position = tilePositions[11];
-        this.tile13.position = tilePositions[12];
-        this.tile14.position = tilePositions[13];
-        this.tile15.position = tilePositions[14];
+        this.tile1.translation = tilePositions[0];
+        this.tile2.translation = tilePositions[1];
+        this.tile3.translation = tilePositions[2];
+        this.tile4.translation = tilePositions[3];
+        this.tile5.translation = tilePositions[4];
+        this.tile6.translation = tilePositions[5];
+        this.tile7.translation = tilePositions[6];
+        this.tile8.translation = tilePositions[7];
+        this.tile9.translation = tilePositions[8];
+        this.tile10.translation = tilePositions[9];
+        this.tile11.translation = tilePositions[10];
+        this.tile12.translation = tilePositions[11];
+        this.tile13.translation = tilePositions[12];
+        this.tile14.translation = tilePositions[13];
+        this.tile15.translation = tilePositions[14];
         console.info( "Open Tile Position: " + this.openTilePosition );
         console.info( "   setting Open Tile Position to: " + tilePositions[15] );
         this.openTilePosition = tilePositions[15];
@@ -509,17 +509,17 @@ scripts:
 
     this.moveTile = function(obj) {
       console.info( "moveTile Open Tile Position: " + this.openTilePosition );
-      dx = Math.abs(obj.position[0] - this.openTilePosition[0]);
-      dy = Math.abs(obj.position[1] - this.openTilePosition[1]);
+      dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
+      dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
       
       console.info( "  dx: " + dx + "   dy: " + dy );
       
       if((dx < this.tileDistance && dy == 0) ||
          (dy < this.tileDistance && dx == 0))
       {
-        currentPosition = [ obj.position[0], obj.position[1], obj.position[2] ];
+        currentPosition = [ obj.translation[0], obj.translation[1], obj.translation[2] ];
         console.info( "   currentPosition: " + currentPosition );
-        obj.position = this.openTilePosition;
+        obj.translation = this.openTilePosition;
         this.openTilePosition = [ currentPosition[0], currentPosition[1], currentPosition[2] ];
         console.info( "   new Open Tile Position: " + this.openTilePosition );
       }           	

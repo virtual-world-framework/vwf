@@ -76,7 +76,6 @@ scripts:
       type: "model/vnd.collada+xml",
       properties: { 
         positions: [],
-        eulers: [ 0, 0, 0 ], 
         scale: [ 6, 6, 6.6 ], 
       },    
     };
@@ -89,7 +88,6 @@ scripts:
       this.originalSpeed = this.speed;
     }
     this.pointerDown = function( parms, pickInfo ){
-      //console.info( " appscene.pointerDown( "+parms.position[0]+", "+parms.position[1]+" )" );
       if ( pickInfo ) {
         this.lastDrawPoint = { pickInfo: pickInfo };
       } else {
@@ -97,8 +95,6 @@ scripts:
       }
     }
     this.pointerMove = function( parms, pickInfo ){
-      //console.info( " appscene.pointerMove( "+parms.position[0]+", "+parms.position[1]+" )" );
-      //console.info( " appscene.pointerMove() this.mouseMode = " + this.mouseMode );
       if ( this.pointerIsDown() ) {
         //console.info( " appscene.pointerMove() pointerDown" );
         switch( this.mouseMode ) {
@@ -111,7 +107,6 @@ scripts:
       }
     }
     this.pointerUp = function( parms, pickInfo ){
-      //console.info( " appscene.pointerUp( "+parms.position[0]+", "+parms.position[1]+" )" );
       switch ( this.mouseMode ) {
         case "pindrop":
           this.pindrop( pickInfo );
@@ -119,97 +114,70 @@ scripts:
       }
       this.lastDrawPoint = undefined;    
     }
-    this.multiply = function( v, value ) {
-      for ( var i = 0; i < v.length; i++ ) {
-        v[i] *= value;
-      }
-    }
-    this.dotProduct = function( v1, v2 ) {
-      return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-    }
-    this.crossProduct = function( v1, v2 ) {
-      return [ v1[1] * v2[2] -v1[2] * v2[1], v1[2] * v2[0] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0], 0 ];
-    }
-    this.vectorLength = function( v ) {
-      var sq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-      return ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
-    }    
-    this.normalize = function( v ) {
-      f = this.vectorLength( v );
-      v[0] /= f;
-      v[1] /= f;
-      v[2] /= f;
-      return f;
-    }   
     this.draw = function( pickInfo ) {
       //console.info( "   Draw ---------------" );
       if ( pickInfo && pickInfo.globalPosition ) {
         if ( this.lastDrawPoint ) {
-          var x1, y1, z1, x2, y2, z2;
           var start = this.lastDrawPoint.pickInfo.globalPosition;
           var end = pickInfo.globalPosition;
-          x1 = start[0];
-          y1 = start[1];
-          z1 = start[2] + this.lineHeight;
-          x2 = end[0];
-          y2 = end[1];
-          z2 = end[2] + this.lineHeight;              
+          x = goog.vec.Vec3.createFromArray( [ start[0], start[1], start[2] + this.lineHeight ] );
+          y = goog.vec.Vec3.createFromArray( [ end[0], end[1], end[2] + this.lineHeight ] );
            
           var pos = [];
           var faces;
           
-          var diff = [ x2 - x1, y2 - y1, z2 - z1 ];
-          var up = [ 0, 1, 0 ];
-          var right = [ 1, 0, 0 ];
-          var top = [ 0, 0, 0 ];
+          var diff = goog.vec.Vec3.createFromArray( [ x2 - x1, y2 - y1, z2 - z1 ] );
+          var up = goog.vec.Vec3.createFromArray( [ 0, 1, 0 ] );
+          var right = goog.vec.Vec3.createFromArray( [ 1, 0, 0 ] );
+          var top = goog.vec.Vec3.createFromArray( [ 0, 0, 0 ] );
           
-          this.normalize( diff );
+          goog.vec.Vec3.normalize( diff, diff );
 
-          if ( Math.abs( this.dotProduct( up, diff ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
+          if ( Math.abs( goog.vec.Vec3.dotProduct( up, diff, goog.vec.Vec3.create() ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
           { // then we can cross with up
-            right = this.crossProduct( diff, up );
+            goog.vec.Vec3.crossProduct( diff, up, right );
           }
           else
           { //too colinear with up, so start w/ a different axis
-            right = this.crossProduct( diff, right );
+            goog.vec.Vec3.crossProduct( diff, right, right );
           }
-          top = this.crossProduct( diff, right );
-          this.normalize( right );
-          this.normalize( top );
-          this.multiply( right, this.lineWidth );
-          this.multiply( top, this.lineWidth );              
+          top = goog.vec.Vec3.crossProduct( diff, right, top );
+          goog.vec.Vec3.normalize( right, right );
+          goog.vec.Vec3.normalize( top, top );
+          goog.vec.Vec3.scale( right, this.lineWidth, right );
+          goog.vec.Vec3.scale( top, this.lineWidth, top );              
           
-          pos.push( x1 + right[0] );  // 0
-          pos.push( y1 + right[1] );  // 0
-          pos.push( z1 + right[2] );  // 0
+          pos.push( x[1] + right[0] );  // 0
+          pos.push( y[1] + right[1] );  // 0
+          pos.push( z[1] + right[2] );  // 0
           
-          pos.push( x2 + right[0] );  // 1
-          pos.push( y2 + right[1] );  // 1
-          pos.push( z2 + right[2] );  // 1
+          pos.push( x[2] + right[0] );  // 1
+          pos.push( y[2] + right[1] );  // 1
+          pos.push( z[2] + right[2] );  // 1
           
-          pos.push( x1 - right[0] );  // 2
-          pos.push( y1 - right[1] );  // 2
-          pos.push( z1 - right[2] );  // 2
+          pos.push( x[1] - right[0] );  // 2
+          pos.push( y[1] - right[1] );  // 2
+          pos.push( z[1] - right[2] );  // 2
           
-          pos.push( x2 - right[0] );  // 3
-          pos.push( y2 - right[1] );  // 3
-          pos.push( z2 - right[2] );  // 3
+          pos.push( x[2] - right[0] );  // 3
+          pos.push( y[2] - right[1] );  // 3
+          pos.push( z[2] - right[2] );  // 3
           
-          pos.push( x1 + top[0] );  // 4
-          pos.push( y1 + top[1] );  // 4
-          pos.push( z1 + top[2] );  // 4
+          pos.push( x[1] + top[0] );  // 4
+          pos.push( y[1] + top[1] );  // 4
+          pos.push( z[1] + top[2] );  // 4
           
-          pos.push( x2 + top[0] );  // 5
-          pos.push( y2 + top[1] );  // 5
-          pos.push( z2 + top[2] );  // 5
+          pos.push( x[2] + top[0] );  // 5
+          pos.push( y[2] + top[1] );  // 5
+          pos.push( z[2] + top[2] );  // 5
           
-          pos.push( x1 - top[0] );  // 6
-          pos.push( y1 - top[1] );  // 6
-          pos.push( z1 - top[2] );  // 6
+          pos.push( x[1] - top[0] );  // 6
+          pos.push( y[1] - top[1] );  // 6
+          pos.push( z[1] - top[2] );  // 6
           
-          pos.push( x2 - top[0] );  // 7
-          pos.push( y2 - top[1] );  // 7
-          pos.push( z2 - top[2] );  // 7
+          pos.push( x[2] - top[0] );  // 7
+          pos.push( y[2] - top[1] );  // 7
+          pos.push( z[2] - top[2] );  // 7
           
           faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
           
@@ -230,7 +198,7 @@ scripts:
       //console.info( "   PinDrop ---------------" );
       
       if ( pickInfo && pickInfo.globalPosition ) {
-        pushpin.properties.position = pickInfo.globalPosition;
+        pushpin.properties.tranlation = pickInfo.globalPosition;
         
         if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
           pushpin.source = "models/pushPinRed.dae";
@@ -317,26 +285,26 @@ scripts:
       var pos = [];
       var faces;
       
-      var diff = [ x2 - x1, y2 - y1, z2 - z1 ];
-      var up = [ 0, 1, 0 ];
-      var right = [ 1, 0, 0 ];
-      var top = [ 0, 0, 0 ];
+      var diff = goog.vec.Vec3.createFromArray( [ x2 - x1, y2 - y1, z2 - z1 ] );
+      var up = goog.vec.Vec3.createFromArray( [ 0, 1, 0 ] );
+      var right = goog.vec.Vec3.createFromArray( [ 1, 0, 0 ] );
+      var top = goog.vec.Vec3.createFromArray( [ 0, 0, 0 ] );
       
-      this.normalize( diff );
+      goog.vec.Vec3.normalize( diff, diff );
 
-      if ( Math.abs( this.dotProduct( up, diff ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
+      if ( Math.abs( goog.vec.Vec3.dotProduct( up, diff, goog.vec.Vec3.create() ) ) < .999 ) // diff far enough from up? (.999==2.5 degrees)
       { // then we can cross with up
-        right = this.crossProduct( diff, up );
+        goog.vec.Vec3.crossProduct( diff, up, right );
       }
       else
       { //too colinear with up, so start w/ a different axis
-        right = this.crossProduct( diff, right );
+        goog.vec.Vec3.crossProduct( diff, right, right );
       }
-      top = this.crossProduct( diff, right );
-      this.normalize( right );
-      this.normalize( top );
-      this.multiply( right, thickness );
-      this.multiply( top, thickness );              
+      goog.vec.Vec3.crossProduct( diff, right, top );
+      goog.vec.Vec3.normalize( right, right );
+      goog.vec.Vec3.normalize( top, top );
+      goog.vec.Vec3.scale( right, thickness, right );
+      goog.vec.Vec3.scale( top, thickness, top );              
       
       pos.push( x1 + right[0] );  // 0
       pos.push( y1 + right[1] );  // 0

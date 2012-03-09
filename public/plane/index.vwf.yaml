@@ -1,7 +1,7 @@
 --- 
 extends: http://vwf.example.com/glge.vwf
 properties:
-  navmode: none
+  navmode: orbit
 children:
   plane:
     extends: http://vwf.example.com/node3.vwf
@@ -10,8 +10,7 @@ children:
     source: seymourplane_triangulate.dae
     type: model/vnd.collada+xml
     properties:
-      position: [ -1, -20, 0 ]
-      eulers: [ 90, 90, 0 ]
+      rotation: [ 0.57735, -0.57735, -0.57735, 120 ]
       # sway-on-click configuration parameters
       sway-axis: [ 1, 0, 0 ]
     children:
@@ -33,22 +32,22 @@ children:
     #       this.prop["spin-spinning"] = true;
     #     }
     #   }
-  # Camera boilerplate
+  sceneCenter:
+    extends: http://vwf.example.com/node3.vwf  
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      rotation: [ -0.79, -3.34, -0.22 ]
+      rotationOLD: [ -0.79, -3.34, -0.22 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      rotation: [ 0.279, 0.9539, -0.08268 ]
-# Camera fix
+      rotationOLD: [ 0.279, 0.9539, -0.08268 ]
 scripts:
-- |
-  this.initialize = function() {
-    vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "eulers", [ 90, 180, 0 ] );
-  }
+- text: |
+    this.initialize = function(){
+      this.camera.transform = [ 1,0,0,0,0,1,-0.000185691867955029,0,0,0.000185691867955029,1,0,0,-48,0,1 ];
+    }

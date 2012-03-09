@@ -20,9 +20,6 @@
         initialize: function( rootSelector ) {
             if (!vwf) return;
 
-            //modules.view.call( this, vwf );
-            //this.namespace = namespace;
-
             this.rootSelector = rootSelector;
             this.canvasQuery = undefined;
  
@@ -666,12 +663,12 @@
 
                         }
                         if ( object ) {
-                            sceneView.createNode( "index-vwf", object, file.name, undefined );
+                            sceneView.kernel.createNode( "index-vwf", object, file.name, undefined );
                         }
                         break;
                     case "yaml":
                         fn = file.name.substr( 0, file.name.length - 5 );
-                        sceneView.createNode( "index-vwf", fn, fn, undefined );                
+                        sceneView.kernel.createNode( "index-vwf", fn, fn, undefined );                
                         break;
                 }
                 

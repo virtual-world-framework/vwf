@@ -17,11 +17,7 @@ methods:
   spin: |
     if ( this["spin-spinning"] ) {  // if enabled
       var rotation = this.rotation;
-      this.rotation = [  // update the rotation
-        rotation[0] + this["spin-axis"][0] * 2 * Math.PI * 0.05 * this["spin-rate"],
-        rotation[1] + this["spin-axis"][1] * 2 * Math.PI * 0.05 * this["spin-rate"],
-        rotation[2] + this["spin-axis"][2] * 2 * Math.PI * 0.05 * this["spin-rate"],
-      ];
+      this.rotation = [ this["spin-axis"][0], this["spin-axis"][1], this["spin-axis"][2], rotation[3] + this["spin-rate"] ];
       this.future( 0.05 ).spin();  // schedule the next step
     }
 scripts:

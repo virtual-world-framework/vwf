@@ -47,12 +47,11 @@ scripts:
       "properties": { 
         "material": "",
         "scale": [ 1.5, 1.5, 1.5 ], 
-        "eulers": [ 0, 0, 0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
-        "position": [ 0, 0, 0 ], 
+        "translation": [ 0, 0, 0 ], 
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
         "velocity": [ 0, 0, 0 ], 
@@ -65,12 +64,11 @@ scripts:
       "properties": { 
         "material": "", 
         "scale": [ 2.0, 2.0, 2.0 ], 
-        "eulers": [ 0, 0, 0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
-        "position": [ 0, 0, 0 ], 
+        "translation": [ 0, 0, 0 ], 
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
         "velocity": [ 0, 0, 0 ], 
@@ -100,6 +98,14 @@ scripts:
       //}
       mouseDownTime = -1;
     }
+    this.getCameraLook = function() {
+        var trans = goog.vec.Mat4.multVec4(
+          this.activeCameraComp.rotationMatrix,
+          goog.vec.Vec4.createFromValues( 1, 1, 1, 1 ),
+          goog.vec.Vec3.create()
+        );
+        return trans;      
+    }
     this.createObject = function() {
       var newObjName;
 
@@ -107,17 +113,16 @@ scripts:
         this.getActiveCamera();
       }
       if ( this.activeCameraComp ) {
-        var mat = this.activeCameraComp.rotationMatrix;
-        var pos = this.activeCameraComp.position;
-        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
+        var pos = this.activeCameraComp.translation;
+        var camLook = this.getCameraLook();
                 
         if ( this.createCube ) {
           this.cubesCreated += 1;
           newObjName = "cube" + this.cubesCreated;
           
           cube.properties.material = materials[ this.colorIndex ];
-          cube.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
-          cube.properties.velocity = [ trans[0] * this.tossCubeStrength, trans[1] * this.tossCubeStrength, trans[2] * this.tossCubeStrength];
+          cube.properties.translation = [ pos[0], pos[1], pos[2] - 10 ];
+          cube.properties.velocity = [ camLook[0] * this.tossCubeStrength, camLook[1] * this.tossCubeStrength, camLook[2] * this.tossCubeStrength];
           this.colorIndex += 1;
           
           vwf.createNode( "index-vwf", cube, newObjName, undefined );        
@@ -127,8 +132,8 @@ scripts:
           newObjName = "sphere" + this.spheresCreated;
           
           sphere.properties.material = materials[ this.colorIndex ];
-          sphere.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
-          sphere.properties.velocity = [ trans[0] * this.tossSphereStrength, trans[1] * this.tossSphereStrength, trans[2] * this.tossSphereStrength ];
+          sphere.properties.translation = [ pos[0], pos[1], pos[2] - 10 ];
+          sphere.properties.velocity = [ camLook[0] * this.tossSphereStrength, camLook[1] * this.tossSphereStrength, camLook[2] * this.tossSphereStrength ];
           this.colorIndex += 1;
           
           vwf.createNode( "index-vwf", sphere, newObjName, undefined );
