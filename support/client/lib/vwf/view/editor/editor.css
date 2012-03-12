@@ -29,6 +29,14 @@
 	pointer-events:all;
 }
 
+.editor-tabs {
+	width:22px;
+	position:relative;
+	right:3px;
+	pointer-events:all;
+	overflow-y:hidden;
+}
+
 hr 
 {
 	background-color:#153255;
@@ -116,4 +124,18 @@ form
 	width:130px;
 	padding:0px;
 	overflow:hidden;
+}
+
+.clientEntry
+{
+	font:10pt Arial;
+	font-weight:bold;
+	padding-left:10px;
+	padding-right:10px;
+}
+
+/* TIMELINE */
+.rate.slider {
+	display: inline-block;
+	width: 10em;
 }
