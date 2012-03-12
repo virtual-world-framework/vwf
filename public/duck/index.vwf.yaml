@@ -7,8 +7,8 @@ children:
     extends: http://vwf.example.com/node3.vwf
     # # 2: Uncomment to apply the spin-on-click behavior
     # # ... located in public/types/spin-on-click.vwf.yaml
-    # implements:
-    # - http://vwf.example.com/spin-on-click.vwf
+    implements:
+    - http://vwf.example.com/spin-on-click.vwf
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
@@ -20,8 +20,8 @@ children:
     # scripts:
     # - |
     #   this.pointerClick = function() {
-    #     var trs = this.translation
-    #     this.translation = [ trs[0], trs[1] , trs[2] + 1 ];
+    #     var rot = this.rotation;
+    #     this.rotation = [ rot[0], rot[1] , rot[2], rot[3] + 1 ];
     #   }
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
