@@ -9,9 +9,11 @@ gem "websocket-rack", :require => "rack/websocket"
 
 gem "thin"
 
+gem "rake" # for build scripts
+gem "rocco" # for documentation builds
+
 group :development do
   gem "sinatra-reloader", :require => "sinatra/reloader"
-  gem "rocco" # for documentation builds
 end
 
 group :test do
