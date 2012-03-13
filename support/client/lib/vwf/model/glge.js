@@ -38,10 +38,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( childExtendsID === undefined /* || childName === undefined */ )
                 return;
 
-            this.logger.enable = true;
-            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childName );
-            this.logger.enable = false;
+//            this.logger.enable = true;
+//            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+//                                childSource, childType, childName );
+//            this.logger.enable = false;
 
             // find the parent node
             if ( nodeID ) {

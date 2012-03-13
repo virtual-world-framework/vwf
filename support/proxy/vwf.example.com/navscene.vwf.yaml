@@ -227,7 +227,7 @@ scripts:
         if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
-        if ( xinc != 0 || yinc != 0 ) {
+        if ( xinc != 0 || yinc != 0 || zinc != 0 ) {
           var x, y, z;
         
           x = cameraPos[0] + xinc * this.speed * mult;
@@ -509,11 +509,11 @@ scripts:
     }
     this.getCameraAt = function() {
       var camRotMat = this.activeCameraComp.rotationMatrix;
-      return [ camRotMat[3], camRotMat[4], camRotMat[5] ];  
+      return [ camRotMat[4], camRotMat[5], camRotMat[6] ];  
     }
     this.getCameraUp = function() {
       var camRotMat = this.activeCameraComp.rotationMatrix;
-      return [ camRotMat[6], camRotMat[7], camRotMat[8] ];  
+      return [ camRotMat[8], camRotMat[9], camRotMat[10] ];  
     }
     this.getCameraRight = function() {
       var camRotMat = this.activeCameraComp.rotationMatrix;
