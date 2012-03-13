@@ -178,17 +178,12 @@ methods:
       - rotation
       - duration
     body: |
-      console.info( "this.quaternion: " + Array.prototype.slice.call( this.quaternion ) );
-      console.info( "rotation = " + rotation );
       var rotation = this.rotationFromValue( rotation );
-      console.info( "rotation = " + Array.prototype.slice.call(rotation) );
-      console.info( "fromAngleAxis( "+ (rotation[3] * Math.PI / 180) + " [ " + Array.prototype.slice.call( rotation ) + " ] " +" )" );
       var deltaQuaternion = goog.vec.Quaternion.fromAngleAxis(
         rotation[3] * Math.PI / 180,
         goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
         goog.vec.Quaternion.create()
       );
-      console.info( "deltaQuaternion = " + Array.prototype.slice.call(deltaQuaternion) );
       this.quaterniateBy( deltaQuaternion, duration ); //@ sourceURL=node3.rotateBy.vwf
   # Rotate to rotation over duration.
   rotateTo:
@@ -244,14 +239,11 @@ methods:
       - startTime
       - stopTime
     body: |
-      console.info( "startQuaternion: " + Array.prototype.slice.call( startQuaternion ) );
-      console.info( "stopQuaternion: " + Array.prototype.slice.call( stopQuaternion ) );
       this.quaternion = goog.vec.Quaternion.slerp(
         startQuaternion, stopQuaternion,
         startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Quaternion.create()
       );
-      console.info( "this.quaternion: " + Array.prototype.slice.call( this.quaternion ) );
       if ( this.time < stopTime ) {
         this.in( 0.04 ).quaternionWorker(
           startQuaternion,
@@ -266,7 +258,7 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scalenew;
+      var startScale = this.scale;
       var deltaScale = this.scaleFromValue( scale );
       var stopScale = goog.vec.Vec3.createFromValues(
         startScale[0] * deltaScale[0],
@@ -285,7 +277,7 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scalenew;
+      var startScale = this.scale;
       var stopScale = this.scaleFromValue( scale );
       this.scaleWorker(
         startScale,
@@ -301,7 +293,7 @@ methods:
       - startTime
       - stopTime
     body: |
-      this.scalenew = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
+      this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
         startScale, stopScale,
         startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Vec3.create()
@@ -400,26 +392,26 @@ scripts:
     console.info( test, "x", Array.prototype.slice.apply( this.transform ) );
     console.info( test, "t", Array.prototype.slice.apply( this.translation ) );
     console.info( test, "o", Array.prototype.slice.apply( this.rotation ) );
-    console.info( test, "s", Array.prototype.slice.apply( this.scalenew ) );
+    console.info( test, "s", Array.prototype.slice.apply( this.scale ) );
     console.info( test, "q", Array.prototype.slice.apply( this.quaternion ) );
   };
   this.test1 = function() {
     this.transform = [];
     this.translation = [ 50, 0, 0 ];
-    this.scalenew = 2;
+    this.scale = 2;
     this.state( "test1" );
   };
   this.test2 = function() {
-    this.scalenew = 2;
+    this.scale = 2;
     this.state( "test2 scale 2" );
-    this.scalenew = 1;
+    this.scale = 1;
     this.state( "test2 scale 1" );
     this.rotation = [ 0, 0, 1, 30 ];
     this.state( "test2 rotation 30" );
-    this.scalenew = 3;
+    this.scale = 3;
     this.state( "test2 scale 3" );
     this.rotation = [ 0, 0, 1, -30 ];
     this.state( "test2 rotation -30" );
-    this.scalenew = 1;
+    this.scale = 1;
     this.state( "test2 scale 1" );
   }; //@ sourceURL=node3.vwf
