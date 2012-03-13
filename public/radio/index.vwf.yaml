@@ -4,13 +4,14 @@ type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
-  navmode: walk
+  navmode: none
 scripts:
 - text: |
     this.initialize = function() {
       console.info( "================ radio ================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
-      this.camera.transform = [ 1,0,0,0,0,0.9999997615814209,-0.0006775359506718814,0,0,0.0006775359506718814,0.9999997615814209,0,0,-12,0,1 ];
+      this.camera.transform = [ 0.8791424632072449,-0.4765590727329254,0,0,0.4433826804161072,0.8179396390914917,-0.36658766865730286,0,0.17470066249370575,0.3222827613353729,0.9303835034370422,0,-6.119999885559082,-11.289999961853027,5.059999942779541,1 ];
+      this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
     }
 children:
   Omni01:

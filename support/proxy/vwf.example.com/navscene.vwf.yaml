@@ -388,14 +388,8 @@ scripts:
         this.getActiveCamera();
       
       if ( this.activeCameraComp ) {
-        var rot = this.getCameraAt();
-        var quat = this.activeCameraComp.quaternion;
-        var axis = goog.vec.Vec3.create();
-        var angle = goog.vec.Quaternion.toAngleAxis( quat, axis );
-        
-        if ( this.navmode == "walk" ) {
-          this.activeCameraComp.rotation = [ axis[0], axis[1], axis[2], angle - ( x*0.05 ) ]
-        } 
+        if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * 1.5 ], 0 ) }
+        if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y ], 0 ) }
       }
     }    
     this.zoom = function( dirIn ) {
