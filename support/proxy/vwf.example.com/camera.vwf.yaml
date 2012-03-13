@@ -41,10 +41,3 @@ properties:
       }
     value: "perspective"
   speed: 2.0
-  position: [ 0, 0, 0 ]
-  eulers: [ 0, 0, 0 ]
-  rotation: [ 0, 0, 0 ]
-  rotX: 0
-  rotY: 0
-  rotZ: 0
-

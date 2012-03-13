@@ -31,7 +31,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 7.2, 10, 0 ]
-      eulersOLD: [90, 0, 180]
+      rotation: [ 1, 0, 0, 0 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |
@@ -54,7 +54,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ -7.2, 10, 0 ]
-      eulersOLD: [90, 0, 180]
+      rotation: [ 1, 0, 0, 0 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |

@@ -214,16 +214,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
              
                 scene = this.scenes[ node.sceneID ];  
                 switch ( propertyName ) {
-                case "x":
-                    node.jigLibObj.set_x( propertyValue );    
-                    break;
-                case "y":
-                    node.jigLibObj.set_y( propertyValue );    
-                    break;
-                case "z":
-                    node.jigLibObj.set_z( propertyValue );    
-                    break;
-                case "position":
+                case "translation":
                     if ( activeNode && activeNode.jlObj ) {
     //                          if ( activeNode.offset ) {
     //                              var newPos = [ propertyValue[0] - activeNode.offset[0], propertyValue[1] - activeNode.offset[1], propertyValue[2] - activeNode.offset[2] ];
@@ -235,11 +226,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         node.jigLibObj.moveTo( propertyValue ); 
                     }   
                     break;                       
-                case "rotation":                       
-                    break;                    
-                case "eulers":
-//                    if ( activeNode ) { }
-                    break;
                 case "scale":
 //                        var physics = this.gettingProperty( nodeID, "physics", [] );
 //                        physicsType = ( physics.constructor == Array ) ? physics[0] : physics;

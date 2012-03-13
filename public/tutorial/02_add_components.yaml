@@ -10,13 +10,13 @@ children:
     source: models/vwf_terrain.dae
     type: model/vnd.collada+xml
     properties:
-      translationnew: [ 0, 0, 0 ]
-      rotationnew: [1, 0, 0, 0 ]
-      scalenew: 0.008
+      translation: [ 0, 0, 0 ]
+      rotation: [1, 0, 0, 0 ]
+      scale: 0.008
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
-      translationnew: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
   predGroup:
     extends: http://vwf.example.com/node3.vwf 
     properties:
@@ -27,24 +27,24 @@ children:
         source: models/Predator.dae
         type: model/vnd.collada+xml
         properties:
-          translationnew: [ 0, 500, 1800 ]
-          rotationnew: [0, 0, 0 ]
-          scalenew: 50
+          translation: [ 0, 500, 1800 ]
+          rotation: [0, 0, 0 ]
+          scale: 50
       cone:
         extends: http://vwf.example.com/node3.vwf
         source: models/cone.dae
         type: model/vnd.collada+xml
         properties:
-          translationnew: [ 0, -300, -1100 ]
-          rotationnew: [0, 0, 0 ]
-          scalenew: [ 8, 8, 16 ]
+          translation: [ 0, -300, -1100 ]
+          rotation: [0, 0, 0 ]
+          scale: [ 8, 8, 16 ]
     implements:
     - http://vwf.example.com/fly.vwf
 scripts:
 - text: |
     this.initialize = function() {
-      this.camera.position = [ 0, 20000, 10000 ];
-      this.camera.rotation = [ 1.56, 0, 0 ];
+      this.camera.translation = [ 0, 20000, 10000 ];
+      this.camera.rotation = [ 1, 0, 0, 90 ];
       this.camera.far = 500000;
       this.camera.near = 2;   
       this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";  
