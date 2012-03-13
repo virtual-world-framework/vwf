@@ -563,7 +563,7 @@
                 switch ( ext[0].toLowerCase() ) {
                     case "dae":
                         object = {
-                          extends: "http://vwf.example.com/editable3.vwf",
+                          extends: "http://vwf.example.com/node3.vwf",
                           source: file.name,
                           type: "model/vnd.collada+xml",
                           properties: { 

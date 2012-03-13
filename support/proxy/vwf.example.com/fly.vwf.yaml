@@ -11,9 +11,9 @@ properties:
         this["fly-flying"] = false;  // set the internal value
       }
     value: false
-  fly-distanceOnGround: 2000
+  fly-distanceOnGround: 1000
   fly-speedOnGroundMax: 200
-  fly-elevation: 1000
+  fly-elevation: 2500
   fly-speedInAir: 250
   fly-raduis: 8000
   fly-speed: 62.5
@@ -67,12 +67,15 @@ scripts:
       this.pointsClimbing = 24.0;
       this.pointsOnCircle = 36.0;
       this.lastTime = 0;
-      var diffX, diffY, diffZ; 
+      var diffX, diffY, diffZ;
+      var at = goog.vec.Vec3.createFromValues( trans[4], trans[5], 0 );
+
+      goog.vec.Vec3.normalize( at, at ); 
       
       for ( var i = 0; i < this.pointsOnGround; i++ ) {
         newPoint = [];
-        newPoint[0] = initPt[0] + trans[4] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
-        newPoint[1] = initPt[1] + trans[5] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
+        newPoint[0] = initPt[0] + at[0] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
+        newPoint[1] = initPt[1] + at[1] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
         newPoint[2] = initPt[2];
         
         if ( prevPt ) {
@@ -82,7 +85,6 @@ scripts:
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "ground" } );
-        //console.info( "   this.points[ "+i+" ] = { point: "+newPoint+", distance: "+distance+", place: ground }" );
         prevPt = newPoint;
         
       }
@@ -93,21 +95,17 @@ scripts:
 
       for ( var i = 1; i <= this.pointsClimbing; i++ ) {
         newPoint = [];
-        newPoint[0] = initPt[0] + trans[4] * i * adjLength / this.pointsClimbing;
-        newPoint[1] = initPt[1] + trans[5] * i * adjLength / this.pointsClimbing;
+        newPoint[0] = initPt[0] + at[0] * i * adjLength / this.pointsClimbing;
+        newPoint[1] = initPt[1] + at[1] * i * adjLength / this.pointsClimbing;
         newPoint[2] = initPt[2] + i * heightToTravel / this.pointsClimbing;
         
-        //console.info( "newPoint = " + newPoint + "   number of points: " + this.points.length );
-        
         if ( prevPt ) {
-          //console.info( "prevPt = " + prevPt );
           diffX = prevPt[0] - newPoint[0];
           diffY = prevPt[1] - newPoint[1];          
           diffZ = prevPt[2] - newPoint[2];
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "rising" } );
-        //console.info( "   this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: rising }" );
         prevPt = newPoint;
       }
 
@@ -119,9 +117,6 @@ scripts:
       center[1] = prevPt[1];    
       center[2] = prevPt[2];       
 
-      //console.info( "++    center = " + center );
-      //console.info( "++    prevPt = " + prevPt );
-     
       this.firstCiclePoint = this.points.length-1; 
       for ( var i = 0; i < this.pointsOnCircle; i++ ) {
         newPoint = [];
@@ -130,8 +125,6 @@ scripts:
         newPoint[2] = center[2];        
         currentAngle += inc;
         
-        //console.info( "newPoint = " + newPoint );
-        //console.info( "++    prevPt = " + prevPt );
         if ( prevPt ) {
           diffX = prevPt[0] - newPoint[0];
           diffY = prevPt[1] - newPoint[1];          
@@ -139,7 +132,6 @@ scripts:
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "circling" } );
-        //console.info( "   this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: circling }" );
 
         prevPt = newPoint;        
       }
@@ -156,7 +148,6 @@ scripts:
     newPos.push( beforeCoord[0] + percent * (afterCoord[0] - beforeCoord[0]) );
     newPos.push( beforeCoord[1] + percent * (afterCoord[1] - beforeCoord[1]) );    
     newPos.push( beforeCoord[2] + percent * (afterCoord[2] - beforeCoord[2]) );  
-    
     return newPos;
   }  
   this.fly = function() {
@@ -182,14 +173,10 @@ scripts:
           }
           // update rotation
           var goalPathPoint = this.points[ this["fly-pointIndex"]+1 ].point;
-
-          //console.info( "goalPathPoint = " + goalPathPoint );
-          //console.info( "newPos = " + newPos );
-
           var zRot = [ goalPathPoint[0] - newPos[0], goalPathPoint[1] - newPos[1], 0 ];
-          //console.info( "zRot = " + zRot );
 
-          this.rotation = [ 0, 0, Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5) ];
+          //this.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )+(Math.PI)) * 180/Math.PI  ];
+          this.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5))*180/Math.PI  ];
 
           this.updateSpeed();
           this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
@@ -199,7 +186,6 @@ scripts:
       this.future( 0.05 ).fly();  // schedule the next step
     }    
   }
-
   this.pointerClick = function()  {  // when clicked ...
     this["fly-flying"] = ! this["fly-flying"];  // ... toggle the enabled flag
   }  //@ sourceURL=fly.vwf
