@@ -63,8 +63,8 @@ scripts:
       source: "models/pushpinblack.dae",
       type: "model/vnd.collada+xml",
       properties: { 
-        rotation: [ 0, 0, 0 ], 
-        scalenew: 6
+        rotation: [ 1, 0, 0, 0 ], 
+        scale: 6
       },    
     };
     this.pointerUp = function( parms, pickInfo ){

@@ -2,5 +2,5 @@
 extends: http://vwf.example.com/glge.vwf
 scripts:
 - text: |
-    this.initialize = function() { this.navmode = "walk"; }
+    this.initialize = function() { this.navmode = "none"; }
   type: application/javascript    

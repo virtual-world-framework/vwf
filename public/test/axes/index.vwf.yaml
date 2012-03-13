@@ -6,7 +6,7 @@ children:
     source: OrientationCube.dae
     type: model/vnd.collada+xml
     properties:
-      scalenew: [ 2, 2, 2 ]
+      scale: [ 2, 2, 2 ]
   spherexp:
     extends: http://vwf.example.com/node3.vwf
     source: UnitSphereRed.dae

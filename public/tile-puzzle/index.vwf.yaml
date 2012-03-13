@@ -31,7 +31,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 7.2, 10, 0 ]
-      rotation: [ 1, 0, 0, 0 ]
+      rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |
@@ -54,7 +54,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ -7.2, 10, 0 ]
-      rotation: [ 1, 0, 0, 0 ]
+      rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - text: |
@@ -77,6 +77,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -99,6 +100,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -121,6 +123,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -143,6 +146,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -165,6 +169,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -187,6 +192,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -209,6 +215,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -231,6 +238,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -253,6 +261,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -275,6 +284,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -301,6 +311,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -327,6 +338,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -353,6 +365,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -379,6 +392,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -405,6 +419,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
     - text: |
@@ -445,12 +460,10 @@ scripts:
       this.tile13.translation = this.tilePosition13;
       this.tile14.translation = this.tilePosition14;
       this.tile15.translation = this.tilePosition15;
-      this.openTiletranslation = this.tilePosition16;
+      this.openTilePosition = this.tilePosition16;
       
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
-      //this.camera.rotation = [ 2.6, 3.11, 0.004 ];
-      this.camera.translation = [ 2.8, 28.32, 63 ];
-      this.loadDone = true;
+      this.camera.transform = [ -0.9999961853027344,0.0027521769516170025,0,0,-0.0013765898765996099,-0.5001803040504456,-0.8659201860427856,0,-0.0023831655271351337,-0.865916907787323,0.5001822113990784,0,0.088880255818367,32.294410705566406,69.99520874023438,1 ];
     }
     
     this.shuffle = function() {
