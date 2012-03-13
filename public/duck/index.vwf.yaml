@@ -1,7 +1,7 @@
 --- 
 extends: http://vwf.example.com/glge.vwf
 properties:
-  navmode: orbit
+  navmode: none
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -42,6 +42,6 @@ children:
 scripts:
 - text: |
     this.initialize = function(){
-      this.camera.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 12, -482, 76, 1 ];
+      this.camera.transform = [ -0.9986274838447571,-0.05237562581896782,0,0,0.05210408568382263,-0.9934501051902771,-0.10169605165719986,0,0.005326394457370043,-0.10155647248029709,0.9948155283927917,0,-20.234933853149414,574.015380859375,107.63810729980469,1 ];
       this.camera.far = this.camera.far * 4;
     }
