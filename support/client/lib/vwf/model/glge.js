@@ -13,8 +13,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
-
-            //this.glge_view = undefined;
  
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
@@ -24,9 +22,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.delayedProperties = {};
 
-            this.meshIndex = 1;
-
-            //this.logger.enable = true;
         },
 
 
@@ -43,9 +38,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( childExtendsID === undefined /* || childName === undefined */ )
                 return;
 
-//            this.logger.enable = true;
-//            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-//                                childSource, childType, childName );
+            this.logger.enable = true;
+            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childName );
+            this.logger.enable = false;
 
             // find the parent node
             if ( nodeID ) {
@@ -408,25 +404,26 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            switch ( nodeID ) {
-                case "http-vwf-example-com-node3-vwf-cityblock":
-                case "http-vwf-example-com-node3-vwf-duck":
-                case "http-vwf-example-com-camera-vwf-camera":
-                case "http-vwf-example-com-camera-vwf-plane":
-                case "http-vwf-example-com-camera-vwf-radio":
-                    if ( propertyName == "transform" ) {
-                        console.info( "SETTING transform" );
-                    }
+//            switch ( nodeID ) {
+//                case "http-vwf-example-com-node3-vwf-cityblock":
+//                case "http-vwf-example-com-node3-vwf-duck":
+//                case "http-vwf-example-com-camera-vwf-camera":
+//                case "http-vwf-example-com-node3-vwf-plane":
+//                case "http-vwf-example-com-node3-vwf-radio":
+//                case "http-vwf-example-com-node3-vwf-flat_terrain":
+////                    if ( propertyName == "transform" ) {
+////                        console.info( "SETTING transform" );
+////                    }
 
-                    if ( propertyValue instanceof Float32Array )
-                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+Array.prototype.slice.call( propertyValue )+" )" );
-                    else
-                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" ); 
-                    break;
-            
-                default:
-                    break;            
-            } 
+//                    if ( propertyValue instanceof Float32Array )
+//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+Array.prototype.slice.call( propertyValue )+" )" );
+//                    else
+//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" ); 
+//                    break;
+//            
+//                default:
+//                    break;            
+//            } 
 
             if ( node && node.glgeObject && propertyValue !== undefined ) {
 
@@ -1956,27 +1953,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
 
         return vertexIndices;
-    }
-
-   
-    function createModelNode( parentID, glgeObject ) {
-        
-        //console.info( "createModelNode( " + parentID + ", " + glgeObject + " )" );
-
-        var extendType = "http://vwf.example.com/node3.vwf";
-        var objName = name( glgeObject );
-
-        if ( glgeObject.constructor == GLGE.Mesh ) {
-            var mesh = glgeObject;
-            if ( objName == "" ) {
-                objName = "Mesh" + this.meshIndex++;
-                mesh.name = objName;
-            }             
-            extendType = "http://vwf.example.com/mesh.vwf";
-        } 
-
-        this.kernel.createNode( parentID, { "extends": extendType }, objName, undefined );
-
     }
 
     function loadComplete() {

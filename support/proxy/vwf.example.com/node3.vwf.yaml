@@ -14,7 +14,7 @@ properties:
       var translation = this.translationFromValue( value ); // parse incoming value
       var transform = this.transform;
       goog.vec.Mat4.setColumnValues( transform, 3, translation[0], translation[1], translation[2], 1 );
-      this.transform = transform;
+      this.transform = transform; //@ sourceURL=node3.translation.set.vwf
     # node.translation => [ x, y, z ]
     get: |
       var translation = goog.vec.Vec3.create();
@@ -69,7 +69,7 @@ properties:
         ),
         goog.vec.Quaternion.create()
       );
-  scalenew:
+  scale:
     # node.scale <= [ x, y, z ], node.scale <= s
     set: |
       var scale = this.scaleFromValue( value ); // parse incoming value
@@ -136,7 +136,7 @@ methods:
         stopTranslation,
         this.time,
         this.time + ( duration || 0 )
-      );
+      ); //@ sourceURL=node3.translateBy.vwf
   # Translate to translation over duration.
   translateTo:
     parameters:
@@ -150,7 +150,7 @@ methods:
         stopTranslation,
         this.time,
         this.time + ( duration || 0 )
-      );
+      ); //@ sourceURL=node3.translateTo.vwf
   # Perform a translation animation.
   translationWorker:
     parameters:
@@ -171,20 +171,25 @@ methods:
           startTime,
           stopTime
         ); // TODO: way to do this.in( next-tick )...
-      }
+      }  //@ sourceURL=node3.translationWorker.vwf
   # Rotate by rotation over duration.
   rotateBy:
     parameters:
       - rotation
       - duration
     body: |
+      console.info( "this.quaternion: " + Array.prototype.slice.call( this.quaternion ) );
+      console.info( "rotation = " + rotation );
       var rotation = this.rotationFromValue( rotation );
+      console.info( "rotation = " + Array.prototype.slice.call(rotation) );
+      console.info( "fromAngleAxis( "+ (rotation[3] * Math.PI / 180) + " [ " + Array.prototype.slice.call( rotation ) + " ] " +" )" );
       var deltaQuaternion = goog.vec.Quaternion.fromAngleAxis(
         rotation[3] * Math.PI / 180,
         goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
         goog.vec.Quaternion.create()
       );
-      this.quaterniateBy( deltaQuaternion, duration );
+      console.info( "deltaQuaternion = " + Array.prototype.slice.call(deltaQuaternion) );
+      this.quaterniateBy( deltaQuaternion, duration ); //@ sourceURL=node3.rotateBy.vwf
   # Rotate to rotation over duration.
   rotateTo:
     parameters:
@@ -197,7 +202,7 @@ methods:
         goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
         goog.vec.Quaternion.create()
       );
-      this.quaterniateTo( stopQuaternion, duration );
+      this.quaterniateTo( stopQuaternion, duration ); //@ sourceURL=node3.rotateTo.vwf
   # Rotate by quaternion over duration.
   quaterniateBy:
     parameters:
@@ -216,7 +221,7 @@ methods:
         stopQuaternion,
         this.time,
         this.time + ( duration || 0 )
-      );
+      ); //@ sourceURL=node3.quaterniateBy.vwf
   # Rotate to quaternion over duration.
   quaterniateTo:
     parameters:
@@ -230,7 +235,7 @@ methods:
         stopQuaternion,
         this.time,
         this.time + ( duration || 0 )
-      );
+      ); //@ sourceURL=node3.quaterniateTo.vwf
   # Perform a quaternion animation.
   quaternionWorker:
     parameters:
@@ -239,12 +244,14 @@ methods:
       - startTime
       - stopTime
     body: |
+      console.info( "startQuaternion: " + Array.prototype.slice.call( startQuaternion ) );
+      console.info( "stopQuaternion: " + Array.prototype.slice.call( stopQuaternion ) );
       this.quaternion = goog.vec.Quaternion.slerp(
         startQuaternion, stopQuaternion,
         startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Quaternion.create()
       );
-      //console.info( "   this.quaternion: " + Array.prototype.slice.call( this.quaternion ) );
+      console.info( "this.quaternion: " + Array.prototype.slice.call( this.quaternion ) );
       if ( this.time < stopTime ) {
         this.in( 0.04 ).quaternionWorker(
           startQuaternion,
@@ -252,7 +259,7 @@ methods:
           startTime,
           stopTime
         ); // TODO: way to do this.in( next-tick )...
-      }
+      } //@ sourceURL=node3.quaternionWorker.vwf
   # Scale by scale over duration.
   scaleBy:
     parameters:
@@ -415,4 +422,4 @@ scripts:
     this.state( "test2 rotation -30" );
     this.scalenew = 1;
     this.state( "test2 scale 1" );
-  };
+  }; //@ sourceURL=node3.vwf

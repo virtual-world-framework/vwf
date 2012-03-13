@@ -8,8 +8,6 @@ properties:
   startSize:
   endSize:
   loop: 
-  position: 
-  eulers:
   velocity:
   startMaxVelocity:
   startMinVelocity:
