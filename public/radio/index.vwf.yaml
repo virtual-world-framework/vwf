@@ -20,6 +20,12 @@ children:
       lightType: "point"
       constantAttenuation: 1
       translation: [ 16.37, -18.15, 17.92 ]
+  Omni02:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      constantAttenuation: 1
+      translation: [ -10, -12.15, 10 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
   radio: 
