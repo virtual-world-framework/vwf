@@ -1712,23 +1712,23 @@ return component;
 
             return {
 
-                enable: false,
+                enabled: false,
 
                 log: function( /* function_name, ... */ ) {
-                    if ( this.enable ) {
+                    if ( this.enabled ) {
                         window.console && console.log && console.log.apply( console, prefixed_arguments.apply( this, arguments ) );
                     }
                 },
 
                 debug: function( /* function_name, ... */ ) {
-                    if ( this.enable ) {
+                    if ( this.enabled ) {
                         window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
                     }
                     // window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
                 },
 
                 info: function( /* function_name, ... */ ) {
-                    if ( this.enable ) {
+                    if ( this.enabled ) {
                         window.console && console.info && console.info.apply( console, prefixed_arguments.apply( this, arguments ) );
                     }
                 },
@@ -1742,19 +1742,19 @@ return component;
                 },
 
                 group: function( /* function_name, ... */ ) {
-                    if ( this.enable ) {
+                    if ( this.enabled ) {
                         window.console && console.group && console.group.apply( console, prefixed_arguments.apply( this, arguments ) );
                     }
                 },
 
                 groupCollapsed: function( /* function_name, ... */ ) {
-                    if ( this.enable ) {
+                    if ( this.enabled ) {
                         window.console && console.groupCollapsed && console.groupCollapsed.apply( console, prefixed_arguments.apply( this, arguments ) );
                     }
                 },
 
                 groupEnd: function( /* function_name, ... */ ) {
-                    if ( this.enable ) {
+                    if ( this.enabled ) {
                         window.console && console.groupEnd && console.groupEnd.apply( console, prefixed_arguments.apply( this, arguments ) );
                     }
                 },
@@ -1789,15 +1789,15 @@ return component;
 
         this.logger = {
 
-            enable: false,
-            log: function() { if ( this.enable ) { window.console && console.log && console.log.apply( console, arguments ) } },
-            debug: function() { if ( this.enable ) { window.console && console.debug && console.debug.apply( console, arguments ) } },
-            info: function() { if ( this.enable ) { window.console && console.info && console.info.apply( console, arguments ) } },
+            enabled: false,
+            log: function() { if ( this.enabled ) { window.console && console.log && console.log.apply( console, arguments ) } },
+            debug: function() { if ( this.enabled ) { window.console && console.debug && console.debug.apply( console, arguments ) } },
+            info: function() { if ( this.enabled ) { window.console && console.info && console.info.apply( console, arguments ) } },
             warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
             error: function() { window.console && console.error && console.error.apply( console, arguments ) },
-            group: function() { if ( this.enable ) { window.console && console.group && console.group.apply( console, arguments ) } },
-            groupCollapsed: function() { if ( this.enable ) { window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) } },
-            groupEnd: function() { if ( this.enable ) { window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) } },
+            group: function() { if ( this.enabled ) { window.console && console.group && console.group.apply( console, arguments ) } },
+            groupCollapsed: function() { if ( this.enabled ) { window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) } },
+            groupEnd: function() { if ( this.enabled ) { window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) } },
 
         };
 

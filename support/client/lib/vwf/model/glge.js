@@ -26,7 +26,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.meshIndex = 1;
 
-            //this.logger.enable = true;
+            //this.logger.enabled = true;
         },
 
 
@@ -43,7 +43,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( childExtendsID === undefined /* || childName === undefined */ )
                 return;
 
-//            this.logger.enable = true;
+//            this.logger.enabled = true;
 //            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childName );
 
@@ -313,7 +313,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                  }  // end of switch
             } // end of else
 
-//            this.logger.enable = false;
+//            this.logger.enabled = false;
                
         },
          
