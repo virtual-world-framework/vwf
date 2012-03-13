@@ -75,18 +75,7 @@ scripts:
     this.pointerDown = this.events.add( function( pointerInfo, pickInfo ) {
       //console.info( "== pointerDown == node3edit == pointerDown ==" );
       if ( !this.input ) { this.init(); }
-
-      //console.info( "  modelMatrix = " + this.modelMatrix );
-      //console.info( "  localMatrix = " + this.localMatrix );
-      //console.info( "  transform = " + this.transform );
-      //console.info( "  pickInfo.globalPosition = " + pickInfo.globalPosition );
-      //console.info( "  pickInfo.globalNormal = " + pickInfo.globalNormal );
-      //console.info( "  pickInfo.globalSource = " + pickInfo.globalSource );
-      //console.info( "  pickInfo.position = " + pickInfo.position );
-      //console.info( "  pickInfo.normal = " + pickInfo.normal );
-      //console.info( "  pickInfo.source = " + pickInfo.source );
-      //console.info( "  pickInfo.distance = " + pickInfo.distance );
-      
+   
       this.input.clear();
       this.input.initialTransform = this.transform;
       this.input.pointerDown.pointerInfo = pointerInfo;

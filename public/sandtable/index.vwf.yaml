@@ -85,15 +85,14 @@ children:
             }
 
             this.nextPathIndex = this.lastPathIndex+1;
-            this.timeSinceLast = vwf.time();
+            this.timeSinceLast = this.time;
             this.planeGroup1.translation = this.path[ this.lastPathIndex ].translation;
             this.goal1.translation = this.path[ this.nextPathIndex ].translation;
 
             this.animating = true;
           }
           this.animate = function() {
-            //console.info( "== predator1 ===== animate ================" );
-            var time = vwf.time();
+            var time = this.time;
             var len = this.path.length;
             var timeElasped = time - this.timeSinceLast;
             var lastPathPoint = this.path[ this.lastPathIndex ];
@@ -119,7 +118,7 @@ children:
             this.planeGroup1.translation = [ newX, newY, 1200 ];
             
             var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
-            this.planeGroup1.rotation = [ 0, 0, 1, Math.atan2( zRot[1], zRot[0] ) ]; 
+            this.planeGroup1.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ]; 
             
             if ( percentDone == 1 ) {
               this.lastPathIndex += 1;
@@ -131,7 +130,6 @@ children:
           }
     properties:
       translation: [ 0, 0, 1200 ]
-      scale: [ 1, 1, 1 ]
       lastPathIndex:
         set: |
           // console.info( "predator1.lastPathIndex.set   value = " + value );
@@ -277,7 +275,7 @@ children:
           //console.info( "END +X -Y === 180 to 90" );
          
           this.nextPathIndex = this.lastPathIndex+1;
-          this.timeSinceLast = vwf.time();
+          this.timeSinceLast = this.time;
           this.planeGroup2.translation = this.path[ this.lastPathIndex ].translation;
           this.goal2.translation = this.path[ this.nextPathIndex ].translation;
           //this.planeGroup2.plane2.lookAt = "http-vwf-example-com-node3-vwf-goal2";
@@ -287,7 +285,7 @@ children:
         }
         this.animate = function() {
           //console.info( "== predator2 =====  animate ================" );
-          var time = vwf.time();
+          var time = this.time;
           var len = this.path.length;
           var timeElasped = time - this.timeSinceLast;
           var lastPathPoint = this.path[ this.lastPathIndex ];
@@ -313,7 +311,7 @@ children:
           this.planeGroup2.translation = [ newX, newY, 1200 ];
 
           var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
-          this.planeGroup2.rotation = [ 0, 0, 1, Math.atan2( zRot[1], zRot[0] ) ];
+          this.planeGroup2.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ];
 
           if ( percentDone == 1 ) {
             this.lastPathIndex += 1;
