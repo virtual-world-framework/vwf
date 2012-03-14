@@ -1,0 +1,11 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  physics: "none"
+  physicsDef: 0
+  mass: 1
+  restitution: 0.1
+  friction: 0.5
+  rotVelocityDamping: [ 0.5, 0.5, 0.5 ]
+  linVelocityDamping: [ 1, 1, 1, 0 ]
+  velocity: [ 0, 0, 0 ]
