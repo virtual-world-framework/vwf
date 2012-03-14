@@ -477,10 +477,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         for ( var nodeID in this.active ) {
                             activeObj = this.active[nodeID];
                             if ( activeObj && activeObj.jlObj ) {
-                                pos = activeObj.jlObj.get_currentState().position;
-                                rot = GLGE.Mat4( activeObj.jlObj.get_currentState().get_orientation().glmatrix );
-                                posRot = [ pos[0], pos[1], pos[2], rot ];
-                                this.kernel.setProperty( nodeID, "posRotMatrix", posRot );
+                                var pos = activeObj.jlObj.get_currentState().position;
+                                var trans = GLGE.Mat4( activeObj.jlObj.get_currentState().get_orientation().glmatrix );
+                                trans[12] = pos[0];
+                                trans[13] = pos[1];
+                                trans[14] = pos[2];
+                                this.kernel.setProperty( nodeID, "transform", posRot );
                             }
                         }
                         this.updating = false;
