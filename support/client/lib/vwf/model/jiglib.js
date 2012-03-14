@@ -482,7 +482,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 trans[12] = pos[0];
                                 trans[13] = pos[1];
                                 trans[14] = pos[2];
-                                this.kernel.setProperty( nodeID, "transform", posRot );
+                                this.kernel.setProperty( nodeID, "transform", trans );
                             }
                         }
                         this.updating = false;

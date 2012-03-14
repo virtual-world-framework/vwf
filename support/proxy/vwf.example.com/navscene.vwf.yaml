@@ -389,7 +389,7 @@ scripts:
       
       if ( this.activeCameraComp ) {
         if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * 1.5 ], 0 ) }
-        if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y ], 0 ) }
+        //if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y ], 0 ) }
       }
     }    
     this.zoom = function( dirIn ) {
@@ -520,8 +520,8 @@ scripts:
           goog.vec.Vec4.createFromValues( x, y, z, 1 ),
           goog.vec.Vec3.create()
         );
-        console.info( "   camRotMat = " + Array.prototype.slice.call( camRotMat ) );
-        console.info( "   getCameraAt( "+x+", "+y+", "+z+" ) = " + Array.prototype.slice.call( camAt ) );
+        //console.info( "   camRotMat = " + Array.prototype.slice.call( camRotMat ) );
+        //console.info( "   getCameraAt( "+x+", "+y+", "+z+" ) = " + Array.prototype.slice.call( camAt ) );
         return camAt;      
     }
     this.translate = function( x, y ) {

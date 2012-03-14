@@ -14,8 +14,8 @@ children:
     properties:
       rotation: [ 1, 0, 0, 90 ]
       # spin-on-click configuration parameters
-      spin-rate: 0.1
-      spin-axis: [ 0, 1, 0 ]
+      spin-rate: 1
+      spin-axis: [ 0, 0, 1 ]
     # # 1: Uncomment to jump up on each click
     # scripts:
     # - |
@@ -40,8 +40,8 @@ children:
       constantAttenuation: 1
       rotation: [ -1, 0, 0, 225 ]
 scripts:
-- text: |
+- |
     this.initialize = function(){
-      this.camera.transform = [ -0.9986274838447571,-0.05237562581896782,0,0,0.05210408568382263,-0.9934501051902771,-0.10169605165719986,0,0.005326394457370043,-0.10155647248029709,0.9948155283927917,0,-20.234933853149414,574.015380859375,107.63810729980469,1 ];
+      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,-20,574,108,1 ];
       this.camera.far = this.camera.far * 4;
     }
