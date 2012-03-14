@@ -11,7 +11,7 @@ events:
 methods:
   spin:
 scripts:
-- text: |
+- |
     this.initialize = function() {
       this.input = {
         "pointerInfo": undefined,

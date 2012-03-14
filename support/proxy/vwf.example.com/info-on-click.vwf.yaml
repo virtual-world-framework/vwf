@@ -2,7 +2,7 @@
 extends: |
   http://vwf.example.com/node3.vwf
 scripts:
-- text: |
+- |
     this.pointerClick = function()  {
       console.info( "info on click", this.id );
     }
