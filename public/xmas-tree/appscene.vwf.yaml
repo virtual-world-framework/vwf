@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/physics2.vwf
 properties:
   createCube: true
   cubesCreated: 0
@@ -42,7 +42,7 @@ scripts:
     var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
       "source": "Cube", 
-      "extends": "http://vwf.example.com/node3.vwf",
+      "extends": "http://vwf.example.com/physics3.vwf",
       "type": "text/xml",
       "properties": { 
         "material": "",
@@ -59,7 +59,7 @@ scripts:
       };
     var sphere = { 
       "source": "Sphere", 
-      "extends": "http://vwf.example.com/node3.vwf",
+      "extends": "http://vwf.example.com/physics3.vwf",
       "type": "text/xml",
       "properties": { 
         "material": "", 

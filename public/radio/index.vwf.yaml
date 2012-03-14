@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
@@ -19,13 +19,13 @@ children:
     properties:
       lightType: "point"
       constantAttenuation: 1
-      translation: [ 16.37, -18.15, 17.92 ]
-  Omni02:
+      translation: [ 0, -30, 8 ]
+  dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: "point"
+      lightType: "directional"
       constantAttenuation: 1
-      translation: [ -10, -12.15, 10 ]
+      rotation: [ 0.707, 0.707, 0, 0 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
   radio: 
@@ -678,5 +678,5 @@ children:
                     this.ic40Antennae = function() {
                       console.info( "=====||====== ic40Antennae.pointerClick()" );
                       this.parent.parent.parent.parent.anteanna = !this.parent.parent.parent.parent.anteanna; 
-                    }
+                    } 
 

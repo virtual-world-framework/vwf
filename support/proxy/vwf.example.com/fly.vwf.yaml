@@ -175,7 +175,6 @@ scripts:
           var goalPathPoint = this.points[ this["fly-pointIndex"]+1 ].point;
           var zRot = [ goalPathPoint[0] - newPos[0], goalPathPoint[1] - newPos[1], 0 ];
 
-          //this.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )+(Math.PI)) * 180/Math.PI  ];
           this.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5))*180/Math.PI  ];
 
           this.updateSpeed();

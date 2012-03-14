@@ -25,39 +25,42 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
           childSource, childType, childName, callback /* ( ready ) */) {
 
+          var kernel = this.kernel.kernel.kernel;
           //this.logger.enable = true;
           //this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
           //                  childSource, childType, childName );
           //this.logger.enable = false;
 
-          switch ( childExtendsID ) {
-             case "appscene-vwf":
-             case "http-vwf-example-com-glge-vwf":
-                this.scenes[ childID ] = {};
-                this.scenes[ childID ].ID = childID;
-                this.scenes[ childID ].extendsID = childExtendsID;
-                this.scenes[ childID ].implementsIDs = childImplementsIDs;
-                this.scenes[ childID ].source = childSource;
-                this.scenes[ childID ].type = childType;
-                this.scenes[ childID ].system = jigLib.PhysicsSystem.getInstance();
-                this.scenes[ childID ].initialized = false;
-                this.scenes[ childID ].propertyMap = {};
-                break;
+          prototypes = getPrototypes.call( this, kernel, childExtendsID );
+          if ( prototypes && isSceneDefinition.call( this, prototypes ) ) {
+            this.scenes[ childID ] = {};
+            this.scenes[ childID ].ID = childID;
+            this.scenes[ childID ].extendsID = childExtendsID;
+            this.scenes[ childID ].implementsIDs = childImplementsIDs;
+            this.scenes[ childID ].source = childSource;
+            this.scenes[ childID ].type = childType;
+            this.scenes[ childID ].system = jigLib.PhysicsSystem.getInstance();
+            this.scenes[ childID ].initialized = false;
+            this.scenes[ childID ].propertyMap = {};
+          } else {
 
-             case "http-vwf-example-com-node3-vwf":
-             case "http-vwf-example-com-mesh-vwf":
-                this.nodes[ childID ] = {};
-/* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
-                this.nodes[ childID ].name = childName;
-                this.nodes[ childID ].ID = childID;
-                this.nodes[ childID ].parentID = nodeID;
-                this.nodes[ childID ].extendsID = childExtendsID;
-                this.nodes[ childID ].implementsIDs = childImplementsIDs;
-                this.nodes[ childID ].source = childSource;
-                this.nodes[ childID ].type = childType;
+              switch ( childExtendsID ) {
+                 case "http-vwf-example-com-physics3-vwf":
+                 case "http-vwf-example-com-node3-vwf":
+                 case "http-vwf-example-com-mesh-vwf":
+                    this.nodes[ childID ] = {};
+    /* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
+                    this.nodes[ childID ].name = childName;
+                    this.nodes[ childID ].ID = childID;
+                    this.nodes[ childID ].parentID = nodeID;
+                    this.nodes[ childID ].extendsID = childExtendsID;
+                    this.nodes[ childID ].implementsIDs = childImplementsIDs;
+                    this.nodes[ childID ].source = childSource;
+                    this.nodes[ childID ].type = childType;
                 
-                break;
-          }
+                    break;
+                }
+            }
           
        },
 
@@ -89,35 +92,35 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         },
 
-        // -- addingChild --------------------------------------------------------------------------
+//        // -- addingChild --------------------------------------------------------------------------
 
-        addingChild: function( nodeID, childID, childName ) {
-        },
+//        addingChild: function( nodeID, childID, childName ) {
+//        },
 
-        // -- movingChild --------------------------------------------------------------------------
+//        // -- movingChild --------------------------------------------------------------------------
 
-        movingChild: function( nodeID, childID, childName ) {
-        },
+//        movingChild: function( nodeID, childID, childName ) {
+//        },
 
-        // -- removingChild ------------------------------------------------------------------------
+//        // -- removingChild ------------------------------------------------------------------------
 
-        removingChild: function( nodeID, childID, childName ) {
-        },
+//        removingChild: function( nodeID, childID, childName ) {
+//        },
 
-        // -- parenting ----------------------------------------------------------------------------
+//        // -- parenting ----------------------------------------------------------------------------
 
-        parenting: function( nodeID ) {
-        },
+//        parenting: function( nodeID ) {
+//        },
 
-        // -- childrening --------------------------------------------------------------------------
+//        // -- childrening --------------------------------------------------------------------------
 
-        childrening: function( nodeID ) {
-        },
+//        childrening: function( nodeID ) {
+//        },
 
-        // -- naming -------------------------------------------------------------------------------
+//        // -- naming -------------------------------------------------------------------------------
 
-        naming: function( nodeID ) {
-        },
+//        naming: function( nodeID ) {
+//        },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
@@ -197,9 +200,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.updating ) {
                 switch ( propertyName ) { 
-                    case "position":
+                    case "translation":
                     case "rotation":
-                    case "posRotMatrix":
+                    case "rotationMatrix":
+                    case "transform":
                         return;
                         break;
                     }
@@ -422,36 +426,36 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 
 
-        // -- creatingMethod ------------------------------------------------------------------------
+//        // -- creatingMethod ------------------------------------------------------------------------
 
-        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
-        },
-
-
-        // -- callingMethod ------------------------------------------------------------------------
-
-        callingMethod: function( nodeID, methodName, methodParameters ) {
-        },
+//        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+//        },
 
 
-        // -- creatingEvent ------------------------------------------------------------------------
+//        // -- callingMethod ------------------------------------------------------------------------
 
-        creatingEvent: function( nodeID, eventName, eventParameters ) {
-        },
-
-        // TODO: deletingEvent
-
-        // -- firingEvent --------------------------------------------------------------------------
-
-        firingEvent: function( nodeID, eventName, eventParameters ) {
-        },
+//        callingMethod: function( nodeID, methodName, methodParameters ) {
+//        },
 
 
-        // -- executing ----------------------------------------------------------------------------
+//        // -- creatingEvent ------------------------------------------------------------------------
 
-        executing: function (nodeID, scriptText, scriptType) {
-            return undefined;
-        },
+//        creatingEvent: function( nodeID, eventName, eventParameters ) {
+//        },
+
+//        // TODO: deletingEvent
+
+//        // -- firingEvent --------------------------------------------------------------------------
+
+//        firingEvent: function( nodeID, eventName, eventParameters ) {
+//        },
+
+
+//        // -- executing ----------------------------------------------------------------------------
+
+//        executing: function (nodeID, scriptText, scriptType) {
+//            return undefined;
+//        },
 
 
         // == ticking =============================================================================
@@ -535,12 +539,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var width = 1;
                 var depth = 1;
                 var height = 1;
-                var pos = this.kernel.getProperty( nodeID, "position" );
+                var pos = this.kernel.getProperty( nodeID, "translation" ) || [ 0, 0, 0 ];
                 var useBoundingBox = scale || !def;
 
                 if ( useBoundingBox ) { 
                     var bBox = this.kernel.getProperty( nodeID, "boundingbox" );
-                    var offset = this.kernel.getProperty( nodeID, "centerOffset" );
+                    var offset = this.kernel.getProperty( nodeID, "centerOffset" ) || [ 0, 0, 0 ] ;
                     if ( bBox.max[0] - bBox.min[0] != 0 ) width = ( bBox.max[0] - bBox.min[0] );
                     if ( bBox.max[1] - bBox.min[1] != 0 ) depth = ( bBox.max[1] - bBox.min[1] );
                     if ( bBox.max[2] - bBox.min[2] != 0 ) height = ( bBox.max[2] - bBox.min[2] );                                
@@ -560,7 +564,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 if ( node.jigLibObj ) {
                     scene.system.addBody( node.jigLibObj );
-                    if ( pos ) node.jigLibObj.moveTo( pos )
+                    if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] )
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
                     this.active[ nodeID ].offset = offset;
@@ -580,20 +584,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( scene ) {
                 var v1, v2;
                 var verts = this.kernel.getProperty( nodeID, "vertices" );
-                var offset = this.kernel.getProperty( nodeID, "centerOffset" );
-                var pos = this.kernel.getProperty( nodeID, "position" );
+                var offset = this.kernel.getProperty( nodeID, "centerOffset" ) || [ 0, 0, 0 ];
+                var pos = this.kernel.getProperty( nodeID, "translation" )|| [ 0, 0, 0 ];
 
                 var raduis = 10;
                 var useBoundingBox = scale || !def;
 
                 if ( useBoundingBox ) {
                     var cRadius = 0; 
-                    if ( !scale ) scale = this.kernel.getProperty( nodeID, "scale" );
+                    if ( !scale ) scale = this.kernel.getProperty( nodeID, "scale" ) || [ 1, 1, 1 ];
                     for ( var j = 0; j < verts.length; j++ ) {
                         vt = verts[j];
-                        vt[0] = vt[0] * scale[0];
-                        vt[1] = vt[1] * scale[1];
-                        vt[2] = vt[2] * scale[2];
+                        if ( scale ) {
+                            vt[0] = vt[0] * scale[0];
+                            vt[1] = vt[1] * scale[1];
+                            vt[2] = vt[2] * scale[2];
+                        }
                         verts[j] = vt;
                     }
                     cRadius = calcRadius.call( this, offset, verts );
@@ -612,7 +618,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     //console.info( "     JSphere object created" );
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
-                    this.active[ nodeID ].offset = this.kernel.getProperty( nodeID, "centerOffset" );
+                    this.active[ nodeID ].offset = this.kernel.getProperty( nodeID, "centerOffset" ) || [ 0, 0, 0 ];
                 }
             }
         }
@@ -635,19 +641,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                 }
                 node.jigLibMeshes = [];
-                var pos = this.kernel.getProperty( nodeID, "position" );
+                var pos = this.kernel.getProperty( nodeID, "translation" ) || [ 0, 0, 0 ];
                 var meshDataList = this.kernel.getProperty( nodeID, "meshData" );
                 if ( meshDataList ) {
                     var verts, vertIndices, scale, vt, jMesh;
                     for ( var i = 0; i < meshDataList.length; i++ ) {
                         verts = meshDataList[i].vertices;
                         vertIndices = meshDataList[i].vertexIndices;
-                        scale = meshDataList[i].scale;
+                        scale = meshDataList[i].scale || [ 1, 1, 1 ];
                         for ( var j = 0; j < verts.length; j++ ) {
                             vt = verts[j];
-                            vt[0] = vt[0] * scale[0];
-                            vt[1] = vt[1] * scale[1];
-                            vt[2] = vt[2] * scale[2];
+                            if ( scale ) {
+                                vt[0] = vt[0] * scale[0];
+                                vt[1] = vt[1] * scale[1];
+                                vt[2] = vt[2] * scale[2];
+                            }
                             verts[j] = vt;
                         }
 
@@ -708,6 +716,33 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 scene.system.addBody( node.jigLibObj );
             }
         }
+    }
+
+    // == getPrototypes =====================================================================
+
+    function getPrototypes( kernel, extendsID ) {
+        var prototypes = [];
+        var id = extendsID;
+
+        while ( id !== undefined ) {
+            prototypes.push( id );
+            id = kernel.prototype( id );
+        }
+                
+        return prototypes;
+    }
+
+    // == isGlgeSceneDefinition ==============================================================
+
+    function isSceneDefinition( prototypes ) {
+        var foundGlge = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-physics2-vwf" );    
+            }
+        }
+
+        return foundGlge;
     }
 
 

@@ -14,6 +14,7 @@ scripts:
       console.info( "==================== index.vwf ====================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.camera.translation = [ 30, 138, 40 ];
+      this.camera.rotation = [ 0, 0, 1, 180 ]
       this.camera.far = 50000.0;  
       if ( !this.loadDone ) {
         this.loadDone = true;        
@@ -32,7 +33,7 @@ children:
     events:
       clearing:
   box:
-    extends: "http://vwf.example.com/node3.vwf"
+    extends: "http://vwf.example.com/physics3.vwf"
     source: box.dae
     type: model/vnd.collada+xml
     properties:
@@ -43,7 +44,7 @@ children:
       friction: 0.5
       restitution: 0.1
   groundplane:
-    extends: "http://vwf.example.com/node3.vwf"
+    extends: "http://vwf.example.com/physics3.vwf"
     properties:
       translation: [ 0, 0, 11.06 ]
       physics: [ "plane", [ 0, 0, 1, 0 ] ]

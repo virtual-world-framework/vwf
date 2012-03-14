@@ -1,6 +1,5 @@
 --- 
 extends: appscene.vwf
-source: index.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
@@ -127,7 +126,7 @@ children:
             if ( this.animating ) {
               this.future( 0.1 ).animate();
             } 		  
-          }
+          } //@ sourceURL=predator1.vwf
     properties:
       translation: [ 0, 0, 1200 ]
       lastPathIndex:
@@ -322,7 +321,7 @@ children:
           if ( this.animating ) {
             this.future( 0.1 ).animate();
           }          
-        }
+        } //@ sourceURL=predator2.vwf
     properties:
       translation: [ 0, 0, 1500 ]
       lastPathIndex:

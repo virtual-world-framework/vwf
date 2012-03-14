@@ -293,7 +293,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "http-vwf-example-com-node-vwf":
                     case "http-vwf-example-com-node2-vwf":
                     case "http-vwf-example-com-scene-vwf":
-                    case "http-vwf-example-com-glge-vwf":
                     case undefined:
                         break;
 
@@ -487,7 +486,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                 }
 
-                var pieDiv180 = 3.14159 / 180.0;
                 var pv = propertyValue;
                 switch ( propertyName ) {
 
@@ -624,7 +622,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                 }
 
-			    var _180divPi = ( 180.0/3.14159 );
                 switch ( propertyName ) {
 
                     case "transform":
@@ -656,6 +653,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
 
                         break;
+
+                    //case "worldTransform":
+                    //   value = goog.vec.Mat4.transpose( glgeObject.getModelMatrix(), goog.vec.Mat4.create() );
+                    //   break;
                 
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
@@ -1991,7 +1992,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-glge-vwf" );    
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );    
             }
         }
 
