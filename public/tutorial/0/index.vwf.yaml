@@ -4,10 +4,10 @@ properties:
 children:  
   blueCube:
     extends: http://vwf.example.com/node3.vwf
-    source: ../models/BlueCube.dae
+    source: BlueSphere.dae
     type: model/vnd.collada+xml
 scripts:
 - |
     this.initialize = function() {
-      this.camera.translation = [ 10, -100, 0 ];
+      this.camera.transform = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,-34,0,1 ];
     }
