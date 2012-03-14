@@ -38,7 +38,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( childExtendsID === undefined /* || childName === undefined */ )
                 return;
 
-//            this.logger.enable = true;
+//            this.logger.enabled = true;
 //            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childName );
 //            this.logger.enable = false;
@@ -309,7 +309,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                  }  // end of switch
             } // end of else
 
-//            this.logger.enable = false;
+//            this.logger.enabled = false;
                
         },
          
@@ -2230,21 +2230,3 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 
 } );
-
-
-//    // -- find_glge_view ---------------------------------------------------------------------------
-
-//    function find_glge_view( kernel ) {
-
-//        // Walk the pipeline backwards to the kernel.
-
-//        while ( kernel.kernel ) {
-//            kernel = kernel.kernel;
-//        }
-
-//        // Locate the GLGE view in the kernel's view list.
-//        return kernel.views.reduce( function( dummy, view ) {
-//            return view.namespace == "vwf.view.glge" ? view : undefined;
-//        }, undefined );
-
-//    }

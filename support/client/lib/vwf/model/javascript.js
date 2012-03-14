@@ -76,6 +76,11 @@ node.id = childID; // TODO: move to vwf/model/object
             node.source = childSource;
             node.type = childType;
 
+            Object.defineProperty( node, "logger", {
+                value: this.logger,
+                enumerable: true,
+            } );
+
             node.properties = Object.create( prototype.properties || Object.prototype, {
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
