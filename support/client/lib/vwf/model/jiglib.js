@@ -11,7 +11,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           this.nodes = {}; // maps id => { property: value, ... }
           this.scenes = {};
           this.active = {};
-          this.enable = false;
+          this.enabled = false;
           this.lastTime = 0;
           this.delayedProperties = {};
           this.updating = false;
@@ -29,7 +29,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           //this.logger.enable = true;
           //this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
           //                  childSource, childType, childName );
-          //this.logger.enable = false;
+          //this.logger.enabled = false;
 
           prototypes = getPrototypes.call( this, kernel, childExtendsID );
           if ( prototypes && isSceneDefinition.call( this, prototypes ) ) {
@@ -133,9 +133,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //this.logger.enable = true;
+            //this.logger.enabled = true;
             //this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
-            //this.logger.enable = false;
+            //this.logger.enabled = false;
 
             if ( !( propertyValue === undefined ) ) {
                 var node = this.nodes[ nodeID ];
@@ -193,10 +193,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //this.logger.enable = !this.updating;
+            //this.logger.enabled = !this.updating;
             //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
             //    this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
-            //this.logger.enable = false;
+            //this.logger.enabled = false;
 
             if ( this.updating ) {
                 switch ( propertyName ) { 
@@ -343,8 +343,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             if ( propertyValue && !scene.initialized ) {
                                 initializeScene.call( this, scene ); 
                             }
-                            this.enable = propertyValue;
-                            //this.enable = false;
+                            this.enabled = propertyValue;
+                            //this.enabled = false;
                             break;
                     }
                 }
@@ -356,10 +356,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- gettingProperty ----------------------------------------------------------------------
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
-            //this.logger.enable = true;
+            //this.logger.enabled = true;
             //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
             //    this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
-            //this.logger.enable = false;
+            //this.logger.enabled = false;
           
             propertyValue = undefined;
 
@@ -465,7 +465,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var elaspedTime = vwfTime - this.lastTime;
             this.lastTime = vwfTime;
             
-            if ( this.enable ) {
+            if ( this.enabled ) {
                 if ( elaspedTime > 0 ) {
                     if (elaspedTime > 0.05) elaspedTime = 0.05;
                     var activeObj, posRotProp, pos, rot;
