@@ -2227,6 +2227,4 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         }
     }
-
-
 } );
