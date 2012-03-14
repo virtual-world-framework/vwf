@@ -198,7 +198,7 @@ scripts:
       //console.info( "   PinDrop ---------------" );
       
       if ( pickInfo && pickInfo.globalPosition ) {
-        pushpin.properties.tranlation = pickInfo.globalPosition;
+        pushpin.properties.translation = pickInfo.globalPosition;
         
         if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
           pushpin.source = "models/pushPinRed.dae";
