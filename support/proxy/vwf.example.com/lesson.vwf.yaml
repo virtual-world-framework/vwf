@@ -10,7 +10,7 @@ properties:
       this.instructionIndex = value;
     value: 0
 scripts:
-- text: |
+- |
     this.onEntry = function() {
       if ( this.instructions && this.instructions.length ) {
         this.instructionIndex = 0;
@@ -33,4 +33,3 @@ scripts:
         activateNext();
       }
     }
-  type: application/javascript
