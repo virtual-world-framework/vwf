@@ -23,18 +23,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- deletingNode -------------------------------------------------------------------------
 
-        deletingNode: function( nodeID ) {
-        },
+        //deletingNode: function( nodeID ) {
+        //},
 
         // -- settingProperty ----------------------------------------------------------------------
 
-        settingProperty: function( nodeID, propertyName, propertyValue ) {
-        },
+        //settingProperty: function( nodeID, propertyName, propertyValue ) {
+        //},
 
         // -- gettingProperty ----------------------------------------------------------------------
 
-        gettingProperty: function( nodeID, propertyName, propertyValue ) {
-        },
+        //gettingProperty: function( nodeID, propertyName, propertyValue ) {
+        //},
 
     } );
 
