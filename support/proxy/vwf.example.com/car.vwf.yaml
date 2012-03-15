@@ -23,10 +23,8 @@ properties:
       this.eulers = value;
     value: [ 0, 0, 0 ]
 scripts:
-- text: |
+- |
     var car = this;
     this.pointerClick = function() {
       this.attachedToCamera = !this.attachedToCamera;
-      console.info( '      this.attachedToCamera = ' + this.attachedToCamera );
     }	
-  type: application/javascript
