@@ -43,11 +43,7 @@ methods:
           // update rotation
           var goalPathPoint = this.points[ this["fly-pointIndex"]+1 ].point;
 
-          //console.info( "goalPathPoint = " + goalPathPoint );
-          //console.info( "newPos = " + newPos );
-
           var zRot = [ goalPathPoint[0] - newPos[0], goalPathPoint[1] - newPos[1], 0 ];
-          //console.info( "zRot = " + zRot );
 
           this.rotation = [ 0, 0, Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5) ];
 
@@ -125,7 +121,6 @@ scripts:
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "ground" } );
-        //console.info( "   this.points[ "+i+" ] = { point: "+newPoint+", distance: "+distance+", place: ground }" );
         prevPt = newPoint;
         
       }
@@ -140,17 +135,14 @@ scripts:
         newPoint[1] = initPt[1] + trans[1] * i * adjLength / this.pointsClimbing;
         newPoint[2] = initPt[2] + i * heightToTravel / this.pointsClimbing;
         
-        //console.info( "newPoint = " + newPoint + "   number of points: " + this.points.length );
         
         if ( prevPt ) {
-          //console.info( "prevPt = " + prevPt );
           diffX = prevPt[0] - newPoint[0];
           diffY = prevPt[1] - newPoint[1];          
           diffZ = prevPt[2] - newPoint[2];
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "rising" } );
-        //console.info( "   this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: rising }" );
         prevPt = newPoint;
       }
 
@@ -161,9 +153,6 @@ scripts:
       center[0] = prevPt[0] + this["fly-raduis"];;
       center[1] = prevPt[1];    
       center[2] = prevPt[2];       
-
-      //console.info( "++    center = " + center );
-      //console.info( "++    prevPt = " + prevPt );
      
       this.firstCiclePoint = this.points.length-1; 
       for ( var i = 0; i < this.pointsOnCircle; i++ ) {
@@ -173,8 +162,6 @@ scripts:
         newPoint[2] = center[2];        
         currentAngle += inc;
         
-        //console.info( "newPoint = " + newPoint );
-        //console.info( "++    prevPt = " + prevPt );
         if ( prevPt ) {
           diffX = prevPt[0] - newPoint[0];
           diffY = prevPt[1] - newPoint[1];          
@@ -182,7 +169,6 @@ scripts:
           distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
         }
         this.points.push( { point: newPoint, distance: distance, place: "circling" } );
-        //console.info( "   this.points[ "+(this.points.length-1)+" ] = { point: "+newPoint+", distance: "+distance+", place: circling }" );
 
         prevPt = newPoint;        
       }
@@ -190,7 +176,6 @@ scripts:
       //var pt;
       //for ( var i = 0; i < this.points.length; i++ ) {
       //  pt = this.points[i];
-      //  console.info( "point["+i+"] { point: "+pt.point+ " distance: "+pt.distance+" place: "+pt.place+" }" );
       //}
       
     }
