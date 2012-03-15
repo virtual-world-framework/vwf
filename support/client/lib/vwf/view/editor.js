@@ -488,7 +488,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
-        vwf.logger.info(self + "    " + nodeID);
+        this.logger.info(self + "    " + nodeID);
 
         // Add prototype properties
         var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
@@ -654,7 +654,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         prmtr = JSON.parse(prmtr);
                         parameters.push( prmtr );
                     } catch (e) {
-                        vwf.logger.error('Invalid Value');
+                        this.logger.error('Invalid Value');
                     }
                 }
             }
@@ -700,7 +700,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         arg = JSON.parse(arg);
                         args.push( arg );
                     } catch (e) {
-                        vwf.logger.error('Invalid Value');
+                        this.logger.error('Invalid Value');
                     }
                 }
             }
