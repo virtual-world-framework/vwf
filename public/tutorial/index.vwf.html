@@ -3,9 +3,11 @@
   <head>
     <title>VWF Tutorial</title>
     <link href="toolbar.css" rel="stylesheet" type="text/css" />
-    <!-- <script type="text/javascript">
+    <script type="text/javascript">
+      var mouseMode = "orbit";
 
       function setMode(mode) {
+        mouseMode = mode;
     		highlightMode(mode);
         vwf_view.kernel.setProperty("index-vwf", "mouseMode", mode);
   	  }
@@ -17,7 +19,7 @@
        	document.getElementById(mode).style.border = "3px solid red";
       }
 
-      vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
+      /*vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
       	if (nodeId == "index-vwf" ) {
       	  switch (propertyName) {
       		case "mouseMode":
@@ -25,12 +27,12 @@
       		  break;
           }
         }
-      }
+      } */
       
-    </script> -->
+    </script>
   </head>
   <body>
-    <!-- <div id="wrapper" class="wrapper">
+    <div id="wrapper" class="wrapper">
       <div class="toolstyle" id="toolbar">
         <img id="orbit" src="images/spin.png" style="border:3px solid red" alt="orbit" onclick="setMode('orbit')"/>
         <img id="pindrop" src="images/pindrop.png" style="border:2px solid black" alt="pindrop" onclick="setMode('pindrop')"/>
@@ -38,6 +40,6 @@
     </div>
     <script type="text/javascript">
       $('#wrapper').appendTo('#vwf-root'); 
-    </script> -->
+    </script>
   </body>
 </html>

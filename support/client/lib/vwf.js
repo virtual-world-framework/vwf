@@ -1702,103 +1702,19 @@ return component;
             return this.moniker_;
         };
 
-        // -- logger_for ---------------------------------------------------------------------------
-
-        // Create a logger for a module. Record the module name. Each logger method expects to
-        // receive a function name as the first parameter. Prepend "<module_name>.<function_name>: "
-        // to each output message.
-
-        this.logger_for = function( module_name ) {
-
-            return {
-
-                enabled: false,
-
-                log: function( /* function_name, ... */ ) {
-                    if ( this.enabled ) {
-                        window.console && console.log && console.log.apply( console, prefixed_arguments.apply( this, arguments ) );
-                    }
-                },
-
-                debug: function( /* function_name, ... */ ) {
-                    if ( this.enabled ) {
-                        window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
-                    }
-                    // window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
-                },
-
-                info: function( /* function_name, ... */ ) {
-                    if ( this.enabled ) {
-                        window.console && console.info && console.info.apply( console, prefixed_arguments.apply( this, arguments ) );
-                    }
-                },
-
-                warn: function( /* function_name, ... */ ) {
-                    window.console && console.warn && console.warn.apply( console, prefixed_arguments.apply( this, arguments ) );
-                },
-
-                error: function( /* function_name, ... */ ) {
-                    window.console && console.error && console.error.apply( console, prefixed_arguments.apply( this, arguments ) );
-                },
-
-                group: function( /* function_name, ... */ ) {
-                    if ( this.enabled ) {
-                        window.console && console.group && console.group.apply( console, prefixed_arguments.apply( this, arguments ) );
-                    }
-                },
-
-                groupCollapsed: function( /* function_name, ... */ ) {
-                    if ( this.enabled ) {
-                        window.console && console.groupCollapsed && console.groupCollapsed.apply( console, prefixed_arguments.apply( this, arguments ) );
-                    }
-                },
-
-                groupEnd: function( /* function_name, ... */ ) {
-                    if ( this.enabled ) {
-                        window.console && console.groupEnd && console.groupEnd.apply( console, prefixed_arguments.apply( this, arguments ) );
-                    }
-                },
-
-            };
-
-            // Calculate an arguments array to pass to a logger function. Pass the arguments
-            // following *function_name* through and prepend "<module_name>.<function_name>: ".
-
-            function prefixed_arguments( /* function_name, ... */ ) {
-
-                if ( arguments.length > 0 && ( typeof arguments[0] == "string" || arguments[0] instanceof String ) ) {
-                    if ( arguments.length == 1 ) {
-                        // just show the module and function name when there are no additional arguments
-                        return [ module_name + "." + arguments[0] ];
-                    } else if ( typeof arguments[1] == "string" || arguments[1] instanceof String ) {
-                        // concatenate when the first field is a string so that it may remain a format string
-                        return [ module_name + "." + arguments[0] + ": " + arguments[1] ].concat( Array.prototype.slice.call( arguments, 2 ) );
-                    } else {
-                        // otherwise insert a new first field
-                        return [ module_name + "." + arguments[0] + ": " ].concat( Array.prototype.slice.call( arguments, 1 ) );
-                    }
-                } else {
-                    return []; // no-op
-                }
-
-            }
-
-        };
-
         // -- logger -------------------------------------------------------------------------------
 
         this.logger = {
 
             enabled: false,
-            log: function() { if ( this.enabled ) { window.console && console.log && console.log.apply( console, arguments ) } },
-            debug: function() { if ( this.enabled ) { window.console && console.debug && console.debug.apply( console, arguments ) } },
-            info: function() { if ( this.enabled ) { window.console && console.info && console.info.apply( console, arguments ) } },
+            log: function() { this.enabled && window.console && console.log && console.log.apply( console, arguments ) },
+            debug: function() { this.enabled && window.console && console.debug && console.debug.apply( console, arguments ) },
+            info: function() { this.enabled && window.console && console.info && console.info.apply( console, arguments ) },
             warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
             error: function() { window.console && console.error && console.error.apply( console, arguments ) },
-            group: function() { if ( this.enabled ) { window.console && console.group && console.group.apply( console, arguments ) } },
-            groupCollapsed: function() { if ( this.enabled ) { window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) } },
-            groupEnd: function() { if ( this.enabled ) { window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) } },
-
+            group: function() { this.enabled && window.console && console.group && console.group.apply( console, arguments ) },
+            groupCollapsed: function() { this.enabled && window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) },
+            groupEnd: function() { this.enabled && window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) },
         };
 
         // == Private functions ====================================================================

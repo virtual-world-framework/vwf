@@ -44,7 +44,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return;
 
 //            this.logger.enabled = true;
-//            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+//            this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childName );
 
             // find the parent node
