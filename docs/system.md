@@ -82,6 +82,13 @@ Kernel
 
     Return the current simulation time.
 
+*   client()
+
+    Return the moniker of the client responsible for the current action.
+
+*   moniker()
+
+    Return the identifer the server assigned to this client.
 
 Model Drivers
 -------------
@@ -166,10 +173,10 @@ View Drivers
 
 *   createdEvent( nodeID, eventName, eventParameters )
 
-*   deletingEvent( nodeID, eventName )
+*   deletedEvent( nodeID, eventName )
 
 *   firedEvent( nodeID, eventName, eventParameters )
 
 *   executed( nodeID, scriptText, scriptType )
 
-*   ticking()
+*   ticked()
