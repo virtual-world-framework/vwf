@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
   navmode: none
 children:
@@ -40,5 +40,5 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "eulers", [ 90, 180, 0 ] );
+    this.camera.eulers = [ 90, 180, 0 ];
   } 
