@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
@@ -49,7 +49,7 @@ children:
     implements:
     - http://vwf.example.com/fly.vwf
 scripts:
-- text: |
+- |
     this.initialize = function() {
       this.camera.position = [ 0, 20000, 10000 ];
       this.camera.rotation = [ 1.56, 0, 0 ];
@@ -81,4 +81,3 @@ scripts:
         pushpinIndex++;        
       }
     }
-  type: application/javascript
