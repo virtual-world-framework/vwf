@@ -129,7 +129,7 @@ scripts:
       return ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
     }    
     this.normalize = function( v ) {
-      f = this.vectorLength( v );
+      var f = this.vectorLength( v );
       v[0] /= f;
       v[1] /= f;
       v[2] /= f;

@@ -1,4 +1,5 @@
-﻿define( [ "module", "vwf/view" ], function( module, view ) {
+﻿"use strict";
+define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
     // is active, scripts on the main page may make (reflected) kernel calls:
@@ -190,6 +191,11 @@
 
     function initScene( sceneNode ) {
 
+        function renderScene() {
+            sceneNode.frameCount++;
+            renderer.render();
+        };
+
         var canvas = this.canvasQuery.get( 0 );
 
         if ( canvas ) {
@@ -211,11 +217,6 @@
             var renderer = sceneNode.glgeRenderer;
 
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
-
-            function renderScene() {
-                sceneNode.frameCount++;
-                renderer.render();
-            };
 
             setInterval( renderScene, 1 );
         }
