@@ -1,5 +1,5 @@
---- 
-extends: http://vwf.example.com/glge.vwf
+  --- 
+extends: http://vwf.example.com/navscene.vwf
 properties:
   createCube: true
   cubesCreated: 0
@@ -28,13 +28,12 @@ methods:
   clear: |
     if ( this.nodesCreated ) {
       for ( var i = 0; i < this.nodesCreated.length; i++ ){
-        //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );
         vwf.deleteNode( this.nodesCreated[i] );
       }
       this.nodesCreated = [];  
     }    
 scripts:
-- text: |
+- |
     var lastTimeObjWasCreated;
     var mouseIsDown = false;
     var mouseDownTime = -1;
@@ -119,8 +118,8 @@ scripts:
           cube.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
           cube.properties.velocity = [ trans[0] * this.tossCubeStrength, trans[1] * this.tossCubeStrength, trans[2] * this.tossCubeStrength];
           this.colorIndex += 1;
-          
-          vwf.createNode( "index-vwf", cube, newObjName, undefined );        
+
+          this.children.create(cube, newObjName);        
           this.createCube = false;
         } else {
           this.spheresCreated += 1;
@@ -131,7 +130,7 @@ scripts:
           sphere.properties.velocity = [ trans[0] * this.tossSphereStrength, trans[1] * this.tossSphereStrength, trans[2] * this.tossSphereStrength ];
           this.colorIndex += 1;
           
-          vwf.createNode( "index-vwf", sphere, newObjName, undefined );
+          this.children.create(sphere, newObjName);
           this.createCube = true;      
         }
         if ( newObjName && newObjName != "" ) {
@@ -139,5 +138,3 @@ scripts:
         }
       }
     }
-
-  type: application/javascript    
