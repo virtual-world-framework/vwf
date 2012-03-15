@@ -6,28 +6,22 @@ properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
-  loadDone: false
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      //console.info( "================ sandtable ================" );
-      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "position", [ 0, 20000, 10000 ] );
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "rotation", [ 1.56, 3.141, 0 ] );
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "far", 500000 );
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "near", 2 );                        
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "lookAt", "http-vwf-example-com-node3-vwf-sceneCenter" );
+      this.camera.position = [ 0, 20000, 10000 ];
+      this.camera.rotation = [ 1.56, 3.141, 0 ];
+      this.camera.far = 500000;
+      this.camera.near = 2;                        
+      this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {
-      // console.info( "selected color", color, this.toolbar.selectedColor );
     }, this );
     this.toolbar.inputModeChanged = this.events.add( function( mode ) {
-      // console.info( "selected color", color, this.toolbar.selectedColor );
     }, this );
     this.toolbar.events.clearing = this.events.add( function() { 
       this.clear(); 
     }, this );
-  type: application/javascript
 children:
   toolbar:
     properties:
@@ -71,8 +65,7 @@ children:
     extends: http://vwf.example.com/node3.vwf 
     methods:
       animate: |
-        //console.info( "== predator1 ===== animate ================" );
-        var time = vwf.time();
+        var time = this.time;
         var len = this.path.length;
         var timeElasped = time - this.timeSinceLast;
         var lastPathPoint = this.path[ this.lastPathIndex ];
@@ -108,37 +101,33 @@ children:
           this.future( 0.1 ).animate();
         }   
     scripts:
-      - text: |
+      - |
           this.initialize = function() {
-            console.info( "================ predator1 ================" );
 
             this.path = [];
             var len = 0, pos, x, y, z = 1200;
-            
+
             for ( var theta = 0; theta < 2 * Math.PI && len < (( 2*180 )-1); theta += Math.PI / 180 ) {
               x = 10000 * Math.cos( theta );
               y = 10000 * Math.sin( theta );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 1 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
-            }  
-            
+            }
+
             this.nextPathIndex = this.lastPathIndex+1;
-            this.timeSinceLast = vwf.time();
+            this.timeSinceLast = this.time
             this.planeGroup1.position = this.path[ this.lastPathIndex ].position;
             this.goal1.position = this.path[ this.nextPathIndex ].position;
-           
+
             this.animating = true;
           }
-        type: application/javascript 
     properties:
       position: [ 0, 0, 1200 ]
       eulers: [0, 0, 0 ]
-      scale: [ 1, 1, 1 ] 
+      scale: [ 1, 1, 1 ]
       lastPathIndex:
         set: |
-          // console.info( "predator1.lastPathIndex.set   value = " + value );
           if ( value >= 0 ) {
             if ( this.path && value < this.path.length ) {
               this.lastPathIndex = value;
@@ -164,7 +153,7 @@ children:
         properties:
           position: [ 0, 0, 1200 ]
           eulers: [0, 0, 0 ]
-          scale: [ 1, 1, 1 ]      
+          scale: [ 1, 1, 1 ]
       planeGroup1:
         extends: http://vwf.example.com/node3.vwf 
         properties:
@@ -192,8 +181,7 @@ children:
     extends: http://vwf.example.com/node3.vwf 
     methods:
       animate: |
-        //console.info( "== predator2 =====  animate ================" );
-        var time = vwf.time();
+        var time = this.time;
         var len = this.path.length;
         var timeElasped = time - this.timeSinceLast;
         var lastPathPoint = this.path[ this.lastPathIndex ];
@@ -217,140 +205,102 @@ children:
         newX = interpolate( lastPathPoint.position[0], nextPathPoint.position[0], percentDone );
         newY = interpolate( lastPathPoint.position[1], nextPathPoint.position[1], percentDone );
         this.planeGroup2.position = [ newX, newY, 1200 ];
- 
+
         var zRot = [ goalPathPoint.position[0] - newX, goalPathPoint.position[1] - newY, 0 ];
         this.planeGroup2.rotation = [ 0, 0, Math.atan2( zRot[1], zRot[0] ) ];
- 
+
         if ( percentDone == 1 ) {
           this.lastPathIndex += 1;
-          
           var newPt = this.path[ this.lastPathIndex ].position;
           var goalPt = this.path[ this.nextPathIndex ].position;
-          
-          //console.info( "== UPDATING ================================================" );
-          //console.info( "== this.path[ "+this.lastPathIndex+" ] = [ " + newPt[0] + ", " + newPt[1] + ", " + newPt[2] + " ] ==" );
-          //console.info( "== this.path[ "+this.nextPathIndex+" ] = [ " + goalPt[0] + ", " + goalPt[1] + ", " + goalPt[2] + " ] ==" );
-          //console.info( "============================================================" );
-          
-          //console.info( "============================================================" );
-          
           this.timeSinceLast = time;
         }
         if ( this.animating ) {
           this.future( 0.1 ).animate();
-        }   
+        }
     scripts:
-      - text: |
+      - |
           this.initialize = function() {
-            console.info( "================ predator2 ================" );
 
             this.path = [];
             var len, pos, x = 0, y = 0, z = 12000;
             var radius = 5000;
             var step = 200;
-            
+
             y = 0;
-            //console.info( "START X === " + radius + " to -" + radius );
             for ( var x = radius - 200; x > -radius; x -= step ) {
               pos = [ x, 0, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            //console.info( "END X === " + radius + " to -" + radius );
-            
-            
-            //console.info( "START -X +Y === 270 to 90" );
+
             for ( var theta = 1.5 * Math.PI; theta > 0; theta -= Math.PI / 90 ) {
               x = -radius + ( radius * Math.cos( theta ) );
               y = radius + ( radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
-            } 
-            //console.info( "END -X +Y === 270 to 90" );
-  
+            }
+
             x = 0;
-            //console.info( "START Y === " + radius + " to -" + radius );
             for ( var y = radius - step; y > -radius ; y -= step ) {
               pos = [ 0, y, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            //console.info( "END Y === " + radius + " to -" + radius );
 
-            //console.info( "START -X -Y === 0 to 90" );
             for ( var theta = 2 * Math.PI; theta > 0.5 * Math.PI; theta -= Math.PI / 90 ) {
               x = -radius + (radius * Math.cos( theta ) );
               y = -radius + (radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
-              this.path.push( { position: pos, time: 2 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
-            } 
-            //console.info( "END -X -Y === 0 to 90" );
+            }
 
             y = 0;
-            //console.info( "START X === -" + radius + " to " + radius );
             for ( var x = -radius + step; x < radius; x += step ) {
               pos = [ x, 0, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
-            }            
-            //console.info( "END X === -" + radius + " to " + radius );
- 
-            //console.info( "START +X +Y === 270 to 180" );
+            }
+
             for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
               x = radius + (radius * Math.cos( theta ) );
               y = radius + (radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            //console.info( "END +X +Y === 270 to 180" );
-            
+
             x = 0;
-            //console.info( "START Y === " + radius + " to -" + radius );
             for ( var y = radius - step; y > -radius; y -= step ) {
               pos = [ 0, y, 1200 ];
               len = this.path.length;
               this.path.push( { position: pos, time: 1 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
             }
-            //console.info( "END Y === " + radius + " to -" + radius );
 
-            //console.info( "START +X -Y === 180 to 90" );
             for ( var theta = 1.0 * Math.PI; theta < 2.5 * Math.PI; theta += Math.PI / 90 ) {
               x = radius + ( radius * Math.cos( theta ) );
               y = -radius + ( radius * Math.sin( theta ) );
               len = this.path.length;
               pos = [ x, y, z ];
               this.path.push( { position: pos, time: 2 } );
-              //console.info( "   this.path["+len+"] = [ " + x + ", " + y + ", " + z + " ]" );
-            }            
-            //console.info( "END +X -Y === 180 to 90" );
-           
+            }
+
             this.nextPathIndex = this.lastPathIndex+1;
-            this.timeSinceLast = vwf.time();
+            this.timeSinceLast = this.time;
             this.planeGroup2.position = this.path[ this.lastPathIndex ].position;
             this.goal2.position = this.path[ this.nextPathIndex ].position;
             //this.planeGroup2.plane2.lookAt = "http-vwf-example-com-node3-vwf-goal2";
             //this.planeGroup2.cone2.lookAt = "http-vwf-example-com-node3-vwf-goal2";
-            
             this.animating = true;
           }
-        type: application/javascript 
     properties:
       position: [ 0, 0, 1500 ]
       eulers: [0, 0, 0 ]
-      scale: [ 1, 1, 1 ] 
+      scale: [ 1, 1, 1 ]
       lastPathIndex:
         set: |
-          // console.info( "predator2.lastPathIndex.set   value = " + value );
+
           if ( value >= 0 ) {
             if ( this.path && value < this.path.length ) {
               this.lastPathIndex = value;
@@ -359,7 +309,7 @@ children:
                 this.nextPathIndex = 0;
             } else {
               this.lastPathIndex = 0;
-              this.nextPathIndex = 1;              
+              this.nextPathIndex = 1;
             }
           }
         value: 0
@@ -376,7 +326,7 @@ children:
         properties:
           position: [ 0, 0, 1500 ]
           eulers: [0, 0, 0 ]
-          scale: [ 1, 1, 1 ]      
+          scale: [ 1, 1, 1 ]
       planeGroup2:
         extends: http://vwf.example.com/node3.vwf 
         properties:
