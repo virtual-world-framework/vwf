@@ -49,7 +49,6 @@ scripts:
     var cubeIndex = 1;
     var coneIndex = 1;
     var pushpinIndex = 1;
-    var f;
     var line = {
       "extends": "http://vwf.example.com/node3.vwf",
       "type": "definition/mesh",
@@ -136,7 +135,7 @@ scripts:
       return ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
     }    
     this.normalize = function( v ) {
-      f = this.vectorLength( v );
+      var f = this.vectorLength( v );
       v[0] /= f;
       v[1] /= f;
       v[2] /= f;
