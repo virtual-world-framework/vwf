@@ -77,7 +77,7 @@ scripts:
         pushpin.properties.position = pickInfo.globalPosition;
 
         var name = "pushpin"+pushpinIndex;
-        vwf.createNode( "index-vwf", pushpin, name, undefined );
+        this.children.create( pushpin, name);
         pushpinIndex++;        
       }
     }
