@@ -9,19 +9,16 @@ properties:
   collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      console.info( "==================== index.vwf ====================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "position", [ 30, 138, 40 ] );
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "rotation", [ 1.56, 3.141, 0 ] );
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-camera", "far", 50000 ); 
-      this.loadDone = true;     
+      this.camera.position = [ 30, 138, 40 ];
+      this.camera.rotation = [ 1.56, 3.141, 0 ];
+      this.camera.far = 50000;    
     }
     this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 
     }, this );    
-  type: application/javascript
 children:
   clearButton:
     extends: http://vwf.example.com/node2.vwf
