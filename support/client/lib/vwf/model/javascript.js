@@ -85,6 +85,12 @@ node.id = childID; // TODO: move to vwf/model/object
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
+            Object.defineProperty( node.properties, "create", {
+                value: function( name, value, get, set ) { // "this" is node.properties
+                    return self.kernel.createProperty( this.node.id, name, value, get, set );
+                }
+            } );
+
             node.private.getters = Object.create( prototype.private ?
                 prototype.private.getters : Object.prototype
             );
@@ -97,6 +103,12 @@ node.id = childID; // TODO: move to vwf/model/object
                 node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
+            Object.defineProperty( node.methods, "create", {
+                value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
+                    return self.kernel.createMethod( this.node.id, name, parameters, body );
+                }
+            } );
+
             node.private.bodies = Object.create( prototype.private ?
                 prototype.private.bodies : Object.prototype
             );
@@ -106,6 +118,12 @@ node.id = childID; // TODO: move to vwf/model/object
             } );
 
             // TODO: these only need to be on the base node's events object
+
+            Object.defineProperty( node.events, "create", {
+                value: function( name, parameters ) { // "this" is node.events
+                    return self.kernel.createEvent( this.node.id, name, parameters );
+                }
+            } );
 
             // Provide helper functions to create the directives for adding, removing and flushing
             // event handlers.
@@ -141,6 +159,22 @@ node.id = childID; // TODO: move to vwf/model/object
             node.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
             node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
+
+            Object.defineProperty( node.children, "node", {
+                value: node // for node.children accessors (non-enumerable)  // TODO: hide this better
+            } );
+
+            Object.defineProperty( node.children, "create", {
+                value: function( component, name, callback /* ( child ) */ ) { // "this" is node.children
+                    return self.kernel.createNode( this.node.id, component, name /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
+                }
+            } );
+
+            Object.defineProperty( node.children, "delete", {
+                value: function( child ) {
+                    return self.kernel.deleteNode( child.id );
+                }
+            } );
 
             // Define the "time", "client", and "moniker" properties.
 
