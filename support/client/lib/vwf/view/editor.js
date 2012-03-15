@@ -106,8 +106,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 name: childName,
             };
 
-            //console.info( "editor.createdNode( "+nodeID+", " +childID+", "+childExtendsID+", "+childImplementsIDs+", "+childSource+", "+childType+", "+childName+" )" );
-
             if ( parent ) {
                 parent.children.push( node );
             }
@@ -142,8 +140,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 name: propertyName,
                 value: propertyValue,
             };
-
-            //console.info( "editor.createdProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
 
             try {
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
@@ -193,26 +189,20 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
         },
 
-        calledMethod: function( nodeID, methodName, methodParameters ) {
-            //console.info('nodeID: ' + nodeID);
-            //console.info('methodName: ' + methodName);
-            //console.info('methodParameters: ' + methodParameters);
-        },
+        //calledMethod: function( nodeID, methodName, methodParameters ) {
+
+        //},
 
         createdEvent: function( nodeID, eventName, eventParameters ) {
             var node = this.nodes[ nodeID ];
-
-            //console.info( "     EVENT editor.createdEvent( "+nodeID+", " +eventName+", "+eventParameters+ " )" );
             if ( node ) {
                 node.events[ eventName ] = eventParameters;
             }         
         },
 
-        firedEvent: function ( nodeID, eventName, eventParameters ) {
-            //console.info('nodeID: ' + nodeID);
-            //console.info('eventName: ' + eventName);
-            //console.info('eventParameters: ' + eventParameters);
-        },
+        //firedEvent: function ( nodeID, eventName, eventParameters ) {
+
+        //},
 
         //executed: [ /* nodeID, scriptText, scriptType */ ],
 
@@ -497,7 +487,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
-        console.info(self + "    " + nodeID);
+        vwf.logger.info(self + "    " + nodeID);
 
         // Add prototype properties
         var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
@@ -663,7 +653,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         prmtr = JSON.parse(prmtr);
                         parameters.push( prmtr );
                     } catch (e) {
-                        console.error('Invalid Value');
+                        vwf.logger.error('Invalid Value');
                     }
                 }
             }
@@ -709,7 +699,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         arg = JSON.parse(arg);
                         args.push( arg );
                     } catch (e) {
-                        console.error('Invalid Value');
+                        vwf.logger.error('Invalid Value');
                     }
                 }
             }
