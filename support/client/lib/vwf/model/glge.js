@@ -1701,10 +1701,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var obj = undefined;
         var assetObj = undefined;
         var glgeObjName = "";
-        GLGE.Assets.assets = {};
 
         //console.info( "=======   Trying to find: " + objName + " of type: " + type );
-        for ( key in GLGE.Assets.assets ) {
+        for ( var key in GLGE.Assets.assets ) {
             assetObj = GLGE.Assets.assets[key];
             if ( assetObj ) {
                 glgeObjName = name( assetObj );
@@ -1754,10 +1753,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // -- setActiveCamera ------------------------------------------------------------------------------
 
     function setActiveCamera( sceneNode, cameraID ) {
-        var glgeCamera = {};
 
         if ( this.state.nodes[ cameraID ] ) {
-            glgeCamera = this.state.nodes[ cameraID ].glgeObject;
+            var glgeCamera = this.state.nodes[ cameraID ].glgeObject;
             if ( glgeCamera ) {
                 var canvas = document.getElementById(this.state.sceneRootID);
                 glgeCamera.setAspect( canvas.width / canvas.height );

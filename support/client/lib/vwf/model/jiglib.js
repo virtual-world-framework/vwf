@@ -751,8 +751,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function initializeScene( scene ) {
         var pm;
-        var nodeID;
-        for ( nodeID in scene.propertyMap ) {
+        for ( var nodeID in scene.propertyMap ) {
             pm = scene.propertyMap[ nodeID ];
             if ( pm.hasPhysics ) {
                 initializeObject.call( this, nodeID, pm );
@@ -766,7 +765,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function initializeObject( nodeID, props ) {
         var physicsDef, physicsType, scale;
-        var propertyName;
         if ( props.physics ) {
             physicsDef = props.physics;
             physicsType = ( physicsDef.constructor == Array ) ? physicsDef[0] : physicsDef;
@@ -797,7 +795,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }  
             
             // set the rest of the non physics props
-            for ( propertyName in props ) {
+            for ( var propertyName in props ) {
                 switch( propertyName ) {
                     case "physics":
                     case "scale":
