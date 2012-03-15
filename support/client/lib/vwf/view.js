@@ -12,9 +12,9 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
-    var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+    var logger = require( "logger" ).for( module.id.replace( /\//g, "." ) );
 
-    logger.info( "load" );
+    logger.infoc( "load" );
 
     return {
 
@@ -27,9 +27,9 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
             var instance = Object.create( this );
 
             instance.module = module;
-            instance.logger = require( "vwf-proxy" ).logger_for( instance.module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+            instance.logger = require( "logger" ).for( instance.module.id.replace( /\//g, "." ) );
             
-            instance.logger.info( "load" );
+            instance.logger.infoc( "load" );
 
             if ( typeof initializer == "function" || initializer instanceof Function ) {
                 initializer = initializer();
@@ -52,7 +52,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
 
         create: function( kernel, view, stages, state, parameters ) {
 
-            this.logger.info( "create" );
+            this.logger.infoc( "create" );
 
             // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 

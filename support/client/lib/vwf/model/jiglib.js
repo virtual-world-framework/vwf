@@ -26,7 +26,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           childSource, childType, childName, callback /* ( ready ) */) {
 
           //this.logger.enabled = true;
-          //this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+          //this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
           //                  childSource, childType, childName );
           //this.logger.enabled = false;
 
@@ -131,7 +131,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var value = undefined;
             //this.logger.enabled = true;
-            //this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
+            //this.logger.infoc( "creatingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enabled = false;
 
             if ( !( propertyValue === undefined ) ) {
@@ -192,7 +192,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var value = undefined;
             //this.logger.enabled = !this.updating;
             //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
-            //    this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
+            //    this.logger.infoc( "settingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enabled = false;
 
             if ( this.updating ) {
@@ -368,7 +368,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
             //this.logger.enabled = true;
             //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
-            //    this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
+            //    this.logger.infoc( "gettingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enabled = false;
           
             propertyValue = undefined;

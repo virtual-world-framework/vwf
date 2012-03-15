@@ -49,7 +49,7 @@
             if ( childExtendsID === undefined )
                 return;
 
-            this.logger.info( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            this.logger.infoc( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             var node = {
                 parentID: nodeID,
                 ID: childID,
@@ -160,7 +160,7 @@
             var obj, earth, ge;
             var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             if ( propertyValue ) {
-                //this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
+                //this.logger.infoc( "satProperty", nodeID, propertyName, propertyValue );
                 if ( propertyName == "controlClient" ) {
                     //console.info( "  SETTING CONTROL CLIENT: " + propertyValue );
                     this.controlClient = propertyValue;

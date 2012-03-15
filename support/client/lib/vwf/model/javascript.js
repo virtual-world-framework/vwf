@@ -77,7 +77,7 @@ node.id = childID; // TODO: move to vwf/model/object
             node.type = childType;
 
             Object.defineProperty( node, "logger", {
-                value: this.logger,
+                value: this.logger.for( childName ),
                 enumerable: true,
             } );
 
@@ -297,7 +297,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                 try {
                     node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
                 } catch ( e ) {
-                    this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", exceptionMessage( e ) );
                 }
             } else {
@@ -308,7 +308,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                 try {
                     node.private.setters[propertyName] = eval( setterScript( propertySet ) );
                 } catch ( e ) {
-                    this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", exceptionMessage( e ) );
                 }
             } else {
@@ -360,7 +360,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 try {
                     return setter.call( node, propertyValue );
                 } catch ( e ) {
-                    this.logger.warn( "settingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
                         "exception in setter:", exceptionMessage( e ) );
                 }
             }
@@ -379,7 +379,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 try {
                     return getter.call( node );
                 } catch ( e ) {
-                    this.logger.warn( "gettingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
                         "exception in getter:", exceptionMessage( e ) );
                 }
             }
@@ -426,7 +426,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
             } catch ( e ) {
-                this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
+                this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", exceptionMessage( e ) );
             }
         
@@ -447,7 +447,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 try {
                     return body.apply( node, methodParameters );
                 } catch ( e ) {
-                    this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                    this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", exceptionMessage( e ) );
                 }
             }
@@ -556,7 +556,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
                 } catch ( e ) {
-                    self.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+                    self.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
                         "exception:", exceptionMessage( e ) );
                 }
 
@@ -577,7 +577,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 try {
                     return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
                 } catch ( e ) {
-                    this.logger.warn( "executing", nodeID,
+                    this.logger.warnc( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", exceptionMessage( e ) );
                 }
             }
