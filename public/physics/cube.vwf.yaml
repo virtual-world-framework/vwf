@@ -15,7 +15,7 @@ properties:
     restitution: 0.1
     friction: 0.5
   scripts: 
-  - text: |
+  - |
       this.loadComplete = function() {
         this.scale = this.scale;
         this.physics = this.physics;
@@ -27,4 +27,3 @@ properties:
         this.position = this.position;
         this.eulers = this.eulers;
       }
-    type: application/javascript
