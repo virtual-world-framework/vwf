@@ -3,7 +3,6 @@ extends: http://vwf.example.com/scene.vwf
 properties: 
   navmode:
     set: |
-      //console.info( "   navmode.set( "+value+" )" );
       switch ( value ) {
         case "walk":
         case "orbit":
@@ -31,7 +30,7 @@ events:
 methods:
   update:  
 scripts:
-- text: |
+- |
     var counter = 1;
     var _piDiv180 = Math.PI / 180;
     var _180DivPI = 180 / Math.PI;
@@ -41,7 +40,6 @@ scripts:
     var phi, theta;
     var positionChanged = false;
     this.initialize = function() {
-      console.info( "== initialize == navscene == initialize ==" );
       this.input = { 
         futureActive: function() {
           return ( this.lookActive || this.moveActive || this.button1Down || this.button2Down || this.keysAreDown() ); 
@@ -94,9 +92,7 @@ scripts:
       }
     }
     this.changeNavMode = function( state ) {
-      //console.info( "   this.changeNavMode( "+state+" )" );
       if ( state == 1 ) {
-        //console.info( "         this.navmode = " + this.navmode );
         if ( this.navmode == "walk" ) this.navmode = "orbit";
         else if ( this.navmode == "orbit" ) this.navmode = "walk"; 
       }
@@ -126,7 +122,6 @@ scripts:
       }      
     }
     this.pointerIsDown = function() {
-      //console.info( "this.input.pointerInfo " + this.input.pointerInfo );
       if ( this.input && this.input.pointerInfo ) {
         var bInfo = this.input.pointerInfo.buttons;
         if ( bInfo ) {
@@ -136,7 +131,6 @@ scripts:
       return false;
     }        
     this.pointerDown = function( parms, pickInfo ){
-      //console.info( " navscene.pointerDown( "+parms.position[0]+", "+parms.position[1]+" )" );
       this.input.lastPointerInfo = undefined;
       this.input.pointerInfo = parms;
       this.input.lastPickInfo = undefined;
@@ -144,7 +138,6 @@ scripts:
       this.input.pointerDownTime = this.time;
     }
     this.pointerUp = function( parms, pickInfo ){
-      //console.info( " navscene.pointerUp( "+parms.position[0]+", "+parms.position[1]+" )" );
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = undefined;
       this.input.lastPickInfo = this.input.pickInfo;
@@ -156,7 +149,6 @@ scripts:
       this.input.pointerInfo = parms;
       this.input.lastPickInfo = this.input.pickInfo;
       this.input.pickInfo = pickInfo;      
-      //console.info( " navscene.pointerMove( "+parms.position[0]+", "+parms.position[1]+" )" );
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
         var active = this.input.futureActive();
         var delta = this.input.pointerDelta();
@@ -307,9 +299,6 @@ scripts:
               this.input.look[0] += 1;
               break;
             case 90: // z
-              console.info( "position: " + this.activeCameraComp.position );
-              console.info( "rotation: " + this.activeCameraComp.rotation );
-              console.info( "  eulers: " + this.activeCameraComp.eulers );
               break;
             case 88: // x
               break;
@@ -340,31 +329,22 @@ scripts:
     }
 
     this.onMove = function( x, y ) {
-      //console.info( "START navscene.onMove( " + x + ", " + y + " )" );
       if ( Math.abs( x ) < 0.1 && Math.abs( y ) < 0.1 ) {
         if ( this.input.moveActive ) {
-          //console.info( "--   DEACTIVATE MOVE ---------------------------------------" );
           this.input.moveActive = false;
           this.input.move = [ 0, 0 ];
         }
         return; 
       }
-      //console.info( "   1   navscene.onMove( " + x + ", " + y + " )" );
       this.input.move = [ x, y ];      
       var active = this.input.futureActive();
       if ( !this.input.moveActive ) {
-        //console.info( "**   ACTIVATE MOVE ***************************************" );
         this.input.moveActive = true;
         this.move( x, y );
       }
-      //console.info( "   2   navscene.onMove( " + x + ", " + y + " )" );
-      //console.info( "   2   active = " + active );
       if ( !active ) {
-        //console.info( "   2   this.future = " + this.future );
-        //console.info( "this.update = " + this.update() );
         this.future( 0.1 ).update();
       }
-      //console.info( "END   navscene.onMove( " + x + ", " + y + " )" );
     }    
     this.move = function( x, y ) {
       if ( this.navmode == "walk" ) {
@@ -376,7 +356,6 @@ scripts:
     this.onLook = function( x, y ) {
       if ( Math.abs( x ) < 0.1 && Math.abs( y ) < 0.1 ) {
         if ( this.input.lookActive ) {
-          //console.info( "--   DEACTIVATE LOOK ---------------------------------------" );
           this.input.lookActive = false;
           this.input.look = [ 0, 0 ];  
         }        
@@ -385,7 +364,6 @@ scripts:
       this.input.look = [ x, y ];
       var active = this.input.futureActive();
       if ( !this.input.lookActive ) {
-        //console.info( "**   ACTIVATE LOOK ***************************************" );
         this.input.lookActive = true;
         this.look( x, y );
       }
@@ -413,8 +391,6 @@ scripts:
           trans[1] = trans[1] / mag;
           
           this.activeCameraComp.rotation = [ 1.56 - trans[1] * incX, rot[1] + incY, -trans[0] * incX ];
-        } else if ( this.navmode == "orbit" ) {
-          console.info( "" );
         }
       }
     }    
@@ -534,7 +510,6 @@ scripts:
       this.input.lastUpdateTime = this.time;
     }    
     this.orbit = function( xDelta, yDelta ){
-      //console.info( "this.orbit( "+xDelta+", "+ yDelta + " )" );
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
     
@@ -591,11 +566,9 @@ scripts:
       }      
     }
     this.update = function() {
-      //console.info( "update   this.input + " + this.input );
       if ( this.input ) {
         var delta = this.input.pointerDelta();
         var pi = this.input.pointerInfo;
-        //console.info( "update   delta = " + delta );
         if ( delta ) {
         if ( this.pointerIsDown() ) {
           if ( this.input.pointerInfo.buttons.left ) {
