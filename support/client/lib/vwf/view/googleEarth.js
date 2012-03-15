@@ -132,7 +132,7 @@
                                     });
 
                                 }, function(errorCode) {
-                                    console.info( "google earth load error: " + errorCode );
+                                    vwf.logger.info( "google earth load error: " + errorCode );
                                 } );
                                 win.clearInterval( interval );
                             }
@@ -145,14 +145,14 @@
 
         }, 
 
-        deletedNode: function (nodeID) {
-        },
+        //deletedNode: function (nodeID) {
+        //},
   
-        createdProperty: function (nodeID, propertyName, propertyValue) {
-        },        
+        //createdProperty: function (nodeID, propertyName, propertyValue) {
+        //},        
 
-        initializedProperty: function (nodeID, propertyName, propertyValue) {
-        },        
+        //initializedProperty: function (nodeID, propertyName, propertyValue) {
+        //},        
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
@@ -162,7 +162,6 @@
             if ( propertyValue ) {
                 //this.logger.infoc( "satProperty", nodeID, propertyName, propertyValue );
                 if ( propertyName == "controlClient" ) {
-                    //console.info( "  SETTING CONTROL CLIENT: " + propertyValue );
                     this.controlClient = propertyValue;
                     value = propertyValue;
                 } else if ( this.kernel.client() != this.kernel.moniker() ) { 
@@ -296,7 +295,6 @@
 
     function broadcastCameraData() {
         var node, ge;   
-        //console.info( "broadcastCameraData  ======================>>>>> " );
         if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ] ) {
             node = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             ge = node.earthInst;
