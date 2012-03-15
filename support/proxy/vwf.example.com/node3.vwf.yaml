@@ -90,17 +90,17 @@ properties:
   rotationMatrix:
   boundingbox: 
     set: |
-      console.info( "WARNING: node3 boundingbox cannot be set" )
+      vwf.logger.info("WARNING: node3 boundingbox cannot be set" )
   centerOffset: 
     set: |
-      console.info( "WARNING: node3 centerOffset cannot be set" )
+      vwf.logger.info( "WARNING: node3 centerOffset cannot be set" )
   vertices: 
     set: |
-      console.info( "WARNING: node3 vertices cannot be set" )
+      vwf.logger.info( "WARNING: node3 vertices cannot be set" )
     value: 
   vertexIndices: 
     set: |
-      console.info( "WARNING: node3 vertexIndices cannot be set" )
+      vwf.logger.info( "WARNING: node3 vertexIndices cannot be set" )
     value: 
   modelMatrix:
   localMatrix:
@@ -388,11 +388,11 @@ scripts:
     return scale;
   };
   this.state = function( test ) {
-    console.info( test, "x", Array.prototype.slice.apply( this.transform ) );
-    console.info( test, "t", Array.prototype.slice.apply( this.translationnew ) );
-    console.info( test, "o", Array.prototype.slice.apply( this.rotationnew ) );
-    console.info( test, "s", Array.prototype.slice.apply( this.scalenew ) );
-    console.info( test, "q", Array.prototype.slice.apply( this.quaternionnew ) );
+    vwf.logger.info( test, "x", Array.prototype.slice.apply( this.transform ) );
+    vwf.logger.info( test, "t", Array.prototype.slice.apply( this.translationnew ) );
+    vwf.logger.info( test, "o", Array.prototype.slice.apply( this.rotationnew ) );
+    vwf.logger.info( test, "s", Array.prototype.slice.apply( this.scalenew ) );
+    vwf.logger.info( test, "q", Array.prototype.slice.apply( this.quaternionnew ) );
   };
   this.test1 = function() {
     this.transform = [];
