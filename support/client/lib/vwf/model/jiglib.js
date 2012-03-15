@@ -91,33 +91,33 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- addingChild --------------------------------------------------------------------------
 
-        addingChild: function( nodeID, childID, childName ) {
-        },
+        //addingChild: function( nodeID, childID, childName ) {
+        //},
 
         // -- movingChild --------------------------------------------------------------------------
 
-        movingChild: function( nodeID, childID, childName ) {
-        },
+        //movingChild: function( nodeID, childID, childName ) {
+        //},
 
         // -- removingChild ------------------------------------------------------------------------
 
-        removingChild: function( nodeID, childID, childName ) {
-        },
+        //removingChild: function( nodeID, childID, childName ) {
+        //},
 
         // -- parenting ----------------------------------------------------------------------------
 
-        parenting: function( nodeID ) {
-        },
+        //parenting: function( nodeID ) {
+        //},
 
         // -- childrening --------------------------------------------------------------------------
 
-        childrening: function( nodeID ) {
-        },
+        //childrening: function( nodeID ) {
+        //},
 
         // -- naming -------------------------------------------------------------------------------
 
-        naming: function( nodeID ) {
-        },
+        //naming: function( nodeID ) {
+        //},
 
         // -- creatingProperty ---------------------------------------------------------------------
 
@@ -210,8 +210,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var scene = this.scenes[ nodeID ]
 
             if ( node && node.jigLibObj ) {
-                //console.info( "jiglib-model.settingProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )" );
-             
+
                 scene = this.scenes[ node.sceneID ];  
                 switch ( propertyName ) {
                 case "x":
@@ -272,7 +271,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     node.jigLibObj.set_linVelocityDamping( propertyValue );
                     break; 
                 case "velocity":
-//                    console.info( nodeID + ".velocity = " + propertyValue );
                     node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
                     break;                        
                 }
@@ -280,7 +278,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 scene = this.scenes[ node.sceneID ];
                 if ( propertyName == "physics" ) {
                     if ( scene && scene.system && propertyValue ) {
-                        //console.info( "**  jiglib-model.settingProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )" );
                         var type = ( propertyValue.constructor == Array ) ? propertyValue[0] : propertyValue;
                         switch ( type ) {
                             case "mesh": {
@@ -307,18 +304,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     if ( this.delayedProperties[nodeID] ) {
                         var props = this.delayedProperties[nodeID];
-                        //console.info( "     START SETTING delayedProperties ----" );
                         for ( var propName in props ) {
-                            //console.info( id + " delayed property set: " + propertyName + " = " + props[propertyName] );
                             this.settingProperty( nodeID, propName, props[propName] );
                         } 
-                        //console.info( "     DONE SETTING delayedProperties ----" );
                         delete this.delayedProperties[nodeID];                       
                     }
 
                 } else {
                     if ( node ) {
-                        //console.info( "STORING settingProperty( " + nodeID+", " + propertyName + ", " + propertyValue + " )" )
                         var propArray;
                         if ( !this.delayedProperties[nodeID] ) {
                             this.delayedProperties[nodeID] = {};
@@ -330,7 +323,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             } else {
                 if ( scene && scene.system ) {
-                    //console.info( "     jiglib-model.settingProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )" );
                     switch ( propertyName ) {
                         case "gravity":
                             scene.system.setGravity( propertyValue );
@@ -438,34 +430,34 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- creatingMethod ------------------------------------------------------------------------
 
-        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
-        },
+        //creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+        //},
 
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName, methodParameters ) {
-        },
+        //callingMethod: function( nodeID, methodName, methodParameters ) {
+        //},
 
 
         // -- creatingEvent ------------------------------------------------------------------------
 
-        creatingEvent: function( nodeID, eventName, eventParameters ) {
-        },
+        //creatingEvent: function( nodeID, eventName, eventParameters ) {
+        //},
 
         // TODO: deletingEvent
 
         // -- firingEvent --------------------------------------------------------------------------
 
-        firingEvent: function( nodeID, eventName, eventParameters ) {
-        },
+        //firingEvent: function( nodeID, eventName, eventParameters ) {
+        //},
 
 
         // -- executing ----------------------------------------------------------------------------
 
-        executing: function (nodeID, scriptText, scriptType) {
-            return undefined;
-        },
+        //executing: function (nodeID, scriptText, scriptType) {
+        //    return undefined;
+        //},
 
 
         // == ticking =============================================================================
@@ -562,9 +554,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     width = def[ 1 ];
                     depth = def[ 2 ]
                     height = def[ 3 ];
-                }
-
-                //console.info( nodeID + " created JBox ( " + width + ", " + depth + ", " + height + " )" );                                
+                }                              
                 
                 if ( node.jigLibObj ) {
                     scene.system.removeBody( node.jigLibObj );
@@ -623,7 +613,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 node.jigLibObj = new jigLib.JSphere( null, raduis );
                 if ( node.jigLibObj ) {
                     scene.system.addBody( node.jigLibObj );
-                    //console.info( "     JSphere object created" );
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
                     this.active[ nodeID ].offset = this.kernel.getProperty( nodeID, "centerOffset" );
@@ -638,7 +627,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function createJMesh( nodeID, scale ) {
 
-        //console.info( "createJMesh( "+nodeID+","+scale+" )" )
         var node = this.nodes[ nodeID ];
         if ( node ) {
             var scene = this.scenes[ node.sceneID ];
@@ -665,15 +653,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             verts[j] = vt;
                         }
 
-//                        console.info("=========== "+nodeID+ "===========");
-//			            console.info("=====================================================================================");
-//			            for (var k = 0; k < verts.length; k++) {
-//				            console.info(k + ".	x: " + verts[k][0] + "	y: " + verts[k][1] + "	z: " + verts[k][2]);
-//			            }
-//			            console.info("=====================================================================================");
-//			            console.info("=========== "+nodeID+" ===========");
-
-//                        console.info( nodeID + " created JTriangleMesh()" );
                         jMesh = new jigLib.JTriangleMesh();
                         node.jigLibMeshes.push( jMesh );
                         jMesh.createMesh( verts, vertIndices );
@@ -715,8 +694,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if ( node.jigLibObj ) {
                     scene.system.removeBody( node.jigLibObj );
                     node.jigLibObj = null;
-                }
-                //console.info( nodeID + " created JPlane ( null, " + normal + " )" );                                
+                }                             
                 node.jigLibObj = new jigLib.JPlane( null, normal );
 
                 scene.system.addBody( node.jigLibObj );
