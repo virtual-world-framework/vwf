@@ -274,7 +274,7 @@ scripts:
         this.input.look = [ 0, 0 ];
         this.input.move = [ 0, 0 ];
         
-        for ( keyPress in kd ) {
+        for ( var keyPress in this.input.keyInfo.keysDown ) {
           switch ( Number( kd[ keyPress ].code ) ) {
             case 87:  //w
             case 38:  //up
