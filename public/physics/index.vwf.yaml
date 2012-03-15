@@ -8,6 +8,7 @@ properties:
   gravity: [ 0, 0, -50.8, 0 ]
   collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
+  loadDone: false
 scripts:
 - |
     this.initialize = function() {
@@ -15,6 +16,7 @@ scripts:
       this.camera.position = [ 30, 138, 40 ];
       this.camera.rotation = [ 1.56, 3.14, 0 ];
       this.camera.far = 50000.0;      
+      this.loadDone = true;
     }
     this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 
