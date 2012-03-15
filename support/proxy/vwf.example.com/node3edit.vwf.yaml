@@ -19,9 +19,8 @@ methods:
   setAxis:
   init:
 scripts:
-- text: |
+- |
     this.init = function() {
-      console.info( '== initialize == node3edit == initialize ==' );
       this.rotationAxis = 'z';
       this.input = {
         "initialTransform": undefined,
@@ -60,7 +59,6 @@ scripts:
         },
         pointChange: function() {
           var ret = [ 0, 0, 0 ];
-          //console.info( "this.pickInfo = " + this.pickInfo );
           if ( this.pickInfo && this.previous.pickInfo ) {
             var oldPt = this.previous.pickInfo.globalPosition;
             var newPt = this.pickInfo.globalPosition;
@@ -73,19 +71,7 @@ scripts:
       };
     }
     this.pointerDown = this.events.add( function( pointerInfo, pickInfo ) {
-      //console.info( "== pointerDown == node3edit == pointerDown ==" );
       if ( !this.input ) { this.init(); }
-
-      //console.info( "  modelMatrix = " + this.modelMatrix );
-      //console.info( "  localMatrix = " + this.localMatrix );
-      //console.info( "  transform = " + this.transform );
-      //console.info( "  pickInfo.globalPosition = " + pickInfo.globalPosition );
-      //console.info( "  pickInfo.globalNormal = " + pickInfo.globalNormal );
-      //console.info( "  pickInfo.globalSource = " + pickInfo.globalSource );
-      //console.info( "  pickInfo.position = " + pickInfo.position );
-      //console.info( "  pickInfo.normal = " + pickInfo.normal );
-      //console.info( "  pickInfo.source = " + pickInfo.source );
-      //console.info( "  pickInfo.distance = " + pickInfo.distance );
       
       this.input.clear();
       this.input.initialTransform = this.transform;
@@ -97,14 +83,12 @@ scripts:
     this.pointerUp = this.events.add( function( pointerInfo, pickInfo ) {
       this.input.update( pointerInfo, pickInfo );
 
-      //console.info( "== pointerUp == node3edit == pointerUp ==" );
       this.edit();
       this.input.clear();
     }, "capture", this );
     this.pointerMove = this.events.add( function( pointerInfo, pickInfo ) {
       this.input.update( pointerInfo, pickInfo );
 
-      //console.info( "== pointerMove == node3edit == pointerMove ==" );
       this.edit();
     }, "capture", this );
     this.edit = function() {
@@ -122,7 +106,6 @@ scripts:
     }
     this.setAxis = function() {
       var info = this.input.pickInfo;
-      //console.info( "this.input.pickInfo = " + this.input.pickInfo );
       if ( info && info.globalNormal ) {
         var largest = 0;
         var val = -1;
@@ -159,13 +142,10 @@ scripts:
       }
       var pc = this.input.pointChange();
       var pos = this.position;
-      //console.info( " pc = " + pc );
-      //console.info( " pos = " + pos );
       pos[0] += pc[0];
       pos[1] += pc[1];
       pos[2] += pc[2];
       this.position = pos;
-      //console.info( "translate    ++++++  pc = " + pc );
     }
     this.rotate = function() {
       if ( !this.input.initialValue ) {
