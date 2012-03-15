@@ -80,7 +80,7 @@ scripts:
     }
     this.keyDown = this.events.add( function( keyInfo ) {
       var key = undefined;
-      for ( kd in keyInfo.keysDown ) {
+      for ( var kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
         if ( key.char == " " || key.key == "space" ) {
           this.createObject();
