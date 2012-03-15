@@ -34,17 +34,6 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#prototyping
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    prototyping: [],
-
-    /// Description.
-    /// 
     /// @name vwf.api.view#addingChild
     /// @function
     /// 
@@ -64,38 +53,6 @@ define( {
     /// @returns {}
 
     removingChild: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.view#parenting
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    parenting: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.view#childrening
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    childrening: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.view#naming
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-    naming: [],
 
     /// Description.
     /// 
@@ -129,20 +86,7 @@ define( {
     /// @returns {}
 
     creatingProperty: [],
-    
-    /// Description.
-    /// 
-    /// @name vwf.api.view#initializingProperty
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
 
-    initializingProperty: [],
-
-    /* TODO: deletingProperty, */
-    
     /// Description.
     /// 
     /// @name vwf.api.view#settingProperty
@@ -151,6 +95,8 @@ define( {
     /// @param {} 
     /// 
     /// @returns {}
+
+    /* TODO: deletingProperty, */
 
     settingProperty: [],
 
@@ -194,7 +140,6 @@ define( {
 
     callingMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-
     /// Description.
     /// 
     /// @name vwf.api.view#creatingEvent
@@ -210,7 +155,6 @@ define( {
 
     /* TODO: deletingEvent, */
 
-
     /// Description.
     /// 
     /// @name vwf.api.view#firingEvent
@@ -224,7 +168,6 @@ define( {
 
     firingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-
     /// Description.
     /// 
     /// @name vwf.api.view#executing
@@ -235,7 +178,6 @@ define( {
 
     executing: [],
 
-
     /// Description.
     /// 
     /// @name vwf.api.view#ticking
@@ -245,5 +187,61 @@ define( {
     /// @returns {}
 
     ticking: [],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#prototyping
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    prototyping: [],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#parenting
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    parenting: [],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#childrening
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    childrening: [],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#naming
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+    naming: [],
+
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#initializingProperty
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    initializingProperty: [],
+
 
 } );

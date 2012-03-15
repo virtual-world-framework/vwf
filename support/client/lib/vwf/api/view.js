@@ -70,21 +70,8 @@ define( {
 
     createdProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
-    /// Description.
-    /// 
-    /// @name vwf.api.view#initializedProperty
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// @param {String} propertyName
-    /// @param {Value} propertyValue
-    /// 
-    /// @returns {}
-
-    initializedProperty: [ /* nodeID, propertyName, propertyValue */ ],
-    
     /* TODO: deletedProperty, */
-    
+
     /// Description.
     /// 
     /// @name vwf.api.view#satProperty
@@ -191,5 +178,18 @@ define( {
     /// @returns {}
 
     ticked: [ /* time */ ],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#initializedProperty
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} propertyName
+    /// @param {Value} propertyValue
+    /// 
+    /// @returns {}
+
+    initializedProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
 } );
