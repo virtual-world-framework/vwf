@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 source: index.xml
 type: model/x-glge
 children: 
@@ -17,7 +17,7 @@ children:
         properties: 
           texture: “images/red.png”
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           if( this.HelloTextMaterial1.texture == "images/red.png" )
           {
@@ -28,7 +28,6 @@ children:
             this.HelloTextMaterial1.texture = "images/red.png";
           }
         }
-      type: application/javascript
   world: 
     extends: http://vwf.example.com/node3.vwf
     source: world.dae
@@ -43,7 +42,7 @@ children:
         properties: 
           texture: “images/blue.png”
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           if( this.WorldTextMaterial1.texture == "images/red.png" )
           {
@@ -54,15 +53,11 @@ children:
             this.WorldTextMaterial1.texture = "images/red.png";
           }
         }
-      type: application/javascript
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      console.info( "================ documentation example four ================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-defaultCamera";
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-defaultCamera", "position", [ 0, 0, 10 ] );
+      this.camera.position = [ 0, 0, 10 ];
       this.hello.HelloTextMaterial1.texture = "images/red.png";
       this.world.WorldTextMaterial1.texture = "images/blue.png";
-      this.loadDone = true;
     }
-  type: application/javascript
