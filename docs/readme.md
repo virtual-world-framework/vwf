@@ -268,7 +268,7 @@ Code View: *index.vwf.yaml*
             properties: 
               texture: ""
         scripts:
-        - text: |
+        - |
             this.pointerClick = function() {
               if( this.HelloTextMaterial1.texture == "images/red.png" )
               {
@@ -279,7 +279,6 @@ Code View: *index.vwf.yaml*
                 this.HelloTextMaterial1.texture = "images/red.png";
               }
             }
-          type: application/javascript
 	  world: 
 		extends: http://vwf.example.com/node3.vwf
 		source: world.dae
@@ -292,7 +291,7 @@ Code View: *index.vwf.yaml*
 			properties: 
 			  texture: ""
 	    scripts:
-	    - text: |
+	    - |
 		    this.pointerClick = function() {
               if( this.WorldTextMaterial1.texture == "images/red.png" )
               {
@@ -303,7 +302,6 @@ Code View: *index.vwf.yaml*
                 this.WorldTextMaterial1.texture = "images/red.png";
               }
             }
-	      type: application/javascript
 
 URL: *http://vwf.orl.lmco.com:80/documentation/4/*
 
