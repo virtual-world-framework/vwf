@@ -1,3 +1,4 @@
+"use strict";
 ( function( window ) {
 
     window.console && console.info && console.info( "loading vwf" );
@@ -1274,7 +1275,7 @@ return component;
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
 
-            var entrants = arguments.callee.entrants;
+            var entrants = this.setProperty.entrants;
 
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
@@ -1380,7 +1381,7 @@ return component;
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
 
-            var entrants = arguments.callee.entrants;
+            var entrants = this.getProperty.entrants;
 
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call

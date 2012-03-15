@@ -1,4 +1,4 @@
-
+"use strict";
 define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( module, kernel_api, model_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
 
     // vwf/model.js is the common implementation of all Virtual World Framework models. Each model

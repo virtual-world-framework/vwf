@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/editor creates a view interface for editor functions. 

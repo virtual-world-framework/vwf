@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
@@ -1672,7 +1673,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var assetObj = undefined;
         var glgeObjName = "";
 
-        for ( key in GLGE.Assets.assets ) {
+        for ( var key in GLGE.Assets.assets ) {
             assetObj = GLGE.Assets.assets[key];
             if ( assetObj ) {
                 glgeObjName = name( assetObj );
@@ -1715,9 +1716,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // -- setActiveCamera ------------------------------------------------------------------------------
 
     function setActiveCamera( sceneNode, cameraID ) {
-        
+
         if ( this.state.nodes[ cameraID ] ) {
-            glgeCamera = this.state.nodes[ cameraID ].glgeObject;
+            var glgeCamera = this.state.nodes[ cameraID ].glgeObject;
             if ( glgeCamera ) {
                 var canvas = document.getElementById(this.state.sceneRootID);
                 glgeCamera.setAspect( canvas.width / canvas.height );

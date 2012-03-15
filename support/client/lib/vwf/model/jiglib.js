@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {
@@ -728,7 +729,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function initializeScene( scene ) {
         var pm;
-        for ( nodeID in scene.propertyMap ) {
+        for ( var nodeID in scene.propertyMap ) {
             pm = scene.propertyMap[ nodeID ];
             if ( pm.hasPhysics ) {
                 initializeObject.call( this, nodeID, pm );
@@ -772,7 +773,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }  
             
             // set the rest of the non physics props
-            for ( propertyName in props ) {
+            for ( var propertyName in props ) {
                 switch( propertyName ) {
                     case "physics":
                     case "scale":
