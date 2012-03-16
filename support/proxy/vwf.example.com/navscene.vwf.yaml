@@ -426,7 +426,7 @@ scripts:
         yinc = yinc + parseFloat( trans[1] ) * speed; 
         xinc = xinc + parseFloat( trans[0] ) * speed;
 
-        if ( this.orbitRadius == -1 || vwf.time() - this.input.lastUpdateTime > 500 ) {
+        if ( this.orbitRadius == -1 || this.time - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
         
