@@ -408,7 +408,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 
                 value = propertyValue;
-    //            vwf.logger.info( namespace + ".satProperty " + path( glgeObject ) + " " + propertyName + " " + propertyValue);
+    //            this.logger.info( namespace + ".satProperty " + path( glgeObject ) + " " + propertyName + " " + propertyValue);
 
                 if ( isAnimatable ) {
 
@@ -1958,11 +1958,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
-                vwf.logger.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
+                this.logger.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
             }
             jQuery.each( this.state.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    if ( debug ) { vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
+                    if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });
@@ -2147,7 +2147,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             return (glgeChild.name || glgeChild.id || glgeChild.sourceURL || "") == childName;
         }).shift();
 
-        //vwf.logger.info("      glgeSceneChild( " + childName + " ) returns " + childToReturn);
+        //this.logger.info("      glgeSceneChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
 
     }
@@ -2163,7 +2163,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         if ( !childToReturn ) {
             childToReturn = findGlgeObject.call( this, childName, childType );
         }
-        //vwf.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
+        //this.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
 
     }
