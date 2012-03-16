@@ -723,11 +723,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
-                vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path.call(this,objectToLookFor) );
+                this.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path.call(this,objectToLookFor) );
             }
             jQuery.each( this.state.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    if ( debug ) { vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
+                    if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });
@@ -819,7 +819,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function outputCollada(collada, iIndent, open) {
         var sOut = indent.call(this,iIndent);
         if (open) {
-            vwf.logger.info(sOut + "children:")
+            this.logger.info(sOut + "children:")
         }
     }
 
@@ -827,11 +827,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var sOut = indent.call( this, iIndent + 1);
         if (open) {
             lastGroupName = name(group);
-            vwf.logger.info(indent.call( this,iIndent) + lastGroupName + ":");
-            vwf.logger.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
+            this.logger.info(indent.call( this,iIndent) + lastGroupName + ":");
+            this.logger.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 
             if (getChildCount.call( this, group) > 0)
-                vwf.logger.info(sOut + "children:");
+                this.logger.info(sOut + "children:");
         }
     }
 
@@ -839,9 +839,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var indentAdd = 0;
         var objName = name( obj );
         if ( objName != "" ) {
-            vwf.logger.info( indent.call( this,iIndent) + "children:" );
-            vwf.logger.info( indent.call( this,iIndent+1) + objName + ":");
-            vwf.logger.info( indent.call( this,iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
+            this.logger.info( indent.call( this,iIndent) + "children:" );
+            this.logger.info( indent.call( this,iIndent+1) + objName + ":");
+            this.logger.info( indent.call( this,iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
             indentAdd = 2;
         }
     }
@@ -849,8 +849,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function outputMaterial( obj, iIndent, objName, index  ) {
 
         var sOut = indent.call( this,iIndent + 1);
-        vwf.logger.info( indent.call( this,iIndent) + objName + "Material" + index + ":" );
-        vwf.logger.info( sOut + "extends: http://vwf.example.com/material.vwf");
+        this.logger.info( indent.call( this,iIndent) + objName + "Material" + index + ":" );
+        this.logger.info( sOut + "extends: http://vwf.example.com/material.vwf");
 
     }
 
