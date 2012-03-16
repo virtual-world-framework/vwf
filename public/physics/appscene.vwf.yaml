@@ -28,7 +28,7 @@ methods:
   clear: |
     if ( this.nodesCreated ) {
       for ( var i = 0; i < this.nodesCreated.length; i++ ){
-        vwf.deleteNode( this.nodesCreated[i] );
+        this.children.delete( this.getChild(this.nodesCreated[i]) );
       }
       this.nodesCreated = [];  
     }    
