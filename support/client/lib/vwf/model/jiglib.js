@@ -33,7 +33,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
           switch ( childExtendsID ) {
              case "appscene-vwf":
-             case "http-vwf-example-com-glge-vwf":
+             case "http-vwf-example-com-navscene-vwf":
                 this.scenes[ childID ] = {};
                 this.scenes[ childID ].ID = childID;
                 this.scenes[ childID ].extendsID = childExtendsID;
@@ -471,7 +471,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( this.enabled ) {
                 if ( elaspedTime > 0 ) {
                     if (elaspedTime > 0.05) elaspedTime = 0.05;
-                    var activeObj, posRotProp, pos, rot;
+                    var activeObj, posRotProp, pos, rot, posRot;
                     var sceneNode = this.scenes["index-vwf"];               
 
                     if ( sceneNode && sceneNode.system ) {
