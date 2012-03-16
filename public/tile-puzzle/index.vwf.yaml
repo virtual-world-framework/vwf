@@ -20,8 +20,7 @@ properties:
   tilePosition15: [  -5.5,   0, 0 ]
   tilePosition16: [ -16.5,   0, 0 ]
   openTilePosition: [ -16.5, 0, 0 ]
-  tileDistance: 12
-  loadDone: false  
+  tileDistance: 12 
 methods:
   setPositions:
 children: 
@@ -34,11 +33,10 @@ children:
       rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
       scale: [ 3, 3, 3 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.shuffle();        	
         }
-      type: application/javascript
     children:
       ShuffleCubeMaterial1:
         extends: http://vwf.example.com/material.vwf
@@ -57,11 +55,10 @@ children:
       rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
       scale: [ 3, 3, 3 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.solve();     	
         }
-      type: application/javascript
     children:
       SolveCubeMaterial1:
         extends: http://vwf.example.com/material.vwf
@@ -80,11 +77,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this);        	
         }
-      type: application/javascript
     children:
       Cube01Material1:
         extends: http://vwf.example.com/material.vwf
@@ -103,11 +99,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this);        	
         }
-      type: application/javascript
     children:
       Cube02Material1:
         extends: http://vwf.example.com/material.vwf
@@ -126,11 +121,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this);        	
         }
-      type: application/javascript
     children:
       Cube03Material1:
         extends: http://vwf.example.com/material.vwf
@@ -149,11 +143,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this);        	
         }
-      type: application/javascript
     children:
       Cube04Material1:
         extends: http://vwf.example.com/material.vwf
@@ -172,11 +165,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this);         	
         }
-      type: application/javascript
     children:
       Cube05Material1:
         extends: http://vwf.example.com/material.vwf
@@ -195,11 +187,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this);         	
         }
-      type: application/javascript
     children:
       Cube06Material1:
         extends: http://vwf.example.com/material.vwf
@@ -218,11 +209,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this);         	
         }
-      type: application/javascript
     children:
       Cube07Material1:
         extends: http://vwf.example.com/material.vwf
@@ -241,11 +231,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube08Material1:
         extends: http://vwf.example.com/material.vwf
@@ -264,11 +253,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube09Material1:
         extends: http://vwf.example.com/material.vwf
@@ -287,11 +275,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube10Material1:
         extends: http://vwf.example.com/material.vwf
@@ -314,11 +301,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube11Material1:
         extends: http://vwf.example.com/material.vwf
@@ -341,11 +327,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube12Material1:
         extends: http://vwf.example.com/material.vwf
@@ -368,11 +353,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube13Material1:
         extends: http://vwf.example.com/material.vwf
@@ -395,11 +379,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube14Material1:
         extends: http://vwf.example.com/material.vwf
@@ -422,11 +405,10 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       scale: [ 0.05, 0.05, 0.05 ]
     scripts:
-    - text: |
+    - |
         this.pointerClick = function() {
           this.parent.moveTile(this); 	
         }
-      type: application/javascript
     children:
       Cube15Material1:
         extends: http://vwf.example.com/material.vwf
@@ -441,9 +423,8 @@ children:
         properties:
           texture: "images/dkBlue.png"      
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      console.info( "================ tile puzzle ================" );
 
       this.tile1.translation = this.tilePosition1;
       this.tile2.translation = this.tilePosition2;
@@ -467,7 +448,7 @@ scripts:
     }
     
     this.shuffle = function() {
-      tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
+      var tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
                        this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
                        this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
                        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
@@ -496,8 +477,8 @@ scripts:
     }
     
     this.setPositions = function(tilePositions) {
-      if (vwf.time() >= (this.lastSetPositionTime || 0) + 0.1) {
-        this.lastSetPositionTime = vwf.time();
+      if (this.time >= (this.lastSetPositionTime || 0) + 0.1) {
+        this.lastSetPositionTime = this.time
         this.tile1.translation = tilePositions[0];
         this.tile2.translation = tilePositions[1];
         this.tile3.translation = tilePositions[2];
@@ -513,28 +494,19 @@ scripts:
         this.tile13.translation = tilePositions[12];
         this.tile14.translation = tilePositions[13];
         this.tile15.translation = tilePositions[14];
-        console.info( "Open Tile Position: " + this.openTilePosition );
-        console.info( "   setting Open Tile Position to: " + tilePositions[15] );
         this.openTilePosition = tilePositions[15];
-        console.info( "   new Open Tile Position: " + this.openTilePosition );
       }
     }
 
     this.moveTile = function(obj) {
-      console.info( "moveTile Open Tile Position: " + this.openTilePosition );
       dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
       dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
-      
-      console.info( "  dx: " + dx + "   dy: " + dy );
       
       if((dx < this.tileDistance && dy == 0) ||
          (dy < this.tileDistance && dx == 0))
       {
         currentPosition = [ obj.translation[0], obj.translation[1], obj.translation[2] ];
-        console.info( "   currentPosition: " + currentPosition );
         obj.translation = this.openTilePosition;
         this.openTilePosition = [ currentPosition[0], currentPosition[1], currentPosition[2] ];
-        console.info( "   new Open Tile Position: " + this.openTilePosition );
       }           	
-    }
-  type: application/javascript
+    } //@ sourceURL=index.vwf

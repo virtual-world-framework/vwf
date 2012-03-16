@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
   navmode: orbit
 children:
@@ -47,7 +47,7 @@ children:
       constantAttenuation: 1
       rotationOLD: [ 0.279, 0.9539, -0.08268 ]
 scripts:
-- text: |
+- |
     this.initialize = function(){
       this.camera.transform = [ 1,0,0,0,0,1,-0.000185691867955029,0,0,0.000185691867955029,1,0,0,-48,0,1 ];
     }

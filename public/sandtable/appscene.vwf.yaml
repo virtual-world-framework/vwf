@@ -1,5 +1,5 @@
 ---
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
   lineWidth: 32
   lineColor: [ 0, 0, 0 ]
@@ -28,7 +28,7 @@ properties:
           }          
           break;
         default:
-          console.info( "WARNING: walk, look, and draw are the only supported mouseMode" );
+          this.logger.debug( "WARNING: walk, look, and draw are the only supported mouseMode" );
           break;
       }
     value: "orbit"
@@ -37,13 +37,12 @@ methods:
   clear: |
     if ( this.nodesCreated ) {
       for ( var i = 0; i < this.nodesCreated.length; i++ ){
-        //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );
         vwf.deleteNode( this.nodesCreated[i] );
       }
       this.nodesCreated = [];  
     }
 scripts:
-- text: |
+- |
     var counter = 1;
     var lineIndex = 1;
     var cubeIndex = 1;
@@ -96,7 +95,6 @@ scripts:
     }
     this.pointerMove = function( parms, pickInfo ){
       if ( this.pointerIsDown() ) {
-        //console.info( " appscene.pointerMove() pointerDown" );
         switch( this.mouseMode ) {
           case "draw":
             if ( this.distanceFromLast( pickInfo ) > this.minDistanceSquared ) {
@@ -115,7 +113,6 @@ scripts:
       this.lastDrawPoint = undefined;    
     }
     this.draw = function( pickInfo ) {
-      //console.info( "   Draw ---------------" );
       if ( pickInfo && pickInfo.globalPosition ) {
         if ( this.lastDrawPoint ) {
           var start = this.lastDrawPoint.pickInfo.globalPosition;
@@ -185,7 +182,7 @@ scripts:
           line.properties.meshDefinition.faces = faces;
           line.properties.meshDefinition.color = this.lineColor;
           
-          vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+          this.children.create(line, "line"+lineIndex);
           this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
           lineIndex++;
           
@@ -195,7 +192,6 @@ scripts:
       }
     }
     this.pindrop = function( pickInfo ) {
-      //console.info( "   PinDrop ---------------" );
       
       if ( pickInfo && pickInfo.globalPosition ) {
         pushpin.properties.translation = pickInfo.globalPosition;
@@ -212,7 +208,7 @@ scripts:
           pushpin.source = "models/pushPinYellow.dae";
         
         var name = "pushpin"+pushpinIndex;
-        vwf.createNode( "index-vwf", pushpin, name, undefined );
+        this.children.create(pushpin, name);
         this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+name );
         pushpinIndex++;        
         
@@ -232,7 +228,6 @@ scripts:
           distSquared = Math.pow( p1[0] - p2[0], 2 ) + Math.pow( p1[1] - p2[1], 2 );
         }
       }
-      //console.info( "   distSquared = " + distSquared );
       return distSquared;
     }
     this.createCube = function( x, y, z, dx, dy, dz, color, temp ) {
@@ -277,7 +272,7 @@ scripts:
       cube.properties.meshDefinition.faces = faces;
       cube.properties.meshDefinition.color = color;
       
-      vwf.createNode( "index-vwf", cube, "cube"+cubeIndex, undefined );
+      this.children.create(cube, "cube"+cubeIndex);
       if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cube"+cubeIndex );
       cubeIndex++;
     }
@@ -344,7 +339,7 @@ scripts:
       line.properties.meshDefinition.faces = faces;
       line.properties.meshDefinition.color = color;
       
-      vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
+      this.children.create(line, "line"+lineIndex);
       if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
       lineIndex++;    
     }
@@ -374,8 +369,7 @@ scripts:
       cone.properties.meshDefinition.faces = faces;
       cone.properties.meshDefinition.color = color;
       
-      vwf.createNode( "index-vwf", cone, "cone"+coneIndex, undefined );
+      this.children.create(cone, "cone"+coneIndex);
       if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cone"+coneIndex );
       coneIndex++; 
-      
     } //@ sourceURL=appScene.vwf

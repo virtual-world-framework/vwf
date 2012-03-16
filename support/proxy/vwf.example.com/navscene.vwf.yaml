@@ -3,7 +3,6 @@ extends: http://vwf.example.com/scene.vwf
 properties: 
   navmode:
     set: |
-      //console.info( "   navmode.set( "+value+" )" );
       switch ( value ) {
         case "walk":
         case "orbit":
@@ -32,7 +31,7 @@ methods:
   update:
   getCameraAt:  
 scripts:
-- text: |
+- |
     var counter = 1;
     var _piDiv180 = Math.PI / 180;
     var _180DivPI = 180 / Math.PI;
@@ -42,7 +41,6 @@ scripts:
     var phi, theta;
     var positionChanged = false;
     this.initialize = function() {
-      console.info( "== initialize == navscene == initialize ==" );
       this.input = { 
         futureActive: function() {
           return ( this.lookActive || this.moveActive || this.button1Down || this.button2Down || this.keysAreDown() ); 
@@ -95,9 +93,7 @@ scripts:
       }
     }
     this.changeNavMode = function( state ) {
-      //console.info( "   this.changeNavMode( "+state+" )" );
       if ( state == 1 ) {
-        //console.info( "         this.navmode = " + this.navmode );
         if ( this.navmode == "walk" ) this.navmode = "orbit";
         else if ( this.navmode == "orbit" ) this.navmode = "walk"; 
       }
@@ -127,7 +123,6 @@ scripts:
       }      
     }
     this.pointerIsDown = function() {
-      //console.info( "this.input.pointerInfo " + this.input.pointerInfo );
       if ( this.input && this.input.pointerInfo ) {
         var bInfo = this.input.pointerInfo.buttons;
         if ( bInfo ) {
@@ -137,7 +132,6 @@ scripts:
       return false;
     }        
     this.pointerDown = function( parms, pickInfo ){
-      //console.info( " navscene.pointerDown( "+parms.position[0]+", "+parms.position[1]+" )" );
       this.input.lastPointerInfo = undefined;
       this.input.pointerInfo = parms;
       this.input.lastPickInfo = undefined;
@@ -145,7 +139,6 @@ scripts:
       this.input.pointerDownTime = this.time;
     }
     this.pointerUp = function( parms, pickInfo ){
-      //console.info( " navscene.pointerUp( "+parms.position[0]+", "+parms.position[1]+" )" );
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = undefined;
       this.input.lastPickInfo = this.input.pickInfo;
@@ -157,7 +150,6 @@ scripts:
       this.input.pointerInfo = parms;
       this.input.lastPickInfo = this.input.pickInfo;
       this.input.pickInfo = pickInfo;      
-      //console.info( " navscene.pointerMove( "+parms.position[0]+", "+parms.position[1]+" )" );
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
         var active = this.input.futureActive();
         var delta = this.input.pointerDelta();
@@ -271,7 +263,7 @@ scripts:
         this.input.look = [ 0, 0 ];
         this.input.move = [ 0, 0 ];
         
-        for ( keyPress in kd ) {
+        for ( var keyPress in this.input.keyInfo.keysDown ) {
           switch ( Number( kd[ keyPress ].code ) ) {
             case 87:  //w
             case 38:  //up
@@ -296,10 +288,10 @@ scripts:
               this.input.look[0] += 1;
               break;
             case 90: // z
-              console.info( "translation: [ " + Array.prototype.slice.call( this.activeCameraComp.translation ) + " ]" );
-              console.info( " quaternion: [ " + Array.prototype.slice.call( this.activeCameraComp.quaternion ) + " ]" );              
-              console.info( "   rotation: [ " + Array.prototype.slice.call( this.activeCameraComp.rotation ) + " ]" );
-              console.info( "  transform: [ " + Array.prototype.slice.call( this.activeCameraComp.transform )  + " ]" );
+              this.logger.info( "translation: [ " + Array.prototype.slice.call( this.activeCameraComp.translation ) + " ]" );
+              this.logger.info( " quaternion: [ " + Array.prototype.slice.call( this.activeCameraComp.quaternion ) + " ]" );              
+              this.logger.info( "   rotation: [ " + Array.prototype.slice.call( this.activeCameraComp.rotation ) + " ]" );
+              this.logger.info( "  transform: [ " + Array.prototype.slice.call( this.activeCameraComp.transform )  + " ]" );
               break;
             case 88: // x
               break;
@@ -330,31 +322,22 @@ scripts:
     }
 
     this.onMove = function( x, y ) {
-      //console.info( "START navscene.onMove( " + x + ", " + y + " )" );
       if ( Math.abs( x ) < 0.1 && Math.abs( y ) < 0.1 ) {
         if ( this.input.moveActive ) {
-          //console.info( "--   DEACTIVATE MOVE ---------------------------------------" );
           this.input.moveActive = false;
           this.input.move = [ 0, 0 ];
         }
         return; 
       }
-      //console.info( "   1   navscene.onMove( " + x + ", " + y + " )" );
       this.input.move = [ x, y ];      
       var active = this.input.futureActive();
       if ( !this.input.moveActive ) {
-        //console.info( "**   ACTIVATE MOVE ***************************************" );
         this.input.moveActive = true;
         this.move( x, y );
       }
-      //console.info( "   2   navscene.onMove( " + x + ", " + y + " )" );
-      //console.info( "   2   active = " + active );
       if ( !active ) {
-        //console.info( "   2   this.future = " + this.future );
-        //console.info( "this.update = " + this.update() );
         this.future( 0.1 ).update();
       }
-      //console.info( "END   navscene.onMove( " + x + ", " + y + " )" );
     }    
     this.move = function( x, y ) {
       if ( this.navmode == "walk" ) {
@@ -366,7 +349,6 @@ scripts:
     this.onLook = function( x, y ) {
       if ( Math.abs( x ) < 0.1 && Math.abs( y ) < 0.1 ) {
         if ( this.input.lookActive ) {
-          //console.info( "--   DEACTIVATE LOOK ---------------------------------------" );
           this.input.lookActive = false;
           this.input.look = [ 0, 0 ];  
         }        
@@ -375,7 +357,6 @@ scripts:
       this.input.look = [ x, y ];
       var active = this.input.futureActive();
       if ( !this.input.lookActive ) {
-        //console.info( "**   ACTIVATE LOOK ***************************************" );
         this.input.lookActive = true;
         this.look( x, y );
       }
@@ -433,10 +414,7 @@ scripts:
           if ( parms.wheelDeltaY > 0 ) zinc *= -1;
           z = origZ + zinc;
           
-          console.info( "PRE  rotationMatrix = " + Array.prototype.slice.call( this.activeCameraComp.rotationMatrix ) );
-          console.info( "   setting translation = [ " + x + ", " + y + ", " + z + " ]" );
           this.activeCameraComp.translation = [ x, y, z ];
-          console.info( "POST rotationMatrix = " + Array.prototype.slice.call( this.activeCameraComp.rotationMatrix ) );
           positionChanged = true;
         }
       }
@@ -475,7 +453,6 @@ scripts:
       this.input.lastUpdateTime = this.time;
     }    
     this.orbit = function( xDelta, yDelta ){
-      //console.info( "this.orbit( "+xDelta+", "+ yDelta + " )" );
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
         this.updateRadius();
@@ -520,8 +497,6 @@ scripts:
           goog.vec.Vec4.createFromValues( x, y, z, 1 ),
           goog.vec.Vec3.create()
         );
-        //console.info( "   camRotMat = " + Array.prototype.slice.call( camRotMat ) );
-        //console.info( "   getCameraAt( "+x+", "+y+", "+z+" ) = " + Array.prototype.slice.call( camAt ) );
         return camAt;      
     }
     this.translate = function( x, y ) {
@@ -546,11 +521,9 @@ scripts:
       }      
     }
     this.update = function() {
-      //console.info( "update   this.input + " + this.input );
       if ( this.input ) {
         var delta = this.input.pointerDelta();
         var pi = this.input.pointerInfo;
-        //console.info( "update   delta = " + delta );
         if ( delta ) {
           if ( this.pointerIsDown() ) {
             if ( this.input.pointerInfo.buttons.left ) {

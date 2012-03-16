@@ -33,7 +33,7 @@ methods:
       this.nodesCreated = [];  
     }    
 scripts:
-- text: |
+- |
     var lastTimeObjWasCreated;
     var mouseIsDown = false;
     var mouseDownTime = -1;
@@ -45,15 +45,13 @@ scripts:
       "type": "text/xml",
       "properties": { 
         "material": "",
-        "scale": [ 1.5, 1.5, 1.5 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
-        "translation": [ 0, 0, 0 ], 
+        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
-        "velocity": [ 0, 0, 0 ], 
         } 
       };
     var sphere = { 
@@ -62,15 +60,13 @@ scripts:
       "type": "text/xml",
       "properties": { 
         "material": "", 
-        "scale": [ 2.0, 2.0, 2.0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
-        "translation": [ 0, 0, 0 ], 
+        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ], 
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
-        "velocity": [ 0, 0, 0 ], 
         } 
       };
     this.initialize = function() {
@@ -78,7 +74,7 @@ scripts:
     }  
     this.keyDown = function( keyInfo ) {
       var key = undefined;
-      for ( kd in keyInfo.keysDown ) {
+      for ( var kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
         if ( key.char == " " || key.key == "space" ) {
           this.createObject();
@@ -103,22 +99,28 @@ scripts:
             newObjName = "cube" + this.cubesCreated;
             
             cube.properties.material = materials[ this.colorIndex ];
-            cube.properties.translation = [ trans[12], trans[13], trans[14] - 10 ];
-            cube.properties.velocity = [ at[0] * this.tossCubeStrength, at[1] * this.tossCubeStrength, at[2] * this.tossCubeStrength];
+            cube.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
+            var vel = [ at[0] * this.tossCubeStrength, at[1] * this.tossCubeStrength, at[2] * this.tossCubeStrength];
             this.colorIndex += 1;
-            
-            vwf.createNode( "index-vwf", cube, newObjName, undefined );        
+  
+            cube.scripts = [];
+            cube.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
+
+            this.children.create( cube, newObjName );        
             this.createCube = false;
           } else {
             this.spheresCreated += 1;
             newObjName = "sphere" + this.spheresCreated;
             
             sphere.properties.material = materials[ this.colorIndex ];
-            sphere.properties.translation = [ trans[12], trans[13], trans[14] - 10 ];
-            sphere.properties.velocity = [ at[0] * this.tossSphereStrength, at[1] * this.tossSphereStrength, at[2] * this.tossSphereStrength ];
+            sphere.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
+            var vel = [ at[0] * this.tossSphereStrength, at[1] * this.tossSphereStrength, at[2] * this.tossSphereStrength ];
             this.colorIndex += 1;
+
+            sphere.scripts = [];
+            sphere.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
             
-            vwf.createNode( "index-vwf", sphere, newObjName, undefined );
+            this.children.create( sphere, newObjName );
             this.createCube = true;      
           }
           if ( newObjName && newObjName != "" ) {
@@ -127,4 +129,4 @@ scripts:
         }
       }
     } //@ sourceURL=appscene.vwf
-  
+

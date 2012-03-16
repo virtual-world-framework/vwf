@@ -4,5 +4,4 @@ extends: |
 scripts:
 - |
     this.pointerClick = function()  {
-      console.info( "info on click", this.id );
     }

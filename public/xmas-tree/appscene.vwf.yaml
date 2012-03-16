@@ -28,13 +28,12 @@ methods:
   clear: |
     if ( this.nodesCreated ) {
       for ( var i = 0; i < this.nodesCreated.length; i++ ){
-        //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );
         vwf.deleteNode( this.nodesCreated[i] );
       }
       this.nodesCreated = [];  
     }
 scripts:
-- text: |
+- |
     var lastTimeObjWasCreated;
     var mouseIsDown = false;
     var mouseDownTime = -1;
@@ -79,7 +78,7 @@ scripts:
     }
     this.keyDown = this.events.add( function( keyInfo ) {
       var key = undefined;
-      for ( kd in keyInfo.keysDown ) {
+      for ( var kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
         if ( key.char == " " || key.key == "space" ) {
           this.createObject();
@@ -88,11 +87,11 @@ scripts:
     }, this );   
     this.pointerDown = function( pointerInfo, pickInfo ) {
       mouseIsDown = true;
-      mouseDownTime = vwf.time();
+      mouseDownTime = this.time;
     }
     this.pointerUp = function( pointerInfo, pickInfo ) {
       mouseIsDown = false;
-      var now =  vwf.time();
+      var now =  this.time;
       //if ( now - mouseDownTime < 700 ) {
       //  this.createObject();
       //}
@@ -125,7 +124,7 @@ scripts:
           cube.properties.velocity = [ camLook[0] * this.tossCubeStrength, camLook[1] * this.tossCubeStrength, camLook[2] * this.tossCubeStrength];
           this.colorIndex += 1;
           
-          vwf.createNode( "index-vwf", cube, newObjName, undefined );        
+          this.children.create( cube, newObjName);        
           this.createCube = false;
         } else {
           this.spheresCreated += 1;
@@ -136,7 +135,7 @@ scripts:
           sphere.properties.velocity = [ camLook[0] * this.tossSphereStrength, camLook[1] * this.tossSphereStrength, camLook[2] * this.tossSphereStrength ];
           this.colorIndex += 1;
           
-          vwf.createNode( "index-vwf", sphere, newObjName, undefined );
+          this.children.create(sphere, newObjName);
           this.createCube = true;      
         }
         if ( newObjName && newObjName != "" ) {

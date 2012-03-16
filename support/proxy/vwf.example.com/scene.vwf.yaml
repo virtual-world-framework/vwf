@@ -26,11 +26,10 @@ properties:
       this.ambientColor = value;
     value: [ 183, 183, 183 ]
 scripts:
-- text: |
+- |
     this.activeCameraComp = undefined;
     var scene = this;
     this.initialize = function() {
-      console.info( "==================== scene ====================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.ambientColor = this.ambientColor;
     }

@@ -8,8 +8,3 @@ properties:
   scale: [ 15, 15, 15 ]
 implements:
 - http://vwf.example.com/fly.vwf
-scripts:
-- text: |
-    this.initialize = function() {
-      console.info( "== initialize == predator == initialize ==" );
-    }

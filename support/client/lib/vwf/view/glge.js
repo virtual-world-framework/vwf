@@ -1,4 +1,5 @@
-﻿define( [ "module", "vwf/view" ], function( module, view ) {
+﻿"use strict";
+define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
     // is active, scripts on the main page may make (reflected) kernel calls:
@@ -131,7 +132,6 @@
                             camID = getObjectID.call( glgeView, cam, false, false);
                         }
                         if (camID && camID != "") {
-                            //console.info( "aspectRatio = " + (( glgeView.width / glgeView.height ) / 1.333 ) );
                             vwf.setProperty(camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
                         }
                         vwf.setProperty(glgeView.state.sceneRootID, "size", [glgeView.width, glgeView.height]);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
@@ -188,6 +188,11 @@
 
     function initScene( sceneNode ) {
 
+        function renderScene() {
+            sceneNode.frameCount++;
+            renderer.render();
+        };
+
         var canvas = this.canvasQuery.get( 0 );
 
         if ( canvas ) {
@@ -209,11 +214,6 @@
             var renderer = sceneNode.glgeRenderer;
 
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
-
-            function renderScene() {
-                sceneNode.frameCount++;
-                renderer.render();
-            };
 
             setInterval( renderScene, 1 );
         }
@@ -403,7 +403,6 @@
             var event = getEventData( e, false );
             if ( event ) {
                 pointerDownID = pointerPickID ? pointerPickID : sceneID;
-                //console.info( "sceneView.kernel.dispatchEvent( "+pointerDownID+", 'pointerDown', .. )" );
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
             }
         }
@@ -471,7 +470,6 @@
             var eData = getEventData( e, false );
             if ( eData ) {
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
-                    //console.info( "sceneView.kernel.dispatchEvent( "+pointerDownID+", 'pointerMove', .. )" );
                     sceneView.kernel.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
                 } else {
                     if ( pointerPickID ) {
@@ -537,11 +535,9 @@
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
-            //console.info( "  +++++ dragover +++++" );
             var eData = getEventData( e, false );
             if ( eData ) {
                 e.dataTransfer.dropEffect = "copy";
-            //    console.info( "  +++++ over has valid info +++++" );
             }
             e.preventDefault();    
         };
@@ -555,10 +551,7 @@
                 var object, match, fn;
                 var files = e.dataTransfer.files;
                 var file = files[0];
-                //console.info( file.name );
                 var ext = (/[.]/.exec(file.name)) ? /[^.]+$/.exec(file.name) : undefined;
-
-                //console.info( ext );
 
                 switch ( ext[0].toLowerCase() ) {
                     case "dae":
@@ -727,11 +720,11 @@
             
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
-                console.info("====>>>  vwf.view-glge.mousePick: searching for: " + path.call(this,objectToLookFor) );
+                vwf.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path.call(this,objectToLookFor) );
             }
             jQuery.each( this.state.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    if ( debug ) { console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
+                    if ( debug ) { vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });
@@ -823,7 +816,7 @@
     function outputCollada(collada, iIndent, open) {
         var sOut = indent.call(this,iIndent);
         if (open) {
-            console.info(sOut + "children:")
+            vwf.logger.info(sOut + "children:")
         }
     }
 
@@ -831,11 +824,11 @@
         var sOut = indent.call( this, iIndent + 1);
         if (open) {
             lastGroupName = name(group);
-            console.info(indent.call( this,iIndent) + lastGroupName + ":");
-            console.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
+            vwf.logger.info(indent.call( this,iIndent) + lastGroupName + ":");
+            vwf.logger.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 
             if (getChildCount.call( this, group) > 0)
-                console.info(sOut + "children:");
+                vwf.logger.info(sOut + "children:");
         }
     }
 
@@ -843,9 +836,9 @@
         var indentAdd = 0;
         var objName = name( obj );
         if ( objName != "" ) {
-            console.info( indent.call( this,iIndent) + "children:" );
-            console.info( indent.call( this,iIndent+1) + objName + ":");
-            console.info( indent.call( this,iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
+            vwf.logger.info( indent.call( this,iIndent) + "children:" );
+            vwf.logger.info( indent.call( this,iIndent+1) + objName + ":");
+            vwf.logger.info( indent.call( this,iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
             indentAdd = 2;
         }
     }
@@ -853,8 +846,8 @@
     function outputMaterial( obj, iIndent, objName, index  ) {
 
         var sOut = indent.call( this,iIndent + 1);
-        console.info( indent.call( this,iIndent) + objName + "Material" + index + ":" );
-        console.info( sOut + "extends: http://vwf.example.com/material.vwf");
+        vwf.logger.info( indent.call( this,iIndent) + objName + "Material" + index + ":" );
+        vwf.logger.info( sOut + "extends: http://vwf.example.com/material.vwf");
 
     }
 

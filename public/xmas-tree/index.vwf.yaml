@@ -8,12 +8,13 @@ properties:
   gravity: [ 0, 0, -50.8, 0 ]
   collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
+  loadDone: false
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      console.info( "==================== index.vwf ====================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.camera.translation = [ 30, 138, 40 ];
+      this.camera.rotation = [ 0, 0, 1, 180 ];
       this.camera.far = 50000; 
       if ( !this.loadDone) {
         this.loadDone = true;
@@ -22,7 +23,6 @@ scripts:
     this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 
     }, this );    
-  type: application/javascript
 children:
   clearButton:
     extends: http://vwf.example.com/node2.vwf

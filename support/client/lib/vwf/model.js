@@ -1,4 +1,4 @@
-
+"use strict";
 define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( module, kernel_api, model_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
 
     // vwf/model.js is the common implementation of all Virtual World Framework models. Each model
@@ -20,9 +20,9 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
-    var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+    var logger = require( "logger" ).for( module.id.replace( /\//g, "." ) );
 
-    logger.info( "load" );
+    logger.infoc( "load" );
 
     return {
 
@@ -35,9 +35,9 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
             var instance = Object.create( this );
 
             instance.module = module;
-            instance.logger = require( "vwf-proxy" ).logger_for( instance.module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+            instance.logger = require( "logger" ).for( instance.module.id.replace( /\//g, "." ) );
             
-            instance.logger.info( "load" );
+            instance.logger.infoc( "load" );
 
             if ( typeof initializer == "function" || initializer instanceof Function ) {
                 initializer = initializer();
@@ -60,7 +60,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
         create: function( kernel, model, stages, state, parameters ) {
 
-            this.logger.info( "create" );
+            this.logger.infoc( "create" );
 
             // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 

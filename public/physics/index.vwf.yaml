@@ -8,10 +8,10 @@ properties:
   gravity: [ 0, 0, -50.8, 0 ]
   collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
+  loadDone: false
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      console.info( "==================== index.vwf ====================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.camera.translation = [ 30, 138, 40 ];
       this.camera.rotation = [ 0, 0, 1, 180 ]
@@ -23,7 +23,6 @@ scripts:
     this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 
     }, this );    
-  type: application/javascript
 children:
   clearButton:
     extends: http://vwf.example.com/node2.vwf
@@ -37,16 +36,14 @@ children:
     source: box.dae
     type: model/vnd.collada+xml
     properties:
-      translation: [ 0, 0, 0 ]
-      rotation: [ 1, 0, 0, 0 ]
-      scale: [ 1, 1, 1 ]
+      transform: [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]
       physics: [ "mesh" ]
       friction: 0.5
       restitution: 0.1
   groundplane:
     extends: "http://vwf.example.com/physics3.vwf"
     properties:
-      translation: [ 0, 0, 11.06 ]
+      transform: [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 11.06, 1 ]
       physics: [ "plane", [ 0, 0, 1, 0 ] ]
       friction: 0.99
       restitution: 0      
@@ -54,8 +51,6 @@ children:
     extends: "http://vwf.example.com/light.vwf"
     properties: 
       lightType: "directional"
-      translation: [ 60, 85, 70 ]
-      rotationOLD: [ 0.5, 0.1, 0 ]
       constantAttenuation: 1.5
       linearAttenuation: 0.00000001
       quadraticAttenuation: 0.00001
