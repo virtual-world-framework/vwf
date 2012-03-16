@@ -16,7 +16,5 @@ scripts:
     application/javascript
 # The default scripting language is JavaScript. A MIME type must be provided for other languages
 # (but no other languages are supported now).
-- text: |
+- |
     // code
-  type:
-    application/javascript

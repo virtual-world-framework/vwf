@@ -10,7 +10,6 @@ scripts:
 - |
   var initialPosition;
   this.initialize = function() {
-    console.info( "== initialize == translate-on-down == initialize == " );
   }
   this.pointerDown = function( pointerInfo, pickInfo ) {
     initialPosition = this.translation;

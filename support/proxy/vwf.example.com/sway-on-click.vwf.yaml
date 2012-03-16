@@ -28,7 +28,7 @@ methods:
       this.future( 0.05 ).sway();
     }
 scripts:
-- text: |
+- |
     this.pointerClick = function() {
       // this["sway-swaying"] = ! this["sway-swaying"];
     }

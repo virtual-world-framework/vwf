@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
@@ -39,7 +40,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 return;
 
 //            this.logger.enabled = true;
-//            this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+//            this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childName );
 //            this.logger.enable = false;
 
@@ -125,10 +126,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     type: childExtendsID,
                     sourceType: childType,
                 };
-
-//                    if ( !glgeChild ) {
-//                        console.info( "UNABLE TO BIND TO CAMERA: " + childName );
-//                    }
 
                 if ( !node.glgeObject ) {
                     createCamera.call( this, nodeID, childID, childName );
@@ -245,7 +242,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 callback( false );
                                 node.glgeObject.vwfID = childID;
                                 sceneNode.xmlColladaObjects.push( node.glgeObject );
-                                //console.info( "ADDING XML Collada +++++++++++++++++++ " + sceneNode.xmlColladaObjects.length );
                                 setupColladaCallback.call( this, node.glgeObject, sceneNode );
                                 node.loadingCollada = callback;                                    
                             }
@@ -269,10 +265,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.settingProperty( childID, "looping", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
                 this.settingProperty( childID, "speed", 1 );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
 
-                //console.info( "============ " +childID+ " ============" );
-                //console.info( "     LOCAL: " + JSON.stringify( this.gettingProperty( childID, "localMatrix", [] ) ) );
-                //console.info( "     MODEL: " + JSON.stringify( this.gettingProperty( childID, "modelMatrix", [] ) ) );
-
 
             } else if ( prototypes && isGlgeMaterialDefinition.call( this, prototypes ) ) {
                 node = this.state.nodes[childID] = {
@@ -293,6 +285,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     case "http-vwf-example-com-node-vwf":
                     case "http-vwf-example-com-node2-vwf":
                     case "http-vwf-example-com-scene-vwf":
+                    case "http-vwf-example-com-navscene-vwf":
                     case undefined:
                         break;
 
@@ -399,7 +392,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            //console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" );
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
@@ -562,7 +554,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             case "http-vwf-example-com-particlesystem-vwf":
                                 value = setParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;                        
-                            case "http-vwf-example-com-glge-vwf":
+                            case "http-vwf-example-com-navscene-vwf":
                             case "appscene-vwf":
                                 value = setSceneProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
@@ -680,7 +672,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         break;
 
                     case "meshData":
-                        //console.info( "gettingProperty", " GETTING meshData -------------------" );
                         value = [];
                         var scale = this.gettingProperty( nodeID, "scale", [] ); 
                         var meshList = findAllMeshes.call( this, glgeObject );
@@ -690,7 +681,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                            "scale": scale 
                                         } );
                         }
-                        //console.info( "gettingProperty", "  (meshData)  value = " + value + "      value.length = " + value.length );
                         break;
  
                     case "lookAt": {
@@ -788,7 +778,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( nodeCopy && nodeCopy.colladaLoaded ) {
                 nodeCopy.colladaLoaded( true );
             }
-            //console.info( "++ 2 ++ "+collada.vwfID+" colladaLoaded( "+ collada.docURL +" )" );
             for ( var j = 0; j < sceneNode.srcColladaObjects.length; j++ ) {
                 if ( sceneNode.srcColladaObjects[j] == collada ){
                     sceneNode.srcColladaObjects.splice( j, 1 );
@@ -796,7 +785,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             } 
             if ( removed ) {
-                //console.info( "REMOVING SRC Collada ------------------------------- " + sceneNode.srcColladaObjects.length );
                 if ( sceneNode.srcColladaObjects.length == 0 ) {
                     //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
                     loadComplete.call( glgeModel );
@@ -809,8 +797,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( glgeModel.state.nodes[id] ) {
                         var colladaNode = glgeModel.state.nodes[id];
                         if ( colladaNode.loadingCollada ) {
-//                            console.info( "== LOADING COLLADA complete       ==" );
-//                            console.info( "====================================" );
                             colladaNode.loadingCollada( true );                    
                         }
                     }
@@ -821,7 +807,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         node.name = childName;
         node.glgeObject = new GLGE.Collada;
         sceneNode.srcColladaObjects.push( node.glgeObject );
-        //console.info( "ADDING SRC Collada +++++++++++++++++++ " + sceneNode.srcColladaObjects.length );
         node.glgeObject.vwfID = nodeID;
 
         node.glgeObject.setDocument( node.source, window.location.href, colladaLoaded );
@@ -856,7 +841,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     var glgeModel = this;
 
                     sceneNode.xmlColladaObjects.push( children[i] );
-                    //console.info( "ADDING XML Collada +++++++++++++++++++ " + sceneNode.xmlColladaObjects.length );
                     setupColladaCallback.call( this, children[i], sceneNode );
 
                     children[i].loadedCallback = colladaLoaded;
@@ -878,7 +862,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             sceneNode.pendingLoads--;
             collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             var bRemoved = false;
-            //console.info( "++ XML Loaded ++        colladaLoaded( "+ collada.docURL +" )" );
             for ( var j = 0; j < sceneNode.xmlColladaObjects.length; j++ ) {
                 if ( sceneNode.xmlColladaObjects[j] == collada ){
                     sceneNode.xmlColladaObjects.splice( j, 1 );
@@ -886,7 +869,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             } 
             if ( bRemoved ){
-                //console.info( "REMOVING XML Collada -------------------- " + sceneNode.xmlColladaObjects.length );
                 if ( sceneNode.xmlColladaObjects.length == 0 ) {
                     //this.kernel.setProperty( modelID, "loadDone", true );
                     loadComplete.call( glgeModel );
@@ -899,8 +881,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if ( glgeModel.state.nodes[id] ) {
                     var colladaNode = glgeModel.state.nodes[id];
                     if ( colladaNode.loadingCollada ) {
-//                        console.info( "== LOADING COLLADA complete       ==" );
-//                        console.info( "====================================" );
                         colladaNode.loadingCollada( true );                    
                     }
                 }
@@ -971,8 +951,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // -- setParticleSystemProperty ------------------------------------------------------------------------
 
     function setParticleSystemProperty( nodeID, propertyName, propertyValue ) {
-
-        //console.info( "glge.setParticleSystemProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )");
 
         var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
@@ -1091,7 +1069,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function setMaterialProperty( nodeID, propertyName, propertyValue ) {
 
-        //console.info( "glge-model.setMaterialProperty( " + nodeID + ", " + propertyName + ", '" + propertyValue + "' )");
         var node = this.state.nodes[ nodeID ]; 
         var value = propertyValue;
         var txtr, mat;
@@ -1108,7 +1085,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "texture": {
                     if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
                         if ( txtr ) {
-                            //console.info( "Setting texture source: " + propertyValue );
                             txtr.setSrc( propertyValue );
                         } else if ( mat ) {
 					        var ml = new GLGE.MaterialLayer;
@@ -1166,7 +1142,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function setLightProperty( nodeID, propertyName, propertyValue ) {
 
-        //console.info( "glge-model.setLightProperty( " + nodeID + ", " + propertyName + ", '" + propertyValue + "' )");
         if ( propertyValue === undefined ) return;
         
         var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
@@ -1385,7 +1360,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getObjectProperty( nodeID, propertyName, propertyValue ) {
 
-        //console.info( "glge-model.getMaterialProperty( " + nodeID + ", " + propertyName + ", '" + propertyValue + "' )");
         var node = this.state.nodes[ nodeID ]; 
         var value = undefined;
         var txtr, mat;
@@ -1406,7 +1380,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function getMaterialProperty( nodeID, propertyName, propertyValue ) {
 
-        //console.info( "glge-model.getMaterialProperty( " + nodeID + ", " + propertyName + ", '" + propertyValue + "' )");
         var node = this.state.nodes[ nodeID ]; 
         var value = undefined;
         var txtr, mat;
@@ -1595,12 +1568,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var assetObj = undefined;
         var glgeObjName = "";
 
-        //console.info( "=======   Trying to find: " + objName + " of type: " + type );
-        for ( key in GLGE.Assets.assets ) {
+        for ( var key in GLGE.Assets.assets ) {
             assetObj = GLGE.Assets.assets[key];
             if ( assetObj ) {
                 glgeObjName = name( assetObj );
-                //console.info( "            Checking: '" + glgeObjName + "' of type " + assetObj.constructor.name );
                 if ( glgeObjName == objName ) {
                     switch ( type ) {
                         case "http-vwf-example-com-mesh-vwf":
@@ -1633,12 +1604,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         }
 
-//        if ( obj ) {
-//            console.info( "     =======   FOUND : " + objName );
-//        } else {
-//            console.info( "**     WARNING ======= UNABLE TO FIND: " + objName );
-//        }
-
         return obj;
 
     }
@@ -1646,9 +1611,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     // -- setActiveCamera ------------------------------------------------------------------------------
 
     function setActiveCamera( sceneNode, cameraID ) {
-        
+
         if ( this.state.nodes[ cameraID ] ) {
-            glgeCamera = this.state.nodes[ cameraID ].glgeObject;
+            var glgeCamera = this.state.nodes[ cameraID ].glgeObject;
             if ( glgeCamera ) {
                 var canvas = document.getElementById(this.state.sceneRootID);
                 glgeCamera.setAspect( canvas.width / canvas.height );
@@ -1850,7 +1815,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function findAllGlgeObjects( glgeNode, objList ) {
 
-        //console.info( "         findAllGlgeObjects( "+name(glgeNode)+", objList )" );
         if ( glgeNode ) {
             if ( glgeNode.constructor == GLGE.Object )
                 objList.push( glgeNode );
@@ -1869,7 +1833,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     function findAllMeshes( glgeNode ) {
 
-        //console.info( "     findAllMeshes(" + name(glgeNode) + " )" );
         var meshes = [];
         var objs = [];
         findAllGlgeObjects.call( this, glgeNode, objs );
@@ -1890,11 +1853,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
-                console.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
+                vwf.logger.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
             }
             jQuery.each( this.state.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    if ( debug ) { console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
+                    if ( debug ) { vwf.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });
@@ -1962,7 +1925,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             if ( this.state.nodes[id] ) {
                 var props = this.delayedProperties[id];
                 for ( var propertyName in props ) {
-                    //console.info( id + " delayed property set: " + propertyName + " = " + props[propertyName] );
                     Object.getPrototypeOf( this ).settingProperty.call( this, id, propertyName, props[propertyName] );
                 }
                 itemsToDelete.push( id );
@@ -1992,7 +1954,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );    
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" );    
             }
         }
 
@@ -2107,9 +2069,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     findAllGlgeObjects.call( this, parentNode.glgeObject, glgeObjs );
 
                     if ( glgeObjs && glgeObjs.length ) {
-                        //console.info( "findMaterial found " + glgeObjs.length + " children searching for: " + childName );
                         for ( var i = 0; i < glgeObjs.length && !found; i++ ) {
-                            //console.info( "     objName: " + name( glgeObjs[i] ) + "    parentName: " + name( glgeObjs[i].parent ) );
                             if ( name( glgeObjs[i].parent ) == childName ) {
                                 materialNode.glgeObject = glgeObjs[i];
                                 materialNode.glgeMaterial = glgeObjs[i].getMaterial( materialIndex );
@@ -2152,9 +2112,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 findAllGlgeObjects.call( this, parentNode.glgeObject, glgeObjs );
 
                 if ( glgeObjs && glgeObjs.length ) {
-                    //console.info( "findMaterial found " + glgeObjs.length + " children searching for: " + childName );
                     for ( var i = 0; i < glgeObjs.length && !found; i++ ) {
-                        //console.info( "     objName: " + name( glgeObjs[i] ) + "    parentName: " + name( glgeObjs[i].parent ) );
                         if ( name( glgeObjs[i].parent ) == childName ) {
                             materialNode.glgeObject = glgeObjs[i];
                             materialNode.glgeMaterial = glgeObjs[i].getMaterial( materialIndex );
@@ -2223,7 +2181,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( child.glgeObject ) {
                 glgeParent.addChild( child.glgeObject );
-                //console.info( "    adding child: " + childID + " to " + parentID );
             }
         }
     }

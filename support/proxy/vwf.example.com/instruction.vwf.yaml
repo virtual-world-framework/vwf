@@ -28,8 +28,4 @@ properties:
 scripts:
 - |
     this.onEntry = function() {
-      if ( this.cameraPosition != "" ) {
-        console.info( "go to camera position: " + this.cameraPosition );
-      }
-      console.info( "update " )
     }

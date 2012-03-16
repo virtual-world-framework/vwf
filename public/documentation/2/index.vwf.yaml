@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 source: index.xml
 type: model/x-glge
 children: 
@@ -8,23 +8,20 @@ children:
     source: hello.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ -2.4, 1.6, 0 ]
-      rotation: [ 0, 0, 3.141 ]
+      translation: [ -2.4, 1.6, 0 ]
+      rotation: [ 0, 0, 1, 180 ]
       scale: [ 1, 1, 1 ]
   world: 
     extends: http://vwf.example.com/node3.vwf
     source: world.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ -2.6, 0.6, 0 ]
-      rotation: [ 0, 0, 3.141 ]
+      translation: [ -2.6, 0.6, 0 ]
+      rotation: [ 0, 0, 1, 180 ]
       scale: [ 1, 1, 1 ]
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      console.info( "================ documentation example two ================" );
       this.activeCamera = "http-vwf-example-com-camera-vwf-defaultCamera";
-      vwf.setProperty( "http-vwf-example-com-camera-vwf-defaultCamera", "position", [ 0, 0, 10 ] );
-      this.loadDone = true;
+      this.camera.translation = [ 0, 0, 10 ];
     }
-  type: application/javascript

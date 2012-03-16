@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/object.js is a backstop property store.
@@ -49,8 +50,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- addingChild --------------------------------------------------------------------------
 
-        addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-        },
+        //addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
+        //},
 
         // TODO: creatingProperties
 
