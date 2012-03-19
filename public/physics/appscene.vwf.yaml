@@ -25,7 +25,17 @@ properties:
       }   
     value: 250
 methods:
+<<<<<<< .working
   clear:
+=======
+  clear: |
+    if ( this.nodesCreated ) {
+      for ( var i = 0; i < this.nodesCreated.length; i++ ){
+        this.children.delete( this.getChild(this.nodesCreated[i]) );
+      }
+      this.nodesCreated = [];  
+    }    
+>>>>>>> .merge-right.r1065
 scripts:
 - |
     var lastTimeObjWasCreated;

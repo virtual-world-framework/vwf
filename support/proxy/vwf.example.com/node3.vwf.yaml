@@ -93,17 +93,17 @@ properties:
   enabled: true
   boundingbox: 
     set: |
-      vwf.logger.info("WARNING: node3 boundingbox cannot be set" )
+      this.logger.info("WARNING: node3 boundingbox cannot be set" )
   centerOffset: 
     set: |
-      vwf.logger.info( "WARNING: node3 centerOffset cannot be set" )
+      this.logger.info( "WARNING: node3 centerOffset cannot be set" )
   vertices: 
     set: |
-      vwf.logger.info( "WARNING: node3 vertices cannot be set" )
+      this.logger.info( "WARNING: node3 vertices cannot be set" )
     value: 
   vertexIndices: 
     set: |
-      vwf.logger.info( "WARNING: node3 vertexIndices cannot be set" )
+      this.logger.info( "WARNING: node3 vertexIndices cannot be set" )
     value: 
   speed: 1
   playing: false

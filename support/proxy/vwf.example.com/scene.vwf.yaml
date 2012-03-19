@@ -56,5 +56,5 @@ scripts:
       return this.activeCameraComp;
     }
     this.load = function( obj, objName ){
-      vwf.createNode( "index-vwf", obj, objName );
+      this.children.create( obj, objName );
     } //@ sourceURL=scene.vwf

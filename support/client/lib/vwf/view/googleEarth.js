@@ -133,7 +133,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     });
 
                                 }, function(errorCode) {
-                                    vwf.logger.info( "google earth load error: " + errorCode );
+                                    this.logger.info( "google earth load error: " + errorCode );
                                 } );
                                 win.clearInterval( interval );
                             }
