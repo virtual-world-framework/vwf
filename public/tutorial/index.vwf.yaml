@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
+extends: http://vwf.example.com/navscene.vwf
 properties:
 children:  
   blueCube:
@@ -7,9 +7,8 @@ children:
     source: models/BlueCube.dae
     type: model/vnd.collada+xml
 scripts:
-- text: |
+- |
     this.initialize = function() {
       this.camera.position = [ 0,-100,0 ];
       this.camera.rotation = [ 1.56,0,0 ];
     }
-  type: application/javascript
