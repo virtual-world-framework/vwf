@@ -25,13 +25,7 @@ properties:
       }   
     value: 250
 methods:
-  clear: |
-    if ( this.nodesCreated ) {
-      for ( var i = 0; i < this.nodesCreated.length; i++ ){
-        vwf.deleteNode( this.nodesCreated[i] );
-      }
-      this.nodesCreated = [];  
-    }
+  clear:
 scripts:
 - |
     var lastTimeObjWasCreated;
@@ -50,7 +44,7 @@ scripts:
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
-        "translation": [ 0, 0, 0 ], 
+        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
         "velocity": [ 0, 0, 0 ], 
@@ -67,7 +61,7 @@ scripts:
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
-        "translation": [ 0, 0, 0 ], 
+        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
         "velocity": [ 0, 0, 0 ], 
@@ -104,7 +98,19 @@ scripts:
           goog.vec.Vec3.create()
         );
         return trans;      
-    }      
+    } 
+    this.clear = function(){
+      if ( this.nodesCreated ) {
+        var node;
+        for ( var i = 0; i < this.nodesCreated.length; i++ ){
+          node = this.getChild( this.nodesCreated[i] );
+          if ( node ) {
+            this.children.delete( node );
+          }
+        }
+        this.nodesCreated = [];  
+      }       
+    }
     this.createObject = function() {
       var newObjName;
 
