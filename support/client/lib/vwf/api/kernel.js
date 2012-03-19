@@ -4,7 +4,25 @@
 
 define( {
 
-    /// Description.
+    /// Create a node from a component specification. Construction may require loading data from
+    /// multiple remote documents. This function returns before construction is complete. A
+    /// callback is invoked once the node has fully loaded. 
+    /// A simple node consists of a set of properties, methods and events, but a node may
+    /// specialize a prototype component and may also contain multiple child nodes, any of which
+    /// may specialize a prototype component and contain child nodes, etc. So components cover a
+    /// vast range of complexity. The application definition for the overall simulation is a
+    /// single component instance.
+    /// A node is a component instance--a single, anonymous specialization of its component.
+    /// Nodes specialize components in the same way that any component may specialize a prototype
+    /// component. The prototype component is made available as a base, then new or modified
+    /// properties, methods, events, child nodes and scripts are attached to modify the base
+    /// implemenation.
+    /// To create a node, we first make the prototoype available by loading it (if it has not
+    /// already been loaded). This is a recursive call to createNode() with the prototype
+    /// specification. Then we add new, and modify existing, properties, methods, and events
+    /// according to the component specification. Then we load an add any children, again
+    /// recursively calling createNode() for each. Finally, we attach any new scripts and invoke
+    /// an initialization function.
     /// 
     /// @name vwf.api.kernel#createNode
     /// @function
@@ -18,7 +36,7 @@ define( {
 
     createNode: [ /* nodeID, childComponent, childName, callback /- ( childID ) -/ */ ],
 
-    /// Description.
+    /// Delete node will delete a node specified by the id given on each model and view.
     /// 
     /// @name vwf.api.kernel#deleteNode
     /// @function
@@ -29,7 +47,7 @@ define( {
 
     deleteNode: [ /* nodeID */ ],
 
-    /// Description.
+    /// Set node will set the properties of the node specified by the given id and component.
     /// 
     /// @name vwf.api.kernel#setNode
     /// @function
@@ -41,7 +59,7 @@ define( {
 
     setNode: [ /* nodeID, component */ ],
 
-    /// Description.
+    /// Get node will retrieve the component of the node specified by the given id.
     /// 
     /// @name vwf.api.kernel#getNode
     /// @function
@@ -52,7 +70,8 @@ define( {
 
     getNode: [ /* nodeID */ ],
 
-    /// Description.
+    /// Prototype calls prototyping() on each model. The first model to return a non-undefined value
+    /// dictates the return value.
     /// 
     /// @name vwf.api.kernel#prototype
     /// @function
@@ -63,7 +82,7 @@ define( {
 
     prototype: [ /* nodeID */ ],
 
-    /// Description.
+    /// Prototypes returns a list of all the prototype ids for a given node id.
     /// 
     /// @name vwf.api.kernel#prototypes
     /// @function
@@ -74,7 +93,9 @@ define( {
 
     prototypes: [ /* nodeID */ ],
 
-    /// Description.
+    /// addChild calls addingChild() on each model. The child is considered added after each model has
+    /// run.  Additionally, it calls addedChild() on each view. The view is being notified that a 
+    /// child has been added.
     /// 
     /// @name vwf.api.kernel#addChild
     /// @function
@@ -87,7 +108,9 @@ define( {
 
     addChild: [ /* nodeID, childID, childName */ ],
 
-    /// Description.
+    /// removeChild calls removingChild() on each model. The child is considered removed after each model
+    /// has run.  Additionally, it calls removedChild() on each view. The view is being notified that a 
+    /// child has been removed.
     /// 
     /// @name vwf.api.kernel#removeChild
     /// @function
@@ -99,7 +122,7 @@ define( {
 
     removeChild: [ /* nodeID, childID */ ],
 
-    /// Description.
+    /// Returns an array of node ids for all of the parents for the given child node id.
     /// 
     /// @name vwf.api.kernel#ancestors
     /// @function
@@ -110,7 +133,8 @@ define( {
 
     ancestors: [ /* nodeID */ ],
 
-    /// Description.
+    /// Parent calls parenting() on each model. The first model to return a non-undefined value
+    /// dictates the return value.
     /// 
     /// @name vwf.api.kernel#parent
     /// @function
@@ -121,7 +145,8 @@ define( {
 
     parent: [ /* nodeID */ ],
 
-    /// Description.
+    /// Children Calls childrening() on each model. The return value is the union of the non-undefined
+    /// results.
     /// 
     /// @name vwf.api.kernel#children
     /// @function
@@ -132,7 +157,8 @@ define( {
 
     children: [ /* nodeID */ ],
 
-    /// Description.
+    /// Name calls naming() on each model. The first model to return a non-undefined value dictates
+    /// the return value.
     /// 
     /// @name vwf.api.kernel#name
     /// @function
@@ -143,7 +169,8 @@ define( {
 
     name: [ /* nodeID */ ],
 
-    /// Description.
+    /// setProperties sets all of the properties for a node.  It will call settingProperties() 
+    /// on each model and satProperties() on each view.
     /// 
     /// @name vwf.api.kernel#setProperties
     /// @function
@@ -155,7 +182,8 @@ define( {
 
     setProperties: [ /* nodeID, properties */ ],
 
-    /// Description.
+    /// getProperties will get all of the properties for a node.  It will call 
+    /// gettingProperties() on each model and gotProperties() on each view.
     /// 
     /// @name vwf.api.kernel#getProperties
     /// @function
@@ -166,7 +194,10 @@ define( {
 
     getProperties: [ /* nodeID */ ],
 
-    /// Description.
+    /// createProperty will create a property on a node and assign an initial value.
+    /// It will call creatingProperty() on each model. The property is considered created after each
+    /// model has run.  Additionally, it wil call createdProperty() on each view. The view is being
+    /// notified that a property has been created.
     /// 
     /// @name vwf.api.kernel#createProperty
     /// @function
@@ -183,7 +214,11 @@ define( {
 
     /* TODO: deleteProperty, */
 
-    /// Description.
+    /// setProperty setsa specific property value on a node.  It will call settingProperty() 
+    /// on each model. The first model to return a non-undefined value has performed the
+    /// set and dictates the return value. The property is considered set after each model has run.
+    /// It will also call satProperty() on each view. The view is being notified that a property has
+    /// been set.
     /// 
     /// @name vwf.api.kernel#setProperty
     /// @function
@@ -196,8 +231,10 @@ define( {
 
     setProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
-    /// Description.
-    /// 
+    /// getProperty will retrive a property value for a node.  It will call gettingProperty() 
+    /// on each model. The first model to return a non-undefined value dictates the return value.
+    /// It will also call gotProperty() on each view.
+    ///
     /// @name vwf.api.kernel#getProperty
     /// @function
     /// 
@@ -208,7 +245,9 @@ define( {
 
     getProperty: [ /* nodeID, propertyName */ ],
 
-    /// Description.
+    /// It will call creatingMethod() on each model. The method is considered created after each
+    /// model has run.  It will also call createdMethod() on each view. The view is being 
+    /// notified that a method has been created.
     /// 
     /// @name vwf.api.kernel#createMethod
     /// @function
@@ -224,7 +263,8 @@ define( {
 
     /* TODO: deleteMethod, */
 
-    /// Description.
+    /// It will call callingMethod() on each model. The first model to return a non-undefined value
+    /// dictates the return value.  It will also call calledMethod() on each view.
     /// 
     /// @name vwf.api.kernel#callMethod
     /// @function
@@ -237,7 +277,9 @@ define( {
 
     callMethod: [ /* nodeID, methodName, methodParameters */ ],
 
-    /// Description.
+    /// It will call creatingEvent() on each model. The event is considered created after each model
+    /// has run.  It will also call createdEvent() on each view. The view is being notified that a
+    /// event has been created.
     /// 
     /// @name vwf.api.kernel#createEvent
     /// @function
@@ -252,7 +294,7 @@ define( {
 
     /* TODO: deleteEvent, */
 
-    /// Description.
+    /// It will call firingEvent() on each model and firedEvent() on each view.
     /// 
     /// @name vwf.api.kernel#fireEvent
     /// @function
@@ -265,7 +307,9 @@ define( {
 
     fireEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-    /// Description.
+    /// Dispatch an event toward a node. Using fireEvent(), capture (down) and bubble (up) along
+    /// the path from the global root to the node. Cancel when one of the handlers returns a
+    /// truthy value to indicate that it has handled the event.
     /// 
     /// @name vwf.api.kernel#dispatchEvent
     /// @function
@@ -279,7 +323,9 @@ define( {
 
     dispatchEvent: [ /* nodeID, eventName, eventParameters, eventNodeParameters */ ],
 
-    /// Description.
+    /// It will call executing() on each model. The script is considered executed after each model
+    /// has run.  It will also call executed() on each view. The view is being notified that a 
+    /// script has been executed.
     /// 
     /// @name vwf.api.kernel#execute
     /// @function
@@ -292,7 +338,7 @@ define( {
 
     execute: [ /* nodeID, scriptText, scriptType */ ],
 
-    /// Description.
+    /// It will return the current simulation time.
     /// 
     /// @name vwf.api.kernel#time
     /// @function
@@ -301,7 +347,8 @@ define( {
 
     time: [],
 
-    /// Description.
+    /// It will return the moniker of the client responsible for the current action. Will be 
+    /// falsy for actions originating in the server, such as time ticks.
     /// 
     /// @name vwf.api.kernel#client
     /// @function
@@ -310,7 +357,7 @@ define( {
 
     client: [],
 
-    /// Description.
+    /// It will return the identifer the server assigned to this client.
     /// 
     /// @name vwf.api.kernel#moniker
     /// @function
