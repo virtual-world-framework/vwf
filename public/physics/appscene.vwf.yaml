@@ -25,13 +25,7 @@ properties:
       }   
     value: 250
 methods:
-  clear: |
-    if ( this.nodesCreated ) {
-      for ( var i = 0; i < this.nodesCreated.length; i++ ){
-        vwf.deleteNode( this.nodesCreated[i] );
-      }
-      this.nodesCreated = [];  
-    }    
+  clear:
 scripts:
 - |
     var lastTimeObjWasCreated;
@@ -80,6 +74,18 @@ scripts:
           this.createObject();
         }
       }
+    }
+    this.clear = function(){
+      if ( this.nodesCreated ) {
+        var node;
+        for ( var i = 0; i < this.nodesCreated.length; i++ ){
+          node = this.getChild( this.nodesCreated[i] );
+          if ( node ) {
+            this.children.delete( node );
+          }
+        }
+        this.nodesCreated = [];  
+      }       
     }
     this.createObject = function() {
       var newObjName;
