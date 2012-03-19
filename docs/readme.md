@@ -366,9 +366,4 @@ How to get started with your own instance of VWF
 *	Use VMware to host virtual instance of a VWF server
 *	Initialize personal server via a Linux Boot CD, where content is loaded from flash drive
 _____________________________________________________________________________________
-Browser Requirements
---------------------
-*	HTML5
-*	Browser with WebGL enabled (Chrome 7, Firefox 3, IE 9)
-*	Browser with WebSocket enabled for multi-user functionality (not on a corporate network)
-_____________________________________________________________________________________
+
