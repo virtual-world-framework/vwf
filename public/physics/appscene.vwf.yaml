@@ -132,7 +132,6 @@ scripts:
           if ( newObjName && newObjName != "" ) {
             this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
           }
-
         }
       }
     } //@ sourceURL=appscene.vwf
