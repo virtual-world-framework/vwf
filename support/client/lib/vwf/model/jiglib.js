@@ -32,7 +32,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           //                  childSource, childType, childName );
           //this.logger.enabled = false;
 
-<<<<<<< .working
           var prototypes = getPrototypes.call( this, kernel, childExtendsID );
           if ( prototypes && isSceneDefinition.call( this, prototypes ) ) {
             this.scenes[ childID ] = {};
@@ -45,21 +44,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.scenes[ childID ].initialized = false;
             this.scenes[ childID ].propertyMap = {};
           } else {
-=======
-          switch ( childExtendsID ) {
-             case "appscene-vwf":
-             case "http-vwf-example-com-navscene-vwf":
-                this.scenes[ childID ] = {};
-                this.scenes[ childID ].ID = childID;
-                this.scenes[ childID ].extendsID = childExtendsID;
-                this.scenes[ childID ].implementsIDs = childImplementsIDs;
-                this.scenes[ childID ].source = childSource;
-                this.scenes[ childID ].type = childType;
-                this.scenes[ childID ].system = jigLib.PhysicsSystem.getInstance();
-                this.scenes[ childID ].initialized = false;
-                this.scenes[ childID ].propertyMap = {};
-                break;
->>>>>>> .merge-right.r1065
 
               switch ( childExtendsID ) {
                  case "http-vwf-example-com-physics3-vwf":
