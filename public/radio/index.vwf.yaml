@@ -524,13 +524,14 @@ children:
                     scripts:  
                     - | 
                         this.pointerClick = function()  {
-                          if ( this.rotZ == 0 ) {
+                          var rot = this.rotation;
+                          if ( rot[4] == 0 ) {
                             this.parent.parent.parent.parent.volume = 10;
-                            this.rotZ = 120;
+                            this.rotateBy( [0,0,1,10],0 );
                           } else {
                             this.parent.parent.parent.parent.volume = 0;
-                            this.rotZ = 0;
-                          }
+                            this.rotation = [0,0,1,0];
+                          }                            
                         }
                   LCD:
                     extends: http://vwf.example.com/node3.vwf
