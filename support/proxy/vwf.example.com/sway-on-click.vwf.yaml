@@ -16,19 +16,16 @@ properties:
   sway-axis: [ 0, 1, 0 ]
   sway-start: null
 methods:
-  sway: |
-    var start = this["sway-start"];
-    if ( start ) {
-      var rotation = this.rotation;
-      this.rotation = [
-        rotation[0] + this["sway-axis"][0] * Math.cos( this.time - start ) * Math.PI / 250,
-        rotation[1] + this["sway-axis"][1] * Math.cos( this.time - start ) * Math.PI / 250,
-        rotation[2] + this["sway-axis"][2] * Math.cos( this.time - start ) * Math.PI / 250,
-      ];
-      this.future( 0.05 ).sway();
-    }
+  sway:
 scripts:
 - |
     this.pointerClick = function() {
       // this["sway-swaying"] = ! this["sway-swaying"];
     }
+    this.sway = function() {
+      var start = this["sway-start"];
+      if ( start ) {
+        this.rotateBy( [ this["sway-axis"][0], this["sway-axis"][1], this["sway-axis"][2],  Math.cos( this.time - start ) * Math.PI / 2 ], 0 );
+        this.future( 0.05 ).sway();
+      }      
+    } //@ sourceURL=sway-on-click.vwf
