@@ -1,7 +1,7 @@
 <html>
   <head>
-    <title>VWF Demos</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <title>Virtual World Framework</title>
+    <link href="web/style.css" rel="stylesheet" type="text/css" />
     <script src="jquery-1.7.1.js"></script>
     <script type='text/javascript'>
       function showInfo(app, query)
@@ -60,7 +60,18 @@
   </head>
   <body>
     <div class="header">
-      <div class="title">Virtual World Framework Demos</div>
+      <div class="title">Virtual World Framework</div>
+      <div class='menu'>
+        <a href="index.html">Catalog</a>
+        <span> | </span>
+        <a href="web/docs/readme.html">Documentation</a>
+        <span> | </span>
+        <a href="web/glossary.html">Glossary</a>
+        <span> | </span>
+        <a href="web/faq.html">FAQ</a>
+        <span> | </span>
+        <a href="web/about.html">About</a>
+      </div>
     </div>
 
     <div>
@@ -77,11 +88,11 @@
           </a>
 
           <!-- Info Button -->
-          <div style="position:relative"><img style="position:absolute;right:2px;bottom:-12px" src="info.png" alt="i" onclick="showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>')" /></div>
+          <div style="position:relative"><img style="position:absolute;right:2px;bottom:-12px" src="web/info.png" alt="i" onclick="showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>')" /></div>
 
           <!-- Content for Overlay -->
-          <div id='<%= application %>-content' class='content'>
-            <p class="exit-button"><img src="exit.png" alt="x" onclick="closeInfo()"/></p>
+          <div id='<%= application %>-content' class='overlayContent'>
+            <p class="exit-button"><img src="web/exit.png" alt="x" onclick="closeInfo()"/></p>
             <span class="app-title" id="<%= application %>"><b><%= name %></b></span>
             <hr>
             <div class="description">
