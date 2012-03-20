@@ -4,7 +4,7 @@ require "rake/clean"
 
 
 CLEAN.include "support/build/Pygments-1.4/**/*.pyc"
-CLOBBER.include "bin/*", "docs/**/*.html", "run.bat"
+CLOBBER.include "bin/*", "docs/**/*.html", "run.bat", "public/index.html"
 
 
 # Delegate the standard tasks to any child projects.
