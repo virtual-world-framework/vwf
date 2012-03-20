@@ -395,27 +395,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-//            switch ( nodeID ) {
-//                case "http-vwf-example-com-node3-vwf-cityblock":
-//                case "http-vwf-example-com-node3-vwf-duck":
-//                case "http-vwf-example-com-camera-vwf-camera":
-//                case "http-vwf-example-com-node3-vwf-plane":
-//                case "http-vwf-example-com-node3-vwf-radio":
-//                case "http-vwf-example-com-node3-vwf-flat_terrain":
-////                    if ( propertyName == "transform" ) {
-////                        console.info( "SETTING transform" );
-////                    }
-
-//                    if ( propertyValue instanceof Float32Array )
-//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+Array.prototype.slice.call( propertyValue )+" )" );
-//                    else
-//                        console.info( "glgeModel.settingProperty( "+nodeID+", "+propertyName+", "+propertyValue+" )" ); 
-//                    break;
-//            
-//                default:
-//                    break;            
-//            } 
-
             if ( node && node.glgeObject && propertyValue !== undefined ) {
 
                 var validProperty = false;

@@ -5,10 +5,7 @@ type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
-  gravity: [ 0, 0, -50.8, 0 ]
-  collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
-  loadDone: false
 scripts:
 - |
     this.initialize = function() {
@@ -18,11 +15,11 @@ scripts:
       this.camera.far = 50000.0;  
       if ( !this.loadDone ) {
         this.loadDone = true;        
-      }    
+      }
     }
     this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 
-    }, this );    
+    }, this ); 
 children:
   clearButton:
     extends: http://vwf.example.com/node2.vwf
