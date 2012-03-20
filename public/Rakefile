@@ -4,10 +4,12 @@ require "tilt"
 require "yaml"
 
 
-CLOBBER.include "index.html"
+CLOBBER.include( "index.html" )
 
 
 desc "Generate the catalog."
+
+task :default => [ :clean, :clobber, :build ]
 
 task :build => "index.html"
 

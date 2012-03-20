@@ -1,2 +1,2 @@
 description:
-  This is the description for the duck application.
+  The duck application allows the user to click the image causing the duck to spin and hop up.  If the user clicks again, the duck will hop again and the spinning will stop.

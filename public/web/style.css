@@ -2,12 +2,12 @@ body {
 	font: 12pt Arial;
 	text-align:center;
 	overflow-y:scroll;
-	min-width:900px;
+	min-width:1000px;
 }
 .header {
 	font:22pt Arial;
 	font-weight:bold;
-	width:800px;
+	width:1000px;
 	margin:auto;
 	text-align:left;
 	padding:20px;
@@ -20,6 +20,77 @@ body {
 	/* display:inline; */
 	/* position:relative; */
 	/* top:-30px; */
+}
+.header .menu {
+	font:10pt Arial;
+	text-transform:uppercase;
+	color:#444456;
+	width:100%;
+	text-align:right;
+	/*float:right;*/
+	position:relative;
+	top:-10px;
+}
+.header .menu a:link {
+	color:#444456;
+	text-decoration:none;
+}
+.header .menu a:visited {
+	color:#444456;
+}
+.header .menu a:hover {
+	color:#AAAABB;
+}
+.navmenu {
+	color:#444456;
+	width:200px;
+	float:left;
+	position:relative;
+	left:-30px;
+}
+.navmenu a:visited {
+	color:#444456;
+}
+.navmenu ul {
+	list-style:none;
+	font:10pt Arial;
+	text-transform:uppercase;
+}
+.navmenu ul li {
+	padding-bottom:5px;
+}
+.navmenu ul li a:link {
+	color:#444456;
+	text-decoration:none;
+}
+.navmenu ul li a:hover {
+	color:#AAAABB;
+}
+.content {
+	width:800px;
+	display:inline;
+	float:right;
+}	
+.content iframe {
+	width:780px;
+	height:300px;
+	display:inline;
+	overflow:hidden;
+}
+.content pre {
+	border:1px solid #AAA;
+	background:#DDD;
+	padding:10px;
+	width:760px;
+	overflow-y:scroll;
+}
+.content h1 {
+	font: 18pt Arial;
+	font-weight:bold;
+}
+.content h2 {
+	font: 14pt Arial;
+	font-weight:bold;
 }
 .row {
 	margin:5px;
@@ -70,22 +141,22 @@ body {
 	text-align:left;
 }
 
-.content {
+.overlayContent {
 	display:none;
 }
 
 .instances {
 	float:right;
 	text-align:left;
-	width:250;
+	width:150;
 	padding-left:5px;
-	padding-right:5px;
+	padding-right:20px;
 }
 
 .description {
 	float:left;
 	text-align:left;
-	width:250;
-	padding-left:5px;
+	width:350;
+	padding-left:20px;
 	padding-right:5px;
 }

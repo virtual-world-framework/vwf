@@ -4,7 +4,7 @@ require "rake/clean"
 
 
 CLEAN.include "support/build/Pygments-1.4/**/*.pyc"
-CLOBBER.include "bin/*", "docs/**/*.html", "run.bat"
+CLOBBER.include "bin/*", "docs/**/*.html", "run.bat", "public/index.html"
 
 
 # Delegate the standard tasks to any child projects.
@@ -63,12 +63,16 @@ task :common do
     original_path = ENV["PATH"]
     ENV["PATH"] = FileList[ "support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
 
-    FileList[ "docs/**/*.md" ].each do |md|
-        sh "( cat docs/format/preamble ; Markdown.pl '#{md}' ; cat docs/format/postamble ) > '#{ md.ext ".html" }'"
+    FileList[ "public/web/*.md" ].each do |md|
+        sh "( cat public/web/format/preamble ; Markdown.pl '#{md}' ; cat public/web/format/postamble ) > '#{ md.ext ".html" }'"
     end
 
-    sh "bundle exec rocco docs/application/*.vwf.yaml"
-    sh "bundle exec rocco docs/application/example.js"
+    FileList[ "public/web/docs/**/*.md" ].each do |md|
+        sh "( cat public/web/docs/format/preamble ; Markdown.pl '#{md}' ; cat public/web/docs/format/postamble ) > '#{ md.ext ".html" }'"
+    end
+
+    sh "bundle exec rocco public/web/docs/application/*.vwf.yaml"
+    sh "bundle exec rocco public/web/docs/application/example.js"
     
     ENV["PATH"] = original_path
 

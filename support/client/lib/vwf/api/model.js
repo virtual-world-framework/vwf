@@ -35,6 +35,17 @@ define( {
 
     /// Description.
     /// 
+    /// @name vwf.api.view#prototyping
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    prototyping: [],
+
+    /// Description.
+    /// 
     /// @name vwf.api.view#addingChild
     /// @function
     /// 
@@ -54,6 +65,38 @@ define( {
     /// @returns {}
 
     removingChild: [],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#parenting
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    parenting: [],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#childrening
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    childrening: [],
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#naming
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+    naming: [],
 
     /// Description.
     /// 
@@ -90,14 +133,25 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#settingProperty
+    /// @name vwf.api.view#initializingProperty
     /// @function
     /// 
     /// @param {} 
     /// 
     /// @returns {}
 
+    initializingProperty: [],
+
     /* TODO: deletingProperty, */
+    
+    /// Description.
+    /// 
+    /// @name vwf.api.view#settingProperty
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
 
     settingProperty: [],
 
@@ -189,60 +243,6 @@ define( {
 
     ticking: [],
 
-    /// Description.
-    /// 
-    /// @name vwf.api.view#prototyping
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    prototyping: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.view#parenting
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    parenting: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.view#childrening
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    childrening: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.view#naming
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-    naming: [],
-
-
-    /// Description.
-    /// 
-    /// @name vwf.api.view#initializingProperty
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    initializingProperty: [],
 
 
 } );
