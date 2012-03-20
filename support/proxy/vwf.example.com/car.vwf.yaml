@@ -14,14 +14,6 @@ properties:
           this.attachedToCamera = value;
         }
     value: false 
-  position: 
-    set: |
-      this.position = value;
-    value: [ 0, 0, 0 ]
-  eulers:
-    set: |
-      this.eulers = value;
-    value: [ 0, 0, 0 ]
 scripts:
 - |
     var car = this;

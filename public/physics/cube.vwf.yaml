@@ -4,8 +4,7 @@ source: cube
 type: text/xml
 properties:
   properties: 
-    position: [ 35, 10, 265 ]
-    eulers: [ 0, 0, 0 ]
+    translation: [ 35, 10, 265 ]
     scale: [ 1.5, 1.5, 1.5 ]
     playing: false
     mass: 1000
@@ -14,16 +13,3 @@ properties:
     linVelocityDamping: [ 1, 1, 1, 0 ]
     restitution: 0.1
     friction: 0.5
-  scripts: 
-  - |
-      this.loadComplete = function() {
-        this.scale = this.scale;
-        this.physics = this.physics;
-        this.mass = this.mass;
-        this.friction = this.friction;
-        this.restitution = this.restitution;
-        this.rotVelocityDamping = this.rotVelocityDamping;
-        this.linVelocityDamping = this.linVelocityDamping;
-        this.position = this.position;
-        this.eulers = this.eulers;
-      }

@@ -4226,6 +4226,36 @@ JAABox.prototype.segmentAABoxOverlap=function(seg){
 	};
 
 	/**
+	 * @function set_Transform 
+	 * @param {array} 16 element 4x4 transform
+	 * @type void
+	 **/
+	RigidBody.prototype.set_Transform=function( mat4 ){
+		this._currState.position = [ mat4[12], mat4[13], mat4[14], 0 ];
+        var matrix3D = new Matrix3D( mat4 );
+        matrix3D.glmatrix[12] = 0;
+        matrix3D.glmatrix[13] = 0;
+        matrix3D.glmatrix[14] = 0;
+        //matrix3D.glmatrix[15] = 1;
+        this._currState.set_orientation( matrix3D );
+        this.updateState();
+	};
+
+	/**
+	 * @function get_Transform 
+	 * @returns {array} 16 element 4x4 transform
+	 * @type void
+	 **/
+	RigidBody.prototype.get_Transform=function(){
+        var matRet = new Float32Array( this._currState.get_orientation().glmatrix );
+        matRet[12] = this._currState.position[0];
+        matRet[13] = this._currState.position[1];
+        matRet[14] = this._currState.position[2];
+        matRet[15] = 1;
+        return matRet;
+	};
+
+	/**
 	 * @function updateState 
 	 * @type void
 	 **/
@@ -14651,5 +14681,4 @@ distribution.
 	};
 	
 	jigLib.JCar=JCar;
-	
-})(jigLib);
+	})(jigLib);

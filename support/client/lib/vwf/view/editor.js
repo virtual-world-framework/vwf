@@ -780,7 +780,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-glge-vwf" );    
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );    
             }
         }
 

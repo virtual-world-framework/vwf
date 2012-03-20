@@ -12,33 +12,36 @@ children:
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
-      position: [ -1, -35, -8 ]
-      eulers: [ 90, 0, 0 ]
-      scale: [ 0.05, 0.05, 0.05 ]
+      rotation: [ 1, 0, 0, 90 ]
       # spin-on-click configuration parameters
-      spin-rate: 0.1
-      spin-axis: [ 0, 1, 0 ]
+      spin-rate: 1
+      spin-axis: [ 0, 0, 1 ]
     # # 1: Uncomment to jump up on each click
-    scripts:
-    - |
-      this.pointerClick = function() {
-      this.position = [ this.position[0], this.position[1] , this.position[2] + 1 ];
-      }
+    # scripts:
+    # - |
+    #   this.pointerClick = function() {
+    #     var rot = this.rotation;
+    #     this.rotation = [ rot[0], rot[1] , rot[2], rot[3] + 1 ];
+    #   }
+  sceneCenter:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ 12, 0, 76 ]
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      rotation: [ -0.79, -3.34, -0.22 ]
+      rotation: [ 1, 0, 0, -45 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       constantAttenuation: 1
-      rotation: [ 0.279, 0.9539, -0.08268 ]
-# Camera fix
+      rotation: [ -1, 0, 0, 225 ]
 scripts:
 - |
-  this.initialize = function() {
-    this.camera.eulers = [ 90, 180, 0 ];
-  } 
+    this.initialize = function(){
+      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,-20,574,108,1 ];
+      this.camera.far = this.camera.far * 4;
+    }

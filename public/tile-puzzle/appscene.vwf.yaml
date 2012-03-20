@@ -1,5 +1,4 @@
 --- 
 extends: http://vwf.example.com/navscene.vwf
-scripts:
-- |
-    this.initialize = function() { this.navmode = "none"; } 
+properties:
+  navmode: none
