@@ -28,7 +28,8 @@ events:
   pointerLeave:
   pointerWheel:
 methods:
-  update:  
+  update:
+  getCameraAt:  
 scripts:
 - |
     var counter = 1;
@@ -191,62 +192,50 @@ scripts:
         this.getActiveCamera();
       }
       if ( this.activeCameraComp ) {
-        var camerapos = this.activeCameraComp.position;
-        var camerarot = this.activeCameraComp.rotation;
-        var mat = this.activeCameraComp.rotationMatrix;
-        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
-        var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
+        var cameraPos = this.activeCameraComp.translation;
+        var cameraAt = this.getCameraAt();
         
         var yinc = 0;
         var xinc = 0;
         var zinc = 0;
-        if ( mag == 0 ) mag = 1;
-        trans[0] = trans[0] / mag;
-        trans[1] = trans[1] / mag;
+
+        goog.vec.Vec3.normalize( cameraAt, cameraAt );
 
         var mult = 0;
         if ( this.input.pickInfo.wheel.deltaY ) {
           mult = Math.abs( this.input.pickInfo.wheel.deltaY / 20 );
           if ( this.input.pickInfo.wheel.deltaY < 0 ) {
             // backwards
-            yinc = yinc - parseFloat( trans[1] ); 
-            xinc = xinc - parseFloat( trans[0] );
+            yinc = yinc - parseFloat( cameraAt[1] ); 
+            xinc = xinc - parseFloat( cameraAt[0] );
+            zinc = zinc - parseFloat( cameraAt[2] );
           } else if ( this.input.pickInfo.wheel.deltaY > 0 ) {
             //forward
-            yinc = yinc + parseFloat( trans[1] ); 
-            xinc = xinc + parseFloat( trans[0] );
+            yinc = yinc + parseFloat( cameraAt[1] ); 
+            xinc = xinc + parseFloat( cameraAt[0] );
+            zinc = zinc + parseFloat( cameraAt[2] );
           }
         }
         if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
-        if (xinc != 0 || yinc != 0 ) {
-          var origX, origY, origZ;
-          var x, y, z, atBounds = false;
-          
-          origX = camerapos[0];
-          origY = camerapos[1];
-          origZ = camerapos[2];
+        if ( xinc != 0 || yinc != 0 || zinc != 0 ) {
+          var x, y, z;
         
-          x = origX + xinc * this.speed * mult;
-          //if ( x > 25000 ) { x = 25000; atBounds = true; }
-          //else if ( x < -25000 ) { x = -25000; atBounds = true; }
-          
-          y = origY + yinc * this.speed * mult;
-          //if ( y > 25000 ) { y = 25000; atBounds = true; }
-          //else if ( y < -25000 ) { y = -25000;  atBounds = true; }         
-          
-          z = origZ;
-          if ( atBounds ) { x = origX; y = origY; }
-          else {
+          x = cameraPos[0] + xinc * this.speed * mult;
+          y = cameraPos[1] + yinc * this.speed * mult;
+
+          if ( this.lookAt != "" ) {
+            z = cameraPos[2] + zinc * this.speed * mult;
+          } else {
+            z = cameraPos[2];
             var ratioHR = camerapos[2] / this.orbitRadius;
-            zinc = Math.sqrt( Math.pow( x-origX, 2 ) + Math.pow( y-origY, 2 ) ) * ratioHR;
+            zinc = Math.sqrt( Math.pow( x-cameraPos[0], 2 ) + Math.pow( y-cameraPos[1], 2 ) ) * ratioHR;
             if ( this.input.pickInfo.wheel.deltaY > 0 ) zinc *= -1;
-            z = origZ + zinc;
-            //if ( z > 25000 ) z = 25000;
-            //else if ( z < 1000 ) z = origZ;
+            z = cameraPos[2] + zinc;
           }
-          this.activeCameraComp.position = [ x, y, z ];
+
+          this.activeCameraComp.translation = [ x, y, z ];
           positionChanged = true;
         }
       }
@@ -274,15 +263,16 @@ scripts:
         this.input.look = [ 0, 0 ];
         this.input.move = [ 0, 0 ];
         
+        var temp;
         for ( var keyPress in this.input.keyInfo.keysDown ) {
           switch ( Number( kd[ keyPress ].code ) ) {
             case 87:  //w
             case 38:  //up
-              this.input.move[1] += -1;
+              this.input.move[1] += 1;
               break;
             case 83:  //s
             case 40:  //down
-              this.input.move[1] += 1;
+              this.input.move[1] += -1;
               break;
             case 37: // left              
             case 65:  //a
@@ -299,6 +289,13 @@ scripts:
               this.input.look[0] += 1;
               break;
             case 90: // z
+              temp = this.logger.enabled;
+              this.logger.enabled = true;
+              this.logger.info( "translation: [ " + Array.prototype.slice.call( this.activeCameraComp.translation ) + " ]" );
+              this.logger.info( " quaternion: [ " + Array.prototype.slice.call( this.activeCameraComp.quaternion ) + " ]" );              
+              this.logger.info( "   rotation: [ " + Array.prototype.slice.call( this.activeCameraComp.rotation ) + " ]" );
+              this.logger.info( "  transform: [ " + Array.prototype.slice.call( this.activeCameraComp.transform )  + " ]" );
+              this.logger.enabled = temp;
               break;
             case 88: // x
               break;
@@ -376,55 +373,29 @@ scripts:
         this.getActiveCamera();
       
       if ( this.activeCameraComp ) {
-        var rot = this.activeCameraComp.rotation;
-        var mat = this.activeCameraComp.rotationMatrix;
-        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
-        var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
-        
-        if ( this.navmode == "walk" ) {
-          var incX = y * 0.1;
-          var incY = -x * 0.1;
-
-          if ( mag == 0 ) 
-            mag = 1;
-          trans[0] = trans[0] / mag;
-          trans[1] = trans[1] / mag;
-          
-          this.activeCameraComp.rotation = [ 1.56 - trans[1] * incX, rot[1] + incY, -trans[0] * incX ];
-        }
+        if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * 1.5 ], 0 ) }
+        //if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y ], 0 ) }
       }
     }    
-    this.mulMat4Vec4 = function( mat1, vec2 ) {
-      return [ mat1[0]*vec2[0] + mat1[1]*vec2[1] + mat1[2]*vec2[2] + mat1[3]*vec2[3],
-               mat1[4]*vec2[0] + mat1[5]*vec2[1] + mat1[6]*vec2[2] + mat1[7]*vec2[3],
-               mat1[8]*vec2[0] + mat1[9]*vec2[1] + mat1[10]*vec2[2] + mat1[11]*vec2[3],
-               mat1[12]*vec2[0] + mat1[13]*vec2[1] + mat1[14]*vec2[2] + mat1[15]*vec2[3] ];
-    }
     this.zoom = function( dirIn ) {
       if (!this.activeCameraComp) {
         this.getActiveCamera();
       }
       if ( this.activeCameraComp ) {
-        var camerapos = this.activeCameraComp.position;
-        var camerarot = this.activeCameraComp.rotation;
-        var mat = this.activeCameraComp.rotationMatrix;
-        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
-        var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
+        var camerapos = this.activeCameraComp.translation;
+        var camerarot = this.getCameraAt();
         
         var yinc = 0;
         var xinc = 0;
         var zinc = 0;
-        if ( mag == 0 ) mag = 1;
-        trans[0] = trans[0] / mag;
-        trans[1] = trans[1] / mag;
 
         var speed = 1.0;
         if ( this.activeCameraComp.speed )
           speed = Number( this.activeCameraComp.speed );
         
         if ( !dirIn ) speed = -speed;
-        yinc = yinc + parseFloat( trans[1] ) * speed; 
-        xinc = xinc + parseFloat( trans[0] ) * speed;
+        yinc = yinc + parseFloat( camerarot[1] ) * speed; 
+        xinc = xinc + parseFloat( camerarot[0] ) * speed;
 
         if ( this.orbitRadius == -1 || this.time - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
@@ -447,48 +418,25 @@ scripts:
           if ( parms.wheelDeltaY > 0 ) zinc *= -1;
           z = origZ + zinc;
           
-          this.activeCameraComp.position = [ x, y, z ];
+          this.activeCameraComp.translation = [ x, y, z ];
           positionChanged = true;
         }
       }
-    
     }
     this.cameraZ = function( dir ) {
       if (!this.activeCameraComp) this.getActiveCamera();
       
       if ( this.activeCameraComp ) {
-        var pos = this.activeCameraComp.position;
+        var pos = this.activeCameraComp.translation;
         var speed = 1.0;
         if ( this.activeCameraComp.speed )
           speed = Number( this.activeCameraComp.speed );
         
-        this.activeCameraComp.position = [ pos[0], pos[1], pos[2] + ( speed * dir ) ];
+        this.activeCameraComp.translation = [ pos[0], pos[1], pos[2] + ( speed * dir ) ];
       }
-    }
-    this.multiply = function( v, value ) {
-      for ( var i = 0; i < v.length; i++ ) {
-        v[i] *= value;
-      }
-    }
-    this.dotProduct = function( v1, v2 ) {
-      return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-    }
-    this.crossProduct = function( v1, v2 ) {
-      return [ v1[1] * v2[2] -v1[2] * v2[1], v1[2] * v2[0] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0], 0 ];
-    }
-    this.vectorLength = function( v ) {
-      var sq = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-      return ( sq > 0 ) ? Math.pow( sq, 0.5 ) : 0.0;
-    }    
-    this.normalize = function( v ) {
-      f = this.vectorLength( v );
-      v[0] /= f;
-      v[1] /= f;
-      v[2] /= f;
-      return f;
     }
     this.updateRadius = function() {
-      var pos = this.activeCameraComp.position;
+      var pos = this.activeCameraComp.translation;
       var oldRadius = this.orbitRadius;
       
       this.orbitRadius = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2]) );
@@ -506,14 +454,11 @@ scripts:
         if ( this.speed > this.maxSpeed ) this.speed = this.maxSpeed;
         if ( this.speed < this.originalSpeed ) this.speed = this.originalSpeed;
       }
-      
       this.input.lastUpdateTime = this.time;
     }    
     this.orbit = function( xDelta, yDelta ){
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
-    
-        //this.activeCameraComp.lookAt = this.orbitObjectID;
         this.updateRadius();
         
         var pixelToRadian = this.orbitRadius / ( this.speed * 1000.0 );
@@ -534,35 +479,49 @@ scripts:
         var y = this.orbitRadius * Math.sin( phi ) * Math.sin( theta );
         var z = this.orbitRadius * Math.cos( phi );
 
-        this.activeCameraComp.position = [ x, y, z ];
-        //this.activeCameraComp.lookAt = this.orbitObjectID;
+        this.activeCameraComp.translation = [ x, y, z ];
       }
     }
-    this.translate= function( x, y ) {
+    this.getCameraAt = function() {
+      var camRotMat = this.activeCameraComp.rotationMatrix;
+      return [ camRotMat[4], camRotMat[5], camRotMat[6] ];  
+    }
+    this.getCameraUp = function() {
+      var camRotMat = this.activeCameraComp.rotationMatrix;
+      return [ camRotMat[8], camRotMat[9], camRotMat[10] ];  
+    }
+    this.getCameraRight = function() {
+      var camRotMat = this.activeCameraComp.rotationMatrix;
+      return [ camRotMat[0], camRotMat[1], camRotMat[2] ];  
+    }            
+    this.getCameraVec = function( x, y, z ) {
+        var camRotMat = this.activeCameraComp.rotationMatrix;
+        var camAt = goog.vec.Mat4.multVec4(
+          camRotMat,
+          goog.vec.Vec4.createFromValues( x, y, z, 1 ),
+          goog.vec.Vec3.create()
+        );
+        return camAt;      
+    }
+    this.translate = function( x, y ) {
       if (!this.activeCameraComp) 
-      this.getActiveCamera();
-      if ( this.activeCameraComp ) {
-        var speed = this.speed;
-        var pos = this.activeCameraComp.position;
-        var mat = this.activeCameraComp.rotationMatrix;
-        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
-        var mag = Math.pow( Math.pow( trans[0], 2 ) + Math.pow( trans[1], 2 ), 0.5 );
-        var incX = 0, incY = 0;
-        
-        if ( mag != 0 ) { 
-          trans[0] = trans[0] / mag;
-          trans[1] = trans[1] / mag;
-        }
-        
-        // forward and back 
-        incX = parseFloat( trans[0] ) * speed * -y;          
-        incY = parseFloat( trans[1] ) * speed * -y;
+        this.getActiveCamera();
 
-        // left and right
-        incX += parseFloat( trans[1] )* speed * x;
-        incY -= parseFloat( trans[0] ) * speed * x; 
-        
-        this.activeCameraComp.position = [ pos[0] + incX, pos[1] + incY, pos[2] ];      
+      if ( this.activeCameraComp ) {
+        var trans = this.getCameraVec( x, y, 0 );
+        trans[2] = 0;
+
+        if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
+          this.activeCameraComp.translation = goog.vec.Vec3.add(
+            this.activeCameraComp.translation,
+            goog.vec.Vec3.scale(
+              goog.vec.Vec3.normalize( trans, trans ),
+              this.speed,
+              trans
+            ),
+            trans
+          );
+        }
       }      
     }
     this.update = function() {
@@ -570,49 +529,48 @@ scripts:
         var delta = this.input.pointerDelta();
         var pi = this.input.pointerInfo;
         if ( delta ) {
-        if ( this.pointerIsDown() ) {
-          if ( this.input.pointerInfo.buttons.left ) {
-          var pi = this.input.pointerInfo;
-          switch( this.navmode ) {
-            case "orbit":
-            this.orbit( delta[0], delta[1] );
-            break;          
-            case "walk":
-            
-            if ( this.dragModeMove )
-              this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
-            else
-              this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
-            break;
-          } 
+          if ( this.pointerIsDown() ) {
+            if ( this.input.pointerInfo.buttons.left ) {
+              var pi = this.input.pointerInfo;
+              switch( this.navmode ) {
+                case "orbit":
+                  this.orbit( delta[0], delta[1] );
+                  break;          
+                case "walk":
+                  if ( this.dragModeMove )
+                    this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
+                  else
+                    this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
+                  break;
+              } 
+            }
+          }   
+          if ( this.input.lookActive ) {
+            this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
           }
-        }   
-        if ( this.input.lookActive ) {
-          this.look( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
-        }
-        if ( this.input.moveActive ) {
-          this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
-        }
+          if ( this.input.moveActive ) {
+            this.move( (pi.position[0]*2.0)-1,(pi.position[1]*2.0)-1 );
+          }
         }
         if ( this.input.keysAreDown() ) {
         this.handleKeyDown();
         }        
         if ( this.input.button1Down ) {
-        if ( this.navMode == "walk" ) {
-          this.cameraZ( 1.0 );
-        } else if ( this.navMode == "orbit" ) {
-          this.zoom( true );
-        }     
+          if ( this.navMode == "walk" ) {
+            this.cameraZ( 1.0 );
+          } else if ( this.navMode == "orbit" ) {
+            this.zoom( true );
+          }     
         }    
         if ( this.input.button2Down ) {
-        if ( this.navMode == "walk" ) {
-          this.cameraZ( -1.0 );
-        } else if ( this.navMode == "orbit" ) {
-          this.zoom( false );
-        }     
+          if ( this.navMode == "walk" ) {
+            this.cameraZ( -1.0 );
+          } else if ( this.navMode == "orbit" ) {
+            this.zoom( false );
+          }     
         }     
         if ( this.input.futureActive() ) {
-        this.future( 0.1 ).update();
+          this.future( 0.1 ).update();
         }
       }	
     } //@ sourceURL=navScene.vwf

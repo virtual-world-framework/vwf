@@ -41,7 +41,7 @@ scripts:
           return this.children[i];        
         }
       }
-      console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
+      //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
     }
     this.getActiveCamera = function() {

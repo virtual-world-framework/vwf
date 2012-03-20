@@ -1,0 +1,16 @@
+--- 
+extends: http://vwf.example.com/navscene.vwf
+properties: 
+  gravity: 
+    set: |
+      this.gravity = value;
+    value: [ 0, 0, -50.8, 0 ]
+  loadDone: 
+    set: |
+      this.loadDone = value;
+    value: false  
+  collisionSystem:
+    get: |
+      this.logger.info( "WARNING: scene.collisionSystem can only be set, get is not implemented" );
+    value: [ false ]
+ 

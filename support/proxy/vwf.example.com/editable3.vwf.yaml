@@ -4,7 +4,3 @@ properties:
   editMode: "translate"
 implements:
 - http://vwf.example.com/node3edit.vwf
-scripts:
-- |
-    this.initialize = function() {
-    }

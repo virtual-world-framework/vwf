@@ -8,20 +8,20 @@ children:
     source: hello.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ -2.4, 1.6, 0 ]
-      rotation: [ 0, 0, 3.141 ]
+      translation: [ -2.4, 1.6, 0 ]
+      rotation: [ 0, 0, 1, 180 ]
       scale: [ 1, 1, 1 ]
   world: 
     extends: http://vwf.example.com/node3.vwf
     source: world.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ -2.6, 0.6, 0 ]
-      rotation: [ 0, 0, 3.141 ]
+      translation: [ -2.6, 0.6, 0 ]
+      rotation: [ 0, 0, 1, 180 ]
       scale: [ 1, 1, 1 ]
 scripts:
 - |
     this.initialize = function() {
       this.activeCamera = "http-vwf-example-com-camera-vwf-defaultCamera";
-      this.camera.position = [ 0, 0, 10 ];
+      this.camera.translation = [ 0, 0, 10 ];
     }
