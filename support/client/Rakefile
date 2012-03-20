@@ -52,16 +52,16 @@ desc "Compress."
 
 task :compress => "build.js" do |task|
     
-    MODULES.each do |path|
+    #MODULES.each do |path|
         
-        sh <<-SH.strip.gsub %r{ +}, " "
-            java -jar bin/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 \
-                --js '#{DESTINATION}/#{path}.js' --js_output_file '#{DESTINATION}/#{path}.js.z'
-        SH
+    #    sh <<-SH.strip.gsub %r{ +}, " "
+    #        java -jar bin/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 \
+    #            --js '#{DESTINATION}/#{path}.js' --js_output_file '#{DESTINATION}/#{path}.js.z'
+    #    SH
 
-        mv "#{DESTINATION}/#{path}.js.z", "#{DESTINATION}/#{path}.js"
+    #    mv "#{DESTINATION}/#{path}.js.z", "#{DESTINATION}/#{path}.js"
 
-    end
+    #end
 
 end
 
