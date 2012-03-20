@@ -263,6 +263,7 @@ scripts:
         this.input.look = [ 0, 0 ];
         this.input.move = [ 0, 0 ];
         
+        var temp;
         for ( var keyPress in this.input.keyInfo.keysDown ) {
           switch ( Number( kd[ keyPress ].code ) ) {
             case 87:  //w
@@ -288,10 +289,13 @@ scripts:
               this.input.look[0] += 1;
               break;
             case 90: // z
+              temp = this.logger.enabled;
+              this.logger.enabled = true;
               this.logger.info( "translation: [ " + Array.prototype.slice.call( this.activeCameraComp.translation ) + " ]" );
               this.logger.info( " quaternion: [ " + Array.prototype.slice.call( this.activeCameraComp.quaternion ) + " ]" );              
               this.logger.info( "   rotation: [ " + Array.prototype.slice.call( this.activeCameraComp.rotation ) + " ]" );
               this.logger.info( "  transform: [ " + Array.prototype.slice.call( this.activeCameraComp.transform )  + " ]" );
+              this.logger.enabled = temp;
               break;
             case 88: // x
               break;

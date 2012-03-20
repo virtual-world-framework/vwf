@@ -194,10 +194,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-            //this.logger.enabled = !this.updating;
-            //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
-            //    this.logger.infoc( "settingProperty", nodeID, propertyName, propertyValue );
-            //this.logger.enabled = false;
+//            this.logger.enabled = !this.updating;
+//            if ( nodeID != "http-vwf-example-com-camera-vwf-camera" )
+//                this.logger.infoc( "settingProperty", nodeID, propertyName, propertyValue );
+//            this.logger.enabled = false;
 
             if ( propertyValue === undefined )
                 return value;
@@ -709,7 +709,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-physics2-vwf" );    
+//                foundGlge = ( prototypes[i] == "http-vwf-example-com-physics2-vwf" ); 
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );
             }
         }
 
