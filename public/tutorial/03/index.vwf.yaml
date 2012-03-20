@@ -18,9 +18,8 @@ children:
     source: models/vwf_terrain.dae
     type: model/vnd.collada+xml
     properties:
-      translationnew: [ 0, 0, 0 ]
-      rotationnew: [ 1, 0, 0, 0 ]
-      scalenew: 0.008
+      translation: [ 0, 0, -1000 ]
+      scale: [ 0.008, 0.008, 0.020 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -37,22 +36,21 @@ children:
         source: models/Predator.dae
         type: model/vnd.collada+xml
         properties:
-          translationnew: [ 0, 500, 1800 ]
-          rotationnew: [ 1, 0, 0, 0 ]
-          scalenew: 50
+          translation: [ 0, 500, 1800 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: 50
       cone:
         extends: http://vwf.example.com/node3.vwf
         source: models/cone.dae
         type: model/vnd.collada+xml
         properties:
-          translationnew: [ 0, -300, -1100 ]
-          rotationnew: [ 1, 0, 0, 0 ]
-          scalenew: [ 8, 8, 16 ]
+          translation: [ 0, -300, -1100 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 8, 8, 16 ]
 scripts:
 - |
   this.initialize = function() {
-    this.camera.position = [ 0, 20000, 10000 ];
-    this.camera.rotation = [ 1.56, 0, 0 ];
+    this.camera.translation = [ 0, 20000, 10000 ];
     this.camera.far = 500000;
     this.camera.near = 2;
     this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
@@ -63,8 +61,7 @@ scripts:
     source: "models/pushpinblack.dae",
     type: "model/vnd.collada+xml",
     properties: {
-      rotationnew: [ 1, 0, 0, 0 ],
-      scalenew: 6
+      scale: 6
     },
   };
   this.pointerUp = function( parms, pickInfo ){
@@ -74,7 +71,7 @@ scripts:
   }
   this.pindrop = function( pickInfo ) {
     if ( pickInfo && pickInfo.globalPosition ) {
-      pushpin.properties.position = pickInfo.globalPosition;
+      pushpin.properties.translation = pickInfo.globalPosition;
 
       var name = "pushpin"+pushpinIndex;
       this.children.create( pushpin, name );

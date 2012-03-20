@@ -14,7 +14,7 @@ Stage 1 - Primitive Scene
 --------
 In the first stage, we'll add in a basic primitive collada file, and set up the initial camera position. The application will contain the default navigation of a walk mode.
 
-The following code creates a child node of the application named blueCube, of type node3, and defines the source file. In the scripts section, the camera position and rotation is initialized, and will be set during the application load. 
+The following code creates a child node of the application named blueCube, of type node3, and defines the source file. In the scripts section, the camera transform is initialized, and will be set during the application load. 
 
 	---
 	extends: http://vwf.example.com/navscene.vwf
@@ -26,13 +26,12 @@ The following code creates a child node of the application named blueCube, of ty
 	scripts:
 	- |
 	  this.initialize = function() {
-	    this.camera.position = [ 0, -100, 0 ];
-	    this.camera.rotation = [ 1.56, 0, 0 ];
+	    this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,100,0,1 ];
 	  }
 
 The above is all that is needed to create an application. The default walk mode allows the user to navigate with the standard WASD keys, as well as Q and E to rotate and R and C to move up and down. 
 
-Example: [Primitive Scene](http://vwf.orl.lmco.com/tutorial/00)
+Example: [Primitive Scene](../../tutorial/00)
 
 _____________________________________________________________________________________
 
@@ -58,18 +57,16 @@ For this navigation mode, we can add an additional child to the application, cal
 	    source: models/vwf_terrain.dae
 	    type: model/vnd.collada+xml
 	    properties:
-	      translationnew: [ 0, 0, 0 ]
-	      rotationnew: [ 1, 0, 0, 0 ]
-	      scalenew: 0.008
+	      translation: [ 0, 0, -1000 ]
+	      scale: [ 0.008, 0.008, 0.020 ]
 	  sceneCenter:
 	    extends: http://vwf.example.com/node3.vwf
 	    properties:
-	      translationnew: [ 0, 0, 0 ]
+	      translation: [ 0, 0, 0 ]
 	scripts:
 	- |
 	  this.initialize = function() {
-	    this.camera.position = [ 0, 20000, 10000 ];
-	    this.camera.rotation = [ 1.56, 0, 0 ];
+	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
 	    this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
@@ -77,7 +74,7 @@ For this navigation mode, we can add an additional child to the application, cal
 
 In this application, the WASD controls can be used for navigation; however, the camera will continue to focus on the sceneCenter point.
 
-Example: [Terrain Model and Orbit Navigation](http://vwf.orl.lmco.com/tutorial/01)
+Example: [Terrain Model and Orbit Navigation](../../tutorial/01)
 
 _____________________________________________________________________________________
 
@@ -99,9 +96,8 @@ Finally, we'll apply a behavior to the 'predGroup', which is defined in a separa
 	    source: models/vwf_terrain.dae
 	    type: model/vnd.collada+xml
 	    properties:
-	      translationnew: [ 0, 0, 0 ]
-	      rotationnew: [ 1, 0, 0, 0 ]
-	      scalenew: 0.008
+	      translation: [ 0, 0, -1000 ]
+	      scale: [ 0.008, 0.008, 0.020 ]
 	  sceneCenter:
 	    extends: http://vwf.example.com/node3.vwf
 	    properties:
@@ -118,28 +114,27 @@ Finally, we'll apply a behavior to the 'predGroup', which is defined in a separa
 	        source: models/Predator.dae
 	        type: model/vnd.collada+xml
 	        properties:
-	          translationnew: [ 0, 500, 1800 ]
-	          rotationnew: [ 1, 0, 0, 0 ]
-	          scalenew: 50
+	          translation: [ 0, 500, 1800 ]
+	          rotation: [ 1, 0, 0, 0 ]
+	          scale: 50
 	      cone:
 	        extends: http://vwf.example.com/node3.vwf
 	        source: models/cone.dae
 	        type: model/vnd.collada+xml
 	        properties:
-	          translationnew: [ 0, -300, -1100 ]
-	          rotationnew: [ 1, 0, 0, 0 ]
-	          scalenew: [ 8, 8, 16 ]
+	          translation: [ 0, -300, -1100 ]
+	          rotation: [ 1, 0, 0, 0 ]
+	          scale: [ 8, 8, 16 ]
 	scripts:
 	- |
 	  this.initialize = function() {
-	    this.camera.position = [ 0, 20000, 10000 ];
-	    this.camera.rotation = [ 1.56, 0, 0 ];
+	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
 	    this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
 	  }
 
-Example: [Multiple Models and Behaviors](http://vwf.orl.lmco.com/tutorial/02)
+Example: [Multiple Models and Behaviors](../../tutorial/02)
 
 _____________________________________________________________________________________
 
@@ -171,9 +166,8 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	    source: models/vwf_terrain.dae
 	    type: model/vnd.collada+xml
 	    properties:
-	      translationnew: [ 0, 0, 0 ]
-	      rotationnew: [ 1, 0, 0, 0 ]
-	      scalenew: 0.008
+	      translation: [ 0, 0, -1000 ]
+	      scale: [ 0.008, 0.008, 0.020 ]
 	  sceneCenter:
 	    extends: http://vwf.example.com/node3.vwf
 	    properties:
@@ -190,22 +184,21 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	        source: models/Predator.dae
 	        type: model/vnd.collada+xml
 	        properties:
-	          translationnew: [ 0, 500, 1800 ]
-	          rotationnew: [ 1, 0, 0, 0 ]
-	          scalenew: 50
+	          translation: [ 0, 500, 1800 ]
+	          rotation: [ 1, 0, 0, 0 ]
+	          scale: 50
 	      cone:
 	        extends: http://vwf.example.com/node3.vwf
 	        source: models/cone.dae
 	        type: model/vnd.collada+xml
 	        properties:
-	          translationnew: [ 0, -300, -1100 ]
-	          rotationnew: [ 1, 0, 0, 0 ]
-	          scalenew: [ 8, 8, 16 ]
+	          translation: [ 0, -300, -1100 ]
+	          rotation: [ 1, 0, 0, 0 ]
+	          scale: [ 8, 8, 16 ]
 	scripts:
 	- |
 	  this.initialize = function() {
-	    this.camera.position = [ 0, 20000, 10000 ];
-	    this.camera.rotation = [ 1.56, 0, 0 ];
+	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
 	    this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
@@ -216,8 +209,7 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	    source: "models/pushpinblack.dae",
 	    type: "model/vnd.collada+xml",
 	    properties: {
-	      rotationnew: [ 1, 0, 0, 0 ],
-	      scalenew: 6
+	      scale: 6
 	    },
 	  };
 	  this.pointerUp = function( parms, pickInfo ){
@@ -227,7 +219,7 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	  }
 	  this.pindrop = function( pickInfo ) {
 	    if ( pickInfo && pickInfo.globalPosition ) {
-	      pushpin.properties.position = pickInfo.globalPosition;
+	      pushpin.properties.translation = pickInfo.globalPosition;
 
 	      var name = "pushpin"+pushpinIndex;
 	      this.children.create( pushpin, name );
@@ -259,6 +251,6 @@ Finally, back in the HTML file, we'll need to add a few javascript functions to 
         }
     }	  
 
-Example: [HTML Overlays and Interaction](http://vwf.orl.lmco.com/tutorial/03)
+Example: [HTML Overlays and Interaction](../../tutorial/03)
 
 _____________________________________________________________________________________

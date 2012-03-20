@@ -10,18 +10,16 @@ children:
     source: models/vwf_terrain.dae
     type: model/vnd.collada+xml
     properties:
-      translationnew: [ 0, 0, 0 ]
-      rotationnew: [ 1, 0, 0, 0 ]
-      scalenew: 0.008
+      translation: [ 0, 0, -1000 ]
+      scale: [ 0.008, 0.008, 0.020 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
-      translationnew: [ 0, 0, 0 ]
+      translation: [ 0, 0, 0 ]
 scripts:
 - |
   this.initialize = function() {
-    this.camera.position = [ 0, 20000, 10000 ];
-    this.camera.rotation = [ 1.56, 0, 0 ];
+    this.camera.translation = [ 0, 20000, 10000 ];
     this.camera.far = 500000;
     this.camera.near = 2;
     this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
