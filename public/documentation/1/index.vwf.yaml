@@ -1,19 +1,16 @@
 --- 
 extends: http://vwf.example.com/navscene.vwf
-source: index.xml
-type: model/x-glge
 children: 
   hello: 
     extends: http://vwf.example.com/node3.vwf
     source: hello.dae
     type: model/vnd.collada+xml
     properties: 
-      position: [ -3, 1, 0 ]
-      rotation: [ 0, 0, 3.141 ]
-      scale: [ 1.8, 1.8, 1.8 ]
+      translation: [ 1, 0, 0 ]
+      rotation: [ 0, 0, 1, 180 ]
+      scale: 1
 scripts:
 - |
     this.initialize = function() {
-      this.activeCamera = "http-vwf-example-com-camera-vwf-defaultCamera";
-      this.camera.position = [ 0, 0, 10 ];
+      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,5,0,1 ];
     }
