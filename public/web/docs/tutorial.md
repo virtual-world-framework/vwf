@@ -101,7 +101,7 @@ Finally, we'll apply a behavior to the 'predGroup', which is defined in a separa
 	  sceneCenter:
 	    extends: http://vwf.example.com/node3.vwf
 	    properties:
-	      translationnew: [ 0, 0, 0 ]
+	      translation: [ 0, 0, 0 ]
 	  predGroup:
 	    extends: http://vwf.example.com/node3.vwf
 	    implements:
@@ -171,7 +171,7 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	  sceneCenter:
 	    extends: http://vwf.example.com/node3.vwf
 	    properties:
-	      translationnew: [ 0, 0, 0 ]
+	      translation: [ 0, 0, 0 ]
 	  predGroup:
 	    extends: http://vwf.example.com/node3.vwf
 	    implements:
