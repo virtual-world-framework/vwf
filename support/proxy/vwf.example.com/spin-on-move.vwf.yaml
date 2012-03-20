@@ -2,7 +2,7 @@
 extends: |
   http://vwf.example.com/node3.vwf
 properties:
-  spin-rate: 1
+  spin-rate: 0.1
   spin-axis: [ 0, 0, 1 ]
   spin-inputDim: "x"
   spin-value: 0
@@ -10,9 +10,10 @@ events:
   valueChanged:
 methods:
   spin:
+  init:
 scripts:
 - |
-    this.initialize = function() {
+    this.init = function() {
       this.input = {
         "pointerInfo": undefined,
         "pickInfo": undefined,
@@ -47,7 +48,7 @@ scripts:
       };
     }
     this.pointerDown = function( pointerInfo, pickInfo ) {
-      if ( !this.input ) this.initialize();
+      if ( !this.input ) this.init();
 
       this.input.pointerDown.pointerInfo = pointerInfo;
       this.input.pointerDown.pointerInfo = pickInfo;
@@ -61,19 +62,20 @@ scripts:
       var diff = this.input.change();
       switch( this["spin-inputDim"] ) {
         case "x":
-          this.spin( diff[0] );
+          this.spin( -diff[0] );
           break;
         case "y":
-          this.spin( diff[1] );
+          this.spin( -diff[1] );
           break;
       }
     }
     this.spin = function( value ){
-        if ( !this["spin-value"] ) {
-          var rotation = this.rotation;
-          this["spin-value"] = rotation[3];
-        }
-        this["spin-value"] += this["spin-rate"];
-        this.rotateBy( [ this["spin-axis"][0], this["spin-axis"][1], this["spin-axis"][2], this["spin-value"] ], 0 ) ;  
+      if ( !this["spin-value"] ) {
+        var rotation = this.rotation;
+        this["spin-value"] = rotation[3];
+      }
+      this["spin-value"] += this["spin-rate"] * value;
+      this.rotateBy( [ this["spin-axis"][0], this["spin-axis"][1], this["spin-axis"][2], this["spin-value"] ], 0 ) ;  
+      this.valueChanged( this["spin-value"] );
     } //@ sourceURL=spin-on-move.vwf
 
