@@ -1,0 +1,4 @@
+---
+extends: http://vwf.example.com/node.vwf
+properties:
+  template: yaml

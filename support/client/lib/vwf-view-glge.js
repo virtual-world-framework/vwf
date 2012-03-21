@@ -25,12 +25,7 @@
         if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
         if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
 
-        //console.info( "aspectRatio = " + (( this.width / this.height ) / 1.333 ) );
-
-        this.canvasQuery = jQuery(this.rootSelector).append(
-            "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
-        ).children(":last");
-        
+        this.canvasQuery = jQuery( this.rootSelector );
           
         // Connect GLGE to the VWF timeline.
         GLGE.now = function() {
@@ -53,13 +48,19 @@
     module.prototype.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
         childSource, childType, childName, callback /* ( ready ) */) {
 
-//        this.logger.info( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs,
-//                            childSource, childType, childName );
+        if ( childExtendsID === undefined /* || childName === undefined */ ) 
+            return;
 
-        if ( childID == this.state.sceneRootID /*&& ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "appscene-vwf" )*/ ) {
+        if ( this.state.scenes[ childID ] ) {
             
+            // this is the scene definition so go ahead and create the canvas and setup the view
             var glgeView = this;
             var domWin = window;
+
+            this.canvasQuery = jQuery( this.rootSelector ).append(
+                "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
+            ).children(":last");
+
             var canvas = this.canvasQuery.get( 0 );
             window.onkeydown = function( event ) {
                 var key = undefined;
@@ -282,7 +283,7 @@
             };
 
             returnData.eventData = [ {
-                client: "123456789ABCDEFG",
+                /*client: "123456789ABCDEFG", */
                 button: mouseButton,
                 clicks: 1,
                 buttons: {
@@ -299,27 +300,94 @@
                 position: [ mouseXPos(e)/sceneView.width, mouseYPos(e)/sceneView.height ],
             } ];
 
+
+
+            var camera = sceneView.state.cameraInUse;
+            var worldCamPos, worldCamTrans, camInverse;
+            if ( camera ) { 
+                worldCamPos = [ camera.getLocX(), camera.getLocY(), camera.getLocZ() ]; 
+//                worldCamTrans = goog.vec.Mat4.createFromArray( camera.getLocalMatrix() );
+//                goog.vec.Mat4.transpose( worldCamTrans, worldCamTrans );
+//                camInverse = goog.vec.Mat4.create();
+//                goog.vec.Mat4.invert( worldCamTrans, camInverse );
+            }
+
             returnData.eventNodeData = { "": [ {
-                normal: undefined,
-                source: undefined,
-                distance: undefined,
-                globalPosition: undefined,
-                globalNormal: undefined,
-                globalSource: undefined,            
+                distance: pickInfo ? pickInfo.distance : undefined,
+                globalPosition: pickInfo ? pickInfo.coord : undefined,
+                globalNormal: pickInfo ? pickInfo.normal : undefined,
+                globalSource: worldCamPos,            
             } ] };
 
-
-            if ( pickInfo ) {
-                returnData.eventNodeData[""][0].position = pickInfo.coord;
-                returnData.eventNodeData[""][0].normal = pickInfo.normal;
-                returnData.eventNodeData[""][0].distance = pickInfo.distance;
-            }
-            var camera = sceneView.state.cameraInUse;
-            if ( camera ) {
-                returnData.eventNodeData[""][0].source = new Array;
-                returnData.eventNodeData[""][0].source.push( camera.getLocX(), camera.getLocY(), camera.getLocZ() );
+            if ( pickInfo && pickInfo.normal ) {
+                var pin = pickInfo.normal;  
+                var nml = goog.vec.Vec3.createFloat32FromValues( pin[0], pin[1], pin[2] );
+                nml = goog.vec.Vec3.normalize( nml, goog.vec.Vec3.create() );
+                returnData.eventNodeData[""][0].globalNormal = [ nml[0], nml[1], nml[2] ];
             }
 
+            if ( sceneView && sceneView.state.nodes[ pointerPickID ] ) {
+                var camera = sceneView.state.cameraInUse;
+                var childID = pointerPickID;
+                var child = sceneView.state.nodes[ childID ];
+                var parentID = child.parentID;
+                var parent = sceneView.state.nodes[ child.parentID ];
+                var trans, parentTrans, localTrans, localNormal, parentInverse, relativeCamPos;
+                while ( child ) {
+
+                    trans = goog.vec.Mat4.createFromArray( child.glgeObject.getLocalMatrix() );
+                    goog.vec.Mat4.transpose( trans, trans );                   
+                    
+                    if ( parent ) {                   
+                        parentTrans = goog.vec.Mat4.createFromArray( parent.glgeObject.getLocalMatrix() );
+                        goog.vec.Mat4.transpose( parentTrans, parentTrans ); 
+                    } else {
+                        parentTrans = undefined;
+                    }
+
+                    if ( trans && parentTrans ) {
+                        // get the parent inverse, and multiply by the world
+                        // transform to get the local transform 
+                        parentInverse = goog.vec.Mat4.create();
+                        if ( goog.vec.Mat4.invert( parentTrans, parentInverse ) ) {
+                            localTrans = goog.vec.Mat4.multMat( parentInverse, trans,
+                                goog.vec.Mat4.create()                       
+                            );
+                        }
+                    }
+
+                    // transform the global normal into local
+                    if ( pickInfo && pickInfo.normal ) {
+                        localNormal = goog.vec.Mat4.multVec3Projective( trans, pickInfo.normal, 
+                            goog.vec.Vec3.create() );
+                    } else {
+                        localNormal = undefined;  
+                    }
+
+                    if ( worldCamPos ) { 
+                        relativeCamPos = goog.vec.Mat4.multVec3Projective( trans, worldCamPos, 
+                            goog.vec.Vec3.create() );                         
+                    } else { 
+                        relativeCamPos = undefined;
+                    }
+                                        
+                    returnData.eventNodeData[ childID ] = [ {
+                        position: localTrans,
+                        normal: localNormal,
+                        source: relativeCamPos,
+                        distance: pickInfo ? pickInfo.distance : undefined,
+                        globalPosition: pickInfo ? pickInfo.coord : undefined,
+                        globalNormal: pickInfo ? pickInfo.normal : undefined,
+                        globalSource: worldCamPos,            
+                    } ];
+
+                    childID = parentID;
+                    child = sceneView.state.nodes[ childID ];
+                    parentID = child ? child.parentID : undefined;
+                    parent = parentID ? sceneView.state.nodes[ child.parentID ] : undefined;
+
+                }
+            }
             return returnData;
         }          
 
@@ -335,10 +403,11 @@
                     mouseLeftDown = true;
                     break;
             };
-            var eData = getEventData( e, false );
-            if ( eData ) {
+            var event = getEventData( e, false );
+            if ( event ) {
                 pointerDownID = pointerPickID ? pointerPickID : sceneID;
-                sceneView.dispatchEvent( pointerDownID, "pointerDown", eData.eventData, eData.eventNodeData );
+                //console.info( "sceneView.dispatchEvent( "+pointerDownID+", 'pointerDown', .. )" );
+                sceneView.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
             }
         }
 
@@ -405,6 +474,7 @@
             var eData = getEventData( e, false );
             if ( eData ) {
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
+                    //console.info( "sceneView.dispatchEvent( "+pointerDownID+", 'pointerMove', .. )" );
                     sceneView.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
                 } else {
                     if ( pointerPickID ) {
@@ -485,118 +555,129 @@
             var eData = getEventData( e, false );
             if ( eData ) {
             
+                var object, match, fn;
                 var files = e.dataTransfer.files;
                 var file = files[0];
-                console.info(file.name);
-        
-                var object = {
-                  extends: "http://vwf.example.com/types/node3",
-                  source: file.name,
-                  type: "model/vnd.collada+xml",
-                  properties: { 
-                    position: eData.eventNodeData[""][0].position,
-                  },   
-                };
+                //console.info( file.name );
+                var ext = (/[.]/.exec(file.name)) ? /[^.]+$/.exec(file.name) : undefined;
 
-                var match;
+                //console.info( ext );
 
-                switch ( file.name ) { // hack it since setting this data through components isn't working
+                switch ( ext[0].toLowerCase() ) {
+                    case "dae":
+                        object = {
+                          extends: "http://vwf.example.com/editable3.vwf",
+                          source: file.name,
+                          type: "model/vnd.collada+xml",
+                          properties: { 
+                            position: eData.eventNodeData[""][0].globalPosition,
+                          },   
+                        };
 
-                    case "blackhawk.dae": // from cityblock
-                        object.properties.eulers = [ 1, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                        switch ( file.name ) { // hack it since setting this data through components isn't working
 
-                    case "blackhawkGW.dae": // from sandtable
-                        object.properties.position[2] += 20;
-                        object.properties.eulers = [ 1, 0, 0 ];
-                        object.properties.scale = [ 2, 2, 2 ];
-                        break;
+                            case "blackhawk.dae": // from cityblock
+                                object.properties.eulers = [ 1, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                    case "Predator.dae": // from sandtable
-                        object["implements"] = [ "http://vwf.example.com/types/fly" ];
-                        object.properties.position[2] += 20;
-                        object.properties.eulers = [ 0, 0, 180 ];
-                        object.properties.scale = [ 15, 15, 15 ];
-                        break;
+                            case "blackhawkGW.dae": // from sandtable
+                                object.properties.position[2] += 20;
+                                object.properties.eulers = [ 1, 0, 0 ];
+                                object.properties.scale = [ 2, 2, 2 ];
+                                break;
 
-                    case "apache.DAE": // from sandtable
-                        object.properties.position[2] += 40;
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                            case "Predator.dae": // from sandtable
+                                object["implements"] = [ "http://vwf.example.com/fly.vwf" ];
+                                object.properties.position[2] += 20;
+                                object.properties.eulers = [ 0, 0, 180 ];
+                                object.properties.scale = [ 15, 15, 15 ];
+                                break;
 
-                    case "awac.DAE": // from sandtable
-                        object.properties.position[2] += 100;
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.5, 0.5, 0.5 ];
-                        break;
+                            case "apache.DAE": // from sandtable
+                                object.properties.position[2] += 40;
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                    case "blackhawk.DAE": // from sandtable
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                            case "awac.DAE": // from sandtable
+                                object.properties.position[2] += 100;
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.5, 0.5, 0.5 ];
+                                break;
 
-                    case "cobra.DAE": // from sandtable
-                        object.properties.position[2] += 50;
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                            case "blackhawk.DAE": // from sandtable
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                    case "f117.DAE": // from sandtable
-                        object.properties.position[2] += 40;
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                            case "cobra.DAE": // from sandtable
+                                object.properties.position[2] += 50;
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                    case "humvee.dae": // from sandtable
-                        object.properties.position[2] += 50;
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                            case "f117.DAE": // from sandtable
+                                object.properties.position[2] += 40;
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                    case "lmtv.dae": // from sandtable
-                        object.properties.position[2] += 50;
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                            case "humvee.dae": // from sandtable
+                                object.properties.position[2] += 50;
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                    case "mlrs.DAE": // from sandtable
-                        object.properties.position[2] += 50;
-                        object.properties.eulers = [ 90, 0, 0 ];
-                        object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                        break;
+                            case "lmtv.dae": // from sandtable
+                                object.properties.position[2] += 50;
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                    default:
+                            case "mlrs.DAE": // from sandtable
+                                object.properties.position[2] += 50;
+                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
+                                break;
 
-                        if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+                            default:
 
-                            object = {
-                              extends: match[1],
-                              properties: { 
-                                position: eData.eventNodeData[""][0].position,
-                              },
-                              scripts: [
-                                  "this.initialize = function() { this.eulers = this.eulers ; this.scale = this.scale }"
-                              ]
-                            };
+                                if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
 
-                        } else if ( match = file.name.match( /\.dae$/i ) ) { // assignment is intentional
+                                    object = {
+                                      extends: match[1],
+                                      properties: { 
+                                        position: eData.eventNodeData[""][0].globalPosition,
+                                      },
+                                      scripts: [
+                                          "this.initialize = function() { this.eulers = this.eulers ; this.scale = this.scale }"
+                                      ]
+                                    };
 
-                            object.properties.scale = [ 1, 1, 1 ];
+                                } else if ( match = file.name.match( /\.dae$/i ) ) { // assignment is intentional
 
-                        } else {
+                                    object.properties.scale = [ 1, 1, 1 ];
 
-                             object = undefined;
+                                } else {
+
+                                     object = undefined;
+                                }
+
+                                break;
+
                         }
-
+                        if ( object ) {
+                            sceneView.createNode( "index-vwf", object, file.name, undefined );
+                        }
                         break;
-
+                    case "yaml":
+                        fn = file.name.substr( 0, file.name.length - 5 );
+                        sceneView.createNode( "index-vwf", fn, fn, undefined );                
+                        break;
                 }
                 
-                if ( object ) {
-                    sceneView.createNode( "index-vwf", object, file.name, undefined );
-                }
+
             }
 
             e.preventDefault();            
@@ -627,7 +708,7 @@
     }
 
     var mouseXPos = function(e) {
-        return e.clientX - e.currentTarget.offsetLeft + window.scrollX;
+        return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
     }
 
     var mouseYPos = function(e) {
@@ -756,7 +837,7 @@
         if (open) {
             lastGroupName = name(group);
             console.info(indent(iIndent) + lastGroupName + ":");
-            console.info(indent(iIndent + 1) + "extends: http://vwf.example.com/types/node3");
+            console.info(indent(iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 
             if (getChildCount(group) > 0)
                 console.info(sOut + "children:");
@@ -770,7 +851,7 @@
         if ( objName != "" ) {
             console.info( indent(iIndent) + "children:" );
             console.info( indent(iIndent+1) + objName + ":");
-            console.info( indent(iIndent+2) + "extends: http://vwf.example.com/types/object3");
+            console.info( indent(iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
             indentAdd = 2;
         }
 
@@ -782,7 +863,7 @@
 //                var meshName = name( mesh );
 //                if ( meshName != "" ) {
 //                    console.info( indent( iIndent + indentAdd + 1 ) + meshName + ":" );
-//                    console.info( indent( iIndent + indentAdd + 2 ) + "extends: http://vwf.example.com/types/mesh" );
+//                    console.info( indent( iIndent + indentAdd + 2 ) + "extends: http://vwf.example.com/mesh.vwf" );
 //                }
 //            }
 //            if ( obj.multimaterials && obj.multimaterials.length > 0 ) {
@@ -798,7 +879,7 @@
 
         var sOut = indent(iIndent + 1);
         console.info( indent(iIndent) + objName + "Material" + index + ":" );
-        console.info( sOut + "extends: http://vwf.example.com/types/material");
+        console.info( sOut + "extends: http://vwf.example.com/material.vwf");
 
     };
 

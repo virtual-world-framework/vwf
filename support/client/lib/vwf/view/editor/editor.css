@@ -39,21 +39,35 @@ hr
 td
 {
 	font:10pt Arial;
-	width:120px;
-	max-width:120px;
+	width:105px;
+	max-width:105px;
 	padding:0px;
 	overflow:hidden;
 }
 
-input 
+.input_text
 {
 	height:11px;
-	width:120px;
+	width:90px;
 	font:9pt Arial;
 	padding:3px;
 	color:#153255;
 	/*background-color:#153255;*/
 	border:1px;
+}
+
+.input_button
+{
+	width:50px;
+	font:8pt Arial;
+	padding:0px;
+}
+
+.input_button_call
+{
+	width:30px;
+	font:8pt Arial;
+	padding:0px;
 }
 
 form
@@ -88,4 +102,18 @@ form
 .childEntry {
 	padding-left:10px;
 	padding-right:10px;
+}
+
+.methodEntry 
+{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.methodEntry td
+{
+	font:10pt Arial;
+	width:130px;
+	padding:0px;
+	overflow:hidden;
 }

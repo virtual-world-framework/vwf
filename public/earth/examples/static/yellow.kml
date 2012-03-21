@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
+<Document>
+	<name>yellow.kml</name>
+	<Style id="sn_arts">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/arts.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<StyleMap id="msn_dollar">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_dollar</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_dollar</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_dollar">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/dollar.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sh_shopping">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/shopping.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sn_shopping">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/shopping.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<StyleMap id="msn_arts">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_arts</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_arts</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_arts">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/arts.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<StyleMap id="msn_shopping">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_shopping</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_shopping</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sn_dollar">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/dollar.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Folder>
+		<name>Yellow</name>
+		<open>1</open>
+		<Placemark>
+			<name>Yellow 1</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_shopping</styleUrl>
+			<Point>
+				<coordinates>-121.9958635121482,36.99590328696596,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Yellow 2</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_dollar</styleUrl>
+			<Point>
+				<coordinates>-122.0066022070807,36.99415392128299,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Yellow 3</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_arts</styleUrl>
+			<Point>
+				<coordinates>-121.9935791643192,37.00582387441896,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

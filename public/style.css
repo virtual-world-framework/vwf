@@ -38,5 +38,54 @@ body {
 .row .example a:visited {color:black;text-decoration:none;}
 .row .example a img { border: 0; }
 
+.overlay {
+	margin:auto;
+	color:#FFF;
+	font-size:10pt;
+	width:560px;
+	height:320px;
+	background:#222;
+	pointer-events:all;
+	opacity:0.98;
+	-moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -khtml-border-radius: 20px;
+    border-radius: 20px;
+    visibility: hidden;
+}
 
-	
+.overlay a:link {color:white;text-decoration:none;}
+.overlay a:hover {color:white;text-decoration:underline;}
+.overlay a:visited {color:white;text-decoration:none;}
+
+.exit-button {
+	text-align:right;
+	position:relative;
+	top:8px;
+	right:10px;
+}
+
+.app-title {
+	font-size:1.2em;
+	text-align:left;
+}
+
+.content {
+	display:none;
+}
+
+.instances {
+	float:right;
+	text-align:left;
+	width:250;
+	padding-left:5px;
+	padding-right:5px;
+}
+
+.description {
+	float:left;
+	text-align:left;
+	width:250;
+	padding-left:5px;
+	padding-right:5px;
+}

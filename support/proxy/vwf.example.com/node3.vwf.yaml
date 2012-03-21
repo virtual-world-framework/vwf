@@ -1,0 +1,90 @@
+---
+extends: http://vwf.example.com/node.vwf
+properties: 
+  enabled: true
+  position:
+  translation:
+    set: |
+      var transform = this.transform;
+      var translation = value;
+      goog.vec.Mat4.setColumn( transform, 3, translation );
+      this.transform = transform;
+      return translation;
+    get: |
+      var transform = this.transform;
+      var translation = goog.vec.Vec4.create();
+      goog.vec.Mat4.getColumn( transform, 3, translation );
+      return translation;   
+  rotation:
+  orientation:
+  rotationMatrix:
+  boundingbox: 
+    set: |
+      console.info( "WARNING: node3 boundingbox cannot be set" )
+  centerOffset: 
+    set: |
+      console.info( "WARNING: node3 centerOffset cannot be set" )
+  transform:
+  vertices: 
+    set: |
+      console.info( "WARNING: node3 vertices cannot be set" )
+    value: 
+  vertexIndices: 
+    set: |
+      console.info( "WARNING: node3 vertexIndices cannot be set" )
+    value: 
+  transform:
+  modelMatrix:
+  localMatrix:
+  speed: 1
+  playing: false
+  looping: false
+  physics: "none"
+  physicsDef: 0
+  mass: 1
+  restitution: 0.1
+  friction: 0.5
+  rotVelocityDamping: [ 0.5, 0.5, 0.5 ]
+  linVelocityDamping: [ 1, 1, 1, 0 ]
+  velocity: [ 0, 0, 0 ]
+  lookAt: ""
+methods:
+  # Translate by translation over duration.
+  translateBy:
+    parameters:
+      - translation
+      - duration
+    body: |
+      this.translateByWorker(
+        this.translation,
+        goog.vec.Vec4.add( this.translation, translation || [ 0, 0, 0, 1 ], goog.vec.Vec4.create() ),
+        this.time,
+        this.time + ( duration || 1 )
+      );
+  translateByWorker:
+    parameters:
+      - startTranslation
+      - stopTranslation
+      - startTime
+      - stopTime
+    body: |
+      this.translation = goog.vec.Vec4.lerp(
+        startTranslation, stopTranslation,
+        ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
+        goog.vec.Vec4.create()
+      );
+      if ( this.time < stopTime ) {
+        this.in( 0.04 ).translateByWorker( startTranslation, stopTranslation, startTime, stopTime );
+      }
+events:
+  keyDown:
+  keyPress:
+  keyUp:
+  pointerClick:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  pointerEnter:
+  pointerOver:
+  pointerLeave:
+  pointerWheel:

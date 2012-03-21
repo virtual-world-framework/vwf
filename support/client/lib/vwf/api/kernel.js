@@ -35,5 +35,7 @@ define( {
     execute: [ /* nodeID, scriptText, scriptType */ ],
 
     time: [],
+    client: [],
+    moniker: [],
 
 } );
