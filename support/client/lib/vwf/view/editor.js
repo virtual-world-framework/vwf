@@ -496,7 +496,10 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var prop = prototypeProperties[key].prop;
             if ( !displayedProperties[ prop.name ]  ) {
                 displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
-
+                if(prop.value == undefined)
+                {
+                    prop.value = JSON.stringify( vwf.getProperty( nodeID, prop.name, []) );
+                }
                 $(topdownTemp).append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
             
                 $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
