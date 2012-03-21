@@ -2157,7 +2157,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
                         component.extends = "http://vwf.example.com/scene.vwf";
                         break;
                     case "model/vnd.collada+xml":
-                        component.extends = "http://vwf.example.com/glge.vwf";
+                        component.extends = "http://vwf.example.com/navscene.vwf";
                         break;
                 }
 
