@@ -10,7 +10,7 @@ class VWF::Application::Admin < Sinatra::Base
     erb :"admin.html"
   end
 
-  # get "/state" do
+  # get "/state" do  # TODO: restore when next handler is switched back to post
   # 
   #   if transport = Rack::SocketIO::Application.session( env )[:transport]
   #     transport.state.to_json
@@ -71,6 +71,19 @@ class VWF::Application::Admin < Sinatra::Base
       transport.stop
       transport.state.to_json
     end
+
+  end
+
+  # Instances derived from this application, clients connected to those instances, and client
+  # details (none currently).
+
+  get "/instances" do
+
+    Hash[ *
+      VWF::Application::Reflector.instances( env ).map do |resource, instance|
+        [ resource, Hash[ :clients => Hash[ * instance[:clients].map { |client| [ client.id, nil ] } .flatten( 1 ) ] ] ]
+      end .flatten( 1 )
+    ] .to_json
 
   end
 

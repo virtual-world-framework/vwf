@@ -8,7 +8,7 @@
 
     <script type="text/javascript" src="qunit.js"></script>
 
-    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
@@ -32,11 +32,13 @@
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
 
-        "vwf/kernel/model",
+        "vwf/kernel/model", // explicitly loaded until vwf can load its dependencies
         "vwf/model/glge",
         "vwf/model/object",
-        "vwf/model/stage/log",
-        "vwf/kernel/view",
+        "vwf/model/test",
+        "vwf/model/stage/log", // explicitly loaded until vwf can load its dependencies
+        "vwf/kernel/view", // explicitly loaded until vwf can load its dependencies
+        "vwf/view/test",
 
       ], function( ready ) {
 
@@ -45,8 +47,39 @@
         ready( function() {
 
           vwf.initialize(
-            /* models */ { "vwf/model/glge": undefined, "vwf/model/object": undefined },
-            /*  views */ { "glge": undefined }
+
+            // Models
+
+            [
+
+              "vwf/model/glge",
+              "vwf/model/object",
+
+              "vwf/model/test",
+              { "vwf/model/test": undefined },
+              { "vwf/model/test": null },
+              { "vwf/model/test": "single" },
+              { "vwf/model/test": [ "first", "second" ] },
+              { "vwf/model/test": [ [ "array" ] ] },
+
+            ],
+
+            // Views
+
+            [
+
+              "glge",
+              "vwf/view/test", // dummy to make the rest have the same indexes as the models
+
+              "vwf/view/test",
+              { "vwf/view/test": undefined },
+              { "vwf/view/test": null },
+              { "vwf/view/test": "single" },
+              { "vwf/view/test": [ "first", "second" ] },
+              { "vwf/view/test": [ [ "array" ] ] },
+
+            ]
+
           );
 
           test( "Models", function() {
@@ -61,8 +94,30 @@
 
           } );
 
+          test ( "Model parameters", function() {
+
+            deepEqual( vwf.models.actual[2].arguments, [], "No arguments" );
+            deepEqual( vwf.models.actual[3].arguments, [], "No arguments, explict undefined " );
+            deepEqual( vwf.models.actual[4].arguments, [], "No arguments, explict null" );
+            deepEqual( vwf.models.actual[5].arguments, [ "single" ], "Single argument as a value" );
+            deepEqual( vwf.models.actual[6].arguments, [ "first", "second" ], "Multiple arguments as an array" );
+            deepEqual( vwf.models.actual[7].arguments, [ [ "array" ] ], "Array as an argument" );
+
+          } );
+
           test( "Views", function() {
             // equal( vwf.views.actual[0].module.id, "vwf/view/glge", "GLGE View" );  // TODO: waiting on views to convert to RequireJS loader
+          } );
+
+          test ( "View parameters", function() {
+
+            deepEqual( vwf.views[2].arguments, [], "No arguments" );
+            deepEqual( vwf.views[3].arguments, [], "No arguments, explict undefined " );
+            deepEqual( vwf.views[4].arguments, [], "No arguments, explict null" );
+            deepEqual( vwf.views[5].arguments, [ "single" ], "Single argument as a value" );
+            deepEqual( vwf.views[6].arguments, [ "first", "second" ], "Multiple arguments as an array" );
+            deepEqual( vwf.views[7].arguments, [ [ "array" ] ], "Array as an argument" );
+
           } );
 
           test( "Shared state", function() {

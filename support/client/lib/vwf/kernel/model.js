@@ -19,8 +19,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             callback && callback( childID );
                         } );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
-                            [ childComponent, childName ], callback /* ( result ) */ );  // TODO: swap childComponent & childName
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            [ childComponent, childName ], when, callback /* ( result ) */ );  // TODO: swap childComponent & childName
                     }
 
                 };
@@ -32,8 +32,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
-                            undefined, callback /* ( result ) */ );
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            undefined, when, callback /* ( result ) */ );
                     }
 
                 };
@@ -45,8 +45,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, childID, childName );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
-                            [ childID, childName ], callback /* ( result ) */ );  // TODO: swap childID & childName?
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            [ childID, childName ], when, callback /* ( result ) */ );  // TODO: swap childID & childName?
                     }
 
                 };
@@ -58,12 +58,38 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, childID );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
-                            [ childID ], callback /* ( result ) */ );  // TODO: swap childID & childName?
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            [ childID ], when, callback /* ( result ) */ );  // TODO: swap childID & childName?
                     }
 
                 };
 
+            case "setProperties":
+
+                return function( nodeID, properties, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, properties );
+                    } else {
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            [ properties ], when, callback /* ( result ) */ );
+                    }
+    
+                };
+
+            case "getProperties":
+
+                return function( nodeID, when, callback ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID );
+                    } else {
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            undefined, when, callback /* ( result ) */ );
+                    }
+
+                };
+    
             case "createProperty":
 
                 return function( nodeID, propertyName, propertyValue, propertyGet, propertySet, when, callback ) {
@@ -71,8 +97,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, propertyName, propertyValue, propertyGet, propertySet );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, propertyName,
-                            [ propertyValue, propertyGet, propertySet ], callback /* ( result ) */ );  // TODO: { value: propertyValue, get: propertyGet, set: propertySet } ? -- vwf.receive() needs to parse
+                        this.kernel.plan( nodeID, kernelFunctionName, propertyName,
+                            [ propertyValue, propertyGet, propertySet ], when, callback /* ( result ) */ );  // TODO: { value: propertyValue, get: propertyGet, set: propertySet } ? -- vwf.receive() needs to parse
                     }
 
                 };
@@ -86,8 +112,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, propertyName, propertyValue );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, propertyName,
-                            [ propertyValue ], callback /* ( result ) */ );
+                        this.kernel.plan( nodeID, kernelFunctionName, propertyName,
+                            [ propertyValue ], when, callback /* ( result ) */ );
                     }
 
                 };
@@ -99,8 +125,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, propertyName );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, propertyName,
-                            undefined, callback /* ( result ) */ );
+                        this.kernel.plan( nodeID, kernelFunctionName, propertyName,
+                            undefined, when, callback /* ( result ) */ );
                     }
 
                 };
@@ -112,8 +138,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, methodName, methodParameters, methodBody );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, methodName,
-                            [ methodParameters, methodBody ], callback /* ( result ) */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- vwf.receive() needs to parse
+                        this.kernel.plan( nodeID, kernelFunctionName, methodName,
+                            [ methodParameters, methodBody ], when, callback /* ( result ) */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- vwf.receive() needs to parse
                     }
 
                 };
@@ -127,8 +153,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, methodName, methodParameters );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, methodName,
-                            [ methodParameters ], callback /* ( result ) */ );
+                        this.kernel.plan( nodeID, kernelFunctionName, methodName,
+                            [ methodParameters ], when, callback /* ( result ) */ );
                     }
 
                 };
@@ -140,8 +166,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, eventName,
-                            [ eventParameters ], callback /* ( result ) */ );
+                        this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                            [ eventParameters ], when, callback /* ( result ) */ );
                     }
 
                 };
@@ -155,8 +181,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, eventName,
-                            [ eventParameters ], callback /* ( result ) */ );
+                        this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                            [ eventParameters ], when, callback /* ( result ) */ );
                     }
 
                 };
@@ -168,8 +194,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, eventName, eventParameters, eventNodeParameters );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, eventName,
-                            [ eventParameters, eventNodeParameters ], callback /* ( result ) */ );
+                        this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                            [ eventParameters, eventNodeParameters ], when, callback /* ( result ) */ );
                     }
 
                 };
@@ -181,19 +207,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( when === undefined ) {
                         return this.kernel[kernelFunctionName]( nodeID, scriptText, scriptType );
                     } else {
-                        this.kernel.queue( when, nodeID, kernelFunctionName, undefined,
-                            [ scriptText, scriptType ], callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
+                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                            [ scriptText, scriptType ], when, callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
                     }
 
                 };
 
-            // TODO: time
-
-            default:
+            case "time":
+            case "client":
+            case "moniker":
 
                 return function() {
-                    return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
-                }
+                    return this.kernel[kernelFunctionName]();
+                };
 
         }
 

@@ -15,7 +15,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    # Start the timer on the first connection to this session.
+    # Start the timer on the first connection to this instance.
 
     schedule_tick
 
@@ -58,11 +58,14 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     fields = JSON.parse message
 
-    # For a normal message, stamp it with the curent time and send it to each client.
+    # For a normal message, stamp it with the curent time and originating client and send it to each
+    # client.
 
     unless fields["result"]
 
-      fields["time"] = session[:transport].time
+      fields["time"] = session[:transport].time  # TODO: allow future times on incoming fields["time"] and queue until needed
+      fields["client"] = id
+
       broadcast JSON.generate fields
 
     # Handle messages where the client returned a result to the server.
@@ -74,6 +77,9 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # lossy, and this ensures that every client resumes from the same state.
 
       if fields["action"] == "getNode"
+
+        fields["time"] = session[:transport].time
+        fields.delete "client"
 
         fields["action"] = "setNode"
         fields["parameters"] = [ fields["result"] ]
@@ -98,12 +104,33 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     session[:pending_clients].delete self
     # TODO: resend getNode if this was the reference client and a getNode was pending
 
-    # Stop the timer and clear the state on the last disconnection from this session.
+    # Stop the timer and clear the state on the last disconnection from this instance.
 
     cancel_tick
 
     super
 
+  end
+
+  # Instances derived from the given resource, and clients connected to those instances.
+
+  def self.instances env
+    Hash[ *
+      instance_sessions( env ).map do |resource, session|
+        [ resource, Hash[ :clients => clients( resource ) ] ]
+      end .flatten( 1 )
+    ]
+  end
+
+  # Instances derived from the resource that this client connects to, and clients connected to those
+  # instances.
+
+  def instances
+    Hash[ *
+      instance_sessions.map do |resource, session|
+        [ resource, Hash[ :clients => self.class.clients( resource ) ] ]
+      end .flatten( 1 )
+    ]
   end
 
 private

@@ -1,8 +1,0 @@
---- 
-extends: |
-  http://vwf.example.com/types/node3
-scripts:
-- text: |
-    this.pointerClick = function()  {
-      console.info( "info on click", this.id );
-    }

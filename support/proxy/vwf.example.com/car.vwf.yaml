@@ -1,0 +1,32 @@
+--- 
+extends: http://vwf.example.com/node3.vwf
+properties:
+  attachedToCamera: 
+    set: |
+        this.properties.attachedToCamera.setter = function( value ) {
+          if ( vwf ) {
+            if ( value ) {
+              vwf.setProperty( 'http-vwf-example-com-camera-vwf-maincamera', 'attachNodeID', 'http-vwf-example-com-car-vwf-pick_up_truck02' );
+            } else {
+              vwf.setProperty( 'http-vwf-example-com-camera-vwf-maincamera', 'attachNodeID', '' );
+            }
+          }
+          this.attachedToCamera = value;
+        }
+    value: false 
+  position: 
+    set: |
+      this.position = value;
+    value: [ 0, 0, 0 ]
+  eulers:
+    set: |
+      this.eulers = value;
+    value: [ 0, 0, 0 ]
+scripts:
+- text: |
+    var car = this;
+    this.pointerClick = function() {
+      this.attachedToCamera = !this.attachedToCamera;
+      console.info( '      this.attachedToCamera = ' + this.attachedToCamera );
+    }	
+  type: application/javascript
