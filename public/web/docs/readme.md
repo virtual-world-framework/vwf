@@ -46,7 +46,11 @@ Code View: *index.vwf.yaml*
 
 Sample URL: *http://vwf.example.com/documentation/1/*
 
-<iframe src="../../documentation/1">Example 1</iframe>
+<!-- <iframe src="../../documentation/1">Example 1</iframe> -->
+<div style="text-align:center">
+<span style="color:blue" onclick="document.getElementById('ex1_frame').src = '../../documentation/1'">Activate Application</span>
+<iframe id="ex1_frame" src="about:blank"></iframe>
+</div>
 _____________________________________________________________________________________
 
 Nodes inherit data from their prototype, including the following:
@@ -91,7 +95,11 @@ Code View: *index.vwf.yaml*
 
 Sample URL: *http://vwf.example.com/documentation/2/*
 
-<iframe src="../../documentation/2">Example 2</iframe>
+<!-- <iframe src="../../documentation/2">Example 2</iframe> -->
+<div style="text-align:center">
+<span style="color:blue" onclick="document.getElementById('ex2_frame').src = '../../documentation/2'">Activate Application</span>
+<iframe id="ex2_frame" src="about:blank"></iframe>
+</div>
 _____________________________________________________________________________________
 
 **Note:** A component specification may be an object literal, an uniform resource identifier (URI) to a .vwf or another type such as .dae, or a JSON-encoded object (primarily for use in the single-user mode application= URI parameter). Components may appear as an extends, implements, or child within the application or another component. 
@@ -162,7 +170,11 @@ Code View: *index.vwf.yaml*
 		  
 URL: *http://vwf.example.com/documentation/3/*
 
-<iframe src="../../documentation/3">Example 3</iframe>
+<!-- <iframe src="../../documentation/3">Example 3</iframe> -->
+<div style="text-align:center">
+<span style="color:blue" onclick="document.getElementById('ex3_frame').src = '../../documentation/3'">Activate Application</span>
+<iframe id="ex3_frame" src="about:blank"></iframe>
+</div>
 _____________________________________________________________________________________
 
 The properties of the default lighting and navigation can be specified within the application file.
@@ -286,7 +298,11 @@ URL: *http://vwf.example.com/documentation/4/*
 
 In this example, clicking on an object will run the pointerClick function, changing the color of the object's material. 
 
-<iframe src="../../documentation/4">Example 4</iframe>
+<!-- <iframe src="../../documentation/4">Example 4</iframe> -->
+<div style="text-align:center">
+<span style="color:blue" onclick="document.getElementById('ex4_frame').src = '../../documentation/4'">Activate Application</span>
+<iframe id="ex4_frame" src="about:blank"></iframe>
+</div>
 _____________________________________________________________________________________
 
 Define additional HTML and jQuery components in an index.vwf.html file. The application will look for a file of this name on load, and will load any scripts or two dimensional components identified. This HTML file interaction can bind user interface components to children and properties defined in the application file. The following example shows the JavaScript defined in the HTML file interacting with the property defined in the YAML file.
