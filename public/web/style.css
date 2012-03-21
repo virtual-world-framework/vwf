@@ -4,6 +4,9 @@ body {
 	overflow-y:scroll;
 	min-width:1000px;
 }
+a:link {
+	text-decoration:none;
+}
 .header {
 	font:22pt Arial;
 	font-weight:bold;
