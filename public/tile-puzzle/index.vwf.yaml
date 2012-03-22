@@ -499,13 +499,13 @@ scripts:
     }
 
     this.moveTile = function(obj) {
-      dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
-      dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
+      var dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
+      var dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
       
       if((dx < this.tileDistance && dy == 0) ||
          (dy < this.tileDistance && dx == 0))
       {
-        currentPosition = [ obj.translation[0], obj.translation[1], obj.translation[2] ];
+        var currentPosition = [ obj.translation[0], obj.translation[1], obj.translation[2] ];
         obj.translation = this.openTilePosition;
         this.openTilePosition = [ currentPosition[0], currentPosition[1], currentPosition[2] ];
       }           	
