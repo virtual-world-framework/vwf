@@ -1,5 +1,6 @@
 "use strict";
-define( [ "module", "vwf/api/kernel", "vwf/api/model", "logger" ], function( module, kernel_api, model_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+
+define( [ "module", "logger", "vwf/api/kernel", "vwf/api/model" ], function( module, logger, kernel_api, model_api ) {
 
     // vwf/model.js is the common implementation of all Virtual World Framework models. Each model
     // is part of a federation with other models attached to the simulation that implements part of
@@ -20,22 +21,22 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "logger" ], function( mod
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
-    var logger = require( "logger" ).for( module.id.replace( /\//g, "." ) );
+    var context = module.id.replace( /\//g, "." );
 
-    logger.infoc( "load" );
+    logger.for( context ).infoc( "load" );
 
     return {
 
         module: module,
 
-        logger: logger,
+        logger: logger.for( context ),
 
         load: function( module, initializer, kernelGenerator, modelGenerator ) {
 
             var instance = Object.create( this );
 
             instance.module = module;
-            instance.logger = require( "logger" ).for( instance.module.id.replace( /\//g, "." ) );
+            instance.logger = logger.for( instance.module.id.replace( /\//g, "." ) );
             
             instance.logger.infoc( "load" );
 
