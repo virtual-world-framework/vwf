@@ -1,5 +1,6 @@
 Getting Started
 ===============
+---------------
 
 Virtual World Framework (VWF) is a collaborative training platform that is scalable, sustainable and can be run via a browser.
 _____________________________________________________________________________________

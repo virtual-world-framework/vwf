@@ -1,5 +1,6 @@
 System Requirements
-==========================
+===================
+-------------------
  
 In order to successfully run the Virtual World Framework, the following browser requirements must be met:
 

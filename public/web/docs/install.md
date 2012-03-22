@@ -1,10 +1,19 @@
-Installing the Ruby Server
+Installation Instructions
 ==========================
+--------------------------
+
+The Virtual World Framework (VWF) can be run on both Windows and Linux. 
+
+There are two options for running VWF on Windows: the self-contained version and using Cygwin. 
+
+The simplest way is to run the self-contained version. Download and extract the contents of the VWF.zip file. Double click 'run.bat' in the extracted folder. 
+
+Linux requires setting up a ruby server environment. 
 _____________________________________________________________________________________
  
-For Windows
+Installing the Ruby Server - For Windows
 ==============
- 
+
 Install Cygwin
 --------------
 
@@ -12,8 +21,7 @@ Download and run setup.exe from [Cygwin](http://www.cygwin.com/install.html).
 
 Accept the default settings, except for:
 
-Set **Root Directory** to C:\Cygwin (with a capital C) if you're a pedant like me and want it to look right among the other top-level directories.
-
+*   Set **Root Directory** to C:\Cygwin (with a capital C).
 *	Consider changing **Local Package Directory** to your browser downloads folder to avoid cluttering your desktop.
 
 Select a download site from the list. Choose one that seems close and reliable.
@@ -35,7 +43,7 @@ ________________________________________________________________________________
 Install RubyGems
 ----------------
 
-Cygwin's ruby installs without the library manager, so we have to install it from source. Open a new Cygwin terminal session and issue the following commands. Don't use the previous session since it hadn't loaded the proxy settings.
+Cygwin's ruby installs without the library manager, so we have to install it from source. Open a new Cygwin terminal session and issue the following commands.
 
 	curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.5.tgz | tar xzcd rubygems-1.8.5ruby setup.rb install 
 
@@ -77,7 +85,7 @@ The server runs on port 3000 in development mode by default. Use Google Chrome t
 
 _____________________________________________________________________________________
 
-For Linux
+Installing the Ruby Server - For Linux
 =========
 
 Ensure RubyGems is installed (for Debian/Ubuntu). 

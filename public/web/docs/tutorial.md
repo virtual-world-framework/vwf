@@ -1,5 +1,6 @@
 Tutorial
 ==========================
+--------------------------
  
 The goal of the following tutorial is to allow a developer to build an application from a simple primitive to small sandtable application. The tutorial is broken up into four stages, each building upon itself to create a more complex application.
 
