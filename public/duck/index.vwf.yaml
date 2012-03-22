@@ -42,6 +42,6 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,-20,574,108,1 ];
+      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,16,616,90,1 ];
       this.camera.far = this.camera.far * 4;
     }
