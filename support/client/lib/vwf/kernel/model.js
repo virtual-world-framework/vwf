@@ -1,5 +1,5 @@
 "use strict";
-define( [ "require", "logger", "module", "vwf/model" ], function( require, logger, module, model ) {
+define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {
 
