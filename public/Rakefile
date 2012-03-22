@@ -4,18 +4,18 @@ require "tilt"
 require "yaml"
 
 
-CLOBBER.include( "index.html" )
+CLOBBER.include( "web/catalog.html" )
 
 
 desc "Generate the catalog."
 
 task :default => [ :clean, :clobber, :build ]
 
-task :build => "index.html"
+task :build => "web/catalog.html"
 
 desc "Generate the catalog."
 
-file "index.html" => "index.html.erb" do |task|
+file "web/catalog.html" => "web/catalog.html.erb" do |task|
 
     component_types = [ :json, :yaml ]
     image_types = [ :png, :jpg, :gif ]

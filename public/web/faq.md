@@ -3,6 +3,7 @@
 
 Frequently Asked Questions
 =====================
+---------------------
 
 [1. What is Virtual World Framework (VWF)?][1]
 

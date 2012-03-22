@@ -9,19 +9,19 @@
 		<div class='header'>
 			<div class='title'>Virtual World Framework</div>
 			<div class='menu'>
-				<a href="../index.html">Catalog</a>
+				<a href="about.html">About</a>
+				<span> | </span>
+				<a href="catalog.html">Demos</a>
 				<span> | </span>
 				<a href="docs/readme.html">Documentation</a>
 				<span> | </span>
 				<a href="glossary.html">Glossary</a>
 				<span> | </span>
 				<a href="faq.html">FAQ</a>
-				<span> | </span>
-				<a href="about.html">About</a>
 			</div>
 		</div>
-		<div style='width:1000px;margin:auto;text-align:left;padding-top:10px'>
-			<div class='content'><br>
+		<div style='width:800px;margin:auto;text-align:left;padding-top:10px'>
+			<div class='full'><br>
 				<!-- Convert source.txt using markdown converter: http://daringfireball.net/projects/markdown/dingus -->
 				
 				<!-- INSERT MARKDOWN HERE -->

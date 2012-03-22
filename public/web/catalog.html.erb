@@ -1,8 +1,8 @@
 <html>
   <head>
     <title>Virtual World Framework</title>
-    <link href="web/style.css" rel="stylesheet" type="text/css" />
-    <script src="web/jquery-1.7.1.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <script src="jquery-1.7.1.js"></script>
     <script type='text/javascript'>
       function showInfo(app, query)
       {
@@ -12,7 +12,7 @@
           var instances$ = $('.overlay').children('.instances');
           var match;
           if ( $('.overlay').children('.app-title').attr('id') == app && $('.overlay').css('visibility') == 'visible' ) {
-            jQuery.getJSON( app + "/admin/instances", function( data ) {
+            jQuery.getJSON( "../" + app + "/admin/instances", function( data ) {
               if ( $('.overlay').children('.app-title').attr('id') == app && $('.overlay').css('visibility') == 'visible' ) {
                 instances$.empty();
                 instances$.html("<p><b>Instances</b></p>");
@@ -20,7 +20,7 @@
                   if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
                     var instanceHTML = htmlEscape( match[1] );
                     var size = Object.size(value.clients); 
-                    instances$.append( "<a href='" + app + "/" + instanceHTML + ( query || "" ) + "'>" + instanceHTML + "</a>" + " (" + size + ")" + "<br />" );
+                    instances$.append( "<a href='../" + app + "/" + instanceHTML + ( query || "" ) + "'>" + instanceHTML + "</a>" + " (" + size + ")" + "<br />" );
                   }
                 } );
                 setTimeout(update, 1000, app);
@@ -62,19 +62,25 @@
     <div class="header">
       <div class="title">Virtual World Framework</div>
       <div class='menu'>
-        <a href="index.html">Catalog</a>
+        <a href="about.html">About</a>
         <span> | </span>
-        <a href="web/docs/readme.html">Documentation</a>
+        <a href="catalog.html">Demos</a>
         <span> | </span>
-        <a href="web/glossary.html">Glossary</a>
+        <a href="docs/readme.html">Documentation</a>
         <span> | </span>
-        <a href="web/faq.html">FAQ</a>
+        <a href="glossary.html">Glossary</a>
         <span> | </span>
-        <a href="web/about.html">About</a>
+        <a href="faq.html">FAQ</a>
       </div>
     </div>
 
     <div>
+      <div style='width:800px;margin:auto;text-align:left;padding-top:10px'>
+        <div class='full'><br />
+          <h1>Demos</h1>
+          <hr />
+        </div>
+      </div>
 <% while applications.any? do %>
       <div class="row">
 <%   3.times do %>
@@ -82,17 +88,17 @@
 <%       application, image, name, description = *applications.shift %>
         <!-- <%= application %> -->
         <div class="example">
-          <a href="<%= application + ( application == "earth" ? "?connected=1" : "" ) %>">
+          <a href="../<%= application + ( application == "earth" ? "?connected=1" : "" ) %>">
             <p><%= name %></p>
-            <img src="<%= image %>" alt="<%= name %>" />
+            <img src="../<%= image %>" alt="<%= name %>" />
           </a>
 
           <!-- Info Button -->
-          <div style="position:relative"><img style="position:absolute;right:2px;bottom:-12px" src="web/info.png" alt="i" onclick="showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>')" /></div>
+          <div style="position:relative"><img style="position:absolute;right:2px;bottom:-12px" src="info.png" alt="i" onclick="showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>')" /></div>
 
           <!-- Content for Overlay -->
           <div id='<%= application %>-content' class='overlayContent'>
-            <p class="exit-button"><img src="web/exit.png" alt="x" onclick="closeInfo()"/></p>
+            <p class="exit-button"><img src="exit.png" alt="x" onclick="closeInfo()"/></p>
             <span class="app-title" id="<%= application %>"><b><%= name %></b></span>
             <hr>
             <div class="description">
