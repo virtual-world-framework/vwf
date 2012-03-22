@@ -2,33 +2,15 @@ About
 =====================
 ---------------------
 
-Overview
----------------------
-The Virtual World Framework (VWF) is a fast, light-weight web-based architecture for creating and distributing secure, scalable, component-based collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers. These technologies include HTML 5 – a significant upgrade in expressive power for the web; WebGL – an integrated 3D graphics capability; WebSockets – providing a full TCP/IP connection between the client and server; JavaScript – the programming language of the web; and XMPP – the Extensible Messaging and Presence Protocol (Jabber).  
+The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing secure, scalable, component-based, and collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers. These technologies include:
 
-The VWF will be particularly focused on portable and mobile platforms, as well as scalable, ad-hoc network infrastructure such as cloud computing. It is a zero-install platform, with additional software components added dynamically as required. VWF spaces can be embedded in virtually any application including web pages and emails. Further, VWF spaces can embed existing applications and browsers.
+* HTML 5 – a significant upgrade in expressive power for the web
+* WebGL – an integrated 3D graphics capability
+* WebSockets – providing a full TCP/IP connection between the client and server
+* JavaScript – the programming language of the web  
 
-The VWF focuses on collaborative virtual worlds with a high degree of customizability of the environment and high bandwidth communications between users. These are environments that are focused on work and working together – even those that are intended primarily for entertainment.
+The application below provides the basic functionality achievable with the VWF. It is representative of a sandtable, allowing a user to navigate the environment, place push pin markers, and draw on the terrain. In additional, 2D HTML components are used in conjunction with the 3D environment in order to change colors and select tool mode. Click the image to launch an instance of the application.
 
-Goals
----------------------
-* Platform scalability - need to work across OSs and devices (desktops - handhelds)
-* Distribution - Needs to be easily deployed across an entire organization with a 0-install preferred. Needs to work on both sides of a firewall.
-* Security - needs to work with existing IT capabilities and requirements
-* Open source - must avoid being a captive solution. Must be accessible to non-business users, especially education
-* Utilize and Define Standards - for interoperability and scalability. Must interoperate and fully enable the Global Information Grid (GIG)
-* Future Proof – must scale dynamically with new requirements and new opportunities while protecting investments in content and infrastructure
-* Business models - must provide interesting business ecosystem for small and large organizations. Must lower the cost of content development while raising the level of quality and affordability.
+<a href='../sandtable/'><img src='sandtable.png' alt='sandtable' /></a>
 
-Summary
----------------------
-* Replicated computing platform for multi-user interactive 2D and 3D
-* Focused on training, collaboration and entertainment
-* Component based model – intelligent objects that can be easily added to existing spaces 
-* Model view architecture to allow multiple rendering models (2D and 3D) as well as dead-reckoning models
-* Open Source platform
-
-Vision
----------------------
-* The next generation of browsers incorporating WebGL coupled with HTML 5 will become the de facto foundation for the next generation of shared virtual worlds. 
-* The next big 3D platform is simply the current WWW with additional capabilities.
+The VWF serves as a replicated computing platform for multi-user interactive 2D and 3D components with a high degree of customizability of the environment and high bandwidth communication between users. These are environments that are focused on work and working together – whether for training, collaboration and/or entertainment. It is a zero-install platform, where additional software components can be added dynamically. VWF spaces can be embedded in virtually any application including web pages and emails. Furthermore, VWF spaces can embed existing applications and browsers. The next big 3D platform is simply the current world wide web with additional capabilities, and the Virtual World Framework embraces this ever growing technology.
