@@ -78,7 +78,8 @@ a:link {
 	width:780px;
 	height:300px;
 	display:inline;
-	overflow:hidden;
+	overflow-x:auto;
+	overflow-y:auto;
 }
 .content pre {
 	border:1px solid #AAA;

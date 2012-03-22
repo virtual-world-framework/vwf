@@ -7,7 +7,7 @@ require "pathname"
 
 SOURCE = "lib"
 DESTINATION = "libz"
-DOCUMENTATION = "doc/jsdoc"
+DOCUMENTATION = "../../public/web/docs/jsdoc"
 
 PATTERNS = [ "vwf.js", "vwf/*.js", "vwf/*/*.js", "vwf/*/stage/*.js" ]
 
