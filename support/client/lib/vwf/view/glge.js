@@ -230,15 +230,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }        
     }
 
-    var mouse; 
-    var sceneCanvas;
-    var container;
-    var mouseOverCanvas = false;
-
     // -- initMouseEvents ------------------------------------------------------------------------
 
     function initMouseEvents( canvas ) {
-
         var sceneNode = this.state.scenes[this.state.sceneRootID], child;
         var sceneID = this.state.sceneRootID;
         var sceneView = this;
@@ -255,9 +249,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var mouseMiddleDown = false;
         var win = window;
 
-        container = document.getElementById("container");
-        sceneCanvas = canvas;
-        mouse = new GLGE.MouseInput( sceneCanvas );
+        var container = document.getElementById("container");
+        var sceneCanvas = canvas;
+        var mouse = new GLGE.MouseInput( sceneCanvas );
+        var mouseOverCanvas = false;
 
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
