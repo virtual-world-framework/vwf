@@ -2,20 +2,16 @@
 extends: http://vwf.example.com/node3.vwf
 properties:
   numberParticles:
-  lifeTime:
   maxLifeTime:
   minLifeTime:
   startSize:
   endSize:
-  loop: 
-  velocity:
-  startMaxVelocity:
-  startMinVelocity:
-  startAcceleration:
-  endAcceleration:
+  loop:
+  maxVelocity:
+  minVelocity:   
   maxStartAcceleration:
+  minStartAcceleration:  
   maxEndAcceleration:
-  minStartAcceleration:
   minEndAcceleration:
   startColor:
   endColor:
