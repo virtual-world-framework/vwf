@@ -26,3 +26,8 @@ end
 # 1.0.0.beta.4 won't build successfully with RubyInstaller and MinGW.
 
 gem "eventmachine", ">= 1.0.0.beta", "!= 1.0.0.beta.4"
+
+# redcarpet >= 2 no longer declares a Markdown class, which Rocco expects. Having rocco require
+# "redcarpet/compat" for redcarpet >= 2 would probably also fix this.
+
+gem "redcarpet", "< 2"
