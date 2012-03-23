@@ -67,7 +67,7 @@ The easiest way is to type c-d-space as above, drag a VWF directory icon from Wi
 Then enter these commands:
 
 	gem install bundler
-	bundle install
+	bundle install --binstubs
 	
 Ignore the warning about sudo not found for bundle install. If you get linker relocation errors, you probably need to tell Cygwin to rebaseall. See [Cygwin rebaseall](http://www.heikkitoivonen.net/blog/2008/11/26/cygwin-upgrades-and-rebaseall) for details. The required rebase and dash packages should already be installed.
 _____________________________________________________________________________________
@@ -116,7 +116,7 @@ Install the Gems
 
 Launch a terminal window and cd to your VWF development directory:
 
-	$ cs vwf/
+	$ cd vwf/
 
 Then enter these commands:
 
@@ -142,7 +142,7 @@ And make them look like this:
 
 Now you can install the RubyGems to the system (as root):
 
-	# bundle install
+	# bundle install --binstubs
 	
 _____________________________________________________________________________________
 
