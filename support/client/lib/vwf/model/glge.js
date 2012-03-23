@@ -697,6 +697,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             }
 
+//            if ( value && value instanceof Object && !( value instanceof Array ) && !( value instanceof Float32Array ) ){
+//                console.info( "WARNING: gettingProperty( "+nodeID+", "+propertyName+" ) returning an OBJECT: " + value );
+//            }
+
             return value;
 
 
@@ -1246,6 +1250,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     function getParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
         var value = undefined;
+        var obj;
         var node = this.state.nodes[nodeID];
         if ( node && node.glgeObject ) {
             var ps = node.glgeObject;
@@ -1279,48 +1284,69 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         value = ps.getLoop();
                     break;
                 case "velocity":
-                    if ( ps.getVelocity )
-                        value = ps.getVelocity();
+                    if ( ps.getVelocity ) {
+                        obj = ps.getVelocity();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "maxVelocity":
-                    if ( ps.getMaxVelocity )
-                        value = ps.getMaxVelocity();
+                    if ( ps.getMaxVelocity ) {
+                        obj = ps.getMaxVelocity();    
+                        value = [ obj.x, obj.y, obj.z ]; 
+                    }
                     break;            
                 case "minVelocity":
-                    if ( ps.getMinVelocity )
-                        value = ps.getMinVelocity();
+                    if ( ps.getMinVelocity ) {
+                        obj = ps.getMinVelocity();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;    
                 case "startAcceleration":
-                    if ( ps.getStartAccelertaion )
-                        value = ps.getStartAccelertaion();
+                    if ( ps.getStartAccelertaion ){
+                        obj = ps.getStartAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "endAcceleration":
-                    if ( ps.getEndAccelertaion )
-                        value = ps.getEndAccelertaion();
+                    if ( ps.getEndAccelertaion ) {
+                        obj = ps.getEndAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "maxStartAcceleration":
-                    if ( ps.getMaxStartAccelertaion )
-                        value = ps.getMaxStartAccelertaion();
+                    if ( ps.getMaxStartAccelertaion ) {
+                        obj = ps.getMaxStartAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "maxEndAcceleration":
-                    if ( ps.getMaxEndAccelertaion )
-                       value = ps.getMaxEndAccelertaion();
+                    if ( ps.getMaxEndAccelertaion ) {
+                       obj = ps.getMaxEndAccelertaion();
+                       value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "minStartAcceleration":
-                    if ( ps.getMinStartAccelertaion )
-                        value = ps.getMinStartAccelertaion();
+                    if ( ps.getMinStartAccelertaion ) {
+                        obj = ps.getMinStartAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "minEndAcceleration":
                     if ( ps.getMinEndAccelertaion )
-                        value = ps.getMinEndAccelertaion();
+                        obj = ps.getMinEndAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ]; 
                     break;
                 case "startColor":
-                    if ( ps.getStartColor )
-                        value = ps.getStartColor();
+                    if ( ps.getStartColor ) {
+                        obj = ps.getStartColor();
+                        value = [ obj.r, obj.b, obj.g, obj.a ? obj.a : undefined ];
+                    }
                     break;
                 case "endColor":
-                    if ( ps.getEndColor )
-                        value = ps.getEndColor();
+                    if ( ps.getEndColor ){
+                        obj = ps.getEndColor();
+                        value = [ obj.r, obj.b, obj.g, obj.a ? obj.a : undefined ];
+                    }
                     break;
                 case "image":
                     if ( ps.getImage )
