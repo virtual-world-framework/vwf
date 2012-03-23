@@ -30,7 +30,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 7.2, 10, 0 ]
-      rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - |
@@ -52,7 +52,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ -7.2, 10, 0 ]
-      rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - |
