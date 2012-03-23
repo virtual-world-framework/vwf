@@ -4,14 +4,32 @@ require "tilt"
 require "yaml"
 
 
-CLOBBER.include( "web/catalog.html" )
+CLOBBER.include "web/**/*.html"
 
-
-desc "Generate the catalog."
 
 task :default => [ :clean, :clobber, :build ]
 
-task :build => "web/catalog.html"
+desc "Generate the catalog and documentation."
+
+task :build => "web/catalog.html" do
+
+    original_path = ENV["PATH"]
+    ENV["PATH"] = FileList[ "../support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
+
+    FileList[ "web/*.md" ].each do |md|
+        sh "( cat web/format/preamble ; Markdown.pl '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
+    end
+
+    FileList[ "web/docs/**/*.md" ].each do |md|
+        sh "( cat web/docs/format/preamble ; Markdown.pl '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
+    end
+
+    sh "bundle exec rocco web/docs/application/*.vwf.yaml"
+    sh "bundle exec rocco web/docs/application/example.js"
+    
+    ENV["PATH"] = original_path
+
+end
 
 desc "Generate the catalog."
 
