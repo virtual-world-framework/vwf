@@ -1221,7 +1221,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         switch ( propertyName ) {
               case "ambientColor":
                 var color = sceneNode.glgeScene.getAmbientColor();
-                value = [ color['r'], color['g'], color['b'] ];
+                value = color['a'] ? [ color['r'], color['g'], color['b'], color['a'] ] : [ color['r'], color['g'], color['b'] ];
                 break;
             case "activeCamera":
                 if ( sceneNode.glgeScene.camera && sceneNode.glgeScene.camera.ID ) {
@@ -1233,7 +1233,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "backgroundColor":
                 var color = sceneNode.glgeScene.getBackgroundColor();
-                value = [ color['r'], color['g'], color['b'] ];
+                value = color['a'] ? [ color['r'], color['g'], color['b'], color['a'] ] : [ color['r'], color['g'], color['b'] ];
                 break;
             
             default:
@@ -1260,6 +1260,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         value = ps.getNumParticles();
                     break;
                 case "lifeTime":
+                    // there is no getLifeTime function in GLGE for ParticleSystems
                     if ( ps.getLifeTime )
                         value = ps.getLifeTime();
                     break;
@@ -1284,6 +1285,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         value = ps.getLoop();
                     break;
                 case "velocity":
+                    // there is no getVelocity function in GLGE for ParticleSystems 
                     if ( ps.getVelocity ) {
                         obj = ps.getVelocity();
                         value = [ obj.x, obj.y, obj.z ];
@@ -1302,12 +1304,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
                     break;    
                 case "startAcceleration":
+                    // there is no getStartAccelertaion function in GLGE for ParticleSystems
                     if ( ps.getStartAccelertaion ){
                         obj = ps.getStartAccelertaion();
                         value = [ obj.x, obj.y, obj.z ];
                     }
                     break;
                 case "endAcceleration":
+                    // there is no getEndAccelertaion function in GLGE for ParticleSystems
                     if ( ps.getEndAccelertaion ) {
                         obj = ps.getEndAccelertaion();
                         value = [ obj.x, obj.y, obj.z ];
@@ -1339,13 +1343,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 case "startColor":
                     if ( ps.getStartColor ) {
                         obj = ps.getStartColor();
-                        value = [ obj.r, obj.b, obj.g, obj.a ? obj.a : undefined ];
+                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
                     }
                     break;
                 case "endColor":
                     if ( ps.getEndColor ){
                         obj = ps.getEndColor();
-                        value = [ obj.r, obj.b, obj.g, obj.a ? obj.a : undefined ];
+                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
                     }
                     break;
                 case "image":
@@ -1387,7 +1391,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         var node = this.state.nodes[ nodeID ]; 
         var value = undefined;
-        var txtr, mat;
+        var txtr, mat, obj;
 
         switch ( propertyName ) {
             case "texture": {
@@ -1403,13 +1407,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
                 break;
             case "color":
-                if ( mat ) { value = mat.getColor(); } 
+                if ( mat ) { 
+                    obj = mat.getColor();
+                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                } 
                 break;                
             case "ambient":
-                if ( mat ) { value = mat.getAmbient(); } 
+                if ( mat ) { 
+                    obj = mat.getAmbient();
+                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                } 
                 break;
             case "specColor":
-                if ( mat ) { value = mat.getSpecularColor(); } 
+                if ( mat ) { 
+                    obj = mat.getSpecularColor();
+                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                } 
                 break;
             case "shininess":
                 if ( mat ) { value = mat.getShininess(); } 

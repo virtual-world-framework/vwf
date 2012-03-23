@@ -55,7 +55,7 @@ children:
               this.powerOn = false;
             }
             this.volume = value;
-            this.bone1.MaxScene.Radio.ic40Volume.rotZ = 12 * value;
+            this.bone1.MaxScene.Radio.ic40Volume.rotation = [ 0, 0, 1, 12 * value ];
           }
         value: 0
       speak: "up"
@@ -514,23 +514,13 @@ children:
                         }
                   ic40Volume:
                     extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/spin-on-move.vwf
-                    properties:
-                      spin-axis: [ 0, 0, 1 ]
-                      spin-rate: 2
-                    properties:
-                      rotZ: 0
                     scripts:  
                     - | 
                         this.pointerClick = function()  {
-                          var rot = this.rotation;
-                          if ( rot[4] == 0 ) {
-                            this.parent.parent.parent.parent.volume = 10;
-                            this.rotateBy( [0,0,1,10],0 );
+                          if ( this.parent.parent.parent.parent.volume == 0 ) {
+                            this.parent.parent.parent.parent.volume = 1;
                           } else {
                             this.parent.parent.parent.parent.volume = 0;
-                            this.rotation = [0,0,1,0];
                           }                            
                         }
                   LCD:
