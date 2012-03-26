@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 
     // vwf/view/editor creates a view interface for editor functions. 
 
@@ -983,7 +983,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         {
             jQuery('#about_tab').append("<div class='header'>About</div>" + 
                 "<div class='about'><p style='font:bold 12pt Arial'>Virtual World Framework</p>" +
-                "<p><b>Version: </b>0.5.0.1250</p>" +
+                "<p><b>Version: </b>" + version.join(".") + "</p>" +
                 "<p><b>Site: </b><a href='http://virtual.wf' target='_blank'>http://virtual.wf</a></p></div>");
 
             this.aboutInit = true;
