@@ -71,7 +71,7 @@ scripts:
   var pushpinIndex = 1;
   var pushpin = {
     extends: "http://vwf.example.com/node3.vwf",
-    source: "models/pushpinblack.dae",
+    source: "models/pushpinred.dae",
     type: "model/vnd.collada+xml",
     properties: {
       scale: 6
