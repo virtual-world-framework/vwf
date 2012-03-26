@@ -1182,13 +1182,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 node.glgeObject.setSpotExponent( propertyValue );
                 break;
 
-//                  case "diffuse":
-//                    node.glgeObject.setDiffuse( propertyValue );
-//                    break;
+            case "diffuse":
+                node.glgeObject.diffuse = propertyValue; // no setDiffuse() in GLGE 0.7
+                break;
 
-//                  case "specular":
-//                    node.glgeObject.setSpecular( propertyValue );
-//                    break;
+            case "specular":
+                node.glgeObject.specular = propertyValue; // no setSpecular() in GLGE 0.7
+                break;
 
             case "samples":
                 node.glgeObject.setShadowSamples( propertyValue );
@@ -1508,13 +1508,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 value = node.glgeObject.getSpotExponent();
                 break;
 
-//                  case "diffuse":
-//                    value = node.glgeObject.getDiffuse();
-//                    break;
+            case "diffuse":
+                value = node.glgeObject.diffuse; // no getDiffuse() in GLGE 0.7
+                break;
 
-//                  case "specular":
-//                    value = node.glgeObject.getSpecular();
-//                    break;
+            case "specular":
+                value = node.glgeObject.specular; // no getSpecular() in GLGE 0.7
+                break;
 
             case "samples":
                 value = node.glgeObject.getShadowSamples();

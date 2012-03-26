@@ -44,6 +44,8 @@ properties:
     set: |
       this.spotExponent = value;
     value: 
+  diffuse:
+  specular:
   samples:
     set: |
       this.samples = value;
@@ -72,4 +74,3 @@ properties:
     set: |
       this.castShadows = value;
     value: 
-  
