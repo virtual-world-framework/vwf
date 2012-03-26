@@ -32,19 +32,19 @@ children:
               Tire01:
                 extends: http://vwf.example.com/node3.vwf
                 properties:
-                  rotation: [ 1, 1, 45, -45 ]
+                  rotation: [ 0, 0, 1, 0 ]
               Tire02:
                 extends: http://vwf.example.com/node3.vwf
                 properties:
-                  rotation: [ 1, 1, 45, 0 ]
+                  rotation: [ 0, 0, 1, 0 ]
               Tire03:
                 extends: http://vwf.example.com/node3.vwf
                 properties:
-                  rotation: [ 1, 1, 45, 0 ]
+                  rotation: [ 0, 0, 1, 0 ]
               Tire04:
                 extends: http://vwf.example.com/node3.vwf
                 properties:
-                  rotation: [ 1, 1, 45, 0 ]
+                  rotation: [ 0, 0, 1, 0 ]
           EnvironmentAmbientLight:
             extends: http://vwf.example.com/node3.vwf
           Omni001:
@@ -53,10 +53,6 @@ children:
             extends: http://vwf.example.com/node3.vwf
           Ground:
             extends: http://vwf.example.com/node3.vwf
-  # test:
-  #   extends: http://vwf.example.com/node3.vwf
-  #   source: TestScene.DAE
-  #   type: model/vnd.collada+xml
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -74,8 +70,7 @@ children:
 scripts:
 - |
   this.initialize = function() {
+    this.camera.translation = [ -500, -500, 235 ];
     this.camera.lookAt = "http-vwf-example-com-node3-vwf-humvee";
-    this.camera.transform = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,-100,0,1 ];
     this.camera.far = 1000;
-    this.camera.translation = [ 10.8, -784.2, 62 ];
   }
