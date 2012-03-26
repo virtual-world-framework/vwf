@@ -62,12 +62,14 @@ children:
     properties:
       lightType: "directional"
       quadraticAttenuation: 10
+      specular: false # the highlights are way too hot (materials or light?)
       rotation: [ 1, 0, 0, -10 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       quadraticAttenuation: 10
+      specular: false # the highlights are way too hot (materials or light?)
       rotation: [ -1, 0, 0, 200 ]
 scripts:
 - |
