@@ -208,9 +208,11 @@ scripts:
         var cameraPos = this.activeCameraComp.translation;
         var cameraAt = this.getCameraAt();
         
-        var yinc = 0;
-        var xinc = 0;
-        var zinc = 0;
+        var xInc = 0;
+        var yInc = 0;
+        var zInc = 0;
+        var distanceLimit;
+        var moveDistance; 
 
         goog.vec.Vec3.normalize( cameraAt, cameraAt );
 
@@ -219,38 +221,36 @@ scripts:
           mult = Math.abs( this.input.pickInfo.wheel.deltaY / 20 );
           if ( this.input.pickInfo.wheel.deltaY < 0 ) {
             // backwards
-            yinc = yinc - parseFloat( cameraAt[1] ); 
-            xinc = xinc - parseFloat( cameraAt[0] );
-            zinc = zinc - parseFloat( cameraAt[2] );
-          } else if ( this.input.pickInfo.wheel.deltaY > 0 ) {
-            //forward
-            yinc = yinc + parseFloat( cameraAt[1] ); 
-            xinc = xinc + parseFloat( cameraAt[0] );
-            zinc = zinc + parseFloat( cameraAt[2] );
+            cameraAt[0] *= -1;
+            cameraAt[1] *= -1;
+            cameraAt[2] *= -1;
+          } else if ( pickInfo && pickInfo.distance ) {
+            distanceLimit = pickInfo.distance;
           }
         }
         if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
-        if ( xinc != 0 || yinc != 0 || zinc != 0 ) {
-          var x, y, z;
-        
-          x = cameraPos[0] + xinc * this.speed * mult;
-          y = cameraPos[1] + yinc * this.speed * mult;
-
-          if ( this.lookAt != "" ) {
-            z = cameraPos[2] + zinc * this.speed * mult;
-          } else {
-            z = cameraPos[2];
-            var ratioHR = camerapos[2] / this.orbitRadius;
-            zinc = Math.sqrt( Math.pow( x-cameraPos[0], 2 ) + Math.pow( y-cameraPos[1], 2 ) ) * ratioHR;
-            if ( this.input.pickInfo.wheel.deltaY > 0 ) zinc *= -1;
-            z = cameraPos[2] + zinc;
-          }
-
-          this.activeCameraComp.translation = [ x, y, z ];
-          positionChanged = true;
+        moveDistance = this.speed * mult;
+        if ( distanceLimit && moveDistance > ( distanceLimit*0.4 )  ) {
+          moveDistance = distanceLimit*0.4;
         }
+
+        xInc = cameraAt[0] * moveDistance;
+        yInc = cameraAt[1] * moveDistance;
+        zInc = cameraAt[2] * moveDistance;
+
+        // old code to handle when lookAt is valid
+        //else {  
+        //  z = cameraPos[2];
+        //  var ratioHR = camerapos[2] / this.orbitRadius;
+        //  zinc = Math.sqrt( Math.pow( x-cameraPos[0], 2 ) + Math.pow( y-cameraPos[1], 2 ) ) * ratioHR;
+        //  if ( this.input.pickInfo.wheel.deltaY > 0 ) zinc *= -1;
+        //  z = cameraPos[2] + zinc;
+        //}
+
+        this.activeCameraComp.translateBy( [ xInc, yInc, zInc ], 0 );
+        positionChanged = true;
       }
     }
     this.keyDown = function( parms ) {
@@ -497,15 +497,15 @@ scripts:
     }
     this.getCameraAt = function() {
       var camRotMat = this.activeCameraComp.rotationMatrix;
-      return [ camRotMat[4], camRotMat[5], camRotMat[6] ];  
+      return goog.vec.Vec3.createFromValues( camRotMat[4], camRotMat[5], camRotMat[6] );  
     }
     this.getCameraUp = function() {
       var camRotMat = this.activeCameraComp.rotationMatrix;
-      return [ camRotMat[8], camRotMat[9], camRotMat[10] ];  
+      return goog.vec.Vec3.createFromValues( camRotMat[8], camRotMat[9], camRotMat[10] );  
     }
     this.getCameraRight = function() {
       var camRotMat = this.activeCameraComp.rotationMatrix;
-      return [ camRotMat[0], camRotMat[1], camRotMat[2] ];  
+      return goog.vec.Vec3.createFromValues( camRotMat[0], camRotMat[1], camRotMat[2] );  
     }            
     this.getCameraVec = function( x, y, z ) {
         var camRotMat = this.activeCameraComp.rotationMatrix;
