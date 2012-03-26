@@ -32,11 +32,11 @@ children:
               Tire01:
                 extends: http://vwf.example.com/node3.vwf
                 properties:
-                  rotation: [ 0, 0, 1, 0 ]
+                  rotation: [ 0, 0, 1, 25 ]
               Tire02:
                 extends: http://vwf.example.com/node3.vwf
                 properties:
-                  rotation: [ 0, 0, 1, 0 ]
+                  rotation: [ 0, 0, 1, 25 ]
               Tire03:
                 extends: http://vwf.example.com/node3.vwf
                 properties:
