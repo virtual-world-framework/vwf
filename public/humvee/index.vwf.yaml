@@ -1,0 +1,62 @@
+---
+extends: http://vwf.example.com/navscene.vwf
+children:
+  humvee:
+    extends: http://vwf.example.com/node3.vwf
+    source: humvee.DAE
+    type: model/vnd.collada+xml
+    children:
+      bone1:
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          bone2:
+            extends: http://vwf.example.com/node3.vwf
+            children:
+              MaxScene:
+                extends: http://vwf.example.com/node3.vwf
+                children:
+                  Humvee:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+                      Tire001:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                      Tire002:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                      Tire003:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                      Tire004:
+                        extends: http://vwf.example.com/node3.vwf
+                        children:
+                  EnvironmentAmbientLight:
+                    extends: http://vwf.example.com/node3.vwf
+                  Omni001:
+                    extends: http://vwf.example.com/node3.vwf
+                  Omni002:
+                    extends: http://vwf.example.com/node3.vwf
+                  Ground:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+  # test:
+  #   extends: http://vwf.example.com/node3.vwf
+  #   source: TestScene.DAE
+  #   type: model/vnd.collada+xml
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      quadraticAttenuation: 10
+      rotation: [ 1, 0, 0, -45 ]
+  dir2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      quadraticAttenuation: 10
+      rotation: [ -1, 0, 0, 225 ]
+scripts:
+- |
+  this.initialize = function() {
+    this.camera.transform = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,-100,0,1 ];
+  }
