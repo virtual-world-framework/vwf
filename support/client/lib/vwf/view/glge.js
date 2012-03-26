@@ -153,6 +153,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         $('#topdown_b').height(canvas.height);
                         $('#client_list').height(canvas.height);
                         $('#time_control').height(canvas.height);
+                        $('#about_tab').height(canvas.height);
                     }
                 }
 
