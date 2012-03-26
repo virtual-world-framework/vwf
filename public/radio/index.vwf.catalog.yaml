@@ -1,15 +1,2 @@
-# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
-# Secretary of Defense (Personnel & Readiness).
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-# in compliance with the License. You may obtain a copy of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software distributed under the License
-# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-# or implied. See the License for the specific language governing permissions and limitations under
-# the License.
-
 description:
   The radio application allows a user to click its buttons and knobs and the radio will update its screen accordingly.  For example, clicking the top right most knob will cause the screen to turn on. Another example is clicking the middle knob will cause the channels to change or clicking the red button will scroll through the backlight, beep function, sql, and channel functions.  The side bottom buttons can update the backlight, beep, and sql functions.
