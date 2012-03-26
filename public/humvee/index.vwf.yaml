@@ -23,39 +23,36 @@ children:
     source: humvee.DAE
     type: model/vnd.collada+xml
     children:
-      bone1:
+      MaxScene:
         extends: http://vwf.example.com/node3.vwf
         children:
-          bone2:
+          Humvee:
             extends: http://vwf.example.com/node3.vwf
             children:
-              MaxScene:
+              Tire01:
                 extends: http://vwf.example.com/node3.vwf
-                children:
-                  Humvee:
-                    extends: http://vwf.example.com/node3.vwf
-                    children:
-                      Tire001:
-                        extends: http://vwf.example.com/node3.vwf
-                        children:
-                      Tire002:
-                        extends: http://vwf.example.com/node3.vwf
-                        children:
-                      Tire003:
-                        extends: http://vwf.example.com/node3.vwf
-                        children:
-                      Tire004:
-                        extends: http://vwf.example.com/node3.vwf
-                        children:
-                  EnvironmentAmbientLight:
-                    extends: http://vwf.example.com/node3.vwf
-                  Omni001:
-                    extends: http://vwf.example.com/node3.vwf
-                  Omni002:
-                    extends: http://vwf.example.com/node3.vwf
-                  Ground:
-                    extends: http://vwf.example.com/node3.vwf
-                    children:
+                properties:
+                  rotation: [ 1, 1, 45, -45 ]
+              Tire02:
+                extends: http://vwf.example.com/node3.vwf
+                properties:
+                  rotation: [ 1, 1, 45, 0 ]
+              Tire03:
+                extends: http://vwf.example.com/node3.vwf
+                properties:
+                  rotation: [ 1, 1, 45, 0 ]
+              Tire04:
+                extends: http://vwf.example.com/node3.vwf
+                properties:
+                  rotation: [ 1, 1, 45, 0 ]
+          EnvironmentAmbientLight:
+            extends: http://vwf.example.com/node3.vwf
+          Omni001:
+            extends: http://vwf.example.com/node3.vwf
+          Omni002:
+            extends: http://vwf.example.com/node3.vwf
+          Ground:
+            extends: http://vwf.example.com/node3.vwf
   # test:
   #   extends: http://vwf.example.com/node3.vwf
   #   source: TestScene.DAE
@@ -65,17 +62,13 @@ children:
     properties:
       lightType: "directional"
       quadraticAttenuation: 10
-      rotation: [ 1, 0, 0, -45 ]
+      rotation: [ 1, 0, 0, -10 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
       quadraticAttenuation: 10
-      rotation: [ -1, 0, 0, 225 ]
-  sceneCenter:
-    extends: http://vwf.example.com/node3.vwf
-    properties:
-      translation: [ 10.8, -784.2, 62 ]
+      rotation: [ -1, 0, 0, 200 ]
 scripts:
 - |
   this.initialize = function() {
