@@ -28,7 +28,7 @@ properties:
   fly-speedOnGroundMax: 200
   fly-elevation: 2500
   fly-speedInAir: 250
-  fly-raduis: 8000
+  fly-radius: 8000
   fly-speed: 62.5
   fly-pointIndex: 0
 methods:
@@ -126,15 +126,15 @@ scripts:
       var inc = ( 2.0 * Math.PI ) / this.pointsOnCircle;
       var currentAngle = Math.PI + inc;
       var center = [];
-      center[0] = prevPt[0] + this["fly-raduis"];;
+      center[0] = prevPt[0] + this["fly-radius"];;
       center[1] = prevPt[1];    
       center[2] = prevPt[2];       
 
       this.firstCiclePoint = this.points.length-1; 
       for ( var i = 0; i < this.pointsOnCircle; i++ ) {
         newPoint = [];
-        newPoint[0] = center[0] + this["fly-raduis"] * Math.cos( currentAngle );
-        newPoint[1] = center[1] + this["fly-raduis"] * Math.sin( currentAngle );
+        newPoint[0] = center[0] + this["fly-radius"] * Math.cos( currentAngle );
+        newPoint[1] = center[1] + this["fly-radius"] * Math.sin( currentAngle );
         newPoint[2] = center[2];        
         currentAngle += inc;
         
