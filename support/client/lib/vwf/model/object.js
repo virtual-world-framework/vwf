@@ -128,11 +128,6 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
             return this.objects[nodeID].properties[propertyName];
         },
 
-getNode: function( nodeID ) {
-    return JSON.parse( JSON.stringify( this.objects[nodeID] ) );
-}
-
-
     } );
 
 } );
