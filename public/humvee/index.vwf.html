@@ -17,6 +17,16 @@
   <head>
     <script type="text/javascript">
 
+      active = false;
+
+      $(document).mousedown( function(){ 
+          active = true;
+      } );
+
+      $(document).mouseup( function(){ 
+          active = false;
+      } ); 
+
       jQuery( ".humvee.wheels.slider" ).slider( {
         value: -25,
         min: -40,
@@ -31,7 +41,7 @@
       	if (nodeId == "http-vwf-example-com-node3-vwf-Tire01" ) {
        	  switch (propertyName) {
          		case "rotation":
-              jQuery( ".humvee.wheels.slider" ).slider( "value", -propertyValue[3]);
+              if(!active) jQuery( ".humvee.wheels.slider" ).slider( "value", -propertyValue[3]);
          		  break;
           }
         }
