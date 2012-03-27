@@ -833,7 +833,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function outputGroup( group, iIndent, open ) {
         var sOut = indent.call( this, iIndent + 1);
         if (open) {
-            lastGroupName = name(group);
+            var lastGroupName = name(group);
             this.logger.info(indent.call( this,iIndent) + lastGroupName + ":");
             this.logger.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 
