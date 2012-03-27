@@ -9,7 +9,7 @@ The Virtual World Framework (VWF) is a fast, light-weight, web-based architectur
 * WebSockets – providing a full TCP/IP connection between the client and server
 * JavaScript – the programming language of the web  
 
-The application below provides the basic functionality achievable with the VWF. It is representative of a sandtable, allowing a user to navigate the environment, place push pin markers, and draw on the terrain. In additional, 2D HTML components are used in conjunction with the 3D environment in order to change colors and select tool mode. Click the image to launch an instance of the application.
+The application below provides the basic functionality achievable with the VWF. It is representative of a sandtable, allowing a user to navigate the environment, place push pin markers, and draw on the terrain. In addition, 2D HTML components are used in conjunction with the 3D environment in order to change colors and select tool mode. Click the image to launch an instance of the application.
 
 <a href='../sandtable/'><img src='sandtable.png' alt='sandtable' style='border:2px black solid' /></a>
 
