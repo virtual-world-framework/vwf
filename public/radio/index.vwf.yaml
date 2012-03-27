@@ -420,14 +420,14 @@ children:
                           var currentChannel = this.parent.parent.parent.parent.channel;
                           if ( this.channelDirectionUp && currentChannel < 16 ) {
                             this.parent.parent.parent.parent.channel = currentChannel + 1;
-                            this.rotZ = this.rotZ - 10;
+                            this.rotation = [ 0, 0, 1, -this.parent.parent.parent.parent.channel * 10];
                             if ( this.parent.parent.parent.parent.channel == 16 )
-                              channelDirectionUp = false;
+                              this.channelDirectionUp = false;
                           } else {
                             this.parent.parent.parent.parent.channel = currentChannel - 1;
-                            this.rotZ = this.rotZ + 10;
+                            this.rotation = [ 0, 0, 1, -this.parent.parent.parent.parent.channel * 10];
                             if ( this.parent.parent.parent.parent.channel == 1 )
-                              channelDirectionUp = true;
+                              this.channelDirectionUp = true;
                           }
                         }
                     properties:
