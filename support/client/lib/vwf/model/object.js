@@ -90,9 +90,9 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
 
             for ( var propertyName in properties ) {  // TODO: since undefined values don't serialize to json, interate over node_properties (has-own only) instead and set to undefined if missing from properties?
 
-                // if ( ! node_properties.hasOwnProperty( propertyName ) ) {
-                //     this.kernel.createProperty( nodeID, propertyName, undefined );
-                // }
+                if ( ! node_properties.hasOwnProperty( propertyName ) ) {
+                    this.kernel.setProperty( nodeID, propertyName, properties[propertyName] );
+                }  // TODO: this needs to be handled in vwf.js for setProperties() the way it's now handling setProperty() create vs. initiailize vs. set
 
                 node_properties[propertyName] = properties[propertyName];
 
