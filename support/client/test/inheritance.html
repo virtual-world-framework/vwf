@@ -34,6 +34,7 @@
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
+        "logger",
 
       ], function( ready ) {
 
@@ -550,7 +551,7 @@
 
               value: function( tag ) {
                 return {
-                  property: tag
+                  property: { value: tag, create: true }
                 };
               },
 

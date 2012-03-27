@@ -12,10 +12,7 @@
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
-
-    <script type="text/javascript" src="../lib/vwf-view.js"></script>
-    <script type="text/javascript" src="../lib/vwf-view-glge.js"></script>
-    <script type="text/javascript" src="../lib/vwf-view-glge/glge-compiled.js"></script>
+    <script type="text/javascript" src="../lib/vwf/model/glge/glge-compiled.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
 
@@ -39,6 +36,8 @@
         "vwf/model/stage/log", // explicitly loaded until vwf can load its dependencies
         "vwf/kernel/view", // explicitly loaded until vwf can load its dependencies
         "vwf/view/test",
+        "vwf/view/glge",
+        "logger",
 
       ], function( ready ) {
 
@@ -68,7 +67,7 @@
 
             [
 
-              "glge",
+              "vwf/view/glge",
               "vwf/view/test", // dummy to make the rest have the same indexes as the models
 
               "vwf/view/test",
