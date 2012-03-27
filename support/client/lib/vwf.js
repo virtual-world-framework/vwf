@@ -106,7 +106,8 @@
         // that we can find it if it is reused. Components specified internally as object literals
         // are anonymous and are not indexed here.
 
-        var types = this.private.types = {}; // maps URI => component specification
+        var types = this.private.types = {}; // maps component node ID => component specification
+        var uris = this.private.uris = {}; // maps component nodeID => component URI
 
         // The proto-prototype of all nodes is "node", identified by this URI. This type is
         // intrinsic to the system and nothing is loaded from the URI.
@@ -837,6 +838,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                     var callbacks = types[nodeID];
                     types[nodeID] = component; // component specification once loaded
+                    uris[nodeID] = uri;
 
                     callbacks.forEach( function( callback ) {
                         callback && callback.call( vwf, nodeID );
@@ -875,6 +877,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                                     var callbacks = types[nodeID];
                                     types[nodeID] = component; // component specification once loaded
+                                    uris[nodeID] = uri;
 
                                     callbacks.forEach( function( callback ) {
                                         callback && callback.call( vwf, nodeID );
