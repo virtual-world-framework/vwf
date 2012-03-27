@@ -50,6 +50,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         },
 
+        // -- initializingNode ---------------------------------------------------------------------
+
+        initializingNode: function( nodeID, childID ) {
+        },
+
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
