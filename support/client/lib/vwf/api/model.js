@@ -38,6 +38,18 @@ define( {
 
     /// Description.
     /// 
+    /// @name vwf.api.model#initializingNode
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {ID} childID
+    /// 
+    /// @returns {} 
+
+    initializingNode: [ /* nodeID, childID */ ],
+
+    /// Description.
+    /// 
     /// @name vwf.api.model#deletingNode
     /// @function
     /// 

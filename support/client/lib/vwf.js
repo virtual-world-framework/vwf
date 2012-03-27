@@ -1938,6 +1938,9 @@ return component;
 
                 function( callback /* ( err, results ) */ ) {
 
+                    // Perform initializations for properties with setter functions. These are
+                    // assigned here so that the setters run on a fully-constructed node.
+
                     Object.keys( deferredInitializations ).forEach( function( propertyName ) {
                         vwf.setProperty( nodeID, propertyName, deferredInitializations[propertyName] );
                     }, this );
@@ -1948,10 +1951,16 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( nodeID );
 }
 
-                    // Invoke an initialization method.
+                    // Call initializingNode() on each model and initializedNode() on each view to
+                    // indicate that the node is fully constructed.
 
-                    vwf.execute( nodeID, "this.initialize && this.initialize()",
-                        "application/javascript" ); 
+                    vwf.models.forEach( function( model ) {
+                        model.initializingNode && model.initializingNode( parentID, nodeID );
+                    } );
+
+                    vwf.views.forEach( function( view ) {
+                        view.initializedNode && view.initializedNode( parentID, nodeID );
+                    } );
 
                     callback( undefined, undefined );
                 },

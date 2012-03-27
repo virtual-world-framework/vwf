@@ -187,6 +187,13 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return undefined; // creatingNode doesn't return anything to the kernel
         },
 
+        // -- initializingNode ---------------------------------------------------------------------
+
+        initializingNode: function( nodeID, childID ) {
+            return this.model.initializingNode && this.model.initializingNode(
+                this.kernel_to_model[nodeID] || nodeID, this.kernel_to_model[childID] || childID );
+        },
+
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {

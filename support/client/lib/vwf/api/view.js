@@ -35,7 +35,19 @@ define( {
     /// @returns {}
 
     createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /- ( ready ) -/ */ ],
-    
+
+    /// Description.
+    /// 
+    /// @name vwf.api.view#initializedNode
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {ID} childID
+    /// 
+    /// @returns {}
+
+    initializedNode: [ /* nodeID, childID */ ],
+   
     /// Description.
     /// 
     /// @name vwf.api.view#deletedNode

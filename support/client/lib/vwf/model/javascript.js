@@ -255,6 +255,25 @@ node.id = childID; // TODO: move to vwf/model/object
 
         },
 
+        // -- initializingNode ---------------------------------------------------------------------
+
+        // Invoke an initialize() function if it exists.
+
+        initializingNode: function( nodeID, childID ) {
+
+            var child = this.nodes[childID];
+            var scriptText = "this.initialize && this.initialize()";
+
+            try {
+                return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+            } catch ( e ) {
+                this.logger.warnc( "initializingNode", childID, propertyName, propertyValue,
+                    "exception in initialize:", exceptionMessage( e ) );
+            }
+
+            return undefined;
+        },
+
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
