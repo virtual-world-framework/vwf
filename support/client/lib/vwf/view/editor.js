@@ -984,7 +984,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             jQuery('#about_tab').append("<div class='header'>About</div>" + 
                 "<div class='about'><p style='font:bold 12pt Arial'>Virtual World Framework</p>" +
                 "<p><b>Version: </b>" + version.join(".") + "</p>" +
-                "<p><b>Site: </b><a href='http://virtual.wf' target='_blank'>http://virtual.wf</a></p></div>");
+                "<p><b>Site: </b><a href='http://virtualworldframework.com' target='_blank'>http://virtualworldframework.com</a></p></div>");
 
             this.aboutInit = true;
         }
