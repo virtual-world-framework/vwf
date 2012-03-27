@@ -60,6 +60,17 @@ define( {
 
     /// Description.
     /// 
+    /// @name vwf.api.model#behavioring
+    /// @function
+    /// 
+    /// @param {} 
+    /// 
+    /// @returns {}
+
+    behavioring: [],
+
+    /// Description.
+    /// 
     /// @name vwf.api.model#addingChild
     /// @function
     /// 
