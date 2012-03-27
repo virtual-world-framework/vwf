@@ -62,6 +62,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             return this.objects[nodeID].extends;
         },
 
+        // -- behavioring --------------------------------------------------------------------------
+
+        behavioring: function( nodeID ) {  // TODO: not for global anchor node 0
+            return this.objects[nodeID].implements;
+        },
+
         // -- addingChild --------------------------------------------------------------------------
 
         //addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0

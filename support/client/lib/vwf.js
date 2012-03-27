@@ -553,7 +553,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             var message = JSON.stringify( fields );
             socket.send( message );
 
-        }
+        };
 
         // -- receive ------------------------------------------------------------------------------
 
@@ -991,7 +991,7 @@ return component;
 
         // -- prototype ----------------------------------------------------------------------------
 
-        this.prototype = function( nodeID ) {
+        this.prototype = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             // Call prototyping() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -1004,24 +1004,41 @@ return component;
             } );
 
             return prototypeID;
-        }
+        };
 
         // -- prototypes ---------------------------------------------------------------------------
 
-        this.prototypes = function( nodeID ) {
+        this.prototypes = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             var prototypeIDs = [];
             var prototypeID = undefined;
             
             while ( nodeID !== undefined ) {
-                if ( ( prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                if ( ( prototypeID = prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
                     prototypeIDs.push( prototypeID );
                 }
                 nodeID = prototypeID;
             }
             
             return prototypeIDs;
-        }
+        };
+
+        // -- behaviors ----------------------------------------------------------------------------
+
+        this.behaviors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+
+            // Call behavioring() on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var behaviorIDs = undefined;
+
+            this.models.some( function( model ) {
+                behaviorIDs = model.behavioring && model.behavioring( nodeID );
+                return behaviorIDs !== undefined && behaviorIDs.length > 0;
+            } );
+
+            return behaviorIDs || [];
+        };
 
         // -- addChild -----------------------------------------------------------------------------
 
@@ -1071,7 +1088,7 @@ return component;
 
         // -- ancestors ----------------------------------------------------------------------------
 
-        this.ancestors = function( nodeID ) {
+        this.ancestors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             var ancestors = [];
 
@@ -1083,11 +1100,11 @@ return component;
             }
 
             return ancestors;
-        }
+        };
 
         // -- parent -------------------------------------------------------------------------------
 
-        this.parent = function( nodeID ) {
+        this.parent = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             // Call parenting() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -1104,7 +1121,7 @@ return component;
 
         // -- children -----------------------------------------------------------------------------
 
-        this.children = function( nodeID ) {
+        this.children = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             this.logger.group( "vwf.children " + nodeID );
 
@@ -1125,7 +1142,7 @@ return component;
 
         // -- name ---------------------------------------------------------------------------------
 
-        this.name = function( nodeID ) {
+        this.name = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             // Call naming() on each model. The first model to return a non-undefined value dictates
             // the return value.
