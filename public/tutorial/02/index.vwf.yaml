@@ -29,29 +29,17 @@ children:
     extends: http://vwf.example.com/node3.vwf
     properties:
       translation: [ 0, 0, 0 ]
-  predGroup:
+  predator:
     extends: http://vwf.example.com/node3.vwf
     implements:
     - http://vwf.example.com/fly.vwf
+    source: models/Predator.dae
+    type: model/vnd.collada+xml
     properties:
+      translation: [ 0, 500, 1800 ]
+      rotation: [ 0, 0, 1, 180 ]
+      scale: 50
       fly-flying: true
-    children:
-      predator:
-        extends: http://vwf.example.com/node3.vwf
-        source: models/Predator.dae
-        type: model/vnd.collada+xml
-        properties:
-          translation: [ 0, 500, 1800 ]
-          rotation: [ 1, 0, 0, 0 ]
-          scale: 50
-      cone:
-        extends: http://vwf.example.com/node3.vwf
-        source: models/cone.dae
-        type: model/vnd.collada+xml
-        properties:
-          translation: [ 0, -300, -1100 ]
-          rotation: [ 1, 0, 0, 0 ]
-          scale: [ 8, 8, 16 ]
 scripts:
 - |
   this.initialize = function() {

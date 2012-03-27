@@ -81,9 +81,7 @@ ________________________________________________________________________________
 
 Stage 3 - Multiple Models and Behaviors
 --------
-In the third stage, we'll add a child group consisting of a predator vehicle, and a cone-shaped radar. A child is added called 'predGroup' and contains two children of its own - 'predator' and 'cone'. These are defined similarly to those above. 
-
-Finally, we'll apply a behavior to the 'predGroup', which is defined in a separate yaml file. Setting the property 'fly-flying' to true will enable the flying behavior immediately upon application load. 
+In the third stage, we'll add an additional child node for a predator vehicle called 'predator' with similar property definitions. We'll then apply a behavior to the 'predator' node, which is defined in a separate yaml file. Setting the property 'fly-flying' to true will enable the flying behavior immediately upon application load. 
 
 	---
 	extends: http://vwf.example.com/navscene.vwf
@@ -103,29 +101,17 @@ Finally, we'll apply a behavior to the 'predGroup', which is defined in a separa
 	    extends: http://vwf.example.com/node3.vwf
 	    properties:
 	      translation: [ 0, 0, 0 ]
-	  predGroup:
-	    extends: http://vwf.example.com/node3.vwf
-	    implements:
-	    - http://vwf.example.com/fly.vwf
-	    properties:
-	      fly-flying: true
-	    children:
-	      predator:
-	        extends: http://vwf.example.com/node3.vwf
-	        source: models/Predator.dae
-	        type: model/vnd.collada+xml
-	        properties:
-	          translation: [ 0, 500, 1800 ]
-	          rotation: [ 1, 0, 0, 0 ]
-	          scale: 50
-	      cone:
-	        extends: http://vwf.example.com/node3.vwf
-	        source: models/cone.dae
-	        type: model/vnd.collada+xml
-	        properties:
-	          translation: [ 0, -300, -1100 ]
-	          rotation: [ 1, 0, 0, 0 ]
-	          scale: [ 8, 8, 16 ]
+	  predator:
+		extends: http://vwf.example.com/node3.vwf
+		implements:
+		- http://vwf.example.com/fly.vwf
+		source: models/Predator.dae
+		type: model/vnd.collada+xml
+		properties:
+		  translation: [ 0, 500, 1800 ]
+		  rotation: [ 0, 0, 1, 180 ]
+		  scale: 50
+		  fly-flying: true
 	scripts:
 	- |
 	  this.initialize = function() {
@@ -143,7 +129,7 @@ Stage 4 - HTML Overlays and Interaction
 --------
 In the fourth stage, we'll add an HTML overlay to the application, and setup the javascript to allow the 2D HTML components interact with the 3D nodes. For this application, we'll create a toolbar of two images, one to select navigation mode, and one to select pindrop mode, where navigation will be disabled, and a click of the mouse will mark the location selected. 
 
-First, we'll create a file called 'application.vwf.html' that will load separately or on top of the application. The name must match that of the 'application.vwf.yaml' file, and the framework will automatically look for that file. We'll define the body with a simple HTML toolbar div containing the two button images. This will allow us to select either navigation mode, or pindrop mode. 
+First, we'll create a file called 'index.vwf.html' that will load separately or on top of the application. The name must match that of the 'index.vwf.yaml' file, and the framework will automatically look for that file. We'll define the body with a simple HTML toolbar div containing the two button images. This will allow us to select either navigation mode, or pindrop mode. 
 
 In the yaml file, we'll add a mouseMode property with a setter. This property will determine whether the navmode is set to 'orbit' or turned off. We'll then add javascript variables and additional functions to drop the pins. The pushpin variable describes the child node that will be added, and will look similar to a child definition. The pointerUp function checks the navigation mode and will call the pindrop function if necessary to create the new node. 
 
@@ -173,29 +159,17 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	    extends: http://vwf.example.com/node3.vwf
 	    properties:
 	      translation: [ 0, 0, 0 ]
-	  predGroup:
-	    extends: http://vwf.example.com/node3.vwf
-	    implements:
-	    - http://vwf.example.com/fly.vwf
-	    properties:
-	      fly-flying: true
-	    children:
-	      predator:
-	        extends: http://vwf.example.com/node3.vwf
-	        source: models/Predator.dae
-	        type: model/vnd.collada+xml
-	        properties:
-	          translation: [ 0, 500, 1800 ]
-	          rotation: [ 1, 0, 0, 0 ]
-	          scale: 50
-	      cone:
-	        extends: http://vwf.example.com/node3.vwf
-	        source: models/cone.dae
-	        type: model/vnd.collada+xml
-	        properties:
-	          translation: [ 0, -300, -1100 ]
-	          rotation: [ 1, 0, 0, 0 ]
-	          scale: [ 8, 8, 16 ]
+	  predator:
+		extends: http://vwf.example.com/node3.vwf
+		implements:
+		- http://vwf.example.com/fly.vwf
+		source: models/Predator.dae
+		type: model/vnd.collada+xml
+		properties:
+		  translation: [ 0, 500, 1800 ]
+		  rotation: [ 0, 0, 1, 180 ]
+		  scale: 50
+		  fly-flying: true
 	scripts:
 	- |
 	  this.initialize = function() {
