@@ -18,7 +18,7 @@
     <script type="text/javascript">
 
       jQuery( ".humvee.wheels.slider" ).slider( {
-        value: 25,
+        value: -25,
         min: -40,
         max: 40,
         slide: update
@@ -26,8 +26,8 @@
 
       function update() {
         var turn = Number( jQuery( ".humvee.wheels.slider" ).slider("value") ) || 0;
-        vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire01", "rotation", [ 0, 0, 1, turn ]);
-        vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire02", "rotation", [ 0, 0, 1, turn ]);
+        vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire01", "rotation", [ 0, 0, 1, -turn ]);
+        vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire02", "rotation", [ 0, 0, 1, -turn ]);
       }
 
       //Currently causes slider to jump
