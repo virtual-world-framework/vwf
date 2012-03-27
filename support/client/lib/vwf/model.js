@@ -1,4 +1,19 @@
-define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( module, kernel_api, model_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+"use strict";
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
+define( [ "module", "logger", "vwf/api/kernel", "vwf/api/model" ], function( module, logger, kernel_api, model_api ) {
 
     // vwf/model.js is the common implementation of all Virtual World Framework models. Each model
     // is part of a federation with other models attached to the simulation that implements part of
@@ -19,24 +34,24 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
-    var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+    var context = module.id.replace( /\//g, "." );
 
-    logger.info( "load" );
+    logger.for( context ).infoc( "load" );
 
     return {
 
         module: module,
 
-        logger: logger,
+        logger: logger.for( context ),
 
         load: function( module, initializer, kernelGenerator, modelGenerator ) {
 
             var instance = Object.create( this );
 
             instance.module = module;
-            instance.logger = require( "vwf-proxy" ).logger_for( instance.module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+            instance.logger = logger.for( instance.module.id.replace( /\//g, "." ) );
             
-            instance.logger.info( "load" );
+            instance.logger.infoc( "load" );
 
             if ( typeof initializer == "function" || initializer instanceof Function ) {
                 initializer = initializer();
@@ -59,7 +74,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/model", "vwf-proxy" ], function( 
 
         create: function( kernel, model, stages, state, parameters ) {
 
-            this.logger.info( "create" );
+            this.logger.infoc( "create" );
 
             // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 

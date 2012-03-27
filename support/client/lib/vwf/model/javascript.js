@@ -1,3 +1,18 @@
+"use strict";
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
@@ -64,7 +79,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var node = this.nodes[childID] = Object.create( prototype );
 
             Object.defineProperty( node, "private", {
-                value: {} // for bookkeeping, not visible to scripts on the node  // TODO: ideally not visible; hide this better ("_private", "vwf_private", ?)
+                value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
             } );
 
 node.id = childID; // TODO: move to vwf/model/object
@@ -76,24 +91,54 @@ node.id = childID; // TODO: move to vwf/model/object
             node.source = childSource;
             node.type = childType;
 
+            Object.defineProperty( node, "logger", {
+                value: this.logger.for( childName ),
+                enumerable: true,
+            } );
+
             node.properties = Object.create( prototype.properties || Object.prototype, {
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            node.private.getters = {};
-            node.private.setters = {};
+            Object.defineProperty( node.properties, "create", {
+                value: function( name, value, get, set ) { // "this" is node.properties
+                    return self.kernel.createProperty( this.node.id, name, value, get, set );
+                }
+            } );
+
+            node.private.getters = Object.create( prototype.private ?
+                prototype.private.getters : Object.prototype
+            );
+
+            node.private.setters = Object.create( prototype.private ?
+                prototype.private.setters : Object.prototype
+            );
 
             node.methods = Object.create( prototype.methods || Object.prototype, {
                 node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            node.private.bodies = {};
+            Object.defineProperty( node.methods, "create", {
+                value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
+                    return self.kernel.createMethod( this.node.id, name, parameters, body );
+                }
+            } );
+
+            node.private.bodies = Object.create( prototype.private ?
+                prototype.private.bodies : Object.prototype
+            );
 
             node.events = Object.create( prototype.events || Object.prototype, {
                 node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
             // TODO: these only need to be on the base node's events object
+
+            Object.defineProperty( node.events, "create", {
+                value: function( name, parameters ) { // "this" is node.events
+                    return self.kernel.createEvent( this.node.id, name, parameters );
+                }
+            } );
 
             // Provide helper functions to create the directives for adding, removing and flushing
             // event handlers.
@@ -126,9 +171,25 @@ node.id = childID; // TODO: move to vwf/model/object
                 }
             } );
 
-            node.private.listeners = {};
+            node.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
             node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
+
+            Object.defineProperty( node.children, "node", {
+                value: node // for node.children accessors (non-enumerable)  // TODO: hide this better
+            } );
+
+            Object.defineProperty( node.children, "create", {
+                value: function( component, name, callback /* ( child ) */ ) { // "this" is node.children
+                    return self.kernel.createNode( this.node.id, component, name /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
+                }
+            } );
+
+            Object.defineProperty( node.children, "delete", {
+                value: function( child ) {
+                    return self.kernel.deleteNode( child.id );
+                }
+            } );
 
             // Define the "time", "client", and "moniker" properties.
 
@@ -190,8 +251,27 @@ node.id = childID; // TODO: move to vwf/model/object
                 }
             } );
 
-            node.private.change = 0; // incremented whenever "future"-related changes occur
+            node.private.change = 1; // incremented whenever "future"-related changes occur
 
+        },
+
+        // -- initializingNode ---------------------------------------------------------------------
+
+        // Invoke an initialize() function if it exists.
+
+        initializingNode: function( nodeID, childID ) {
+
+            var child = this.nodes[childID];
+            var scriptText = "this.initialize && this.initialize()";
+
+            try {
+                return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+            } catch ( e ) {
+                this.logger.warnc( "initializingNode", childID, propertyName, propertyValue,
+                    "exception in initialize:", exceptionMessage( e ) );
+            }
+
+            return undefined;
         },
 
         // -- deletingNode -------------------------------------------------------------------------
@@ -280,6 +360,37 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
             var node = this.nodes[nodeID];
+
+            if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
+                try {
+                    node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
+                } catch ( e ) {
+                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
+                        "exception evaluating getter:", exceptionMessage( e ) );
+                }
+            } else {
+                node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
+            }
+        
+            if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
+                try {
+                    node.private.setters[propertyName] = eval( setterScript( propertySet ) );
+                } catch ( e ) {
+                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
+                        "exception evaluating setter:", exceptionMessage( e ) );
+                }
+            } else {
+                node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
+            }
+
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
+        },
+
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            var node = this.nodes[nodeID];
             var self = this;
 
             Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
@@ -295,30 +406,10 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
                 enumerable: true
             } );
 
-            if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
-                try {
-                    node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
-                } catch ( e ) {
-                    this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating getter:", exceptionMessage( e ) );
-                }
-            } else if ( propertyValue !== undefined ) {
-                node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
-            }
-        
-            if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
-                try {
-                    node.private.setters[propertyName] = eval( setterScript( propertySet ) );
-                } catch ( e ) {
-                    this.logger.warn( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating setter:", exceptionMessage( e ) );
-                }
-            } else if ( propertyValue !== undefined ) {
-                node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
-            }
-
             node.private.change++; // invalidate the "future" cache
 
+            return propertyValue !== undefined ?
+                this.settingProperty( nodeID, propertyName, propertyValue ) : undefined;
         },
 
         // TODO: deletingProperty
@@ -331,17 +422,13 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
 
 if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 
-            if ( ! node.properties.hasOwnProperty( propertyName ) ) {
-                this.kernel.createProperty( nodeID, propertyName, undefined );
-            }
-
-            var setter = findSetter( node, propertyName );
+            var setter = node.private.setters && node.private.setters[propertyName];
 
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
                     return setter.call( node, propertyValue );
                 } catch ( e ) {
-                    this.logger.warn( "settingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
                         "exception in setter:", exceptionMessage( e ) );
                 }
             }
@@ -354,13 +441,13 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.nodes[nodeID];
-            var getter = findGetter( node, propertyName );
+            var getter = node.private.getters && node.private.getters[propertyName];
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {
                     return getter.call( node );
                 } catch ( e ) {
-                    this.logger.warn( "gettingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
                         "exception in getter:", exceptionMessage( e ) );
                 }
             }
@@ -407,7 +494,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
             } catch ( e ) {
-                this.logger.warn( "creatingMethod", nodeID, methodName, methodParameters,
+                this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", exceptionMessage( e ) );
             }
         
@@ -422,13 +509,13 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
         callingMethod: function( nodeID, methodName, methodParameters ) {
 
             var node = this.nodes[nodeID];
-            var body = findBody( node, methodName );
+            var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
                 try {
                     return body.apply( node, methodParameters );
                 } catch ( e ) {
-                    this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                    this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", exceptionMessage( e ) );
                 }
             }
@@ -537,7 +624,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
                 } catch ( e ) {
-                    self.logger.warn( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+                    self.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
                         "exception:", exceptionMessage( e ) );
                 }
 
@@ -558,7 +645,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 try {
                     return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
                 } catch ( e ) {
-                    this.logger.warn( "executing", nodeID,
+                    this.logger.warnc( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", exceptionMessage( e ) );
                 }
             }
@@ -918,27 +1005,6 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             var bodyString = body.length ? " " + body + " " : "";
             return prefix + bodyString + suffix;
         }
-    }
-
-    // -- findGetter -------------------------------------------------------------------------------
-
-    function findGetter( node, propertyName ) {
-        return node.private.getters && node.private.getters[propertyName] ||
-            Object.getPrototypeOf( node ).private && findGetter( Object.getPrototypeOf( node ), propertyName );
-    }
-
-    // -- findSetter -------------------------------------------------------------------------------
-
-    function findSetter( node, propertyName ) {
-        return node.private.setters && node.private.setters[propertyName] ||
-            Object.getPrototypeOf( node ).private && findSetter( Object.getPrototypeOf( node ), propertyName );
-    }
-
-    // -- findBody ---------------------------------------------------------------------------------
-
-    function findBody( node, methodName ) {
-        return node.private.bodies && node.private.bodies[methodName] ||
-            Object.getPrototypeOf( node ).private && findBody( Object.getPrototypeOf( node ), methodName );
     }
 
     // -- findListeners ----------------------------------------------------------------------------

@@ -11,10 +11,14 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
---- 
-extends: |
-  http://vwf.example.com/node3.vwf
-scripts:
-- |
-    this.pointerClick = function()  {
-    }
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  physics: none
+  physicsDef: 0
+  mass: 
+  restitution: 
+  friction: 
+  rotVelocityDamping: 
+  linVelocityDamping: 
+  velocity: 

@@ -1,3 +1,5 @@
+"use strict";
+
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
 // 
@@ -11,20 +13,6 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
-
-    // vwf/model/test.js is a dummy driver used for tests.
-
-    return model.load( module, {
-
-        // == Module Definition ====================================================================
-
-        // -- initialize ---------------------------------------------------------------------------
-
-        initialize: function() {
-            this.arguments = Array.prototype.slice.call( arguments );
-        },
-
-    } );
-
+define( function() {
+	return [ 0, 5, 0, 0 ]; // major, minor, patch, build
 } );

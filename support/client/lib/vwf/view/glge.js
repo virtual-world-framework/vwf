@@ -1,195 +1,212 @@
-(function (modules, namespace) {
+﻿"use strict";
 
-    window.console && console.info && console.info("loading " + namespace);
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
 
-    // vwf-view-glge.js is a placeholder for an GLGE WebGL view of the scene.
-    //
-    // vwf-view-glge is a JavaScript module (http://www.yuiblog.com/blog/2007/06/12/module-pattern).
-    // It attaches to the vwf modules list as vwf.modules.glge.
+define( [ "module", "vwf/view" ], function( module, view ) {
 
-    var module = modules[namespace.split(".").pop()] = function(vwf, rootSelector) {
+    // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
+    // is active, scripts on the main page may make (reflected) kernel calls:
 
-        if (!vwf) return;
+    //     window.vwf_view.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
+    //         childSource, childType, childName, function( childID ) {
+    //         ...
+    //     } );
 
-        modules.view.call( this, vwf );
-        this.namespace = namespace;
+    // And receive view calls:
 
-        this.rootSelector = rootSelector;
-        this.canvasQuery = undefined;
+    //     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
+    //         childSource, childType, childName, callback /* ( ready ) */ ) {
+    //         ...
+    //     }
+
+    return view.load( module, {
+
+        initialize: function( rootSelector ) {
+            if (!vwf) return;
+
+            this.rootSelector = rootSelector;
+            this.canvasQuery = undefined;
  
-        this.keyStates = { keysDown: {}, mods: {} };
+            this.keyStates = { keysDown: {}, mods: {} };
 
-        this.height = 600;
-        this.width = 800;
+            this.height = 600;
+            this.width = 800;
 
-        if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
-        if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
+            if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
+            if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
 
-        this.canvasQuery = jQuery( this.rootSelector );
+            this.canvasQuery = jQuery( this.rootSelector );
           
-        // Connect GLGE to the VWF timeline.
-        GLGE.now = function() {
-            return vwf.time() * 1000;
-        };
-
-    };
-
-    // Delegate any unimplemented functions to vwf-view.
-
-    module.prototype = new modules.view();
-
-    // == Response API =============================================================================
-
-    // This is a placeholder for maintaining a view of the changing state of the simulation using
-    // nested HTML block elements.
-
-    // -- createdNode ------------------------------------------------------------------------------
-
-    module.prototype.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
-        childSource, childType, childName, callback /* ( ready ) */) {
-
-        if ( childExtendsID === undefined /* || childName === undefined */ ) 
-            return;
-
-        if ( this.state.scenes[ childID ] ) {
-            
-            // this is the scene definition so go ahead and create the canvas and setup the view
-            var glgeView = this;
-            var domWin = window;
-
-            this.canvasQuery = jQuery( this.rootSelector ).append(
-                "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
-            ).children(":last");
-
-            var canvas = this.canvasQuery.get( 0 );
-            window.onkeydown = function( event ) {
-                var key = undefined;
-                var validKey = false;
-                switch ( event.keyCode ) {
-                    case 17:
-                    case 16:
-                    case 18:
-                    case 19:
-                    case 20:
-                        break;                        
-                    default:
-                        key = getKeyValue( event.keyCode );
-                        glgeView.keyStates.keysDown[ key.key ] = key;
-                        validKey = true;
-                        break;
-                }
-
-                if ( !glgeView.keyStates.mods ) glgeView.keyStates.mods = {};
-                glgeView.keyStates.mods.alt = event.altKey;
-                glgeView.keyStates.mods.shift = event.shiftKey;
-                glgeView.keyStates.mods.ctrl = event.ctrlKey;
-                glgeView.keyStates.mods.meta = event.metaKey;
-
-                var sceneNode = glgeView.state.scenes[ glgeView.state.sceneRootID ];
-                if ( validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/ ) {
-                  //var params = JSON.stringify( glgeView.keyStates );
-                  glgeView.dispatchEvent( sceneNode.ID, "keyDown", [ glgeView.keyStates ] );
-                }
-            };
-
-            window.onkeyup = function( event ) {
-                var key = undefined;
-                var validKey = false;
-                switch ( event.keyCode ) {
-                    case 16:
-                    case 17:
-                    case 18:
-                    case 19:
-                    case 20:
-                        break;                        
-                    default:
-                        key = getKeyValue( event.keyCode );
-                        delete glgeView.keyStates.keysDown[ key.key ];
-                        validKey = true;
-                        break;
-                }
-
-                glgeView.keyStates.mods.alt = event.altKey;
-                glgeView.keyStates.mods.shift = event.shiftKey;
-                glgeView.keyStates.mods.ctrl = event.ctrlKey;
-                glgeView.keyStates.mods.meta = event.metaKey;
-
-                var sceneNode = glgeView.state.scenes[ glgeView.state.sceneRootID ];
-                if ( validKey && sceneNode ) {
-                  //var params = JSON.stringify( glgeView.keyStates );
-                  glgeView.dispatchEvent( sceneNode.ID, "keyUp", [ glgeView.keyStates ] );
-                }
-
-            };
-
-            window.onresize = function() {
-                var origWidth = glgeView.width;
-                var origHeight = glgeView.height;
-                if ( domWin && domWin.innerHeight ) glgeView.height = domWin.innerHeight - 20;
-                if ( domWin && domWin.innerWidth ) glgeView.width = domWin.innerWidth - 20; 
-
-                if ( ( origWidth != glgeView.width ) || ( origHeight != glgeView.height ) ) {
-                    canvas.height = glgeView.height;
-                    canvas.width = glgeView.width;
-                    var camID = glgeView.state.cameraInUseID                
-                    if ( !camID && camID != "" ) {
-                        var cam = glgeView.state.cameraInUse;
-                        camID = getObjectID.call( this, cam, glgeView, false, false );
-                    }
-                    if ( camID && camID != "" ) {
-                        //console.info( "aspectRatio = " + (( glgeView.width / glgeView.height ) / 1.333 ) );
-                        vwf.setProperty( camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/ );  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
-                    }
-                    vwf.setProperty( glgeView.state.sceneRootID, "size", [ glgeView.width, glgeView.height ] );  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
-                    $('#topdown_a').height(canvas.height);
-                    $('#topdown_b').height(canvas.height);
-                } 
+            // Connect GLGE to the VWF timeline.
+            GLGE.now = function() {
+                return vwf.time() * 1000;
             }
+        },
 
-            //var dropbox = document.getElementById(this.state.sceneRootID);
+        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childName, callback /* ( ready ) */) {
 
+            if (childExtendsID === undefined /* || childName === undefined */)
+                return;
 
+            if (this.state.scenes[childID]) {
 
-            var sceneNode = this.state.scenes[ childID ];
-            if ( sceneNode ) {
-                initScene.call( this, sceneNode );
+                // this is the scene definition so go ahead and create the canvas and setup the view
+                var glgeView = this;
+                var domWin = window;
+
+                this.canvasQuery = jQuery(this.rootSelector).append(
+                    "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='" + this.width + "' height='" + this.height + "'/>"
+                ).children(":last");
+
+                var canvas = this.canvasQuery.get(0);
+                window.onkeydown = function (event) {
+                    var key = undefined;
+                    var validKey = false;
+                    switch (event.keyCode) {
+                        case 17:
+                        case 16:
+                        case 18:
+                        case 19:
+                        case 20:
+                            break;
+                        default:
+                            key = getKeyValue.call( glgeView, event.keyCode);
+                            glgeView.keyStates.keysDown[key.key] = key;
+                            validKey = true;
+                            break;
+                    }
+
+                    if (!glgeView.keyStates.mods) glgeView.keyStates.mods = {};
+                    glgeView.keyStates.mods.alt = event.altKey;
+                    glgeView.keyStates.mods.shift = event.shiftKey;
+                    glgeView.keyStates.mods.ctrl = event.ctrlKey;
+                    glgeView.keyStates.mods.meta = event.metaKey;
+
+                    var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
+                    if (validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
+                        //var params = JSON.stringify( glgeView.keyStates );
+                        glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
+                    }
+                };
+
+                window.onkeyup = function (event) {
+                    var key = undefined;
+                    var validKey = false;
+                    switch (event.keyCode) {
+                        case 16:
+                        case 17:
+                        case 18:
+                        case 19:
+                        case 20:
+                            break;
+                        default:
+                            key = getKeyValue.call( glgeView, event.keyCode);
+                            delete glgeView.keyStates.keysDown[key.key];
+                            validKey = true;
+                            break;
+                    }
+
+                    glgeView.keyStates.mods.alt = event.altKey;
+                    glgeView.keyStates.mods.shift = event.shiftKey;
+                    glgeView.keyStates.mods.ctrl = event.ctrlKey;
+                    glgeView.keyStates.mods.meta = event.metaKey;
+
+                    var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
+                    if (validKey && sceneNode) {
+                        //var params = JSON.stringify( glgeView.keyStates );
+                        glgeView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [glgeView.keyStates]);
+                    }
+
+                };
+
+                window.onresize = function () {
+                    var origWidth = glgeView.width;
+                    var origHeight = glgeView.height;
+                    if (domWin && domWin.innerHeight) glgeView.height = domWin.innerHeight - 20;
+                    if (domWin && domWin.innerWidth) glgeView.width = domWin.innerWidth - 20;
+
+                    if ((origWidth != glgeView.width) || (origHeight != glgeView.height)) {
+                        canvas.height = glgeView.height;
+                        canvas.width = glgeView.width;
+                        var camID = glgeView.state.cameraInUseID
+                        if (!camID && camID != "") {
+                            var cam = glgeView.state.cameraInUse;
+                            camID = getObjectID.call( glgeView, cam, false, false);
+                        }
+                        if (camID && camID != "") {
+                            vwf.setProperty(camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
+                        }
+                        vwf.setProperty(glgeView.state.sceneRootID, "size", [glgeView.width, glgeView.height]);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
+                        $('#topdown_a').height(canvas.height);
+                        $('#topdown_b').height(canvas.height);
+                        $('#client_list').height(canvas.height);
+                        $('#time_control').height(canvas.height);
+                        $('#about_tab').height(canvas.height);
+                    }
+                }
+
+                var sceneNode = this.state.scenes[childID];
+                if (sceneNode) {
+                    initScene.call(this, sceneNode);
+                }
             }
-        } 
-    };
+        },
+ 
+ 
+        // -- deletedNode ------------------------------------------------------------------------------
 
-    // -- deletedNode ------------------------------------------------------------------------------
+        //deletedNode: function( nodeID ) { },
 
-    module.prototype.deletedNode = function( nodeID ) { };
+        // -- addedChild -------------------------------------------------------------------------------
 
-    // -- addedChild -------------------------------------------------------------------------------
+        //addedChild: function( nodeID, childID, childName ) { },
 
-    module.prototype.addedChild = function( nodeID, childID, childName ) { };
+        // -- removedChild -----------------------------------------------------------------------------
 
-    // -- removedChild -----------------------------------------------------------------------------
+        //removedChild: function( nodeID, childID ) { },
 
-    module.prototype.removedChild = function( nodeID, childID ) { };
+        // -- createdProperty --------------------------------------------------------------------------
 
-    // -- createdProperty --------------------------------------------------------------------------
+        //createdProperty: function (nodeID, propertyName, propertyValue) { },
 
-    module.prototype.createdProperty = function (nodeID, propertyName, propertyValue) { };
+        // -- initializedProperty ----------------------------------------------------------------------
 
-    // TODO: deletedProperty
+        //initializedProperty: function (nodeID, propertyName, propertyValue) { },
 
-    // -- satProperty ------------------------------------------------------------------------------
+        // TODO: deletedProperty
 
-    module.prototype.satProperty = function (nodeID, propertyName, propertyValue) {
-    };
+        // -- satProperty ------------------------------------------------------------------------------
 
-    // -- gotProperty ------------------------------------------------------------------------------
+        //satProperty: function (nodeID, propertyName, propertyValue) { },
 
-    module.prototype.gotProperty = function ( nodeID, propertyName, propertyValue ) {
-    };
+        // -- gotProperty ------------------------------------------------------------------------------
 
-    // == Private functions ========================================================================
+        //gotProperty: function ( nodeID, propertyName, propertyValue ) { },
+    
+    
+    } );
 
+    // GLGE private functions
     // -- initScene ------------------------------------------------------------------------
 
     function initScene( sceneNode ) {
+
+        function renderScene() {
+            sceneNode.frameCount++;
+            renderer.render();
+        };
 
         var canvas = this.canvasQuery.get( 0 );
 
@@ -203,7 +220,7 @@
             this.state.cameraInUse.setAspect( ( canvas.width / canvas.height) /*/ 1.333 */ );
 
             // set up all of the mouse event handlers
-            initMouseEvents( canvas, this );
+            initMouseEvents.call( this, canvas );
 
             // Schedule the renderer.
 
@@ -212,11 +229,6 @@
             var renderer = sceneNode.glgeRenderer;
 
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
-
-            function renderScene() {
-                sceneNode.frameCount++;
-                renderer.render();
-            };
 
             setInterval( renderScene, 1 );
         }
@@ -233,18 +245,12 @@
         }        
     }
 
-    var mouse; 
-    var sceneCanvas;
-    var container;
-    var mouseOverCanvas = false;
-
     // -- initMouseEvents ------------------------------------------------------------------------
 
-    var initMouseEvents = function( canvas, view ) {
-
-        var sceneNode = view.state.scenes[view.state.sceneRootID], child;
-        var sceneID = view.state.sceneRootID;
-        var sceneView = view;
+    function initMouseEvents( canvas ) {
+        var sceneNode = this.state.scenes[this.state.sceneRootID], child;
+        var sceneID = this.state.sceneRootID;
+        var sceneView = this;
 
         var pointerDownID = undefined;
         var pointerOverID = undefined;
@@ -258,17 +264,18 @@
         var mouseMiddleDown = false;
         var win = window;
 
-        container = document.getElementById("container");
-        sceneCanvas = canvas;
-        mouse = new GLGE.MouseInput( sceneCanvas );
+        var container = document.getElementById("container");
+        var sceneCanvas = canvas;
+        var mouse = new GLGE.MouseInput( sceneCanvas );
+        var mouseOverCanvas = false;
 
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
-            var pickInfo = mousePick( e, sceneNode );
+            var pickInfo = mousePick.call( sceneView, e, sceneNode );
             pointerPickID = undefined;
 
             glgeActualObj = pickInfo ? pickInfo.object : undefined;
-            pointerPickID = pickInfo ? getPickObjectID( pickInfo, sceneView, debug ) : undefined;
+            pointerPickID = pickInfo ? getPickObjectID.call( sceneView, pickInfo, debug ) : undefined;
             var mouseButton = "left";
             switch( e.button ) {
                 case 2: 
@@ -297,7 +304,7 @@
                         shift: e.shiftKey,
                         meta: e.metaKey,
                     },
-                position: [ mouseXPos(e)/sceneView.width, mouseYPos(e)/sceneView.height ],
+                position: [ mouseXPos.call( this,e)/sceneView.width, mouseYPos.call( this,e)/sceneView.height ],
             } ];
 
 
@@ -406,8 +413,7 @@
             var event = getEventData( e, false );
             if ( event ) {
                 pointerDownID = pointerPickID ? pointerPickID : sceneID;
-                //console.info( "sceneView.dispatchEvent( "+pointerDownID+", 'pointerDown', .. )" );
-                sceneView.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
+                sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
             }
         }
 
@@ -432,7 +438,7 @@
             if ( eData ) {
                 var mouseUpObjectID = pointerPickID;
                 if ( mouseUpObjectID && pointerDownID && mouseUpObjectID == pointerDownID ) {
-                    view.dispatchEvent( mouseUpObjectID, "pointerClick", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( mouseUpObjectID, "pointerClick", eData.eventData, eData.eventNodeData );
 
                     var glgeObj = sceneView.state.nodes[mouseUpObjectID].glgeObject;
                     if ( glgeObj ) {
@@ -447,16 +453,16 @@
                                         currentObj = currentObj.parent;
                                 } 
                                 if ( colladaObj ) {
-                                    recurseGroup( colladaObj, 0 );
+                                    recurseGroup.call( this, colladaObj, 0 );
                                 }
                             }                
                         } else if ( atlDown && !ctrlDown ) {
-                            recurseGroup( glgeObj, 0 ); 
+                            recurseGroup.call( this, glgeObj, 0 ); 
                         }
                     }
                 }
 
-                sceneView.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
+                sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
             pointerDownID = undefined;
         }
@@ -466,7 +472,7 @@
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
-                sceneView.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
             }
         }
 
@@ -474,25 +480,24 @@
             var eData = getEventData( e, false );
             if ( eData ) {
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
-                    //console.info( "sceneView.dispatchEvent( "+pointerDownID+", 'pointerMove', .. )" );
-                    sceneView.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
                 } else {
                     if ( pointerPickID ) {
                         if ( pointerOverID ) {
                             if ( pointerPickID != pointerOverID ) {
-                                sceneView.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
                                 pointerOverID = pointerPickID;
-                                sceneView.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
                             } else {
-                                sceneView.dispatchEvent( pointerOverID, "pointerHover", eData.eventData, eData.eventNodeData );
+                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerHover", eData.eventData, eData.eventNodeData );
                             }
                         } else {
                             pointerOverID = pointerPickID;
-                            sceneView.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                            sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
                         }
                     } else {
                         if ( pointerOverID ) {
-                            sceneView.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                            sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
                             pointerOverID = undefined;
                         }
                     }
@@ -502,7 +507,7 @@
 
         canvas.onmouseout = function( e ) {
             if ( pointerOverID ) {
-                sceneView.dispatchEvent( pointerOverID, "pointerLeave" );
+                sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave" );
                 pointerOverID = undefined;
             }
             mouseOverCanvas = false;
@@ -522,7 +527,7 @@
                 else if ( pointerOverID )
                     id = pointerOverID; 
                     
-                sceneView.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+                sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
             }
         }
 
@@ -540,11 +545,9 @@
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
-            //console.info( "  +++++ dragover +++++" );
             var eData = getEventData( e, false );
             if ( eData ) {
                 e.dataTransfer.dropEffect = "copy";
-            //    console.info( "  +++++ over has valid info +++++" );
             }
             e.preventDefault();    
         };
@@ -558,86 +561,83 @@
                 var object, match, fn;
                 var files = e.dataTransfer.files;
                 var file = files[0];
-                //console.info( file.name );
                 var ext = (/[.]/.exec(file.name)) ? /[^.]+$/.exec(file.name) : undefined;
-
-                //console.info( ext );
 
                 switch ( ext[0].toLowerCase() ) {
                     case "dae":
                         object = {
-                          extends: "http://vwf.example.com/editable3.vwf",
+                          extends: "http://vwf.example.com/node3.vwf",
                           source: file.name,
                           type: "model/vnd.collada+xml",
                           properties: { 
-                            position: eData.eventNodeData[""][0].globalPosition,
+                            translation: eData.eventNodeData[""][0].globalPosition,
                           },   
                         };
 
                         switch ( file.name ) { // hack it since setting this data through components isn't working
 
                             case "blackhawk.dae": // from cityblock
-                                object.properties.eulers = [ 1, 0, 0 ];
+                                object.properties.rotation = [ 1, 0, 0, 0 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
                             case "blackhawkGW.dae": // from sandtable
-                                object.properties.position[2] += 20;
-                                object.properties.eulers = [ 1, 0, 0 ];
+                                object.properties.translation[2] += 20;
+                                object.properties.rotation = [ 1, 0, 0, 0 ];
                                 object.properties.scale = [ 2, 2, 2 ];
                                 break;
 
                             case "Predator.dae": // from sandtable
                                 object["implements"] = [ "http://vwf.example.com/fly.vwf" ];
-                                object.properties.position[2] += 20;
-                                object.properties.eulers = [ 0, 0, 180 ];
+                                object.properties.translation[2] += 20;
+                                object.properties.rotation = [ 0, 0, 1, 180 ];
                                 object.properties.scale = [ 15, 15, 15 ];
                                 break;
 
                             case "apache.DAE": // from sandtable
-                                object.properties.position[2] += 40;
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.translation[2] += 40;
+                                object.properties.rotation = [ 1, 0, 0, 90 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
                             case "awac.DAE": // from sandtable
-                                object.properties.position[2] += 100;
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.translation[2] += 100;
+                                object.properties.rotation = [ 1, 0, 0, 90  ];
                                 object.properties.scale = [ 0.5, 0.5, 0.5 ];
                                 break;
 
                             case "blackhawk.DAE": // from sandtable
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.rotation = [ 1, 0, 0, 90 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
                             case "cobra.DAE": // from sandtable
-                                object.properties.position[2] += 50;
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.translation[2] += 50;
+                                object.properties.rotation = [ 1, 0, 0, 90 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
                             case "f117.DAE": // from sandtable
-                                object.properties.position[2] += 40;
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.translation[2] += 40;
+                                object.properties.rotation = [ 1, 0, 0, 90 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
                             case "humvee.dae": // from sandtable
-                                object.properties.position[2] += 50;
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.translation[2] += 50;
+                                object.properties.rotation = [ 1, 0, 0, 90 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
                             case "lmtv.dae": // from sandtable
-                                object.properties.position[2] += 50;
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.translation[2] += 50;
+                                object.properties.rotation = [ 1, 0, 0, 90 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
                             case "mlrs.DAE": // from sandtable
-                                object.properties.position[2] += 50;
-                                object.properties.eulers = [ 90, 0, 0 ];
+                                object.properties.translation[2] += 50;
+                                object.properties.rotation = [ 1, 0, 0, 90 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
@@ -648,10 +648,10 @@
                                     object = {
                                       extends: match[1],
                                       properties: { 
-                                        position: eData.eventNodeData[""][0].globalPosition,
+                                        translation: eData.eventNodeData[""][0].globalPosition,
                                       },
                                       scripts: [
-                                          "this.initialize = function() { this.eulers = this.eulers ; this.scale = this.scale }"
+                                          "this.initialize = function() { this.rotation = this.rotation ; this.scale = this.scale }"
                                       ]
                                     };
 
@@ -668,12 +668,12 @@
 
                         }
                         if ( object ) {
-                            sceneView.createNode( "index-vwf", object, file.name, undefined );
+                            sceneView.kernel.createNode( "index-vwf", object, file.name, undefined );
                         }
                         break;
                     case "yaml":
                         fn = file.name.substr( 0, file.name.length - 5 );
-                        sceneView.createNode( "index-vwf", fn, fn, undefined );                
+                        sceneView.kernel.createNode( "index-vwf", fn, fn, undefined );                
                         break;
                 }
                 
@@ -699,42 +699,42 @@
 
         while (obj && obj.parent) {
             if (sOut == "")
-                sOut = name(obj);
+                sOut = name.call(this,obj);
             else
-                sOut = name(obj) + "." + sOut;
+                sOut = name.call(this,obj) + "." + sOut;
             obj = obj.parent;
         }
         return sOut;
     }
 
-    var mouseXPos = function(e) {
+    function mouseXPos(e) {
         return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
     }
 
-    var mouseYPos = function(e) {
+    function mouseYPos(e) {
         return e.clientY - e.currentTarget.offsetTop + window.scrollY;
     }
 
-    var getPickObjectID = function( pickInfo, view, debug ) {
+    function getPickObjectID( pickInfo, debug ) {
 
         if ( pickInfo && pickInfo.object ) {
-            return getObjectID( pickInfo.object, view, true, debug );
+            return getObjectID.call( this, pickInfo.object, true, debug );
         }
         return undefined;
 
     }
 
-    var getObjectID = function( objectToLookFor, view, bubbleUp, debug ) {
+    function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
         var objectIDFound = -1;
             
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
-                console.info("====>>>  vwf.view-glge.mousePick: searching for: " + path(objectToLookFor) );
+                this.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path.call(this,objectToLookFor) );
             }
-            jQuery.each( view.state.nodes, function (nodeID, node) {
+            jQuery.each( this.state.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    if ( debug ) { console.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
+                    if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });
@@ -748,9 +748,9 @@
             return objectIDFound;
 
         return undefined;
-    };
+    }
 
-    var mousePick = function( e, sceneNode ) {
+    function mousePick( e, sceneNode ) {
 
         if (sceneNode && sceneNode.glgeScene) {
 
@@ -761,46 +761,44 @@
             if ( sceneNode.frameCount > 10 && sceneNode.pendingLoads == 0 ) {
 
                 var objectIDFound = -1;
-                var x = mouseXPos( e );
-                var y = mouseYPos( e );
+                var x = mouseXPos.call( this, e );
+                var y = mouseYPos.call( this, e );
 
                 return sceneNode.glgeScene.pick(x, y);
             }
-
         }
-
         return undefined;
-    };
+    }
 
-    var recurseGroup = function( grp, iDepth ) {
+    function recurseGroup( grp, iDepth ) {
         if ( grp && grp.getChildren ) {
             var grpChildren = grp.getChildren();
-            var sOut = indent(iDepth);
+            var sOut = indent.call( this,iDepth);
             var name = "";
 
             for (var i = 0; i < grpChildren.length; i++) {
                 if (grpChildren[i].constructor == GLGE.Collada) {
                     iDepth++;
-                    outputCollada(grpChildren[i], iDepth, true);
-                    recurseGroup(grpChildren[i], iDepth + 1);
-                    outputCollada(grpChildren[i], iDepth, false);
+                    outputCollada.call( this, grpChildren[i], iDepth, true);
+                    recurseGroup.call( this, grpChildren[i], iDepth + 1);
+                    outputCollada.call( this, grpChildren[i], iDepth, false);
                     iDepth--;
                 } else if (grpChildren[i].constructor == GLGE.Group) {
                     iDepth++;
-                    outputGroup(grpChildren[i], iDepth, true);
-                    recurseGroup(grpChildren[i], iDepth + 1);
-                    outputGroup(grpChildren[i], iDepth, false);
+                    outputGroup.call( this, grpChildren[i], iDepth, true);
+                    recurseGroup.call( this, grpChildren[i], iDepth + 1);
+                    outputGroup.call( this, grpChildren[i], iDepth, false);
                     iDepth--;
                 } else if ( grpChildren[i].constructor == GLGE.Object ) {
-                    outputObject(grpChildren[i], iDepth);
+                    outputObject.call( this, grpChildren[i], iDepth);
                 }
             }
         } else if ( grp.constructor == GLGE.Object ) {
-            outputObject( grp, iDepth );
+            outputObject.call( this, grp, iDepth );
         }
-    };
+    }
 
-    var getChildCount = function(grp) {
+    function getChildCount(grp) {
         var iCount = 0;
         if (grp) {
             var grpChildren = grp.getChildren();
@@ -815,75 +813,55 @@
         return iCount;
     };
 
-    var indentStr = function() {
+    function indentStr() {
         return "  ";
-    };
+    }
 
-    var indent = function(iIndent) {
+    function indent(iIndent) {
         var sOut = "";
-        for (var j = 0; j < iIndent; j++) { sOut = sOut + indentStr(); }
+        for (var j = 0; j < iIndent; j++) { sOut = sOut + indentStr.call( this ); }
         return sOut;
-    };
+    }
 
-    var outputCollada = function(collada, iIndent, open) {
-        var sOut = indent(iIndent);
+    function outputCollada(collada, iIndent, open) {
+        var sOut = indent.call(this,iIndent);
         if (open) {
-            console.info(sOut + "children:")
+            this.logger.info(sOut + "children:")
         }
-    };
+    }
 
-    var outputGroup = function(group, iIndent, open) {
-        var sOut = indent(iIndent + 1);
+    function outputGroup( group, iIndent, open ) {
+        var sOut = indent.call( this, iIndent + 1);
         if (open) {
-            lastGroupName = name(group);
-            console.info(indent(iIndent) + lastGroupName + ":");
-            console.info(indent(iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
+            var lastGroupName = name(group);
+            this.logger.info(indent.call( this,iIndent) + lastGroupName + ":");
+            this.logger.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 
-            if (getChildCount(group) > 0)
-                console.info(sOut + "children:");
+            if (getChildCount.call( this, group) > 0)
+                this.logger.info(sOut + "children:");
         }
-    };
+    }
 
-    var objectIndex = 1;
-    var outputObject = function(obj, iIndent) {
+    function outputObject(obj, iIndent) {
         var indentAdd = 0;
         var objName = name( obj );
         if ( objName != "" ) {
-            console.info( indent(iIndent) + "children:" );
-            console.info( indent(iIndent+1) + objName + ":");
-            console.info( indent(iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
+            this.logger.info( indent.call( this,iIndent) + "children:" );
+            this.logger.info( indent.call( this,iIndent+1) + objName + ":");
+            this.logger.info( indent.call( this,iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
             indentAdd = 2;
         }
+    }
 
-//        if ( ( obj.getMesh && obj.getMesh() ) || ( obj.multimaterials && obj.multimaterials.length > 0 ) ) {
-//            console.info( indent( iIndent+indentAdd ) + "children:" );
+    function outputMaterial( obj, iIndent, objName, index  ) {
 
-//            if ( obj.getMesh && obj.getMesh() ) {
-//                var mesh = obj.getMesh();
-//                var meshName = name( mesh );
-//                if ( meshName != "" ) {
-//                    console.info( indent( iIndent + indentAdd + 1 ) + meshName + ":" );
-//                    console.info( indent( iIndent + indentAdd + 2 ) + "extends: http://vwf.example.com/mesh.vwf" );
-//                }
-//            }
-//            if ( obj.multimaterials && obj.multimaterials.length > 0 ) {
-//                materialIndex = 1;
-//                for ( var i = 0; i < obj.multimaterials.length; i++ ) {
-//                    outputMaterial( obj.getMaterial(i), iIndent + 1 + indentAdd, objName, i );
-//                }
-//            }
-//        }
-    };
+        var sOut = indent.call( this,iIndent + 1);
+        this.logger.info( indent.call( this,iIndent) + objName + "Material" + index + ":" );
+        this.logger.info( sOut + "extends: http://vwf.example.com/material.vwf");
 
-    var outputMaterial = function( obj, iIndent, objName, index  ) {
+    }
 
-        var sOut = indent(iIndent + 1);
-        console.info( indent(iIndent) + objName + "Material" + index + ":" );
-        console.info( sOut + "extends: http://vwf.example.com/material.vwf");
-
-    };
-
-    var getKeyValue = function( keyCode ) {
+    function getKeyValue( keyCode ) {
         var key = { key: undefined, code: keyCode, char: undefined };
         switch ( keyCode ) {
             case 8:
@@ -1247,7 +1225,6 @@
                 break;
         }
         return key;
-    };
+    }
 
-})(window.vwf.modules, "vwf.view.glge");
-
+} );
