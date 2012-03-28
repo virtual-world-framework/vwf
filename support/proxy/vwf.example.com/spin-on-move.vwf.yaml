@@ -1,0 +1,94 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: |
+  http://vwf.example.com/node3.vwf
+properties:
+  spin-rate: 0.1
+  spin-axis: [ 0, 0, 1 ]
+  spin-inputDim: "x"
+  spin-value: 0
+events:
+  valueChanged:
+methods:
+  spin:
+  init:
+scripts:
+- |
+    this.init = function() {
+      this.input = {
+        "pointerInfo": undefined,
+        "pickInfo": undefined,
+        "previous": {
+          "pointerInfo": undefined,
+          "pickInfo": undefined,        
+        },
+        pointerDown: {
+          "pointerInfo": undefined,
+          "pickInfo": undefined,        
+        },
+        update: function( pointerInfo, pickInfo ){
+          this.previous.pointerInfo = this.pointerInfo;
+          this.previous.pickInfo = this.pickInfo;
+          this.pointerInfo = pointerInfo;
+          this.pickInfo = pickInfo;
+        }, 
+        clear: function(){
+          this.previous.pointerInfo = undefined;
+          this.previous.pickInfo = undefined;
+          this.pointerInfo = undefined;
+          this.pickInfo = undefined;        
+        },
+        change: function() {
+          var ret = [ 0, 0 ]
+          if ( this.pointerInfo && this.previous.pointerInfo ) {
+            ret[0] = this.pointerInfo.position[0] - this.previous.pointerInfo.position[0];
+            ret[1] = this.pointerInfo.position[1] - this.previous.pointerInfo.position[1];          
+          }
+          return ret;
+        }
+      };
+    }
+    this.pointerDown = function( pointerInfo, pickInfo ) {
+      if ( !this.input ) this.init();
+
+      this.input.pointerDown.pointerInfo = pointerInfo;
+      this.input.pointerDown.pointerInfo = pickInfo;
+      this.input.clear();
+    }
+    this.pointerUp = function( pointerInfo, pickInfo ) {
+      this.input.clear();
+    }
+    this.pointerMove = function( pointerInfo, pickInfo ) {
+      this.input.update( pointerInfo, pickInfo );
+      var diff = this.input.change();
+      switch( this["spin-inputDim"] ) {
+        case "x":
+          this.spin( -diff[0] );
+          break;
+        case "y":
+          this.spin( -diff[1] );
+          break;
+      }
+    }
+    this.spin = function( value ){
+      if ( !this["spin-value"] ) {
+        var rotation = this.rotation;
+        this["spin-value"] = rotation[3];
+      }
+      this["spin-value"] += this["spin-rate"] * value;
+      this.rotateBy( [ this["spin-axis"][0], this["spin-axis"][1], this["spin-axis"][2], this["spin-value"] ], 0 ) ;  
+      this.valueChanged( this["spin-value"] );
+    } //@ sourceURL=spin-on-move.vwf
+

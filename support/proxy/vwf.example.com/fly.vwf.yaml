@@ -1,0 +1,202 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: |
+  http://vwf.example.com/node3.vwf
+properties:
+  fly-flying:
+    set: |
+      if ( value && ! this["fly-flying"] ) {  // starting
+        this["fly-flying"] = true;  // set the internal value
+        this.fly();  // run the first step and schedule the next one
+      } else if ( ! value && this["spin-spinning"] ) { // stopping
+        this["fly-flying"] = false;  // set the internal value
+      }
+    value: false
+  fly-distanceOnGround: 1000
+  fly-speedOnGroundMax: 200
+  fly-elevation: 2500
+  fly-speedInAir: 250
+  fly-radius: 8000
+  fly-speed: 62.5
+  fly-pointIndex: 0
+methods:
+  fly:
+  updateSpeed:
+  isOnGround:
+  isRising:
+  initialize:
+  interpolate:
+scripts:
+- |
+  var index = 0;
+  var lastTime = undefined;
+  var onGround = true;
+  this.isOnGround = function() {
+    if ( this.points[ this["fly-pointIndex"] ].place == "ground" ) {
+      return true;
+    }
+    return false;    
+  }
+  this.isRising = function() {
+    if ( this.points[ this["fly-pointIndex"] ].place == "rising" ) {a
+      return true;
+    }
+    return false;    
+  }
+  this.updateSpeed = function() {
+    if ( this.isOnGround() ) {
+      if ( this["fly-speed"] < this["fly-speedOnGroundMax"] ) {
+        this["fly-speed"] = this["fly-speed"] + this["fly-speedOnGroundMax"] / this.pointsOnGround;
+      }
+      if ( this["fly-speed"] >= this["fly-speedOnGroundMax"] ) {
+        this["fly-speed"] = this["fly-speedOnGroundMax"];
+      }
+    } else {
+      this["fly-speed"] = this["fly-speedInAir"];
+    }
+  }
+  this.initialize = function(){
+    var trans = this.transform;
+    if ( trans ) { 
+      var initPt = this.translation;
+      var newPoint;
+      var distance = 0;
+      var prevPt = undefined;
+      this.points = [];
+      this["fly-pointIndex"] = 0;
+      this.pointsOnGround = 16.0;
+      this.pointsClimbing = 24.0;
+      this.pointsOnCircle = 36.0;
+      this.lastTime = 0;
+      var diffX, diffY, diffZ;
+      var at = goog.vec.Vec3.createFromValues( trans[4], trans[5], 0 );
+
+      goog.vec.Vec3.normalize( at, at ); 
+      
+      for ( var i = 0; i < this.pointsOnGround; i++ ) {
+        newPoint = [];
+        newPoint[0] = initPt[0] + at[0] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
+        newPoint[1] = initPt[1] + at[1] * i * this["fly-distanceOnGround"] / this.pointsOnGround;
+        newPoint[2] = initPt[2];
+        
+        if ( prevPt ) {
+          diffX = prevPt[0] - newPoint[0];
+          diffY = prevPt[1] - newPoint[1];          
+          diffZ = prevPt[2] - newPoint[2];
+          distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
+        }
+        this.points.push( { point: newPoint, distance: distance, place: "ground" } );
+        prevPt = newPoint;
+        
+      }
+      var heightToTravel = this["fly-elevation"];
+      var hypLength = heightToTravel / Math.sin( Math.PI/6 );
+      var adjLength = Math.cos( Math.PI/6 ) * hypLength;
+      initPt = this.points[ this.points.length-1 ].point;
+
+      for ( var i = 1; i <= this.pointsClimbing; i++ ) {
+        newPoint = [];
+        newPoint[0] = initPt[0] + at[0] * i * adjLength / this.pointsClimbing;
+        newPoint[1] = initPt[1] + at[1] * i * adjLength / this.pointsClimbing;
+        newPoint[2] = initPt[2] + i * heightToTravel / this.pointsClimbing;
+
+        if ( prevPt ) {
+          diffX = prevPt[0] - newPoint[0];
+          diffY = prevPt[1] - newPoint[1];          
+          diffZ = prevPt[2] - newPoint[2];
+          distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
+        }
+        this.points.push( { point: newPoint, distance: distance, place: "rising" } );
+        prevPt = newPoint;
+      }
+
+      //prevPt = this.points[ this.points.length-1 ].point;
+      var inc = ( 2.0 * Math.PI ) / this.pointsOnCircle;
+      var currentAngle = Math.PI + inc;
+      var center = [];
+      center[0] = prevPt[0] + this["fly-radius"];;
+      center[1] = prevPt[1];    
+      center[2] = prevPt[2];       
+
+      this.firstCiclePoint = this.points.length-1; 
+      for ( var i = 0; i < this.pointsOnCircle; i++ ) {
+        newPoint = [];
+        newPoint[0] = center[0] + this["fly-radius"] * Math.cos( currentAngle );
+        newPoint[1] = center[1] + this["fly-radius"] * Math.sin( currentAngle );
+        newPoint[2] = center[2];        
+        currentAngle += inc;
+        
+        if ( prevPt ) {
+          diffX = prevPt[0] - newPoint[0];
+          diffY = prevPt[1] - newPoint[1];          
+          diffZ = prevPt[2] - newPoint[2];
+          distance = Math.sqrt( diffX*diffX + diffY*diffY + diffZ*diffZ );
+        }
+        this.points.push( { point: newPoint, distance: distance, place: "circling" } );
+
+        prevPt = newPoint;        
+      }
+      
+      //var pt;
+      //for ( var i = 0; i < this.points.length; i++ ) {
+      //  pt = this.points[i];
+      //}
+    }
+  }
+  this.interpolate = function( beforeCoord, afterCoord, percent ) {
+    var newPos = [];
+    newPos.push( beforeCoord[0] + percent * (afterCoord[0] - beforeCoord[0]) );
+    newPos.push( beforeCoord[1] + percent * (afterCoord[1] - beforeCoord[1]) );    
+    newPos.push( beforeCoord[2] + percent * (afterCoord[2] - beforeCoord[2]) );  
+    return newPos;
+  }  
+  this.fly = function() {
+    if ( this["fly-flying"] ) {  // if enabled
+      if ( this["fly-speed"] < 63 ) {
+        if (!this.points) {  
+          this.initialize();
+        }
+        this.updateSpeed();
+        this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
+        this.timeAtLastPoint = this.time;
+      } else {
+        var elapsedTime = this.time - this.timeAtLastPoint; 
+        var currentPoint = this.points[ this["fly-pointIndex"] ].point;
+        var nextPoint = this.points[ this["fly-pointIndex"]+1 ].point;
+        var percent = elapsedTime / this.timeToNext;
+        var newPos = this.interpolate( currentPoint, nextPoint, percent );
+        this.translation = newPos;
+        if ( percent > 0.9875 ) {
+          this["fly-pointIndex"]++;
+          if ( this["fly-pointIndex"]+1 >= this.points.length ) {
+            this["fly-pointIndex"] = this.firstCiclePoint;
+          }
+          // update rotation
+          var goalPathPoint = this.points[ this["fly-pointIndex"]+1 ].point;
+          var zRot = [ goalPathPoint[0] - newPos[0], goalPathPoint[1] - newPos[1], 0 ];
+
+          this.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5))*180/Math.PI  ];
+
+          this.updateSpeed();
+          this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
+          this.timeAtLastPoint = this.time;          
+        }
+      }
+      this.future( 0.05 ).fly();  // schedule the next step
+    }    
+  }
+  this.pointerClick = function()  {  // when clicked ...
+    this["fly-flying"] = ! this["fly-flying"];  // ... toggle the enabled flag
+  }  //@ sourceURL=fly.vwf

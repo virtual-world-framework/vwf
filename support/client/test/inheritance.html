@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        // This is the common model implementation and an example model that connects the
+        // simulation to a WebGL scene manager.
+
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "logger",
+
+      ], function( ready ) {
+
+        // Verify that prototype-based inheritance in VWF works the same way as in JavaScript.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ ]
+          );
+
+          test( "Models", function() {
+            equal( vwf.models.actual[0].module.id, "vwf/model/javascript", "JavaScript Model" );
+            equal( vwf.models.actual[1].module.id, "vwf/model/object", "Object Model" );
+          } );
+
+          test( "Views", function() {
+          } );
+
+          // Validate the fixture.
+
+          test( "Property Inheritance fixture JS", function() {
+
+            var fixture = createFixtureJS( "empty", "value", "accessor" );
+
+            equal( fixture.top.tag, "top", "top tag" );
+            ok( ! fixture.top.hasOwnProperty( "property" ) ); // "empty" type
+            ok( ! fixture.top.hasOwnProperty( "property_" ) ); // "empty" type
+
+            equal( fixture.middle.tag, "middle", "middle tag" );
+            ok( fixture.middle.hasOwnProperty( "property" ) ); // "value" type
+            ok( ! fixture.middle.hasOwnProperty( "property_" ) ); // "value" type
+
+            equal( fixture.bottom.tag, "bottom", "bottom tag" );
+            ok( fixture.bottom.hasOwnProperty( "property" ) ); // "accessor" type
+            ok( fixture.bottom.hasOwnProperty( "property_" ) ); // "accessor" type
+
+          } );
+
+          // Validate the fixture.
+
+          asyncTest( "Property Inheritance fixture VWF", function() {
+
+            createFixtureVWF( "empty", "value", "accessor", function( fixture ) {
+
+              equal( vwf.execute( fixture.top, "this.tag" ), "top", "top tag" );
+              ok( ! vwf.execute( fixture.top, "this.hasOwnProperty( 'property' )" ) ); // "empty" type
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) ); // "empty" type  // TODO: vwf/model/javascript internals
+  
+              equal( vwf.execute( fixture.middle, "this.tag" ), "middle", "middle tag" );
+              ok( vwf.execute( fixture.middle, "this.hasOwnProperty( 'property' )" ) ); // "value" type
+              // ok( ! fixture.middle.hasOwnProperty( "property_" ) ); // "value" type  // TODO: vwf/model/javascript internals
+  
+              equal( vwf.execute( fixture.bottom, "this.tag" ), "bottom", "bottom tag" );
+              ok( vwf.execute( fixture.bottom, "this.hasOwnProperty( 'property' )" ) ); // "accessor" type
+              // ok( fixture.bottom.hasOwnProperty( "property_" ) ); // "accessor" type  // TODO: vwf/model/javascript internals
+  
+              start();
+            } );
+
+          } );
+
+          // With no prior values, gets return undefined, and sets apply directly to the top.
+
+          test( "Property Inheritance JS: empty, empty, empty", function() {
+
+            var fixture = createFixtureJS( "empty", "empty", "empty" );
+
+            equal( fixture.top.property, undefined, "top before" );
+            equal( fixture.middle.property, undefined, "middle before" );
+            equal( fixture.bottom.property, undefined, "bottom before" );
+
+            fixture.top.property = "UpDaTeD";
+
+            equal( fixture.top.property, "UpDaTeD", "top after" );
+            equal( fixture.middle.property, undefined, "middle after" );
+            equal( fixture.bottom.property, undefined, "bottom after" );
+
+          } );
+
+          // With no prior values, gets return undefined, and sets apply directly to the top.
+
+          asyncTest( "Property Inheritance VWF: empty, empty, empty", function() {
+
+            createFixtureVWF( "empty", "empty", "empty", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), undefined, "top before" );
+              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: empty, empty, value", function() {
+
+            var fixture = createFixtureJS( "empty", "empty", "value" );
+
+            equal( fixture.top.property, "bottom", "top before" );
+            equal( fixture.middle.property, "bottom", "middle before" );
+            equal( fixture.bottom.property, "bottom", "bottom before" );
+
+            fixture.top.property = "UpDaTeD";
+
+            equal( fixture.top.property, "UpDaTeD", "top after" );
+            equal( fixture.middle.property, "bottom", "middle after" );
+            equal( fixture.bottom.property, "bottom", "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: empty, empty, value", function() {
+
+            createFixtureVWF( "empty", "empty", "value", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "bottom", "top before" );
+              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: empty, empty, accessor", function() {
+
+            var fixture = createFixtureJS( "empty", "empty", "accessor" );
+
+            equal( fixture.top.property, "BOTTOM", "top before" ); // via accessor on bottom
+            ok( ! fixture.top.hasOwnProperty( "property_" ) );
+
+            equal( fixture.middle.property, "BOTTOM", "middle before" );
+            equal( fixture.bottom.property, "BOTTOM", "bottom before" );
+
+            fixture.top.property = "UpDaTeD"; // through accessor on bottom
+
+            equal( fixture.top.property, "UPDATED", "top after" ); // via accessor on bottom using value on top
+            ok( fixture.top.hasOwnProperty( "property_" ) );
+            equal( fixture.top.property_, "updated" );
+
+            equal( fixture.middle.property, "BOTTOM", "middle after" );
+            equal( fixture.bottom.property, "BOTTOM", "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: empty, empty, accessor", function() {
+
+            createFixtureVWF( "empty", "empty", "accessor", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "BOTTOM", "top before" ); // via accessor on bottom
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on bottom
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" );
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: value, empty, empty", function() {
+
+            var fixture = createFixtureJS( "value", "empty", "empty" );
+
+            equal( fixture.top.property, "top", "top before" );
+            equal( fixture.middle.property, undefined, "middle before" );
+            equal( fixture.bottom.property, undefined, "bottom before" );
+
+            fixture.top.property = "UpDaTeD";
+
+            equal( fixture.top.property, "UpDaTeD", "top after" );
+            equal( fixture.middle.property, undefined, "middle after" );
+            equal( fixture.bottom.property, undefined, "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: value, empty, empty", function() {
+
+            createFixtureVWF( "value", "empty", "empty", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
+              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: value, empty, value", function() {
+
+            var fixture = createFixtureJS( "value", "empty", "value" );
+
+            equal( fixture.top.property, "top", "top before" );
+            equal( fixture.middle.property, "bottom", "middle before" );
+            equal( fixture.bottom.property, "bottom", "bottom before" );
+
+            fixture.top.property = "UpDaTeD";
+
+            equal( fixture.top.property, "UpDaTeD", "top after" );
+            equal( fixture.middle.property, "bottom", "middle after" );
+            equal( fixture.bottom.property, "bottom", "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: value, empty, value", function() {
+
+            createFixtureVWF( "value", "empty", "value", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
+              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: value, empty, accessor", function() {
+
+            var fixture = createFixtureJS( "value", "empty", "accessor" );
+
+            equal( fixture.top.property, "top", "top before" );
+            ok( ! fixture.top.hasOwnProperty( "property_" ) );
+
+            equal( fixture.middle.property, "BOTTOM", "middle before" );
+            equal( fixture.bottom.property, "BOTTOM", "bottom before" );
+
+            fixture.top.property = "UpDaTeD"; // not using accessor on bottom
+
+            equal( fixture.top.property, "UpDaTeD", "top after" );
+            ok( ! fixture.top.hasOwnProperty( "property_" ) );
+
+            equal( fixture.middle.property, "BOTTOM", "middle after" );
+            equal( fixture.bottom.property, "BOTTOM", "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: value, empty, accessor", function() {
+
+            createFixtureVWF( "value", "empty", "accessor", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // not using accessor on bottom
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: accessor, empty, empty", function() {
+
+            var fixture = createFixtureJS( "accessor", "empty", "empty" );
+
+            equal( fixture.top.property, "TOP", "top before" ); // via accessor on top
+            ok( fixture.top.hasOwnProperty( "property_" ) );
+            equal( fixture.top.property_, "top" );
+
+            equal( fixture.middle.property, undefined, "middle before" );
+            equal( fixture.bottom.property, undefined, "bottom before" );
+
+            fixture.top.property = "UpDaTeD"; // through accessor on top
+
+            equal( fixture.top.property, "UPDATED", "top after" ); // via accessor on top using value on top
+            ok( fixture.top.hasOwnProperty( "property_" ) );
+            equal( fixture.top.property_, "updated" );
+
+            equal( fixture.middle.property, undefined, "middle after" );
+            equal( fixture.bottom.property, undefined, "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: accessor, empty, empty", function() {
+
+            createFixtureVWF( "accessor", "empty", "empty", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: accessor, empty, value", function() {
+
+            var fixture = createFixtureJS( "accessor", "empty", "value" );
+
+            equal( fixture.top.property, "TOP", "top before" ); // via accessor on top
+            ok( fixture.top.hasOwnProperty( "property_" ) );
+            equal( fixture.top.property_, "top" );
+
+            equal( fixture.middle.property, "bottom", "middle before" );
+            equal( fixture.bottom.property, "bottom", "bottom before" );
+
+            fixture.top.property = "UpDaTeD"; // through accessor on top
+
+            equal( fixture.top.property, "UPDATED", "top after" ); // via accessor on top using value on top
+            ok( fixture.top.hasOwnProperty( "property_" ) );
+            equal( fixture.top.property_, "updated" );
+
+            equal( fixture.middle.property, "bottom", "middle after" );
+            equal( fixture.bottom.property, "bottom", "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: accessor, empty, value", function() {
+
+            createFixtureVWF( "accessor", "empty", "value", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          test( "Property Inheritance JS: accessor, empty, accessor", function() {
+
+            var fixture = createFixtureJS( "accessor", "empty", "accessor" );
+
+            equal( fixture.top.property, "TOP", "top before" ); // via accessor on top
+            ok( fixture.top.hasOwnProperty( "property_" ) );
+            equal( fixture.top.property_, "top" );
+
+            equal( fixture.middle.property, "BOTTOM", "middle before" );
+            equal( fixture.bottom.property, "BOTTOM", "bottom before" );
+
+            fixture.top.property = "UpDaTeD"; // through accessor on top
+
+            equal( fixture.top.property, "UPDATED", "top after" ); // via accessor on top using value on top
+            ok( fixture.top.hasOwnProperty( "property_" ) );
+            equal( fixture.top.property_, "updated" );
+
+            equal( fixture.middle.property, "BOTTOM", "middle after" );
+            equal( fixture.bottom.property, "BOTTOM", "bottom after" );
+
+          } );
+
+          asyncTest( "Property Inheritance VWF: accessor, empty, accessor", function() {
+
+            createFixtureVWF( "accessor", "empty", "accessor", function( fixture ) {
+
+              equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
+
+              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
+
+              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
+              // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
+              // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
+
+              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
+              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
+
+              start();
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create a regular JavaScript object with three levels of inheritance using the given
+          // constructors. Tag each level with a unique identifier.
+
+          function createFixtureJS( top, middle, bottom ) {
+
+            // Factories for constructor functions for the various cases.
+
+            var factories = {
+
+              // No "property" property.
+
+              empty: function( tag ) {
+                return function() {
+                  this.tag = tag;
+                }
+              },
+
+              // "property" as a simple value type.
+
+              value: function( tag ) {
+                return function() {
+                  Object.defineProperty( this, "property", {
+                    value: tag,
+                    writable: true
+                  } );
+                  this.tag = tag;
+                }
+              },
+
+              // "property" with getter and setter functions.
+
+              accessor: function( tag ) {
+                return function() {
+                  Object.defineProperty( this, "property", {
+                    get: function() { return this.property_.toUpperCase() },
+                    set: function( value ) { this.property_ = value.toLowerCase() }
+                  } );
+                  this.property_ = tag;
+                  this.tag = tag;
+                }
+              },
+
+            };
+
+            // Construct the three-level inheritance pattern: top : middle : bottom. 
+
+            var bc = factories[bottom]( "bottom" ); // constructor
+            var bi = new bc(); // instance
+
+            var mc = factories[middle]( "middle" ); mc.prototype = bi; // constructor
+            var mi = new mc(); // instance
+
+            var tc = factories[top]( "top" ); tc.prototype = mi; // constructor
+            var ti = new tc(); // instance
+
+            // Return the instances at all three levels.
+
+            return { top: ti, middle: mi, bottom: bi };
+          }
+
+          // Create a VWF object with three levels of inheritance using the given configurations.
+
+          function createFixtureVWF( top, middle, bottom, callback ) {
+
+            // Factories for property initializers for the various cases.
+
+            var factories = {
+
+              // No "property" property.
+
+              empty: function( tag ) {
+                return undefined;
+              },
+
+              // "property" as a simple value type.
+
+              value: function( tag ) {
+                return {
+                  property: { value: tag, create: true }
+                };
+              },
+
+              // "property" with getter and setter functions.
+
+              accessor: function( tag ) {
+                return {
+                  property: {
+                    get: "return this.property && this.property.toUpperCase()",
+                    set: "this.property = value.toLowerCase()",
+                    value: tag
+                  }
+                };
+              },
+
+            };
+
+            // Construct the three-level inheritance pattern: top : middle : bottom. 
+
+            var bottomProperties = factories[bottom]( "bottom" );
+            var middleProperties = factories[middle]( "middle" );
+            var topProperties = factories[top]( "top" );
+
+            vwf.createNode( 0, { extends: "http://vwf.example.com/node.vwf", properties: bottomProperties }, unique_name( "bottom" ), function( bottomID ) {
+              vwf.execute( bottomID, "this.tag = 'bottom'" );
+              vwf.createNode( 0, { extends: "@" + JSON.stringify( bottomID ), properties: middleProperties }, unique_name( "middle" ), function( middleID ) {
+                vwf.execute( middleID, "this.tag = 'middle'" );
+                vwf.createNode( 0, { extends: "@" + JSON.stringify( middleID ), properties: topProperties }, unique_name( "top" ), function( topID ) {
+                  vwf.execute( topID, "this.tag = 'top'" );
+                  callback( { top: topID, middle: middleID, bottom: bottomID } );
+                } );
+              } );
+            } );
+
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>
