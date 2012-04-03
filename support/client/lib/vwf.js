@@ -1,18 +1,3 @@
-"use strict";
-
-// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
-// Secretary of Defense (Personnel & Readiness).
-// 
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License. You may obtain a copy of the License at
-// 
-//   http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed under the License
-// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-// or implied. See the License for the specific language governing permissions and limitations under
-// the License.
-
 ( function( window ) {
 
     window.console && console.info && console.info( "loading vwf" );
@@ -75,18 +60,9 @@
         } );
 
         // This is the simulation clock, which contains the current time in milliseconds. Time is
-        // controlled by the reflector and updates here as we receive control messages.
+        // controlled by the conference server and updates here as we receive control messages.
 
         this.now = 0;
-
-        // The moniker of the client responsible for an action. Will be falsy for actions
-        // originating in the server, such as time ticks.
-
-        this.client_ = undefined;
-
-        // The identifer assigned to the client by the server.
-
-        this.moniker_ = undefined;
 
         // Nodes that are receiving ticks.
 
@@ -106,26 +82,23 @@
         // that we can find it if it is reused. Components specified internally as object literals
         // are anonymous and are not indexed here.
 
-        var types = this.private.types = {}; // maps component node ID => component specification
-        var uris = this.private.uris = {}; // maps component nodeID => component URI
+        var types = this.private.types = {}; // maps URI => component specification
 
         // The proto-prototype of all nodes is "node", identified by this URI. This type is
         // intrinsic to the system and nothing is loaded from the URI.
 
-        var nodeTypeURI = "http://vwf.example.com/node.vwf";
+        var nodeTypeURI = "http://vwf.example.com/types/node";
 
-        // Control messages from the reflector are stored here in a priority queue, ordered by
-        // execution time.
+        // Control messages from the conference server are stored here in a priority queue, ordered
+        // by execution time.
 
         var queue = this.private.queue = [];
 
         queue.time = 0; // current server time
         queue.ready = true;
 
-        queue.sequence = 0; // message counter to ensure a stable sort
-
-        // This is the connection to the reflector. In this sample implementation, "socket" is a
-        // socket.io client that communicates over a channel provided by the server hosting the
+        // This is the connection to the conference server. In this sample implementation, "socket"
+        // is a socket.io client that communicates over a channel provided by the server hosting the
         // client documents.
 
         var socket = this.private.socket = undefined;
@@ -154,56 +127,62 @@
         // require.ready() or jQuery(document).ready() to call initialize() once the page has
         // loaded. initialize() accepts three parameters.
         
-        // A component specification identifies the application to be loaded. If a URI is provided,
-        // the specification is loaded from there [1]. Alternately, a JavaScript object literal
+        // A component specification identifies the world to be loaded. If a URI is provided, the
+        // specification is loaded from there [1]. Alternately, a JavaScript object literal
         // containing the specfication may be provided [2]. Since a component can extend and
         // specialize a prototype, using a simple object literal allows existing component to be
         // configured for special uses [3].
         // 
-        //     [1] vwf.initialize( "http://vwf.example.com/applications/sample12345", ... )
+        //     [1] vwf.initialize( "http://vwf.example.com/worlds/sample12345", ... )
         //
         //     [2] vwf.initialize( { source: "model.dae", type: "model/vnd.collada+xml",
         //             properties: { "p1": ... }, ... }, ... )
         //
-        //     [3] vwf.initialize( { extends: "http://vwf.example.com/applications/sample12345",
+        //     [3] vwf.initialize( { extends: "http://vwf.example.com/worlds/sample12345",
         //             source: "alternate-model.dae", type: "model/vnd.collada+xml" }, ... )
         // 
-        // modelInitializers and viewInitializers identify the model and view modules that should be
-        // attached to the simulation. Each is specified as an array of objects that map the name of
-        // a model or view to construct to the set of arguments to pass to its constructor. Modules
-        // without parameters may be specified as a string [4]. Arguments may be specified as an
-        // array [5], or as a single value if there is only one [6].
+        // modelArguments and viewArguments identify the model and view modules that should be
+        // attached to the simulation and provides their configuration parameters. Each argument set
+        // is specified as an object (hash) in which each key is the name of a model or view to
+        // construct, and the value is the set of arguments to pass to the constructor. The
+        // arguments may be specified as an array of values [4], or as a single value if there is
+        // only one [5].
         // 
-        //     [4] vwf.initialize( ..., [ "vwf/model/javascript" ], [ ... ] )
-        //     [5] vwf.initialize( ..., [ { "vwf/model/glge": [ "#scene, "second param" ] } ], [ ... ] )
-        //     [6] vwf.initialize( ..., [ { "vwf/model/glge": "#scene" } ], [ ... ] )
+        //     [4] vwf.initialize( ..., { scenejs: "#scene" }, { ... } )
+        //     [5] vwf.initialize( ..., { ... }, { html: [ "#world", "second param" ] } )
 
-        this.initialize = function( /* [ componentURI|componentObject ] [ modelInitializers ]
-            [ viewInitializers ] */ ) {
+        this.initialize = function( /* [ componentURI|componentObject ] [ modelArguments ]
+            [ viewArguments ] */ ) {
 
             var args = Array.prototype.slice.call( arguments );
 
-            // Get the application specification if one is provided in the query string. Parse it
-            // into an application specification object if it's valid JSON, otherwise keep the query
-            // string and assume it's a URI.
+            // Get the world specification if one is provided in the query string. Parse it into a
+            // world specification object if it's valid JSON, otherwise keep the query string and
+            // assume it's a URI.
 
-            var application = getQueryString( "application" );  // TODO: move to index.html; don't reach out to the window from the kernel
+            var application = getQueryString( "application" );
 
-            // Parse the function parameters. If the first parameter is not an array, then treat it
-            // as the application specification. Otherwise, fall back to the "application" parameter
-            // in the query string.
+            // Parse the function parameters. If the first parameter is a string or contains
+            // component properties, then treat it as the world specification. Otherwise, fall back
+            // to the "application" parameter in the query string.
 
-            if ( typeof args[0] != "object" || ! ( args[0] instanceof Array ) ) {
+            if ( typeof args[0] == "string" || args[0] instanceof String || objectIsComponent( args[0] ) ) {
                 application = args.shift();
             }
 
-            // Shift off the parameter containing the model list and initializer arguments.
+            // Shift off the parameter containing the model argument lists.
 
-            var modelInitializers = args.shift() || [];
+            var modelArgumentLists = args.shift() || {};
 
-            // Shift off the parameter containing the view list and initializer arguments.
+            if ( typeof modelArgumentLists != "object" && ! modelArgumentLists instanceof Object )
+                modelArgumentLists = {};
 
-            var viewInitializers = args.shift() || [];
+            // Shift off the parameter containing the view argument lists.
+
+            var viewArgumentLists = args.shift() || {};
+
+            if ( typeof viewArgumentLists != "object" && ! viewArgumentLists instanceof Object )
+                viewArgumentLists = {};
 
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
@@ -212,41 +191,31 @@
 
             // Create and attach each configured model.
 
-            modelInitializers.forEach( function( modelInitializer ) {
-
-                // Accept either { "vwf/model/name": [ arguments] } or "vwf/model/name".
-
-                if ( typeof modelInitializer == "object" || modelInitializer instanceof Object ) {
-                    var modelName = Object.keys( modelInitializer )[0];
-                    var modelArguments = modelInitializer[modelName];
-                } else {
-                    var modelName = modelInitializer;
-                    var modelArguments = undefined;
-                }
+            jQuery.each( modelArgumentLists, function( modelName, modelArguments ) {
 
                 var model = require( modelName ).create(
                     kernel_for_models,                          // model's kernel access
                     [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
-                    {},                                         // state shared with a paired view
-                    [].concat( modelArguments || [] )           // arguments for initialize()
+                    {}                                          // state shared with a paired view
+                    // TODO: configuration parameters (modelArguments)
                 );
 
                 if ( model ) {
-                    this.models.push( model );
-                    this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
+                    vwf.models.push( model );
+                    vwf.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
 if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-    this.models.javascript = model;
-    while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
+    vwf.models.javascript = model;
+    while ( vwf.models.javascript.model ) vwf.models.javascript = vwf.models.javascript.model;
 }
 
 if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
-    this.models.object = model;
-    while ( this.models.object.model ) this.models.object = this.models.object.model;
+    vwf.models.object = model;
+    while ( vwf.models.object.model ) vwf.models.object = vwf.models.object.model;
 }
                 }
 
-            }, this );
+            } );
 
             // Create the view interface to the kernel. Views can only make replicated calls which
             // bounce off the reflection server, are placed on the queue when received, and executed
@@ -256,53 +225,43 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             // Create and attach each configured view.
 
-            viewInitializers.forEach( function( viewInitializer ) {
-
-                // Accept either { "vwf/view/name": [ arguments] } or "vwf/view/name".
-
-                if ( typeof viewInitializer == "object" || viewInitializer instanceof Object ) {
-                    var viewName = Object.keys( viewInitializer )[0];
-                    var viewArguments = viewInitializer[viewName];
-                } else {
-                    var viewName = viewInitializer;
-                    var viewArguments = undefined;
-                }
+            jQuery.each( viewArgumentLists, function( viewName, viewArguments ) {
 
                 if ( ! viewName.match( "^vwf/view/" ) ) { // old way
 
-                    var view = this.modules[viewName];
+                    var view = vwf.modules[viewName];
 
                     if ( view ) {
                         var instance = new view();
-                        instance.state = this.models.actual["vwf/model/"+viewName] && this.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
+                        instance.state = vwf.models.actual["vwf/model/"+viewName] && vwf.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
                         view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
-                        this.views.push( instance );
-                        this.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                        vwf.views.push( instance );
+                        vwf.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
                     }
 
                 } else { // new way
 
-                    var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
+                    var modelPeer = vwf.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: vwf.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
 
                     var view = require( viewName ).create(
                         kernel_for_views,                           // view's kernel access
                         [],                                         // stages between the kernel and view
-                        modelPeer && modelPeer.state || {},         // state shared with a paired model
-                        [].concat( viewArguments || [] )            // arguments for initialize()
+                        modelPeer && modelPeer.state || {}          // state shared with a paired model
+                        // TODO: configuration parameters (viewArguments)
                     );
 
                     if ( view ) {
-                        this.views.push( view );
-                        this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                        vwf.views.push( view );
+                        vwf.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
                     }
 
                 }
 
-            }, this );
+            } );
 
-            // Load the application.
+            // Load the world.
 
-            this.ready( application );
+            vwf.ready( application );
 
         };
 
@@ -310,8 +269,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.ready = function( component_uri_or_json_or_object ) {
 
-            // Connect to the reflector. This implementation uses the socket.io library, which
-            // communicates using a channel back to the server that provided the client documents.
+            // Connect to the conference server. This implementation uses the socket.io library,
+            // which communicates using a channel back to the server that provided the client
+            // documents.
 
             try {
 
@@ -346,14 +306,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // "jsonp-polling": { timeout: 90000 },
                     // }
 
-                } );
+    			} );
 
             } catch ( e ) {
 
-                // If a connection to the reflector is not available, then run in single-user mode.
-                // Messages intended for the reflector will loop directly back to us in this case.
-                // Start a timer to monitor the incoming queue and dispatch the messages as though
-                // they were received from the server.
+                // If a connection to the conference server is not available, then run in single-
+                // user mode. Messages intended for the conference server will loop directly back to
+                // us in this case. Start a timer to monitor the incoming queue and dispatch the
+                // messages as though they were received from the server.
 
                 this.dispatch( 0 );
 
@@ -365,13 +325,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             if ( socket ) {
 
-                socket.on( "connect", function() {
-
-                    vwf.logger.info( "vwf.socket connected" );
-
-                    vwf.moniker_ = this.transport.sessionid;
-
-                } );
+                socket.on( "connect", function() { vwf.logger.info( "vwf.socket connected" ) } );
 
                 // Configure a handler to receive messages from the server.
                 
@@ -396,7 +350,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         // Add the message to the queue.
 
-                        vwf.queue( fields );
+                        vwf.queue( fields.time, fields.node, fields.action, fields.member, fields.parameters );
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -404,7 +358,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     
                         // The simulation may perform immediate actions at the current time or it
                         // may post actions to the queue to be performed in the future. But we only
-                        // move time forward for items arriving in the queue from the reflector.
+                        // move time forward for items arriving in the queue from the conference
+                        // server.
 
                         vwf.dispatch( fields.time );
 
@@ -419,18 +374,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "disconnect", function() { vwf.logger.info( "vwf.socket disconnected" ) } );
 
-                // Start communication with the reflector. 
+                // Start communication with the conference server. 
 
                 socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
 
             } else if ( component_uri_or_json_or_object ) {
 
-                // Load the application. The application is rooted in a single node constructed here
-                // as an instance of the component passed to initialize(). That component, its
+                // Load the world. The world is a rooted in a single node constructed here as an
+                // instance of the component passed to initialize(). That component, its
                 // prototype(s), and its children, and their prototypes and children, flesh out the
-                // entire application.
+                // entire world.
 
-                // TODO: add note that this is only for a self-determined application; with socket, wait for reflection server to tell us.
+                // TODO: add note that this is only for a self-determined world; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
                 this.createNode( 0, component_uri_or_json_or_object, undefined );
@@ -445,13 +400,31 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // -- queue --------------------------------------------------------------------------------
 
-        this.queue = function( fields ) {
+        this.queue = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
 
-            fields.sequence = ++queue.sequence; // to stabilize the sort
+            var time = when > 0 ? // absolute (+) or relative (-)
+                Math.max( this.now, when ) :
+                this.now + ( -when );
+
+            var fields = {
+                time: time,
+                sequence: undefined, // for stabilizing the sort
+                node: nodeID,
+                action: actionName,
+                member: memberName,
+                parameters: parameters,
+                // callback: callback,  // TODO
+            };
 
             queue.push( fields );
 
             // Sort by time then by sequence.  // TODO: use a better-performing priority queue
+
+            var sequence = 0;
+
+            queue.forEach( function( fields ) {
+                fields.sequence = ++sequence;
+            } );
 
             queue.sort( function( a, b ) {
                 return a.time != b.time ?
@@ -461,46 +434,28 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         };
 
-        // -- plan ---------------------------------------------------------------------------------
-
-        this.plan = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
-
-            var time = when > 0 ? // absolute (+) or relative (-)
-                Math.max( this.now, when ) :
-                this.now + ( -when );
-
-            var fields = {
-                time: time,
-                node: nodeID,
-                action: actionName,
-                member: memberName,
-                parameters: parameters,
-                // callback: callback,  // TODO
-            };
-
-            if ( this.client_ ) {
-                fields.client = this.client_; // propagate the current originating client
-            }
-
-            this.queue( fields );
-
-        };
-
         // -- send ---------------------------------------------------------------------------------
 
-        // Send a message to the reflector. The message will be reflected back to all participants
-        // in the instance.
+        // Send a message to the conference server. The message will be reflected back to all
+        // participants in the conference.
 
-        this.send = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
+        this.send = function( when, nodeID, actionName, memberName, parameters, callback /* ( result ) */ ) {
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
                 this.now + ( -when );
+
+            // For single-user mode, loop the message back to the incoming queue.
+
+            if ( ! socket ) {
+                return this.queue( time, nodeID, actionName, memberName, parameters, callback /* ( result ) */ );
+            }
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
                 time: time,
+                // sequence: undefined,  // TODO: use to identify on return from reflector?
                 node: nodeID,
                 action: actionName,
                 member: memberName,
@@ -508,21 +463,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
-            if ( ! socket ) { // single-user mode
-    
-                // Loop the message back to the incoming queue.
+            // Send the message.
 
-                fields.client = this.moniker_; // stamp with the originating client like the reflector does
-                this.queue( fields );
-    
-            } else {
-                
-                // Send the message.
-
-                var message = JSON.stringify( fields );
-                socket.send( message );
-
-            }
+            var message = JSON.stringify( fields );
+            socket.send( message );
 
         };
 
@@ -530,7 +474,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // Return a result for a function invoked by the server.
 
-        this.respond = function( nodeID, actionName, memberName, parameters, result ) {
+        this.respond = function( time, nodeID, actionName, memberName, parameters, result ) {
 
             // Nothing to do in single-user mode.
 
@@ -541,6 +485,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
+                time: time,
                 // sequence: undefined,  // TODO: use to identify on return from reflector?
                 node: nodeID,
                 action: actionName,
@@ -554,13 +499,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             var message = JSON.stringify( fields );
             socket.send( message );
 
-        };
+        }
 
         // -- receive ------------------------------------------------------------------------------
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
+        this.receive = function( time, nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
 
 // TODO: delegate parsing and validation to each action.
 
@@ -596,7 +541,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             var result = this[actionName] && this[actionName].apply( this, args );
 
 if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
-    this.respond( nodeID, actionName, memberName, parameters, result );
+    this.respond( time, nodeID, actionName, memberName, parameters, result );
 }
             
         };
@@ -605,7 +550,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
         // Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
         // simulation time that we should advance to and was taken from the time stamp of the last
-        // message received from the reflector.
+        // message received from the conference server.
 
         this.dispatch = function( currentTime ) {
 
@@ -626,13 +571,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
                 this.now = fields.time;
 
-                // Record the originating client.
-
-                this.client_ = fields.client;
-
-                // Perform the action.
-
-                this.receive( fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
+                this.receive( fields.time, fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
                         vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
                         queue.ready = ready;
@@ -659,27 +598,29 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
         // -- tick ---------------------------------------------------------------------------------
 
-        // Tick each tickable model, view, and node. Ticks are sent on each time change.
+        // Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
+        // simulation time that we should advance to and was taken from the time stamp of the last
+        // message received from the conference server.
 
         this.tick = function() {
 
             // Call ticking() on each model.
 
-            this.models.forEach( function( model ) {
-                model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
-            }, this );
+            vwf.models.forEach( function( model ) {
+                model.ticking && model.ticking( vwf.now ); // TODO: maintain a list of tickable models and only call those
+            } );
 
             // Call ticked() on each view.
 
-            this.views.forEach( function( view ) {
-                view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
-            }, this );
+            vwf.views.forEach( function( view ) {
+                view.ticked && view.ticked( vwf.now ); // TODO: maintain a list of tickable views and only call those
+            } );
 
             // Call tick() on each tickable node.
 
-            this.tickable.nodeIDs.forEach( function( nodeID ) {
-                this.callMethod( nodeID, "tick", [ this.now ] );
-            }, this );
+            vwf.tickable.nodeIDs.forEach( function( nodeID ) {
+                vwf.callMethod( nodeID, "tick", [ vwf.now ] );
+            } );
 
         };
 
@@ -692,8 +633,8 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // A simple node consists of a set of properties, methods and events, but a node may
         // specialize a prototype component and may also contain multiple child nodes, any of which
         // may specialize a prototype component and contain child nodes, etc. So components cover a
-        // vast range of complexity. The application definition for the overall simulation is a
-        // single component instance.
+        // vast range of complexity. The world definition for the overall simulation is a single
+        // component instance.
         // 
         // A node is a component instance--a single, anonymous specialization of its component.
         // Nodes specialize components in the same way that any component may specialize a prototype
@@ -731,7 +672,7 @@ childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id
             // Call getType() to locate or load the prototype node, then pass the prototype and the
             // component specification to construct().
     
-            this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with application param?
+            this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with world param?
 
                 async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
 
@@ -769,14 +710,14 @@ vwf.addChild( nodeID, childNodeID, childName );
             // Call deletingNode() on each model. The node is considered deleted after each model
             // has run.
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
             } );
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.deletedNode && view.deletedNode( nodeID );
             } );
 
@@ -838,7 +779,6 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                     var callbacks = types[nodeID];
                     types[nodeID] = component; // component specification once loaded
-                    uris[nodeID] = uri;
 
                     callbacks.forEach( function( callback ) {
                         callback && callback.call( vwf, nodeID );
@@ -865,29 +805,18 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
 
-                            async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
+                            construct.call( this, 0, nodeID, prototypeID, [], component, undefined, function( nodeID ) {
 
-                                vwf.getType( uri, function( behaviorID ) {
-                                    callback( undefined, behaviorID );
-                                } );
+                                var callbacks = types[nodeID];
+                                types[nodeID] = component; // component specification once loaded
 
-                            }, function( err, behaviorIDs ) {
-
-                                construct.call( vwf, 0, nodeID, prototypeID, behaviorIDs, component, undefined, function( nodeID ) {
-
-                                    var callbacks = types[nodeID];
-                                    types[nodeID] = component; // component specification once loaded
-                                    uris[nodeID] = uri;
-
-                                    callbacks.forEach( function( callback ) {
-                                        callback && callback.call( vwf, nodeID );
-                                    } );
-
+                                callbacks.forEach( function( callback ) {
+                                    callback && callback.call( vwf, nodeID );
                                 } );
 
                             } );
 
-                        } );
+                        } )
 
                     },
 
@@ -899,13 +828,16 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
         };
 
+
+
+
         // -- setNode ------------------------------------------------------------------------------
 
         this.setNode = function( nodeID, component ) {
 
 Object.keys( component ).forEach( function( nodeID ) {
-    this.setProperties( nodeID, component[nodeID] );
-}, this );
+    vwf.setProperties( nodeID, component[nodeID] );
+} );
 
 return;
 
@@ -935,10 +867,10 @@ return;
 
             var component = {};
 
-Object.keys( this.models.object.objects ).forEach( function( nodeID ) {
-    component[nodeID] = this.getProperties( nodeID );
+Object.keys( vwf.models.object.objects ).forEach( function( nodeID ) {
+    component[nodeID] = vwf.getProperties( nodeID );
     Object.keys( component[nodeID] ).length || delete component[nodeID];
-}, this );
+} );
 
 return component;
 
@@ -994,54 +926,38 @@ return component;
 
         // -- prototype ----------------------------------------------------------------------------
 
-        this.prototype = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+        this.prototype = function( nodeID ) {
 
             // Call prototyping() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
             var prototypeID = undefined;
 
-            this.models.some( function( model ) {
+            vwf.models.some( function( model ) {
                 prototypeID = model.prototyping && model.prototyping( nodeID );
                 return prototypeID !== undefined;
             } );
 
             return prototypeID;
-        };
+        }
 
         // -- prototypes ---------------------------------------------------------------------------
 
-        this.prototypes = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+        this.prototypes = function( nodeID ) {
 
             var prototypeIDs = [];
             var prototypeID = undefined;
             
             while ( nodeID !== undefined ) {
-                if ( ( prototypeID = prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                if ( ( prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
                     prototypeIDs.push( prototypeID );
                 }
                 nodeID = prototypeID;
             }
             
             return prototypeIDs;
-        };
+        }
 
-        // -- behaviors ----------------------------------------------------------------------------
-
-        this.behaviors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            // Call behavioring() on each model. The first model to return a non-undefined value
-            // dictates the return value.
-
-            var behaviorIDs = undefined;
-
-            this.models.some( function( model ) {
-                behaviorIDs = model.behavioring && model.behavioring( nodeID );
-                return behaviorIDs !== undefined && behaviorIDs.length > 0;
-            } );
-
-            return behaviorIDs || [];
-        };
 
         // -- addChild -----------------------------------------------------------------------------
 
@@ -1052,14 +968,14 @@ return component;
             // Call addingChild() on each model. The child is considered added after each model has
             // run.
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 model.addingChild && model.addingChild( nodeID, childID, childName );
             } );
 
             // Call addedChild() on each view. The view is being notified that a child has been
             // added.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
@@ -1075,14 +991,14 @@ return component;
             // Call removingChild() on each model. The child is considered removed after each model
             // has run.
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 model.removingChild && model.removingChild( nodeID, childID );
             } );
 
             // Call removedChild() on each view. The view is being notified that a child has been
             // removed.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
@@ -1091,7 +1007,7 @@ return component;
 
         // -- ancestors ----------------------------------------------------------------------------
 
-        this.ancestors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+        this.ancestors = function( nodeID ) {
 
             var ancestors = [];
 
@@ -1103,18 +1019,18 @@ return component;
             }
 
             return ancestors;
-        };
+        }
 
         // -- parent -------------------------------------------------------------------------------
 
-        this.parent = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+        this.parent = function( nodeID ) {
 
             // Call parenting() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
             var parent = undefined;
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 var modelParent = model.parenting && model.parenting( nodeID );
                 parent = modelParent !== undefined ? modelParent  : parent;
             } );
@@ -1124,7 +1040,7 @@ return component;
 
         // -- children -----------------------------------------------------------------------------
 
-        this.children = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+        this.children = function( nodeID ) {
 
             this.logger.group( "vwf.children " + nodeID );
 
@@ -1133,7 +1049,7 @@ return component;
 
             var children = [];
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 var modelChildren = model.childrening && model.childrening( nodeID ) || [];
                 Array.prototype.push.apply( children, modelChildren );
             } );
@@ -1145,14 +1061,14 @@ return component;
 
         // -- name ---------------------------------------------------------------------------------
 
-        this.name = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+        this.name = function( nodeID ) {
 
             // Call naming() on each model. The first model to return a non-undefined value dictates
             // the return value.
 
             var name = undefined;
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 var modelName = model.naming && model.naming( nodeID );
                 name = modelName !== undefined ? modelName : name;
             } );
@@ -1170,7 +1086,7 @@ return component;
 
             // Call settingProperties() on each model.
 
-            properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
+            properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and stop after the first that accepts the set since we are setting all of the properties as a batch; verify that this creates the same result as calling setProperty individually on each property and that there are no side effects from setting through a driver after the one that handles the set.
 
                 var model_properties = {};
 
@@ -1195,7 +1111,7 @@ return component;
 
             // Call satProperties() on each view.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
 
                 if ( view.satProperties ) {
                     view.satProperties( nodeID, properties );
@@ -1222,7 +1138,7 @@ return component;
 
             // Call gettingProperties() on each model.
 
-            var properties = this.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+            var properties = vwf.models.reduceRight( function( intermediate_properties, model ) {  // TODO: note that we need can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
 
                 var model_properties = {};
 
@@ -1231,17 +1147,13 @@ return component;
                 } else if ( model.gettingProperty ) {
                     for ( var propertyName in intermediate_properties ) {
                         model_properties[propertyName] =
-                            model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );
+                            model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );  // TODO: probably don't need propertyValue here
                     }
                 }
 
                 for ( var propertyName in model_properties ) {
                     if ( model_properties[propertyName] !== undefined ) {
-                        if ( objectIsTypedArray( model_properties[propertyName] ) ) {
-                            intermediate_properties[propertyName] = Array.prototype.slice.call( model_properties[propertyName] ); // convert typed arrays to regular arrays for proper JSON serialization
-                        } else {
-                            intermediate_properties[propertyName] = model_properties[propertyName];
-                        }
+                        intermediate_properties[propertyName] = model_properties[propertyName];
                     }
                 }
 
@@ -1251,7 +1163,7 @@ return component;
 
             // Call gotProperties() on each view.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
 
                 if ( view.gotProperties ) {
                     view.gotProperties( nodeID, properties );
@@ -1279,20 +1191,18 @@ return component;
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
             // Call createdProperty() on each view. The view is being notified that a property has
             // been created.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
             this.logger.groupEnd();
-
-            return propertyValue;
         };
 
         // -- setProperty --------------------------------------------------------------------------
@@ -1303,13 +1213,11 @@ return component;
 
             this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
 
-            var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
-
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
 
-            var entrants = this.setProperty.entrants;
+            var entrants = arguments.callee.entrants;
 
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
@@ -1318,11 +1226,11 @@ return component;
             // has performed the set and dictates the return value. The property is considered set
             // after each model has run.
 
-            this.models.some( function( model, index ) {
+            vwf.models.some( function( model, index ) {
 
                 // Skip models up through the one making the most recent call here (if any).
 
-                if ( entry.index === undefined || index > entry.index ) {
+                if ( index > entry.index || entry.index === undefined ) {
 
                     // Record the active model number.
  
@@ -1330,43 +1238,32 @@ return component;
 
                     // Make the call.
 
-                    if ( initializing ) {
-                        var value = model.initializingProperty &&
-                            model.initializingProperty( nodeID, propertyName, propertyValue );
-                    } else {
-                        var value = model.settingProperty &&
-                            model.settingProperty( nodeID, propertyName, propertyValue );
-                    }
+                    var value = model.settingProperty &&
+                        model.settingProperty( nodeID, propertyName, propertyValue );
 
-                    // Look for a return value potentially stored here by a reentrant call if the
+                    // Look for a return value potentially stored by a reentrant call here if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
                     // method).
 
-                    if ( value === undefined ) {
+                    if ( value === undefined )
                         value = reentry.value;
-                    }
 
-                    // Record the value actually assigned. This may differ from the incoming value
-                    // if it was range limited, quantized, etc. by the model. This is the value
-                    // passed to the views.
+                    delete reentry.value;
+
+                    // If we have a return value, save it and exit from Array.some().
 
                     if ( value !== undefined ) {
                         propertyValue = value;
+                        return true;
                     }
 
-                    // If we are setting, exit from the this.models.some() iterator once the value
-                    // has been set. Don't exit early if we are initializing since every model needs
-                    // the opportunity to register the property.
-
-                    return ! initializing && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
                 }
 
             } );
 
             if ( entry.index !== undefined ) {
 
-                // For a reentrant call, restore the previous state, move the index forward to cover
-                // the models we called, and record the current result.
+                // For a reentrant call, restore the previous state and record the current result.
 
                 entrants[nodeID+'-'+propertyName] = entry;
                 entry.value = propertyValue;
@@ -1381,12 +1278,8 @@ return component;
                 // Call satProperty() on each view. The view is being notified that a property has
                 // been set.  TODO: only want to call when actually set and with final value
 
-                this.views.forEach( function( view ) {
-                    if ( initializing ) {
-                        view.initializedProperty && view.initializedProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
-                    } else {
-                        view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
-                    }
+                vwf.views.forEach( function( view ) {
+                    view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
                 } );
 
             }
@@ -1415,7 +1308,7 @@ return component;
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
 
-            var entrants = this.getProperty.entrants;
+            var entrants = arguments.callee.entrants;
 
             var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
             var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
@@ -1423,11 +1316,11 @@ return component;
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
-            this.models.some( function( model, index ) {
+            vwf.models.some( function( model, index ) {
 
                 // Skip models up through the one making the most recent call here (if any).
 
-                if ( entry.index === undefined || index > entry.index ) {
+                if ( index > entry.index || entry.index === undefined ) {
 
                     // Record the active model number.
  
@@ -1438,31 +1331,29 @@ return component;
                     var value = model.gettingProperty &&
                         model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
 
-                    // Look for a return value potentially stored here by a reentrant call if the
+                    // Look for a return value potentially stored by a reentrant call here if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
                     // method).
 
-                    if ( value === undefined ) {
+                    if ( value === undefined )
                         value = reentry.value;
-                    }
 
-                    // Record the value retrieved.
+                    delete reentry.value;
+
+                    // If we have a return value, save it and exit from Array.some().
 
                     if ( value !== undefined ) {
                         propertyValue = value;
+                        return true;
                     }
 
-                    // Exit from the this.models.some() iterator once we have a return value.
-
-                    return value !== undefined;
                 }
 
             } );
 
             if ( entry.index !== undefined ) {
 
-                // For a reentrant call, restore the previous state, move the index forward to cover
-                // the models we called, and record the current result.
+                // For a reentrant call, restore the previous state and record the current result.
 
                 entrants[nodeID+'-'+propertyName] = entry;
                 entry.value = propertyValue;
@@ -1477,15 +1368,15 @@ return component;
                 // Delegate to the prototype if we didn't get a result from the current node.
 
                 if ( propertyValue === undefined ) {
-                    var prototypeID = nodePrototypeID.call( this, nodeID );
+                    var prototypeID = Object.getPrototypeOf( vwf.models.javascript.nodes[nodeID] ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
                     if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
-                        propertyValue = this.getProperty( prototypeID, propertyName );
+                        propertyValue = vwf.getProperty( prototypeID, propertyName );
                     }
                 }
 
                 // Call gotProperty() on each view.
 
-                this.views.forEach( function( view ) {
+                vwf.views.forEach( function( view ) {
                     view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
                 } );
 
@@ -1507,14 +1398,14 @@ return component;
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
             // Call createdMethod() on each view. The view is being notified that a method has been
             // created.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
@@ -1532,14 +1423,14 @@ return component;
 
             var methodValue = undefined;
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
                 methodValue = value !== undefined ? value : methodValue;
             } );
 
             // Call calledMethod() on each view.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
             } );
 
@@ -1557,14 +1448,14 @@ return component;
             // Call creatingEvent() on each model. The event is considered created after each model
             // has run.
 
-            this.models.forEach( function( model ) {
+            vwf.models.forEach( function( model ) {
                 model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
             } );
 
             // Call createdEvent() on each view. The view is being notified that a event has been
             // created.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
             } );
 
@@ -1695,7 +1586,7 @@ return component;
 
             var scriptValue = undefined;
 
-            this.models.some( function( model ) {
+            vwf.models.some( function( model ) {
                 scriptValue = model.executing && model.executing( nodeID, scriptText, scriptType );
                 return scriptValue !== undefined;
             } );
@@ -1703,7 +1594,7 @@ return component;
             // Call executed() on each view. The view is being notified that a script has been
             // executed.
 
-            this.views.forEach( function( view ) {
+            vwf.views.forEach( function( view ) {
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
@@ -1714,42 +1605,112 @@ return component;
 
         // -- time ---------------------------------------------------------------------------------
 
-        // The current simulation time.
+        // Return the current simulation time.
 
         this.time = function() {
+
+            // this.logger.debug( "vwf.time" );
+
             return this.now;
         };
 
-        // -- client -------------------------------------------------------------------------------
+        // -- logger_for ---------------------------------------------------------------------------
 
-        // The moniker of the client responsible for the current action. Will be falsy for actions
-        // originating in the server, such as time ticks.
+        // Create a logger for a module. Record the module name. Each logger method expects to
+        // receive a function name as the first parameter. Prepend "<module_name>.<function_name>: "
+        // to each output message.
 
-        this.client = function() {
-            return this.client_;
-        };
+        this.logger_for = function( module_name ) {
 
-        // -- moniker ------------------------------------------------------------------------------
+            return {
 
-        // The identifer the server assigned to this client.
+				enable: false,
 
-        this.moniker = function() {
-            return this.moniker_;
+                log: function( /* function_name, ... */ ) {
+                    if ( this.enable ) {
+						window.console && console.log && console.log.apply( console, prefixed_arguments.apply( this, arguments ) );
+					}
+                },
+
+                debug: function( /* function_name, ... */ ) {
+                    if ( this.enable ) {
+						window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
+					}
+                    // window.console && console.debug && console.debug.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                info: function( /* function_name, ... */ ) {
+                    if ( this.enable ) {
+						window.console && console.info && console.info.apply( console, prefixed_arguments.apply( this, arguments ) );
+					}
+                },
+
+                warn: function( /* function_name, ... */ ) {
+                    window.console && console.warn && console.warn.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                error: function( /* function_name, ... */ ) {
+                    window.console && console.error && console.error.apply( console, prefixed_arguments.apply( this, arguments ) );
+                },
+
+                group: function( /* function_name, ... */ ) {
+                    if ( this.enable ) {
+						window.console && console.group && console.group.apply( console, prefixed_arguments.apply( this, arguments ) );
+					}
+                },
+
+                groupCollapsed: function( /* function_name, ... */ ) {
+                    if ( this.enable ) {
+						window.console && console.groupCollapsed && console.groupCollapsed.apply( console, prefixed_arguments.apply( this, arguments ) );
+					}
+                },
+
+                groupEnd: function( /* function_name, ... */ ) {
+                    if ( this.enable ) {
+						window.console && console.groupEnd && console.groupEnd.apply( console, prefixed_arguments.apply( this, arguments ) );
+					}
+                },
+
+            };
+
+            // Calculate an arguments array to pass to a logger function. Pass the arguments
+            // following *function_name* through and prepend "<module_name>.<function_name>: ".
+
+            function prefixed_arguments( /* function_name, ... */ ) {
+
+                if ( arguments.length > 0 && ( typeof arguments[0] == "string" || arguments[0] instanceof String ) ) {
+                    if ( arguments.length == 1 ) {
+                        // just show the module and function name when there are no additional arguments
+                        return [ module_name + "." + arguments[0] ];
+                    } else if ( typeof arguments[1] == "string" || arguments[1] instanceof String ) {
+                        // concatenate when the first field is a string so that it may remain a format string
+                        return [ module_name + "." + arguments[0] + ": " + arguments[1] ].concat( Array.prototype.slice.call( arguments, 2 ) );
+                    } else {
+                        // otherwise insert a new first field
+                        return [ module_name + "." + arguments[0] + ": " ].concat( Array.prototype.slice.call( arguments, 1 ) );
+                    }
+                } else {
+                    return []; // no-op
+                }
+
+            }
+
         };
 
         // -- logger -------------------------------------------------------------------------------
 
         this.logger = {
 
-            enabled: false,
-            log: function() { this.enabled && window.console && console.log && console.log.apply( console, arguments ) },
-            debug: function() { this.enabled && window.console && console.debug && console.debug.apply( console, arguments ) },
-            info: function() { this.enabled && window.console && console.info && console.info.apply( console, arguments ) },
+			enable: false,
+            log: function() { if ( this.enable ) { window.console && console.log && console.log.apply( console, arguments ) } },
+            debug: function() { if ( this.enable ) { window.console && console.debug && console.debug.apply( console, arguments ) } },
+            info: function() { if ( this.enable ) { window.console && console.info && console.info.apply( console, arguments ) } },
             warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
             error: function() { window.console && console.error && console.error.apply( console, arguments ) },
-            group: function() { this.enabled && window.console && console.group && console.group.apply( console, arguments ) },
-            groupCollapsed: function() { this.enabled && window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) },
-            groupEnd: function() { this.enabled && window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) },
+            group: function() { if ( this.enable ) { window.console && console.group && console.group.apply( console, arguments ) } },
+            groupCollapsed: function() { if ( this.enable ) { window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) } },
+            groupEnd: function() { if ( this.enable ) { window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) } },
+
         };
 
         // == Private functions ====================================================================
@@ -1770,8 +1731,6 @@ return component;
         var construct = function( parentID, nodeID, prototypeID, behaviorIDs, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
 
             this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
-
-            var deferredInitializations = {};
 
             async.series( [
 
@@ -1838,67 +1797,27 @@ return component;
                     // delegates to the models and views as above.
 
                     nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {
-
-                        var value = propertyValue, get, set, create;
-
                         if ( valueHasAccessors( propertyValue ) ) {
-                            value = propertyValue.value;
-                            get = propertyValue.get;
-                            set = propertyValue.set;
-                            create = propertyValue.create;
-                        }
-
-                        // Is the property specification directing us to create a new property, or
-                        // initialize a property already defined on a prototype?
-
-                        // Create a new property if an explicit getter or setter are provided or if
-                        // the property is not defined on a prototype. Initialize the property when
-                        // the property is already defined on a prototype and no explicit getter or
-                        // setter are provided.
-
-                        var creating = create || // explicit create directive, or
-                            get !== undefined || set !== undefined || // explicit accessor, or
-                            ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on prototype
-
-                        // Are we assigning the value here, or deferring assignment until the node
-                        // is constructed because setters will run?
-
-                        var assigning = value === undefined || // no value, or
-                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, nodeID, propertyName ) ); // no setter
-
-                        if ( ! assigning ) {
-                            deferredInitializations[propertyName] = value;
-                            value = undefined;
-                        }
-
-                        // Create or initialize the property.
-
-                        if ( creating ) {
-                            vwf.createProperty( nodeID, propertyName, value, get, set );
+                            vwf.createProperty( nodeID, propertyName, propertyValue.value, propertyValue.get, propertyValue.set );
                         } else {
-                            vwf.setProperty( nodeID, propertyName, value );
+                            vwf.createProperty( nodeID, propertyName, propertyValue );
                         }
-
                     } );
 
                     nodeComponent.methods && jQuery.each( nodeComponent.methods, function( methodName, methodValue ) {
-
                         if ( valueHasBody( methodValue ) ) {
                             vwf.createMethod( nodeID, methodName, methodValue.parameters, methodValue.body );
                         } else {
                             vwf.createMethod( nodeID, methodName, undefined, methodValue );
                         }
-
                     } );
 
                     nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName, eventValue ) {
-
                         if ( valueHasBody( eventValue ) ) {
                             vwf.createEvent( nodeID, eventName, eventValue.parameters );
                         } else {
                             vwf.createEvent( nodeID, eventName, undefined );
                         }
-
                     } );
 
                     callback( undefined, undefined );
@@ -1941,29 +1860,16 @@ return component;
 
                 function( callback /* ( err, results ) */ ) {
 
-                    // Perform initializations for properties with setter functions. These are
-                    // assigned here so that the setters run on a fully-constructed node.
-
-                    Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                        vwf.setProperty( nodeID, propertyName, deferredInitializations[propertyName] );
-                    }, this );
-
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
 if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( nodeID );
 }
 
-                    // Call initializingNode() on each model and initializedNode() on each view to
-                    // indicate that the node is fully constructed.
+                    // Invoke an initialization method.
 
-                    vwf.models.forEach( function( model ) {
-                        model.initializingNode && model.initializingNode( parentID, nodeID );
-                    } );
-
-                    vwf.views.forEach( function( view ) {
-                        view.initializedNode && view.initializedNode( parentID, nodeID );
-                    } );
+                    vwf.execute( nodeID, "this.initialize && this.initialize()",
+                        "application/javascript" ); 
 
                     callback( undefined, undefined );
                 },
@@ -1971,41 +1877,14 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             ], function( err, results ) {
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
-                // ID of its prototype. If this was the root node for the application, the
-                // application is now fully initialized.
+                // ID of its prototype. If this was the root node for the world, the world is now
+                // fully initialized.
 
                 callback && callback.call( vwf, nodeID );
             } );
 
             this.logger.groupEnd();
-        };
-
-        var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return propertyName in node.properties;
-        };
-
-        var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
-        };
-
-        var nodePropertyHasSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-            var node = this.models.javascript.nodes[nodeID];
-            var setter = node.private.setters && node.private.setters[propertyName];
-            return typeof setter == "function" || setter instanceof Function;
-        };
-
-        var nodePropertyHasOwnSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-            var node = this.models.javascript.nodes[nodeID];
-            var setter = node.private.setters && node.private.setters.hasOwnProperty( propertyName ) && node.private.setters[propertyName];
-            return typeof setter == "function" || setter instanceof Function;
-        };
-
-        var nodePrototypeID = function( nodeID ) { // invoke with the kernel as "this"
-            var node = this.models.javascript.nodes[nodeID];
-            return Object.getPrototypeOf( node ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-        };
+        }
 
         // -- objectIsComponent --------------------------------------------------------------------
 
@@ -2037,38 +1916,6 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             }
             
             return isComponent; 
-        };
-
-        // -- objectIsTypedArray  ------------------------------------------------------------------
-
-        // Determine if a JavaScript object is a component specification by searching for component
-        // specification attributes in the candidate object.
-
-        var objectIsTypedArray = function( candidate ) {
-
-            var typedArrayTypes = [
-                Int8Array,
-                Uint8Array,
-                // Uint8ClampedArray,
-                Int16Array,
-                Uint16Array,
-                Int32Array,
-                Uint32Array,
-                Float32Array,
-                Float64Array,
-            ];
-
-            var isTypedArray = false;
-
-            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
-
-                typedArrayTypes.forEach( function( typedArrayType ) {
-                    isTypedArray = isTypedArray || candidate instanceof typedArrayType;
-                } );
-
-            }
-            
-            return isTypedArray; 
         };
 
         // -- valueHasAccessors --------------------------------------------------------------------
@@ -2166,8 +2013,8 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
             // an untyped reference to that asset.
 
             if ( typeof component == "string" || component instanceof String ) { // TODO: validate URI
-                component = component.match( /(^@)|(\.vwf$)/ ) ?
-                    { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?
+                component = component.match( /(^@)|(^http:\/\/vwf.example.com\/types\/)|(\.vwf$)/ ) ?
+                    { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?  // TODO: this only detects .../types/camera (without .vwf extension) in the http://vwf.example.com/types/... domain.
             }
 
             // Fill in the mime type from the source specification if not provided.
@@ -2197,10 +2044,10 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
                 switch ( component.type ) {
                     case "application/vnd.unity":
-                        component.extends = "http://vwf.example.com/scene.vwf";
+                        component.extends = "http://vwf.example.com/types/scene";
                         break;
                     case "model/vnd.collada+xml":
-                        component.extends = "http://vwf.example.com/navscene.vwf";
+                        component.extends = "http://vwf.example.com/types/glge";
                         break;
                 }
 
@@ -2289,17 +2136,17 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
         // -- remappedURI --------------------------------------------------------------------------
 
-        // Remap a component URI to its location in a local cache.
+        // Remap a type identifier to its location in a local cache.
 
-        // http://vwf.example.com/component.vwf => http://localhost/proxy/vwf.example.com/component.vwf
+        // http://vwf.example.com/types/sometype => http://localhost:8001/types/sometype.vwf
+        //                              ^------^                                ^------^
 
         var remappedURI = function( uri ) {
 
-            var match = uri.match( RegExp( "http://(vwf.example.com)/(.*)" ) );
+            var match = uri.match( RegExp( "http://vwf.example.com/types/(.*)" ) );
 
             if ( match ) {
-                uri = window.location.protocol + "//" + window.location.host +
-                    "/proxy/" + match[1] + "/" + match[2];
+                uri = window.location.protocol + "//" + window.location.host + "/types/" + match[1] + ".vwf";
             }
 
             return uri;

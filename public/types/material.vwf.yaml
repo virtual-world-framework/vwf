@@ -1,0 +1,43 @@
+﻿--- 
+extends: http://vwf.example.com/types/node
+properties:
+  texture:
+    set: |
+      this.texture = value;
+    value:   
+  color: 
+    set: |
+      this.color = value;
+    value: 
+  specColor:
+    set: |
+      this.specColor = value;
+    value: 
+  reflect:
+    set: |
+      this.reflect = value;
+    value: 
+  shininess:
+    set: |
+      this.shininess = value;
+    value: 
+  specular:
+    set: |
+      this.specular = value;
+    value: 
+  emit:
+    set: |
+      this.emit = value;
+    value: 
+  alpha:
+    set: |
+      this.alpha = value;
+    value:  
+  ambient: 
+    set: |
+      this.ambient = value;
+    value:  
+  binaryAlpha:
+    set: |
+      this.binaryAlpha = value;
+    value:

@@ -1,0 +1,25 @@
+--- 
+extends: http://vwf.example.com/types/node3
+properties:
+  numberParticles:
+  lifeTime:
+  maxLifeTime:
+  minLifeTime:
+  startSize:
+  endSize:
+  loop: 
+  position: 
+  eulers:
+  velocity:
+  startMaxVelocity:
+  startMinVelocity:
+  startAcceleration:
+  endAcceleration:
+  maxStartAcceleration:
+  maxEndAcceleration:
+  minStartAcceleration:
+  minEndAcceleration:
+  startColor:
+  endColor:
+  image:
+

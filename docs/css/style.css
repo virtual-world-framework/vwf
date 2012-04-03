@@ -6,7 +6,7 @@ body {
 .header {
 	font:22pt Arial;
 	font-weight:bold;
-	width:1000px;
+	width:800px;
 	margin:auto;
 	text-align:left;
 	padding:20px;
@@ -46,12 +46,12 @@ body {
 	color:#AAAABB;
 }
 .content {
-	width:800px;
+	width:600px;
 	display:inline;
 	float:right;
 }	
 .content iframe {
-	width:780px;
+	width:580px;
 	height:300px;
 	display:inline;
 	overflow:hidden;
@@ -60,7 +60,7 @@ body {
 	border:1px solid #AAA;
 	background:#DDD;
 	padding:10px;
-	width:760px;
+	width:560px;
 	overflow-y:scroll;
 }
 .content h1 {

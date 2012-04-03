@@ -1,17 +1,3 @@
-# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
-# Secretary of Defense (Personnel & Readiness).
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-# in compliance with the License. You may obtain a copy of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software distributed under the License
-# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-# or implied. See the License for the specific language governing permissions and limitations under
-# the License.
-
-
 class VWF::Pattern
 
   Match = Struct.new :captures
@@ -26,9 +12,11 @@ class VWF::Pattern
 
     @captures = Match.new []
 
+    @mock_filesystem = VWF.settings.mock_filesystem
+
   end
 
-  # incoming path                                       public_path             application     instance        private_path            
+  # incoming path                                       public_path             application     session         private_path            
 
   # /path/to/component                                  "/path/to/component"    "index.vwf"     nil             nil                     
   # /path/to/component/                                 "/path/to/component"    "index.vwf"     nil             nil                     
@@ -42,17 +30,17 @@ class VWF::Pattern
   # /path/to/component.vwf/path/to/component/file       "/path/to"              "component.vwf" nil             "path/to/component/file"
   # /path/to/component.vwf/socket/path                  "/path/to"              "component.vwf" nil             "socket/path"           
 
-  # /path/to/component/instance                         "/path/to/component"    "index.vwf"     "instance"      nil                     
-  # /path/to/component/instance/                        "/path/to/component"    "index.vwf"     "instance"      nil                     
-  # /path/to/component/instance/path/to/client/file     "/path/to/component"    "index.vwf"     "instance"      "path/to/client/file"   
-  # /path/to/component/instance/path/to/component/file  "/path/to/component"    "index.vwf"     "instance"      "path/to/component/file"
-  # /path/to/component/instance/socket/path             "/path/to/component"    "index.vwf"     "instance"      "socket/path"           
+  # /path/to/component/session                          "/path/to/component"    "index.vwf"     "session"       nil                     
+  # /path/to/component/session/                         "/path/to/component"    "index.vwf"     "session"       nil                     
+  # /path/to/component/session/path/to/client/file      "/path/to/component"    "index.vwf"     "session"       "path/to/client/file"   
+  # /path/to/component/session/path/to/component/file   "/path/to/component"    "index.vwf"     "session"       "path/to/component/file"
+  # /path/to/component/session/socket/path              "/path/to/component"    "index.vwf"     "session"       "socket/path"           
 
-  # /path/to/component.vwf/instance                     "/path/to"              "component.vwf" "instance"      nil                     
-  # /path/to/component.vwf/instance/                    "/path/to"              "component.vwf" "instance"      nil                     
-  # /path/to/component.vwf/instance/path/to/client/file "/path/to"              "component.vwf" "instance"      "path/to/client/file"   
-  # /path/to/component.vwf/instance/path/to/component/file "/path/to"           "component.vwf" "instance"      "path/to/component/file"
-  # /path/to/component.vwf/instance/socket/path         "/path/to"              "component.vwf" "instance"      "socket/path"           
+  # /path/to/component.vwf/session                      "/path/to"              "component.vwf" "session"       nil                     
+  # /path/to/component.vwf/session/                     "/path/to"              "component.vwf" "session"       nil                     
+  # /path/to/component.vwf/session/path/to/client/file  "/path/to"              "component.vwf" "session"       "path/to/client/file"   
+  # /path/to/component.vwf/session/path/to/component/file "/path/to"            "component.vwf" "session"       "path/to/component/file"
+  # /path/to/component.vwf/session/socket/path          "/path/to"              "component.vwf" "session"       "socket/path"           
 
   def match path
 
@@ -78,10 +66,10 @@ class VWF::Pattern
 
     if extension
 
-      instance = segments.shift if instance?( segments.first )
+      session = segments.shift if session?( segments.first )
       private_path = File.join( segments.shift segments.length ) unless segments.empty?
 
-      Match.new [ public_path, application, instance, private_path ]
+      Match.new [ public_path, application, session, private_path ]
 
     end
 
@@ -127,7 +115,7 @@ private
     end
   end
 
-  def instance? segment
+  def session? segment
     segment =~ /^[0-9A-Za-z]{16}$/
   end
 

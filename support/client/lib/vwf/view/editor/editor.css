@@ -29,14 +29,6 @@
 	pointer-events:all;
 }
 
-.editor-tabs {
-	width:22px;
-	position:relative;
-	right:3px;
-	pointer-events:all;
-	overflow-y:hidden;
-}
-
 hr 
 {
 	background-color:#153255;
@@ -47,35 +39,21 @@ hr
 td
 {
 	font:10pt Arial;
-	width:105px;
-	max-width:105px;
+	width:120px;
+	max-width:120px;
 	padding:0px;
 	overflow:hidden;
 }
 
-.input_text
+input 
 {
 	height:11px;
-	width:90px;
+	width:120px;
 	font:9pt Arial;
 	padding:3px;
 	color:#153255;
 	/*background-color:#153255;*/
 	border:1px;
-}
-
-.input_button
-{
-	width:50px;
-	font:8pt Arial;
-	padding:0px;
-}
-
-.input_button_call
-{
-	width:30px;
-	font:8pt Arial;
-	padding:0px;
 }
 
 form
@@ -111,42 +89,3 @@ form
 	padding-left:10px;
 	padding-right:10px;
 }
-
-.methodEntry 
-{
-	padding-left:10px;
-	padding-right:10px;
-}
-
-.methodEntry td
-{
-	font:10pt Arial;
-	width:130px;
-	padding:0px;
-	overflow:hidden;
-}
-
-.clientEntry
-{
-	font:10pt Arial;
-	font-weight:bold;
-	padding-left:10px;
-	padding-right:10px;
-}
-
-/* TIMELINE */
-.rate.slider {
-	display: inline-block;
-	width: 10em;
-}
-
-.about {
-	padding-left:10px;
-}
-
-.about a:link {
-	color:white;
-}
-
-.about a:visited {
-	color:white;

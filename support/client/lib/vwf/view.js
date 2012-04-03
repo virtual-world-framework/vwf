@@ -1,19 +1,4 @@
-"use strict";
-
-// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
-// Secretary of Defense (Personnel & Readiness).
-// 
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License. You may obtain a copy of the License at
-// 
-//   http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed under the License
-// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-// or implied. See the License for the specific language governing permissions and limitations under
-// the License.
-
-define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( module, logger, kernel_api, view_api ) {
+define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( module, kernel_api, view_api ) {  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
 
     // vwf/view.js is the common implementation of all Virtual World Framework views. Views
     // interpret information from the simulation, present it to the user, and accept user input
@@ -27,24 +12,23 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
-    var context = module.id.replace( /\//g, "." );
-
-    logger.for( context ).infoc( "load" );
+    var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+    logger.info( "load" );
 
     return {
 
         module: module,
 
-        logger: logger.for( context ),
+        logger: logger,
 
         load: function( module, initializer, kernelGenerator, viewGenerator ) {
 
             var instance = Object.create( this );
 
             instance.module = module;
-            instance.logger = logger.for( instance.module.id.replace( /\//g, "." ) );
+            instance.logger = require( "vwf-proxy" ).logger_for( instance.module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
             
-            instance.logger.infoc( "load" );
+            instance.logger.info( "load" );
 
             if ( typeof initializer == "function" || initializer instanceof Function ) {
                 initializer = initializer();
@@ -65,14 +49,13 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
             return instance;
         },
 
-        create: function( kernel, view, stages, state, parameters ) {
+        create: function( kernel, view, stages, state ) {  // TODO: configuration parameters
 
-            this.logger.infoc( "create" );
+            this.logger.info( "create" );
 
-            // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
+            // Interpret create( kernel, stages, state ) as create( kernel, undefined, stages, state )
 
-            if ( view && view.length !== undefined ) { // is an array?
-                parameters = state;
+            if ( view && view.length !== undefined ) {
                 state = stages;
                 stages = view;
                 view = undefined;
@@ -111,7 +94,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
             // Call the driver's initialize().
 
-            initialize.apply( instance, parameters );
+            initialize.call( instance );  // TODO: configuration parameters
 
             // Call viewize() on the driver.
 
@@ -129,7 +112,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
             // Call initialize() on the driver.
 
-            function initialize( /* parameters */ ) {
+            function initialize() {
                 Object.getPrototypeOf( this ) && initialize.apply( Object.getPrototypeOf( this ), arguments ); // depth-first recursion through the prototypes
                 this.hasOwnProperty( "initialize" ) && this.initialize.apply( instance, arguments ); // initialize() from the bottom up
             }

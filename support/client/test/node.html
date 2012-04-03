@@ -8,7 +8,7 @@
 
     <script type="text/javascript" src="qunit.js"></script>
 
-    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
@@ -32,7 +32,6 @@
         "vwf/model/stage/log",
         "vwf/kernel/view",
         "vwf/view/document",
-        "logger",
 
       ], function( ready ) {
 
@@ -41,8 +40,8 @@
         ready( function() {
 
           vwf.initialize(
-            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
-            /*  views */ [ "vwf/view/document" ]
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
+            /*  views */ { "vwf/view/document": undefined }
           );
 
           // Member name priority on the node
@@ -108,7 +107,7 @@
             vwf.createNode( 0, {
 
               extends:
-                "http://vwf.example.com/node.vwf",
+                "http://vwf.example.com/types/node",
               
               properties: {
                 a: {
