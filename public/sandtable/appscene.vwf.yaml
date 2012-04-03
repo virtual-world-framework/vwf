@@ -1,5 +1,5 @@
 ---
-extends: http://vwf.example.com/types/glge
+extends: http://vwf.example.com/glge.vwf
 properties:
   lineWidth: 32
   lineColor: [ 0, 0, 0 ]
@@ -50,28 +50,28 @@ scripts:
     var coneIndex = 1;
     var pushpinIndex = 1;
     var line = {
-      "extends": "http://vwf.example.com/types/node3",
+      "extends": "http://vwf.example.com/node3.vwf",
       "type": "definition/mesh",
       "properties": { 
         "meshDefinition": { positions: [], faces: [], color: [] }
       }
     };
     var cube = {
-      "extends": "http://vwf.example.com/types/node3",
+      "extends": "http://vwf.example.com/node3.vwf",
       "type": "definition/mesh",
       "properties": { 
         "meshDefinition": { positions: [], faces: [], color: [] }
       }
     }; 
     var cone = {
-      "extends": "http://vwf.example.com/types/node3",
+      "extends": "http://vwf.example.com/node3.vwf",
       "type": "definition/mesh",
       "properties": { 
         "meshDefinition": { positions: [], faces: [], color: [] }
       }
     };
     var pushpin = {
-      extends: "http://vwf.example.com/types/node3",
+      extends: "http://vwf.example.com/node3.vwf",
       source: "models/pushpinblack.dae",
       type: "model/vnd.collada+xml",
       properties: { 
@@ -218,7 +218,7 @@ scripts:
           line.properties.meshDefinition.color = this.lineColor;
           
           vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
-          this.nodesCreated.push( "http-vwf-example-com-types-node3-line"+lineIndex );
+          this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
           lineIndex++;
           
           this.lastDrawPoint.pickInfo = pickInfo;
@@ -245,7 +245,7 @@ scripts:
         
         var name = "pushpin"+pushpinIndex;
         vwf.createNode( "index-vwf", pushpin, name, undefined );
-        this.nodesCreated.push( "http-vwf-example-com-types-node3-"+name );
+        this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+name );
         pushpinIndex++;        
         
         //var pt = parms.pickInfo.coord;
@@ -310,7 +310,7 @@ scripts:
       cube.properties.meshDefinition.color = color;
       
       vwf.createNode( "index-vwf", cube, "cube"+cubeIndex, undefined );
-      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-cube"+cubeIndex );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cube"+cubeIndex );
       cubeIndex++;
     }
     this.createLine = function( x1, y1, z1, x2, y2, z2, thickness, color, temp ) {
@@ -377,7 +377,7 @@ scripts:
       line.properties.meshDefinition.color = color;
       
       vwf.createNode( "index-vwf", line, "line"+lineIndex, undefined );
-      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-line"+lineIndex );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
       lineIndex++;    
     }
     this.createCone = function( x, y, z, radius, height, color, accuracy, temp ) {
@@ -407,7 +407,7 @@ scripts:
       cone.properties.meshDefinition.color = color;
       
       vwf.createNode( "index-vwf", cone, "cone"+coneIndex, undefined );
-      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-types-node3-cone"+coneIndex );
+      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cone"+coneIndex );
       coneIndex++; 
       
     }

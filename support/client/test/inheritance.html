@@ -8,7 +8,7 @@
 
     <script type="text/javascript" src="qunit.js"></script>
 
-    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
@@ -42,8 +42,8 @@
         ready( function() {
 
           vwf.initialize(
-            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
-            /*  views */ { }
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ ]
           );
 
           test( "Models", function() {
@@ -574,7 +574,7 @@
             var middleProperties = factories[middle]( "middle" );
             var topProperties = factories[top]( "top" );
 
-            vwf.createNode( 0, { extends: "http://vwf.example.com/types/node", properties: bottomProperties }, unique_name( "bottom" ), function( bottomID ) {
+            vwf.createNode( 0, { extends: "http://vwf.example.com/node.vwf", properties: bottomProperties }, unique_name( "bottom" ), function( bottomID ) {
               vwf.execute( bottomID, "this.tag = 'bottom'" );
               vwf.createNode( 0, { extends: "@" + JSON.stringify( bottomID ), properties: middleProperties }, unique_name( "middle" ), function( middleID ) {
                 vwf.execute( middleID, "this.tag = 'middle'" );

@@ -158,6 +158,10 @@ input {
   font-size: 14px;
 }
 
+#vwf-root {
+  position:absolute;
+}
+
 #vwf-root > .vwf-label > .vwf-attribute {
   font-size: 18px;
 }

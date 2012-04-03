@@ -26,13 +26,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           childSource, childType, childName, callback /* ( ready ) */) {
 
           //this.logger.enable = true;
-          this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-                            childSource, childType, childName );
+          //this.logger.info( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+          //                  childSource, childType, childName );
           //this.logger.enable = false;
 
           switch ( childExtendsID ) {
              case "appscene-vwf":
-             case "http-vwf-example-com-types-glge":
+             case "http-vwf-example-com-glge-vwf":
                 this.scenes[ childID ] = {};
                 this.scenes[ childID ].ID = childID;
                 this.scenes[ childID ].extendsID = childExtendsID;
@@ -44,8 +44,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 this.scenes[ childID ].propertyMap = {};
                 break;
 
-             case "http-vwf-example-com-types-node3":
-             case "http-vwf-example-com-types-mesh":
+             case "http-vwf-example-com-node3-vwf":
+             case "http-vwf-example-com-mesh-vwf":
                 this.nodes[ childID ] = {};
 /* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
                 this.nodes[ childID ].name = childName;
@@ -64,8 +64,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
-
-            this.logger.info( "deletingNode", nodeID );
 
             if ( this.active[ nodeID ] ) {
                 delete this.active[ nodeID ];
@@ -94,49 +92,31 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- addingChild --------------------------------------------------------------------------
 
         addingChild: function( nodeID, childID, childName ) {
-
-            this.logger.info( "addingChild", nodeID, childID, childName );
-
         },
 
         // -- movingChild --------------------------------------------------------------------------
 
         movingChild: function( nodeID, childID, childName ) {
-
-            this.logger.info( "movingChild", nodeID, childID, childName );
-
         },
 
         // -- removingChild ------------------------------------------------------------------------
 
         removingChild: function( nodeID, childID, childName ) {
-
-            this.logger.info( "removingChild", nodeID, childID, childName );
-
         },
 
         // -- parenting ----------------------------------------------------------------------------
 
         parenting: function( nodeID ) {
-
-            this.logger.info( "parenting", nodeID );
-
         },
 
         // -- childrening --------------------------------------------------------------------------
 
         childrening: function( nodeID ) {
-
-            this.logger.info( "childrening", nodeID );
-
         },
 
         // -- naming -------------------------------------------------------------------------------
 
         naming: function( nodeID ) {
-
-            this.logger.info( "naming", nodeID );
-
         },
 
         // -- creatingProperty ---------------------------------------------------------------------
@@ -144,7 +124,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
 
             //this.logger.enable = true;
-            this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
+            //this.logger.info( "creatingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enable = false;
 
             if ( !( propertyValue === undefined ) ) {
@@ -203,8 +183,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var value = undefined;
             //this.logger.enable = !this.updating;
-            //if (!( ( nodeID == "http-vwf-example-com-types-camera" ) || ( nodeID == "http-vwf-example-com-types-camera-maincamera" ) ) )
-                this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
+            //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
+            //    this.logger.info( "settingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enable = false;
 
             if ( this.updating ) {
@@ -378,10 +358,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- gettingProperty ----------------------------------------------------------------------
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
-
             //this.logger.enable = true;
-            //if (!( ( nodeID == "http-vwf-example-com-types-camera" ) || ( nodeID == "http-vwf-example-com-types-camera-maincamera" ) ) )
-                this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
+            //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
+            //    this.logger.info( "gettingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enable = false;
           
             propertyValue = undefined;
@@ -452,27 +431,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingMethod ------------------------------------------------------------------------
 
         creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
-
-            this.logger.info( "creatingMethod", nodeID, methodName, methodParameters, methodBody );
-
         },
 
 
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters ) {
-
-            this.logger.info( "creatingMethod", nodeID, methodName, methodParameters );
-
         },
 
 
         // -- creatingEvent ------------------------------------------------------------------------
 
         creatingEvent: function( nodeID, eventName, eventParameters ) {
-
-            this.logger.info( "creatingEvent", nodeID, eventName, eventParameters );
-
         },
 
         // TODO: deletingEvent
@@ -480,19 +450,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- firingEvent --------------------------------------------------------------------------
 
         firingEvent: function( nodeID, eventName, eventParameters ) {
-
-            this.logger.info( "firingEvent", nodeID, eventName, eventParameters );
-
         },
 
 
         // -- executing ----------------------------------------------------------------------------
 
         executing: function (nodeID, scriptText, scriptType) {
-
-            //this.logger.info( "callingMethod", nodeID, scriptText, scriptType );
             return undefined;
-
         },
 
 
@@ -554,7 +518,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 //    function findMeshChildren( nodeID, childList ) {
 //        var children = this.kernel.children( nodeID );
 
-//        if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-types-mesh" ) {
+//        if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-mesh-vwf" ) {
 //            childList.push( this.nodes[nodeID] ); 
 //        }
 

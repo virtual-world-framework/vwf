@@ -26,7 +26,7 @@ methods:
   setPositions:
 children: 
   shuffleBtn: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: shuffleBtn.dae
     type: model/vnd.collada+xml
     properties: 
@@ -41,15 +41,15 @@ children:
       type: application/javascript
     children:
       ShuffleCubeMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/red.png"
       ShuffleTextMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/black.png"  
   solveBtn: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: solveBtn.dae
     type: model/vnd.collada+xml
     properties: 
@@ -64,15 +64,15 @@ children:
       type: application/javascript
     children:
       SolveCubeMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/green.png"
       SolveTextMaterial1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/black.png"  
   tile1: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile01.dae
     type: model/vnd.collada+xml
     properties: 
@@ -86,15 +86,15 @@ children:
       type: application/javascript
     children:
       Cube01Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text01Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"        
   tile2: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile02.dae
     type: model/vnd.collada+xml
     properties: 
@@ -108,15 +108,15 @@ children:
       type: application/javascript
     children:
       Cube02Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text02Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"  
   tile3: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile03.dae
     type: model/vnd.collada+xml
     properties: 
@@ -130,15 +130,15 @@ children:
       type: application/javascript
     children:
       Cube03Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text03Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"        
   tile4: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile04.dae
     type: model/vnd.collada+xml
     properties: 
@@ -152,15 +152,15 @@ children:
       type: application/javascript
     children:
       Cube04Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text04Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png" 
   tile5: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile05.dae
     type: model/vnd.collada+xml
     properties: 
@@ -174,15 +174,15 @@ children:
       type: application/javascript
     children:
       Cube05Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text05Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
   tile6: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile06.dae
     type: model/vnd.collada+xml
     properties: 
@@ -196,15 +196,15 @@ children:
       type: application/javascript
     children:
       Cube06Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text06Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
   tile7: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile07.dae
     type: model/vnd.collada+xml
     properties: 
@@ -218,15 +218,15 @@ children:
       type: application/javascript
     children:
       Cube07Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text07Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
   tile8: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile08.dae
     type: model/vnd.collada+xml
     properties: 
@@ -240,15 +240,15 @@ children:
       type: application/javascript
     children:
       Cube08Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text08Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
   tile9: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile09.dae
     type: model/vnd.collada+xml
     properties: 
@@ -262,15 +262,15 @@ children:
       type: application/javascript
     children:
       Cube09Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text09Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
   tile10: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile10.dae
     type: model/vnd.collada+xml
     properties: 
@@ -284,19 +284,19 @@ children:
       type: application/javascript
     children:
       Cube10Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text10_1Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
       Text10_2Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
   tile11: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile11.dae
     type: model/vnd.collada+xml
     properties: 
@@ -310,19 +310,19 @@ children:
       type: application/javascript
     children:
       Cube11Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text11_1Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
       Text11_2Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
   tile12: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile12.dae
     type: model/vnd.collada+xml
     properties: 
@@ -336,19 +336,19 @@ children:
       type: application/javascript
     children:
       Cube12Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text12_1Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
       Text12_2Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"      
   tile13: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile13.dae
     type: model/vnd.collada+xml
     properties: 
@@ -362,19 +362,19 @@ children:
       type: application/javascript
     children:
       Cube13Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text13_1Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
       Text13_2Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"        
   tile14: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile14.dae
     type: model/vnd.collada+xml
     properties: 
@@ -388,19 +388,19 @@ children:
       type: application/javascript
     children:
       Cube14Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text14_1Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
       Text14_2Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"  
   tile15: 
-    extends: http://vwf.example.com/types/node3
+    extends: http://vwf.example.com/node3.vwf
     source: tile15.dae
     type: model/vnd.collada+xml
     properties: 
@@ -414,15 +414,15 @@ children:
       type: application/javascript
     children:
       Cube15Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/ltBlue.png"
       Text15_1Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"
       Text15_2Material1:
-        extends: http://vwf.example.com/types/material
+        extends: http://vwf.example.com/material.vwf
         properties:
           texture: "images/dkBlue.png"      
 scripts:
@@ -447,9 +447,9 @@ scripts:
       this.tile15.position = this.tilePosition15;
       this.openTilePosition = this.tilePosition16;
       
-      this.activeCamera = "http-vwf-example-com-types-camera-defaultCamera";
-      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "rotation", [ 2.6, 3.11, 0.004 ] );
-      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "position", [ 2.8, 28.32, 63 ] );
+      this.activeCamera = "http-vwf-example-com-camera-vwf-defaultCamera";
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-defaultCamera", "rotation", [ 2.6, 3.11, 0.004 ] );
+      vwf.setProperty( "http-vwf-example-com-camera-vwf-defaultCamera", "position", [ 2.8, 28.32, 63 ] );
       this.loadDone = true;
     }
     
@@ -460,7 +460,7 @@ scripts:
                        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
       tilePositions.sort( function(){ return (Math.round( Math.random() )-0.5); } ); 
       // this.setPositions(tilePositions);
-      vwf.send(0, this.id, "callMethod", "setPositions", [[tilePositions]]);
+      vwf.send(this.id, "callMethod", "setPositions", [[tilePositions]], 0);
     }
     
     this.solve = function() {
