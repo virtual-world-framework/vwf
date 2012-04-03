@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/object.js is a backstop property store.
@@ -49,8 +50,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- addingChild --------------------------------------------------------------------------
 
-        addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-        },
+        //addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
+        //},
 
         // TODO: creatingProperties
 
@@ -84,7 +85,13 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-            return this.objects[nodeID].properties[propertyName] = propertyValue;
+            return this.initializingProperty( nodeID, propertyName, propertyValue );
+        },
+
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.settingProperty( nodeID, propertyName, propertyValue );
         },
 
         // TODO: deletingProperty

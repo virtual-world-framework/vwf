@@ -3,37 +3,8 @@ require "rake/testtask"
 require "rake/clean"
 
 
-# CLOBBER.include ""docs/**/*.html""  # TODO: not until the build and manual versions are resolved
-
-desc "Generate the documentation and build any child projects."
-
-task :build do
-
-    original_path = ENV["PATH"]
-    ENV["PATH"] = FileList[ "support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
-
-    FileList[ "docs/**/*.md" ].each do |md|
-        sh "Markdown.pl '#{md}' > '#{ md.ext ".html" }'"
-    end
-
-    sh "rocco docs/application/*.vwf.yaml"
-    sh "rocco docs/application/example.js"
-    
-    ENV["PATH"] = original_path
-
-end
-
-
-# Create the test task.
-
-Rake::TestTask.new do |task| 
-
-    task.libs << "test"
-    task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb" ]
-
-    task.verbose = true
-
-end
+CLEAN.include "support/build/Pygments-1.4/**/*.pyc"
+CLOBBER.include "bin/*", "docs/**/*.html", "run.bat", "public/index.html"
 
 
 # Delegate the standard tasks to any child projects.
@@ -77,17 +48,99 @@ def rake *args
 end
 
 
+# == build =========================================================================================
+
+task :build => [ :common, :windows ]
+
+# -- common ----------------------------------------------------------------------------------------
+
+desc "Update the gems (generating bin/*), and generate the documentation."
+
+task :common do
+
+    sh "bundle install --binstubs"
+
+    original_path = ENV["PATH"]
+    ENV["PATH"] = FileList[ "support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
+
+    FileList[ "public/web/*.md" ].each do |md|
+        sh "( cat public/web/format/preamble ; Markdown.pl '#{md}' ; cat public/web/format/postamble ) > '#{ md.ext ".html" }'"
+    end
+
+    FileList[ "public/web/docs/**/*.md" ].each do |md|
+        sh "( cat public/web/docs/format/preamble ; Markdown.pl '#{md}' ; cat public/web/docs/format/postamble ) > '#{ md.ext ".html" }'"
+    end
+
+    sh "bundle exec rocco public/web/docs/application/*.vwf.yaml"
+    sh "bundle exec rocco public/web/docs/application/example.js"
+    
+    ENV["PATH"] = original_path
+
+end
+
+# -- windows ---------------------------------------------------------------------------------------
+
+# Window standalone build
+
+task :windows => :common do
+
+    if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
+
+        DEVKIT = "support/build/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx"
+        RUBY = "support/build/ruby-1.8.7-p357-i386-mingw32"
+
+        File.open( "#{DEVKIT}/config.yml", "w" ) do |io|
+            io.puts "---"
+            io.puts "- ../../../#{RUBY}"
+        end
+
+        sh "echo '" + <<-BAT.strip.gsub( %r{^ *}, "" ) + "' | CMD.EXE"
+            @ECHO OFF
+            REM Clear the bundle exec environment
+            SET BUNDLE_BIN_PATH=
+            SET BUNDLE_GEMFILE=
+            SET GEM_HOME=
+            SET GEM_PATH=
+            SET RUBYOPT=
+            REM Install DevKit in the local ruby
+            SET DEVKIT=#{ DEVKIT.gsub( "/", "\\" ) }
+            CD %DEVKIT%
+            SET RUBY=..\\..\\..\\#{ RUBY.gsub( "/", "\\" ) }
+            SET PATH=%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem
+            SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin
+            ruby dk.rb install
+            REM Configure the local ruby
+            CD ..\\..\\..
+            SET RUBY=#{ RUBY.gsub( "/", "\\" ) }
+            SET PATH=%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem
+            SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin
+            gem install bundler --no-rdoc --no-ri
+            bundle install --system
+        BAT
+
+        File.open( "run.bat", "w" ) do |io|
+            io.puts "@ECHO OFF"
+            io.puts ""
+            io.puts "SET RUBY=#{ RUBY.gsub( "/", "\\" ) }"
+            io.puts "SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin"
+            io.puts ""
+            io.puts "ruby bin\\thin start %*"
+        end
+
+    end
+    
+end
 
 
-# Test for trailing newline
+# == test ==========================================================================================
 
-# vwf@vwf:~/vwf/branches/integration/public/types$ tail -c 1 material.vwf.yaml | od -a
-# 0000000  nl
-# 0000001
+# Create the test task.
 
+Rake::TestTask.new do |task| 
 
-# Test against server
+    task.libs << "test"
+    task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb" ]
 
-# curl --silent --head --fail "http://166.27.115.155:3000/types/material.vwf/77103a5888ada488/material.vwf" --output /dev/null
+    task.verbose = true
 
-# for i in `find . -name '*.vwf.yaml' -o -name '*.vwf.json' | perl -nle 'print $1 if m|\./(.*)\.(yaml\|json)$|'` ; do curl --silent --head --fail "http://166.27.115.155:3000/$i" --output /dev/null || echo "$i bad"; done
+end

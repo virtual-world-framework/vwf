@@ -1,4 +1,5 @@
-    define( [ "module", "vwf/view" ], function( module, view ) {
+"use strict";
+define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/editor creates a view interface for editor functions. 
 
@@ -13,51 +14,84 @@
 
             this.nodes = {};
             this.scenes = {};
-            this.editorVisible = false;
+
+            // EDITOR CLOSED  --> 0
+            // HIERARCHY OPEN --> 1
+            // USER LIST OPEN --> 2
+            // TIMELINE OPEN  --> 3
+            this.editorView = 0;
+            this.editorOpen = false;
+            this.timelineInit = false;
+
             this.topdownName = '#topdown_a';
             this.topdownTemp = '#topdown_b';
+            this.clientList = '#client_list';
+            this.timeline = '#time_control';
             this.currentNodeID = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='eImg'><img id='launchEditor' src='images/editor.png' style='pointer-events:all' alt='launchEditor' /></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div><div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>"
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /></div></div></div>" + 
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='time_control'></div></div></div>"
             );
             
-            $('#launchEditor').stop().animate({ opacity:0.0 }, 0);
+            $('#tabs').stop().animate({ opacity:0.0 }, 0);
             
-            jQuery('#launchEditor').mouseenter( function(evt) { 
+            jQuery('#tabs').mouseenter( function(evt) { 
                 evt.stopPropagation();
-                $('#launchEditor').stop().animate({ opacity:1.0 }, 175);
+                $('#tabs').stop().animate({ opacity:1.0 }, 175);
                 return false; 
             });
             
-            jQuery('#launchEditor').mouseleave( function(evt) { 
+            jQuery('#tabs').mouseleave( function(evt) { 
                 evt.stopPropagation(); 
-                $('#launchEditor').stop().animate({ opacity:0.0 }, 175);
+                $('#tabs').stop().animate({ opacity:0.0 }, 175);
                 return false; 
             });
             
-            jQuery('#launchEditor').click ( function(evt) {
-                openEditor.call(self);
+            jQuery('#hierarchy').click ( function(evt) {
+                openEditor.call(self, 1);
+            });
+
+            jQuery('#userlist').click ( function(evt) {
+                openEditor.call(self, 2);
+            });
+
+            jQuery('#timeline').click ( function(evt) {
+                openEditor.call(self, 3);
+            });
+
+            jQuery('#x').click ( function(evt) {
+                closeEditor.call(self);
             });
 
             $('#topdown_a').hide();
             $('#topdown_b').hide();
+            $('#client_list').hide();
+            $('#time_control').hide();
             
             var canvas = document.getElementById("index-vwf");
             if ( canvas ) {
                 $('#topdown_a').height(canvas.height);
                 $('#topdown_b').height(canvas.height);
+                $('#client_list').height(canvas.height);
+                $('#time_control').height(canvas.height);
             }
             else
             {    
                 $('#topdown_a').height(window.innerHeight-20);
                 $('#topdown_b').height(window.innerHeight-20);
+                $('#client_list').height(window.innerHeight-20);
+                $('#time_control').height(window.innerHeight-20);
             }
         },
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childName, callback /* ( ready ) */ ) {
             
+            var kernel = this.kernel.kernel;
             var self = this;
             var parent = this.nodes[ nodeID ];
             var node = this.nodes[ childID ] = {
@@ -77,7 +111,8 @@
                 parent.children.push( node );
             }
 
-            if ( childExtendsID =="http-vwf-example-com-glge-vwf" || childExtendsID =="appscene-vwf" ) {
+            var prototypes = getPrototypes.call( this, kernel, childExtendsID );
+            if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == "index-vwf" ) {
                 this.scenes[ childID ] = node;
             }
             
@@ -93,8 +128,15 @@
         },
         
         createdProperty: function (nodeID, propertyName, propertyValue) {
+
+            return this.initializedProperty(nodeID, propertyName, propertyValue);   
+        },
+        
+        initializedProperty: function (nodeID, propertyName, propertyValue) {
    
             var node = this.nodes[ nodeID ];
+if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
+
             var property = node.properties[ propertyName ] = {
                 name: propertyName,
                 value: propertyValue,
@@ -103,7 +145,7 @@
             try {
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
-                this.logger.warn( "createdProperty", nodeID, propertyName, propertyValue,
+                this.logger.warnc( "createdProperty", nodeID, propertyName, propertyValue,
                     "stringify error:", e.message );
                 node.properties[ propertyName ].value = propertyValue;
             }
@@ -124,14 +166,14 @@
         //removedChild: [ /* nodeID, childID */ ],
 
         satProperty: function (nodeID, propertyName, propertyValue) {
-            var self = this;
+
             var node = this.nodes[ nodeID ];
 if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 
             try {
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
-                this.logger.warn( "satProperty", nodeID, propertyName, propertyValue,
+                this.logger.warnc( "satProperty", nodeID, propertyName, propertyValue,
                     "stringify error:", e.message );
                 node.properties[ propertyName ].value = propertyValue;
             }
@@ -148,11 +190,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
         },
 
-        calledMethod: function( nodeID, methodName, methodParameters ) {
-            //console.info('nodeID: ' + nodeID);
-            //console.info('methodName: ' + methodName);
-            //console.info('methodParameters: ' + methodParameters);
-        },
+        //calledMethod: function( nodeID, methodName, methodParameters ) {
+
+        //},
 
         createdEvent: function( nodeID, eventName, eventParameters ) {
             var node = this.nodes[ nodeID ];
@@ -161,11 +201,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }         
         },
 
-        firedEvent: function ( nodeID, eventName, eventParameters ) {
-            //console.info('nodeID: ' + nodeID);
-            //console.info('eventName: ' + eventName);
-            //console.info('eventParameters: ' + eventParameters);
-        },
+        //firedEvent: function ( nodeID, eventName, eventParameters ) {
+
+        //},
 
         //executed: [ /* nodeID, scriptText, scriptType */ ],
 
@@ -199,38 +237,164 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
     
     // -- openEditor ------------------------------------------------------------------------
 
-    function openEditor() // invoke with the view as "this"
+    function openEditor(eView) // invoke with the view as "this"
     {
-        var topdownName = this.topdownName;
-        
-        if(!this.editorVisible)
+        if(eView == 0)
         {
-            if( $('#topdown_a').html() == '')
+            closeEditor.call(this);
+        }
+        
+        if(this.editorView != eView)
+        {
+            // Hierarchy
+            if(eView == 1)
             {
-                drillDown.call(this, "index-vwf");
-            }
-            else
-            {
-                $(topdownName).show('slide', {direction: 'right'}, 175);
+                var topdownName = this.topdownName;
+                var topdownTemp = this.topdownTemp;
+
+                if( this.currentNodeID == '' )
+                {
+                    this.currentNodeID = "index-vwf";
+                }
+
+                drill.call(this, this.currentNodeID);
+                $(this.clientList).hide();
+                $(this.timeline).hide();
+
+                if(this.editorOpen)
+                {
+                    $(topdownName).hide();
+                    $(topdownTemp).show();
+                }
+
+                else
+                {
+                    $(topdownTemp).show('slide', {direction: 'right'}, 175);    
+                }
+
+                this.topdownName = topdownTemp;
+                this.topdownTemp = topdownName;
             }
 
-            this.editorVisible = true;
-            window.slideOffset = 260;
-            $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
-            $('#editor').animate({ 'left' : "-=260px" }, 175);
-            $('#launchEditor').attr('src', 'images/editorClose.png');
+            // User List
+            else if(eView == 2)
+            {
+                $(this.topdownName).hide();
+                $(this.topdownTemp).hide();
+                $(this.timeline).hide();
+                showUserList.call(this);
+            }
+
+            // Timeline
+            else if(eView == 3)
+            {
+                $(this.topdownName).hide();
+                $(this.topdownTemp).hide();
+                $(this.clientList).hide();
+                showTimeline.call(this);
+            }
+
+
+            if(this.editorView == 0)
+            {
+                window.slideOffset = 260;
+                $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
+                $('#editor').animate({ 'left' : "-=260px" }, 175);
+                $('#x').delay(1000).css({ 'display' : 'inline' });
+            }
+
+            this.editorView = eView;
+            this.editorOpen = true;
+        }
+    }
+
+    // -- closeEditor -----------------------------------------------------------------------
+
+    function closeEditor() // invoke with the view as "this"
+    {
+        var topdownName = this.topdownName;
+
+        window.slideOffset = 0;
+
+        if (this.editorOpen && this.editorView == 1) // Hierarchy view open
+        {
+            $(topdownName).hide('slide', {direction: 'right'}, 175);
+            $(this.clientList).hide();
+            $(this.timeline).hide();
+        }
+
+        else if (this.editorOpen && this.editorView == 2) // Client list open
+        {
+            $(this.clientList).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).hide();
+            $(this.timeline).hide();
+        }
+
+        else if (this.editorOpen && this.editorView == 3) // Timeline open
+        {
+            $(this.timeline).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).hide();
+            $(this.clientList).hide();
+        }
+        
+        $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
+        $('#editor').animate({ 'left' : "+=260px" }, 175);
+        $('#x').css({ 'display' : 'none' });
+        this.editorView = 0;
+        this.editorOpen = false;
+    }
+
+    // -- showUserList ----------------------------------------------------------------------
+
+    function showUserList() // invoke with the view as "this"
+    {
+        var clientList = this.clientList;
+
+        updateClients.call(this);
+
+        if (!this.editorOpen)
+        {
+            $(clientList).show('slide', {direction: 'right'}, 175);    
         }
         else
         {
-            this.editorVisible = false;
-            window.slideOffset = 0;
-            $(topdownName).hide('slide', {direction: 'right'}, 175);
-            $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
-            $('#editor').animate({ 'left' : "+=260px" }, 175);
-            $('#launchEditor').attr('src', 'images/editor.png');
+            $(clientList).show();
         }
     }
-    
+
+    // -- updateClients ---------------------------------------------------------------------
+
+    function updateClients() {
+        var app = window.location.pathname;
+        var match;
+
+        var clients$ = $(this.clientList);
+
+        jQuery.getJSON( "/" + app.substring(1, app.indexOf('/', 1)) + "/admin/instances", function( data ) {
+            jQuery.each( data, function( key, value ) {
+                if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
+
+                    var instanceHTML = String( match[1] ).
+                      replace( /&/g, "&amp;" ).
+                      replace( /"/g, "&quot;" ).
+                      replace( /'/g, "&#39;" ).
+                      replace( /</g, "&lt;" ).
+                      replace( />/g, "&gt;" );
+
+                    if(instanceHTML == app.substring(app.indexOf('/', 1)+1, app.lastIndexOf('/')))
+                    {
+                        clients$.html("<div class='header'>Users</div>");
+                        for (var clientID in value.clients) { 
+                            clients$.append("<div class='clientEntry'>" + clientID + "</div><hr>"); 
+                        }
+                    }
+                }
+            } );
+        } );
+
+        //setTimeout(updateClients.call(this), 5000);
+    };
+
     // -- drillDown -------------------------------------------------------------------------
 
     function drillDown(nodeID) // invoke with the view as "this"
@@ -286,39 +450,87 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
         }
         
+        var displayedProperties = {};
+        // Add node properties
         for ( var i = 0; i < node.properties.length; i++ ) {
-            $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div><hr>");
+            if ( !displayedProperties[ node.properties[i].name ] ) {
+                displayedProperties[ node.properties[i].name ] = "instance";
+                $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div><hr>");
             
-            $('#input-' + nodeID + '-' + node.properties[i].name).change( function(evt) {
-                var inputID = ($(this).attr("id"));
-                var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
-                var propName = inputID.substring(inputID.lastIndexOf('-')+1);
-                var propValue = $(this).val();
+                $('#input-' + nodeID + '-' + node.properties[i].name).change( function(evt) {
+                    var inputID = ($(this).attr("id"));
+                    var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
+                    var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                    var propValue = $(this).val();
                 
-                try {
-                    propValue = JSON.parse(propValue);
-                    self.kernel.setProperty(nodeID, propName, propValue);
-                } catch (e) {
-                    // restore the original value on error
-                    $(this).val(node.properties[ propName ].value);
-                }
-            } );
+                    try {
+                        propValue = JSON.parse(propValue);
+                        self.kernel.setProperty(nodeID, propName, propValue);
+                    } catch (e) {
+                        // restore the original value on error
+                        $(this).val(node.properties[ propName ].value);
+                    }
+                } );
 
-            $('#input-' + nodeID + '-' + node.properties[i].name).keydown( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + node.properties[i].name).keydown( function(evt) {
+                    evt.stopPropagation();
+                });
 
-            $('#input-' + nodeID + '-' + node.properties[i].name).keypress( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + node.properties[i].name).keypress( function(evt) {
+                    evt.stopPropagation();
+                });
 
-            $('#input-' + nodeID + '-' + node.properties[i].name).keyup( function(evt) {
-                evt.stopPropagation();
-            });
+                $('#input-' + nodeID + '-' + node.properties[i].name).keyup( function(evt) {
+                    evt.stopPropagation();
+                });
+            }
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
+
+        this.logger.info(self + "    " + nodeID);
+
+        // Add prototype properties
+        var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
+        for ( var key in prototypeProperties ) {
+            var prop = prototypeProperties[key].prop;
+            if ( !displayedProperties[ prop.name ]  ) {
+                displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
+
+                $(topdownTemp).append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
+            
+                $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
+                    var inputID = ($(this).attr("id"));
+                    var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
+                    var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                    var propValue = $(this).val();
+                
+                    try {
+                        propValue = JSON.parse(propValue);
+                        self.kernel.setProperty(nodeID, propName, propValue);
+                    } catch (e) {
+                        // restore the original value on error
+                        $(this).val(node.properties[ propName ].value);
+                    }
+                } );
+
+                $('#input-' + nodeID + '-' + prop.name).keydown( function(evt) {
+                    evt.stopPropagation();
+                });
+
+                $('#input-' + nodeID + '-' + prop.name).keypress( function(evt) {
+                    evt.stopPropagation();
+                });
+
+                $('#input-' + nodeID + '-' + prop.name).keyup( function(evt) {
+                    evt.stopPropagation();
+                });
+            }
         }
 
         $(topdownTemp + ' hr:last').css('height', '3px');
         
+        // Add node children
         for ( var i = 0; i < node.children.length; i++ ) {
             $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div><hr></div>");
             $('#' + node.children[i].ID).click( function(evt) {
@@ -328,9 +540,10 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
+        // Add node methods
         for ( var key in node.methods ) {
             var method = node.methods[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><div id='rollover-" + key + "'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -347,9 +560,52 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
+        // Add prototype methods
+        var prototypeMethods = getMethods.call( this, this.kernel.kernel, node.extendsID );
+        for ( var key in prototypeMethods ) {
+            var method = prototypeMethods[key];
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#rollover-' + key).mouseover( function(evt) {
+                $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
+            });
+            $('#rollover-' + key).mouseleave( function(evt) {
+                $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
+            });
+            $('#call-' + key).click( function(evt) {
+                self.kernel.callMethod( nodeID, $(this).attr("id").substring(5) );
+            });
+            $('#param-' + key).click( function(evt) {
+                setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
+            });
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
+
+        // Add node events
         for ( var key in node.events ) {
             var nodeEvent = node.events[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right'><div id='rollover-" + key + "'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#rollover-' + key).mouseover( function(evt) {
+                $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
+            });
+            $('#rollover-' + key).mouseleave( function(evt) {
+                $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
+            });
+            $('#fire-' + key).click( function(evt) {
+                self.kernel.fireEvent( nodeID, $(this).attr("id").substring(5) );
+            });
+            $('#arg-' + key).click( function(evt) {
+                setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
+            });
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
+
+        // Add prototype events
+        var prototypeEvents = getEvents.call( this, this.kernel.kernel, node.extendsID );
+        for ( var key in prototypeEvents ) {
+            var nodeEvent = prototypeEvents[key];
+            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -375,7 +631,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
      
-        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodName + "-back' alt='back'/> " + methodName + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:22px'></input></div>");
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodName + "-back' alt='back'/> " + methodName + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:33px'></input></div>");
         jQuery('#' + methodName + '-back').click ( function(evt) {
             
             drillUp.call(self, nodeID);
@@ -398,12 +654,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         prmtr = JSON.parse(prmtr);
                         parameters.push( prmtr );
                     } catch (e) {
-                        console.error('Invalid Value');
+                        this.logger.error('Invalid Value');
                     }
                 }
             }
 
-            self.kernel.callMethod(nodeID, methodName, [parameters]);
+            self.kernel.callMethod(nodeID, methodName, parameters);
         });
 
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
@@ -421,7 +677,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
      
-        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + eventName + "-back' alt='back'/> " + eventName + "<input type='button' class='input_button_call' id='fire' value='Fire' style='float:right;position:relative;top:5px;right:22px'></input></div>");
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + eventName + "-back' alt='back'/> " + eventName + "<input type='button' class='input_button_call' id='fire' value='Fire' style='float:right;position:relative;top:5px;right:33px'></input></div>");
         jQuery('#' + eventName + '-back').click ( function(evt) {
             drillUp.call(self, nodeID);
         });
@@ -444,12 +700,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         arg = JSON.parse(arg);
                         args.push( arg );
                     } catch (e) {
-                        console.error('Invalid Value');
+                        this.logger.error('Invalid Value');
                     }
                 }
             }
 
-            self.kernel.fireEvent(nodeID, eventName, [args]);
+            self.kernel.fireEvent(nodeID, eventName, args);
         });
 
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
@@ -459,4 +715,210 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         this.topdownTemp = topdownName;
 
     }
+
+    function getPrototypes( kernel, extendsID ) {
+        var prototypes = [];
+        var id = extendsID;
+
+        while ( id !== undefined ) {
+            prototypes.push( id );
+            id = kernel.prototype( id );
+        }
+                
+        return prototypes;
+    }
+
+    function getProperties( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var pProperties = {};
+        if ( pTypes ) {
+            for ( var i=0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if ( nd && nd.properties ) {
+                    for ( var key in nd.properties ) {
+                        pProperties[ key ] = { "prop": nd.properties[ key ], "prototype": pTypes[i]  };
+                    }
+                }
+            }
+        }
+        return pProperties;
+    }
+
+    function getEvents( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var events = {};
+        if ( pTypes ) {
+            for ( var i = 0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if  ( nd && nd.events ) {
+                    for ( var key in nd.events ) {
+                        events[ key ] = nd.events[key];
+                    }
+                }
+            }
+        }
+        return events;
+    }
+
+    function getMethods( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var methods = {};
+        if ( pTypes ) {
+            for ( var i = 0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if  ( nd && nd.methods ) {
+                    for ( var key in nd.methods ) {
+                        methods[ key ] = nd.methods[key];
+                    }
+                }
+            }
+        }
+        return methods;
+    }
+
+    function isGlgeSceneDefinition( prototypes ) {
+        var foundGlge = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );    
+            }
+        }
+
+        return foundGlge;
+    }
+
+    // -- showTimeline ----------------------------------------------------------------------
+
+    function showTimeline() // invoke with the view as "this"
+    {
+        var timeline = this.timeline;
+
+        if(!this.timelineInit)
+        {
+            jQuery('#time_control').append("<div class='header'>Timeline</div>" + 
+                "<div style='text-align:center;padding-top:10px'><span><button id='play'></button><button id='stop'></button></span>" +
+                "<span><span class='rate slider'></span>&nbsp;" + 
+                "<span class='rate vwf-label' style='display: inline-block; width:8ex'></span></span></div>");
+
+            var options = {};
+
+            [ "play", "pause", "stop" ].forEach( function( state ) {
+                options[state] = { icons: { primary: "ui-icon-" + state }, label: state, text: false };
+            } );
+
+            options.rate = { value: 0, min: -2, max: 2, step: 0.1, };
+
+            var state = {};
+
+            jQuery.get(
+                "admin/state", 
+                undefined, 
+                function( data ) {
+                    state = data;
+
+                    jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                    jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+
+                    jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+
+                    if ( state.rate < 1.0 ) {
+                        var label_rate = 1.0 / state.rate;
+                    } 
+                    else {
+                        var label_rate = state.rate;
+                    }
+
+                    var label = label_rate.toFixed(2).toString().replace( /(\.\d*?)0+$/, "$1" ).replace( /\.$/, "" );
+
+                    if ( state.rate < 1.0 ) {
+                        label = "&#x2215; " + label;
+                    } else {
+                        label = label + " &times;";
+                    }
+
+                    jQuery( ".rate.vwf-label" ).html( label );
+                }, 
+                "json" 
+            );
+
+            jQuery( "button#play" ).button(
+                options.pause
+            ). click( function() {
+                jQuery.post(
+                    state.playing ? "admin/pause" : "admin/play", 
+                    undefined, 
+                    function( data ) {
+                        state = data;
+
+                        jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                        jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+                    },
+                    "json" 
+                );
+            } );
+
+
+            jQuery( "button#stop" ).button(
+                options.stop
+            ). click( function() {
+                jQuery.post(
+                    "admin/stop", 
+                    undefined, 
+                    function( data ) {
+                        state = data;
+
+                        jQuery( "button#play" ).button( "option", state.playing ? options.pause : options.play );
+                        jQuery( "button#stop" ).button( "option", "disabled", state.stopped );
+                    }, 
+                    "json" 
+                );
+            } );
+
+            jQuery( ".rate.slider" ).slider(
+                options.rate
+            ) .bind( "slide", function( event, ui ) {
+                jQuery.get( 
+                    "admin/state", 
+
+                    { "rate": Math.pow( 10, Number(ui.value) ) }, 
+
+                    function( data ) {
+                        state = data;
+
+                        jQuery( ".rate.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+
+                        if ( state.rate < 1.0 ) {
+                            var label_rate = 1.0 / state.rate;
+                        } 
+                        else {
+                            var label_rate = state.rate;
+                        }
+
+                        var label = label_rate.toFixed(2).toString().replace( /(\.\d*?)0+$/, "$1" ).replace( /\.$/, "" );
+
+                        if ( state.rate < 1.0 ) {
+                            label = "&#x2215; " + label;
+                        } else {
+                            label = label + " &times;";
+                        }
+
+                        jQuery( ".rate.vwf-label" ).html( label );
+                    }, 
+                    "json"
+                );
+            } );
+
+            this.timelineInit = true;
+        }
+
+        if (!this.editorOpen)
+        {
+            $(timeline).show('slide', {direction: 'right'}, 175);    
+        }
+        else
+        {
+            $(timeline).show();
+        }
+    }
+
 } );

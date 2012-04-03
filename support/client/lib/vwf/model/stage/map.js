@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
     // vwf/model/stage/map.js translates between kernel-side nodeIDs and model-side objects or ids.
@@ -214,6 +215,13 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
             return this.model.creatingProperty && this.model.creatingProperty( this.kernel_to_model[nodeID] || nodeID,
+                propertyName, propertyValue );
+        },
+
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+            return this.model.initializingProperty && this.model.initializingProperty( this.kernel_to_model[nodeID] || nodeID,
                 propertyName, propertyValue );
         },
 

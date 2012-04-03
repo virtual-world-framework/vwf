@@ -1,12 +1,15 @@
 require "rake"
 require "rake/clean"
 require "tilt"
+require "yaml"
 
 
-CLOBBER.include "index.html"
+CLOBBER.include( "index.html" )
 
 
 desc "Generate the catalog."
+
+task :default => [ :clean, :clobber, :build ]
 
 task :build => "index.html"
 
@@ -27,16 +30,25 @@ file "index.html" => "index.html.erb" do |task|
         base = File.basename name, ext
 
         type = image_types.find do |type|
-            File.exist? "#{path}/#{base}.#{type}"
+            File.exist? "#{path}/#{base}.catalog.#{type}"
+        end
+
+        descr = ""
+        begin
+            descrFile = YAML.load( File.read( "#{path}/#{base}.catalog.yaml" ) )
+            descr = descrFile["description"]
+        rescue => err
+            err
         end
 
         [
             ( base == "index.vwf" ? path : file ),
-            type && "#{path}/#{base}.#{type}",
-            path
+            type && "#{path}/#{base}.catalog.#{type}",
+            path, 
+            descr
         ]
 
-    end .select do |application, image, name|
+    end .select do |application, image, name, description|
 
         image
 

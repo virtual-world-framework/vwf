@@ -1,3 +1,4 @@
+"use strict";
 define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/document extends a view interface up to the browser document. When vwf/view/document

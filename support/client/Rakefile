@@ -6,6 +6,8 @@ require "tilt"
 SOURCE = "lib"
 DESTINATION = "libz"
 
+DDESTINATION = "libd"
+
 PATTERNS = [ "vwf.js", "vwf/*.js", "vwf/*/*.js", "vwf/*/stage/*.js" ]
 
 chdir SOURCE do
@@ -62,3 +64,46 @@ task :compress => "build.js" do |task|
     end
 
 end
+
+desc "Doc"
+
+task :doc do |task|
+
+    # Convert /// comments to /** */ comments for jsdoc.
+
+    rm_r DDESTINATION, :force => true
+    cp_r SOURCE, DDESTINATION
+
+    chdir DDESTINATION do
+
+        FileList.new( PATTERNS ).sort.each do |path|
+            sh <<-SH.strip.gsub %r{ +}, " "
+                ruby -p -i.bak -e ' \
+                    case ( state ||= 0 ) + ( %r{^\s*///} ? 1 : 0 ) \
+                        when 1 ; \
+                            last = $_ ; sub %r{///}, "/**" ; \
+                            state = 2 \
+                        when 2 ; \
+                            puts last.sub %r{///.*}, " */" ; \
+                            state = 0 \
+                        when 3 ; \
+                            last = $_ ; sub %r{///}, " * " \
+                    end \
+                ' '#{path}'
+            SH
+        end
+
+        sh <<-SH.strip.gsub %r{ +}, " "
+
+            java -jar ../../build/jsdoc_toolkit-2.4.0/jsrun.jar ../../build/jsdoc_toolkit-2.4.0/app/run.js \
+                -Djsdoc.dir=../../build/jsdoc_toolkit-2.4.0 \
+                --template=../../build/jsdoc_toolkit-2.4.0/templates/jsdoc --allfunctions --recurse=10 --directory=../doc/jsdoc \
+                #{ FileList.new( PATTERNS ).sort.map { |path| "'" + path + "'" } .join " " }
+
+        SH
+
+    end
+
+end
+
+#             -E=closure -E=async.js -E='jquery.*' -E=domReady.js -E=require.js -E=socket.io.js -E='glge-.*' -E='[/\\](glge|jiglib)[/\\].*' -E=UnityObject.js
