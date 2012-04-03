@@ -8,6 +8,5 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.position = [ 0, -100, 0 ];
-    this.camera.rotation = [ 1.56, 0, 0 ];
+    this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,0,100,0,1 ];
   }

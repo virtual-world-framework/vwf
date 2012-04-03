@@ -1,12 +1,12 @@
 "use strict";
-/// @name vwf.api.view
+/// @name vwf.api.model
 /// @namespace
 
 define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#creatingNode
+    /// @name vwf.api.model#creatingNode
     /// @function
     /// 
     /// @param {ID} nodeID
@@ -24,7 +24,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#deletingNode
+    /// @name vwf.api.model#deletingNode
     /// @function
     /// 
     /// @param {ID} nodeID
@@ -35,7 +35,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#prototyping
+    /// @name vwf.api.model#prototyping
     /// @function
     /// 
     /// @param {} 
@@ -46,7 +46,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#addingChild
+    /// @name vwf.api.model#addingChild
     /// @function
     /// 
     /// @param {} 
@@ -57,7 +57,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#removingChild
+    /// @name vwf.api.model#removingChild
     /// @function
     /// 
     /// @param {} 
@@ -68,7 +68,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#parenting
+    /// @name vwf.api.model#parenting
     /// @function
     /// 
     /// @param {} 
@@ -79,7 +79,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#childrening
+    /// @name vwf.api.model#childrening
     /// @function
     /// 
     /// @param {} 
@@ -90,7 +90,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#naming
+    /// @name vwf.api.model#naming
     /// @function
     /// 
     /// @param {} 
@@ -100,7 +100,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#settingProperties
+    /// @name vwf.api.model#settingProperties
     /// @function
     /// 
     /// @param {} 
@@ -111,7 +111,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#gettingProperties
+    /// @name vwf.api.model#gettingProperties
     /// @function
     /// 
     /// @param {} 
@@ -122,7 +122,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#creatingProperties
+    /// @name vwf.api.model#creatingProperties
     /// @function
     /// 
     /// @param {} 
@@ -133,7 +133,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#initializingProperty
+    /// @name vwf.api.model#initializingProperty
     /// @function
     /// 
     /// @param {} 
@@ -146,7 +146,7 @@ define( {
     
     /// Description.
     /// 
-    /// @name vwf.api.view#settingProperty
+    /// @name vwf.api.model#settingProperty
     /// @function
     /// 
     /// @param {} 
@@ -157,7 +157,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#gettingProperty
+    /// @name vwf.api.model#gettingProperty
     /// @function
     /// 
     /// @param {} 
@@ -168,7 +168,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#creatingMethod
+    /// @name vwf.api.model#creatingMethod
     /// @function
     /// 
     /// @param {ID} nodeID
@@ -184,7 +184,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#callingMethod
+    /// @name vwf.api.model#callingMethod
     /// @function
     /// 
     /// @param {ID} nodeID
@@ -197,7 +197,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#creatingEvent
+    /// @name vwf.api.model#creatingEvent
     /// @function
     /// 
     /// @param {ID} nodeID
@@ -212,7 +212,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#firingEvent
+    /// @name vwf.api.model#firingEvent
     /// @function
     /// 
     /// @param {ID} nodeID
@@ -225,7 +225,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#executing
+    /// @name vwf.api.model#executing
     /// @function
     /// 
     /// @param {}
@@ -235,7 +235,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.view#ticking
+    /// @name vwf.api.model#ticking
     /// @function
     /// 
     /// @param {}

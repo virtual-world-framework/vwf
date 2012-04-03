@@ -15,7 +15,6 @@ Accept the default settings, except for:
 Set **Root Directory** to C:\Cygwin (with a capital C) if you're a pedant like me and want it to look right among the other top-level directories.
 
 *	Consider changing **Local Package Directory** to your browser downloads folder to avoid cluttering your desktop.
-*   If connected to the LMI, for **Select Your Internet Connection**, choose *Use Internet Explorer Proxy Settings*.
 
 Select a download site from the list. Choose one that seems close and reliable.
 
