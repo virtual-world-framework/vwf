@@ -1,4 +1,18 @@
 "use strict";
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
@@ -239,6 +253,25 @@ node.id = childID; // TODO: move to vwf/model/object
 
             node.private.change = 1; // incremented whenever "future"-related changes occur
 
+        },
+
+        // -- initializingNode ---------------------------------------------------------------------
+
+        // Invoke an initialize() function if it exists.
+
+        initializingNode: function( nodeID, childID ) {
+
+            var child = this.nodes[childID];
+            var scriptText = "this.initialize && this.initialize()";
+
+            try {
+                return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+            } catch ( e ) {
+                this.logger.warnc( "initializingNode", childID, propertyName, propertyValue,
+                    "exception in initialize:", exceptionMessage( e ) );
+            }
+
+            return undefined;
         },
 
         // -- deletingNode -------------------------------------------------------------------------

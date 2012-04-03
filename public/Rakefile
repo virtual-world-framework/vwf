@@ -1,21 +1,53 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+
 require "rake"
 require "rake/clean"
 require "tilt"
 require "yaml"
 
 
-CLOBBER.include( "index.html" )
+CLOBBER.include "web/**/*.html"
 
-
-desc "Generate the catalog."
 
 task :default => [ :clean, :clobber, :build ]
 
-task :build => "index.html"
+desc "Generate the catalog and documentation."
+
+task :build => "web/catalog.html" do
+
+    original_path = ENV["PATH"]
+    ENV["PATH"] = FileList[ "../support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
+
+    FileList[ "web/*.md" ].each do |md|
+        sh "( cat web/format/preamble ; Markdown.pl '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
+    end
+
+    FileList[ "web/docs/**/*.md" ].each do |md|
+        sh "( cat web/docs/format/preamble ; Markdown.pl '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
+    end
+
+    sh "bundle exec rocco web/docs/application/*.vwf.yaml"
+    sh "bundle exec rocco web/docs/application/example.js"
+    
+    ENV["PATH"] = original_path
+
+end
 
 desc "Generate the catalog."
 
-file "index.html" => "index.html.erb" do |task|
+file "web/catalog.html" => "web/catalog.html.erb" do |task|
 
     component_types = [ :json, :yaml ]
     image_types = [ :png, :jpg, :gif ]

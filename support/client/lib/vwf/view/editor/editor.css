@@ -139,3 +139,14 @@ form
 	display: inline-block;
 	width: 10em;
 }
+
+.about {
+	padding-left:10px;
+}
+
+.about a:link {
+	color:white;
+}
+
+.about a:visited {
+	color:white;

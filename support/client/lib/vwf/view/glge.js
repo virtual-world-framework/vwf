@@ -1,4 +1,18 @@
 ﻿"use strict";
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
 define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
@@ -139,6 +153,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         $('#topdown_b').height(canvas.height);
                         $('#client_list').height(canvas.height);
                         $('#time_control').height(canvas.height);
+                        $('#about_tab').height(canvas.height);
                     }
                 }
 
@@ -230,15 +245,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }        
     }
 
-    var mouse; 
-    var sceneCanvas;
-    var container;
-    var mouseOverCanvas = false;
-
     // -- initMouseEvents ------------------------------------------------------------------------
 
     function initMouseEvents( canvas ) {
-
         var sceneNode = this.state.scenes[this.state.sceneRootID], child;
         var sceneID = this.state.sceneRootID;
         var sceneView = this;
@@ -255,9 +264,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var mouseMiddleDown = false;
         var win = window;
 
-        container = document.getElementById("container");
-        sceneCanvas = canvas;
-        mouse = new GLGE.MouseInput( sceneCanvas );
+        var container = document.getElementById("container");
+        var sceneCanvas = canvas;
+        var mouse = new GLGE.MouseInput( sceneCanvas );
+        var mouseOverCanvas = false;
 
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
@@ -823,7 +833,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function outputGroup( group, iIndent, open ) {
         var sOut = indent.call( this, iIndent + 1);
         if (open) {
-            lastGroupName = name(group);
+            var lastGroupName = name(group);
             this.logger.info(indent.call( this,iIndent) + lastGroupName + ":");
             this.logger.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 

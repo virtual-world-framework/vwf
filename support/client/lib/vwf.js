@@ -1,4 +1,18 @@
 "use strict";
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
 ( function( window ) {
 
     window.console && console.info && console.info( "loading vwf" );
@@ -92,7 +106,8 @@
         // that we can find it if it is reused. Components specified internally as object literals
         // are anonymous and are not indexed here.
 
-        var types = this.private.types = {}; // maps URI => component specification
+        var types = this.private.types = {}; // maps component node ID => component specification
+        var uris = this.private.uris = {}; // maps component nodeID => component URI
 
         // The proto-prototype of all nodes is "node", identified by this URI. This type is
         // intrinsic to the system and nothing is loaded from the URI.
@@ -539,7 +554,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             var message = JSON.stringify( fields );
             socket.send( message );
 
-        }
+        };
 
         // -- receive ------------------------------------------------------------------------------
 
@@ -823,6 +838,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                     var callbacks = types[nodeID];
                     types[nodeID] = component; // component specification once loaded
+                    uris[nodeID] = uri;
 
                     callbacks.forEach( function( callback ) {
                         callback && callback.call( vwf, nodeID );
@@ -861,6 +877,7 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
                                     var callbacks = types[nodeID];
                                     types[nodeID] = component; // component specification once loaded
+                                    uris[nodeID] = uri;
 
                                     callbacks.forEach( function( callback ) {
                                         callback && callback.call( vwf, nodeID );
@@ -977,7 +994,7 @@ return component;
 
         // -- prototype ----------------------------------------------------------------------------
 
-        this.prototype = function( nodeID ) {
+        this.prototype = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             // Call prototyping() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -990,24 +1007,41 @@ return component;
             } );
 
             return prototypeID;
-        }
+        };
 
         // -- prototypes ---------------------------------------------------------------------------
 
-        this.prototypes = function( nodeID ) {
+        this.prototypes = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             var prototypeIDs = [];
             var prototypeID = undefined;
             
             while ( nodeID !== undefined ) {
-                if ( ( prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                if ( ( prototypeID = prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
                     prototypeIDs.push( prototypeID );
                 }
                 nodeID = prototypeID;
             }
             
             return prototypeIDs;
-        }
+        };
+
+        // -- behaviors ----------------------------------------------------------------------------
+
+        this.behaviors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
+
+            // Call behavioring() on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var behaviorIDs = undefined;
+
+            this.models.some( function( model ) {
+                behaviorIDs = model.behavioring && model.behavioring( nodeID );
+                return behaviorIDs !== undefined && behaviorIDs.length > 0;
+            } );
+
+            return behaviorIDs || [];
+        };
 
         // -- addChild -----------------------------------------------------------------------------
 
@@ -1057,7 +1091,7 @@ return component;
 
         // -- ancestors ----------------------------------------------------------------------------
 
-        this.ancestors = function( nodeID ) {
+        this.ancestors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             var ancestors = [];
 
@@ -1069,11 +1103,11 @@ return component;
             }
 
             return ancestors;
-        }
+        };
 
         // -- parent -------------------------------------------------------------------------------
 
-        this.parent = function( nodeID ) {
+        this.parent = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             // Call parenting() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -1090,7 +1124,7 @@ return component;
 
         // -- children -----------------------------------------------------------------------------
 
-        this.children = function( nodeID ) {
+        this.children = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             this.logger.group( "vwf.children " + nodeID );
 
@@ -1111,7 +1145,7 @@ return component;
 
         // -- name ---------------------------------------------------------------------------------
 
-        this.name = function( nodeID ) {
+        this.name = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
 
             // Call naming() on each model. The first model to return a non-undefined value dictates
             // the return value.
@@ -1907,6 +1941,9 @@ return component;
 
                 function( callback /* ( err, results ) */ ) {
 
+                    // Perform initializations for properties with setter functions. These are
+                    // assigned here so that the setters run on a fully-constructed node.
+
                     Object.keys( deferredInitializations ).forEach( function( propertyName ) {
                         vwf.setProperty( nodeID, propertyName, deferredInitializations[propertyName] );
                     }, this );
@@ -1917,10 +1954,16 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( nodeID );
 }
 
-                    // Invoke an initialization method.
+                    // Call initializingNode() on each model and initializedNode() on each view to
+                    // indicate that the node is fully constructed.
 
-                    vwf.execute( nodeID, "this.initialize && this.initialize()",
-                        "application/javascript" ); 
+                    vwf.models.forEach( function( model ) {
+                        model.initializingNode && model.initializingNode( parentID, nodeID );
+                    } );
+
+                    vwf.views.forEach( function( view ) {
+                        view.initializedNode && view.initializedNode( parentID, nodeID );
+                    } );
 
                     callback( undefined, undefined );
                 },
