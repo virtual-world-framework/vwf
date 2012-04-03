@@ -1,5 +1,6 @@
 Application Reference
 =====================
+---------------------
 
 A Virtual World Framework application is an arrangement of nodes communicating through properties,
 methods, and events. Applications are constructed from components, which may themselves build on

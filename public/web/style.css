@@ -69,16 +69,30 @@ a:link {
 .navmenu ul li a:hover {
 	color:#AAAABB;
 }
+.full {
+	width:800px;
+	display:inline;
+	margin:auto;
+}
+.full h1 {
+	font: 18pt Arial;
+	font-weight:bold;
+}
+.full h2 {
+	font: 14pt Arial;
+	font-weight:bold;
+}
 .content {
 	width:800px;
 	display:inline;
 	float:right;
-}	
+}
 .content iframe {
 	width:780px;
 	height:300px;
 	display:inline;
-	overflow:hidden;
+	overflow-x:auto;
+	overflow-y:auto;
 }
 .content pre {
 	border:1px solid #AAA;

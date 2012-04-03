@@ -1,4 +1,18 @@
 "use strict";
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
@@ -697,6 +711,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
             }
 
+//            if ( value && value instanceof Object && !( value instanceof Array ) && !( value instanceof Float32Array ) ){
+//                console.info( "WARNING: gettingProperty( "+nodeID+", "+propertyName+" ) returning an OBJECT: " + value );
+//            }
+
             return value;
 
 
@@ -1164,13 +1182,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 node.glgeObject.setSpotExponent( propertyValue );
                 break;
 
-//                  case "diffuse":
-//                    node.glgeObject.setDiffuse( propertyValue );
-//                    break;
+            case "diffuse":
+                node.glgeObject.diffuse = propertyValue; // no setDiffuse() in GLGE 0.7
+                break;
 
-//                  case "specular":
-//                    node.glgeObject.setSpecular( propertyValue );
-//                    break;
+            case "specular":
+                node.glgeObject.specular = propertyValue; // no setSpecular() in GLGE 0.7
+                break;
 
             case "samples":
                 node.glgeObject.setShadowSamples( propertyValue );
@@ -1217,7 +1235,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         switch ( propertyName ) {
               case "ambientColor":
                 var color = sceneNode.glgeScene.getAmbientColor();
-                value = [ color['r'], color['g'], color['b'] ];
+                value = color['a'] ? [ color['r'], color['g'], color['b'], color['a'] ] : [ color['r'], color['g'], color['b'] ];
                 break;
             case "activeCamera":
                 if ( sceneNode.glgeScene.camera && sceneNode.glgeScene.camera.ID ) {
@@ -1229,7 +1247,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "backgroundColor":
                 var color = sceneNode.glgeScene.getBackgroundColor();
-                value = [ color['r'], color['g'], color['b'] ];
+                value = color['a'] ? [ color['r'], color['g'], color['b'], color['a'] ] : [ color['r'], color['g'], color['b'] ];
                 break;
             
             default:
@@ -1246,6 +1264,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
     function getParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
         var value = undefined;
+        var obj;
         var node = this.state.nodes[nodeID];
         if ( node && node.glgeObject ) {
             var ps = node.glgeObject;
@@ -1255,6 +1274,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         value = ps.getNumParticles();
                     break;
                 case "lifeTime":
+                    // there is no getLifeTime function in GLGE for ParticleSystems
                     if ( ps.getLifeTime )
                         value = ps.getLifeTime();
                     break;
@@ -1279,48 +1299,72 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         value = ps.getLoop();
                     break;
                 case "velocity":
-                    if ( ps.getVelocity )
-                        value = ps.getVelocity();
+                    // there is no getVelocity function in GLGE for ParticleSystems 
+                    if ( ps.getVelocity ) {
+                        obj = ps.getVelocity();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "maxVelocity":
-                    if ( ps.getMaxVelocity )
-                        value = ps.getMaxVelocity();
+                    if ( ps.getMaxVelocity ) {
+                        obj = ps.getMaxVelocity();    
+                        value = [ obj.x, obj.y, obj.z ]; 
+                    }
                     break;            
                 case "minVelocity":
-                    if ( ps.getMinVelocity )
-                        value = ps.getMinVelocity();
+                    if ( ps.getMinVelocity ) {
+                        obj = ps.getMinVelocity();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;    
                 case "startAcceleration":
-                    if ( ps.getStartAccelertaion )
-                        value = ps.getStartAccelertaion();
+                    // there is no getStartAccelertaion function in GLGE for ParticleSystems
+                    if ( ps.getStartAccelertaion ){
+                        obj = ps.getStartAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "endAcceleration":
-                    if ( ps.getEndAccelertaion )
-                        value = ps.getEndAccelertaion();
+                    // there is no getEndAccelertaion function in GLGE for ParticleSystems
+                    if ( ps.getEndAccelertaion ) {
+                        obj = ps.getEndAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "maxStartAcceleration":
-                    if ( ps.getMaxStartAccelertaion )
-                        value = ps.getMaxStartAccelertaion();
+                    if ( ps.getMaxStartAccelertaion ) {
+                        obj = ps.getMaxStartAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "maxEndAcceleration":
-                    if ( ps.getMaxEndAccelertaion )
-                       value = ps.getMaxEndAccelertaion();
+                    if ( ps.getMaxEndAccelertaion ) {
+                       obj = ps.getMaxEndAccelertaion();
+                       value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "minStartAcceleration":
-                    if ( ps.getMinStartAccelertaion )
-                        value = ps.getMinStartAccelertaion();
+                    if ( ps.getMinStartAccelertaion ) {
+                        obj = ps.getMinStartAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ];
+                    }
                     break;
                 case "minEndAcceleration":
                     if ( ps.getMinEndAccelertaion )
-                        value = ps.getMinEndAccelertaion();
+                        obj = ps.getMinEndAccelertaion();
+                        value = [ obj.x, obj.y, obj.z ]; 
                     break;
                 case "startColor":
-                    if ( ps.getStartColor )
-                        value = ps.getStartColor();
+                    if ( ps.getStartColor ) {
+                        obj = ps.getStartColor();
+                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
+                    }
                     break;
                 case "endColor":
-                    if ( ps.getEndColor )
-                        value = ps.getEndColor();
+                    if ( ps.getEndColor ){
+                        obj = ps.getEndColor();
+                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
+                    }
                     break;
                 case "image":
                     if ( ps.getImage )
@@ -1361,7 +1405,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         var node = this.state.nodes[ nodeID ]; 
         var value = undefined;
-        var txtr, mat;
+        var txtr, mat, obj;
 
         switch ( propertyName ) {
             case "texture": {
@@ -1377,13 +1421,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
                 break;
             case "color":
-                if ( mat ) { value = mat.getColor(); } 
+                if ( mat ) { 
+                    obj = mat.getColor();
+                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                } 
                 break;                
             case "ambient":
-                if ( mat ) { value = mat.getAmbient(); } 
+                if ( mat ) { 
+                    obj = mat.getAmbient();
+                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                } 
                 break;
             case "specColor":
-                if ( mat ) { value = mat.getSpecularColor(); } 
+                if ( mat ) { 
+                    obj = mat.getSpecularColor();
+                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                } 
                 break;
             case "shininess":
                 if ( mat ) { value = mat.getShininess(); } 
@@ -1455,13 +1508,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 value = node.glgeObject.getSpotExponent();
                 break;
 
-//                  case "diffuse":
-//                    value = node.glgeObject.getDiffuse();
-//                    break;
+            case "diffuse":
+                value = node.glgeObject.diffuse; // no getDiffuse() in GLGE 0.7
+                break;
 
-//                  case "specular":
-//                    value = node.glgeObject.getSpecular();
-//                    break;
+            case "specular":
+                value = node.glgeObject.specular; // no getSpecular() in GLGE 0.7
+                break;
 
             case "samples":
                 value = node.glgeObject.getShadowSamples();

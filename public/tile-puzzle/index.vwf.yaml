@@ -1,3 +1,16 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
 --- 
 extends: appscene.vwf
 source: index.xml
@@ -30,7 +43,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ 7.2, 10, 0 ]
-      rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - |
@@ -52,7 +65,7 @@ children:
     type: model/vnd.collada+xml
     properties: 
       translation: [ -7.2, 10, 0 ]
-      rotation: [ -0.000145, 0.707106, -0.707106, 180 ]
+      rotation: [ 1, 0, 0, -90 ]
       scale: [ 3, 3, 3 ]
     scripts:
     - |
@@ -499,13 +512,13 @@ scripts:
     }
 
     this.moveTile = function(obj) {
-      dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
-      dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
+      var dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
+      var dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
       
       if((dx < this.tileDistance && dy == 0) ||
          (dy < this.tileDistance && dx == 0))
       {
-        currentPosition = [ obj.translation[0], obj.translation[1], obj.translation[2] ];
+        var currentPosition = [ obj.translation[0], obj.translation[1], obj.translation[2] ];
         obj.translation = this.openTilePosition;
         this.openTilePosition = [ currentPosition[0], currentPosition[1], currentPosition[2] ];
       }           	

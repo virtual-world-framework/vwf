@@ -1,12 +1,13 @@
 Getting Started
 ===============
+---------------
 
 Virtual World Framework (VWF) is a collaborative training platform that is scalable, sustainable and can be run via a browser.
 _____________________________________________________________________________________
 
 The most basic implementation of VWF is a single asset in a COLLADA format. A URL pointing directly to an asset COLLADA file (.dae) with no code will result in a scene containing the specified asset with default light, camera, and navigation.
 
-Sample URL: *http://vwf.example.com/documentation/hello.dae*
+Sample URL: *http://vwf.example.com/application/hello.dae*
 _____________________________________________________________________________________
 
 An asset can be wrapped in a VWF application by specifying the source file in the code.
@@ -16,7 +17,7 @@ Code View: *index.vwf.yaml*
 	---
 	source: hello.dae
 
-Sample URL: *http://vwf.example.com/documentation/index.vwf*
+Sample URL: *http://vwf.example.com/application/index.vwf*
 _____________________________________________________________________________________
 
 Prototypes for nodes are defined within the framework. Extend these prototypes and specify a file source to create application components. For example, an application child can extend a node type with a COLLADA file.
@@ -44,11 +45,11 @@ Code View: *index.vwf.yaml*
 	    properties: 
 	      translation: [ 0, 0, 0 ]
 
-Sample URL: *http://vwf.example.com/documentation/1/*
+Sample URL: *http://vwf.example.com/web/example/1/*
 
-<!-- <iframe src="../../documentation/1">Example 1</iframe> -->
+<!-- <iframe src="../../web/example/1">Example 1</iframe> -->
 <div style="text-align:center">
-<span style="color:blue" onclick="document.getElementById('ex1_frame').src = '../../documentation/1'">Activate Application</span>
+<span style="color:blue" onclick="document.getElementById('ex1_frame').src = '../../web/example/1'">Activate Application</span>
 <iframe id="ex1_frame" src="about:blank"></iframe>
 </div>
 _____________________________________________________________________________________
@@ -93,11 +94,11 @@ Code View: *index.vwf.yaml*
 		  rotation: [ 1, 0, 0, 0]
 		  scale: 1
 
-Sample URL: *http://vwf.example.com/documentation/2/*
+Sample URL: *http://vwf.example.com/web/example/2/*
 
-<!-- <iframe src="../../documentation/2">Example 2</iframe> -->
+<!-- <iframe src="../../web/example/2">Example 2</iframe> -->
 <div style="text-align:center">
-<span style="color:blue" onclick="document.getElementById('ex2_frame').src = '../../documentation/2'">Activate Application</span>
+<span style="color:blue" onclick="document.getElementById('ex2_frame').src = '../../web/example/2'">Activate Application</span>
 <iframe id="ex2_frame" src="about:blank"></iframe>
 </div>
 _____________________________________________________________________________________
@@ -168,11 +169,11 @@ Code View: *index.vwf.yaml*
 			properties: 
 			  texture: "images/blue.png"
 		  
-URL: *http://vwf.example.com/documentation/3/*
+URL: *http://vwf.example.com/web/example/3/*
 
-<!-- <iframe src="../../documentation/3">Example 3</iframe> -->
+<!-- <iframe src="../../web/example/3">Example 3</iframe> -->
 <div style="text-align:center">
-<span style="color:blue" onclick="document.getElementById('ex3_frame').src = '../../documentation/3'">Activate Application</span>
+<span style="color:blue" onclick="document.getElementById('ex3_frame').src = '../../web/example/3'">Activate Application</span>
 <iframe id="ex3_frame" src="about:blank"></iframe>
 </div>
 _____________________________________________________________________________________
@@ -237,7 +238,7 @@ Code View: *index.vwf.yaml*
 	    extends: rotate.vwf
 	    source: world.dae
 
-URL: *http://vwf.example.com/documentation/index.vwf*
+URL: *http://vwf.example.com/application/index.vwf*
 _____________________________________________________________________________________
 
 Add JavaScript functions to application components by defining scripts as a child of the application or a specific component. Prototypes define some functions that can be extended, such as pointerClick.
@@ -294,13 +295,13 @@ Code View: *index.vwf.yaml*
               }
             }
 
-URL: *http://vwf.example.com/documentation/4/*
+URL: *http://vwf.example.com/web/example/4/*
 
 In this example, clicking on an object will run the pointerClick function, changing the color of the object's material. 
 
-<!-- <iframe src="../../documentation/4">Example 4</iframe> -->
+<!-- <iframe src="../../web/example/4">Example 4</iframe> -->
 <div style="text-align:center">
-<span style="color:blue" onclick="document.getElementById('ex4_frame').src = '../../documentation/4'">Activate Application</span>
+<span style="color:blue" onclick="document.getElementById('ex4_frame').src = '../../web/example/4'">Activate Application</span>
 <iframe id="ex4_frame" src="about:blank"></iframe>
 </div>
 _____________________________________________________________________________________
@@ -348,7 +349,7 @@ Code View: *index.vwf.html*
 	  </body>
 	</html>
 
-URL: *http://vwf.example.com/documentation/index.vwf*
+URL: *http://vwf.example.com/application/index.vwf*
 _____________________________________________________________________________________
 
 By default, the framework will search for the index.vwf.yaml file. Thus, if the application is defined in that file, the application can be reached with the following URL: http://*server/IP:port*/*applicationname*/ and index.vwf will automatically be initiated. If the application is defined in another file, the application can be reached with the following URL: http://*servername*/*applicationname*/*applicationname*.vwf.

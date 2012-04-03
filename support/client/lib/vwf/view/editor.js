@@ -1,5 +1,19 @@
 "use strict";
-define( [ "module", "vwf/view" ], function( module, view ) {
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
+define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 
     // vwf/view/editor creates a view interface for editor functions. 
 
@@ -19,22 +33,26 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             // HIERARCHY OPEN --> 1
             // USER LIST OPEN --> 2
             // TIMELINE OPEN  --> 3
+            // ABOUT OPEN     --> 4
             this.editorView = 0;
             this.editorOpen = false;
             this.timelineInit = false;
+            this.aboutInit = false;
 
             this.topdownName = '#topdown_a';
             this.topdownTemp = '#topdown_b';
             this.clientList = '#client_list';
             this.timeline = '#time_control';
+            this.about = '#about_tab';
             this.currentNodeID = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /></div></div></div>" + 
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
-                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='time_control'></div></div></div>"
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='time_control'></div></div></div>" +
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='about_tab'></div></div></div>"
             );
             
             $('#tabs').stop().animate({ opacity:0.0 }, 0);
@@ -63,6 +81,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 openEditor.call(self, 3);
             });
 
+            jQuery('#about').click ( function(evt) {
+                openEditor.call(self, 4);
+            });
+
             jQuery('#x').click ( function(evt) {
                 closeEditor.call(self);
             });
@@ -71,6 +93,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             $('#topdown_b').hide();
             $('#client_list').hide();
             $('#time_control').hide();
+            $('#about_tab').hide();
             
             var canvas = document.getElementById("index-vwf");
             if ( canvas ) {
@@ -78,6 +101,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 $('#topdown_b').height(canvas.height);
                 $('#client_list').height(canvas.height);
                 $('#time_control').height(canvas.height);
+                $('#about_tab').height(canvas.height);
             }
             else
             {    
@@ -85,6 +109,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 $('#topdown_b').height(window.innerHeight-20);
                 $('#client_list').height(window.innerHeight-20);
                 $('#time_control').height(window.innerHeight-20);
+                $('#about_tab').height(window.innerHeight-20);
             }
         },
         
@@ -260,6 +285,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 drill.call(this, this.currentNodeID);
                 $(this.clientList).hide();
                 $(this.timeline).hide();
+                $(this.about).hide();
 
                 if(this.editorOpen)
                 {
@@ -282,6 +308,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.topdownName).hide();
                 $(this.topdownTemp).hide();
                 $(this.timeline).hide();
+                $(this.about).hide();
                 showUserList.call(this);
             }
 
@@ -291,7 +318,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.topdownName).hide();
                 $(this.topdownTemp).hide();
                 $(this.clientList).hide();
+                $(this.about).hide();
                 showTimeline.call(this);
+            }
+
+            // About
+            else if(eView == 4)
+            {
+                $(this.topdownName).hide();
+                $(this.topdownTemp).hide();
+                $(this.clientList).hide();
+                $(this.timeline).hide();
+                showAboutTab.call(this);
             }
 
 
@@ -321,6 +359,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(topdownName).hide('slide', {direction: 'right'}, 175);
             $(this.clientList).hide();
             $(this.timeline).hide();
+            $(this.about).hide();
         }
 
         else if (this.editorOpen && this.editorView == 2) // Client list open
@@ -328,6 +367,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(this.clientList).hide('slide', {direction: 'right'}, 175);
             $(topdownName).hide();
             $(this.timeline).hide();
+            $(this.about).hide();
         }
 
         else if (this.editorOpen && this.editorView == 3) // Timeline open
@@ -335,6 +375,15 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(this.timeline).hide('slide', {direction: 'right'}, 175);
             $(topdownName).hide();
             $(this.clientList).hide();
+            $(this.about).hide();
+        }
+
+        else if (this.editorOpen && this.editorView == 4) // About open
+        {
+            $(this.about).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).hide();
+            $(this.clientList).hide();
+            $(this.timeline).hide();
         }
         
         $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
@@ -496,7 +545,10 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var prop = prototypeProperties[key].prop;
             if ( !displayedProperties[ prop.name ]  ) {
                 displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
-
+                if(prop.value == undefined)
+                {
+                    prop.value = JSON.stringify( vwf.getProperty( nodeID, prop.name, []) );
+                }
                 $(topdownTemp).append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
             
                 $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
@@ -918,6 +970,32 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         else
         {
             $(timeline).show();
+        }
+    }
+
+        // -- showAboutTab ----------------------------------------------------------------------
+
+    function showAboutTab() // invoke with the view as "this"
+    {
+        var about = this.about;
+
+        if(!this.aboutInit)
+        {
+            jQuery('#about_tab').append("<div class='header'>About</div>" + 
+                "<div class='about'><p style='font:bold 12pt Arial'>Virtual World Framework</p>" +
+                "<p><b>Version: </b>" + version.join(".") + "</p>" +
+                "<p><b>Site: </b><a href='http://virtualworldframework.com' target='_blank'>http://virtualworldframework.com</a></p></div>");
+
+            this.aboutInit = true;
+        }
+
+        if (!this.editorOpen)
+        {
+            $(about).show('slide', {direction: 'right'}, 175);    
+        }
+        else
+        {
+            $(about).show();
         }
     }
 

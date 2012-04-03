@@ -1,10 +1,24 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+
 require "rake"
 require "rake/testtask"
 require "rake/clean"
 
 
 CLEAN.include "support/build/Pygments-1.4/**/*.pyc"
-CLOBBER.include "bin/*", "docs/**/*.html", "run.bat", "public/index.html"
+CLOBBER.include "bin/*", "run.bat"
 
 
 # Delegate the standard tasks to any child projects.
@@ -54,33 +68,17 @@ task :build => [ :common, :windows ]
 
 # -- common ----------------------------------------------------------------------------------------
 
-desc "Update the gems (generating bin/*), and generate the documentation."
+desc "Update the gems (generating bin/*)."
 
 task :common do
 
     sh "bundle install --binstubs"
 
-    original_path = ENV["PATH"]
-    ENV["PATH"] = FileList[ "support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
-
-    FileList[ "public/web/*.md" ].each do |md|
-        sh "( cat public/web/format/preamble ; Markdown.pl '#{md}' ; cat public/web/format/postamble ) > '#{ md.ext ".html" }'"
-    end
-
-    FileList[ "public/web/docs/**/*.md" ].each do |md|
-        sh "( cat public/web/docs/format/preamble ; Markdown.pl '#{md}' ; cat public/web/docs/format/postamble ) > '#{ md.ext ".html" }'"
-    end
-
-    sh "bundle exec rocco public/web/docs/application/*.vwf.yaml"
-    sh "bundle exec rocco public/web/docs/application/example.js"
-    
-    ENV["PATH"] = original_path
-
 end
 
 # -- windows ---------------------------------------------------------------------------------------
 
-# Window standalone build
+# Windows standalone build
 
 task :windows => :common do
 
