@@ -1,5 +1,5 @@
 "use strict";
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "require", "logger", "module", "vwf/view" ], function( require, logger, module, view ) {
 
     return view.load( module, {
 

@@ -1,12 +1,13 @@
 require "rake"
 require "rake/clean"
 require "tilt"
+require "tmpdir"
+require "pathname"
 
 
 SOURCE = "lib"
 DESTINATION = "libz"
-
-DDESTINATION = "libd"
+DOCUMENTATION = "doc/jsdoc"
 
 PATTERNS = [ "vwf.js", "vwf/*.js", "vwf/*/*.js", "vwf/*/stage/*.js" ]
 
@@ -17,12 +18,12 @@ chdir SOURCE do
 end
 
 CLEAN.include "build.js", "#{DESTINATION}/**/*.js.z", "#{DESTINATION}/build.txt"
-CLOBBER.include "#{DESTINATION}"
+CLOBBER.include "#{DESTINATION}", "#{DOCUMENTATION}"
 
 
 desc "Run the RequireJS optimizer."
 
-task :build => [ :clean, :compile, :compress ]
+task :build => [ :clean, :compile, :compress, :documentation ]
 
 desc "Generate the compilation script."
 
@@ -52,58 +53,79 @@ desc "Compress."
 
 task :compress => "build.js" do |task|
     
-    MODULES.each do |path|
+    #MODULES.each do |path|
         
-        sh <<-SH.strip.gsub %r{ +}, " "
-            java -jar bin/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 \
-                --js '#{DESTINATION}/#{path}.js' --js_output_file '#{DESTINATION}/#{path}.js.z'
-        SH
+    #    sh <<-SH.strip.gsub %r{ +}, " "
+    #        java -jar bin/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --language_in ECMASCRIPT5 \
+    #            --js '#{DESTINATION}/#{path}.js' --js_output_file '#{DESTINATION}/#{path}.js.z'
+    #    SH
 
-        mv "#{DESTINATION}/#{path}.js.z", "#{DESTINATION}/#{path}.js"
+    #    mv "#{DESTINATION}/#{path}.js.z", "#{DESTINATION}/#{path}.js"
 
-    end
+    #end
 
 end
 
-desc "Doc"
+desc "Generate the jsdoc documentation."
 
-task :doc do |task|
+task :documentation do |task|
 
-    # Convert /// comments to /** */ comments for jsdoc.
+    Dir.mktmpdir nil, "." do |tmpdir| # not in /tmp since java can't see across /cygdrive/c/... on Cygwin
 
-    rm_r DDESTINATION, :force => true
-    cp_r SOURCE, DDESTINATION
+        # Calculate absolute paths for the output directory and the build tools.
 
-    chdir DDESTINATION do
+        documentation = File.expand_path DOCUMENTATION
+        build = File.expand_path "../build"
 
-        FileList.new( PATTERNS ).sort.each do |path|
+        # Copy the input directory to a temporary location.
+
+        cp_r SOURCE + "/.", tmpdir
+
+        # cd to the copy and build from there.
+
+        chdir tmpdir do
+
+            # Convert to relative paths so that java doesn't need to traverse /cygdrive/c/... on Cygwin.
+
+            cwd = Pathname.new( "." ).expand_path
+
+            documentation = Pathname.new( documentation ).expand_path.relative_path_from( cwd ).to_s
+            build = Pathname.new( build ).expand_path.relative_path_from( cwd ).to_s
+
+            # Convert /// comments to /** */ comments for jsdoc.
+
+            FileList.new( PATTERNS ).sort.each do |path|
+
+                sh <<-SH.strip.gsub %r{ +}, " "
+                    ruby -p -i.bak -e ' \
+                        case ( state ||= 0 ) + ( %r{^\s*///} ? 1 : 0 ) \
+                            when 1 ; \
+                                last = $_ ; sub %r{///}, "/**" ; \
+                                state = 2 \
+                            when 3 ; \
+                                last = $_ ; sub %r{///}, " * " \
+                            when 2 ;\
+                                puts last.sub %r{///.*}, " */" ; \
+                                state = 0 \
+                        end \
+                    ' '#{path}'
+                SH
+
+            end
+
+            # Run jsdoc on the translated source.
+
             sh <<-SH.strip.gsub %r{ +}, " "
-                ruby -p -i.bak -e ' \
-                    case ( state ||= 0 ) + ( %r{^\s*///} ? 1 : 0 ) \
-                        when 1 ; \
-                            last = $_ ; sub %r{///}, "/**" ; \
-                            state = 2 \
-                        when 2 ; \
-                            puts last.sub %r{///.*}, " */" ; \
-                            state = 0 \
-                        when 3 ; \
-                            last = $_ ; sub %r{///}, " * " \
-                    end \
-                ' '#{path}'
+
+                java -jar #{build}/jsdoc_toolkit-2.4.0/jsrun.jar #{build}/jsdoc_toolkit-2.4.0/app/run.js \
+                    -Djsdoc.dir=#{build}/jsdoc_toolkit-2.4.0 \
+                    --template=#{build}/jsdoc_toolkit-2.4.0/templates/jsdoc --allfunctions --recurse=10 --directory=#{documentation} \
+                    #{ FileList.new( PATTERNS ).sort.map { |path| "'" + path + "'" } .join " " }
+
             SH
+
         end
 
-        sh <<-SH.strip.gsub %r{ +}, " "
-
-            java -jar ../../build/jsdoc_toolkit-2.4.0/jsrun.jar ../../build/jsdoc_toolkit-2.4.0/app/run.js \
-                -Djsdoc.dir=../../build/jsdoc_toolkit-2.4.0 \
-                --template=../../build/jsdoc_toolkit-2.4.0/templates/jsdoc --allfunctions --recurse=10 --directory=../doc/jsdoc \
-                #{ FileList.new( PATTERNS ).sort.map { |path| "'" + path + "'" } .join " " }
-
-        SH
-
     end
 
 end
-
-#             -E=closure -E=async.js -E='jquery.*' -E=domReady.js -E=require.js -E=socket.io.js -E='glge-.*' -E='[/\\](glge|jiglib)[/\\].*' -E=UnityObject.js
