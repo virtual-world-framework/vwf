@@ -431,6 +431,10 @@ children:
                         extends: http://vwf.example.com/types/mesh
                   ic40P0:
                     extends: http://vwf.example.com/types/node3
+                    implements:
+                    - http://vwf.example.com/types/translate-on-down
+                    properties:
+                      translate-vector: [ 0, 0.03, 0 ]
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -440,6 +444,10 @@ children:
                       type: application/javascript                    
                   ic40P1:
                     extends: http://vwf.example.com/types/node3
+                    implements:
+                    - http://vwf.example.com/types/translate-on-down
+                    properties:
+                      translate-vector: [ 0, 0.03, 0 ]                    
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -449,6 +457,10 @@ children:
                       type: application/javascript                    
                   ic40P2:
                     extends: http://vwf.example.com/types/node3
+                    implements:
+                    - http://vwf.example.com/types/translate-on-down
+                    properties:
+                      translate-vector: [ 0, 0.03, 0 ]
                     scripts:
                     - text: |
                         this.pointerClick = function() {
@@ -458,6 +470,10 @@ children:
                       type: application/javascript                    
                   ic40P3:
                     extends: http://vwf.example.com/types/node3
+                    implements:
+                    - http://vwf.example.com/types/translate-on-down
+                    properties:
+                      translate-vector: [ 0, 0.03, 0 ]
                     scripts:
                     - text: |
                         this.pointerClick = function() {

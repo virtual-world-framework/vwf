@@ -2,10 +2,12 @@ body {
     background-color: #6C87A4;
     min-width:520px;
 }
-div.wrapper {
+div.wrapper  {
 	width:99%;
+	text-align:center;
 	position:absolute;
-	bottom:30px;
+	top:20px;
+	pointer-events:none;
 }
 div.toolstyle {
 	border-style:solid;
@@ -16,9 +18,15 @@ div.toolstyle {
 	opacity: .6;
 	box-shadow: 0px 30px 10px 0px #222 inset, 0px 0px 0px 0px #000;
 	text-align:center;
+	position:absolute;
+	left:20px;
 	background:#333;
 	width:520px;
 	height:45px;
 	margin:auto;
 	pointer-events:all;
+}
+div.logostyle {
+	top:-45px;
+	position:relative;
 }
