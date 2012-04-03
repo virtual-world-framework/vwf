@@ -1,0 +1,10 @@
+--- 
+extends: http://vwf.example.com/node3.vwf
+source: predator.dae
+type: "model/vnd.collada+xml"
+properties:
+  translation: [ 0, 0, 0 ]
+  rotation: [ 0, 0, 1, 180 ]
+  scale: [ 15, 15, 15 ]
+implements:
+- http://vwf.example.com/fly.vwf

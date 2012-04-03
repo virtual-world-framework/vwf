@@ -4,21 +4,22 @@ source: physics.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-camera-vwf-maincamera"
-  gravity: [ 0, 0, -50.8, 0 ]
-  collisionSystem: [ false ]
+  activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
 scripts:
-- text: |
+- |
     this.initialize = function() {
-      console.info( "==================== index.vwf ====================" );
-      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
-      this.loadDone = true;
+      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+      this.camera.translation = [ 30, 138, 40 ];
+      this.camera.rotation = [ 0, 0, 1, 180 ]
+      this.camera.far = 50000.0;  
+      if ( !this.loadDone ) {
+        this.loadDone = true;        
+      }
     }
     this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 
-    }, this );    
-  type: application/javascript
+    }, this ); 
 children:
   clearButton:
     extends: http://vwf.example.com/node2.vwf
@@ -27,29 +28,19 @@ children:
         this.clearing();
     events:
       clearing:
-  maincamera: 
-    extends: http://vwf.example.com/camera.vwf
-    properties:
-      walkMode: "walk"
-      cameraType: "perspective"
-      position: [ 30, 138, 40 ]
-      rotation: [ 1.56, 3.14, 0 ]
-      far: 50000.0
   box:
-    extends: "http://vwf.example.com/node3.vwf"
+    extends: "http://vwf.example.com/physics3.vwf"
     source: box.dae
     type: model/vnd.collada+xml
     properties:
-      position: [ 0, 0, 0 ]
-      rotation: [ 0, 0, 0 ]
-      scale: [ 1, 1, 1 ]
+      transform: [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]
       physics: [ "mesh" ]
       friction: 0.5
       restitution: 0.1
   groundplane:
-    extends: "http://vwf.example.com/node3.vwf"
+    extends: "http://vwf.example.com/physics3.vwf"
     properties:
-      position: [ 0, 0, 11.06 ]
+      transform: [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 11.06, 1 ]
       physics: [ "plane", [ 0, 0, 1, 0 ] ]
       friction: 0.99
       restitution: 0      
@@ -57,8 +48,6 @@ children:
     extends: "http://vwf.example.com/light.vwf"
     properties: 
       lightType: "directional"
-      position: [ 60, 85, 70 ]
-      rotation: [ 0.5, 0.1, 0 ]
       constantAttenuation: 1.5
       linearAttenuation: 0.00000001
       quadraticAttenuation: 0.00001

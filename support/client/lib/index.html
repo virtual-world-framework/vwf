@@ -21,6 +21,7 @@
 
     <script type="text/javascript" src="closure/base.js"></script>
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
+    <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
     <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
     <script type="text/javascript" src="socket.io.js"></script>
@@ -40,6 +41,10 @@
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
     <!-- script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script -->
+
+    <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
+    <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
+    <script type="text/javascript">connected && google.load( "earth", "1" )</script>
 
     <script type="text/javascript">
 
@@ -61,6 +66,9 @@
             "vwf/kernel/view",
             "vwf/view/document",
             "vwf/view/editor",
+            "vwf/view/glge",
+            "vwf/view/googleEarth",
+            "logger"
 
         ], function( ready ) {
 
@@ -105,9 +113,10 @@
                     // configurations.
 
                     [
-                        { "glge": "#vwf-root" },
+						{ "vwf/view/glge": "#vwf-root" },
                         "vwf/view/document",
                         "vwf/view/editor",
+                    	"vwf/view/googleEarth",
                     ]
 
                 );
@@ -123,11 +132,13 @@
 
     <script type="text/javascript" src="vwf-view.js"></script>
 
-    <script type="text/javascript" src="vwf-view-glge.js"></script>
+    <!-- script type="text/javascript" src="vwf-view-glge.js"></script -->
     <script type="text/javascript" src="vwf-view-glge/glge-compiled.js"></script>
     <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
 
     <script type="text/javascript" src="vwf-view-html.js"></script>
+
+    <script type="text/javascript" src="debug.js"></script>
 
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />

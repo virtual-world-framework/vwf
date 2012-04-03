@@ -1,30 +1,38 @@
 --- 
-extends: http://vwf.example.com/glge.vwf
-source: radio.xml
+extends: http://vwf.example.com/navscene.vwf
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-camera-vwf-maincamera"
-  loadDone: false
+  activeCamera: "http-vwf-example-com-camera-vwf-camera"
   navmode: none
 scripts:
-- text:
+- text: |
     this.initialize = function() {
-      console.info( "================ radio ================" );
-      this.activeCamera = "http-vwf-example-com-camera-vwf-maincamera";
-      this.loadDone = true;
-      this["radio.dae"].position = this["radio.dae"].position;
-      this["radio.dae"].eulers = this["radio.dae"].eulers;      
+      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+      this.camera.transform = [ 0.8791424632072449,-0.4765590727329254,0,0,0.4433826804161072,0.8179396390914917,-0.36658766865730286,0,0.17470066249370575,0.3222827613353729,0.9303835034370422,0,-6.119999885559082,-11.289999961853027,5.059999942779541,1 ];
+      this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
     }
-  type: application/javascript
-children: 
-  radio.dae: 
+children:
+  Omni01:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      constantAttenuation: 1
+      translation: [ 0, -30, 8 ]
+  dir2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 0.707, 0.707, 0, 0 ]
+  sceneCenter:
+    extends: http://vwf.example.com/node3.vwf
+  radio: 
     extends: http://vwf.example.com/node3.vwf
     source: Radio.DAE
     type: model/vnd.collada+xml
     properties:
-      position: [ 0, 4, 0 ]
-      eulers: [ 338, 0, 211 ]
+      translation: [ 0, 0, 0 ]
       powerOn:
         set: |
           if ( this.powerOwn != Boolean( value ) ){
@@ -127,7 +135,7 @@ children:
           if ( value ) {
             this.bone1.MaxScene.Radio.playing = !value;
           } else {
-            console.info( "replace the anteanna" );
+            this.logger.debug( "replace the anteanna" );
           }
           this.anteanna = value;
         value: true
@@ -263,12 +271,11 @@ children:
         value: 4
       keysLocked: false
     scripts: 
-    - text: |
+    - |
         var radio = this;
         this.configSave = function(){
         }
         this.red = function() {
-          console.info( '=====||====== radio.dae.red()' );
           if ( radio.keysLocked ) return;
           switch( radio.menuMode ) {
             case 'channel':
@@ -359,7 +366,6 @@ children:
         this.ptt = function() {
           if ( radio.keysLocked ) return;
         }
-      type: application/javascript
     children:
       bone1:
         extends: http://vwf.example.com/node3.vwf
@@ -395,10 +401,9 @@ children:
                   ic40Channel:
                     extends: http://vwf.example.com/node3.vwf
                     scripts:
-                    - text: |
+                    - |
                         this.channelDirectionUp = true; 
                         this.pointerClick = function()  {
-                          console.info( "=====||====== ic40Channel.pointerClick()" );
                           var currentChannel = this.parent.parent.parent.parent.channel;
                           if ( this.channelDirectionUp && currentChannel < 16 ) {
                             this.parent.parent.parent.parent.channel = currentChannel + 1;
@@ -412,7 +417,6 @@ children:
                               channelDirectionUp = true;
                           }
                         }
-                      type: application/javascript 
                     properties:
                       rotZ: 0                      
                   ic40Down:
@@ -422,12 +426,10 @@ children:
                     properties:
                       translate-vector: [ 0.03, 0, 0 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40Down.pointerClick()" );
                           this.parent.parent.parent.parent.down();
                         }
-                      type: application/javascript
                   ic40Monitor:
                     extends: http://vwf.example.com/node3.vwf
                     children:
@@ -440,12 +442,10 @@ children:
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40P0.pointerClick()" );
                           this.parent.parent.parent.parent.p0();
-                        }
-                      type: application/javascript                    
+                        }                
                   ic40P1:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -453,12 +453,10 @@ children:
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40P1.pointerClick()" );
                           this.parent.parent.parent.parent.p1();
-                        }
-                      type: application/javascript                    
+                        }                  
                   ic40P2:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -466,12 +464,10 @@ children:
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40P2.pointerClick()" );
                           this.parent.parent.parent.parent.p2();
-                        }
-                      type: application/javascript                    
+                        }                  
                   ic40P3:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -479,12 +475,10 @@ children:
                     properties:
                       translate-vector: [ 0, 0.03, 0 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40P3.pointerClick()" );
                           this.parent.parent.parent.parent.p3();
-                        }
-                      type: application/javascript                    
+                        }                  
                   ic40PTT:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -492,12 +486,10 @@ children:
                     properties:
                       translate-vector: [ 0.04, 0, 0 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40PTT.pointerClick()" );
                           this.parent.parent.parent.parent.ptt();
-                        }
-                      type: application/javascript                    
+                        }                  
                   ic40Red:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -505,12 +497,10 @@ children:
                     properties:
                       translate-vector: [ 0, 0, -0.02 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40Red.pointerClick()" );
                           this.parent.parent.parent.parent.red();
-                        }
-                      type: application/javascript                    
+                        }                 
                   ic40Up:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -518,12 +508,10 @@ children:
                     properties:
                       translate-vector: [ 0.04, 0, 0 ]
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== ic40Up.pointerClick()" );
                           this.parent.parent.parent.parent.up();
                         }
-                      type: application/javascript
                   ic40Volume:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -534,18 +522,17 @@ children:
                     properties:
                       rotZ: 0
                     scripts:  
-                    - text: | 
+                    - | 
                         this.pointerClick = function()  {
-                          console.info( "=====||====== ic40Volume.pointerClick()" );
-                          if ( this.rotZ == 0 ) {
+                          var rot = this.rotation;
+                          if ( rot[4] == 0 ) {
                             this.parent.parent.parent.parent.volume = 10;
-                            this.rotZ = 120;
+                            this.rotateBy( [0,0,1,10],0 );
                           } else {
                             this.parent.parent.parent.parent.volume = 0;
-                            this.rotZ = 0;
-                          }
+                            this.rotation = [0,0,1,0];
+                          }                            
                         }
-                      type: application/javascript
                   LCD:
                     extends: http://vwf.example.com/node3.vwf
                     children:
@@ -568,12 +555,10 @@ children:
                       looping: false
                       speed: 1
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info("=====||====== BeltClip_1.pointerClick()"); 
                           this.playing = !this.playing 
-                        }
-                      type: application/javascript                    
+                        }               
                     children:
                       BeltClip:
                         extends: http://vwf.example.com/node3.vwf
@@ -598,12 +583,10 @@ children:
                           looping: false
                           speed: 1
                         scripts:
-                        - text: |
+                        - |
                             this.pointerClick = function() {
-                              console.info("=====||====== BeltClip_Latch.pointerClick()");
                               this.playing = !this.playing 
-                            }
-                          type: application/javascript                        
+                            }                      
                         children:
                           BeltClipTab:
                             extends: http://vwf.example.com/node3.vwf
@@ -620,12 +603,10 @@ children:
                       looping: false
                       speed: 1
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info("=====||====== Battery.pointerClick()"); 
                           this.playing = !this.playing 
-                        }
-                      type: application/javascript                    
+                        }                 
                     children:
                       ic40Battery:
                         extends: http://vwf.example.com/node3.vwf
@@ -642,12 +623,10 @@ children:
                       looping: false
                       speed: 1
                     scripts:
-                    - text: |
+                    - |
                         this.pointerClick = function() {
-                          console.info( "=====||====== BatteryLatch.pointerClick()" );
                           this.playing = !this.playing 
-                        }
-                      type: application/javascript                    
+                        }                    
                     children:
                       ic40BatteryLatch:
                         extends: http://vwf.example.com/node3.vwf
@@ -665,23 +644,8 @@ children:
               ic40Antennae:
                 extends: http://vwf.example.com/node3.vwf
                 scripts:
-                - text: |
+                - |
                     this.ic40Antennae = function() {
-                      console.info( "=====||====== ic40Antennae.pointerClick()" );
                       this.parent.parent.parent.parent.anteanna = !this.parent.parent.parent.parent.anteanna; 
-                    }
-                  type: application/javascript
-  maincamera: 
-    extends: http://vwf.example.com/camera.vwf
-    properties: 
-      walkMode: "walk"
-      cameraType: "perspective"
-      position: [ -0.3733, 12.29, 0 ]
-      eulers: [ 90, 180, 0 ]
-      rotation: [ 1.56, 3.141, 0 ]
-  Omni01:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "point"
-      constantAttenuation: 1
-      position: [ 16.37, -18.15, 17.92 ]
+                    } 
+

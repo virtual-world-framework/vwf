@@ -1,0 +1,41 @@
+@media screen {
+  .SimpleSlider {
+    border: 1px solid #ccc;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .SimpleSlider:hover {
+    border: 1px solid #080;
+  }
+
+  .SimpleSlider_peg {
+    width: 0px;
+    border-right: 3px solid #0a0;
+    height: 10px;
+    background-color: #efe;
+  }
+
+  .SimpleSlider_time {
+    padding: 0 8px;
+    left: 0;
+    color: #0a0;
+  }
+
+  .SimpleSlider_duration {
+    padding-left: 5px;
+    color: #888;
+  }
+  
+  .SimpleSlider:hover .SimpleSlider_duration {
+    color: #060;
+  }
+
+  .SimpleSlider_time,
+  .SimpleSlider_duration {
+    position: absolute;
+    top: 0;
+    font-size: 9px;
+    font-weight: bold;
+  }
+}

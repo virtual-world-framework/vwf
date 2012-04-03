@@ -10,10 +10,9 @@ scripts:
 - |
   var initialPosition;
   this.initialize = function() {
-    console.info( "== initialize == translate-on-down == initialize == " );
   }
   this.pointerDown = function( pointerInfo, pickInfo ) {
-    initialPosition = this.position;
+    initialPosition = this.translation;
     this.move( true );
     this["translate_value"] = 1;
   }
@@ -28,8 +27,8 @@ scripts:
           initialPosition[1] + this["translate-vector"][1],
           initialPosition[2] + this["translate-vector"][2],
         ]; 
-        this.position = newPos;
+        this.translation = newPos;
       } else {
-        this.position = initialPosition;
+        this.translation = initialPosition;
       }
-  }
+  } //@ sourceURL=translate-on-down.vwf
