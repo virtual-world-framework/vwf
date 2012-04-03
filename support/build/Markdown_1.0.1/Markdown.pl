@@ -217,7 +217,6 @@ else {
 			local $/;               # Slurp the whole file
 			$text = <>;
 		}
-        
         print Markdown($text);
     }
 }

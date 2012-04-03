@@ -1,0 +1,50 @@
+--- 
+extends: http://vwf.example.com/types/node3
+properties: 
+  allowMouseNav: false
+  walkMode:
+    set: |
+      switch ( value ) {
+        case 'orbit':
+        case 'walk':
+          this.walkMode = value;
+          break;
+      }
+    value: "walk"
+  orbitPoint: [ 0, 0, 0 ]
+  far:
+    set: |
+      if ( value > 0 && value > this.near ) {
+        this.far = value;
+      }
+    value: 1000.0
+  near:
+    set: |
+      if ( value > 0 && value < this.far ) {
+        this.near = value;
+      }
+    value: 0.1
+  fovy:
+    value: 35
+    set: |
+      if ( value > 0 ) {
+        this.fovy = value;
+      }
+  aspect: 1.0
+  cameraType:
+    set: |
+      switch ( value ) {
+        case 'perspective':
+        case 'orthographic':
+          this.cameraType = value;
+          break;
+      }
+    value: "perspective"
+  speed: 2.0
+  position: [ 0, 0, 0 ]
+  eulers: [ 0, 0, 0 ]
+  rotation: [ 0, 0, 0 ]
+  rotX: 0
+  rotY: 0
+  rotZ: 0
+

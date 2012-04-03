@@ -1,0 +1,22 @@
+--- 
+extends: http://vwf.example.com/types/glge
+source: index.xml
+type: model/x-glge
+children: 
+  hello: 
+    extends: http://vwf.example.com/types/node3
+    source: hello.dae
+    type: model/vnd.collada+xml
+    properties: 
+      position: [ -3, 1, 0 ]
+      rotation: [ 0, 0, 3.141 ]
+      scale: [ 1.8, 1.8, 1.8 ]
+scripts:
+- text: |
+    this.initialize = function() {
+      console.info( "================ documentation example one ================" );
+      this.activeCamera = "http-vwf-example-com-types-camera-defaultCamera";
+      vwf.setProperty( "http-vwf-example-com-types-camera-defaultCamera", "position", [ 0, 0, 10 ] );
+      this.loadDone = true;
+    }
+  type: application/javascript

@@ -1,17 +1,3 @@
-# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
-# Secretary of Defense (Personnel & Readiness).
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-# in compliance with the License. You may obtain a copy of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software distributed under the License
-# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-# or implied. See the License for the specific language governing permissions and limitations under
-# the License.
-
-
 require "erb"
 
 class VWF::Application::Admin < Sinatra::Base
@@ -24,7 +10,7 @@ class VWF::Application::Admin < Sinatra::Base
     erb :"admin.html"
   end
 
-  # get "/state" do  # TODO: restore when next handler is switched back to post
+  # get "/state" do
   # 
   #   if transport = Rack::SocketIO::Application.session( env )[:transport]
   #     transport.state.to_json
@@ -85,19 +71,6 @@ class VWF::Application::Admin < Sinatra::Base
       transport.stop
       transport.state.to_json
     end
-
-  end
-
-  # Instances derived from this application, clients connected to those instances, and client
-  # details (none currently).
-
-  get "/instances" do
-
-    Hash[ *
-      VWF::Application::Reflector.instances( env ).map do |resource, instance|
-        [ resource, Hash[ :clients => Hash[ * instance[:clients].map { |client| [ client.id, nil ] } .flatten( 1 ) ] ] ]
-      end .flatten( 1 )
-    ] .to_json
 
   end
 

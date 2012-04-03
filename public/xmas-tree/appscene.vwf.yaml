@@ -1,18 +1,5 @@
-# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
-# Secretary of Defense (Personnel & Readiness).
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-# in compliance with the License. You may obtain a copy of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software distributed under the License
-# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-# or implied. See the License for the specific language governing permissions and limitations under
-# the License.
-
 --- 
-extends: http://vwf.example.com/physics2.vwf
+extends: http://vwf.example.com/types/glge
 properties:
   createCube: true
   cubesCreated: 0
@@ -38,9 +25,16 @@ properties:
       }   
     value: 250
 methods:
-  clear:
+  clear: |
+    if ( this.nodesCreated ) {
+      for ( var i = 0; i < this.nodesCreated.length; i++ ){
+        //console.info( "vwf.deleteNode( "+this.nodesCreated[i]+" )" );
+        vwf.deleteNode( this.nodesCreated[i] );
+      }
+      this.nodesCreated = [];  
+    }
 scripts:
-- |
+- text: |
     var lastTimeObjWasCreated;
     var mouseIsDown = false;
     var mouseDownTime = -1;
@@ -48,16 +42,17 @@ scripts:
     var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
       "source": "Cube", 
-      "extends": "http://vwf.example.com/physics3.vwf",
+      "extends": "http://vwf.example.com/types/node3",
       "type": "text/xml",
       "properties": { 
         "material": "",
         "scale": [ 1.5, 1.5, 1.5 ], 
+        "eulers": [ 0, 0, 0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
+        "position": [ 0, 0, 0 ], 
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
         "velocity": [ 0, 0, 0 ], 
@@ -65,16 +60,17 @@ scripts:
       };
     var sphere = { 
       "source": "Sphere", 
-      "extends": "http://vwf.example.com/physics3.vwf",
+      "extends": "http://vwf.example.com/types/node3",
       "type": "text/xml",
       "properties": { 
         "material": "", 
         "scale": [ 2.0, 2.0, 2.0 ], 
+        "eulers": [ 0, 0, 0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
+        "position": [ 0, 0, 0 ], 
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
         "velocity": [ 0, 0, 0 ], 
@@ -83,46 +79,26 @@ scripts:
     this.initialize = function() {
       this.nodesCreated = [];
     }
-    this.keyDown = this.events.add( function( keyInfo ) {
+    this.keyDown = function( keyInfo ) {
       var key = undefined;
-      for ( var kd in keyInfo.keysDown ) {
+      for ( kd in keyInfo.keysDown ) {
         key = keyInfo.keysDown[kd];
-        if ( key.char == " " || key.key == "space" ) {
+        if ( key.char == " " ) {
           this.createObject();
         }
       }
-    }, this );   
+    }    
     this.pointerDown = function( pointerInfo, pickInfo ) {
       mouseIsDown = true;
-      mouseDownTime = this.time;
+      mouseDownTime = vwf.time();
     }
     this.pointerUp = function( pointerInfo, pickInfo ) {
       mouseIsDown = false;
-      var now =  this.time;
+      var now =  vwf.time();
       //if ( now - mouseDownTime < 700 ) {
-      //  this.createObject();
+        this.createObject();
       //}
       mouseDownTime = -1;
-    }
-    this.getCameraLook = function() {
-        var trans = goog.vec.Mat4.multVec4(
-          this.activeCameraComp.rotationMatrix,
-          goog.vec.Vec4.createFromValues( 1, 1, 1, 1 ),
-          goog.vec.Vec3.create()
-        );
-        return trans;      
-    } 
-    this.clear = function(){
-      if ( this.nodesCreated ) {
-        var node;
-        for ( var i = 0; i < this.nodesCreated.length; i++ ){
-          node = this.getChild( this.nodesCreated[i] );
-          if ( node ) {
-            this.children.delete( node );
-          }
-        }
-        this.nodesCreated = [];  
-      }       
     }
     this.createObject = function() {
       var newObjName;
@@ -131,34 +107,37 @@ scripts:
         this.getActiveCamera();
       }
       if ( this.activeCameraComp ) {
-        var camLook = getCameraLook();        
-        var pos = this.activeCameraComp.translation;
-
+        var mat = this.activeCameraComp.rotationMatrix;
+        var pos = this.activeCameraComp.position;
+        var trans = this.mulMat4Vec4( mat, [ 0, 0, -1, 1 ] );
         if ( this.createCube ) {
           this.cubesCreated += 1;
           newObjName = "cube" + this.cubesCreated;
           
           cube.properties.material = materials[ this.colorIndex ];
-          cube.properties.translation = [ pos[0], pos[1], pos[2] - 10 ];
-          cube.properties.velocity = [ camLook[0] * this.tossCubeStrength, camLook[1] * this.tossCubeStrength, camLook[2] * this.tossCubeStrength];
+          cube.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
+          cube.properties.velocity = [ trans[0] * this.tossCubeStrength, trans[1] * this.tossCubeStrength, trans[2] * this.tossCubeStrength];
           this.colorIndex += 1;
           
-          this.children.create( cube, newObjName);        
+          vwf.createNode( "index-vwf", cube, newObjName, undefined );        
           this.createCube = false;
         } else {
           this.spheresCreated += 1;
           newObjName = "sphere" + this.spheresCreated;
           
           sphere.properties.material = materials[ this.colorIndex ];
-          sphere.properties.translation = [ pos[0], pos[1], pos[2] - 10 ];
-          sphere.properties.velocity = [ camLook[0] * this.tossSphereStrength, camLook[1] * this.tossSphereStrength, camLook[2] * this.tossSphereStrength ];
+          sphere.properties.position = [ pos[0], pos[1], pos[2] - 10 ];
+          sphere.properties.velocity = [ trans[0] * this.tossSphereStrength, trans[1] * this.tossSphereStrength, trans[2] * this.tossSphereStrength ];
           this.colorIndex += 1;
           
-          this.children.create(sphere, newObjName);
+          vwf.createNode( "index-vwf", sphere, newObjName, undefined );
           this.createCube = true;      
         }
         if ( newObjName && newObjName != "" ) {
-          this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
+          this.nodesCreated.push( "http-vwf-example-com-types-node3-"+newObjName );
         }
       }
-    }  //@ sourceURL=appScene.vwf
+      
+    }
+
+  type: application/javascript    

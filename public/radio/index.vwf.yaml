@@ -1,51 +1,30 @@
-# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
-# Secretary of Defense (Personnel & Readiness).
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-# in compliance with the License. You may obtain a copy of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software distributed under the License
-# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-# or implied. See the License for the specific language governing permissions and limitations under
-# the License.
-
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/types/glge
+source: radio.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-camera-vwf-camera"
+  activeCamera: "http-vwf-example-com-types-camera-maincamera"
+  loadDone: false
   navmode: none
 scripts:
-- text: |
+- text:
     this.initialize = function() {
-      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
-      this.camera.transform = [ 0.8791424632072449,-0.4765590727329254,0,0,0.44338271021842957,0.8179396390914917,-0.36658763885498047,0,0.17470066249370575,0.3222827613353729,0.9303835034370422,0,-3.814249038696289,-7.036417007446289,3.153610944747925,1 ];
-      this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
+      console.info( "================ radio ================" );
+      this.activeCamera = "http-vwf-example-com-types-camera-maincamera";
+      this.loadDone = true;
+      this["radio.dae"].position = this["radio.dae"].position;
+      this["radio.dae"].eulers = this["radio.dae"].eulers;      
     }
-children:
-  Omni01:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "point"
-      constantAttenuation: 1
-      translation: [ 0, -30, 8 ]
-  dir2:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      constantAttenuation: 1
-      rotation: [ 0.707, 0.707, 0, 0 ]
-  sceneCenter:
-    extends: http://vwf.example.com/node3.vwf
-  radio: 
-    extends: http://vwf.example.com/node3.vwf
+  type: application/javascript
+children: 
+  radio.dae: 
+    extends: http://vwf.example.com/types/node3
     source: Radio.DAE
     type: model/vnd.collada+xml
     properties:
-      translation: [ 0, 0, 0 ]
+      position: [ 0, 4, 0 ]
+      eulers: [ 338, 0, 211 ]
       powerOn:
         set: |
           if ( this.powerOwn != Boolean( value ) ){
@@ -55,7 +34,7 @@ children:
               this.menuMode = "channel";
             } else {
               this.volume = 0;
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/lcd.png";
+              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD.png";
             } 
           }
         value: false
@@ -68,7 +47,7 @@ children:
               this.powerOn = false;
             }
             this.volume = value;
-            this.bone1.MaxScene.Radio.ic40Volume.rotation = [ 0, 0, 1, 12 * value ];
+            this.bone1.MaxScene.Radio.ic40Volume.rotZ = 12 * value;
           }
         value: 0
       speak: "up"
@@ -148,7 +127,7 @@ children:
           if ( value ) {
             this.bone1.MaxScene.Radio.playing = !value;
           } else {
-            this.logger.debug( "replace the anteanna" );
+            console.info( "replace the anteanna" );
           }
           this.anteanna = value;
         value: true
@@ -284,11 +263,12 @@ children:
         value: 4
       keysLocked: false
     scripts: 
-    - |
+    - text: |
         var radio = this;
         this.configSave = function(){
         }
         this.red = function() {
+          console.info( '=====||====== radio.dae.red()' );
           if ( radio.keysLocked ) return;
           switch( radio.menuMode ) {
             case 'channel':
@@ -379,276 +359,292 @@ children:
         this.ptt = function() {
           if ( radio.keysLocked ) return;
         }
+      type: application/javascript
     children:
       bone1:
-        extends: http://vwf.example.com/node3.vwf
+        extends: http://vwf.example.com/types/node3
         children:
           MaxScene:
-            extends: http://vwf.example.com/node3.vwf
+            extends: http://vwf.example.com/types/node3
             children:
               EnvironmentAmbientLight:
-                extends: http://vwf.example.com/node3.vwf
+                extends: http://vwf.example.com/types/node3
               Radio:
-                extends: http://vwf.example.com/node3.vwf
+                extends: http://vwf.example.com/types/node3
                 properties: 
                   playing: false
                   looping: false
                   speed: 1
                 children:
                   ic40_MicrophonePort:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     children:
                       bone6:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj1:
-                            extends: http://vwf.example.com/mesh.vwf
+                            extends: http://vwf.example.com/types/mesh
                   ic40_SpeakerPort:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     children:
                       bone8:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj2:
-                            extends: http://vwf.example.com/mesh.vwf
+                            extends: http://vwf.example.com/types/mesh
                   ic40Channel:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.channelDirectionUp = true; 
                         this.pointerClick = function()  {
+                          console.info( "=====||====== ic40Channel.pointerClick()" );
                           var currentChannel = this.parent.parent.parent.parent.channel;
                           if ( this.channelDirectionUp && currentChannel < 16 ) {
                             this.parent.parent.parent.parent.channel = currentChannel + 1;
-                            this.rotation = [ 0, 0, 1, -this.parent.parent.parent.parent.channel * 10];
+                            this.rotZ = this.rotZ - 10;
                             if ( this.parent.parent.parent.parent.channel == 16 )
-                              this.channelDirectionUp = false;
+                              channelDirectionUp = false;
                           } else {
                             this.parent.parent.parent.parent.channel = currentChannel - 1;
-                            this.rotation = [ 0, 0, 1, -this.parent.parent.parent.parent.channel * 10];
+                            this.rotZ = this.rotZ + 10;
                             if ( this.parent.parent.parent.parent.channel == 1 )
-                              this.channelDirectionUp = true;
+                              channelDirectionUp = true;
                           }
                         }
+                      type: application/javascript 
                     properties:
                       rotZ: 0                      
                   ic40Down:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0.03, 0, 0 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40Down.pointerClick()" );
                           this.parent.parent.parent.parent.down();
                         }
+                      type: application/javascript
                   ic40Monitor:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     children:
                       glgeObj5:
-                        extends: http://vwf.example.com/mesh.vwf
+                        extends: http://vwf.example.com/types/mesh
                   ic40P0:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P0.pointerClick()" );
                           this.parent.parent.parent.parent.p0();
-                        }                
+                        }
+                      type: application/javascript                    
                   ic40P1:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P1.pointerClick()" );
                           this.parent.parent.parent.parent.p1();
-                        }                  
+                        }
+                      type: application/javascript                    
                   ic40P2:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P2.pointerClick()" );
                           this.parent.parent.parent.parent.p2();
-                        }                  
+                        }
+                      type: application/javascript                    
                   ic40P3:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40P3.pointerClick()" );
                           this.parent.parent.parent.parent.p3();
-                        }                  
+                        }
+                      type: application/javascript                    
                   ic40PTT:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0.04, 0, 0 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40PTT.pointerClick()" );
                           this.parent.parent.parent.parent.ptt();
-                        }                  
+                        }
+                      type: application/javascript                    
                   ic40Red:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0, 0, -0.02 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40Red.pointerClick()" );
                           this.parent.parent.parent.parent.red();
-                        }                 
+                        }
+                      type: application/javascript                    
                   ic40Up:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/translate-on-down.vwf
-                    properties:
-                      translate-vector: [ 0.04, 0, 0 ]
+                    extends: http://vwf.example.com/types/node3
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== ic40Up.pointerClick()" );
                           this.parent.parent.parent.parent.up();
                         }
+                      type: application/javascript
                   ic40Volume:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
+                    properties:
+                      rotZ: 0
                     scripts:  
-                    - | 
+                    - text: | 
                         this.pointerClick = function()  {
-                          if ( this.parent.parent.parent.parent.volume == 0 ) {
-                            this.parent.parent.parent.parent.volume = 1;
+                          console.info( "=====||====== ic40Volume.pointerClick()" );
+                          if ( this.rotZ == 0 ) {
+                            this.parent.parent.parent.parent.volume = 10;
+                            this.rotZ = 120;
                           } else {
                             this.parent.parent.parent.parent.volume = 0;
-                          }                            
+                            this.rotZ = 0;
+                          }
                         }
+                      type: application/javascript
                   LCD:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     children:
                       glgeObj14:
-                        extends: http://vwf.example.com/mesh.vwf
+                        extends: http://vwf.example.com/types/mesh
                         children:
                           material:
-                            extends: http://vwf.example.com/material.vwf
+                            extends: http://vwf.example.com/types/material
                             properties:
                               texture: 
                   LCD_Back:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     children:
                       glgeObj15:
-                        extends: http://vwf.example.com/mesh.vwf
+                        extends: http://vwf.example.com/types/mesh
                   BeltClip_1:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     properties: 
                       playing: false
                       looping: false
                       speed: 1
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info("=====||====== BeltClip_1.pointerClick()"); 
                           this.playing = !this.playing 
-                        }               
+                        }
+                      type: application/javascript                    
                     children:
                       BeltClip:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         children:
                           bone25:
-                            extends: http://vwf.example.com/node3.vwf
+                            extends: http://vwf.example.com/types/node3
                             children:
                               glgeObj16:
-                                extends: http://vwf.example.com/mesh.vwf
+                                extends: http://vwf.example.com/types/mesh
                       BeltClipBase:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         children:
                           bone27:
-                            extends: http://vwf.example.com/node3.vwf
+                            extends: http://vwf.example.com/types/node3
                             children:
                               glgeObj17:
-                                extends: http://vwf.example.com/mesh.vwf
+                                extends: http://vwf.example.com/types/mesh
                       BeltClip_Latch:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         properties: 
                           playing: false
                           looping: false
                           speed: 1
                         scripts:
-                        - |
+                        - text: |
                             this.pointerClick = function() {
+                              console.info("=====||====== BeltClip_Latch.pointerClick()");
                               this.playing = !this.playing 
-                            }                      
+                            }
+                          type: application/javascript                        
                         children:
                           BeltClipTab:
-                            extends: http://vwf.example.com/node3.vwf
+                            extends: http://vwf.example.com/types/node3
                             children:
                               bone30:
-                                extends: http://vwf.example.com/node3.vwf
+                                extends: http://vwf.example.com/types/node3
                                 children:
                                   glgeObj18:
-                                    extends: http://vwf.example.com/mesh.vwf
+                                    extends: http://vwf.example.com/types/mesh
                   Battery:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     properties: 
                       playing: false
                       looping: false
                       speed: 1
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info("=====||====== Battery.pointerClick()"); 
                           this.playing = !this.playing 
-                        }                 
+                        }
+                      type: application/javascript                    
                     children:
                       ic40Battery:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         children:
                           bone33:
-                            extends: http://vwf.example.com/node3.vwf
+                            extends: http://vwf.example.com/types/node3
                             children:
                               glgeObj19:
-                                extends: http://vwf.example.com/mesh.vwf
+                                extends: http://vwf.example.com/types/mesh
                   BatteryLatch:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     properties: 
                       playing: false
                       looping: false
                       speed: 1
                     scripts:
-                    - |
+                    - text: |
                         this.pointerClick = function() {
+                          console.info( "=====||====== BatteryLatch.pointerClick()" );
                           this.playing = !this.playing 
-                        }                    
+                        }
+                      type: application/javascript                    
                     children:
                       ic40BatteryLatch:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj20:
-                            extends: http://vwf.example.com/mesh.vwf
+                            extends: http://vwf.example.com/types/mesh
                   ic40Radio:
-                    extends: http://vwf.example.com/node3.vwf
+                    extends: http://vwf.example.com/types/node3
                     children:
                       bone37:
-                        extends: http://vwf.example.com/node3.vwf
+                        extends: http://vwf.example.com/types/node3
                         children:
                           glgeObj21:
-                            extends: http://vwf.example.com/mesh.vwf
+                            extends: http://vwf.example.com/types/mesh
               ic40Antennae:
-                extends: http://vwf.example.com/node3.vwf
+                extends: http://vwf.example.com/types/node3
                 scripts:
-                - |
+                - text: |
                     this.ic40Antennae = function() {
+                      console.info( "=====||====== ic40Antennae.pointerClick()" );
                       this.parent.parent.parent.parent.anteanna = !this.parent.parent.parent.parent.anteanna; 
-                    } 
-
+                    }
+                  type: application/javascript
+  maincamera: 
+    extends: http://vwf.example.com/types/camera
+    properties: 
+      walkMode: "walk"
+      cameraType: "perspective"
+      position: [ -0.3733, 12.29, 0 ]
+      eulers: [ 90, 180, 0 ]
+      rotation: [ 1.56, 3.141, 0 ]
+  Omni01:
+    extends: http://vwf.example.com/types/light
+    properties:
+      lightType: "point"
+      constantAttenuation: 1
+      position: [ 16.37, -18.15, 17.92 ]

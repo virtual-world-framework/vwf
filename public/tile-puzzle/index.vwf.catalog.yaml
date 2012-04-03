@@ -1,2 +1,0 @@
-description:
-  The tile puzzle application allows a user to shuffle the board or solve the board automatically.  It also allows the user to play by clicking on a tile and the tile will move to the open space.  The goal of the game is to have the numbers show in sequential order from left to right, top to bottom.

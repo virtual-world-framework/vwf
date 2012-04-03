@@ -1,24 +1,11 @@
 <!DOCTYPE html>
 
-<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
-<!-- Secretary of Defense (Personnel & Readiness).                                               -->
-<!--                                                                                             -->
-<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
-<!-- except in compliance with the License. You may obtain a copy of the License at              -->
-<!--                                                                                             -->
-<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
-<!--                                                                                             -->
-<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
-<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
-<!-- either express or implied. See the License for the specific language governing permissions  -->
-<!-- and limitations under the License.                                                          -->
-
 <html>
 
   <!-- The Virtual World Framework client is a collection of scripts and a world specification   -->
   <!-- passed to an initialization call. In this sample, the world specification is provided     -->
-  <!-- inline for clarity, but it is normally provided by the reflector or may be specified as a -->
-  <!-- URI and loaded from a network-visible location.                                           -->
+  <!-- inline for clarity, but it is normally provided by the conference server or may be        -->
+  <!-- specified as a URI and loaded from a network-visible location.                            -->
 
   <head>
 
@@ -28,13 +15,9 @@
 
     <script type="text/javascript" src="require.js"></script>
 
-    <script type="text/javascript" src="jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="jquery-1.6.2.js"></script>
     <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
     <script type="text/javascript" src="async.js"></script>
-
-    <script type="text/javascript" src="closure/base.js"></script>
-    <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
-    <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
     <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
     <script type="text/javascript" src="socket.io.js"></script>
@@ -54,10 +37,6 @@
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
     <!-- script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script -->
-
-    <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
-    <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
-    <script type="text/javascript">connected && google.load( "earth", "1" )</script>
 
     <script type="text/javascript">
 
@@ -79,8 +58,6 @@
             "vwf/kernel/view",
             "vwf/view/document",
             "vwf/view/editor",
-            "vwf/view/glge",
-            "vwf/view/googleEarth"
 
         ], function( ready ) {
 
@@ -98,10 +75,10 @@
                     // index page.
      
                     // As a literal:
-                    //     { extends: "http://vwf.example.com/example-type.vwf", properties: { ... }, ... }
+                    //     { extends: "http://vwf.example.com/types/example-type", properties: { ... }, ... }
      
                     // As a string:
-                    //     "http://vwf.example.com/example-type.vwf",
+                    //     "http://vwf.example.com/types/example-type",
      
                     // These are the model configurations. Each key within the configuration object
                     // is a model name, and each value is an argument or an array of arguments to be
@@ -113,23 +90,22 @@
                     // As a single argument to the "html" view:
                     //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
      
-                    [
-                        "vwf/model/javascript",
-                        "vwf/model/jiglib",
-                        "vwf/model/glge",
-                        // { "vwf/model/unity": "#vwf-root" },  // TODO: resolve #vwf-root after ready()
-                        "vwf/model/object",
-                    ],
+                    {
+                        "vwf/model/javascript": [],
+                        "vwf/model/jiglib": [],
+                        "vwf/model/glge": [],
+                        // "vwf/model/unity": "#vwf-root",  // TODO: resolve #vwf-root after ready()
+                        "vwf/model/object": [],
+                    },
 
                     // These are the view configurations. They use the same format as the model
                     // configurations.
 
-                    [
-						{ "vwf/view/glge": "#vwf-root" },
-                        "vwf/view/document",
-                        "vwf/view/editor",
-                    	"vwf/view/googleEarth",
-                    ]
+                    {
+                        glge: "#vwf-root",
+                        "vwf/view/document": [],
+                        "vwf/view/editor": [],
+                    }
 
                 );
 
@@ -141,8 +117,14 @@
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
-    <script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
+
+    <script type="text/javascript" src="vwf-view.js"></script>
+
+    <script type="text/javascript" src="vwf-view-glge.js"></script>
+    <script type="text/javascript" src="vwf-view-glge/glge-compiled.js"></script>
     <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
+
+    <script type="text/javascript" src="vwf-view-html.js"></script>
 
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />

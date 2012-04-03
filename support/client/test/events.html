@@ -8,7 +8,7 @@
 
     <script type="text/javascript" src="qunit.js"></script>
 
-    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.6.2.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
@@ -31,7 +31,6 @@
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
-        "logger",
 
       ], function( ready ) {
 
@@ -40,8 +39,8 @@
         ready( function() {
 
           vwf.initialize(
-            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
-            /*  views */ [ ]
+            /* models */ { "vwf/model/javascript": undefined, "vwf/model/object": undefined },
+            /*  views */ { }
           );
 
           // Event firing directly from the kernel
@@ -312,7 +311,7 @@
             vwf.createNode( 0, {
 
               extends:
-                "http://vwf.example.com/node.vwf",
+                "http://vwf.example.com/types/node",
 
               events: {
 
@@ -343,7 +342,7 @@
 
             vwf.createNode( 0, {
 
-              extends: "http://vwf.example.com/node.vwf",
+              extends: "http://vwf.example.com/types/node",
               events: { base: undefined },
 
             }, unique_name( "base" ), function( baseID ) {
@@ -380,7 +379,7 @@
 
             vwf.createNode( 0, {
 
-              extends: "http://vwf.example.com/node.vwf",
+              extends: "http://vwf.example.com/types/node",
               events: { base: undefined },
               scripts: [ ],
 
