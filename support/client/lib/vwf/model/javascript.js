@@ -130,11 +130,25 @@ node.id = childID; // TODO: move to vwf/model/object
 
             node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
-            // Define the "time" property.
+            // Define the "time", "client", and "moniker" properties.
 
             Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return self.kernel.time();
+                },
+                enumerable: true,
+            } );
+
+            Object.defineProperty( node, "client", {  // TODO: only define on shared "node" prototype?
+                get: function() {
+                    return self.kernel.client();
+                },
+                enumerable: true,
+            } );
+
+            Object.defineProperty( node, "moniker", {  // TODO: only define on shared "node" prototype?
+                get: function() {
+                    return self.kernel.moniker();
                 },
                 enumerable: true,
             } );

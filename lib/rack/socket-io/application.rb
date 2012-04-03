@@ -167,9 +167,8 @@ module Rack
 
         # logger.debug "Rack::SocketIO::Application#on_open #{ object_id }"
 
-        @session_id = rand( 1000000 ).to_s  # TODO: more random, map to server's actual session
         @heartbeats = 0
-        send_serialization @session_id
+        send_serialization id
         schedule_heartbeat
         onconnect
 
@@ -216,6 +215,12 @@ module Rack
         @@sessions[resource]
       end
 
+      # This client's id. Generate it when first accessed.
+
+      def id
+        @id ||= "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
+      end
+
     private
 
       # The clients connected to the given resource, or nil if no session for that resource exists.
@@ -233,16 +238,16 @@ module Rack
       # The socket.io resource for a given environment.
       
       def self.resource env
-        env["vwf.session"] ?
-          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.session"] ) :
+        env["vwf.instance"] ?
+          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
           ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
       end
 
       # The socket.io resource this instance connects to.
   
       def resource
-        env["vwf.session"] ?
-          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.session"] ) :
+        env["vwf.instance"] ?
+          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
           ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
       end
 

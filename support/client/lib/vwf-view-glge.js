@@ -25,12 +25,7 @@
         if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
         if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
 
-        //console.info( "aspectRatio = " + (( this.width / this.height ) / 1.333 ) );
-
-        this.canvasQuery = jQuery(this.rootSelector).append(
-            "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
-        ).children(":last");
-        
+        this.canvasQuery = jQuery( this.rootSelector );
           
         // Connect GLGE to the VWF timeline.
         GLGE.now = function() {
@@ -53,13 +48,19 @@
     module.prototype.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
         childSource, childType, childName, callback /* ( ready ) */) {
 
-//        this.logger.info( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs,
-//                            childSource, childType, childName );
+        if ( childExtendsID === undefined /* || childName === undefined */ ) 
+            return;
 
-        if ( childID == this.state.sceneRootID /*&& ( nodeExtendsID == "http-vwf-example-com-types-glge" || nodeExtendsID == "appscene-vwf" )*/ ) {
+        if ( this.state.scenes[ childID ] ) {
             
+            // this is the scene definition so go ahead and create the canvas and setup the view
             var glgeView = this;
             var domWin = window;
+
+            this.canvasQuery = jQuery( this.rootSelector ).append(
+                "<canvas id='" + this.state.sceneRootID + "' class='vwf-scene' width='"+this.width+"' height='"+this.height+"'/>"
+            ).children(":last");
+
             var canvas = this.canvasQuery.get( 0 );
             window.onkeydown = function( event ) {
                 var key = undefined;
@@ -490,7 +491,7 @@
                 console.info(file.name);
         
                 var object = {
-                  extends: "http://vwf.example.com/types/node3",
+                  extends: "http://vwf.example.com/node3.vwf",
                   source: file.name,
                   type: "model/vnd.collada+xml",
                   properties: { 
@@ -514,7 +515,7 @@
                         break;
 
                     case "Predator.dae": // from sandtable
-                        object["implements"] = [ "http://vwf.example.com/types/fly" ];
+                        object["implements"] = [ "http://vwf.example.com/fly.vwf" ];
                         object.properties.position[2] += 20;
                         object.properties.eulers = [ 0, 0, 180 ];
                         object.properties.scale = [ 15, 15, 15 ];
@@ -627,7 +628,7 @@
     }
 
     var mouseXPos = function(e) {
-        return e.clientX - e.currentTarget.offsetLeft + window.scrollX;
+        return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
     }
 
     var mouseYPos = function(e) {
@@ -756,7 +757,7 @@
         if (open) {
             lastGroupName = name(group);
             console.info(indent(iIndent) + lastGroupName + ":");
-            console.info(indent(iIndent + 1) + "extends: http://vwf.example.com/types/node3");
+            console.info(indent(iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 
             if (getChildCount(group) > 0)
                 console.info(sOut + "children:");
@@ -770,7 +771,7 @@
         if ( objName != "" ) {
             console.info( indent(iIndent) + "children:" );
             console.info( indent(iIndent+1) + objName + ":");
-            console.info( indent(iIndent+2) + "extends: http://vwf.example.com/types/object3");
+            console.info( indent(iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
             indentAdd = 2;
         }
 
@@ -782,7 +783,7 @@
 //                var meshName = name( mesh );
 //                if ( meshName != "" ) {
 //                    console.info( indent( iIndent + indentAdd + 1 ) + meshName + ":" );
-//                    console.info( indent( iIndent + indentAdd + 2 ) + "extends: http://vwf.example.com/types/mesh" );
+//                    console.info( indent( iIndent + indentAdd + 2 ) + "extends: http://vwf.example.com/mesh.vwf" );
 //                }
 //            }
 //            if ( obj.multimaterials && obj.multimaterials.length > 0 ) {
@@ -798,7 +799,7 @@
 
         var sOut = indent(iIndent + 1);
         console.info( indent(iIndent) + objName + "Material" + index + ":" );
-        console.info( sOut + "extends: http://vwf.example.com/types/material");
+        console.info( sOut + "extends: http://vwf.example.com/material.vwf");
 
     };
 

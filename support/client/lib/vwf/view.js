@@ -13,6 +13,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
     var logger = require( "vwf-proxy" ).logger_for( module.id.replace( /\//g, "." ) );  // TODO: remove explicit reference to vwf / require( "vwf-proxy" )
+
     logger.info( "load" );
 
     return {
@@ -49,13 +50,14 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
             return instance;
         },
 
-        create: function( kernel, view, stages, state ) {  // TODO: configuration parameters
+        create: function( kernel, view, stages, state, parameters ) {
 
             this.logger.info( "create" );
 
-            // Interpret create( kernel, stages, state ) as create( kernel, undefined, stages, state )
+            // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 
-            if ( view && view.length !== undefined ) {
+            if ( view && view.length !== undefined ) { // is an array?
+                parameters = state;
                 state = stages;
                 stages = view;
                 view = undefined;
@@ -94,7 +96,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
 
             // Call the driver's initialize().
 
-            initialize.call( instance );  // TODO: configuration parameters
+            initialize.apply( instance, parameters );
 
             // Call viewize() on the driver.
 
@@ -112,7 +114,7 @@ define( [ "module", "vwf/api/kernel", "vwf/api/view", "vwf-proxy" ], function( m
 
             // Call initialize() on the driver.
 
-            function initialize() {
+            function initialize( /* parameters */ ) {
                 Object.getPrototypeOf( this ) && initialize.apply( Object.getPrototypeOf( this ), arguments ); // depth-first recursion through the prototypes
                 this.hasOwnProperty( "initialize" ) && this.initialize.apply( instance, arguments ); // initialize() from the bottom up
             }

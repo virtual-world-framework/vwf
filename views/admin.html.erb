@@ -4,7 +4,7 @@
 
         <title>Admin</title>
 
-        <script type="text/javascript" src="../jquery-1.6.2.js"></script>
+        <script type="text/javascript" src="../jquery-1.7.1.js"></script>
         <script type="text/javascript" src="../jquery-ui-1.8.16.custom.js"></script>
         <script type="text/javascript" src="../async.js"></script>
 
@@ -34,12 +34,12 @@
 
                 ready( function() {
 
-                    vwf.initialize( {
-                        "vwf/model/javascript": [],
-                        "vwf/model/object": [],
-                    }, {
-                        html: "#listing"
-                    } );
+                    vwf.initialize( [
+                        "vwf/model/javascript",
+                        "vwf/model/object",
+                    ], [
+                        { "html": "#listing" }
+                    ] );
 
                     $( "#tabs" ).tabs();
 
@@ -126,7 +126,7 @@
                             console.info( "admin socket disconnected" )
                         } );
 
-                        // Start communication with the conference server. 
+                        // Start communication with the reflector. 
 
                         socket.connect();
 
