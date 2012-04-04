@@ -419,6 +419,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "disconnect", function() { vwf.logger.info( "vwf.socket disconnected" ) } );
 
+                socket.on( "error", function() { 
+
+                    jQuery('body').html("<div class='vwf-err'>WebSockets connections are currently being blocked. Please check your proxy server settings.</div>"); 
+
+                } );
+
                 // Start communication with the reflector. 
 
                 socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
@@ -1929,6 +1935,7 @@ return component;
                     // script type.
 
                     nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
+                        //console.info(script);
                         if ( valueHasType( script ) ) {
                             script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                         } else {
