@@ -197,3 +197,12 @@ input {
     display: inline-block;
     width: 4em;
 }
+
+.vwf-err {
+    border: 2px solid red;
+    font: 14px Arial;
+    background: #FFFFDD;
+    color: #880000;
+    padding: 8px;
+    width: 300px;
+}
