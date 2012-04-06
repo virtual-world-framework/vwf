@@ -1,3 +1,16 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
 --- 
 extends: |
   http://vwf.example.com/node3.vwf
@@ -16,19 +29,16 @@ properties:
   sway-axis: [ 0, 1, 0 ]
   sway-start: null
 methods:
-  sway: |
-    var start = this["sway-start"];
-    if ( start ) {
-      var rotation = this.rotation;
-      this.rotation = [
-        rotation[0] + this["sway-axis"][0] * Math.cos( this.time - start ) * Math.PI / 250,
-        rotation[1] + this["sway-axis"][1] * Math.cos( this.time - start ) * Math.PI / 250,
-        rotation[2] + this["sway-axis"][2] * Math.cos( this.time - start ) * Math.PI / 250,
-      ];
-      this.future( 0.05 ).sway();
-    }
+  sway:
 scripts:
-- text: |
+- |
     this.pointerClick = function() {
       // this["sway-swaying"] = ! this["sway-swaying"];
     }
+    this.sway = function() {
+      var start = this["sway-start"];
+      if ( start ) {
+        this.rotateBy( [ this["sway-axis"][0], this["sway-axis"][1], this["sway-axis"][2],  Math.cos( this.time - start ) * Math.PI / 2 ], 0 );
+        this.future( 0.05 ).sway();
+      }      
+    } //@ sourceURL=sway-on-click.vwf
