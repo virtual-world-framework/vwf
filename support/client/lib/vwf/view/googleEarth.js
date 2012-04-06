@@ -1,4 +1,19 @@
-﻿define( [ "module", "vwf/view" ], function( module, view ) {
+﻿"use strict";
+
+// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Secretary of Defense (Personnel & Readiness).
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+
+define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
     // is active, scripts on the main page may make (reflected) kernel calls:
@@ -49,7 +64,7 @@
             if ( childExtendsID === undefined )
                 return;
 
-            this.logger.info( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            this.logger.infoc( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             var node = {
                 parentID: nodeID,
                 ID: childID,
@@ -87,6 +102,7 @@
                                 node.earth = gg.earth;
                                 gg.earth.createInstance( "map3d", function(instance) {
                                     
+                                    gg.earth.geInstance = instance;
                                     node.earthInst = instance;
                                     node.earthInst.getWindow().setVisibility(true);
     
@@ -131,8 +147,10 @@
 
                                     });
 
+                                    view.kernel.callMethod( nodeID, "loaded", [] );
+
                                 }, function(errorCode) {
-                                    console.info( "google earth load error: " + errorCode );
+                                    this.logger.info( "google earth load error: " + errorCode );
                                 } );
                                 win.clearInterval( interval );
                             }
@@ -145,11 +163,14 @@
 
         }, 
 
-        deletedNode: function (nodeID) {
-        },
+        //deletedNode: function (nodeID) {
+        //},
   
-        createdProperty: function (nodeID, propertyName, propertyValue) {
-        },        
+        //createdProperty: function (nodeID, propertyName, propertyValue) {
+        //},        
+
+        //initializedProperty: function (nodeID, propertyName, propertyValue) {
+        //},        
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
@@ -157,9 +178,8 @@
             var obj, earth, ge;
             var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             if ( propertyValue ) {
-                //this.logger.info( "satProperty", nodeID, propertyName, propertyValue );
+                //this.logger.infoc( "satProperty", nodeID, propertyName, propertyValue );
                 if ( propertyName == "controlClient" ) {
-                    //console.info( "  SETTING CONTROL CLIENT: " + propertyValue );
                     this.controlClient = propertyValue;
                     value = propertyValue;
                 } else if ( this.kernel.client() != this.kernel.moniker() ) { 
@@ -293,7 +313,6 @@
 
     function broadcastCameraData() {
         var node, ge;   
-        //console.info( "broadcastCameraData  ======================>>>>> " );
         if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ] ) {
             node = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             ge = node.earthInst;

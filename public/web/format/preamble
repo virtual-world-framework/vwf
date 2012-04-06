@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+		<title>Virtual World Framework</title>
+		<link rel='stylesheet' type='text/css' href='style.css' />
+	</head>
+	<body>
+		<div class='header'>
+			<div class='title'>Virtual World Framework</div>
+			<div class='menu'>
+				<a href="about.html">About</a>
+				<span> | </span>
+				<a href="catalog.html">Demos</a>
+				<span> | </span>
+				<a href="docs/reqs.html">Documentation</a>
+				<span> | </span>
+				<a href="glossary.html">Glossary</a>
+				<span> | </span>
+				<a href="faq.html">FAQ</a>
+			</div>
+		</div>
+		<div style='width:800px;margin:auto;text-align:left;padding-top:10px'>
+			<div class='full'><br>
+				<!-- Convert source.txt using markdown converter: http://daringfireball.net/projects/markdown/dingus -->
+				
+				<!-- INSERT MARKDOWN HERE -->
