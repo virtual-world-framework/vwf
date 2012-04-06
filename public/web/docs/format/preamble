@@ -13,7 +13,7 @@
 				<span> | </span>
 				<a href="../catalog.html">Demos</a>
 				<span> | </span>
-				<a href="readme.html">Documentation</a>
+				<a href="reqs.html">Documentation</a>
 				<span> | </span>
 				<a href="../glossary.html">Glossary</a>
 				<span> | </span>
@@ -23,8 +23,8 @@
 		<div style='width:1000px;margin:auto;text-align:left;padding-top:10px'>
 			<div class='navmenu'>
 				<ul>
+					<li><a href='reqs.html' title='Requirements'>Requirements</a></li>
 				    <li><a href='install.html' title='Installation Guide'>Installation Guide</a></li>
-				    <li><a href='reqs.html' title='Requirements'>Requirements</a></li>
 					<li><a href='readme.html' title='Getting Started with VWF'>Getting Started</a></li>
 					<li><a href='tutorial.html' title='Tutorial'>Tutorial</a></li>
 					<li><a href='application.html' title='Application'>Application</a></li>
