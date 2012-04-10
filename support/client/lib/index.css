@@ -206,3 +206,37 @@ input {
     padding: 8px;
     width: 300px;
 }
+
+.overlay {
+  position:absolute;
+  top:30%;
+  width:99%;
+  pointer-events:none;
+}
+
+.loading {
+  margin:auto;
+  color:#FFF;
+  width:200px;
+  height:80px;
+  background:#222;
+  opacity:0.9;
+  -moz-border-radius: 20px;
+  -webkit-border-radius: 20px;
+  -khtml-border-radius: 20px;
+  border-radius: 20px;
+  /*visibility: hidden;*/
+}
+
+.loading span {
+  position:relative;
+  top:-18px;
+  left:30px;
+  font:18px Arial;
+}
+
+.loading img {
+  position:relative;
+  top:7px;
+  left:38px; 
+}
