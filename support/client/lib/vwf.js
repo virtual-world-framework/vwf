@@ -754,6 +754,8 @@ vwf.addChild( nodeID, childNodeID, childName );
                             jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html", function() { // load the UI chrome if available
                                 callback && callback.call( vwf, childNodeID );
                             } );
+                            // Removes 'loading' overlay
+                            $('#loadstatus').remove();
                         } else {
                             callback && callback.call( vwf, childNodeID );
                         }
