@@ -29,7 +29,7 @@ properties:
     value: "walk"
   orbitRadius: -1  
   orbitObjectID: "http-vwf-example-com-node3-vwf-sceneCenter"
-  speed: 2.0
+  speed: 10.0
   maxSpeed: 500
   dragModeMove: false
 events:
@@ -52,7 +52,7 @@ scripts:
     var _85 = 85.0 * _piDiv180;
     var _10 = 10.0 * _piDiv180;
     var phi, theta;
-    var positionChanged = false;
+    var timeElapsed = 1.0;
     this.initialize = function() {
       this.input = { 
         futureActive: function() {
@@ -85,6 +85,7 @@ scripts:
         turnLeftDown: false,
         turnRightDown: false,
         lastUpdateTime: undefined,
+        lastInputTime: undefined,
       };
       this.originalSpeed = this.speed;
       this.setNavMode( this.navmode );
@@ -150,19 +151,22 @@ scripts:
       this.input.lastPickInfo = undefined;
       this.input.pickInfo = pickInfo;      
       this.input.pointerDownTime = this.time;
+      this.input.lastInputTime = this.time;
     }
     this.pointerUp = function( parms, pickInfo ){
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = undefined;
       this.input.lastPickInfo = this.input.pickInfo;
-      this.input.pickInfo = undefined;            
+      this.input.pickInfo = undefined;
+      this.input.lastInputTime = this.time;            
     }
     this.pointerMove = function( parms, pickInfo ){
       this.input.pointerEventTime = this.time;
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = parms;
       this.input.lastPickInfo = this.input.pickInfo;
-      this.input.pickInfo = pickInfo;      
+      this.input.pickInfo = pickInfo;  
+ 
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
         var active = this.input.futureActive();
         var delta = this.input.pointerDelta();
@@ -185,16 +189,19 @@ scripts:
             this.future( 0.1 ).update();
           }
         }
-      }    
+      } 
+      this.input.lastInputTime = this.time;   
     }
     this.pointerLeave = function( parms ){
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = undefined;
       this.input.lastPickInfo = this.input.pickInfo;
-      this.input.pickInfo = undefined;              
+      this.input.pickInfo = undefined; 
+      this.input.lastInputTime = this.time;             
     }
     this.pointerWheel = function( parms, pickInfo ) {
       this.input.pointerEventTime = this.time;
+      this.input.lastInputTime = this.time;
 
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = parms;      
@@ -231,7 +238,7 @@ scripts:
         if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 500 ) {
           this.updateRadius();
         }
-        moveDistance = this.speed * mult;
+        moveDistance = this.distance() * mult *4;
         if ( distanceLimit && moveDistance > ( distanceLimit*0.4 )  ) {
           moveDistance = distanceLimit*0.4;
         }
@@ -250,19 +257,48 @@ scripts:
         //}
 
         this.activeCameraComp.translateBy( [ xInc, yInc, zInc ], 0 );
-        positionChanged = true;
       }
     }
     this.keyDown = function( parms ) {
       var active = this.input.futureActive();
+      var oldKeysDownCount = 0;
+      if ( this.input.keyInfo ){
+        oldKeysDownCount = Object.keys( this.input.keyInfo.keysDown ).length;
+      }
+
+      // capture the event input locally
       this.input.keyInfo = parms;
-      this.handleKeyDown();
+
+      // skip the very first event with no time
+      // we need to have the timeElasped in order to calc a distance
+      if ( this.input.lastInputTime ) {
+        timeElapsed = this.time - this.input.lastInputTime;
+        if ( timeElapsed > 1 ) {
+          timeElapsed = 1;  
+        }
+        // if there were no keys down previously then go ahead and call 
+        // to handle this event
+        if ( oldKeysDownCount == 0 ) {
+          this.handleKeyDown();
+        }
+      }
+      // store the current Time
+      this.input.lastInputTime = this.time;
+
+      // call future.update if update was not currently occurring
       if ( !active ) {
         this.future( 0.1 ).update();
       }
+      
     }
     this.keyUp = function( parms ) {
       this.input.keyInfo = parms;
+      if ( Object.keys( parms.keysDown ).length == 0 ){
+        this.input.lastInputTime = undefined;
+        timeElapsed = 1;
+      } else {
+        this.input.lastInputTime = this.time;
+      }
     }
     this.handleKeyDown = function() {
       if (!this.activeCameraComp) {
@@ -360,7 +396,7 @@ scripts:
       if ( this.navmode == "walk" ) {
         this.translate( x, y );
       } else if ( this.navmode == "orbit" ) {
-        this.orbit( x * 0.1, y * 0.1 );
+        this.orbit( x * 0.01, y * 0.01 );
       }
     }
     this.onLook = function( x, y ) {
@@ -386,8 +422,11 @@ scripts:
         this.getActiveCamera();
       
       if ( this.activeCameraComp ) {
-        if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * 1.5 ], 0 ) }
-        //if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y ], 0 ) }
+        if ( this.input.pointerInfo && this.input.pointerInfo.modifiers.ctrl ) {
+          if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y ], 0 ) }
+        } else {
+          if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * 1.5 ], 0 ) }
+        } 
       }
     }    
     this.zoom = function( dirIn ) {
@@ -402,10 +441,8 @@ scripts:
         var xinc = 0;
         var zinc = 0;
 
-        var speed = 1.0;
-        if ( this.activeCameraComp.speed )
-          speed = Number( this.activeCameraComp.speed );
-        
+        var speed = this.distance();
+
         if ( !dirIn ) speed = -speed;
         yinc = yinc + parseFloat( camerarot[1] ) * speed; 
         xinc = xinc + parseFloat( camerarot[0] ) * speed;
@@ -414,7 +451,7 @@ scripts:
           this.updateRadius();
         }
         
-        if (xinc != 0 || yinc != 0 ) {
+        if ( xinc != 0 || yinc != 0 ) {
           var origX, origY, origZ;
           var x, y, z, atBounds = false;
           
@@ -422,8 +459,8 @@ scripts:
           origY = camerapos[1];
           origZ = camerapos[2];
         
-          x = origX + xinc * this.speed * mult;
-          y = origY + yinc * this.speed * mult;
+          x = origX + xinc * this.distance() * mult;
+          y = origY + yinc * this.distance() * mult;
           z = origZ;
 
           var ratioHR = camerapos[2] / this.orbitRadius;
@@ -432,20 +469,23 @@ scripts:
           z = origZ + zinc;
           
           this.activeCameraComp.translation = [ x, y, z ];
-          positionChanged = true;
         }
       }
+    }
+    this.distance = function(){
+      var dist = this.speed;
+      if ( timeElapsed ) {
+        dist = this.speed * timeElapsed;
+      } 
+      return dist;
     }
     this.cameraZ = function( dir ) {
       if (!this.activeCameraComp) this.getActiveCamera();
       
       if ( this.activeCameraComp ) {
         var pos = this.activeCameraComp.translation;
-        var speed = 1.0;
-        if ( this.activeCameraComp.speed )
-          speed = Number( this.activeCameraComp.speed );
         
-        this.activeCameraComp.translation = [ pos[0], pos[1], pos[2] + ( speed * dir ) ];
+        this.activeCameraComp.translation = [ pos[0], pos[1], pos[2] + ( this.distance() * dir ) ];
       }
     }
     this.updateRadius = function() {
@@ -461,9 +501,9 @@ scripts:
       
       if ( oldRadius != -1 ) {
         if ( this.orbitRadius > oldRadius )
-          this.speed += ( this.orbitRadius - oldRadius ) * 0.006;
+          this.speed += ( this.orbitRadius - oldRadius ) * 0.0002;
         else if ( this.orbitRadius < oldRadius )
-          this.speed -= ( oldRadius - this.orbitRadius ) * 0.006;
+          this.speed -= ( oldRadius - this.orbitRadius ) * 0.0002;
         if ( this.speed > this.maxSpeed ) this.speed = this.maxSpeed;
         if ( this.speed < this.originalSpeed ) this.speed = this.originalSpeed;
       }
@@ -474,9 +514,9 @@ scripts:
       if ( this.activeCameraComp ) {
         this.updateRadius();
         
-        var pixelToRadian = this.orbitRadius / ( this.speed * 1000.0 );
-        var phiDelta = -yDelta * pixelToRadian * 0.5;
-        var thetaDelta = -xDelta * pixelToRadian * 2.0;
+        var pixelToRadian = this.orbitRadius / ( this.distance() * 1000.0 );
+        var phiDelta = -yDelta * pixelToRadian * 0.006;
+        var thetaDelta = -xDelta * pixelToRadian * 0.04;
 
         phi = phi - phiDelta;
         theta = theta - thetaDelta;
@@ -529,7 +569,7 @@ scripts:
             this.activeCameraComp.translation,
             goog.vec.Vec3.scale(
               goog.vec.Vec3.normalize( trans, trans ),
-              this.speed,
+              this.distance(),
               trans
             ),
             trans
@@ -538,6 +578,9 @@ scripts:
       }      
     }
     this.update = function() {
+      if ( this.input.lastInputTime ) {
+        timeElapsed = this.time - this.input.lastInputTime;
+      }
       if ( this.input ) {
         var delta = this.input.pointerDelta();
         var pi = this.input.pointerInfo;
@@ -586,5 +629,5 @@ scripts:
           this.future( 0.1 ).update();
         }
       }	
+      this.input.lastInputTime = this.time;
     } //@ sourceURL=navScene.vwf
-
