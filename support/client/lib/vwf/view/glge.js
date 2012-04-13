@@ -453,11 +453,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                         currentObj = currentObj.parent;
                                 } 
                                 if ( colladaObj ) {
-                                    recurseGroup.call( this, colladaObj, 0 );
+                                    recurseGroup.call( sceneView, colladaObj, 0 );
                                 }
                             }                
                         } else if ( atlDown && !ctrlDown ) {
-                            recurseGroup.call( this, glgeObj, 0 ); 
+                            recurseGroup.call( sceneView, glgeObj, 0 ); 
                         }
                     }
                 }
