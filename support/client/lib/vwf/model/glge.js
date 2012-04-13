@@ -1273,11 +1273,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( ps.getNumParticles )
                         value = ps.getNumParticles();
                     break;
-                case "lifeTime":
-                    // there is no getLifeTime function in GLGE for ParticleSystems
-                    if ( ps.getLifeTime )
-                        value = ps.getLifeTime();
-                    break;
                 case "maxLifeTime":
                     if ( ps.getMaxLifeTime )
                         value = ps.getMaxLifeTime();
@@ -1298,13 +1293,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     if ( ps.getLoop )
                         value = ps.getLoop();
                     break;
-                case "velocity":
-                    // there is no getVelocity function in GLGE for ParticleSystems 
-                    if ( ps.getVelocity ) {
-                        obj = ps.getVelocity();
-                        value = [ obj.x, obj.y, obj.z ];
-                    }
-                    break;
                 case "maxVelocity":
                     if ( ps.getMaxVelocity ) {
                         obj = ps.getMaxVelocity();    
@@ -1317,20 +1305,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         value = [ obj.x, obj.y, obj.z ];
                     }
                     break;    
-                case "startAcceleration":
-                    // there is no getStartAccelertaion function in GLGE for ParticleSystems
-                    if ( ps.getStartAccelertaion ){
-                        obj = ps.getStartAccelertaion();
-                        value = [ obj.x, obj.y, obj.z ];
-                    }
-                    break;
-                case "endAcceleration":
-                    // there is no getEndAccelertaion function in GLGE for ParticleSystems
-                    if ( ps.getEndAccelertaion ) {
-                        obj = ps.getEndAccelertaion();
-                        value = [ obj.x, obj.y, obj.z ];
-                    }
-                    break;
                 case "maxStartAcceleration":
                     if ( ps.getMaxStartAccelertaion ) {
                         obj = ps.getMaxStartAccelertaion();
