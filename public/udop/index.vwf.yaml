@@ -1,0 +1,48 @@
+
+--- 
+extends: http://vwf.example.com/googleEarth.vwf
+properties:
+  controlClient: "NONE"
+children:
+  earth:
+    extends: http://vwf.example.com/node3.vwf
+  lookAt:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      longitude:
+      latitude:
+      altitude: 
+      altitudeMode: 
+      heading: 
+      tilt: 
+      range: 
+      cameraData:
+  camera:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      longitude:
+      latitude:
+      altitude: 
+      altitudeMode: 
+      heading: 
+      tilt: 
+      range: 
+      cameraData:
+methods:
+  setInstance:
+scripts:
+- |
+    var earthInstance = undefined;
+    this.setInstance = function(){
+      earthInstance = google.earth.geInstance;
+    }
+    this.initialize = function(){
+      // the initialize fucntion is called too early
+      // reference is not valid yet
+      // earthInstance = google.earth.gInstance;
+    } //@ sourceURL=googleEarthApp.vwf
+    this.loadComplete = function() {
+          //this.eulers = this.eulers;
+    }
+    this.tick = function(time) {
+    }
