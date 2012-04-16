@@ -200,17 +200,19 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     // GLGE private functions
     // -- initScene ------------------------------------------------------------------------
-
+	var lastPick;
     function initScene( sceneNode ) {
 
         function renderScene() {
             sceneNode.frameCount++;
+			lastPick = mousePick.call( this, mouse, sceneNode );
             renderer.render();
         };
 
         var canvas = this.canvasQuery.get( 0 );
 
         if ( canvas ) {
+			var mouse = new GLGE.MouseInput( canvas );
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
@@ -271,7 +273,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
-            var pickInfo = mousePick.call( sceneView, e, sceneNode );
+            var pickInfo = lastPick;
             pointerPickID = undefined;
 
             glgeActualObj = pickInfo ? pickInfo.object : undefined;
@@ -750,7 +752,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return undefined;
     }
 
-    function mousePick( e, sceneNode ) {
+    function mousePick( mouse, sceneNode ) {
 
         if (sceneNode && sceneNode.glgeScene) {
 
@@ -761,10 +763,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( sceneNode.frameCount > 10 && sceneNode.pendingLoads == 0 ) {
 
                 var objectIDFound = -1;
-                var x = mouseXPos.call( this, e );
-                var y = mouseYPos.call( this, e );
+                var mousepos=mouse.getMousePosition();
+                mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
+                mousepos.y = mousepos.y + window.scrollY;
 
-                return sceneNode.glgeScene.pick(x, y);
+                return sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
             }
         }
         return undefined;
