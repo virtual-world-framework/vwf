@@ -205,7 +205,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         function renderScene() {
             sceneNode.frameCount++;
-			lastPick = mousePick.call( this, mouse, sceneNode );
+			if(mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) {
+				lastPick = mousePick.call( this, mouse, sceneNode );
+				oldMouseX = mouse.getMousePosition().x;
+				oldMouseY = mouse.getMousePosition().y;
+			}
             renderer.render();
         };
 
@@ -213,6 +217,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         if ( canvas ) {
 			var mouse = new GLGE.MouseInput( canvas );
+			var oldMouseX = mouse.getMousePosition().x;
+			var oldMouseY = mouse.getMousePosition().y;
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
