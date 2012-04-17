@@ -29,11 +29,13 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   configure :production do
     enable :logging
+    set :protection, :except => :frame_options # we want to be able to embed VWF into iframes so tell Sinatra to chill out on this protection
   end
 
   configure :development do
     require "logger"
     set :logging, ::Logger::DEBUG
+    set :protection, :except => :frame_options # we want to be able to embed VWF into iframes so tell Sinatra to chill out on this protection
   end
 
   get Pattern.new do |public_path, application, instance, private_path|
