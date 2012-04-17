@@ -439,7 +439,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // TODO: add note that this is only for a self-determined application; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
-                this.createNode( 0, component_uri_or_json_or_object, undefined );
+                this.createNode( 0, undefined, component_uri_or_json_or_object );
 
             } else {  // TODO: also do this if component_uri_or_json_or_object was invalid and createNode() failed
 
@@ -585,7 +585,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             switch ( actionName ) {
 
-                case "createNode": // nodeID, childComponent, childName, callback /* ( childID ) */
+                case "createNode": // nodeID, childName, childComponent, callback /* ( childID ) */
 
                     callback( false ); // suspend the queue
 
@@ -714,7 +714,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( nodeID, childComponent, childName, callback /* ( childID ) */ ) {  // TODO: swap childComponent & childName for consistency with createProperty( nodeID, memberName, memberDescription ), etc.  // TODO: consider renaming to createChild(), or switch node/child => parent/node
+        this.createNode = function( nodeID, childName, childComponent, callback /* ( childID ) */ ) {  // TODO: consider renaming to createChild(), or switch node/child => parent/node
 
             this.logger.group( "vwf.createNode " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
@@ -1917,7 +1917,7 @@ return component;
                     // new node as a child. addChild() delegates to the models and views as before.
 
                     async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, callback /* ( err ) */ ) {
-                        vwf.createNode( nodeID, nodeComponent.children[childName], childName, function( childID ) {  // TODO: add in original order from nodeComponent.children
+                        vwf.createNode( nodeID, childName, nodeComponent.children[childName], function( childID ) {  // TODO: add in original order from nodeComponent.children
                             callback( undefined );
                         } );
                     }, function( err ) {

@@ -105,7 +105,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createNode( 0, {
+            vwf.createNode( 0, unique_name( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -141,7 +141,7 @@
                 "this.test = undefined",
               ],
 
-            }, unique_name( "fixture" ), function( fixtureID ) {
+            }, function( fixtureID ) {
 
               callback( fixtureID );
 

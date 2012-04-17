@@ -180,8 +180,8 @@ node.id = childID; // TODO: move to vwf/model/object
             } );
 
             Object.defineProperty( node.children, "create", {
-                value: function( component, name, callback /* ( child ) */ ) { // "this" is node.children
-                    return self.kernel.createNode( this.node.id, component, name /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
+                value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
+                    return self.kernel.createNode( this.node.id, name, component /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
                 }
             } );
 

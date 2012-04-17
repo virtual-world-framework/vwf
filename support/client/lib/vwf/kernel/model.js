@@ -27,15 +27,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "createNode":
 
-                return function( nodeID, childComponent, childName, when, callback /* ( childID ) */ ) {
+                return function( nodeID, childName, childComponent, when, callback /* ( childID ) */ ) {
 
                     if ( when === undefined ) {
-                        return this.kernel[kernelFunctionName]( nodeID, childComponent, childName, function( childID ) {
+                        return this.kernel[kernelFunctionName]( nodeID, childName, childComponent, function( childID ) {
                             callback && callback( childID );
                         } );
                     } else {
-                        this.kernel.plan( nodeID, kernelFunctionName, undefined,
-                            [ childComponent, childName ], when, callback /* ( result ) */ );  // TODO: swap childComponent & childName
+                        this.kernel.plan( nodeID, kernelFunctionName, childName,
+                            [ childComponent ], when, callback /* ( result ) */ );
                     }
 
                 };

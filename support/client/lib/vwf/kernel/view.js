@@ -27,9 +27,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "createNode":
 
-                return function( nodeID, childComponent, childName, when, callback /* ( childID ) */ ) {
-                    this.kernel.send( nodeID, kernelFunctionName, undefined,
-                        [ childComponent, childName ], when || 0, callback /* ( result ) */ );  // TODO: swap childComponent & childName
+                return function( nodeID, childName, childComponent, when, callback /* ( childID ) */ ) {
+                    this.kernel.send( nodeID, kernelFunctionName, childName,
+                        [ childComponent ], when || 0, callback /* ( result ) */ );
                 };
 
             case "deleteNode":
