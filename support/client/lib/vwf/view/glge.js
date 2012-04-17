@@ -202,13 +202,50 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     // -- initScene ------------------------------------------------------------------------
 	var lastPick;
     function initScene( sceneNode ) {
+	
+		var requestAnimFrame, cancelAnimFrame;
+		(function() {
+			var lastTime = 0;
+			var vendors = ['ms', 'moz', 'webkit', 'o'];
+			for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+				window.cancelRequestAnimationFrame = window[vendors[x]+
+				  'CancelRequestAnimationFrame'];
+			}
 
-        function renderScene() {
+			if (!window.requestAnimationFrame) {
+				requestAnimFrame = function(callback, element) {
+					var currTime = +new Date;
+					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+					var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+					  timeToCall);
+					lastTime = currTime + timeToCall;
+					return id;
+				};
+			}
+			else {
+				requestAnimFrame = window.requestAnimationFrame;
+			}
+
+			if (!window.cancelAnimationFrame) {
+				cancelAnimFrame = function(id) {
+					clearTimeout(id);
+				};
+			}
+			else {
+				cancelAnimFrame = window.cancelAnimationFrame;
+			}
+		}());
+
+		var lastPickTime = 0;
+        function renderScene(time) {
+			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-			if(mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) {
+			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
 				lastPick = mousePick.call( this, mouse, sceneNode );
 				oldMouseX = mouse.getMousePosition().x;
 				oldMouseY = mouse.getMousePosition().y;
+				lastPickTime = time;
 			}
             renderer.render();
         };
@@ -238,7 +275,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
 
-            setInterval( renderScene, 1 );
+            renderScene((+new Date));
         }
     } 
 
