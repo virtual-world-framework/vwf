@@ -128,6 +128,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 parentID: nodeID,
                 ID: childID,
                 extendsID: childExtendsID,
+                implementsIDs: childImplementsIDs,
                 source: childSource, 
                 name: childName,
             };
@@ -498,6 +499,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 drillUp.call(self, node.parentID);
             });
         }
+
+        for ( var i = 0; i < node.implementsIDs.length; i++ ) {
+            $(topdownTemp).append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
+
+            /* 
+            //Placeholder to Enable/Disable behaviors
+            $('#' + node.implementsID[i] + '-enable').change( function(evt) {
+            
+            }); 
+            */
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
         
         var displayedProperties = {};
         // Add node properties
