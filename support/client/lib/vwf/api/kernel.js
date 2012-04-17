@@ -42,13 +42,13 @@ define( {
     /// @function
     /// 
     /// @param {ID} nodeID
-    /// @param {String|Object} childComponent
     /// @param {String} childName
+    /// @param {String|Object} childComponent
     /// @param {Function} [callback]
     /// 
     /// @returns {}
 
-    createNode: [ /* nodeID, childComponent, childName, callback /- ( childID ) -/ */ ],
+    createNode: [ /* nodeID, childName, childComponent, callback /- ( childID ) -/ */ ],
 
     /// Delete node will delete a node specified by the id given on each model and view.
     /// 

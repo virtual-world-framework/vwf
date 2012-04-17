@@ -143,7 +143,7 @@ scripts:
           cube.properties.velocity = [ camLook[0] * this.tossCubeStrength, camLook[1] * this.tossCubeStrength, camLook[2] * this.tossCubeStrength];
           this.colorIndex += 1;
           
-          this.children.create( cube, newObjName);        
+          this.children.create( newObjName, cube );
           this.createCube = false;
         } else {
           this.spheresCreated += 1;
@@ -154,7 +154,7 @@ scripts:
           sphere.properties.velocity = [ camLook[0] * this.tossSphereStrength, camLook[1] * this.tossSphereStrength, camLook[2] * this.tossSphereStrength ];
           this.colorIndex += 1;
           
-          this.children.create(sphere, newObjName);
+          this.children.create( newObjName, sphere );
           this.createCube = true;      
         }
         if ( newObjName && newObjName != "" ) {
