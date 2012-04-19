@@ -14,5 +14,5 @@
 // the License.
 
 define( function() {
-	return [ PRELIMINARY_VERSION ]; // major, minor, patch, build
+	return [ 0, 5, 0, 0 ]; // major, minor, patch, build
 } );
