@@ -396,7 +396,7 @@ scripts:
       if ( this.navmode == "walk" ) {
         this.translate( x, y );
       } else if ( this.navmode == "orbit" ) {
-        this.orbit( x * 0.01, y * 0.01 );
+        this.orbit( x, y );
       }
     }
     this.onLook = function( x, y ) {
@@ -514,10 +514,10 @@ scripts:
       if ( this.activeCameraComp ) {
         this.updateRadius();
         
-        var pixelToRadian = this.orbitRadius / ( this.distance() * 1000.0 );
-        var phiDelta = -yDelta * pixelToRadian * 0.006;
-        var thetaDelta = -xDelta * pixelToRadian * 0.04;
-
+        var pixelToRadian = ( this.distance() * 10.0 ) / this.orbitRadius;
+        var phiDelta = -yDelta * pixelToRadian * 0.4;
+        var thetaDelta = -xDelta * pixelToRadian * 0.4;
+        
         phi = phi - phiDelta;
         theta = theta - thetaDelta;
         
@@ -531,7 +531,7 @@ scripts:
         var x = this.orbitRadius * Math.sin( phi ) * Math.cos( theta );
         var y = this.orbitRadius * Math.sin( phi ) * Math.sin( theta );
         var z = this.orbitRadius * Math.cos( phi );
-
+        
         this.activeCameraComp.translation = [ x, y, z ];
       }
     }
