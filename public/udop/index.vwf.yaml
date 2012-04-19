@@ -6,28 +6,14 @@ properties:
 children:
   earth:
     extends: http://vwf.example.com/node3.vwf
-  lookAt:
-    extends: http://vwf.example.com/node3.vwf
+  uav1:
     properties:
-      longitude:
-      latitude:
-      altitude: 
-      altitudeMode: 
-      heading: 
-      tilt: 
-      range: 
-      cameraData:
-  camera:
-    extends: http://vwf.example.com/node3.vwf
+      model: UAV.dae
+      video: asdf
+  uav2:
     properties:
-      longitude:
-      latitude:
-      altitude: 
-      altitudeMode: 
-      heading: 
-      tilt: 
-      range: 
-      cameraData:
+      model: UAV.dae
+      video: asdf
 methods:
   setInstance:
 scripts:
@@ -42,7 +28,6 @@ scripts:
       // earthInstance = google.earth.gInstance;
     } //@ sourceURL=googleEarthApp.vwf
     this.loadComplete = function() {
-          //this.eulers = this.eulers;
     }
     this.tick = function(time) {
     }
