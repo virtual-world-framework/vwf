@@ -766,29 +766,6 @@ vwf.addChild( nodeID, childNodeID, childName );
             this.logger.groupEnd();
         };
 
-        // -- deleteNode ---------------------------------------------------------------------------
-
-        this.deleteNode = function( nodeID ) {
-
-            this.logger.group( "vwf.deleteNode " + nodeID );
-
-            // Call deletingNode() on each model. The node is considered deleted after each model
-            // has run.
-
-            this.models.forEach( function( model ) {
-                model.deletingNode && model.deletingNode( nodeID );
-            } );
-
-            // Call deletedNode() on each view. The view is being notified that a node has been
-            // deleted.
-
-            this.views.forEach( function( view ) {
-                view.deletedNode && view.deletedNode( nodeID );
-            } );
-
-            this.logger.groupEnd();
-        };
-
         // -- getType ------------------------------------------------------------------------------
 
         // Find or load a node that will serve as the prototype for a component specification. If
@@ -903,6 +880,29 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
 
             }
 
+        };
+
+        // -- deleteNode ---------------------------------------------------------------------------
+
+        this.deleteNode = function( nodeID ) {
+
+            this.logger.group( "vwf.deleteNode " + nodeID );
+
+            // Call deletingNode() on each model. The node is considered deleted after each model
+            // has run.
+
+            this.models.forEach( function( model ) {
+                model.deletingNode && model.deletingNode( nodeID );
+            } );
+
+            // Call deletedNode() on each view. The view is being notified that a node has been
+            // deleted.
+
+            this.views.forEach( function( view ) {
+                view.deletedNode && view.deletedNode( nodeID );
+            } );
+
+            this.logger.groupEnd();
         };
 
         // -- setNode ------------------------------------------------------------------------------
