@@ -372,7 +372,7 @@
 
             // Prototype for the three nodes.
 
-            vwf.createNode( 0, unique_name( "base" ), {
+            vwf.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
 
@@ -413,27 +413,27 @@
 
               // Parent node.
 
-              vwf.createNode( 0, unique_name( "top" ), {
+              vwf.createChild( 0, unique_name( "top" ), {
 
-                extends: "@" + JSON.stringify( baseID ),
+                extends: baseID,
                 properties: { result: result.top },
 
               }, function( topID ) {
 
                 // Child node.
 
-                vwf.createNode( topID, unique_name( "middle" ), {
+                vwf.createChild( topID, unique_name( "middle" ), {
 
-                  extends: "@" + JSON.stringify( baseID ),
+                  extends: baseID,
                   properties: { result: result.middle },
 
                 }, function( middleID ) {
 
                   // Grandchild node.
 
-                  vwf.createNode( middleID, unique_name( "bottom" ), {
+                  vwf.createChild( middleID, unique_name( "bottom" ), {
 
-                    extends: "@" + JSON.stringify( baseID ),
+                    extends: baseID,
                     properties: { result: result.bottom },
 
                   }, function( bottomID ) {

@@ -108,7 +108,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 initCamera.call( this, sceneNode.glgeScene.camera );
 
                 var camType = "http://vwf.example.com/camera.vwf";
-                vwf.createNode( childID, "camera", { "extends": camType }, undefined );    
+                vwf.createChild( childID, "camera", { "extends": camType }, undefined );    
 
                 var model = this;
                 var xmlDocLoadedCallback = callback;

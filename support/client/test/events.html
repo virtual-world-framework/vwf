@@ -308,7 +308,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createNode( 0, unique_name( "node" ), {
+            vwf.createChild( 0, unique_name( "node" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -340,7 +340,7 @@
 
             // Prototype for the nodes.
 
-            vwf.createNode( 0, unique_name( "base" ), {
+            vwf.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
               events: { base: undefined },
@@ -349,17 +349,17 @@
 
               // Parent node.
 
-              vwf.createNode( 0, unique_name( "parent" ), {
+              vwf.createChild( 0, unique_name( "parent" ), {
 
-                extends: "@" + JSON.stringify( baseID ),
+                extends: baseID,
 
               }, function( parentID ) {
 
                 // Child node.
 
-                vwf.createNode( parentID, unique_name( "child" ), {
+                vwf.createChild( parentID, unique_name( "child" ), {
 
-                  extends: "@" + JSON.stringify( baseID ),
+                  extends: baseID,
 
                 }, function( childID ) {
 
@@ -377,7 +377,7 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( 0, unique_name( "base" ), {
+            vwf.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
               events: { base: undefined },
@@ -385,9 +385,9 @@
 
             }, function( baseID ) {
 
-              vwf.createNode( 0, unique_name( "derived" ), {
+              vwf.createNode( {
 
-                extends: "@" + JSON.stringify( baseID ),
+                extends: baseID,
                 events: { derived: undefined },
                 scripts: [ ],
 

@@ -106,13 +106,17 @@
         // that we can find it if it is reused. Components specified internally as object literals
         // are anonymous and are not indexed here.
 
-        var types = this.private.types = {}; // maps component node ID => component specification
+        var components = this.private.components = {}; // maps component node ID => component specification
         var uris = this.private.uris = {}; // maps component nodeID => component URI
 
         // The proto-prototype of all nodes is "node", identified by this URI. This type is
         // intrinsic to the system and nothing is loaded from the URI.
 
         var nodeTypeURI = "http://vwf.example.com/node.vwf";
+
+        // The "node" component descriptor.
+
+        var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
 
         // Control messages from the reflector are stored here in a priority queue, ordered by
         // execution time.
@@ -188,6 +192,8 @@
             // string and assume it's a URI.
 
             var application = getQueryString( "application" );  // TODO: move to index.html; don't reach out to the window from the kernel
+
+            try { application = JSON.parse( application ) } catch ( e ) { }  // TODO: conflict between (some relative) uris and json?  // TODO: move to index.html; don't reach out to the window from the kernel
 
             // Parse the function parameters. If the first parameter is not an array, then treat it
             // as the application specification. Otherwise, fall back to the "application" parameter
@@ -338,7 +344,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
 
                     // transportOptions: {
-                    //     "websocket": { timeout: 90000 },
+                        // "websocket": { timeout: 90000 },
                         // "flashsocket": { timeout: 90000 },
                         // "htmlfile": { timeout: 90000 },
                         // "xhr-multipart": { timeout: 90000 },
@@ -439,7 +445,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // TODO: add note that this is only for a self-determined application; with socket, wait for reflection server to tell us.
                 // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
 
-                this.createNode( 0, undefined, component_uri_or_json_or_object );
+                this.createNode( component_uri_or_json_or_object );
 
             } else {  // TODO: also do this if component_uri_or_json_or_object was invalid and createNode() failed
 
@@ -577,7 +583,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             var args = [];
 
-            if ( nodeID || nodeID === 0 ) args.push( nodeID );  // TODO: don't bother testing anymore? createNode() before parentID didn't have a nodeID but now I think all functions do ... except time()?
+            if ( nodeID || nodeID === 0 ) args.push( nodeID );
             if ( memberName ) args.push( memberName );
             if ( parameters ) args = args.concat( parameters ); // flatten
 
@@ -585,11 +591,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             switch ( actionName ) {
 
-                case "createNode": // nodeID, childName, childComponent, callback /* ( childID ) */
+                case "createNode": // nodeComponent, callback /* ( nodeID ) */
 
                     callback( false ); // suspend the queue
 
-                    args[3] = function( childID ) {
+                    args[1] = function( nodeID ) {
                         callback( true ); // resume the queue when the action completes
                     };
 
@@ -714,172 +720,132 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( nodeID, childName, childComponent, callback /* ( childID ) */ ) {  // TODO: consider renaming to createChild(), or switch node/child => parent/node
+        this.createNode = function( nodeComponent, create_callback /* ( nodeID ) */ ) {
 
             this.logger.group( "vwf.createNode " + (
-                typeof childComponent == "string" || childComponent instanceof String ?
-                    childComponent : JSON.stringify( loggableComponent( childComponent ) )
+                typeof nodeComponent == "string" || nodeComponent instanceof String ?
+                    nodeComponent : JSON.stringify( loggableComponent( nodeComponent ) )
             ) );
 
-            // Any component specification may be provided as either a URI identifying a network
-            // resource containing the specification or as an object literal that provides the data
-            // directly.
+            // nodeComponent may be a URI, a descriptor, or an ID, and while being created will
+            // transform from a URI to a descriptor to an ID (depending on its starting state).
+            // nodeURI, nodeDescriptor, and nodeID capture the applicable intermediate states.
 
-            var component = normalizedComponent( childComponent );
+            var nodeURI, nodeDescriptor, nodeID;
 
-            // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
+            async.series( [
 
-            var childNodeID = ( component["extends"] || nodeTypeURI ) + "." + childName;
-childNodeID = childNodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
+                // If nodeComponent is a URI, load the descriptor.
 
-            this.logger.info( "vwf.createNode: creating node of type " + ( component["extends"] || nodeTypeURI ) + " with id " + childNodeID );
+                function( series_callback /* ( err, results ) */ ) { // nodeComponent is a URI, a descriptor, or an ID
 
-            // Call getType() to locate or load the prototype node, then pass the prototype and the
-            // component specification to construct().
-    
-            this.getType( component["extends"] || nodeTypeURI, function( childPrototypeID ) { // TODO: could be a JSON-encoded type literal as with application param?
+                    if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
-                async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
+                        nodeURI = nodeComponent;
 
-                    vwf.getType( uri, function( childBehaviorID ) {
-                        callback( undefined, childBehaviorID );
-                    } );
+                        // Load the document if we haven't seen this URI yet. Mark the components
+                        // list to indicate that this component is loading.
 
-                }, function( err, childBehaviorIDs ) {
+                        if ( ! components[nodeURI] ) { // uri is not loading (Array) or loaded (id)
 
-                    construct.call( vwf, nodeID, childNodeID, childPrototypeID, childBehaviorIDs, component, childName, function( childNodeID ) {
-if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
-vwf.addChild( nodeID, childNodeID, childName );
-                        if ( nodeID == 0 && component["extends"] && component["extends"] != nodeTypeURI && component["extends"][0] != "@" ) {  // TODO: const for root id  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
-                            jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( component["extends"] ) + ".html", function() { // load the UI chrome if available
-                                callback && callback.call( vwf, childNodeID );
+                            components[nodeURI] = []; // [] => array of callbacks while loading => true
+
+                            loadComponent( nodeURI, function( nodeDescriptor ) {
+                                nodeComponent = nodeDescriptor;
+                                series_callback( undefined, undefined );
                             } );
-                        } else {
-                            callback && callback.call( vwf, childNodeID );
-                        }
-                    } );
 
-                } );
+                        // If we've seen this URI, but it is still loading, just add our callback to
+                        // the list. The original load's completion will call our callback too.
+
+                        } else if ( components[nodeURI] instanceof Array ) { // loading
+                            create_callback && components[nodeURI].push( create_callback );
+
+                        // If this URI has already loaded, skip to the end and call the callback
+                        // with the ID.
+
+                        } else { // loaded
+                            create_callback && create_callback( components[nodeURI] );
+                        }
+
+                    } else { // descriptor, ID or error
+                        series_callback( undefined, undefined );
+                    }
+
+                },
+
+                // If nodeComponent is a descriptor, construct and get the ID.
+
+                function( series_callback /* ( err, results ) */ ) { // nodeComponent is a descriptor or an ID
+
+                    if ( componentIsDescriptor( nodeComponent ) ) { // descriptor  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
+
+                        nodeDescriptor = nodeComponent;
+
+if ( nodeURI ) nodeDescriptor.uri = nodeURI;
+
+                        // Create the node as an unnamed child global object.
+
+                        vwf.createChild( 0, undefined, nodeDescriptor, function( nodeID ) {
+                            nodeComponent = nodeID;
+                            series_callback( undefined, undefined );
+                        } );
+                        
+                    } else { // ID or error
+                        series_callback( undefined, undefined );
+                    }
+
+                },
+
+                // nodeComponent is the ID.
+
+                function( series_callback /* ( err, results ) */ ) { // nodeComponent is an ID
+
+                    if ( componentIsID( nodeComponent ) ) {  // ID
+                        nodeID = nodeComponent;
+                        series_callback( undefined, undefined );
+                    } else {  // error
+                        series_callback( undefined, undefined );  // TODO: error
+                    }
+
+                },
+
+            ], function( err, results ) {
+
+                // If this node derived from a URI, save the list of callbacks waiting for
+                // completion and update the component list with the ID.
+
+                if ( nodeURI ) {
+                    var create_callbacks = components[nodeURI];
+                    components[nodeURI] = nodeID;
+                    uris[nodeID] = nodeURI;  // TODO: move to vwf/model/object
+                }
+
+                // Pass the ID to our callback.
+
+                create_callback && create_callback( nodeID );  // TODO: handle error if invalid id
+
+                // Call the other callbacks.
+
+                if ( nodeURI ) {
+                    create_callbacks.forEach( function( create_callback ) {
+                        create_callback && create_callback( nodeID );
+                    } );
+                }
+
+                // Load the UI chrome if available.
+
+                if ( nodeURI ) {  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
+if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  // TODO: any better way to only attempt to load chrome for the main application and not the prototypes?
+                    jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( nodeURI ) + ".html", function() {  // TODO: move to index.html; don't reach out to the window from the kernel; connect through a future vwf.initialize callback.
+                        $('#loadstatus').remove(); // remove 'loading' overlay
+                    } );
+}
+                }
 
             } );
 
             this.logger.groupEnd();
-        };
-
-        // -- getType ------------------------------------------------------------------------------
-
-        // Find or load a node that will serve as the prototype for a component specification. If
-        // the component is identified using a URI, save a mapping from the URI to the prototype ID
-        // in the "types" database for reuse. If the component is not identified by a URI, don't
-        // save a reference in the database (since no other component can refer to it), and just
-        // create it as an anonymous type.
-
-        this.getType = function( uri, callback /* nodeID */ ) {
-
-            var nodeID = uri; // TODO: hash uri => nodeID to shorten for faster lookups? // TODO: canonicalize uri
-nodeID = nodeID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters
-
-if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be used in place of an extends uri; this is primarily to support the tests, but should be eventually be fully supported.
-    nodeID = JSON.parse( uri.slice( 1 ) );
-    types[nodeID] = "dummy";
-}
-
-            // If the type is being loaded, add the callback to the list to be invoked when the load
-            // completes.
-
-            if ( types[nodeID] instanceof Array ) {
-
-                types[nodeID].push( callback );
-
-            // If the URI is in the database, invoke the callback with the ID of the previously-
-            // loaded prototype node.
-            
-            } else if ( types[nodeID] ) {
-
-                callback && callback.call( this, nodeID );
-
-            // If the type has not been loaded, call createNode() to make the node that we will use
-            // as the prototype. When it loads, save the ID in the types database and invoke the
-            // callback with the new prototype node's ID.
-
-            // nodeTypeURI is a special URI identifying the base "node" component that is the
-            // ultimate prototype of all other components. Its specification is known
-            // intrinsicly and does not exist as a network resource. If the component URI
-            // identifies "node", call construct() directly and pass a null prototype and an
-            // empty specification.
-
-            } else if ( uri == nodeTypeURI ) {
-
-                types[nodeID] = [ callback ]; // array of callbacks while loading
-
-                var component = {};
-                var prototypeID = undefined;
-
-                this.logger.info( "vwf.getType: creating type " + uri );
-
-                construct.call( this, 0, nodeID, prototypeID, [], component, undefined, function( nodeID ) {
-
-                    var callbacks = types[nodeID];
-                    types[nodeID] = component; // component specification once loaded
-                    uris[nodeID] = uri;
-
-                    callbacks.forEach( function( callback ) {
-                        callback && callback.call( vwf, nodeID );
-                    } );
-
-                } );
-
-            // For any other URI, load the document. Once it loads, call getType() to locate or
-            // load the prototype node, then pass the prototype and the component specification
-            // to construct().
-
-            } else {
-
-                this.logger.info( "vwf.getType: creating type " + uri );
-
-                types[nodeID] = [ callback ]; // array of callbacks while loading
-
-                jQuery.ajax( {
-
-                    url: remappedURI( uri ),
-                    dataType: "jsonp",
-
-                    success: function( component ) {
-
-                        this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
-
-                            async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
-
-                                vwf.getType( uri, function( behaviorID ) {
-                                    callback( undefined, behaviorID );
-                                } );
-
-                            }, function( err, behaviorIDs ) {
-
-                                construct.call( vwf, 0, nodeID, prototypeID, behaviorIDs, component, undefined, function( nodeID ) {
-
-                                    var callbacks = types[nodeID];
-                                    types[nodeID] = component; // component specification once loaded
-                                    uris[nodeID] = uri;
-
-                                    callbacks.forEach( function( callback ) {
-                                        callback && callback.call( vwf, nodeID );
-                                    } );
-
-                                } );
-
-                            } );
-
-                        } );
-
-                    },
-
-                    context: this
-
-                } );
-
-            }
-
         };
 
         // -- deleteNode ---------------------------------------------------------------------------
@@ -1049,7 +1015,7 @@ return component;
             return behaviorIDs || [];
         };
 
-        // -- construct ----------------------------------------------------------------------------
+        // -- createChild --------------------------------------------------------------------------
 
         // When we arrive here, we have a prototype node in hand (by way of its ID) and an object
         // containing a component specification. We now need to create and assemble the new node.
@@ -1062,77 +1028,130 @@ return component;
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        var construct = function( parentID, nodeID, prototypeID, behaviorIDs, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
+        this.createChild = function( nodeID, childName, childComponent, create_callback /* ( childID ) */ ) {
 
-            this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
+            this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
+                typeof childComponent == "string" || childComponent instanceof String ?
+                    childComponent : JSON.stringify( loggableComponent( childComponent ) )
+            ) );
 
-            var deferredInitializations = {};
+            childComponent = normalizedComponent( childComponent );
+
+            // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
+
+            var childID = childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
+
+            var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
             async.series( [
 
-                function( callback /* ( err, results ) */ ) {
+                function( series_callback /* ( err, results ) */ ) {
+
+                    // Create the prototype and behavior nodes (or locate previously created
+                    // instances).
+
+                    async.parallel( [
+
+                        function( parallel_callback /* ( err, results ) */ ) {
+
+                            // Create or find the prototype and save the ID in childPrototypeID.
+
+                            if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
+                                vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) {
+                                    childPrototypeID = prototypeID;
+                                    parallel_callback( undefined, undefined );
+                                } );
+                            } else {
+                                childPrototypeID = undefined;
+                                parallel_callback( undefined, undefined );
+                            }
+
+                        },
+
+                        function( parallel_callback /* ( err, results ) */ ) {
+
+                            // Create or find the behaviors and save the IDs in childBehaviorIDs.
+
+                            async.map( childComponent["implements"] || [], function( behaviorComponent, map_callback /* ( err, result ) */ ) {
+                                vwf.createNode( behaviorComponent, function( behaviorID ) {
+                                    map_callback( undefined, behaviorID );
+                                } );
+                            }, function( err, behaviorIDs ) {
+                                childBehaviorIDs = behaviorIDs;
+                                parallel_callback( err, undefined );
+                            } );
+
+                        },
+
+                    ], function( err, results ) {
+                        series_callback( err, undefined );
+                    } );
+
+                },
+
+                function( series_callback /* ( err, results ) */ ) {
 
                     // Call creatingNode() on each model. The node is considered to be constructed after
                     // each model has run.
 
-                    async.forEachSeries( vwf.models, function( model, callback /* ( err ) */ ) {
+                    async.forEachSeries( vwf.models, function( model, each_callback /* ( err ) */ ) {
 
                         var driver_ready = true;
 
-                        model.creatingNode && model.creatingNode( parentID, nodeID, prototypeID, behaviorIDs,
-                                nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+                        model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                childComponent.source, childComponent.type, childName, function( ready ) {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
+                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
-                                driver_ready && callback( undefined );
+                                driver_ready && each_callback( undefined );
                             }
 
                         } );
 
-                        driver_ready && callback( undefined );
+                        driver_ready && each_callback( undefined );
 
                     }, function( err ) {
-                        callback( err, undefined );
+                        series_callback( err, undefined );
                     } );
 
                 },
 
-                function( callback /* ( err, results ) */ ) {
+                function( series_callback /* ( err, results ) */ ) {
 
                     // Call createdNode() on each view. The view is being notified of a node that has
                     // been constructed.
 
-                    async.forEach( vwf.views, function( view, callback /* ( err ) */ ) {
+                    async.forEach( vwf.views, function( view, each_callback /* ( err ) */ ) {
 
                         var driver_ready = true;
 
-                        view.createdNode && view.createdNode( parentID, nodeID, prototypeID, behaviorIDs,
-                                nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
+                        view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                                childComponent.source, childComponent.type, childName, function( ready ) {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", nodeID, "for", nodeComponent.source );
+                                vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
-                                driver_ready && callback( undefined );
+                                driver_ready && each_callback( undefined );
                             }
 
                         } );
 
-                        driver_ready && callback( undefined );
+                        driver_ready && each_callback( undefined );
 
                     }, function( err ) {
-                        callback( err, undefined );
+                        series_callback( err, undefined );
                     } );
 
                 },
 
-                function( callback /* ( err, results ) */ ) {
+                function( series_callback /* ( err, results ) */ ) {
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
                     // delegates to the models and views as above.
 
-                    nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {
+                    childComponent.properties && jQuery.each( childComponent.properties, function( propertyName, propertyValue ) {
 
                         var value = propertyValue, get, set, create;
 
@@ -1153,13 +1172,13 @@ return component;
 
                         var creating = create || // explicit create directive, or
                             get !== undefined || set !== undefined || // explicit accessor, or
-                            ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on prototype
+                            ! nodeHasProperty.call( vwf, childID, propertyName ); // not defined on prototype
 
                         // Are we assigning the value here, or deferring assignment until the node
                         // is constructed because setters will run?
 
                         var assigning = value === undefined || // no value, or
-                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, nodeID, propertyName ) ); // no setter
+                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, childID, propertyName ) ); // no setter
 
                         if ( ! assigning ) {
                             deferredInitializations[propertyName] = value;
@@ -1169,53 +1188,56 @@ return component;
                         // Create or initialize the property.
 
                         if ( creating ) {
-                            vwf.createProperty( nodeID, propertyName, value, get, set );
+                            vwf.createProperty( childID, propertyName, value, get, set );
                         } else {
-                            vwf.setProperty( nodeID, propertyName, value );
+                            vwf.setProperty( childID, propertyName, value );
                         }
 
                     } );
 
-                    nodeComponent.methods && jQuery.each( nodeComponent.methods, function( methodName, methodValue ) {
+                    childComponent.methods && jQuery.each( childComponent.methods, function( methodName, methodValue ) {
 
                         if ( valueHasBody( methodValue ) ) {
-                            vwf.createMethod( nodeID, methodName, methodValue.parameters, methodValue.body );
+                            vwf.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
                         } else {
-                            vwf.createMethod( nodeID, methodName, undefined, methodValue );
+                            vwf.createMethod( childID, methodName, undefined, methodValue );
                         }
 
                     } );
 
-                    nodeComponent.events && jQuery.each( nodeComponent.events, function( eventName, eventValue ) {
+                    childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
 
                         if ( valueHasBody( eventValue ) ) {
-                            vwf.createEvent( nodeID, eventName, eventValue.parameters );
+                            vwf.createEvent( childID, eventName, eventValue.parameters );
                         } else {
-                            vwf.createEvent( nodeID, eventName, undefined );
+                            vwf.createEvent( childID, eventName, undefined );
                         }
 
                     } );
 
-                    callback( undefined, undefined );
+                    series_callback( undefined, undefined );
                 },
 
-                function( callback /* ( err, results ) */ ) {
+                function( series_callback /* ( err, results ) */ ) {
 
                     // Create and attach the children. For each child, call createNode() with the
                     // child's component specification, then once loaded, call addChild() to attach the
                     // new node as a child. addChild() delegates to the models and views as before.
 
-                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, callback /* ( err ) */ ) {
-                        vwf.createNode( nodeID, childName, nodeComponent.children[childName], function( childID ) {  // TODO: add in original order from nodeComponent.children
-                            callback( undefined );
+                    async.forEach( Object.keys( childComponent.children || {} ), function( childName, each_callback /* ( err ) */ ) {
+                        var childValue = childComponent.children[childName];
+
+                        vwf.createChild( childID, childName, childValue, function( childID ) {  // TODO: add in original order from childComponent.children
+                            each_callback( undefined );
                         } );
+
                     }, function( err ) {
-                        callback( err, undefined );
+                        series_callback( err, undefined );
                     } );
 
                 },
 
-                function( callback /* ( err, results ) */ ) {
+                function( series_callback /* ( err, results ) */ ) {
 
                     // Attach the scripts. For each script, load the network resource if the script is
                     // specified as a URI, then once loaded, call execute() to direct any model that
@@ -1223,54 +1245,57 @@ return component;
                     // perform any immediate actions and retain any callbacks as appropriate for the
                     // script type.
 
-                    nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
+                    childComponent.scripts && childComponent.scripts.forEach( function( script ) {
                         //console.info(script);
                         if ( valueHasType( script ) ) {
-                            script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                            script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                         } else {
-                            script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
+                            script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
                         }
                     } );
 
-                    callback( undefined, undefined );
+                    series_callback( undefined, undefined );
                 },
 
-                function( callback /* ( err, results ) */ ) {
+                function( series_callback /* ( err, results ) */ ) {
 
                     // Perform initializations for properties with setter functions. These are
                     // assigned here so that the setters run on a fully-constructed node.
 
                     Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                        vwf.setProperty( nodeID, propertyName, deferredInitializations[propertyName] );
-                    }, this );
+                        vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                    } );
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
-if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
-    vwf.tickable.nodeIDs.push( nodeID );
+if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
+    vwf.tickable.nodeIDs.push( childID );
 }
 
                     // Call initializingNode() on each model and initializedNode() on each view to
                     // indicate that the node is fully constructed.
 
                     vwf.models.forEach( function( model ) {
-                        model.initializingNode && model.initializingNode( parentID, nodeID );
+                        model.initializingNode && model.initializingNode( nodeID, childID );
                     } );
 
                     vwf.views.forEach( function( view ) {
-                        view.initializedNode && view.initializedNode( parentID, nodeID );
+                        view.initializedNode && view.initializedNode( nodeID, childID );
                     } );
 
-                    callback( undefined, undefined );
+                    series_callback( undefined, undefined );
                 },
 
             ], function( err, results ) {
+
+if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
+vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) implicit in createChild( parent-id, child-name, child-component ); remove this
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
                 // ID of its prototype. If this was the root node for the application, the
                 // application is now fully initialized.
 
-                callback && callback.call( vwf, nodeID );
+                create_callback && create_callback( childID );
             } );
 
             this.logger.groupEnd();
@@ -1987,6 +2012,29 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
         // == Private functions ====================================================================
 
+        // -- loadComponent ------------------------------------------------------------------------
+
+        var loadComponent = function( nodeURI, load_callback /* ( nodeDescriptor ) */ ) {
+
+            if ( nodeURI != nodeTypeURI ) {
+
+                jQuery.ajax( {
+
+                    url: remappedURI( nodeURI ),
+                    dataType: "jsonp",
+
+                    success: function( nodeDescriptor ) {
+                        load_callback( nodeDescriptor );
+                    }
+
+                } );
+
+            } else {
+                load_callback( nodeTypeDescriptor );
+            }
+
+        };
+
         var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
             return propertyName in node.properties;
@@ -2012,6 +2060,47 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
         var nodePrototypeID = function( nodeID ) { // invoke with the kernel as "this"
             var node = this.models.javascript.nodes[nodeID];
             return Object.getPrototypeOf( node ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+        };
+
+        // Is a component specifier a URI?
+
+        var componentIsURI = function( candidate ) {
+            return ( typeof candidate == "string" || candidate instanceof String ) && ! componentIsID( candidate );
+        };
+
+        // Is a component specifier a descriptor?
+
+        var componentIsDescriptor = function( candidate ) {
+            return typeof candidate == "object" && ! isPrimitive( candidate );
+        };
+
+        // Is a component specifier an ID?
+
+        var componentIsID = function( candidate ) {
+            return isPrimitive( candidate ) &&
+vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
+        };
+
+        // Is a primitive or a boxed primitive.
+
+        var isPrimitive = function( candidate ) {
+
+            switch ( typeof candidate ) {
+
+                case "string":
+                case "number":
+                case "boolean":
+                    return true;
+
+                case "object":
+                    return candidate instanceof String || candidate instanceof Number ||
+                        candidate instanceof Boolean;
+
+                default:
+                    return false;
+
+            }
+
         };
 
         // -- objectIsComponent --------------------------------------------------------------------
@@ -2159,27 +2248,22 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
         // -- normalizedComponent ------------------------------------------------------------------
 
-        var normalizedComponent = function( /* component */ ) {
+        var normalizedComponent = function( component ) {
 
-            var component = arguments[0]; // component is sometimes not writable when it is an argument?
+            // Convert a component URI to an instance of that type or an asset reference to an
+            // untyped reference to that asset. Convert a component ID to an instance of that
+            // prototype.
 
-            // Decode if JSON.
-
-            if ( typeof component == "string" || component instanceof String ) {
-                try { component = JSON.parse( component ) } catch ( e ) { }
-            }
-
-            // Convert a component URI to an instance of that type. Convert an asset reference to
-            // an untyped reference to that asset.
-
-            if ( typeof component == "string" || component instanceof String ) { // TODO: validate URI
-                component = component.match( /(^@)|(\.vwf$)/ ) ?
-                    { "extends": component } : { source: component };  // TODO: detect component from mime-type instead of extension?
+            if ( componentIsURI( component ) ) {
+                component = component.match( /\.vwf$/ ) ?
+                    { extends: component } : { source: component };  // TODO: detect component from mime-type instead of extension?
+            } else if ( componentIsID( component ) ) {
+                component = { extends: component };
             }
 
             // Fill in the mime type from the source specification if not provided.
 
-            if ( component.source && ! component.type ) { // TODO: validate component
+            if ( component.source && ! component.type ) {  // TODO: validate component
 
                 var match = component.source.match( /\.([^.]*)$/ ); // TODO: get type from mime-type (from server if remote, from os if local, or (?) from this internal table otherwise)
 
@@ -2200,7 +2284,7 @@ if ( vwf.execute( nodeID, "Boolean( this.tick )" ) ) {
 
             // Fill in the component type from the mime type if not provided.
 
-            if ( component.type && ! component.extends ) { // TODO: load from a server configuration file
+            if ( component.type && ! component.extends ) {  // TODO: load from a server configuration file
 
                 switch ( component.type ) {
                     case "application/vnd.unity":

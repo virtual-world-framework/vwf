@@ -181,7 +181,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
-                    return self.kernel.createNode( this.node.id, name, component /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
+                    return self.kernel.createChild( this.node.id, name, component /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
                 }
             } );
 
@@ -267,7 +267,7 @@ node.id = childID; // TODO: move to vwf/model/object
             try {
                 return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
             } catch ( e ) {
-                this.logger.warnc( "initializingNode", childID, propertyName, propertyValue,
+                this.logger.warnc( "initializingNode", childID,
                     "exception in initialize:", exceptionMessage( e ) );
             }
 

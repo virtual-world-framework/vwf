@@ -27,14 +27,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "createNode":
 
-                return function( nodeID, childName, childComponent, when, callback /* ( childID ) */ ) {
+                return function( nodeComponent, when, callback /* ( nodeID ) */ ) {
 
                     if ( when === undefined ) {
-                        return this.kernel[kernelFunctionName]( nodeID, childName, childComponent, function( childID ) {
-                            callback && callback( childID );
+                        return this.kernel[kernelFunctionName]( nodeComponent, function( nodeID ) {
+                            callback && callback( nodeID );
                         } );
                     } else {
-                        this.kernel.plan( nodeID, kernelFunctionName, childName,
+                        this.kernel.plan( undefined, kernelFunctionName, undefined,
                             [ childComponent ], when, callback /* ( result ) */ );
                     }
 
@@ -49,6 +49,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     } else {
                         this.kernel.plan( nodeID, kernelFunctionName, undefined,
                             undefined, when, callback /* ( result ) */ );
+                    }
+
+                };
+
+            case "createChild":
+
+                return function( nodeID, childName, childComponent, when, callback /* ( childID ) */ ) {
+
+                    if ( when === undefined ) {
+                        return this.kernel[kernelFunctionName]( nodeID, childName, childComponent, function( childID ) {
+                            callback && callback( childID );
+                        } );
+                    } else {
+                        this.kernel.plan( nodeID, kernelFunctionName, childName,
+                            [ childComponent ], when, callback /* ( result ) */ );
                     }
 
                 };
