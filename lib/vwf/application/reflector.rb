@@ -42,9 +42,9 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     fields = {
       "time" => session[:transport].time,
-      "node" => 0,
+      "node" => nil,
       "action" => "createNode",
-      "parameters" => [ nil, env["vwf.application"] ]
+      "parameters" => [ env["vwf.application"] ]
     }
 
     send JSON.generate fields

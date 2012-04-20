@@ -112,14 +112,14 @@
             prototype.properties = prototype.properties || {};
             prototype.properties.test = prototype.properties.test || null;
 
-            vwf.createNode( 0, unique_name( "prototype" ), prototype, function( prototypeID ) {
+            vwf.createNode( prototype, function( prototypeID ) {
 
-                node.extends = "@\"" + prototypeID + "\"";
+                node.extends = prototypeID;
 
                 node.properties = node.properties || {};
                 node.properties.test = node.properties.test || null;
 
-                vwf.createNode( 0, unique_name( "node" ), node, function( nodeID ) {
+                vwf.createChild( 0, unique_name( "node" ), node, function( nodeID ) {
                     callback( nodeID, prototypeID );
                 } );
 

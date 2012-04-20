@@ -152,7 +152,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createNode( 0, unique_name( "node" ), {
+            vwf.createChild( 0, unique_name( "node" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -188,16 +188,16 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( 0, unique_name( "base" ), {
+            vwf.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
               methods: { base: "return 'base-' + this.id", },
 
             }, function( baseID ) {
 
-              vwf.createNode( 0, unique_name( "derived" ), {
+              vwf.createNode( {
 
-                extends: "@" + JSON.stringify( baseID ),
+                extends: baseID,
                 methods: { derived: "return 'derived-' + this.id", },
 
               }, function( derivedID ) {

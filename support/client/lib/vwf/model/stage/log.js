@@ -33,7 +33,11 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             switch ( kernelFunctionName ) {
 
-                case "createNode": // nodeID, childName, childComponent, callback /* ( childID ) */
+                case "createNode": // nodeComponent, callback /* ( nodeID ) */
+                    objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // nodeComponent
+                    break;
+
+                case "createChild": // nodeID, childName, childComponent, callback /* ( childID ) */
                     objectIsComponent( logees[2] ) && ( logees[2] = JSON.stringify( loggableComponent( logees[2] ) ) ); // childComponent
                     break;
 
