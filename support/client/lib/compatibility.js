@@ -43,7 +43,7 @@ function testWS()
         // For single user mode
         //$('#WS').html("<img src='images/warning.png' alt=' ' width='20px'/>WebSockets");
         $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/>WebSockets");
-        $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review documentation for specific <br/>requirements. </span>");
+        $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review <a href='/web/docs/reqs.html'>documentation</a> for specific <br/>requirements. </span>");
         return;
     };
 }
@@ -80,6 +80,6 @@ function updateOverlay()
     // Test to to see if VWF can run
     if(! (testWGL() && testES5()) )
     {
-        $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review documentation for specific <br/>requirements. </span>");
+        $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review <a href='/web/docs/reqs.html'>documentation</a> for specific <br/>requirements. </span>");
     }
 }
