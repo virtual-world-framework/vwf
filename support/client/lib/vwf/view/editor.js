@@ -28,6 +28,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 
             this.nodes = {};
             this.scenes = {};
+            this.allScripts = {};
 
             // EDITOR CLOSED  --> 0
             // HIERARCHY OPEN --> 1
@@ -231,7 +232,24 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         //},
 
-        //executed: [ /* nodeID, scriptText, scriptType */ ],
+        executed: function( nodeID, scriptText, scriptType ) {
+
+            var nodeScript = {
+                text: scriptText,
+                type: scriptType,
+            };
+
+            if ( !this.allScripts[ nodeID ] ) {
+                var nodeScripts = new Array();
+                nodeScripts.push(nodeScript);
+
+                this.allScripts[ nodeID ] = nodeScripts;
+            }
+
+            else {
+                this.allScripts[ nodeID ].push(nodeScript);
+            }
+        },
 
         //ticked: [ /* time */ ],
         
@@ -500,6 +518,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
         }
 
+        // Add node behaviors
         for ( var i = 0; i < node.implementsIDs.length; i++ ) {
             $(topdownTemp).append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
 
@@ -509,6 +528,21 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             
             }); 
             */
+        }
+
+        $(topdownTemp + ' hr:last').css('height', '3px');
+
+        // Add node scripts
+        for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
+        {
+            var scriptFull = this.allScripts[nodeID][i].text;
+            var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+            $(topdownTemp).append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
+            $('#script-' + nodeID + "-" + i).click( function(evt) {
+                var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                viewScript.call(self, id, scriptID);
+            });
         }
 
         $(topdownTemp + ' hr:last').css('height', '3px');
@@ -687,6 +721,35 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         $(topdownTemp + ' hr:last').css('height', '3px');
+    }
+
+    // -- viewScript ------------------------------------------------------------------------
+
+    function viewScript (nodeID, scriptID) // invoke with the view as "this"
+    {
+        var self = this;
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
+        var allScripts = this.allScripts;
+        
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeID + "-back' alt='back'/> script</div>");
+        console.info('#script-' + nodeID + '-back');
+        jQuery('#script-' + nodeID + '-back').click ( function(evt) {
+            var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
+            drillUp.call(self, id);
+        });
+
+        var scriptText = self.allScripts[nodeID][scriptID].text;
+        scriptText = scriptText.replace(/{/g, "{<br />");
+        scriptText = scriptText.replace(/;/g, ";<br />");
+        scriptText = scriptText.replace(/}/g, "}<br />");
+        $(topdownTemp).append("<div class='propEntry'>" + scriptText + "</div><hr>");
+        
+        $(topdownName).hide('slide', {direction: 'left'}, 175); 
+        $(topdownTemp).show('slide', {direction: 'right'}, 175);    
+        
+        this.topdownName = topdownTemp;
+        this.topdownTemp = topdownName;
     }
 
     // -- setParams -------------------------------------------------------------------------
