@@ -217,26 +217,50 @@ input {
 .loading {
   margin:auto;
   color:#FFF;
-  width:200px;
-  height:80px;
+  width:300px;
+  height:200px;
   background:#222;
   opacity:0.9;
   -moz-border-radius: 20px;
   -webkit-border-radius: 20px;
   -khtml-border-radius: 20px;
   border-radius: 20px;
+  font:18px Arial;
   /*visibility: hidden;*/
 }
 
-.loading span {
-  position:relative;
-  top:-18px;
-  left:30px;
-  font:18px Arial;
+.loading p {
+  padding:0px;
+  margin:0px;
 }
 
-.loading img {
+.loadText {
+ position:relative;
+ left:90px;
+ top:10px;
+}
+
+.loadImg {
   position:relative;
-  top:7px;
-  left:38px; 
+  left:82px;
+  top:35px;
+}
+
+.requirements {
+  position:relative;
+  left:60px;
+  top:20px;
+}
+
+.req {
+  font-size:14px;
+  position:relative;
+  left:20px;
+}
+
+.loadError {
+  font-size:14px;
+  position:relative;
+  left:20px;
+  top:30px;
 }
