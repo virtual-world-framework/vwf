@@ -16,24 +16,11 @@ extends: http://vwf.example.com/navscene.vwf
 properties:
   navmode: none
 events:
-  keyDown:	
+  keyDown:
+methods:  
+  newplayer:
+  deleteplayer:
 children:
-  HUMVEE:
-    extends: hmvee.vwf
-    source: matv01_veh.dae
-    type: model/vnd.collada+xml
-    properties:
-      PlayerNumber: 1
-      rotation: [ 1, 0, 0, 90 ]
-      translation: [300,0,0]
-  HUMVEE2:
-    extends: hmvee.vwf
-    source: matv01_veh.dae
-    type: model/vnd.collada+xml
-    properties:
-      PlayerNumber: 2
-      rotation: [ 1, 0, 0, 90 ]
-      translation: [-300,-300,0]
   Terrain:
     extends: http://vwf.example.com/node3.vwf
     source: landscape.dae
@@ -52,7 +39,29 @@ scripts:
 - |
     this.initialize = function(){
       this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,16,616,90,1 ];
-      
-      
+         
+    }
+    this.deleteplayer = function(e)
+    {
+        var num = vwf_view.kernel.kernel.getNode()[e].PlayerNumber;
+        vwf_view.kernel.kernel.deleteNode(e,0,null);
+        var div = document.getElementById("Player " + num + 'label');
+        div.parentNode.removeChild(div);
+    }
+    this.newplayer = function(e)
+    {
+        
+        var proto = JSON.parse(e);
+        
+        //Because SendSelf will create circular messages, don't create a guy who is already created.
+        var newname = "player-"+proto.properties.PlayerNumber;
+        
+        if(!document[proto.properties.PlayerNumber + 'link'])
+        {
+            //When a new player is created, you'll have to let the new guy know that you exist. SendSelf does this.
+            SendSelf();
+            //alert('create' + proto.properties.PlayerNumber);
+            vwf_view.kernel.kernel.createNode('index-vwf',proto , "player-"+proto.properties.PlayerNumber, null);
+        }
     }
    

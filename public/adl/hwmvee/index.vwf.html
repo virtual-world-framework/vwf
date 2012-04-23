@@ -17,17 +17,95 @@
   <head>
     <script type="text/javascript" src="terrainheight.js"></script>
 	<script type="text/javascript" src="terrainfunctions.js"></script> 
+	<script type="text/javascript">
 	
+	var PlayerProto  = { 
+                    
+                    extends: 'hmvee.vwf',
+                    source: 'matv01_veh.dae',
+                    type: 'model/vnd.collada+xml',
+                    properties: {
+                        PlayerNumber: 1,
+						rotation: [ 1, 0, 0, 90 ],
+						translation: [0,0,1],
+						initialPos: [10,10,1],
+						initialRot: [0,0,0,1],
+						initialHealth: 100,
+						initialRotAmt: 0,
+						initialSteerAmt:0,
+						initialWheelRotate:0
+                        },
+                    };
 	
-
-
+	function Begin()
+	{
+		var name = $('#name').val();
+		PlayerProto.properties.PlayerNumber = name;
+		//PlayerProto.id = "player-"+name;
+		document["PlayerNumber"] = name;
+		var parms = new Array();
+		parms.push(JSON.stringify(PlayerProto));
+		//alert(JSON.stringify(parms));
+		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
 		
+		
+		$('#Logon').dialog('close');
+	}
+	function SendSelf()
+	{
+		//Because this will be called on the local client when creating his own player, filter if he is not yet created;
+		if(!document[document.PlayerNumber +'link'])
+		    return;
+		//alert('sendself');
+	    var name = $('#name').val();
+		PlayerProto.properties.PlayerNumber = name;
+		PlayerProto.properties.initialPos[0] = document[document.PlayerNumber +'link'].translation[0];
+		PlayerProto.properties.initialPos[1] = document[document.PlayerNumber +'link'].translation[1];
+		PlayerProto.properties.initialPos[2] = document[document.PlayerNumber +'link'].translation[2];
+		PlayerProto.properties.initialRot[0] = document[document.PlayerNumber +'link'].rotation[0];
+		PlayerProto.properties.initialRot[1] = document[document.PlayerNumber +'link'].rotation[1];
+		PlayerProto.properties.initialRot[2] = document[document.PlayerNumber +'link'].rotation[2];
+		PlayerProto.properties.initialRot[3] = document[document.PlayerNumber +'link'].rotation[3];
+		PlayerProto.properties.initialHealth = document[document.PlayerNumber +'link'].Health;
+		PlayerProto.properties.initialRotAmt = document[document.PlayerNumber +'link'].RotationAmt;
+		PlayerProto.properties.initialSteerAmt = document[document.PlayerNumber +'link'].steerAmt;
+		PlayerProto.properties.initialWheelRotate = document[document.PlayerNumber +'link'].wheelRotate;
+		//PlayerProto.id = "player-"+name;
+		var parms = new Array();
+		parms.push(JSON.stringify(PlayerProto));
+		//alert(JSON.stringify(parms));
+		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
+	//	var x = document[document.PlayerNumber +'link'].translation[0];
+	//	var y = document[document.PlayerNumber +'link'].translation[1];
+	//	var z = document[document.PlayerNumber +'link'].translation[2];
+	//	vwf_view.kernel.setProperty('hmvee-vwf-player-'+document.PlayerNumber, 'translation', [x,y,z]);
+	}
+	function SceneInitialize()
+	{
+		$(window).unload(function(){SceneDestroy();});
+		$('#Logon').dialog({title:'Enter Name',modal:true,buttons:{"Begin Game":function(){Begin();}}});
+	}
+	function SceneDestroy()
+	{
+		
+	    var parms = new Array();
+		parms.push(document[document.PlayerNumber +'link'].id);
+		//alert(JSON.stringify(parms));
+		vwf_view.kernel.callMethod('index-vwf','deleteplayer',parms);
+	}
+	$(document).ready(function(){SceneInitialize();});
+	
+	</script>	
 
 
 
   </head>
   <body>
     
-    
+    <div id='Logon'>
+		<form>
+				<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
+		</form>
+	</div>
   </body>
 </html>
