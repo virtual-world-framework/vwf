@@ -1,2 +1,2 @@
 description:
-  The duck application allows the user to click the image causing the duck to spin.  If the user clicks again, the spinning will stop.
+  ADL's hwmvee application allows the user to drive the hwmvee vehicle around the rough terrain. Use WASD keys to move and steer. 
