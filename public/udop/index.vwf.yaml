@@ -1,28 +1,51 @@
-
 --- 
 extends: http://vwf.example.com/googleEarth.vwf
 properties:
   controlClient: "NONE"
+  planeCount:
+  startDate: 
+  lastSpeedChange:
+  timeMultiplier: 1
+  timeOffset: 0
+  zoomed: false
+  selectedName:
+  disasterView: false
 children:
   earth:
     extends: http://vwf.example.com/node3.vwf
-  uav1:
+  lookAt:
+    extends: http://vwf.example.com/node3.vwf
     properties:
-      model: UAV.dae
-      video: asdf
-  uav2:
+      longitude:
+      latitude:
+      altitude: 
+      altitudeMode: 
+      heading: 
+      tilt: 
+      range: 
+      cameraData:
+  camera:
+    extends: http://vwf.example.com/node3.vwf
     properties:
-      model: UAV.dae
-      video: asdf
+      longitude:
+      latitude:
+      altitude: 
+      altitudeMode: 
+      heading: 
+      tilt: 
+      range: 
+      cameraData: 
 methods:
-  setInstance:
+  loaded:
 scripts:
 - |
-    var earthInstance = undefined;
-    this.setInstance = function(){
-      earthInstance = google.earth.geInstance;
+
+    this.instance = google.earth.geInstance;
+
+    this.loaded = function() {
     }
-    this.initialize = function(){
+
+    this.initialize = function() {
       // the initialize fucntion is called too early
       // reference is not valid yet
       // earthInstance = google.earth.gInstance;
