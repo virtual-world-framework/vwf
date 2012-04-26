@@ -12,11 +12,11 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-#####################################################################################################################
+###################################################################################################
 # This script installs Virtual World Framework on a Debian (Ubuntu) flavor of Linux.
 # This script can be called from a shell prompt using: 
-# sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh  | bash
-#####################################################################################################################
+# sudo bash -x <(curl -s http://www.github.com/support/build/scripts/build_debian.sh)
+###################################################################################################
 
 set -e
 
