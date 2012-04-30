@@ -60,7 +60,7 @@ sudo bundle exec rake build
 sudo gem install thin
 sudo thin install
 sudo /usr/sbin/update-rc.d -f thin defaults
-sudo bundle exec thin config -C /etc/thin/vwf.yml -c /var/www/vwf -e production -p 80
+sudo bundle exec thin config -C /etc/thin/vwf.yml -c /var/www/vwf -e production -p 80 -R /var/www/vwf/config.ru
 sudo service thin stop
 sudo service thin start
 hostname=`hostname -s`
