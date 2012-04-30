@@ -141,7 +141,7 @@ scripts:
             this.createCube = true;      
           }
           if ( newObjName && newObjName != "" ) {
-            this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
+            this.nodesCreated.push( "http-vwf-example-com-physics3-vwf-"+newObjName );
           }
         }
       }
