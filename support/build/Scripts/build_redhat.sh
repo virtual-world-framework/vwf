@@ -60,7 +60,7 @@ sudo gem install thin
 sudo thin install
 sudo mv /etc/rc.d/thin /etc/rc.d/init.d/thin
 sudo /sbin/chkconfig --level 345 thin on
-sudo thin config -C /etc/thin/vwf.yml -c /var/www/vwf -e production -p 80
+sudo thin config -C /etc/thin/vwf.yml -c /var/www/vwf -e production -p 80  -R /var/www/vwf/config.ru
 sudo service thin stop
 sudo service thin start
 hostname=`hostname -s`
