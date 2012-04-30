@@ -14,5 +14,7 @@
 require "init"
 
 map "/" do
+# Uncomment and add your Google Analytics ID to inject website analytics into your VWF server pages.
+# use Rack::GoogleAnalytics, :tracker => 'UA-xxxxxx-x'
   run VWF
 end
