@@ -257,7 +257,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
         // -- initializingNode ---------------------------------------------------------------------
 
-        // Invoke an initialize() function if it exists.
+        // Invoke an initialize() function if one exists.
 
         initializingNode: function( nodeID, childID ) {
 
@@ -355,6 +355,18 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
             return node.name || "";
         },
 
+        // TODO: creatingProperties
+
+        // -- settingProperties --------------------------------------------------------------------
+
+        // settingProperties: function( nodeID, properties ) {
+        // },
+
+        // -- gettingProperties --------------------------------------------------------------------
+
+        // gettingProperties: function( nodeID, properties ) {
+        // },
+
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
@@ -424,6 +436,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             var setter = node.private.setters && node.private.setters[propertyName];
 
+if ( this.disabled ) setter = undefined;
+
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
                     return setter.call( node, propertyValue );
@@ -442,6 +456,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             var node = this.nodes[nodeID];
             var getter = node.private.getters && node.private.getters[propertyName];
+
+if ( this.disabled ) getter = undefined;
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {

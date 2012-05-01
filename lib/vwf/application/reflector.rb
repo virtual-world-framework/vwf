@@ -15,6 +15,15 @@
 require "rack/socket-io/application"
 require "json"
 
+
+# class Array  # TODO: only for debugging
+#   def to_yaml_style
+#     # self.length <= 16 && self.all? { |n| n.kind_of? Numeric } ? :inline : super
+#     self.all? { |n| n.kind_of? Numeric } ? :inline : super
+#   end
+# end
+
+
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def call env
@@ -36,7 +45,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     # Register as a not-yet-synchronized client.
 
     session[:pending_clients] ||= {}
-    session[:pending_clients][self] = true
+    session[:pending_clients][self] = session[:transport].time # true
 
     # Initialize to the application starting state.
 
@@ -47,20 +56,29 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       "parameters" => [ env["vwf.application"] ]
     }
 
+unless clients.length > session[:pending_clients].size
+    # logger.warn "sending createNode to #{id} #{JSON.generate fields}"
     send JSON.generate fields
+end
 
     # Request the current state from a synchronized client.
 
     fields = {
       "time" => session[:transport].time,
-      "node" => 0,
-      "action" => "getNode",
-      "parameters" => []
+      "node" => nil, # "index-vwf", # 0,
+      "action" => "getState",
+      "parameters" => [],  # TODO: omit if not needed?
+      "respond" => true
     }
 
     if clients.length > session[:pending_clients].size
+# logger.warn "sending getState to #{clients.first.id} #{JSON.generate fields}"
+      # clients.first.send( JSON.generate "time" => session[:transport].time, "action" => "hashState", "respond" => true )
       clients.first.send JSON.generate fields
+      # clients.first.send( JSON.generate "time" => session[:transport].time, "action" => "hashState", "respond" => true )
+      # clients.first.send( JSON.generate "time" => session[:transport].time, "action" => "getState", "parameters" => [ true, true ], "respond" => true )
     else
+# logger.warn "not sending getState"
       session[:pending_clients].delete self
     end
 
@@ -70,10 +88,10 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    fields = JSON.parse message
+    fields = JSON.parse message, :max_nesting => 100
 
-    # For a normal message, stamp it with the curent time and originating client and send it to each
-    # client.
+    # For a normal message, stamp it with the curent time and originating client, and send it to
+    # each client.
 
     unless fields["result"]
 
@@ -86,21 +104,41 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     else
 
+      if fields["action"] == "hashState"
+# logger.warn "received hashState from #{id} #{JSON.generate fields}"
+# File.open "log/#{id}", "a" do |file|
+#   file.puts YAML::dump fields
+# end
+
+      end
+
       # When the request for the current state is received, update all unsynchronized clients to the
       # current state. Refresh the synchronized clients as well since the get/set operation may be
       # lossy, and this ensures that every client resumes from the same state.
 
-      if fields["action"] == "getNode"
+      if fields["action"] == "getState"
 
-        fields["time"] = session[:transport].time
-        fields.delete "client"
+# File.open "log/#{id}", "a" do |file|
+#   file.puts YAML::dump fields
+# end
 
-        fields["action"] = "setNode"
+# logger.warn "received getState from #{id} #{JSON.generate fields}"
+
+        # fields["time"] = session[:transport].time  # TODO: hold back time for pending clients, plus save interim messages until synced
+        fields.delete "client"  # TODO: generate a new message instead of cleaning the received one
+
+# fields["node"] = nil
+        fields["action"] = "setState"
         fields["parameters"] = [ fields["result"] ]
         fields.delete "result"
+        fields["respond"] = true
 
-        clients.each do |client| # session[:pending_clients].each do |client, dummy|
-          client.send JSON.generate fields
+        session[:pending_clients].each do |client, dummy| # clients.each do |client|
+# logger.warn "sending setState to #{client.id} #{JSON.generate fields}"
+fields["time"] = session[:pending_clients][client]
+          client.send JSON.generate fields, :max_nesting => 100
+          # client.send( JSON.generate "time" => session[:pending_clients][client], "action" => "hashState", "respond" => true )
+          # client.send( JSON.generate "time" => session[:pending_clients][client], "action" => "getState", "parameters" => [ true, true ], "respond" => true )
         end
 
         session[:pending_clients].clear
