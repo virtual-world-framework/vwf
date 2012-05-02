@@ -68,7 +68,6 @@ children:
               this.powerOn = false;
             }
             this.volume = value;
-            this.bone1.MaxScene.Radio.ic40Volume.rotation = [ 0, 0, 1, 12 * value ];
           }
         value: 0
       speak: "up"
@@ -76,72 +75,72 @@ children:
         set: |
           if ( !this.powerOn ) return;
           switch( value ) {
-            case 1:
+            case 0:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan1_Gon_Von.png";
               this.channel = value;
               break;
-            case 2:
+            case 1:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan2_Gon_Von.png";
               this.channel = value;
               break;
-            case 3:
+            case 2:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan3_Gon_Von.png";
               this.channel = value;
               break;
-            case 4:
+            case 3:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan4_Gon_Von.png";
               this.channel = value;
               break;
-            case 5:
+            case 4:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan5_Gon_Von.png";
               this.channel = value;
               break;
-            case 6:
+            case 5:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan6_Gon_Von.png";
               this.channel = value;
               break;
-            case 7:
+            case 6:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan7_Gon_Von.png";
               this.channel = value;
               break;
-            case 8:
+            case 7:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan8_Gon_Von.png";
               this.channel = value;
               break;
-            case 9:
+            case 8:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan9_Gon_Von.png";
               this.channel = value;
               break;
-            case 10:
+            case 9:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan10_Gon_Von.png";
               this.channel = value;
               break;
-            case 11:
+            case 10:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan11_Gon_Von.png";
               this.channel = value;
               break;
-            case 12:
+            case 11:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan12_Gon_Von.png";
               this.channel = value;
               break;
-            case 13:
+            case 12:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan13_Gon_Von.png";
               this.channel = value;
               break;
-            case 14:
+            case 13:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan14_Gon_Von.png";
               this.channel = value;
               break;
-            case 15:
+            case 14:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan15_Gon_Von.png";
               this.channel = value;
               break;
-            case 16:
+            case 15:
               this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/LCD12_Chan16_Gon_Von.png";
               this.channel = value;
               break;
           }
-        value: 1
+        value: 0
       headphones: false
       anteanna:
         set: |
@@ -413,34 +412,33 @@ children:
                             extends: http://vwf.example.com/mesh.vwf
                   ic40Channel:
                     extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control.vwf
+                    properties: 
+                      controlType: rotate
+                      controlMode: positions
+                      transformIncrement: -18
+                      transformAxis: [0, 0, 1]
+                      maxValue: 15
                     scripts:
                     - |
-                        this.channelDirectionUp = true; 
-                        this.pointerClick = function()  {
-                          var currentChannel = this.parent.parent.parent.parent.channel;
-                          if ( this.channelDirectionUp && currentChannel < 16 ) {
-                            this.parent.parent.parent.parent.channel = currentChannel + 1;
-                            this.rotation = [ 0, 0, 1, -this.parent.parent.parent.parent.channel * 10];
-                            if ( this.parent.parent.parent.parent.channel == 16 )
-                              this.channelDirectionUp = false;
-                          } else {
-                            this.parent.parent.parent.parent.channel = currentChannel - 1;
-                            this.rotation = [ 0, 0, 1, -this.parent.parent.parent.parent.channel * 10];
-                            if ( this.parent.parent.parent.parent.channel == 1 )
-                              this.channelDirectionUp = true;
-                          }
+                        this.pointerUp = function( pointerInfo, pickInfo ) {
+                          this.parent.parent.parent.parent.channel = this.controlValue;
                         }
-                    properties:
-                      rotZ: 0                      
+                        this.pointerMove = function( pointerInfo, pickInfo ) {
+                          this.parent.parent.parent.parent.channel = this.controlValue;
+                        }
                   ic40Down:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0.03, 0, 0 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0.03, 0, 0 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.down();
                         }
                   ic40Monitor:
@@ -451,85 +449,107 @@ children:
                   ic40P0:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.p0();
                         }                
                   ic40P1:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.p1();
                         }                  
                   ic40P2:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.p2();
                         }                  
                   ic40P3:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0, 0.03, 0 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0.03, 0 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.p3();
                         }                  
                   ic40PTT:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0.04, 0, 0 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0.04, 0, 0 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.ptt();
                         }                  
                   ic40Red:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0, 0, -0.02 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0, 0, -0.02 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.red();
                         }                 
                   ic40Up:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/translate-on-down.vwf
+                    - http://vwf.example.com/control.vwf
                     properties:
-                      translate-vector: [ 0.04, 0, 0 ]
+                      controlType: translate
+                      controlMode: momentary
+                      transformAxis: [ 0.04, 0, 0 ]
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.parent.parent.parent.parent.up();
                         }
                   ic40Volume:
                     extends: http://vwf.example.com/node3.vwf
+                    implements:
+                    - http://vwf.example.com/control.vwf
+                    properties:
+                      rotation: [0, 0, 1, 0]
+                      controlType: rotate
+                      controlMode: positions
+                      transformIncrement: 12
+                      transformAxis: [0, 0, 1]
                     scripts:  
                     - | 
-                        this.pointerClick = function()  {
+                        this.pointerUp = function()  {
                           if ( this.parent.parent.parent.parent.volume == 0 ) {
                             this.parent.parent.parent.parent.volume = 1;
                           } else {
@@ -559,7 +579,7 @@ children:
                       speed: 1
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.playing = !this.playing 
                         }               
                     children:
@@ -587,7 +607,7 @@ children:
                           speed: 1
                         scripts:
                         - |
-                            this.pointerClick = function() {
+                            this.pointerUp = function() {
                               this.playing = !this.playing 
                             }                      
                         children:
@@ -607,7 +627,7 @@ children:
                       speed: 1
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.playing = !this.playing 
                         }                 
                     children:
@@ -627,7 +647,7 @@ children:
                       speed: 1
                     scripts:
                     - |
-                        this.pointerClick = function() {
+                        this.pointerUp = function() {
                           this.playing = !this.playing 
                         }                    
                     children:
