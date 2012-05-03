@@ -416,10 +416,11 @@ children:
                     - http://vwf.example.com/control.vwf
                     properties: 
                       controlType: rotate
-                      controlMode: positions
+                      controlMode: continuous
                       transformIncrement: -18
                       transformAxis: [0, 0, 1]
                       maxValue: 15
+                      dragSpeed: 20
                     scripts:
                     - |
                         this.pointerUp = function( pointerInfo, pickInfo ) {

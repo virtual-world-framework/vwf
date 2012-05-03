@@ -88,6 +88,9 @@ properties:
           break;
       }
     value: 1
+  # dragSpeed: How quickly the object will move when the mouse is dragged. Larger values result in faster dragging. 
+  # A value of 1 would mean that the mouse would have to be dragged from one side of the screen to increment the controlValue.
+  dragSpeed: 50
 methods:
   init:
   deltaTranslation: 
@@ -156,6 +159,10 @@ scripts:
       if(this.input.previous.pointerInfo == undefined) {
         this.controlValue = this.controlValue + this.direction;
       }
+      else if (this.controlMode == "continuous") {
+        this.direction = (Math.round(this.controlValue) >= this.controlValue) ? 1 : -1;
+        this.controlValue = Math.round(this.controlValue);
+      }
       this.input.clear();
     }
   }
@@ -163,28 +170,70 @@ scripts:
     if(this.controlMode != "momentary") {
       this.input.update( pointerInfo, pickInfo );
       var diff = this.input.change();
+      var speed = 1 / this.dragSpeed;
 
-      if(diff[0] > 0.02 && this.controlValue < this.maxValue) {
-        this.direction = 1;
-        this.controlValue = this.controlValue + 1;
-        this.input.previous.pointerInfo = pointerInfo;
-        this.input.previous.pickInfo = pickInfo;
+      // If in positions mode, wait until the change in mouse position is greater than 1/dragSpeed, then increment or decrement controlValue based on the direction of mouse movement.
+      if(this.controlMode == "positions") {
+        if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
+          if(diff[0] > speed && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            this.controlValue = this.controlValue + 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+          else if(diff[0] < (speed * -1) && this.controlValue > this.minValue) {
+            this.direction = -1;
+            this.controlValue = this.controlValue - 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+        }
+        else {
+          if(diff[1] > speed && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            this.controlValue = this.controlValue + 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+          else if(diff[1] < (speed * -1) && this.controlValue > this.minValue) {
+            this.direction = -1;
+            this.controlValue = this.controlValue - 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+        }
       }
-      else if(diff[0] < -0.02 && this.controlValue > this.minValue) {
-        this.direction = -1;
-        this.controlValue = this.controlValue - 1;
-        this.input.previous.pointerInfo = pointerInfo;
-        this.input.previous.pickInfo = pickInfo;
-      }
-      else if(diff[1] > 0.02 && this.controlValue < this.maxValue) {
-        this.direction = 1;
-        this.controlValue = this.controlValue + 1;
-        this.input.previous.pointerInfo = pointerInfo;
-        this.input.previous.pickInfo = pickInfo;
-      }
-      else if(diff[1] < -0.02 && this.controlValue > this.minValue) {
-        this.direction = -1;
-        this.controlValue = this.controlValue - 1;
+      else if(this.controlMode == "continuous") {
+        if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
+          var changeBy = diff[0] * this.dragSpeed;
+          if(diff[0] > 0 && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            if((this.controlValue + changeBy) < this.maxValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+          else if(diff[0] < 0 && this.controlValue > this.minValue) {
+            this.direction = -1;
+            if((this.controlValue + changeBy) > this.minValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+        }
+        else {
+          var changeBy = diff[1] * this.dragSpeed;
+          if(diff[1] > 0 && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            if((this.controlValue + changeBy) < this.maxValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+          else if(diff[1] < 0 && this.controlValue > this.minValue) {
+            this.direction = -1;
+            if((this.controlValue + changeBy) > this.minValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+        }
         this.input.previous.pointerInfo = pointerInfo;
         this.input.previous.pickInfo = pickInfo;
       }
@@ -200,24 +249,31 @@ scripts:
     this.rotateBy([this.transformAxis[0], this.transformAxis[1], this.transformAxis[2], (incrementBy * this.transformIncrement)]);
   }
   this.deltaScale = function(incrementBy) {
-    var scale = [1, 1, 1];
+    var newScale = [1, 1, 1];
+    var scaleFactor = Math.pow(Math.abs(this.transformIncrement), incrementBy);
     if(this.transformAxis[0] > 0) {
-      scale[0] = (this.transformAxis[0] * this.transformIncrement * incrementBy);
-      if(scale[0] < 0) {
-        scale[0] = 1 / Math.abs(scale[0]);
+      if(this.transformIncrement > 0) {
+        newScale[0] = newScale[0] * scaleFactor;
+      }
+      else {
+        newScale[0] = newScale[0] / scaleFactor;
       }
     }
     if(this.transformAxis[1] > 0) {
-      scale[1] = (this.transformAxis[1] * this.transformIncrement * incrementBy);
-      if(scale[1] < 0) {
-        scale[1] = 1 / Math.abs(scale[1]);
+      if(this.transformIncrement > 0) {
+        newScale[1] = newScale[1] * scaleFactor;
+      }
+      else {
+        newScale[1] = newScale[1] / scaleFactor;
       }
     }
     if(this.transformAxis[2] > 0) {
-      scale[2] = (this.transformAxis[2] * this.transformIncrement * incrementBy);
-      if(scale[2] < 0) {
-        scale[2] = 1 / Math.abs(scale[2]);
+      if(this.transformIncrement > 0) {
+        newScale[2] = newScale[2] * scaleFactor;
+      }
+      else {
+        newScale[2] = newScale[2] / scaleFactor;
       }
     }
-    this.scaleBy(scale);
+    this.scaleBy(newScale);
   }
