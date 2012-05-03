@@ -47,6 +47,7 @@ scripts:
         vwf_view.kernel.kernel.deleteNode(e,0,null);
         var div = document.getElementById("Player " + num + 'label');
         div.parentNode.removeChild(div);
+        document[num + 'link'] = null;
     }
     this.newplayer = function(e)
     {

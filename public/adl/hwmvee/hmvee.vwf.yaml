@@ -197,7 +197,9 @@ scripts:
                   });
                 if(this.Health < 1)
                 {
-                  // $('<div/>').dialog({title:'Game Over!',modal:true});
+                 SceneDestroy();
+                 LogFailure();
+                 $('#Logon').dialog({title:'Game Over!',modal:true,buttons:{"Respawn":function(){$('#Logon').dialog('close');Begin();}}});
                 }
              }
                  
@@ -421,7 +423,15 @@ scripts:
                   //vwf_view.kernel.setProperty(this.id, 'wheelRotate',this.wheelRotate -.01 * this.Momentum);
                   this.wheelRotate=this.wheelRotate -.01 * this.Momentum;
                       
-                  var front = GLGE.mulMat4Vec3(GLGE.angleAxis(angle,axis),[0,0,-this.Momentum*.007]);
+                    
+                  var front = GLGE.mulMat4Vec3(GLGE.angleAxis(angle,axis),[0,0,1]);
+                  var flat = document.TerrainFunctions.normalize([0,0,1]);
+                  var slope = GLGE.dotVec3(front,flat);
+                  
+                  this.Momentum += (slope*.25);
+                  var speedforward  =-this.Momentum*.007;  
+                  
+                  front = GLGE.scaleVec3(front,speedforward);
                   //vwf_view.kernel.setProperty(this.id, 'position' , [this.position[0] + front[0],this.position[1] + front[1],z + front[2]]);
                   this.translation = [this.translation[0] + front[0],this.translation[1] + front[1],z + front[2]]   
                   this.turn(1);
