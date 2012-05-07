@@ -473,13 +473,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         for ( var nodeID in this.active ) {
                             activeObj = this.active[nodeID];
                             if ( activeObj && activeObj.jlObj ) {
-                                var pos = activeObj.jlObj.get_currentState().position;
-                                var trans1 = GLGE.Mat4( activeObj.jlObj.get_currentState().get_orientation().glmatrix );
-                                trans1[12] = pos[0];
-                                trans1[13] = pos[1];
-                                trans1[14] = pos[2];
-                                var trans2 = activeObj.jlObj.get_Transform();
-                                this.kernel.setProperty( nodeID, "transform", trans2 );
+                                var trans = activeObj.jlObj.get_Transform();
+                                this.kernel.setProperty( nodeID, "transform", trans );
                             }
                         }
                         this.updating = false;
@@ -561,7 +556,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 if ( node.jigLibObj ) {
                     scene.system.addBody( node.jigLibObj );
-                    if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] )
+                    if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] );
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
                     this.active[ nodeID ].offset = offset;
@@ -612,6 +607,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 node.jigLibObj = new jigLib.JSphere( null, raduis );
                 if ( node.jigLibObj ) {
                     scene.system.addBody( node.jigLibObj );
+					if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] );
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
                     this.active[ nodeID ].offset = this.kernel.getProperty( nodeID, "centerOffset" ) || [ 0, 0, 0 ];
@@ -659,7 +655,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         jMesh.createMesh( verts, vertIndices );
 
                         scene.system.addBody( jMesh );
-                        //if ( pos ) jMesh.moveTo( pos );
+                        if ( pos ) jMesh.moveTo( [ pos[0], pos[1], pos[2] ] );
                     }
                 }
             }
@@ -675,6 +671,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var scene = this.scenes[ node.sceneID ];
             if ( scene ) {
                 var normal = [0, 0, 1, 0];
+				var pos = this.kernel.getProperty( nodeID, "translation" )|| [ 0, 0, 0 ];
                 if ( physicsDef.constructor == Array ) {
                     switch ( physicsDef.length ) {
                         case "2":
@@ -699,6 +696,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 node.jigLibObj = new jigLib.JPlane( null, normal );
 
                 scene.system.addBody( node.jigLibObj );
+				if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] );
             }
         }
     }

@@ -56,7 +56,6 @@ scripts:
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
         } 
@@ -71,7 +70,6 @@ scripts:
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ], 
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
         } 
@@ -143,7 +141,7 @@ scripts:
             this.createCube = true;      
           }
           if ( newObjName && newObjName != "" ) {
-            this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
+            this.nodesCreated.push( "http-vwf-example-com-physics3-vwf-"+newObjName );
           }
         }
       }

@@ -102,6 +102,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                 node.earth = gg.earth;
                                 gg.earth.createInstance( "map3d", function(instance) {
                                     
+                                    gg.earth.geInstance = instance;
                                     node.earthInst = instance;
                                     node.earthInst.getWindow().setVisibility(true);
     
@@ -145,6 +146,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                         }  
 
                                     });
+
+                                    view.kernel.callMethod( nodeID, "loaded", [] );
 
                                 }, function(errorCode) {
                                     this.logger.info( "google earth load error: " + errorCode );

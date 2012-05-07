@@ -39,4 +39,17 @@ children:
       heading: 
       tilt: 
       range: 
-      cameraData: 
+      cameraData:
+methods:
+  setInstance:
+scripts:
+- |
+    var earthInstance = undefined;
+    this.setInstance = function(){
+      earthInstance = google.earth.geInstance;
+    }
+    this.initialize = function(){
+      // the initialize fucntion is called too early
+      // reference is not valid yet
+      // earthInstance = google.earth.gInstance;
+    } //@ sourceURL=googleEarthApp.vwf
