@@ -402,7 +402,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         // Add the message to the queue.
 
-                        vwf.queue( fields );
+                        // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                            vwf.queue( fields );
+                        // }
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -423,7 +425,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 } );
 
-                socket.on( "disconnect", function() { vwf.logger.info( "vwf.socket disconnected" ) } );
+                socket.on( "disconnect", function() {
+
+                    vwf.logger.info( "vwf.socket disconnected" );
+
+                } );
 
                 socket.on( "error", function() { 
 
@@ -640,7 +646,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Advance the time.
 
-                this.now = fields.time;
+                if ( this.now != fields.time ) {
+                    this.now = fields.time;
+                    this.tick();
+                }
 
                 // Record the originating client.
 
@@ -656,17 +665,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     }
                 } );
 
-                // Tick after the last message, or after the last message before the time advances.
-
-                if ( queue.ready && ( queue.length == 0 || queue[0].time != this.now ) ) {
-                    this.tick();
-                }
-
             }
 
             // Set the simulation time to the new current time. Tick if the time advances.
 
-            if ( queue.ready && queue.time != this.now ) {
+            if ( queue.ready && this.now != queue.time ) {
                 this.now = queue.time;
                 this.tick();
             }
@@ -676,6 +679,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // -- tick ---------------------------------------------------------------------------------
 
         // Tick each tickable model, view, and node. Ticks are sent on each time change.
+
+        // TODO: remove, in favor of drivers and nodes exclusively using future scheduling;
+        // TODO: otherwise, all clients must receive exactly the same ticks at the same times.
 
         this.tick = function() {
 
