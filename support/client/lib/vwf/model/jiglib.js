@@ -79,53 +79,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           
         },
 
-        // -- initializingNode ---------------------------------------------------------------------
-
-        // Invoke an initialize() function if one exists.
-
-        initializingNode: function( nodeID, childID ) {
-
-            var scene = this.scenes[ childID ];
-            var node = this.nodes[ childID ];
-
-            if ( scene && scene.system ) {
-// vwf.log( "initializingNode scene", nodeID, childID, scene.initialized, this.enabled );
-                if ( !scene.initialized ) {
-                    initializeScene.call( this, scene );
-                }
-                this.enabled = true;
-
-            } else if ( node ) {
-// vwf.log( "initializingNode node", nodeID, childID, node.privateprivate );
-                if ( node.jigLibObj && node.privateprivate ) {
-
-// vwf.log( "initializingNode node jibLigObj before", nodeID, childID, node.jigLibObj );
-
-                    node.jigLibObj._currState.position = node.privateprivate._currState.position.slice(0);
-                    node.jigLibObj._currState.set_orientation( new jigLib.Matrix3D( node.privateprivate._currState._orientation.glmatrix ) );
-                    node.jigLibObj._currState.linVelocity = node.privateprivate._currState.linVelocity.slice(0);
-                    node.jigLibObj._currState.rotVelocity = node.privateprivate._currState.rotVelocity.slice(0);
-
-                    node.jigLibObj._oldState.position = node.privateprivate._oldState.position.slice(0);
-                    node.jigLibObj._oldState.set_orientation( new jigLib.Matrix3D( node.privateprivate._oldState._orientation.glmatrix ) );
-                    node.jigLibObj._oldState.linVelocity = node.privateprivate._oldState.linVelocity.slice(0);
-                    node.jigLibObj._oldState.rotVelocity = node.privateprivate._oldState.rotVelocity.slice(0);
-
-                    node.jigLibObj._velChanged = node.privateprivate._velChanged;
-
-                    node.jigLibObj._storedPositionForActivation = node.privateprivate._storedPositionForActivation.slice(0);
-                    node.jigLibObj._lastPositionForDeactivation = node.privateprivate._lastPositionForDeactivation.slice(0);
-
-// vwf.log( "initializingNode node jibLigObj after", nodeID, childID, node.jigLibObj );
-
-                    delete node.privateprivate;
-                }
-
-            }
-    
-            return undefined;
-        },
-
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
@@ -273,11 +226,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var activeNode  = this.active[ nodeID ];
             var node = this.nodes[ nodeID ];
-            var scene = this.scenes[ nodeID ];
+            var scene = this.scenes[ nodeID ]
 
             if ( node && node.jigLibObj ) {
-
-// nodeID.match( /-cube/ ) && vwf.log( "setProperty", nodeID, propertyName, propertyValue );
 
                 scene = this.scenes[ node.sceneID ];  
                 switch ( propertyName ) {
@@ -322,19 +273,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     node.jigLibObj.set_linVelocityDamping( propertyValue );
                     break; 
                 case "velocity":
-                    //console.info( nodeID + ".velocity = " + propertyValue );
+                    console.info( nodeID + ".velocity = " + propertyValue );
                     node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
-                    break;
-                case "private":
-                    node.privateprivate = propertyValue;
-                    break;
-                // case "oldState":
-// if ( propertyValue ) {
-//                     node.jigLibObj._oldState.position = propertyValue.position.slice(0);
-// console.warn( "oldState", nodeID, node.jigLibObj._oldState.position, propertyValue.position );
-// }
-// node.oldState = propertyValue;
-//                     break;
+                    break;                        
                 }
             } else if ( node && !scene ) {
                 scene = this.scenes[ node.sceneID ];
@@ -399,23 +340,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 }           
                                 break;
                             }
-                        // case "activeBodies":
-                        //     var result = propertyValue;
-                        //     var activeBodies = scene.system._activeBodies;
-                        //     for ( var i = 0; i < ( propertyValue || [] ).length; i++ ) {
-                        //         if ( i < activeBodies.length ) {
-                        //             var oldState = activeBodies[i]._oldState;
-                        //             oldState.position = propertyValue[i]._oldState.position.slice(0);
-                        //         }
-                        //     }
-                        //     break;
-                        // case "loadDone":
-                        //     if ( propertyValue && !scene.initialized ) {
-                        //         initializeScene.call( this, scene ); 
-                        //     }
-                        //     this.enabled = propertyValue;
-                        //     //this.enabled = false;
-                        //     break;
+                        case "loadDone":
+                            if ( propertyValue && !scene.initialized ) {
+                                initializeScene.call( this, scene ); 
+                            }
+                            this.enabled = propertyValue;
+                            //this.enabled = false;
+                            break;
                     }
                 }
             }
@@ -475,18 +406,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         //                    case "velocity":
         //                       propertyValue = node.jigLibObj.getVelocity( node.jigLibObj.get_position() );
         //                       break;
-                    case "private":
-                        propertyValue = {
-                            _currState: node.jigLibObj._currState,
-                            _oldState: node.jigLibObj._oldState,
-                            _velChanged: node.jigLibObj._velChanged,
-                            _storedPositionForActivation: node.jigLibObj._storedPositionForActivation,
-                            _lastPositionForDeactivation: node.jigLibObj._lastPositionForDeactivation,
-                        }
-                        break;
-                    // case "oldState":
-                    //     propertyValue = node.jigLibObj._oldState;
-                    //     break;
                     }
                 }
             } else if ( this.scenes[ nodeID ] ) {
@@ -499,19 +418,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         case "collisionSystem":
                             propertyValue = undefined;
                             break;
-                        // case "activeBodies":
-                        //     var result = [];
-                        //     var activeBodies = sceneNode.system._activeBodies;
-                        //     for ( var i = 0; i < activeBodies.length; i++ ) {
-                        //         var oldState = activeBodies[i]._oldState;
-                        //         result.push( {
-                        //             _oldState: {
-                        //                 position: oldState.position
-                        //             }
-                        //         } );
-                        //     }
-                        //     propertyValue = result;
-                        //     break;
                     }
                 }
                 
@@ -567,9 +473,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         for ( var nodeID in this.active ) {
                             activeObj = this.active[nodeID];
                             if ( activeObj && activeObj.jlObj ) {
-                                var trans = activeObj.jlObj.get_Transform();
-                                this.kernel.setProperty( nodeID, "transform", trans );
-// vwf.log( nodeID, "transform", trans );
+                                var pos = activeObj.jlObj.get_currentState().position;
+                                var trans1 = GLGE.Mat4( activeObj.jlObj.get_currentState().get_orientation().glmatrix );
+                                trans1[12] = pos[0];
+                                trans1[13] = pos[1];
+                                trans1[14] = pos[2];
+                                var trans2 = activeObj.jlObj.get_Transform();
+                                this.kernel.setProperty( nodeID, "transform", trans2 );
                             }
                         }
                         this.updating = false;
@@ -651,7 +561,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 if ( node.jigLibObj ) {
                     scene.system.addBody( node.jigLibObj );
-                    if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] );
+                    if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] )
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
                     this.active[ nodeID ].offset = offset;
@@ -702,7 +612,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 node.jigLibObj = new jigLib.JSphere( null, raduis );
                 if ( node.jigLibObj ) {
                     scene.system.addBody( node.jigLibObj );
-					if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] );
                     this.active[ nodeID ] = {};
                     this.active[ nodeID ].jlObj = node.jigLibObj;
                     this.active[ nodeID ].offset = this.kernel.getProperty( nodeID, "centerOffset" ) || [ 0, 0, 0 ];
@@ -750,7 +659,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         jMesh.createMesh( verts, vertIndices );
 
                         scene.system.addBody( jMesh );
-                        if ( pos ) jMesh.moveTo( [ pos[0], pos[1], pos[2] ] );
+                        //if ( pos ) jMesh.moveTo( pos );
                     }
                 }
             }
@@ -766,7 +675,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var scene = this.scenes[ node.sceneID ];
             if ( scene ) {
                 var normal = [0, 0, 1, 0];
-				var pos = this.kernel.getProperty( nodeID, "translation" )|| [ 0, 0, 0 ];
                 if ( physicsDef.constructor == Array ) {
                     switch ( physicsDef.length ) {
                         case "2":
@@ -791,7 +699,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 node.jigLibObj = new jigLib.JPlane( null, normal );
 
                 scene.system.addBody( node.jigLibObj );
-				if ( pos ) node.jigLibObj.moveTo( [ pos[0], pos[1], pos[2] ] );
             }
         }
     }
@@ -919,8 +826,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
                         break;    
                 }
-            }
-
+            }                      
         }
     }
 

@@ -59,7 +59,7 @@ module Rack
         # end
 
       end
-
+  
       def broadcast message, log = true
 
         log and logger.debug "Rack::SocketIO::Application#broadcast #{ object_id } #{ message_for_log message }"

@@ -37,8 +37,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.objects[childID] = {
 
-                name: childName,
-
                 id: childID,
                 extends: childExtendsID,
                 implements: childImplementsIDs,
@@ -48,10 +46,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 properties: {},
 
-                initialized: false,
-                changed: false, // any changes since initialization?
-                added: false, // added since parent's initialization?
-
             };
 
         },
@@ -59,15 +53,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- initializingNode ---------------------------------------------------------------------
 
         initializingNode: function( nodeID, childID ) {
-
-            this.objects[childID].changed = false;
-            this.objects[childID].initialized = true;
-
-            if ( nodeID != 0 && this.objects[nodeID].initialized ) {
-                this.objects[childID].changed = true;
-                this.objects[childID].added = true;
-            }
-
         },
 
         // -- deletingNode -------------------------------------------------------------------------
@@ -90,13 +75,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- addingChild --------------------------------------------------------------------------
 
-        addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-        },
-
-        // -- removingChild ------------------------------------------------------------------------
-
-        removingChild: function( nodeID, childID ) {
-        },
+        //addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
+        //},
 
         // TODO: creatingProperties
 
@@ -117,8 +97,6 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
                 node_properties[propertyName] = properties[propertyName];
 
             }
-
-            this.objects[nodeID].changed = true;
 
             return node_properties;
         },
@@ -146,7 +124,6 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-            this.objects[nodeID].changed = true;
             return this.objects[nodeID].properties[propertyName] = propertyValue;
         },
 
@@ -154,49 +131,6 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
             return this.objects[nodeID].properties[propertyName];
-        },
-
-        // -- name_source_type ---------------------------------------------------------------------
-
-        name_source_type: function( nodeID, result ) {
-
-            result = result || {};
-
-            var object = this.objects[nodeID];
-
-            if ( object ) {
-                result.name = object.name;
-                result.source = object.source;
-                result.type = object.type;
-            }
-
-            return result;
-        },
-
-        // -- changed ------------------------------------------------------------------------------
-
-        changed: function( nodeID ) {
-
-            var object = this.objects[nodeID];
-
-            if ( object ) {
-                return object.changed;
-            }
-
-            return undefined;
-        },
-
-        // -- added --------------------------------------------------------------------------------
-
-        added: function( nodeID ) {
-
-            var object = this.objects[nodeID];
-
-            if ( object ) {
-                return object.added;
-            }
-
-            return undefined;
         },
 
     } );

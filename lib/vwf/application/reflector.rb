@@ -11,6 +11,7 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+
 require "rack/socket-io/application"
 require "json"
 
@@ -32,40 +33,33 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     schedule_tick
 
-    # Use a consistent timestamp for the synchronization messages.
-
-    time = session[:transport].time
-
     # Register as a not-yet-synchronized client.
 
     session[:pending_clients] ||= {}
-    session[:pending_clients][self] = [ time ] # save the client's starting time
+    session[:pending_clients][self] = true
 
     # Initialize to the application starting state.
 
-    fields_createNode = {
-      "time" => time,
+    fields = {
+      "time" => session[:transport].time,
+      "node" => nil,
       "action" => "createNode",
       "parameters" => [ env["vwf.application"] ]
     }
 
-    unless clients.length > session[:pending_clients].size
-      send fields_createNode
-    end
+    send JSON.generate fields
 
     # Request the current state from a synchronized client.
 
-    fields_getState = {
-      "time" => time,
-      "action" => "getState",
-      "respond" => true
+    fields = {
+      "time" => session[:transport].time,
+      "node" => 0,
+      "action" => "getNode",
+      "parameters" => []
     }
 
     if clients.length > session[:pending_clients].size
-      # clients.first.send "time" => time, "action" => "hashState", "respond" => true
-      clients.first.send fields_getState
-      # clients.first.send "time" => time, "action" => "hashState", "respond" => true
-      # clients.first.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
+      clients.first.send JSON.generate fields
     else
       session[:pending_clients].delete self
     end
@@ -76,50 +70,37 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    fields = JSON.parse message, :max_nesting => 100
+    fields = JSON.parse message
 
-    # For a normal message, stamp it with the curent time and originating client, and send it to
-    # each client.
+    # For a normal message, stamp it with the curent time and originating client and send it to each
+    # client.
 
     unless fields["result"]
 
-      broadcast fields.merge "time" => session[:transport].time, "client" => id  # TODO: allow future times on incoming fields["time"] and queue until needed
-        
+      fields["time"] = session[:transport].time  # TODO: allow future times on incoming fields["time"] and queue until needed
+      fields["client"] = id
+
+      broadcast JSON.generate fields
+
     # Handle messages where the client returned a result to the server.
 
     else
-
-      # log fields, :receive
 
       # When the request for the current state is received, update all unsynchronized clients to the
       # current state. Refresh the synchronized clients as well since the get/set operation may be
       # lossy, and this ensures that every client resumes from the same state.
 
-      if fields["action"] == "getState"
+      if fields["action"] == "getNode"
 
-        fields_setState = {
-          "time" => nil, # updated per client
-          "action" => "setState",
-          "parameters" => [ fields["result"] ]
-        }
+        fields["time"] = session[:transport].time
+        fields.delete "client"
 
-        session[:pending_clients].each do |client, messages| # clients.each do |client|
+        fields["action"] = "setNode"
+        fields["parameters"] = [ fields["result"] ]
+        fields.delete "result"
 
-          time = messages.shift # the first slot stores the client's starting time
-
-          # Set the state in the new client.
-
-          client.send fields_setState.merge "time" => time
-          # client.send "time" => time, "action" => "hashState", "respond" => true
-          # client.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
-
-          # Deliver any messages that arrived after the client joined but before we received the
-          # state from the reference client.
-
-          messages.each do |fields_pending|
-            client.send fields_pending.merge "time" => time
-          end
-
+        clients.each do |client| # session[:pending_clients].each do |client, dummy|
+          client.send JSON.generate fields
         end
 
         session[:pending_clients].clear
@@ -142,120 +123,6 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     cancel_tick
 
     super
-
-  end
-
-  # Override the socket.io #send to accept messages as a fields hash and to record a detailed log
-  # when enabled.
-
-  def send message, log = true
-
-    if Hash === message # magic when passed a fields Hash
-
-      fields = message
-      message = JSON.generate fields, :max_nesting => 100
-
-      # log fields, :send if log
-      super message, log
-
-    else # otherwise the socket.io default
-      super
-    end
-
-  end
-
-  # Override the socket.io #broadcast to accept messages as a fields hash, record a detailed log for
-  # each client when enabled, and to store messages for pending clients to be delivered once the
-  # client is ready.
-
-  def broadcast message, log = true
-
-    if Hash === message # magic when passed a fields Hash
-
-      fields = message
-      message = JSON.generate fields, :max_nesting => 100
-
-      logger.debug "VWF::Application::Reflector#broadcast #{ object_id } #{ message_for_log message }" if log
-
-      clients.each do |client|
-        unless session[:pending_clients][client] # established clients: same as in super
-          next if client.closing
-          # client.log fields, :send if log
-          client.send message, false
-        else # pending clients: save until "setState" sent
-          session[:pending_clients][client].push fields
-        end
-      end
-
-    else # otherwise the socket.io default
-      super
-    end
-
-  end
-
-  # Detailed log of a fields Hash.
-
-  def log fields, direction
-
-    if false  # TODO: provide a configuration option; this is a heavy operation and we only want to use it for trace-level debugging
-
-      # Log to a directory under "log/" matching the application's location in "public/" plus
-      # application/instance/client. Log messages for each unique time to a separate file.
-
-      path = File.join "log", env["vwf.root"][1..100], env["vwf.application"], env["vwf.instance"], id
-
-      FileUtils.mkpath path
-
-      # Timestamp string for the file name and message summary.
-
-      stamp = "%010.4f" % fields["time"]
-
-      # Create or append to the file.
-
-      File.open File.join( path, stamp ), "a" do |file|
-
-        # Filter to summarize the "parameters" array.
-
-        filter = Proc.new do |element|
-          case element
-            when Hash
-              "{ /* pruned */ }"
-            when Array
-              "[ " + element.map do |e|
-                filter.call e
-              end .join( ", ") + " ]"
-            else
-              element.inspect
-          end
-        end
-
-        # Summarize the message as a comment before the YAML document.
-
-        file.puts [
-
-          "#",
-
-          direction == :send ?
-            ">" : "<",
-
-          stamp,
-
-          fields["action"] || "undefined",
-          fields["node"] || "undefined",
-          fields["member"] || "undefined",
-
-          fields["parameters"] ?
-            filter.call( fields["parameters"] ): "undefined"
-
-        ] .join( " " )
-
-        # Write the entire message as a YAML document.
-
-        file.puts YAML::dump fields
-
-      end
-
-    end
 
   end
 
@@ -287,7 +154,7 @@ private
     if clients.length == 1
       transport = session[:transport] = Transport.new
       session[:timer] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
-        transport.playing and broadcast( { :time => transport.time }, false )
+        transport.playing and broadcast JSON.generate( :time => transport.time ), false
       end
       transport.play  # TODO: wait until first client has completed loading  # TODO: wait until all clients are ready for an instructor session
     end

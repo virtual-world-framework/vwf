@@ -4947,12 +4947,10 @@ JAABox.prototype.segmentAABoxOverlap=function(seg){
 	 * @type void
 	 **/
 	RigidBody.prototype.copyCurrentStateToOld=function(){
-// this._type == "BOX" && vwf.log( "copyCurrentStateToOld before", this._id, this._type, this._oldState );
 		this._oldState.position = this._currState.position.slice(0);
 		this._oldState.set_orientation(this._currState.get_orientation().clone());
 		this._oldState.linVelocity = this._currState.linVelocity.slice(0);
 		this._oldState.rotVelocity = this._currState.rotVelocity.slice(0);
-// this._type == "BOX" && vwf.log( "copyCurrentStateToOld after", this._id, this._type, this._oldState );
 	};
 
 	/**
@@ -10184,9 +10182,7 @@ distribution.
 		}
 						
 		var sphere = info.body0;
-		var box = info.body1;
-
-		
+		var box = info.body1;		
 		if (!sphere.hitTestObject3D(box)) 
 			return;
 
@@ -10502,10 +10498,7 @@ distribution.
 	var JNumber3D=jigLib.JNumber3D;
 	var JConstraint=jigLib.JConstraint;
 	var JConfig=jigLib.JConfig;
-	var JSphere=jigLib.JSphere;
-	var MaterialProperties=jigLib.MaterialProperties;
-	var CollPointInfo=jigLib.CollPointInfo;
-	var CollisionInfo=jigLib.CollisionInfo;
+	var JSphere=jigLib.JSphere;	var MaterialProperties=jigLib.MaterialProperties;	var CollPointInfo=jigLib.CollPointInfo;	var CollisionInfo=jigLib.CollisionInfo;
 	 
 	/**
 	 * @author Muzer(muzerly@gmail.com)
@@ -10537,8 +10530,7 @@ distribution.
 	 **/
 	CollDetectSphereSphere.prototype.collDetect=function(info, collArr){
 		var sphere0 = info.body0;
-		var sphere1 = info.body1;
-
+		var sphere1 = info.body1;
 		var oldDelta = Vector3DUtil.subtract(sphere0.get_oldState().position, sphere1.get_oldState().position);
 		var newDelta = Vector3DUtil.subtract(sphere0.get_currentState().position, sphere1.get_currentState().position);
 
@@ -13690,9 +13682,6 @@ distribution.
 		this._doingIntegration = true;
 
 		this.findAllActiveBodies();
-// this._activeBodies.length > 1 && vwf.log( "integration before", require( "vwf/utility" ).transform( this._activeBodies, function( object, index, depth ) {
-// 	return depth > 2 && typeof object == "object" && object != null && ! ( object instanceof Array ) && index[1] != "collisions" && index[1] != "position" && index[1] != "linVelocity" && index[1] != "_oldState" && index[0] != "glmatrix" && index[1] != "_currState" && index[1] != "_storeState" && index[1] != "_edges" || index[0] == "_storeState" ? "pruned" : object;
-// } ) );
 		this.copyAllCurrentStatesToOld();
 
 		this.getAllExternalForces(dt);
@@ -13725,13 +13714,6 @@ distribution.
 		}
 
 		this._doingIntegration = false;
-
-// this._activeBodies.length > 1 && vwf.log( "integration after", require( "vwf/utility" ).transform( this._activeBodies, function( object, index, depth ) {
-// 	return depth > 2 && typeof object == "object" && object != null && ! ( object instanceof Array ) && index[1] != "position" && index[1] != "linVelocity" && index[1] != "_oldState" && index[0] != "glmatrix" && index[1] != "_currState" && index[1] != "_storeState" && index[1] != "_edges" || index[0] == "_storeState" ? "pruned" : object;
-// 	// return depth > 2 && typeof object == "object" && ! ( object instanceof Array ) && index[1] != "collisions" ? "pruned" : object;
-// 	// return depth > 2 && typeof object == "object" && ( ! object instanceof Array ) ? "pruned" : object;
-// } ) );
-
 	};
 	
 	jigLib.PhysicsSystem=PhysicsSystem;
