@@ -79,6 +79,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           
         },
 
+        // -- initializingNode ---------------------------------------------------------------------
+
+        // Invoke an initialize() function if one exists.
+
+        initializingNode: function( nodeID, childID ) {
+
+            var scene = this.scenes[ childID ];
+
+            if ( scene && !scene.initialized ) {
+                initializeScene.call( this, scene );
+            }
+            this.enabled = true;
+    
+            return undefined;
+        },
+
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
@@ -340,13 +356,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 }           
                                 break;
                             }
-                        case "loadDone":
-                            if ( propertyValue && !scene.initialized ) {
-                                initializeScene.call( this, scene ); 
-                            }
-                            this.enabled = propertyValue;
-                            //this.enabled = false;
-                            break;
                     }
                 }
             }
