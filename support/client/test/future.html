@@ -108,10 +108,10 @@
                     deepEqual( vwf.execute( fixtureID, "this.property" )[ time1 ], [ "tick" ], "tick when a future action executes" ) } },
 
                 { absolute: time2, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time2 ], [ "one", "tick" ], "tick is after the future action" ) } },
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time2 ], [ "tick", "one" ], "tick is before the future action" ) } },
 
                 { absolute: time3, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time3 ], [ "two", "three", "tick" ], "one tick per group of future actions" ) } },
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time3 ], [ "tick", "two", "three" ], "one tick per group of future actions" ) } },
 
                 { absolute: timeStop, assertion: function() {
                     deepEqual( vwf.execute( fixtureID, "this.property" )[ timeStop ], [ "tick" ], "one tick with the future action at the periodic interval time" ) } },
@@ -443,8 +443,8 @@
 
             function ready( assertion, time ) {
 
-              return assertion.absolute && time >= assertion.absolute ||
-                assertion.relative && time >= reference + assertions[next].relative;
+              return assertion.absolute && time > assertion.absolute ||
+                assertion.relative && time > reference + assertions[next].relative;
               
             }
             
