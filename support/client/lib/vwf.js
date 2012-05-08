@@ -214,7 +214,7 @@
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
 
-            var kernel_for_models = require( "vwf/kernel/model" ).create( vwf );
+            this.models.kernel = require( "vwf/kernel/model" ).create( vwf );
 
             // Create and attach each configured model.
 
@@ -231,7 +231,7 @@
                 }
 
                 var model = require( modelName ).create(
-                    kernel_for_models,                          // model's kernel access
+                    this.models.kernel,                         // model's kernel access
                     [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
                     {},                                         // state shared with a paired view
                     [].concat( modelArguments || [] )           // arguments for initialize()
@@ -258,7 +258,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // bounce off the reflection server, are placed on the queue when received, and executed
             // when removed.
 
-            var kernel_for_views = require( "vwf/kernel/view" ).create( vwf );
+            this.views.kernel = require( "vwf/kernel/view" ).create( vwf );
 
             // Create and attach each configured view.
 
@@ -291,7 +291,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
 
                     var view = require( viewName ).create(
-                        kernel_for_views,                           // view's kernel access
+                        this.views.kernel,                          // view's kernel access
                         [],                                         // stages between the kernel and view
                         modelPeer && modelPeer.state || {},         // state shared with a paired model
                         [].concat( viewArguments || [] )            // arguments for initialize()
