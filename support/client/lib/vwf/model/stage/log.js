@@ -123,7 +123,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         var isComponent = false;
 
-        if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+        if ( typeof candidate == "object" && candidate != null ) {
 
             componentAttributes.forEach( function( attributeName ) {
                 isComponent = isComponent || Boolean( candidate[attributeName] );
@@ -217,7 +217,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         var hasAccessors = false;
 
-        if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+        if ( typeof candidate == "object" && candidate != null ) {
 
             accessorAttributes.forEach( function( attributeName ) {
                 hasAccessors = hasAccessors || Boolean( candidate[attributeName] );
