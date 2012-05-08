@@ -544,16 +544,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
-            // Nothing to do in single-user mode.
-
-            if ( ! socket ) {
-                return;
-            }
-
             // Attach the current simulation time and pack the message as an array of the arguments.
 
             var fields = {
                 // sequence: undefined,  // TODO: use to identify on return from reflector?
+                time: this.now,
                 node: nodeID,
                 action: actionName,
                 member: memberName,
@@ -561,10 +556,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 result: result,
             };
 
-            // Send the message.
+            if ( ! socket ) {
 
-            var message = JSON.stringify( fields );
-            socket.send( message );
+                // Nothing to do in single-user mode.
+
+            } else {
+
+                // Send the message.
+
+                var message = JSON.stringify( fields );
+                socket.send( message );
+
+            }
 
         };
 
@@ -572,7 +575,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( nodeID, actionName, memberName, parameters, callback /* ( ready ) */ ) {
+        this.receive = function( nodeID, actionName, memberName, parameters, respond, callback /* ( ready ) */ ) {
 
 // TODO: delegate parsing and validation to each action.
 
@@ -607,10 +610,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             var result = this[actionName] && this[actionName].apply( this, args );
 
-if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
-    this.respond( nodeID, actionName, memberName, parameters, result );
-}
-            
+            // Return the result.
+
+            respond && this.respond( nodeID, actionName, memberName, parameters,
+                require( "vwf/utility" ).transform( result, transitTransformation ) );
+
         };
 
         // -- dispatch -----------------------------------------------------------------------------
@@ -644,7 +648,7 @@ if ( socket && actionName == "getNode" ) {  // TODO: merge with send()
 
                 // Perform the action.
 
-                this.receive( fields.node, fields.action, fields.member, fields.parameters, function( ready ) {
+                this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
                         vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
                         queue.ready = ready;
@@ -1495,11 +1499,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 for ( var propertyName in model_properties ) {
                     if ( model_properties[propertyName] !== undefined ) {
-                        if ( objectIsTypedArray( model_properties[propertyName] ) ) {
-                            intermediate_properties[propertyName] = Array.prototype.slice.call( model_properties[propertyName] ); // convert typed arrays to regular arrays for proper JSON serialization
-                        } else {
-                            intermediate_properties[propertyName] = model_properties[propertyName];
-                        }
+                        intermediate_properties[propertyName] = model_properties[propertyName];
                     }
                 }
 
@@ -2394,6 +2394,20 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             }
 
             return uri;
+
+        };
+
+        // -- transitTransformation ----------------------------------------------------------------
+
+        // vwf/utility/transform() transformation function to convert an object for proper JSON
+        // serialization.
+
+        var transitTransformation = function( object ) {
+
+            // Convert typed arrays to regular arrays.
+
+            return objectIsTypedArray( object ) ?
+                Array.prototype.slice.call( object ) : object;
 
         };
 

@@ -55,6 +55,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       "time" => session[:transport].time,
       "node" => 0,
       "action" => "getNode",
+      "respond" => true,
       "parameters" => []
     }
 
