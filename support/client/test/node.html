@@ -31,6 +31,7 @@
         "vwf/model/stage/log",
         "vwf/kernel/view",
         "vwf/view/document",
+        "vwf/utility",
         "logger",
 
       ], function( ready ) {
@@ -198,8 +199,8 @@
 
             function ready( assertion, time ) {
 
-              return assertion.absolute && time >= assertion.absolute ||
-                assertion.relative && time >= reference + assertions[next].relative;
+              return assertion.absolute && time > assertion.absolute ||
+                assertion.relative && time > reference + assertions[next].relative;
               
             }
             

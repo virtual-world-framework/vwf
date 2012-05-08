@@ -214,7 +214,7 @@
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
 
-            var kernel_for_models = require( "vwf/kernel/model" ).create( vwf );
+            this.models.kernel = require( "vwf/kernel/model" ).create( vwf );
 
             // Create and attach each configured model.
 
@@ -231,7 +231,7 @@
                 }
 
                 var model = require( modelName ).create(
-                    kernel_for_models,                          // model's kernel access
+                    this.models.kernel,                         // model's kernel access
                     [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
                     {},                                         // state shared with a paired view
                     [].concat( modelArguments || [] )           // arguments for initialize()
@@ -258,7 +258,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // bounce off the reflection server, are placed on the queue when received, and executed
             // when removed.
 
-            var kernel_for_views = require( "vwf/kernel/view" ).create( vwf );
+            this.views.kernel = require( "vwf/kernel/view" ).create( vwf );
 
             // Create and attach each configured view.
 
@@ -291,7 +291,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
 
                     var view = require( viewName ).create(
-                        kernel_for_views,                           // view's kernel access
+                        this.views.kernel,                          // view's kernel access
                         [],                                         // stages between the kernel and view
                         modelPeer && modelPeer.state || {},         // state shared with a paired model
                         [].concat( viewArguments || [] )            // arguments for initialize()
@@ -402,9 +402,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         // Add the message to the queue.
 
-                        if ( fields.action ) {
+                        // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                             vwf.queue( fields );
-                        }
+                        // }
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -419,13 +419,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     } catch ( e ) {
 
                         vwf.logger.warn( fields.action, fields.node, fields.member, fields.parameters,
-                            "exception performing action:", e.stack );
+                            "exception performing action:", require( "vwf/utility" ).exceptionMessage( e ) );
 
                     }
 
                 } );
 
-                socket.on( "disconnect", function() { vwf.logger.info( "vwf.socket disconnected" ) } );
+                socket.on( "disconnect", function() {
+
+                    vwf.logger.info( "vwf.socket disconnected" );
+
+                } );
 
                 socket.on( "error", function() { 
 
@@ -668,7 +672,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Advance the time.
 
-                this.now = fields.time;
+                if ( this.now != fields.time ) {
+                    this.now = fields.time;
+                    this.tick();
+                }
 
                 // Record the originating client.
 
@@ -684,26 +691,34 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     }
                 } );
 
-                // Tick after the last message, or after the last message before the time advances.
-
-                if ( queue.ready && ( queue.length == 0 || queue[0].time != this.now ) ) {
-                    this.tick();
-                }
-
             }
 
             // Set the simulation time to the new current time. Tick if the time advances.
 
-            if ( queue.ready && queue.time != this.now ) {
+            if ( queue.ready && this.now != queue.time ) {
                 this.now = queue.time;
                 this.tick();
             }
             
         };
 
+        // -- log ----------------------------------------------------------------------------------
+
+        // Send a log message to the reflector.
+
+        this.log = function() {
+
+            this.respond( undefined, "log", undefined, undefined,
+                require( "vwf/utility" ).transform( arguments, transitTransformation ) );
+
+        }
+
         // -- tick ---------------------------------------------------------------------------------
 
         // Tick each tickable model, view, and node. Ticks are sent on each time change.
+
+        // TODO: remove, in favor of drivers and nodes exclusively using future scheduling;
+        // TODO: otherwise, all clients must receive exactly the same ticks at the same times.
 
         this.tick = function() {
 
@@ -733,50 +748,63 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.logger.group( "vwf.setState" );
 
-            async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback /* ( err ) */ ) {
+            async.series( [
 
-                vwf.createNode( nodeComponent, function( nodeID ) {
-                    each_callback( undefined );
-                } );
+                function( series_callback /* ( err, results ) */ ) {
 
-            }, function( err ) {
+                    // Clear the queue, but leave any private direct messages in place. Update the queue
+                    // array in place so that existing references remain valid.
 
-                // Clear the queue, but leave any private direct messages in place. Update the queue
-                // array in place so that existing references remain valid.
+                    var private_queue = [], fields;
 
-                // TODO: this probably isn't needed if the application initializers (and setters?) don't run
+                    while ( queue.length > 0 ) {
 
-                var private_queue = [], fields;
+                        fields = queue.shift();
 
-                while ( queue.length > 0 ) {
+                        vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
+                            return depth == 2 ? Array.prototype.slice.call( object ) : object
+                        } ), "from queue" );
 
-                    fields = queue.shift();
+                        fields.respond && private_queue.push( fields );
 
-                    console.info( "setState", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                        return depth == 2 ? Array.prototype.slice.call( object ) : object
-                    } ), "from queue" );
+                    }
 
-                    fields.respond && private_queue.push( fields );
+                    while ( private_queue.length > 0 ) {
 
-                }
+                        fields = private_queue.shift();
 
-                while ( private_queue.length > 0 ) {
+                        vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
+                            return depth == 2 ? Array.prototype.slice.call( object ) : object
+                        } ), "to queue" );
 
-                    fields = private_queue.shift();
+                        queue.push( fields );
 
-                    console.info( "setState", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                        return depth == 2 ? Array.prototype.slice.call( object ) : object
-                    } ), "to queue" );
+                    }
 
-                    queue.push( fields );
+                    // Add the incoming items to the queue.
 
-                }
+                    if ( applicationState.queue ) {
+                        vwf.queue( applicationState.queue );
+                    }
 
-                // Add the incoming items to the queue.
+                    series_callback( undefined, undefined );
+                },
 
-                if ( applicationState.queue ) {
-                    vwf.queue( applicationState.queue );
-                }
+                function( series_callback /* ( err, results ) */ ) {
+
+                    async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback /* ( err ) */ ) {
+
+                        vwf.createNode( nodeComponent, function( nodeID ) {
+                            each_callback( undefined );
+                        } );
+
+                    }, function( err ) {
+                        series_callback( err, undefined );
+                    } );
+
+                },
+
+            ], function( err, results ) {
 
                 set_callback && set_callback();
 
@@ -791,17 +819,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.logger.group( "vwf.getState", full, normalize );
 
-if ( queue.time != this.now ) console.error( "getState", "queue time", queue.time, this.now );  // TODO: remove
-if ( ! queue.ready ) console.error( "getState", "queue ready", queue.ready );  // TODO: remove
-
             var applicationState = {
+
+                queue: 
+                    require( "vwf/utility" ).transform( queue, queueTransitTransformation ),
 
                 nodes: [  // TODO: all global objects
                     require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), transitTransformation ),
                 ],
-
-                queue: 
-                    require( "vwf/utility" ).transform( queue, queueTransitTransformation ),
 
             };
 
@@ -1043,13 +1068,16 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         // -- setNode ------------------------------------------------------------------------------
 
-        this.setNode = function( nodeID, nodeComponent, set_callback /* ( nodeID ) */ ) {  // TODO: merge with createChild?  // TODO: this is a lot like patch()
+        this.setNode = function( nodeID, nodeComponent, set_callback /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
             async.series( [
 
                 function( series_callback /* ( err, results ) */ ) {
 
-vwf.models.javascript.disabled = true;  // TODO: allow getProperties()/setProperties to bypass all script drivers and read/write under script layer
+                    // Suppress kernel reentry so that we can write the state without coloring from
+                    // any scripts.
+
+                    vwf.models.kernel.disable();
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
@@ -1075,9 +1103,11 @@ vwf.models.javascript.disabled = true;  // TODO: allow getProperties()/setProper
 
                     } );
 
-delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProperties to bypass all script drivers and read/write under script layer
-
                     // TODO: methods, events
+
+                    // Restore kernel reentry.
+
+                    vwf.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1154,6 +1184,8 @@ delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProper
                 child_full = false;
             }
 
+            // Intrinsic state.
+
             nodeComponent.id = nodeID;
 
             if ( full || this.models.object.changed( nodeID ) ) {
@@ -1177,13 +1209,16 @@ delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProper
 
             }
 
+            // Suppress kernel reentry so that we can read the state without coloring from any
+            // scripts.
+
+            vwf.models.kernel.disable();
+
+            // Properties.
+
             if ( full || this.models.object.changed( nodeID ) ) {  // TODO: properties changed only
 
-vwf.models.javascript.disabled = true;  // TODO: allow getProperties()/setProperties to bypass all script drivers and read/write under script layer
-
                 nodeComponent.properties = this.getProperties( nodeID );
-
-delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProperties to bypass all script drivers and read/write under script layer
 
                 for ( var propertyName in nodeComponent.properties ) {  // TODO: distinguish add, change, remove
                     if ( nodeComponent.properties[propertyName] === undefined ) {
@@ -1196,6 +1231,8 @@ delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProper
 
             }
 
+            // Methods.
+
             // nodeComponent.methods = {};  // TODO
 
             // for ( var methodName in nodeComponent.methods ) {
@@ -1206,6 +1243,8 @@ delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProper
             // Object.keys( nodeComponent.methods ).length ||
             //     delete nodeComponent.methods;
 
+            // Events.
+
             // nodeComponent.events = {};  // TODO
 
             // for ( var eventName in nodeComponent.events ) {
@@ -1215,6 +1254,12 @@ delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProper
 
             // Object.keys( nodeComponent.events ).length ||
             //     delete nodeComponent.events;
+
+            // Restore kernel reentry.
+
+            vwf.models.kernel.enable();
+
+            // Children.
 
             nodeComponent.children = {};
 
@@ -1230,6 +1275,8 @@ delete vwf.models.javascript.disabled;  // TODO: allow getProperties()/setProper
 
             Object.keys( nodeComponent.children ).length ||
                 delete nodeComponent.children;
+
+            // Scripts.
 
             // TODO: scripts
 
@@ -2738,12 +2785,12 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
                 // Omit private direct messages to this client.
 
                 return object.filter( function( fields ) {
-                    return ! fields.respond;
+                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages
                 } );
 
             } else if ( depth == 1 ) {
 
-                // Remove the sequence fields since they're local annotations just to stabilize the sort.
+                // Remove the sequence fields since they're just local annotations (to stabilize the sort).
 
                 var filtered = {};
 
@@ -2794,7 +2841,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
                 // Reduce precision slightly to match what passes through the reflector.
 
-                 return Number( object.toPrecision(15) );
+                return Number( object.toPrecision(15) );
 
             } else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
                 
