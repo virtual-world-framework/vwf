@@ -38,3 +38,8 @@ and then execute the _run.bat_ file provided at the root level of the extracted 
 Manual Installations
 -
 For addition information please visit: http://www.virtual.wf/web/docs/install.html
+
+VWF Examples
+=====================
+
+Upon installation completion, VWF examples may be executed via the browser at http://servername/web/catalog.html. Example application code is located in the public directory. 
