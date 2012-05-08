@@ -222,7 +222,7 @@
 
                 // Accept either { "vwf/model/name": [ arguments] } or "vwf/model/name".
 
-                if ( typeof modelInitializer == "object" || modelInitializer instanceof Object ) {
+                if ( typeof modelInitializer == "object" && modelInitializer != null ) {
                     var modelName = Object.keys( modelInitializer )[0];
                     var modelArguments = modelInitializer[modelName];
                 } else {
@@ -266,7 +266,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Accept either { "vwf/view/name": [ arguments] } or "vwf/view/name".
 
-                if ( typeof viewInitializer == "object" || viewInitializer instanceof Object ) {
+                if ( typeof viewInitializer == "object" && viewInitializer != null ) {
                     var viewName = Object.keys( viewInitializer )[0];
                     var viewArguments = viewInitializer[viewName];
                 } else {
@@ -2071,7 +2071,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         // Is a component specifier a descriptor?
 
         var componentIsDescriptor = function( candidate ) {
-            return typeof candidate == "object" && ! isPrimitive( candidate );
+            return typeof candidate == "object" && candidate != null && ! isPrimitive( candidate );
         };
 
         // Is a component specifier an ID?
@@ -2124,7 +2124,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
             var isComponent = false;
 
-            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+            if ( typeof candidate == "object" && candidate != null ) {
 
                 componentAttributes.forEach( function( attributeName ) {
                     isComponent = isComponent || Boolean( candidate[attributeName] );
@@ -2156,7 +2156,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
             var isTypedArray = false;
 
-            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+            if ( typeof candidate == "object" && candidate != null ) {
 
                 typedArrayTypes.forEach( function( typedArrayType ) {
                     isTypedArray = isTypedArray || candidate instanceof typedArrayType;
@@ -2183,7 +2183,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
             var hasAccessors = false;
 
-            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+            if ( typeof candidate == "object" && candidate != null ) {
 
                 accessorAttributes.forEach( function( attributeName ) {
                     hasAccessors = hasAccessors || Boolean( candidate[attributeName] );
@@ -2209,7 +2209,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
             var hasBody = false;  // TODO: "body" term is confusing, but that's the current terminology used in vwf/model/javascript
 
-            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+            if ( typeof candidate == "object" && candidate != null ) {
 
                 bodyAttributes.forEach( function( attributeName ) {
                     hasBody = hasBody || Boolean( candidate[attributeName] );
@@ -2235,7 +2235,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
             var hasType = false;
 
-            if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+            if ( typeof candidate == "object" && candidate != null ) {
 
                 typeAttributes.forEach( function( attributeName ) {
                     hasType = hasType || Boolean( candidate[attributeName] );
