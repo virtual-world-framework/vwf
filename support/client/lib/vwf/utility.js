@@ -34,17 +34,19 @@ define( [ "module" ], function( module ) {
         /// @param {Object} object The object to transform. Object and Array contents are
         ///   recursively transformed using the same transformation function.
         /// @param {Function} Transformation function:
-        ///   function( object, index, depth ) { return object }
-        /// @param {Number} [name] Object index in container (recursive calls only).
+        ///   function( object, names, depth ) { return object }
+        /// @param {(Number|String)[]} [names] Array of names or indexes to Object in its ancestors,
+        ///   parent first (recursive calls only).
         /// @param {Number} [depth] Recursion depth (recursive calls only).
         /// 
         /// @returns {Object} The transformed object.
 
-        transform: function( object, transformation /* ( object, name, depth ) */, name, depth ) {
+        transform: function( object, transformation /* ( object, names, depth ) */, names, depth ) {
 
+            names = names || [];
             depth = depth || 0;
 
-            var result = object = transformation( object, name, depth );  // TODO: transform scalars always? sometimes? ... transform whole objects and arrays before generic recursion ... separate functions?
+            var result = object = transformation( object, names, depth );  // TODO: transform scalars always? sometimes? ... transform whole objects and arrays before generic recursion ... separate functions?
 
             var item;
 
@@ -54,7 +56,7 @@ define( [ "module" ], function( module ) {
 
                     for ( var index = 0; index < object.length; index++ ) {
 
-                        if ( ( item = this.transform( object[index], transformation, index, depth + 1 ) ) !== object[index] ) {
+                        if ( ( item = this.transform( object[index], transformation, [ index ].concat( names ), depth + 1 ) ) !== object[index] ) {
 
                             if ( result === object ) {
                                 result = [].concat( object ); // shallow copy into new Array
@@ -68,7 +70,7 @@ define( [ "module" ], function( module ) {
 
                     Object.keys( object ).forEach( function( key ) {
 
-                        if ( ( item = this.transform( object[key], transformation, key, depth + 1 ) ) !== object[key] ) {
+                        if ( ( item = this.transform( object[key], transformation, [ key ].concat( names ), depth + 1 ) ) !== object[key] ) {
 
                             if ( result === object ) {
                                 result = {}; Object.keys( object ).forEach( function( k ) { result[k] = object[k] } ); // shallow copy into new Object
@@ -86,56 +88,42 @@ define( [ "module" ], function( module ) {
             return result;
         },
 
-        // Old, from vwf.js.
+        // -- exceptionMessage ---------------------------------------------------------------------
 
-        // transformObject: function( object, transformation ) {
+        /// Format the stack trace for readability.
+        /// 
+        /// @name vwf.utility#exceptionMessage
+        /// @function
+        /// 
+        /// @param {Error} error An Error object, generally provided by a catch statement.
+        /// 
+        /// @returns {String} An error message that may be written to the console or a log.
 
-        //     var result = object;
-        //     var object_, object_i;
+        exceptionMessage: function( error ) {
 
-        //     if ( typeof object != "object" ) {
+            // https://github.com/eriwen/javascript-stacktrace sniffs the browser type from the
+            // exception this way.
 
-        //         result = transformation( object );  // TODO: transform scalars always? sometimes? ... transform whole objects and arrays before generic recursion ... separate functions?
+            if ( error.arguments && error.stack ) { // Chrome
 
-        //     } else if ( ( object_ = transformation( object ) ) !== object ) {
+                return "\n  " + error.stack;
 
-        //         result = object_;
+            } else if ( window && window.opera ) { // Opera
 
-        //     } else if ( ! ( object instanceof Array ) ) {
+                return error.toString();
 
-        //         for ( var i in object ) {
+            } else if ( error.stack ) { // Firefox
 
-        //             if ( ( object_i = this.transformObject( object[i], transformation ) ) !== object[i] ) {
+                return "\n  " + error.toString() + "\n" + // somewhat like Chrome's
+                    error.stack.replace( /^/mg, "    " );
 
-        //                 if ( result === object ) {
-        //                     result = {};
-        //                     for ( var ii in object ) { result[ii] = object[ii] }
-        //                 }
+            } else { // default
 
-        //                 result[i] = object_i;
-        //             }
-        //         }
+                return error.toString();
 
-        //     } else {
+            }
 
-        //         for ( var i = 0; i < object.length; i++ ) {
-
-        //             if ( ( object_i = this.transformObject( object[i], transformation ) ) !== object[i] ) {
-
-        //                 if ( result === object ) {
-        //                     result = [];
-        //                     for ( var ii = 0; ii < object.length; ii++ ) { result[ii] = object[ii] }
-        //                 }
-
-        //                 result[i] = object_i;
-        //             }
-
-        //         }
-
-        //     }
-
-        //     return result;
-        // },
+        },
 
     };
 

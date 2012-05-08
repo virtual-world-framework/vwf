@@ -52,15 +52,12 @@ scripts:
       "type": "text/xml",
       "properties": { 
         "material": "",
-        "scale": [ 1.5, 1.5, 1.5 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
-        "velocity": [ 0, 0, 0 ], 
         } 
       };
     var sphere = { 
@@ -69,15 +66,12 @@ scripts:
       "type": "text/xml",
       "properties": { 
         "material": "", 
-        "scale": [ 2.0, 2.0, 2.0 ], 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
-        "velocity": [ 0, 0, 0 ], 
         } 
       };
     this.initialize = function() {
@@ -131,34 +125,44 @@ scripts:
         this.getActiveCamera();
       }
       if ( this.activeCameraComp ) {
-        var camLook = getCameraLook();        
-        var pos = this.activeCameraComp.translation;
+        var trans = this.activeCameraComp.transform;
+           
+        if ( trans ) {
+          var at = goog.vec.Vec3.createFromValues( trans[4], trans[5], trans[6] );
+          goog.vec.Vec3.normalize( at, at )
 
-        if ( this.createCube ) {
-          this.cubesCreated += 1;
-          newObjName = "cube" + this.cubesCreated;
-          
-          cube.properties.material = materials[ this.colorIndex ];
-          cube.properties.translation = [ pos[0], pos[1], pos[2] - 10 ];
-          cube.properties.velocity = [ camLook[0] * this.tossCubeStrength, camLook[1] * this.tossCubeStrength, camLook[2] * this.tossCubeStrength];
-          this.colorIndex += 1;
-          
-          this.children.create( newObjName, cube );
-          this.createCube = false;
-        } else {
-          this.spheresCreated += 1;
-          newObjName = "sphere" + this.spheresCreated;
-          
-          sphere.properties.material = materials[ this.colorIndex ];
-          sphere.properties.translation = [ pos[0], pos[1], pos[2] - 10 ];
-          sphere.properties.velocity = [ camLook[0] * this.tossSphereStrength, camLook[1] * this.tossSphereStrength, camLook[2] * this.tossSphereStrength ];
-          this.colorIndex += 1;
-          
-          this.children.create( newObjName, sphere );
-          this.createCube = true;      
-        }
-        if ( newObjName && newObjName != "" ) {
-          this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
+          if ( this.createCube ) {
+            this.cubesCreated += 1;
+            newObjName = "cube" + this.cubesCreated;
+            
+            cube.properties.material = materials[ this.colorIndex ];
+            cube.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
+            var vel = [ at[0] * this.tossCubeStrength, at[1] * this.tossCubeStrength, at[2] * this.tossCubeStrength];
+            this.colorIndex += 1;
+  
+            cube.scripts = [];
+            cube.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
+
+            this.children.create( newObjName, cube );        
+            this.createCube = false;
+          } else {
+            this.spheresCreated += 1;
+            newObjName = "sphere" + this.spheresCreated;
+            
+            sphere.properties.material = materials[ this.colorIndex ];
+            sphere.properties.transform = [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, trans[12], trans[13], trans[14] - 10, 1 ];
+            var vel = [ at[0] * this.tossSphereStrength, at[1] * this.tossSphereStrength, at[2] * this.tossSphereStrength ];
+            this.colorIndex += 1;
+
+            sphere.scripts = [];
+            sphere.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
+            
+            this.children.create( newObjName, sphere );
+            this.createCube = true;      
+          }
+          if ( newObjName && newObjName != "" ) {
+            this.nodesCreated.push( "http-vwf-example-com-physics3-vwf-"+newObjName );
+          }
         }
       }
     }  //@ sourceURL=appScene.vwf
