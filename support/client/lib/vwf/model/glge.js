@@ -389,7 +389,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     switch ( propertyName ) {
 
                         case "meshDefinition":
-                            createMesh.call( this, propertyValue, node );
+                            createMesh( propertyValue, node );
                             break;
 
                         default:

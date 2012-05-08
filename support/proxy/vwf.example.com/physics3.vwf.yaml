@@ -22,4 +22,3 @@ properties:
   rotVelocityDamping: 
   linVelocityDamping: 
   velocity: 
-  oldState: 
