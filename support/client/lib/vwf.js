@@ -417,7 +417,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     } catch ( e ) {
 
                         vwf.logger.warn( fields.action, fields.node, fields.member, fields.parameters,
-                            "exception performing action:", e.stack );
+                            "exception performing action:", require( "vwf/utility" ).exceptionMessage( e ) );
 
                     }
 
