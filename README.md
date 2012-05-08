@@ -42,4 +42,4 @@ For addition information please visit: http://www.virtual.wf/web/docs/install.ht
 VWF Examples
 =====================
 
-Upon installation completion, VWF examples may be executed via the browser at http://servername/web/catalog.html. Example application code is located in the public directory. 
+Upon installation completion, VWF examples may be executed via the browser at http://servername/web/catalog.html. Demo application code is located in the public directory. Please refer to http://virtual.wf/web/docs/readme.html for additional information. 
