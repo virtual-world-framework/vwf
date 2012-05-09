@@ -702,6 +702,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             
         };
 
+        // -- log ----------------------------------------------------------------------------------
+
+        // Send a log message to the reflector.
+
+        this.log = function() {
+
+            this.respond( undefined, "log", undefined, undefined,
+                require( "vwf/utility" ).transform( arguments, transitTransformation ) );
+
+        }
+
         // -- tick ---------------------------------------------------------------------------------
 
         // Tick each tickable model, view, and node. Ticks are sent on each time change.
