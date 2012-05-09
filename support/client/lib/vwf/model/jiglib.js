@@ -86,11 +86,36 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         initializingNode: function( nodeID, childID ) {
 
             var scene = this.scenes[ childID ];
+            var node = this.nodes[ childID ];
 
-            if ( scene && !scene.initialized ) {
-                initializeScene.call( this, scene );
+            if ( scene && scene.system ) {
+                if ( !scene.initialized ) {
+                    initializeScene.call( this, scene );
+                }
+                this.enabled = true;
+
+            } else if ( node ) {
+                if ( node.jigLibObj && node.jigLibInternals ) {
+
+                    node.jigLibObj._currState.position = node.jigLibInternals._currState.position.slice(0);
+                    node.jigLibObj._currState.set_orientation( new jigLib.Matrix3D( node.jigLibInternals._currState._orientation.glmatrix ) );
+                    node.jigLibObj._currState.linVelocity = node.jigLibInternals._currState.linVelocity.slice(0);
+                    node.jigLibObj._currState.rotVelocity = node.jigLibInternals._currState.rotVelocity.slice(0);
+
+                    node.jigLibObj._oldState.position = node.jigLibInternals._oldState.position.slice(0);
+                    node.jigLibObj._oldState.set_orientation( new jigLib.Matrix3D( node.jigLibInternals._oldState._orientation.glmatrix ) );
+                    node.jigLibObj._oldState.linVelocity = node.jigLibInternals._oldState.linVelocity.slice(0);
+                    node.jigLibObj._oldState.rotVelocity = node.jigLibInternals._oldState.rotVelocity.slice(0);
+
+                    node.jigLibObj._velChanged = node.jigLibInternals._velChanged;
+
+                    node.jigLibObj._storedPositionForActivation = node.jigLibInternals._storedPositionForActivation.slice(0);
+                    node.jigLibObj._lastPositionForDeactivation = node.jigLibInternals._lastPositionForDeactivation.slice(0);
+
+                    delete node.jigLibInternals;
+                }
+
             }
-            this.enabled = true;
     
             return undefined;
         },
@@ -242,7 +267,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var activeNode  = this.active[ nodeID ];
             var node = this.nodes[ nodeID ];
-            var scene = this.scenes[ nodeID ]
+            var scene = this.scenes[ nodeID ];
 
             if ( node && node.jigLibObj ) {
 
@@ -289,9 +314,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     node.jigLibObj.set_linVelocityDamping( propertyValue );
                     break; 
                 case "velocity":
-                    console.info( nodeID + ".velocity = " + propertyValue );
+                    //console.info( nodeID + ".velocity = " + propertyValue );
                     node.jigLibObj.setVelocity( propertyValue ); // should be [ x, y, z ]
-                    break;                        
+                    break;
+                case "private":
+                    node.jigLibInternals = propertyValue;
+                    break;
                 }
             } else if ( node && !scene ) {
                 scene = this.scenes[ node.sceneID ];
@@ -415,6 +443,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         //                    case "velocity":
         //                       propertyValue = node.jigLibObj.getVelocity( node.jigLibObj.get_position() );
         //                       break;
+                    case "private":
+                        propertyValue = {
+                            _currState: node.jigLibObj._currState,
+                            _oldState: node.jigLibObj._oldState,
+                            _velChanged: node.jigLibObj._velChanged,
+                            _storedPositionForActivation: node.jigLibObj._storedPositionForActivation,
+                            _lastPositionForDeactivation: node.jigLibObj._lastPositionForDeactivation,
+                        }
+                        break;
                     }
                 }
             } else if ( this.scenes[ nodeID ] ) {
