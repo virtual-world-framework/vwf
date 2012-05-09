@@ -836,6 +836,29 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             return applicationState;
         };
 
+        // -- hashState ----------------------------------------------------------------------------
+
+        this.hashState = function() {
+
+            this.logger.group( "vwf.hashState" );
+
+            var applicationState = this.getState( true, true );
+
+            // Hash the nodes.
+
+            var hashn = this.hashNode( applicationState.nodes[0] );  // TODO: all global objects
+
+            // Hash the queue.
+
+            var hashq = applicationState.queue.length ?
+                "q" + Crypto.MD5( JSON.stringify( applicationState.queue ) ).toString().substring( 0, 16 ) : undefined;
+
+            this.logger.groupEnd();
+
+            // Generate the combined hash.
+
+            return hashn + ( hashq ? ":" + hashq : "" );
+        }
 
         // -- createNode ---------------------------------------------------------------------------
 
@@ -1257,6 +1280,43 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         };
 
+        // -- hashNode -----------------------------------------------------------------------------
+
+        this.hashNode = function( nodeID ) {  // TODO: works with patches?  // TODO: only for nodes from getNode( , , true )
+
+            this.logger.group( "vwf.hashNode", typeof nodeID == "object" ? nodeID.id : nodeID );
+
+            var nodeComponent = typeof nodeID == "object" ? nodeID : this.getNode( nodeID );
+
+            // Hash the intrinsic state.
+
+            var internal = { id: nodeComponent.id, name: nodeComponent.name, source: nodeComponent.source, type: nodeComponent.type };  // TODO: get subset same way as getNode() puts them in without calling out specific field names
+
+            internal.source === undefined && delete internal.source;
+            internal.type === undefined && delete internal.type;
+
+            var hashi = "i" + Crypto.MD5( JSON.stringify( internal ) ).toString().substring( 0, 16 );
+
+            // Hash the properties.
+
+            var properties = nodeComponent.properties || {};
+
+            var hashp = Object.keys( properties ).length ?
+                "p" + Crypto.MD5( JSON.stringify( properties ) ).toString().substring( 0, 16 ) : undefined;
+
+            // Hash the children.
+
+            var children = nodeComponent.children || {};
+
+            var hashc = Object.keys( children ).length ?
+                "c" + Crypto.MD5( JSON.stringify( children ) ).toString().substring( 0, 16 ) : undefined;
+
+            this.logger.groupEnd();
+
+            // Generate the combined hash.
+
+            return hashi + ( hashp ? "." + hashp : "" ) + ( hashc ? "/" + hashc : "" );
+        };
 
         // -- prototype ----------------------------------------------------------------------------
 
