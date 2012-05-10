@@ -740,10 +740,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         });
 
         var scriptText = self.allScripts[nodeID][scriptID].text;
-        scriptText = scriptText.replace(/{/g, "{<br />");
-        scriptText = scriptText.replace(/;/g, ";<br />");
-        scriptText = scriptText.replace(/}/g, "}<br />");
-        $(topdownTemp).append("<div class='propEntry'>" + scriptText + "</div><hr>");
+        $(topdownTemp).append("<div class='scriptEntry'><pre class='scriptCode'><textarea class='scriptEdit' spellcheck='false'>" + scriptText + "</textarea></pre></div><hr>");
         
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
         $(topdownTemp).show('slide', {direction: 'right'}, 175);    
