@@ -20003,7 +20003,7 @@ define('Scene/CameraHelpers',[
     // hardware. Should be investigated further.
     var inertiaMaxClickTimeThreshold = 0.4;
     var inertiaMaxTimeThreshold = 2.0;
-
+    
     function maintainInertia(handler, decayCoef, action, object, lastMovementName) {
         var ts = handler.getButtonPressTime();
         var tr = handler.getButtonReleaseTime();
@@ -20052,6 +20052,67 @@ define('Scene/CameraHelpers',[
             }
         }
     }
+    
+    /**
+     * This function is similar to maintainInertia except that it does not require a handler. 
+     * Instead, the touch start time, touch release time, and last movement are passed as arguments.
+     * 
+     * @param {JulianDate} ts The time the mouse touch started.
+     * @param {JulianDate} tr The time the mouse touch released.
+     * @param {Object} lastMovement
+     * @param {Number} decayCoef
+     * @param {Function} action 
+     * @param {Object} object
+     * @param {String} lastMovementName
+     */
+    function createInertia(ts, tr, lastMovement, decayCoef, action, object, lastMovementName) {
+    	if(ts && tr) {
+    		// In VWF, ts and tr will be untyped objects that were originally JulianDates.
+    		ts = new Cesium.JulianDate(ts._julianDayNumber, ts._secondsOfDay, ts._timeStandard);
+        	tr = new Cesium.JulianDate(tr._julianDayNumber, tr._secondsOfDay, tr._timeStandard);
+    	}
+    	var threshold = ts && tr && ts.getSecondsDifference(tr);
+        if (ts && tr && threshold < inertiaMaxClickTimeThreshold) {
+            var now = new JulianDate();
+            var fromNow = tr.getSecondsDifference(now);
+            if (fromNow > inertiaMaxTimeThreshold) {
+                return;
+            }
+
+            var d = decay(fromNow, decayCoef);
+
+            if (!object[lastMovementName]) {
+                if (!lastMovement) {
+                    return;
+                }
+
+                var motionX = (lastMovement.endPosition.x - lastMovement.startPosition.x) * 0.5;
+                var motionY = (lastMovement.endPosition.y - lastMovement.startPosition.y) * 0.5;
+                object[lastMovementName] = {
+                    startPosition : new Cartesian2(lastMovement.startPosition.x, lastMovement.startPosition.y),
+                    endPosition : new Cartesian2(lastMovement.startPosition.x + motionX * d, lastMovement.startPosition.y + motionY * d),
+                    motion : new Cartesian2(motionX, motionY)
+                };
+            } else {
+                object[lastMovementName] = {
+                    startPosition : object[lastMovementName].endPosition.clone(),
+                    endPosition : new Cartesian2(
+                            object[lastMovementName].endPosition.x + object[lastMovementName].motion.x * d,
+                            object[lastMovementName].endPosition.y + object[lastMovementName].motion.y * d),
+                    motion : new Cartesian2(0.0, 0.0)
+                };
+            }
+
+            // If value from the decreasing exponential function is close to zero,
+            // the end coordinates may be NaN.
+            if (isNaN(object[lastMovementName].endPosition.x) || isNaN(object[lastMovementName].endPosition.y) || sameMousePosition(object[lastMovementName])) {
+                object[lastMovementName] = undefined;
+                return;
+            }
+
+            action.apply(object, [object[lastMovementName]]);
+        }
+    }
 
     function handleZoom(object, movement, distanceMeasure) {
         // distanceMeasure should be the height above the ellipsoid.
@@ -20089,6 +20150,7 @@ define('Scene/CameraHelpers',[
         move : move,
         handleZoom : handleZoom,
         maintainInertia : maintainInertia,
+        createInertia : createInertia,
         zoom : zoom
     };
 });
@@ -21271,7 +21333,7 @@ define('Scene/CameraSpindleController',[
 
         return true;
     };
-
+    
     CameraSpindleController.prototype._spin = function (movement) {
         if (this.mode === CameraSpindleControllerMode.AUTO) {
             var point = this._camera.pickEllipsoid(this._ellipsoid, movement.startPosition);
@@ -23504,7 +23566,7 @@ define('Scene/Camera',[
         this._canvas = canvas;
         this._controllers = new CameraControllerCollection(this, canvas);
     }
-
+    
     /**
      * DOC_TBA
      * @memberof Camera
