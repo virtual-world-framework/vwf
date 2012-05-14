@@ -95,7 +95,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     else
 
-      # log fields, :receive
+      log fields, :receive
 
       # When the request for the current state is received, update all unsynchronized clients to the
       # current state. Refresh the synchronized clients as well since the get/set operation may be
@@ -162,7 +162,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       fields = message
       message = JSON.generate fields, :max_nesting => 100
 
-      # log fields, :send if log
+      log fields, :send if log
       super message, log
 
     else # otherwise the socket.io default
@@ -187,7 +187,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       clients.each do |client|
         unless session[:pending_clients][client] # established clients: same as in super
           next if client.closing
-          # client.log fields, :send if log
+          client.log fields, :send if log
           client.send message, false
         else # pending clients: save until "setState" sent
           session[:pending_clients][client].push fields
