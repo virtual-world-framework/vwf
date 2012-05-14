@@ -753,6 +753,20 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 function( series_callback /* ( err, results ) */ ) {
 
+                    async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback /* ( err ) */ ) {
+
+                        vwf.createNode( nodeComponent, function( nodeID ) {
+                            each_callback( undefined );
+                        } );
+
+                    }, function( err ) {
+                        series_callback( err, undefined );
+                    } );
+
+                },
+
+                function( series_callback /* ( err, results ) */ ) {
+
                     // Clear the queue, but leave any private direct messages in place. Update the queue
                     // array in place so that existing references remain valid.
 
@@ -791,20 +805,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     series_callback( undefined, undefined );
                 },
 
-                function( series_callback /* ( err, results ) */ ) {
-
-                    async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback /* ( err ) */ ) {
-
-                        vwf.createNode( nodeComponent, function( nodeID ) {
-                            each_callback( undefined );
-                        } );
-
-                    }, function( err ) {
-                        series_callback( err, undefined );
-                    } );
-
-                },
-
             ], function( err, results ) {
 
                 set_callback && set_callback();
@@ -822,12 +822,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             var applicationState = {
 
-                queue: 
-                    require( "vwf/utility" ).transform( queue, queueTransitTransformation ),
-
                 nodes: [  // TODO: all global objects
                     require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), transitTransformation ),
                 ],
+
+                queue: 
+                    require( "vwf/utility" ).transform( queue, queueTransitTransformation ),
 
             };
 
