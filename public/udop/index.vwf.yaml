@@ -1,0 +1,33 @@
+
+--- 
+extends: http://vwf.example.com/googleEarth.vwf
+properties:
+  controlClient: "NONE"
+children:
+  earth:
+    extends: http://vwf.example.com/node3.vwf
+  uav1:
+    properties:
+      model: UAV.dae
+      video: asdf
+  uav2:
+    properties:
+      model: UAV.dae
+      video: asdf
+methods:
+  setInstance:
+scripts:
+- |
+    var earthInstance = undefined;
+    this.setInstance = function(){
+      earthInstance = google.earth.geInstance;
+    }
+    this.initialize = function(){
+      // the initialize fucntion is called too early
+      // reference is not valid yet
+      // earthInstance = google.earth.gInstance;
+    } //@ sourceURL=googleEarthApp.vwf
+    this.loadComplete = function() {
+    }
+    this.tick = function(time) {
+    }

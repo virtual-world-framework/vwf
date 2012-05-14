@@ -2,6 +2,10 @@ Installation Instructions
 ==========================
 --------------------------
 
+The VWF source can be downloaded from GitHub: [https://github.com/virtual-world-framework](https://github.com/virtual-world-framework)
+
+--------------------------
+
 The Virtual World Framework (VWF) can be run on both Windows and Linux. 
 
 There are two options for running VWF on Windows: the self-contained version and using Cygwin. 

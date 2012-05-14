@@ -37,8 +37,8 @@ task :build => "web/catalog.html" do
         sh "( cat web/docs/format/preamble ; Markdown.pl '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
     end
 
-    sh "bundle exec rocco web/docs/application/*.vwf.yaml"
-    sh "bundle exec rocco web/docs/application/example.js"
+    sh "bundle exec ../bin/rocco web/docs/application/*.vwf.yaml"
+    sh "bundle exec ../bin/rocco web/docs/application/example.js"
     
     ENV["PATH"] = original_path
 

@@ -59,6 +59,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 window.onkeydown = function (event) {
                     var key = undefined;
                     var validKey = false;
+                    var keyAlreadyDown = false;
                     switch (event.keyCode) {
                         case 17:
                         case 16:
@@ -68,6 +69,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                             break;
                         default:
                             key = getKeyValue.call( glgeView, event.keyCode);
+                            keyAlreadyDown = !!glgeView.keyStates.keysDown[key.key];
                             glgeView.keyStates.keysDown[key.key] = key;
                             validKey = true;
                             break;
@@ -80,7 +82,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     glgeView.keyStates.mods.meta = event.metaKey;
 
                     var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
-                    if (validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
+                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
                         //var params = JSON.stringify( glgeView.keyStates );
                         glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
                     }
@@ -185,17 +187,62 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     // GLGE private functions
     // -- initScene ------------------------------------------------------------------------
-
+	var lastPick;
     function initScene( sceneNode ) {
+	
+		var requestAnimFrame, cancelAnimFrame;
+		(function() {
+			var lastTime = 0;
+			var vendors = ['ms', 'moz', 'webkit', 'o'];
+			for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+				window.cancelRequestAnimationFrame = window[vendors[x]+
+				  'CancelRequestAnimationFrame'];
+			}
 
-        function renderScene() {
+			if (!window.requestAnimationFrame) {
+				requestAnimFrame = function(callback, element) {
+					var currTime = +new Date;
+					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+					var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+					  timeToCall);
+					lastTime = currTime + timeToCall;
+					return id;
+				};
+			}
+			else {
+				requestAnimFrame = window.requestAnimationFrame;
+			}
+
+			if (!window.cancelAnimationFrame) {
+				cancelAnimFrame = function(id) {
+					clearTimeout(id);
+				};
+			}
+			else {
+				cancelAnimFrame = window.cancelAnimationFrame;
+			}
+		}());
+
+		var lastPickTime = 0;
+        function renderScene(time) {
+			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
+			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
+				lastPick = mousePick.call( this, mouse, sceneNode );
+				oldMouseX = mouse.getMousePosition().x;
+				oldMouseY = mouse.getMousePosition().y;
+				lastPickTime = time;
+			}
             renderer.render();
         };
 
         var canvas = this.canvasQuery.get( 0 );
 
         if ( canvas ) {
+			var mouse = new GLGE.MouseInput( canvas );
+			var oldMouseX = mouse.getMousePosition().x;
+			var oldMouseY = mouse.getMousePosition().y;
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
@@ -215,7 +262,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
 
-            setInterval( renderScene, 1 );
+            renderScene((+new Date));
         }
     } 
 
@@ -256,7 +303,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
-            var pickInfo = mousePick.call( sceneView, e, sceneNode );
+            var pickInfo = lastPick;
             pointerPickID = undefined;
 
             glgeActualObj = pickInfo ? pickInfo.object : undefined;
@@ -438,11 +485,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                         currentObj = currentObj.parent;
                                 } 
                                 if ( colladaObj ) {
-                                    recurseGroup.call( this, colladaObj, 0 );
+                                    recurseGroup.call( sceneView, colladaObj, 0 );
                                 }
                             }                
                         } else if ( atlDown && !ctrlDown ) {
-                            recurseGroup.call( this, glgeObj, 0 ); 
+                            recurseGroup.call( sceneView, glgeObj, 0 ); 
                         }
                     }
                 }
@@ -735,7 +782,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return undefined;
     }
 
-    function mousePick( e, sceneNode ) {
+    function mousePick( mouse, sceneNode ) {
 
         if (sceneNode && sceneNode.glgeScene) {
 
@@ -746,10 +793,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( sceneNode.frameCount > 10 && sceneNode.pendingLoads == 0 ) {
 
                 var objectIDFound = -1;
-                var x = mouseXPos.call( this, e );
-                var y = mouseYPos.call( this, e );
+                var mousepos=mouse.getMousePosition();
+                mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
+                mousepos.y = mousepos.y + window.scrollY;
 
-                return sceneNode.glgeScene.pick(x, y);
+                return sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
             }
         }
         return undefined;
