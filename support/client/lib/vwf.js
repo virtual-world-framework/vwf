@@ -1807,7 +1807,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 }
 
                 for ( var propertyName in model_properties ) {
-                    if ( model_properties[propertyName] !== undefined ) {
+                    if ( model_properties[propertyName] !== undefined || // copy values from this model
+                            intermediate_properties[propertyName] === undefined ) { // as well as any new keys
                         intermediate_properties[propertyName] = model_properties[propertyName];
                     }
                 }
@@ -1859,7 +1860,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 }
 
                 for ( var propertyName in model_properties ) {
-                    if ( model_properties[propertyName] !== undefined ) {
+                    if ( model_properties[propertyName] !== undefined || // copy values from this model
+                            intermediate_properties[propertyName] === undefined ) { // as well as any new keys
                         intermediate_properties[propertyName] = model_properties[propertyName];
                     }
                 }
@@ -1937,7 +1939,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // has performed the set and dictates the return value. The property is considered set
             // after each model has run.
 
-            this.models.forEach( function( model, index ) {  // TODO: make this work with this.models.some() again; forEach() is needed on create and initialize to push property list into vwf/model/object, but shouldn't be needed on set (test with physics)
+            this.models.some( function( model, index ) {
 
                 // Skip models up through the one making the most recent call here (if any).
 
@@ -1961,30 +1963,26 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     // model didn't return one explicitly (such as with a JavaScript accessor
                     // method).
 
-                    // if ( value === undefined ) {
-                    //     value = reentry.value;
-                    // }
+                    if ( value === undefined ) {
+                        value = reentry.value;
+                    }
 
                     // Record the value actually assigned. This may differ from the incoming value
                     // if it was range limited, quantized, etc. by the model. This is the value
                     // passed to the views.
 
-                    // if ( value !== undefined ) {
-                    //     propertyValue = value;
-                    // }
+                    if ( value !== undefined ) {
+                        propertyValue = value;
+                    }
 
                     // If we are setting, exit from the this.models.some() iterator once the value
                     // has been set. Don't exit early if we are initializing since every model needs
                     // the opportunity to register the property.
 
-                    // return ! initializing && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+                    return ! initializing && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
                 }
 
             } );
-
-            if ( reentry.value !== undefined ) {
-                propertyValue = reentry.value;
-            }
 
             if ( entry.index !== undefined ) {
 
