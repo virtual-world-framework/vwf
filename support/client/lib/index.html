@@ -166,11 +166,24 @@
 
     <!-- Overlay div to display loading information -->
     <div id='loadstatus' class='overlay'>
-      <div class="loading">
-        <span>LOADING</span>
-        <img src='images/loading.gif' alt='loading'/>
+      <div class='loading'>
+        <div class='requirements'>
+          <p><span>Checking Compatibility</span></p>
+          <p><span id='WGL' class='req'>WebGL</span></p>
+          <p><span id='ES5' class='req'>ECMAScript5</span></p>
+          <p><span id='WS' class='req'>WebSockets</span></p>
+        </div>
+        <div id='loadText'>    
+          <span class='loadText'>LOADING</span>
+          <img class='loadImg' src='images/loading.gif' alt='loading'/>
+        </div>
       </div>
     </div>
+
+    <script type="text/javascript" src="compatibility.js"></script>
+    <script type="text/javascript">
+        updateOverlay();
+    </script>
 
   </body>
 

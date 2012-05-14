@@ -83,6 +83,10 @@ form
 	margin:0px;
 }
 
+textarea:focus, input:focus{
+    outline: none;
+}
+
 .header 
 {
 	font:16pt Arial;
@@ -132,6 +136,45 @@ form
 	font-weight:bold;
 	padding-left:10px;
 	padding-right:10px;
+}
+
+.scriptEntry 
+{
+	padding-left:10px;
+	padding-right:10px;
+	height:90%;
+}
+
+.scriptCode
+{
+	height:100%;
+}
+
+.scriptEdit
+{
+	width:99%;
+	height:99%;
+	color:white;
+	background-color:#1F497D;
+	border: 1px solid #153255;
+}
+
+.scriptCode textarea:focus
+{
+	border: 1px solid #153255;
+}
+
+.scriptEdit::-webkit-scrollbar {
+    height:12px;
+	width:12px;
+	background:#1B456F;
+}
+.scriptEdit::-webkit-scrollbar-thumb {
+    background:#153255;
+    -webkit-border-radius: 0.8ex;
+}
+.scriptEdit::-webkit-scrollbar-corner {
+    background: #153255;
 }
 
 /* TIMELINE */
