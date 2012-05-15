@@ -159,7 +159,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.model#creatingProperties
+    /// @name vwf.api.model#creatingProperty
     /// @function
     /// 
     /// @param {} 

@@ -177,6 +177,15 @@ textarea:focus, input:focus{
     background: #153255;
 }
 
+.update_button
+{
+	width:100%;
+	font:10pt Arial;
+	padding:2px;
+	color:white;
+	background:#153255;
+}
+
 /* TIMELINE */
 .rate.slider {
 	display: inline-block;

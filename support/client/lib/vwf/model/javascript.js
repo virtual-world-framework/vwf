@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     // vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
     // simulation.
@@ -180,8 +180,8 @@ node.id = childID; // TODO: move to vwf/model/object
             } );
 
             Object.defineProperty( node.children, "create", {
-                value: function( component, name, callback /* ( child ) */ ) { // "this" is node.children
-                    return self.kernel.createNode( this.node.id, component, name /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
+                value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
+                    return self.kernel.createChild( this.node.id, name, component /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
                 }
             } );
 
@@ -257,7 +257,7 @@ node.id = childID; // TODO: move to vwf/model/object
 
         // -- initializingNode ---------------------------------------------------------------------
 
-        // Invoke an initialize() function if it exists.
+        // Invoke an initialize() function if one exists.
 
         initializingNode: function( nodeID, childID ) {
 
@@ -267,8 +267,8 @@ node.id = childID; // TODO: move to vwf/model/object
             try {
                 return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
             } catch ( e ) {
-                this.logger.warnc( "initializingNode", childID, propertyName, propertyValue,
-                    "exception in initialize:", exceptionMessage( e ) );
+                this.logger.warnc( "initializingNode", childID,
+                    "exception in initialize:", utility.exceptionMessage( e ) );
             }
 
             return undefined;
@@ -355,6 +355,16 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
             return node.name || "";
         },
 
+        // -- settingProperties --------------------------------------------------------------------
+
+        settingProperties: function( nodeID, properties ) {  // TODO: these are here as a hack to keep scripts from coloring the setNode()/getNode() property values; vwf/kernel/model's disable and set/getProperties need to handle this properly (problem: getters can still return a value even when reentry is blocked)
+        },
+
+        // -- gettingProperties --------------------------------------------------------------------
+
+        gettingProperties: function( nodeID, properties ) {  // TODO: these are here as a hack to keep scripts from coloring the setNode()/getNode() property values; vwf/kernel/model's disable and set/getProperties need to handle this properly (problem: getters can still return a value even when reentry is blocked)
+        },
+
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
@@ -366,7 +376,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                     node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
                 } catch ( e ) {
                     this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating getter:", exceptionMessage( e ) );
+                        "exception evaluating getter:", utility.exceptionMessage( e ) );
                 }
             } else {
                 node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
@@ -377,7 +387,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                     node.private.setters[propertyName] = eval( setterScript( propertySet ) );
                 } catch ( e ) {
                     this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
-                        "exception evaluating setter:", exceptionMessage( e ) );
+                        "exception evaluating setter:", utility.exceptionMessage( e ) );
                 }
             } else {
                 node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
@@ -429,7 +439,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     return setter.call( node, propertyValue );
                 } catch ( e ) {
                     this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
-                        "exception in setter:", exceptionMessage( e ) );
+                        "exception in setter:", utility.exceptionMessage( e ) );
                 }
             }
 
@@ -448,7 +458,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     return getter.call( node );
                 } catch ( e ) {
                     this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
-                        "exception in getter:", exceptionMessage( e ) );
+                        "exception in getter:", utility.exceptionMessage( e ) );
                 }
             }
 
@@ -495,7 +505,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
             } catch ( e ) {
                 this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
-                    "exception evaluating body:", exceptionMessage( e ) );
+                    "exception evaluating body:", utility.exceptionMessage( e ) );
             }
         
             node.private.change++; // invalidate the "future" cache
@@ -516,7 +526,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     return body.apply( node, methodParameters );
                 } catch ( e ) {
                     this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                        "exception:", exceptionMessage( e ) );
+                        "exception:", utility.exceptionMessage( e ) );
                 }
             }
 
@@ -625,7 +635,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     }
                 } catch ( e ) {
                     self.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
-                        "exception:", exceptionMessage( e ) );
+                        "exception:", utility.exceptionMessage( e ) );
                 }
 
                 return handled;
@@ -646,7 +656,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
                 } catch ( e ) {
                     this.logger.warnc( "executing", nodeID,
-                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", exceptionMessage( e ) );
+                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );
                 }
             }
 
@@ -1029,64 +1039,5 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         }
 
     }
-
-    // -- exceptionMessage -------------------------------------------------------------------------
-
-    // Format the stack trace for readability.
-
-    function exceptionMessage( exception ) {
-
-        // https://github.com/eriwen/javascript-stacktrace sniffs the browser type from the
-        // exception this way.
-
-        if ( exception.arguments && exception.stack ) { // Chrome
-
-            return "\n  " + exception.stack;
-
-        } else if ( window && window.opera ) { // Opera
-
-            return exception.toString();
-
-        } else if ( exception.stack ) { // Firefox
-
-            return "\n  " + exception.toString() + "\n" + // somewhat like Chrome's
-                exception.stack.replace( /^/mg, "    " );
-
-        } else { // default
-
-            return exception.toString();
-
-        }
-
-    }
-
-    // == Node =====================================================================================
-
-    // var node = function( nodeSource, nodeType ) {
-    // 
-    //     this.parent = undefined;
-    // 
-    //     // this.name = nodeName;
-    // 
-    //     this.source = nodeSource;
-    //     this.type = nodeType;
-    // 
-    //     this.properties = {};
-    //     this.methods = {};
-    //     this.events = {};
-    //     this.children = [];
-    // 
-    // };
-
-    // == Property =================================================================================
-
-    // var property = function( node, value ) {
-    // 
-    //     this.node = node; // TODO: make private
-    //     this.value = value;
-    //     this.get = undefined;
-    //     this.set = undefined;
-    // 
-    // };
 
 } );
