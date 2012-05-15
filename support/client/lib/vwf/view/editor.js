@@ -39,6 +39,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             this.editorOpen = false;
             this.timelineInit = false;
             this.aboutInit = false;
+            this.editingScript = false;
 
             this.topdownName = '#topdown_a';
             this.topdownTemp = '#topdown_b';
@@ -143,7 +144,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 this.scenes[ childID ] = node;
             }
             
-            if ( nodeID === this.currentNodeID )
+            if ( nodeID === this.currentNodeID && this.editingScript == false )
             {
                 $(this.topdownName + ' hr:last').css('height', '1px');
                 $(this.topdownName).append("<div id='" + childID + "' class='childContainer'><div class='childEntry'><b>" + childName + "</b></div><hr></div>");
@@ -536,13 +537,16 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
         {
             var scriptFull = this.allScripts[nodeID][i].text;
-            var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-            $(topdownTemp).append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
-            $('#script-' + nodeID + "-" + i).click( function(evt) {
-                var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
-                var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
-                viewScript.call(self, id, scriptID);
-            });
+            if(scriptFull != undefined)
+            {
+                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                $(topdownTemp).append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
+                $('#script-' + nodeID + "-" + i).click( function(evt) {
+                    var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                    viewScript.call(self, id, scriptID);
+                });
+            }
         }
 
         $(topdownTemp + ' hr:last').css('height', '3px');
@@ -731,19 +735,30 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         var allScripts = this.allScripts;
+
+        this.editingScript = true;
         
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeID + "-back' alt='back'/> script</div>");
-        console.info('#script-' + nodeID + '-back');
         jQuery('#script-' + nodeID + '-back').click ( function(evt) {
+            self.editingScript = false;
             var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
             drillUp.call(self, id);
         });
 
         var scriptText = self.allScripts[nodeID][scriptID].text;
-        $(topdownTemp).append("<div class='scriptEntry'><pre class='scriptCode'><textarea class='scriptEdit' spellcheck='false'>" + scriptText + "</textarea></pre></div><hr>");
+        if(scriptText != undefined)
+        {
+            $(topdownTemp).append("<div class='scriptEntry'><pre class='scriptCode'><textarea id='scriptTextArea' class='scriptEdit' spellcheck='false' wrap='off'>" + scriptText + "</textarea></pre><input class='update_button' type='button' id='update-" + nodeID + "-" + scriptID + "' value='Update' /></div><hr>");
+            $("#update-" + nodeID + "-" + scriptID).click ( function(evt) {
+                var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
+                var s_id = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-') + 1);
+                self.allScripts[id][s_id].text = undefined;
+                vwf.execute( id, $("#scriptTextArea").val() );
+            });
+        }
         
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
-        $(topdownTemp).show('slide', {direction: 'right'}, 175);    
+        $(topdownTemp).show('slide', {direction: 'right'}, 175);
         
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
