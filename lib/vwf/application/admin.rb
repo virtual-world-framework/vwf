@@ -103,7 +103,7 @@ class VWF::Application::Admin < Sinatra::Base
 
   get "/models" do
     directory = Rack::Directory.new('public')
-    directory._call({'SCRIPT_NAME'=>'http://localhost:3000', 'PATH_INFO'=>'models'})
+    directory._call({'SCRIPT_NAME'=>request.scheme+'://'+request.host_with_port, 'PATH_INFO'=>'models'})
     dirContents = directory.list_directory[2].files 
     dirContents.map do |dirContent|
       if dirContent[3] != "" && dirContent[3] != "directory"

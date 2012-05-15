@@ -623,99 +623,22 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                           },   
                         };
 
-                        switch ( fileName ) { // hack it since setting this data through components isn't working
-
-                            case "blackhawk.dae": // from cityblock
-                                object.properties.rotation = [ 1, 0, 0, 0 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "a10.dae": // from sandtable
-                                object.properties.translation[2] += 20;
-                                object.properties.rotation = [ 1, 0, 0, 0 ];
-                                object.properties.scale = [ 2, 2, 2 ];
-                                break;
-
-                            case "Predator.dae": // from sandtable
-                                object["implements"] = [ "http://vwf.example.com/fly.vwf" ];
-                                object.properties.translation[2] += 20;
-                                object.properties.rotation = [ 0, 0, 1, 180 ];
-                                object.properties.scale = [ 15, 15, 15 ];
-                                break;
-
-                            case "apache.DAE": // from sandtable
-                                object.properties.translation[2] += 40;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "awac.DAE": // from sandtable
-                                object.properties.translation[2] += 100;
-                                object.properties.rotation = [ 1, 0, 0, 90  ];
-                                object.properties.scale = [ 0.5, 0.5, 0.5 ];
-                                break;
-
-                            case "blackhawk.DAE": // from sandtable
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "cobra.DAE": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "f117.DAE": // from sandtable
-                                object.properties.translation[2] += 40;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "humvee.dae": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "lmtv.dae": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "mlrs.DAE": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            default:
-
-                                if ( match = fileName.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
-
-                                    object = {
-                                      extends: match[1],
-                                      properties: { 
-                                        translation: eData.eventNodeData[""][0].globalPosition,
-                                      },
-                                      scripts: [
-                                          "this.initialize = function() { this.rotation = this.rotation ; this.scale = this.scale }"
-                                      ]
-                                    };
-
-                                } else if ( match = fileName.match( /\.dae$/i ) ) { // assignment is intentional
-
-                                    object.properties.scale = [ 1, 1, 1 ];
-
-                                } else {
-
-                                     object = undefined;
-                                }
-
-                                break;
-
+                        if ( match = fileName.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+                            object = {
+                              extends: match[1],
+                              properties: { 
+                                translation: eData.eventNodeData[""][0].globalPosition,
+                              },
+                              scripts: [
+                                  "this.initialize = function() { this.rotation = this.rotation ; this.scale = this.scale }"
+                              ]
+                            };
+                        } else if ( match = fileName.match( /\.dae$/i ) ) { // assignment is intentional
+                            object.properties.scale = [ 1, 1, 1 ];
+                        } else {
+                             object = undefined;
                         }
+
                         if ( object ) {
                             sceneView.kernel.createNode( "index-vwf", object, fileName, undefined );
                         }
