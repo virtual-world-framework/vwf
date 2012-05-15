@@ -1,0 +1,197 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/node3.vwf
+properties:
+  editMode:
+    set: |
+      switch ( value ) {
+        case "translate":
+        case "rotate":
+        case "scale":
+          this.editMode = value;
+          break;	
+      }
+  axis: [ 0, 0, 1 ]
+methods:
+  translate:
+  rotate:
+  scaling:
+  edit:
+  setAxis:
+  init:
+scripts:
+- |
+    this.init = function() {
+      this.rotationAxis = 'z';
+      this.input = {
+        "initialTransform": undefined,
+        "initialValue": undefined,
+        "pointerInfo": undefined,
+        "pickInfo": undefined,
+        "previous": {
+          "pointerInfo": undefined,
+          "pickInfo": undefined,
+        },
+        pointerDown: {
+          "pointerInfo": undefined,
+          "pickInfo": undefined,
+        },
+        update: function( pointerInfo, pickInfo ){
+          this.previous.pointerInfo = this.pointerInfo;
+          this.previous.pickInfo = this.pickInfo;
+          this.pointerInfo = pointerInfo;
+          this.pickInfo = pickInfo;
+        },
+        clear: function(){
+          this.previous.pointerInfo = undefined;
+          this.previous.pickInfo = undefined;
+          this.pointerInfo = undefined;
+          this.pickInfo = undefined;
+          this.initialValue = undefined;
+        },
+        change: function() {
+          var ret = [ 0, 0 ]
+          if ( this.pointerInfo && this.previous.pointerInfo ) {
+            ret[0] = this.pointerInfo.position[0] - this.previous.pointerInfo.position[0];
+            ret[1] = this.pointerInfo.position[1] - this.previous.pointerInfo.position[1];
+
+          }
+          return ret;
+        },
+        pointChange: function() {
+          var ret = [ 0, 0, 0 ];
+          if ( this.pickInfo && this.previous.pickInfo ) {
+            var oldPt = this.previous.pickInfo.globalPosition;
+            var newPt = this.pickInfo.globalPosition;
+            ret[0] = newPt[0] - oldPt[0];
+            ret[1] = newPt[1] - oldPt[1];
+            ret[2] = newPt[2] - oldPt[2];
+          }
+          return ret;
+        },
+      };
+    }
+    this.pointerDown = this.events.add( function( pointerInfo, pickInfo ) {
+      if ( !this.input ) { this.init(); }
+
+      this.input.clear();
+      this.input.initialTransform = this.transform;
+      this.input.pointerDown.pointerInfo = pointerInfo;
+      this.input.pointerDown.pointerInfo = pickInfo;
+      this.input.update( pointerInfo, pickInfo );
+      this.setAxis();
+    }, "capture", this );
+    this.pointerUp = this.events.add( function( pointerInfo, pickInfo ) {
+      this.input.update( pointerInfo, pickInfo );
+
+      this.edit();
+      this.input.clear();
+    }, "capture", this );
+    this.pointerMove = this.events.add( function( pointerInfo, pickInfo ) {
+      this.input.update( pointerInfo, pickInfo );
+
+      this.edit();
+    }, "capture", this );
+    this.edit = function() {
+      switch( this.editMode ) {
+        case "translate":
+          this.translate();
+          break;
+        case "rotate":
+          this.rotate();
+          break;
+        case "scale":
+          this.scaling();
+          break;
+      }
+    }
+    this.setAxis = function() {
+      var info = this.input.pickInfo;
+      if ( info && info.globalNormal ) {
+        var largest = 0;
+        var val = -1;
+        for ( var i = 0; i < 3; i++ ) {
+          if ( val >= info.globalNormal[i] ) {
+            largest = i;
+            val = info.globalNormal[i];
+          }
+        }
+        switch( largest ) {
+          case 0:
+            this.axis = [ 1, 0, 0 ];
+            this.rotationAxis = "x";
+            break;
+          case 1:
+            this.axis = [ 0, 1, 0 ];
+            this.rotationAxis = "y";
+            break;
+          default:
+            this.axis = [ 0, 0, 1 ];
+            this.rotationAxis = "z";
+            break;
+        }
+      }
+    }
+    this.translate = function() {
+      if ( !this.input.initialValue ) {
+        this.input.initialValue = {
+          transform: this.transform,
+        }
+      }
+      var pc = this.input.pointChange();
+      var pos = this.position;
+      pos[0] += pc[0];
+      pos[1] += pc[1];
+      pos[2] += pc[2];
+      this.position = pos;
+    }
+    this.rotate = function() {
+      if ( !this.input.initialValue ) {
+        this.input.initialValue = {
+          transform: this.transform,
+        }
+      }
+      var diff = this.input.change();
+      var rot = this.rotation;
+      switch( this.rotationAxis ) {
+        case "x":
+          this.rotateBy( [ 1, 0, 0, rot[3] + (diff[0] * 4) ], 0 );
+          break;
+        case "y":
+          this.rotateBy( [ 0, 1, 0, rot[3] + (diff[0] * 4) ], 0 );
+          break;
+        case "z":
+          this.rotateBy( [ 0, 0, 1, rot[3] + (diff[0] * 4) ], 0 );
+          break;
+        default:
+          this.rotateBy( [ this.axis[0], this.axis[1], this.axis[2], rot[3] + (diff[0] * 4) ], 0 );
+          break;
+      }
+    }
+    this.scaling = function() {
+      if ( !this.input.initialValue ) {
+        this.input.initialValue = {
+          transform: this.transform,
+        }
+      }
+      var diff = this.input.change();
+      var scale = this.scale;
+      scale[0] += diff[0];
+      scale[1] += diff[0];
+      scale[2] += diff[0];
+      if ( scale[0] != 0 && scale[1] != 0 && scale[2] != 0 ) {
+        this.scale = scale;
+      }
+    } //@ sourceURL=node3edit.vwf

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        // This is the common model implementation and an example model that connects the
+        // simulation to a WebGL scene manager.
+
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "logger",
+
+      ], function( ready ) {
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ ]
+          );
+
+          module( "initialize() inheritance" );
+
+          // node and prototype execute their own initializers.
+
+          asyncTest( "node and prototype initializers", function() {
+  
+            create_node_prototype_with_initializers( true, true, function( nodeID, prototypeID ) {
+
+                equal( vwf.getProperty( nodeID, "test" ), "node", "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "test" ), "prototype", "prototype's initialization" );
+
+                start();
+            } );
+
+          } );
+
+          // node's initializer runs for node even when prototype's initializer is not provided.
+
+          asyncTest( "node initializer", function() {
+  
+            create_node_prototype_with_initializers( true, false, function( nodeID, prototypeID ) {
+
+                equal( vwf.getProperty( nodeID, "test" ), "node", "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "test" ), null, "prototype's initialization" );
+
+                start();
+            } );
+
+          } );
+
+          // node is initialized by prototype's initializer when it doesn't provide one itself.
+
+          asyncTest( "prototype initializer", function() {
+  
+            create_node_prototype_with_initializers( false, true, function( nodeID, prototypeID ) {
+
+                equal( vwf.getProperty( nodeID, "test" ), "prototype", "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "test" ), "prototype", "prototype's initialization" );
+
+                start();
+            } );
+
+          } );
+
+          // no initializers run if none are provided.
+
+          asyncTest( "no initializers", function() {
+  
+            create_node_prototype_with_initializers( false, false, function( nodeID, prototypeID ) {
+
+                equal( vwf.getProperty( nodeID, "test" ), null, "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "test" ), null, "prototype's initialization" );
+
+                start();
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create a VWF object with two levels of inheritance using the given initializers. Add a
+          // "test" property to each.
+
+          function create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ ) {
+
+            prototype.properties = prototype.properties || {};
+            prototype.properties.test = prototype.properties.test || null;
+
+            vwf.createNode( 0, prototype, unique_name( "prototype" ), function( prototypeID ) {
+
+                node.extends = "@\"" + prototypeID + "\"";
+
+                node.properties = node.properties || {};
+                node.properties.test = node.properties.test || null;
+
+                vwf.createNode( 0, node, unique_name( "node" ), function( nodeID ) {
+                    callback( nodeID, prototypeID );
+                } );
+
+            } );
+
+          }
+
+          // Create a node with a prototype. Add initialize() methods as specified to set the "test"
+          // property.
+
+          function create_node_prototype_with_initializers( node_init, prototype_init, callback /* ( nodeID, prototypeID ) */ ) {
+
+            var node = {};
+
+            if ( node_init ) {
+                node.scripts = [ {
+                    text: "this.initialize = function() { this.test = \"node\" }",
+                    type: "application/javascript"
+                } ];
+            }
+
+            var prototype = {};
+
+            if ( prototype_init ) {
+                prototype .scripts = [ {
+                    text: "this.initialize = function() { this.test = \"prototype\" }",
+                    type: "application/javascript"
+                } ];
+            }
+
+            create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ );
+
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>
