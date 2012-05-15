@@ -11,7 +11,6 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-
 require "rake"
 require "rake/clean"
 require "tilt"
@@ -31,11 +30,11 @@ task :build => "web/catalog.html" do
     ENV["PATH"] = FileList[ "../support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
 
     FileList[ "web/*.md" ].each do |md|
-        sh "( cat web/format/preamble ; Markdown.pl '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
+        sh "( cat web/format/preamble ; ../support/build/Markdown_1.0.1/Markdown.pl '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
     end
 
     FileList[ "web/docs/**/*.md" ].each do |md|
-        sh "( cat web/docs/format/preamble ; Markdown.pl '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
+        sh "( cat web/docs/format/preamble ; ../support/build/Markdown_1.0.1/Markdown.pl '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
     end
 
     sh "bundle exec ../bin/rocco web/docs/application/*.vwf.yaml"

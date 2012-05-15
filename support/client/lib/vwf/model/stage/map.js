@@ -42,15 +42,21 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- createNode ---------------------------------------------------------------------------
 
-        createNode: function( node, childComponent, childName, callback /* ( childID ) */ ) {
-            return this.kernel.createNode( this.model_to_kernel[this.object_id(node)] || node,
-                childComponent, childName, callback );  // TODO: remap callback parameter
+        createNode: function( nodeComponent, callback /* ( nodeID ) */ ) {
+            return this.kernel.createNode( nodeComponent, callback );  // TODO: remap callback parameter
         },
 
         // -- deleteNode ---------------------------------------------------------------------------
 
         deleteNode: function( node ) {
             return this.kernel.deleteNode( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- createChild --------------------------------------------------------------------------
+
+        createChild: function( node, childName, childComponent, callback /* ( childID ) */ ) {
+            return this.kernel.createChild( this.model_to_kernel[this.object_id(node)] || node,
+                childName, childComponent, callback );  // TODO: remap callback parameter
         },
 
         // -- addChild -----------------------------------------------------------------------------

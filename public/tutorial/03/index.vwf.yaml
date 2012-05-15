@@ -75,7 +75,7 @@ scripts:
       pushpin.properties.translation = pickInfo.globalPosition;
 
       var name = "pushpin"+pushpinIndex;
-      this.children.create( pushpin, name );
+      this.children.create( name, pushpin );
       pushpinIndex++;
     }
   }

@@ -12,7 +12,6 @@
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
-    <script type="text/javascript" src="../lib/vwf-view.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
 
@@ -34,6 +33,7 @@
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
+        "vwf/utility",
         "logger",
 
       ], function( ready ) {
@@ -113,14 +113,14 @@
             prototype.properties = prototype.properties || {};
             prototype.properties.test = prototype.properties.test || null;
 
-            vwf.createNode( 0, prototype, unique_name( "prototype" ), function( prototypeID ) {
+            vwf.createNode( prototype, function( prototypeID ) {
 
-                node.extends = "@\"" + prototypeID + "\"";
+                node.extends = prototypeID;
 
                 node.properties = node.properties || {};
                 node.properties.test = node.properties.test || null;
 
-                vwf.createNode( 0, node, unique_name( "node" ), function( nodeID ) {
+                vwf.createChild( 0, unique_name( "node" ), node, function( nodeID ) {
                     callback( nodeID, prototypeID );
                 } );
 

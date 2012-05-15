@@ -15,21 +15,6 @@
 
 define( [ "module", "vwf/view" ], function( module, view ) {
 
-    // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
-    // is active, scripts on the main page may make (reflected) kernel calls:
-
-    //     window.vwf_view.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childName, function( childID ) {
-    //         ...
-    //     } );
-
-    // And receive view calls:
-
-    //     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childName, callback /* ( ready ) */ ) {
-    //         ...
-    //     }
-
     return view.load( module, {
 
         initialize: function( rootSelector ) {
@@ -640,13 +625,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         }
 
                         if ( object ) {
-                            sceneView.kernel.createNode( "index-vwf", object, fileName, undefined );
+                            sceneView.kernel.createChild( "index-vwf", fileName, object, undefined );
                         }
                         break;
                     case "yaml":
                         fileName = fileName.substr( 0, fileName.length - 5 );
                         fileUrl = fileUrl.substr( 0, fileUrl.length - 5 )
-                        sceneView.kernel.createNode( "index-vwf", fileUrl, fileName, undefined );                
+                        sceneView.kernel.createChild( "index-vwf", fileName, fileUrl, undefined );                
                         break;
                 }
             }
