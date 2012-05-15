@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
+<Document>
+	<name>green.kml</name>
+	<StyleMap id="msn_horsebackriding">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_horsebackriding</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_horsebackriding</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_parks">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/parks.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sn_campground">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/campground.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sh_campground">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/campground.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sn_parks">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/parks.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<StyleMap id="msn_campground">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_campground</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_campground</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sn_horsebackriding">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/horsebackriding.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<Style id="sh_horsebackriding">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/horsebackriding.png</href>
+			</Icon>
+			<hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/>
+		</IconStyle>
+		<ListStyle>
+		</ListStyle>
+	</Style>
+	<StyleMap id="msn_parks">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_parks</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_parks</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Folder>
+		<name>Green</name>
+		<open>1</open>
+		<Placemark>
+			<name>Green 1</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_parks</styleUrl>
+			<Point>
+				<coordinates>-122.0061363292435,37.00231189766796,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Green 2</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_horsebackriding</styleUrl>
+			<Point>
+				<coordinates>-122.0021451379501,36.99526870317528,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Green 3</name>
+			<LookAt>
+				<longitude>-121.9970391013746</longitude>
+				<latitude>36.99996940801145</latitude>
+				<altitude>0</altitude>
+				<range>3905.899311483621</range>
+				<tilt>5.266354267548308</tilt>
+				<heading>2.017198810203125</heading>
+				<altitudeMode>relativeToGround</altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_campground</styleUrl>
+			<Point>
+				<coordinates>-121.9983783590328,37.00236183193373,0</coordinates>
+			</Point>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

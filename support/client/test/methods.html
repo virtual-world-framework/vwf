@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+    <script type="text/javascript" src="../lib/vwf-view.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "logger",
+
+      ], function( ready ) {
+
+        // Test methods.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ ]
+          );
+
+          // Method invocation directly to the kernel
+
+          asyncTest( "Method invocation kernel", function() {
+
+            createFixture( function( nodeID ) {
+
+              equal( vwf.callMethod( nodeID, "empty1" ), undefined, "Empty" );
+              equal( vwf.callMethod( nodeID, "empty2" ), undefined, "Empty, as body" );
+              equal( vwf.callMethod( nodeID, "empty3" ), undefined, "Empty, as parameters" );
+
+              equal( vwf.callMethod( nodeID, "noParameters1" ), "result", "No parameters, as text" );
+              equal( vwf.callMethod( nodeID, "noParameters2" ), "result", "No parameters, as body" );
+              equal( vwf.callMethod( nodeID, "noParameters3" ), "result", "No parameters, as parameters/body" );
+
+              equal( vwf.callMethod( nodeID, "unnamedParameters1", [ "value" ] ), "value", "Unnamed parameters, as text" );
+              equal( vwf.callMethod( nodeID, "unnamedParameters2", [ "value" ] ), "value", "Unnamed parameters, as body" );
+              equal( vwf.callMethod( nodeID, "unnamedParameters3", [ "value" ] ), "value", "Unnamed parameters, as parameters/body" );
+
+              equal( vwf.callMethod( nodeID, "oneParameter", [ "a" ] ), "a", "One parameter" );
+              deepEqual( vwf.callMethod( nodeID, "twoParameters", [ "a", "b" ] ), [ "a", "extra", "b" ], "Two parameters" );
+
+              start();
+            } );
+
+          } );
+
+          // Method invocation through JavaScript
+
+          asyncTest( "Method invocation JavaScript", function() {
+
+            createFixture( function( nodeID ) {
+
+              equal( vwf.execute( nodeID, "this.empty1()" ), undefined, "Empty" );
+              equal( vwf.execute( nodeID, "this.empty2()" ), undefined, "Empty, as body" );
+              equal( vwf.execute( nodeID, "this.empty3()" ), undefined, "Empty, as parameters" );
+
+              equal( vwf.execute( nodeID, "this.noParameters1()" ), "result", "No parameters, as text" );
+              equal( vwf.execute( nodeID, "this.noParameters2()" ), "result", "No parameters, as body" );
+              equal( vwf.execute( nodeID, "this.noParameters3()" ), "result", "No parameters, as parameters/body" );
+
+              equal( vwf.execute( nodeID, "this.unnamedParameters1( 'value' )" ), "value", "Unnamed parameters, as text" );
+              equal( vwf.execute( nodeID, "this.unnamedParameters2( 'value' )" ), "value", "Unnamed parameters, as body" );
+              equal( vwf.execute( nodeID, "this.unnamedParameters3( 'value' )" ), "value", "Unnamed parameters, as parameters/body" );
+
+              equal( vwf.execute( nodeID, "this.oneParameter( 'a' )" ), "a", "One parameter" );
+              deepEqual( vwf.execute( nodeID, "this.twoParameters( 'a', 'b' )" ), [ "a", "extra", "b" ], "Two parameters" );
+
+              start();
+            } );
+
+          } );
+
+          // Method inheritance directly to the kernel
+
+          asyncTest( "Method inheritance kernel", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.callMethod( derivedID, "derived" ), "derived-" + derivedID, "derived method in derived" );
+              equal( vwf.callMethod( derivedID, "base" ), "base-" + derivedID, "base method invoked on derived" );
+
+              equal( vwf.callMethod( baseID, "derived" ), undefined, "derived method not visible in base" );
+              equal( vwf.callMethod( baseID, "base" ), "base-" + baseID, "base method in base" );
+              
+              start();
+            } );
+
+          } );
+
+          // Method inheritance through JavaScript direct properties
+
+          asyncTest( "Method inheritance JavaScript direct", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.execute( derivedID, "this.derived()" ), "derived-" + derivedID, "derived method in derived" );
+              equal( vwf.execute( derivedID, "this.base()" ), "base-" + derivedID, "base method invoked on derived" );
+
+              equal( vwf.execute( baseID, "this.derived && this.derived()" ), undefined, "derived method not visible in base" );
+              equal( vwf.execute( baseID, "this.base()" ), "base-" + baseID, "base method in base" );
+              
+              start();
+            } );
+
+          } );
+
+          // Method inheritance through JavaScript collection properties
+
+          asyncTest( "Method inheritance JavaScript collection", function() {
+
+            createFixtureDerivedBase( function( derivedID, baseID ) {
+
+              equal( vwf.execute( derivedID, "this.methods.derived()" ), "derived-" + derivedID, "derived method in derived" );
+              equal( vwf.execute( derivedID, "this.methods.base()" ), "base-" + derivedID, "base method invoked on derived" );
+
+              equal( vwf.execute( baseID, "this.methods.derived && this.methods.derived()" ), undefined, "derived method not visible in base" );
+              equal( vwf.execute( baseID, "this.methods.base()" ), "base-" + baseID, "base method in base" );
+              
+              start();
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create a node with methods to invoke.
+
+          function createFixture( callback ) {
+
+            vwf.createNode( 0, {
+
+              extends:
+                "http://vwf.example.com/node.vwf",
+
+              methods: {
+
+                empty1: undefined,
+                empty2: { body: "" },
+                empty3: { parameters: [] },
+
+                noParameters1: "return 'result'",
+                noParameters2: { body: "return 'result'" },
+                noParameters3: { parameters: [], body: "return 'result'" },
+
+                unnamedParameters1: "return arguments[0]",
+                unnamedParameters2: { body: "return arguments[0]" },
+                unnamedParameters3: { parameters: [], body: "return arguments[0]" },
+                
+                oneParameter: { parameters: [ "one" ], body: "return one" },
+                twoParameters: { parameters: [ "one", "two" ], body: "return [ one, 'extra', two ]" },
+
+              },
+
+            }, unique_name( "node" ), function( nodeID ) {
+
+                callback( nodeID );
+
+            } );
+
+          }
+
+          // Create a node with two levels of inheritance and methods to invoke.
+
+          function createFixtureDerivedBase( callback ) {
+
+            vwf.createNode( 0, {
+
+              extends: "http://vwf.example.com/node.vwf",
+              methods: { base: "return 'base-' + this.id", },
+
+            }, unique_name( "base" ), function( baseID ) {
+
+              vwf.createNode( 0, {
+
+                extends: "@" + JSON.stringify( baseID ),
+                methods: { derived: "return 'derived-' + this.id", },
+
+              }, unique_name( "derived" ), function( derivedID ) {
+
+                callback( derivedID, baseID );
+
+              } );
+
+            } );
+
+          }
+
+          // Create a unique name from a base.
+
+          var sequence = 0;
+
+          function unique_name( base ) {
+            return base + "-" + ( ++sequence );
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>

@@ -1,0 +1,349 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: appscene.vwf
+type: model/x-glge
+properties:
+  ambientColor: [ 183, 183, 183 ]
+  activeCamera: "http-vwf-example-com-camera-vwf-camera"
+  backgroundColor: [ 83, 157, 194 ]
+scripts:
+- |
+    this.initialize = function() {
+      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+      this.camera.translation = [ 0, 20000, 10000 ];
+      this.camera.far = 500000;
+      this.camera.near = 2;     
+      this.speed = 400;
+      this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
+    }
+    this.toolbar.selectedColorChanged = this.events.add( function( color ) {
+    }, this );
+    this.toolbar.inputModeChanged = this.events.add( function( mode ) {
+    }, this );
+    this.toolbar.events.clearing = this.events.add( function() { 
+      this.clear(); 
+    }, this );
+children:
+  toolbar:
+    properties:
+      selectedColor:
+        set: |
+          this.selectedColor = value;
+          this.selectedColorChanged( value );
+        value:
+          "black"
+      inputMode:
+        set: |
+          this.inputMode = value;
+          this.inputModeChanged( value );
+        value:
+          "orbit"
+    methods:
+      clear: |
+        this.clearing();
+    events:
+      selectedColorChanged:
+      inputModeChanged:
+      clearing:
+  flat_terrain:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/vwf_terrain.dae
+    type: model/vnd.collada+xml
+    properties:
+      translation: [ 0, 0, -150 ]
+      scale: [ 0.008, 0.008, 0.020 ]
+  sceneCenter:
+    extends: http://vwf.example.com/node3.vwf
+  light1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      constantAttenuation: 1
+  predator1:
+    extends: http://vwf.example.com/node3.vwf 
+    methods:
+      animate: 
+    scripts:
+      - |
+          this.initialize = function() {
+
+            this.path = [];
+            var len = 0, pos, x, y, z = 1200;
+
+            for ( var theta = 0; theta < 2 * Math.PI && len < (( 2*180 )-1); theta += Math.PI / 180 ) {
+              x = 10000 * Math.cos( theta );
+              y = 10000 * Math.sin( theta );
+              len = this.path.length;
+              pos = [ x, y, z ];
+              this.path.push( { translation: pos, time: 1 } );
+            }
+            this.nextPathIndex = this.lastPathIndex+1;
+            this.timeSinceLast = this.time;
+            this.planeGroup1.translation = this.path[ this.lastPathIndex ].translation;
+            this.goal1.translation = this.path[ this.nextPathIndex ].translation;
+
+            this.animating = true;
+          }
+          this.animate = function() {
+            var time = this.time;
+            var len = this.path.length;
+            var timeElasped = time - this.timeSinceLast;
+            var lastPathPoint = this.path[ this.lastPathIndex ];
+            var nextPathPoint = this.path[ this.nextPathIndex ];
+            var goalPointIndex = this.nextPathIndex + 1;
+            if ( goalPointIndex >= this.path.length )
+              goalPointIndex = 0;
+            var goalPathPoint = this.path[ goalPointIndex ];
+            var percentDone = timeElasped / nextPathPoint.time;
+            if ( percentDone > 0.975 )
+              percentDone = 1;
+             
+            function interpolate( beforeCoord, afterCoord, percent ) {
+              return beforeCoord + percent * (afterCoord - beforeCoord);
+            }
+            
+            var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
+            var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
+            this.goal1.translation = [ newX, newY, 1200 ]; 
+            
+            newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
+            newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
+            this.planeGroup1.translation = [ newX, newY, 1200 ];
+            
+            var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
+            this.planeGroup1.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ]; 
+            
+            if ( percentDone == 1 ) {
+              this.lastPathIndex += 1;
+              this.timeSinceLast = time;
+            }
+            if ( this.animating ) {
+              this.future( 0.1 ).animate();
+            } 		  
+          } //@ sourceURL=predator1.vwf
+    properties:
+      translation: [ 0, 0, 1200 ]
+      lastPathIndex:
+        set: |
+          if ( value >= 0 ) {
+            if ( this.path && value < this.path.length ) {
+              this.lastPathIndex = value;
+              this.nextPathIndex = value+1;
+              if ( this.nextPathIndex == this.path.length )
+                this.nextPathIndex = 0;
+            } else {
+              this.lastPathIndex = 0;
+              this.nextPathIndex = 1;              
+            }
+          }
+        value: 0
+      animating:
+        set: |
+          if ( value && !this.animating ) {
+             this.future( 0.1 ).animate();
+          }
+          this.animating = value;
+        value: false
+    children:
+      goal1:
+        extends: http://vwf.example.com/node3.vwf 
+        properties:
+          translation: [ 0, 0, 1200 ]
+      planeGroup1:
+        extends: http://vwf.example.com/node3.vwf 
+        properties:
+          translation: [ 0, 0, 1200 ]
+        children:
+          plane1:
+            extends: http://vwf.example.com/node3.vwf
+            source: models/Predator.dae
+            type: model/vnd.collada+xml
+            properties:
+              translation: [ 0, 500, 1800 ]
+              scale: [ 15, 15, 15 ]
+          cone1:
+            extends: http://vwf.example.com/node3.vwf
+            source: models/cone.dae
+            type: model/vnd.collada+xml
+            properties:
+              translation: [ 0, -300, -1100 ]
+              scale: [ 8, 8, 16 ]
+  predator2:
+    extends: http://vwf.example.com/node3.vwf 
+    methods:
+      animate:
+    scripts:
+    - |
+        this.initialize = function() {
+          console.info( "================ predator2 ================" );
+
+          this.path = [];
+          var len, pos, x = 0, y = 0, z = 12000;
+          var radius = 5000;
+          var step = 200;
+
+          y = 0;
+          for ( var x = radius - 200; x > -radius; x -= step ) {
+            pos = [ x, 0, 1200 ];
+            len = this.path.length;
+            this.path.push( { translation: pos, time: 1 } );
+          }
+
+          for ( var theta = 1.5 * Math.PI; theta > 0; theta -= Math.PI / 90 ) {
+            x = -radius + ( radius * Math.cos( theta ) );
+            y = radius + ( radius * Math.sin( theta ) );
+            len = this.path.length;
+            pos = [ x, y, z ];
+            this.path.push( { translation: pos, time: 2 } );
+          } 
+
+          x = 0;
+          for ( var y = radius - step; y > -radius ; y -= step ) {
+            pos = [ 0, y, 1200 ];
+            len = this.path.length;
+            this.path.push( { translation: pos, time: 1 } );
+          }
+
+          for ( var theta = 2 * Math.PI; theta > 0.5 * Math.PI; theta -= Math.PI / 90 ) {
+            x = -radius + (radius * Math.cos( theta ) );
+            y = -radius + (radius * Math.sin( theta ) );
+            len = this.path.length;
+            pos = [ x, y, z ];
+            this.path.push( { translation: pos, time: 2 } );
+          } 
+
+          y = 0;
+          for ( var x = -radius + step; x < radius; x += step ) {
+            pos = [ x, 0, 1200 ];
+            len = this.path.length;
+            this.path.push( { translation: pos, time: 1 } );
+          }            
+
+          for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
+            x = radius + (radius * Math.cos( theta ) );
+            y = radius + (radius * Math.sin( theta ) );
+            len = this.path.length;
+            pos = [ x, y, z ];
+            this.path.push( { translation: pos, time: 2 } );
+          }
+          
+          x = 0;
+          for ( var y = radius - step; y > -radius; y -= step ) {
+            pos = [ 0, y, 1200 ];
+            len = this.path.length;
+            this.path.push( { translation: pos, time: 1 } );
+          }
+
+          for ( var theta = 1.0 * Math.PI; theta < 2.5 * Math.PI; theta += Math.PI / 90 ) {
+            x = radius + ( radius * Math.cos( theta ) );
+            y = -radius + ( radius * Math.sin( theta ) );
+            len = this.path.length;
+            pos = [ x, y, z ];
+            this.path.push( { translation: pos, time: 2 } );
+          }            
+         
+          this.nextPathIndex = this.lastPathIndex+1;
+          this.timeSinceLast = this.time;
+          this.planeGroup2.translation = this.path[ this.lastPathIndex ].translation;
+          this.goal2.translation = this.path[ this.nextPathIndex ].translation;
+          
+          this.animating = true;
+        }
+        this.animate = function() {
+          var time = this.time;
+          var len = this.path.length;
+          var timeElasped = time - this.timeSinceLast;
+          var lastPathPoint = this.path[ this.lastPathIndex ];
+          var nextPathPoint = this.path[ this.nextPathIndex ];
+          var goalPointIndex = this.nextPathIndex + 1;
+          if ( goalPointIndex >= this.path.length )
+            goalPointIndex = 0;
+          var goalPathPoint = this.path[ goalPointIndex ];
+          var percentDone = timeElasped / nextPathPoint.time;
+          if ( percentDone > 0.975 )
+            percentDone = 1;
+        
+          function interpolate( beforeCoord, afterCoord, percent ) {
+            return beforeCoord + percent * (afterCoord - beforeCoord);
+          }
+          var newX = interpolate( nextPathPoint.translation[0], goalPathPoint.translation[0], percentDone );
+          var newY = interpolate( nextPathPoint.translation[1], goalPathPoint.translation[1], percentDone );
+          this.goal2.translation = [ newX, newY, 1200 ]; 
+          
+          newX = interpolate( lastPathPoint.translation[0], nextPathPoint.translation[0], percentDone );
+          newY = interpolate( lastPathPoint.translation[1], nextPathPoint.translation[1], percentDone );
+          this.planeGroup2.translation = [ newX, newY, 1200 ];
+
+          var zRot = [ goalPathPoint.translation[0] - newX, goalPathPoint.translation[1] - newY, 0 ];
+          this.planeGroup2.rotation = [ 0, 0, 1, (Math.atan2( zRot[1], zRot[0] )-(Math.PI*0.5)) * 180 / Math.PI ];
+
+          if ( percentDone == 1 ) {
+            this.lastPathIndex += 1;
+            var newPt = this.path[ this.lastPathIndex ].translation;
+            var goalPt = this.path[ this.nextPathIndex ].translation;
+            this.timeSinceLast = time;
+          }
+          if ( this.animating ) {
+            this.future( 0.1 ).animate();
+          }          
+        } //@ sourceURL=predator2.vwf
+    properties:
+      translation: [ 0, 0, 1500 ]
+      lastPathIndex:
+        set: |
+
+          if ( value >= 0 ) {
+            if ( this.path && value < this.path.length ) {
+              this.lastPathIndex = value;
+              this.nextPathIndex = value+1;
+              if ( this.nextPathIndex == this.path.length )
+                this.nextPathIndex = 0;
+            } else {
+              this.lastPathIndex = 0;
+              this.nextPathIndex = 1;
+            }
+          }
+        value: 0
+      animating:
+        set: |
+          if ( value && !this.animating ) {
+             this.future( 0.1 ).animate();
+          }
+          this.animating = value;
+        value: false
+    children:
+      goal2:
+        extends: http://vwf.example.com/node3.vwf 
+        properties:
+          translation: [ 0, 0, 1500 ]
+      planeGroup2:
+        extends: http://vwf.example.com/node3.vwf 
+        properties:
+          translation: [ 0, 0, 1500 ]
+        children:
+          plane2:
+            extends: http://vwf.example.com/node3.vwf
+            source: models/Predator.dae
+            type: model/vnd.collada+xml
+            properties:
+              translation: [ 0, 500, 1800 ]
+              scale: [ 15, 15, 15 ]
+          cone2:
+            extends: http://vwf.example.com/node3.vwf
+            source: models/cone.dae
+            type: model/vnd.collada+xml
+            properties:
+              translation: [ 0, -300, -1100 ]
+              scale: [ 8, 8, 16 ]

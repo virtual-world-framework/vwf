@@ -1,0 +1,40 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: |
+  http://vwf.example.com/node3.vwf
+properties:
+  spin-spinning:
+    set: |
+      if ( value && ! this["spin-spinning"] ) {  // starting
+        this["spin-spinning"] = true;  // set the internal value
+        this.spin();  // run the first step and schedule the next one
+      } else if ( ! value && this["spin-spinning"] ) { // stopping
+        this["spin-spinning"] = false;  // set the internal value
+      }
+    value: false
+  spin-rate: 1
+  spin-axis: [ 0, 0, 1 ]
+methods:
+  spin: |
+    if ( this["spin-spinning"] ) {  // if enabled
+      var axis = this["spin-axis"];
+      this.rotateBy( [ axis[0], axis[1], axis[2], this["spin-rate"], 0 ] );
+      this.future( 0.05 ).spin();  // schedule the next step
+    }
+scripts:
+- |
+  this.pointerClick = function()  {  // when clicked ...
+    this["spin-spinning"] = ! this["spin-spinning"];  // ... toggle the enabled flag
+  }

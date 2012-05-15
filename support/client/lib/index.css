@@ -1,0 +1,279 @@
+body {
+  background-color: #AAA;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+table {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+form {
+    margin: 2em;
+}
+
+label {
+  font-size: 18px;
+}
+
+input {
+  font-size: 18px;
+  padding: 5px;
+}
+
+.vwf-properties {
+  background-color: #DCC;
+}
+
+.vwf-methods {
+  background-color: #CDC;
+}
+
+.vwf-events {
+  background-color: #CCD;
+}
+
+.vwf-root {
+  background-color: #CCC;
+}
+
+.vwf-root .vwf-node:nth-child(odd) {
+  background-color: #BCC;
+}
+
+.vwf-root .vwf-node:nth-child(even) {
+  background-color: #CBC;
+}
+
+.vwf-orphanage {
+  background-color: #CCC;
+}
+
+.vwf-orphanage .vwf-node:nth-child(odd) {
+  background-color: #BCC;
+}
+
+.vwf-orphanage .vwf-node:nth-child(even) {
+  background-color: #CBC;
+}
+
+.vwf-children {
+  background-color: #CCC;
+}
+
+.vwf-children .vwf-node:nth-child(odd) {
+  background-color: #BCC;
+}
+
+.vwf-children .vwf-node:nth-child(even) {
+  background-color: #CBC;
+}
+
+.vwf-children .vwf-children {
+  background-color: #AAA;
+}
+
+.vwf-children .vwf-children .vwf-node:nth-child(odd) {
+  background-color: #9AA;
+}
+
+.vwf-children .vwf-children .vwf-node:nth-child(even) {
+  background-color: #A9A;
+}
+
+.vwf-children .vwf-children .vwf-children {
+  background-color: #888;
+}
+
+.vwf-children .vwf-children .vwf-children .vwf-node:nth-child(odd) {
+  background-color: #788;
+}
+
+.vwf-children .vwf-children .vwf-children .vwf-node:nth-child(even) {
+  background-color: #878;
+}
+
+.vwf-children .vwf-children .vwf-children .vwf-children {
+  background-color: #666;
+}
+
+.vwf-children .vwf-children .vwf-children .vwf-children .vwf-node:nth-child(odd) {
+  background-color: #566;
+}
+
+.vwf-children .vwf-children .vwf-children .vwf-children .vwf-node:nth-child(even) {
+  background-color: #656;
+}
+
+.vwf-scripts {
+  background-color: #CDD;
+}
+
+.vwf-properties, .vwf-methods, .vwf-events, .vwf-children, .vwf-scripts {
+  padding: 0;
+}
+
+.vwf-properties > .vwf-label, .vwf-methods > .vwf-label, .vwf-events > .vwf-label, .vwf-children > .vwf-label, .vwf-scripts> .vwf-label {
+  margin: 0;
+  padding: 8px 5px 5px 5px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.vwf-properties > .vwf-label {
+  background-color: #CBB;
+}
+
+.vwf-methods > .vwf-label {
+  background-color: #BCB;
+}
+
+.vwf-events > .vwf-label {
+  background-color: #BBC;
+}
+
+.vwf-children > .vwf-label {
+  background-color: #BBB;
+}
+
+.vwf-scripts > .vwf-label {
+  background-color: #BCC;
+}
+
+.vwf-node > .vwf-label {
+  padding-left: 3px;
+  padding-bottom: 5px;
+}
+
+.vwf-label {
+  margin: 0;
+  padding: 2px 5px 2px 5px;
+  font-size: 18px;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+.vwf-attribute {
+  font-size: 14px;
+}
+
+#vwf-root {
+  position:absolute;
+}
+
+#vwf-root > .vwf-label > .vwf-attribute {
+  font-size: 18px;
+}
+
+.vwf-node {
+  padding: 10px;
+}
+
+#vwf-root>div, #vwf-root>canvas {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.vwf-control-slider, .vwf-control-roll-slider, .vwf-control-pitch-slider, .vwf-control-yaw-slider, .vwf-control-x-slider, .vwf-control-y-slider, .vwf-control-z-slider, .vwf-control-r-slider, .vwf-control-g-slider, .vwf-control-b-slider {
+    display: inline-block;
+    width: 15em;
+    margin-left: 1ex;
+}
+
+.vwf-activeCamera-dropdown {
+    display: inline-block;
+    width: 15em;
+    margin-left: 1ex;
+}
+
+.vwf-roll-value, .vwf-pitch-value, .vwf-yaw-value, .vwf-r-value, .vwf-g-value, .vwf-b-value, .vwf-a-value {
+    display: inline-block;
+    width: 2em;
+}
+
+.vwf-x-value, .vwf-y-value, .vwf-z-value {
+    display: inline-block;
+    width: 4em;
+}
+
+.vwf-err {
+    border: 2px solid red;
+    font: 14px Arial;
+    background: #FFFFDD;
+    color: #880000;
+    padding: 8px;
+    width: 300px;
+}
+
+.overlay {
+  position:absolute;
+  top:30%;
+  width:99%;
+  pointer-events:none;
+}
+
+.overlay p {
+  padding:0px;
+  margin:0px;
+}
+
+.overlay a:link {
+  color:#888888;
+}
+
+.overlay a:visited {
+  color:#888888;
+}
+
+.overlay a:hover {
+  color:#CCCCCC;
+}
+
+.loading {
+  margin:auto;
+  color:#FFF;
+  width:300px;
+  height:200px;
+  background:#222;
+  opacity:0.9;
+  -moz-border-radius: 20px;
+  -webkit-border-radius: 20px;
+  -khtml-border-radius: 20px;
+  border-radius: 20px;
+  font:18px Arial;
+  /*visibility: hidden;*/
+}
+
+.loadText {
+ position:relative;
+ left:90px;
+ top:10px;
+}
+
+.loadImg {
+  position:relative;
+  left:82px;
+  top:35px;
+}
+
+.requirements {
+  position:relative;
+  left:60px;
+  top:20px;
+}
+
+.req {
+  font-size:14px;
+  position:relative;
+  left:20px;
+}
+
+.loadError {
+  font-size:14px;
+  pointer-events:all;
+  position:relative;
+  left:20px;
+  top:30px;
+}
