@@ -39,21 +39,24 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             this.editorOpen = false;
             this.timelineInit = false;
             this.aboutInit = false;
+            this.modelsInit = false;
 
             this.topdownName = '#topdown_a';
             this.topdownTemp = '#topdown_b';
             this.clientList = '#client_list';
             this.timeline = '#time_control';
             this.about = '#about_tab';
+            this.models = '#model_tab';
             this.currentNodeID = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='about' src='images/tab_About.png' alt='about' /><img id='models' src='images/tab_About.png' alt='models' /></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='time_control'></div></div></div>" +
-                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='about_tab'></div></div></div>"
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='about_tab'></div></div></div>" +
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_tab'></div></div></div>"
             );
             
             $('#tabs').stop().animate({ opacity:0.0 }, 0);
@@ -86,6 +89,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 openEditor.call(self, 4);
             });
 
+            jQuery('#models').click ( function(evt) {
+                openEditor.call(self, 5);
+            });
+
             jQuery('#x').click ( function(evt) {
                 closeEditor.call(self);
             });
@@ -95,6 +102,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             $('#client_list').hide();
             $('#time_control').hide();
             $('#about_tab').hide();
+            $('#model_tab').hide();
             
             var canvas = document.getElementById("index-vwf");
             if ( canvas ) {
@@ -103,6 +111,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 $('#client_list').height(canvas.height);
                 $('#time_control').height(canvas.height);
                 $('#about_tab').height(canvas.height);
+                $('#model_tab').height(canvas.height);
             }
             else
             {    
@@ -111,6 +120,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 $('#client_list').height(window.innerHeight-20);
                 $('#time_control').height(window.innerHeight-20);
                 $('#about_tab').height(window.innerHeight-20);
+                $('#model_tab').height(window.innerHeight-20);
             }
         },
         
@@ -305,6 +315,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.clientList).hide();
                 $(this.timeline).hide();
                 $(this.about).hide();
+                $(this.models).hide();
 
                 if(this.editorOpen)
                 {
@@ -328,6 +339,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.topdownTemp).hide();
                 $(this.timeline).hide();
                 $(this.about).hide();
+                $(this.models).hide();
                 showUserList.call(this);
             }
 
@@ -338,6 +350,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.topdownTemp).hide();
                 $(this.clientList).hide();
                 $(this.about).hide();
+                $(this.models).hide();
                 showTimeline.call(this);
             }
 
@@ -348,7 +361,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.topdownTemp).hide();
                 $(this.clientList).hide();
                 $(this.timeline).hide();
+                $(this.models).hide();
                 showAboutTab.call(this);
+            }
+
+            // Models
+            else if(eView == 5)
+            {
+                $(this.topdownName).hide();
+                $(this.topdownTemp).hide();
+                $(this.clientList).hide();
+                $(this.timeline).hide();
+                $(this.about).hide();
+                showModelsTab.call(this);
             }
 
 
@@ -379,6 +404,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(this.clientList).hide();
             $(this.timeline).hide();
             $(this.about).hide();
+            $(this.models).hide();
         }
 
         else if (this.editorOpen && this.editorView == 2) // Client list open
@@ -387,6 +413,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(topdownName).hide();
             $(this.timeline).hide();
             $(this.about).hide();
+            $(this.models).hide();
         }
 
         else if (this.editorOpen && this.editorView == 3) // Timeline open
@@ -395,6 +422,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(topdownName).hide();
             $(this.clientList).hide();
             $(this.about).hide();
+            $(this.models).hide();
         }
 
         else if (this.editorOpen && this.editorView == 4) // About open
@@ -403,6 +431,16 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(topdownName).hide();
             $(this.clientList).hide();
             $(this.timeline).hide();
+            $(this.models).hide();
+        }
+
+        else if (this.editorOpen && this.editorView == 5) // Models open
+        {
+            $(this.models).hide('slide', {direction: 'right'}, 175);
+            $(topdownName).hide();
+            $(this.clientList).hide();
+            $(this.timeline).hide();
+            $(this.about).hide();
         }
         
         $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
@@ -1074,4 +1112,44 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
     }
 
+    //  -- showModelsTab ----------------------------------------------------------------------
+
+    function showModelsTab() // invoke with the view as "this"
+    {
+        var models = this.models;
+        if(!this.modelsInit) {
+            $(models).append("<div class='header'>Models</div>");
+            this.modelsInit = true;
+        }
+        else {
+            $(models+' .childContainer').remove();
+        }
+
+        $.getJSON("admin/models", function( data ) {
+            $.each( data, function( key, value ) {
+                var fileName = encodeURIComponent(value['basename']);
+                var divId = fileName;
+                if(divId.indexOf('.') != -1) {
+                    divId = divId.replace(/\./g, "_");
+                }
+                var url = value['url'];
+
+                $(models).append("<div class='childContainer'><div id='" + divId + "' class='modelEntry' draggable='true' data-url='" + url + "'>"
+                    + fileName + "</div><hr></div>");
+                $("#" + divId).on("dragstart", function (e) {
+                    var fileData = "{\"fileName\":\""+e.target.textContent+"\", \"fileUrl\":\""+e.target.getAttribute("data-url")+"\"}";
+                    e.originalEvent.dataTransfer.setData('text/plain', fileData);
+                    e.originalEvent.dataTransfer.setDragImage(e.target, 0, 0);
+                    return true;
+                });
+            });
+        } );
+
+        if(!this.editorOpen) {
+            $(models).show('slide', {direction: 'right'}, 175);
+        }
+        else {
+            $(models).show();
+        }
+    }
 } );
