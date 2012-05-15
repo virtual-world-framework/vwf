@@ -62,7 +62,7 @@ scripts:
             //When a new player is created, you'll have to let the new guy know that you exist. SendSelf does this.
             SendSelf();
             //alert('create' + proto.properties.PlayerNumber);
-            vwf_view.kernel.kernel.createNode('index-vwf',proto , "player-"+proto.properties.PlayerNumber, null);
+            vwf_view.kernel.kernel.createNode('index-vwf', "player-"+proto.properties.PlayerNumber, proto, null);
         }
     }
    

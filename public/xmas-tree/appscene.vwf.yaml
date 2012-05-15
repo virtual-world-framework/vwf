@@ -143,7 +143,7 @@ scripts:
             cube.scripts = [];
             cube.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
 
-            this.children.create( cube, newObjName );        
+            this.children.create( newObjName, cube );        
             this.createCube = false;
           } else {
             this.spheresCreated += 1;
@@ -157,7 +157,7 @@ scripts:
             sphere.scripts = [];
             sphere.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
             
-            this.children.create( sphere, newObjName );
+            this.children.create( newObjName, sphere );
             this.createCube = true;      
           }
           if ( newObjName && newObjName != "" ) {

@@ -321,7 +321,7 @@ scripts:
                 
                 var newid = "missile" + this.numfired + "" + this.PlayerNumber;
                 this.camtarget = newid;
-                this.parent.children.create(proto, newid);
+                this.parent.children.create(newid, proto);
                 
          }
          this.turn = function(dir)
