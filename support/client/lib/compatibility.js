@@ -36,16 +36,21 @@ function testES5()
 
 function testWS()
 {
-    var ws = 'ws' + document.URL.substring(4) + 'websocket';
-    var websocket = new WebSocket(ws);
-    websocket.onerror = function(evt) 
-    { 
-        // For single user mode
-        //$('#WS').html("<img src='images/warning.png' alt=' ' width='20px'/>WebSockets");
+    // var ws = 'ws' + document.URL.substring(4) + 'websocket';
+    // var websocket = new WebSocket(ws);
+    // websocket.onerror = function(evt) 
+    // { 
+    //     // For single user mode
+    //     //$('#WS').html("<img src='images/warning.png' alt=' ' width='20px'/>WebSockets");
+    //     $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/>WebSockets");
+    //     $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review <a href='/web/docs/reqs.html'>documentation</a> for specific <br/>requirements. </span>");
+    //     return;
+    // };
+    if(! io.Transport.websocket.check() )
+    {
         $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/>WebSockets");
         $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review <a href='/web/docs/reqs.html'>documentation</a> for specific <br/>requirements. </span>");
-        return;
-    };
+    }
 }
 
 function updateOverlay()
