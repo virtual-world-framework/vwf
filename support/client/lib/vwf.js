@@ -873,7 +873,10 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                     success: function( component ) {
 
                         this.getType( component["extends"] || nodeTypeURI, function( prototypeID ) { // TODO: if object literal?
-
+                            if(component["source"]) {
+                                var glgeDocument = new GLGE.Document();
+                                component["source"] = glgeDocument.getAbsolutePath(component["source"], uri);
+                            }
                             async.map( component["implements"] || [], function( uri, callback /* ( err, result ) */ ) {
 
                                 vwf.getType( uri, function( behaviorID ) {
@@ -881,7 +884,6 @@ if ( uri[0] == "@" ) {  // TODO: this is allowing an already-loaded nodeID to be
                                 } );
 
                             }, function( err, behaviorIDs ) {
-
                                 construct.call( vwf, 0, nodeID, prototypeID, behaviorIDs, component, undefined, function( nodeID ) {
 
                                     var callbacks = types[nodeID];
@@ -1777,7 +1779,6 @@ return component;
         // a notification on each view.
 
         var construct = function( parentID, nodeID, prototypeID, behaviorIDs, nodeComponent, nodeName, callback /* ( nodeID ) */ ) {
-
             this.logger.group( "vwf.construct " + nodeID + " " + nodeComponent.source + " " + nodeComponent.type );
 
             var deferredInitializations = {};
@@ -1792,7 +1793,6 @@ return component;
                     async.forEachSeries( vwf.models, function( model, callback /* ( err ) */ ) {
 
                         var driver_ready = true;
-
                         model.creatingNode && model.creatingNode( parentID, nodeID, prototypeID, behaviorIDs,
                                 nodeComponent.source, nodeComponent.type, nodeName, function( ready ) {
 

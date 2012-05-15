@@ -602,33 +602,35 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- drop ---------------------------------------------------------------------------------
 
         canvas.ondrop = function( e ) {
+            e.preventDefault();
             var eData = getEventData( e, false );
             if ( eData ) {
             
-                var object, match, fn;
-                var files = e.dataTransfer.files;
-                var file = files[0];
-                var ext = (/[.]/.exec(file.name)) ? /[^.]+$/.exec(file.name) : undefined;
+                var object, match, fileName, fileUrl;
+                var fileData = $.parseJSON(e.dataTransfer.getData('text/plain'));
+                fileName = decodeURIComponent(fileData.fileName);
+                fileUrl = decodeURIComponent(fileData.fileUrl);
+                var ext = (/[.]/.exec(fileName)) ? /[^.]+$/.exec(fileName) : undefined;
 
                 switch ( ext[0].toLowerCase() ) {
                     case "dae":
                         object = {
                           extends: "http://vwf.example.com/node3.vwf",
-                          source: file.name,
+                          source: fileUrl,
                           type: "model/vnd.collada+xml",
                           properties: { 
                             translation: eData.eventNodeData[""][0].globalPosition,
                           },   
                         };
 
-                        switch ( file.name ) { // hack it since setting this data through components isn't working
+                        switch ( fileName ) { // hack it since setting this data through components isn't working
 
                             case "blackhawk.dae": // from cityblock
                                 object.properties.rotation = [ 1, 0, 0, 0 ];
                                 object.properties.scale = [ 0.2, 0.2, 0.2 ];
                                 break;
 
-                            case "blackhawkGW.dae": // from sandtable
+                            case "a10.dae": // from sandtable
                                 object.properties.translation[2] += 20;
                                 object.properties.rotation = [ 1, 0, 0, 0 ];
                                 object.properties.scale = [ 2, 2, 2 ];
@@ -690,7 +692,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                             default:
 
-                                if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+                                if ( match = fileName.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
 
                                     object = {
                                       extends: match[1],
@@ -702,7 +704,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                       ]
                                     };
 
-                                } else if ( match = file.name.match( /\.dae$/i ) ) { // assignment is intentional
+                                } else if ( match = fileName.match( /\.dae$/i ) ) { // assignment is intentional
 
                                     object.properties.scale = [ 1, 1, 1 ];
 
@@ -715,19 +717,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                         }
                         if ( object ) {
-                            sceneView.kernel.createNode( "index-vwf", object, file.name, undefined );
+                            sceneView.kernel.createNode( "index-vwf", object, fileName, undefined );
                         }
                         break;
                     case "yaml":
-                        fn = file.name.substr( 0, file.name.length - 5 );
-                        sceneView.kernel.createNode( "index-vwf", fn, fn, undefined );                
+                        fileName = fileName.substr( 0, fileName.length - 5 );
+                        fileUrl = fileUrl.substr( 0, fileUrl.length - 5 )
+                        sceneView.kernel.createNode( "index-vwf", fileUrl, fileName, undefined );                
                         break;
                 }
-                
-
             }
-
-            e.preventDefault();            
         };
          
     };
