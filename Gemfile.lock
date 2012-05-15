@@ -12,7 +12,6 @@ GEM
     json (1.6.5)
     mustache (0.99.4)
     rack (1.4.1)
-    rack-google-analytics (0.10.0)
     rack-protection (1.2.0)
       rack
     rack-test (0.6.1)
@@ -52,7 +51,6 @@ PLATFORMS
 DEPENDENCIES
   eventmachine (>= 1.0.0.beta, != 1.0.0.beta.4)
   json
-  rack-google-analytics
   rack-test
   rake
   redcarpet (< 2)

@@ -11,7 +11,7 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-require "init"
+require File.dirname(__FILE__) + '/init.rb'
 
 map "/" do
 # Uncomment and add your Google Analytics ID to inject website analytics into your VWF server pages.

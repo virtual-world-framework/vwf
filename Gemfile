@@ -22,7 +22,7 @@ gem "websocket-rack", :require => "rack/websocket"
 gem "thin"
 gem "rake" # for build scripts
 gem "rocco" # for documentation builds
-gem 'rack-google-analytics', :require => 'rack/google-analytics'
+#gem 'rack-google-analytics', :require => 'rack/google-analytics'
 
 group :development do
   gem "sinatra-reloader", :require => "sinatra/reloader"
