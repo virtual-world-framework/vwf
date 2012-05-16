@@ -964,7 +964,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                             components[nodeURI] = []; // [] => array of callbacks while loading => true
 
                             loadComponent( nodeURI, function( nodeDescriptor ) {
-                                if(nodeDescriptor["source"]) {
+                                if(nodeDescriptor["source"] && nodeComponent.indexOf("/") != -1) {
                                     var glgeDocument = new GLGE.Document();
                                     nodeDescriptor["source"] = glgeDocument.getAbsolutePath(nodeDescriptor["source"], nodeComponent);
                                 }
