@@ -229,7 +229,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
 			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
-				lastPick = mousePick.call( this, mouse, sceneNode );
+                var newPick = mousePick.call( this, mouse, sceneNode );
+                if(newPick) {
+    				lastPick = newPick;
+                }
 				oldMouseX = mouse.getMousePosition().x;
 				oldMouseY = mouse.getMousePosition().y;
 				lastPickTime = time;
@@ -493,7 +496,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         }
                     }
                 }
-
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
             pointerDownID = undefined;
@@ -577,6 +579,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
+            sceneCanvas.mouseX=e.clientX;
+            sceneCanvas.mouseY=e.clientY;
             var eData = getEventData( e, false );
             if ( eData ) {
                 e.dataTransfer.dropEffect = "copy";
@@ -590,7 +594,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             e.preventDefault();
             var eData = getEventData( e, false );
             if ( eData ) {
-            
                 var object, match, fileName, fileUrl;
                 var fileData = $.parseJSON(e.dataTransfer.getData('text/plain'));
                 fileName = decodeURIComponent(fileData.fileName);
