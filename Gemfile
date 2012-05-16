@@ -23,6 +23,8 @@ gem "thin"
 gem "rake" # for build scripts
 gem "rocco" # for documentation builds
 gem 'rack-google-analytics', :require => 'rack/google-analytics'
+gem 'kramdown'
+
 
 group :development do
   gem "sinatra-reloader", :require => "sinatra/reloader"
