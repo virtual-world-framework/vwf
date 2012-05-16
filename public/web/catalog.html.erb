@@ -1,7 +1,10 @@
 <html>
   <head>
-    <title>Virtual World Framework</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <title>Virtual World Framework - Examples and Demonstrations</title>
+		<link rel='stylesheet' type='text/css' href='css/bootstrap.min.css' />
+		<link rel='stylesheet' type='text/css' href='css/bootstrap-responsive.min.css' />
+		<link rel='stylesheet' type='text/css' href='css/vwf.css' />
+	
     <script src="jquery-1.7.1.js"></script>
     <script type='text/javascript'>
       function showInfo(app, query)
@@ -58,29 +61,27 @@
 
     </script>
   </head>
-  <body>
-    <div class="header">
-      <div class="title">Virtual World Framework</div>
-      <div class='menu'>
-        <a href="about.html">About</a>
-        <span> | </span>
-        <a href="catalog.html">Demos</a>
-        <span> | </span>
-        <a href="docs/reqs.html">Documentation</a>
-        <span> | </span>
-        <a href="glossary.html">Glossary</a>
-        <span> | </span>
-        <a href="faq.html">FAQ</a>
-      </div>
-    </div>
-
-    <div>
-      <div style='width:800px;margin:auto;text-align:left;padding-top:10px'>
-        <div class='full'><br />
-          <h1>Demos</h1>
+	<body>
+		<header class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container"><div id="logo">Virtual World Framework</div>
+					<nav>
+						<ul class="nav pull-right">
+						  <li><a href="about.html">About</a></li>
+						  <li><a href="catalog.html">Demos</a></li>
+						  <li><a href="docs/reqs.html">Documentation</a></li>
+						  <li><a href="glossary.html">Glossary</a></li>
+						  <li><a href="faq.html">FAQ</a></li>
+						</ul>
+				  </nav>
+				</div>
+			</div>
+		</header>
+			
+	<div class="container">
+        <h1>Demos</h1>
           <hr />
-        </div>
-      </div>
+
 <% while applications.any? do %>
       <div class="row">
 <%   3.times do %>
