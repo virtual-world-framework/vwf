@@ -1,7 +1,12 @@
+<script>
+	$(function(){
+		  $('#myCarousel').carousel();
+		});
+</script>
 <div>
 <section id="carousel">
 <div class="row">
-<div class="span11">
+<div class="span11" markdown="1">
 <div id="myCarousel" class="carousel slide">
 <div class="carousel-inner">
 <div class="item active">
@@ -15,7 +20,7 @@
 <img src="images/webgl.png" alt="WebGL"/>
 <div class="carousel-caption">
 <h4>Utilizing WebGL</h4>
-<p>Virtual World Framework takes advantage of the latest web standards to bring real time 3D hardware accelerated graphics in your browser.</p>
+<p>Virtual World Framework uses the latest GL standard to bring real time 3D hardware accelerated graphics to your browser.</p>
 </div>
 </div>
 <div class="item">
@@ -40,10 +45,12 @@
 </div>
 </section>
 </div>
-
+<div class="alert alert-info" markdown="1" style="text-align:center;">
+### "The next big 3D platform is your browser. Virtual World Framework unleashes its potential."
+</div>
 <div class="span11" style="margin-left:30px;" markdown="1">
 
-## About Virtual World Framework 
+
 <div class="span3" markdown="1" style="margin-left:25px;padding-right: 5px;" >
 <h3>WHAT<img src="images/compass.png" alt="Virtual World Framework Compass" style="text-align:center;"/></h3><br/>
 The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing secure, scalable, component-based, and collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers.
@@ -51,7 +58,7 @@ The Virtual World Framework (VWF) is a fast, light-weight, web-based architectur
 <div class="span3" markdown="1" style="padding-right: 5px;">
 <h3>WHY<img src="images/framework.png" alt="Virtual World Framework" style="text-align:center;"/></h3><br/>
 The VWF serves as a replicated computing platform for multi-user interactive 2D and 3D components with a high degree of customizability of the environment and high bandwidth communication between users. These are environments that are focused on work and working together – whether for training, collaboration and/or entertainment. <br/><br/>
-It is a zero-install platform, where additional software components can be added dynamically. VWF spaces can be embedded in virtually any application including web pages and emails. Furthermore, VWF spaces can embed existing applications and browsers. The next big 3D platform is simply the current world wide web with additional capabilities, and the Virtual World Framework embraces this ever growing technology. 
+VWF is a zero-install platform that can be extended dynamically in production. VWF spaces can be embedded anywhere HTML lives including websites and e-mail. Correspondingly, VWF can embed applications in any virtual space.
 </div>
 <div class="span3" markdown="1">
 <h3>WHERE<a href="https://github.com/virtual-world-framework/vwf"><img src="images/Downloads.png" alt="Virtual World Framework Download from GitHub" style="text-align:center;"/></a></h3><br/>
