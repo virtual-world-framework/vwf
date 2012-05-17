@@ -129,51 +129,9 @@ footer ul li {
 .row .example a:visited {color:grey;text-decoration:none;}
 .row .example a img { border: 0; }
 
-.overlay {
-	margin-left:auto;
-	margin-right:auto;
-	margin-top:auto;
-	margin-bottom:auto;
-	color:#FFF;
-	font-size:10pt;
-	width:560px;
-	height:320px;
-	background:#222;
-	pointer-events:all;
-	opacity:0.98;
-	-moz-border-radius: 20px;
-    -webkit-border-radius: 20px;
-    -khtml-border-radius: 20px;
-    border-radius: 20px;
-    visibility: hidden;
-}
-
-.overlay a:link {color:white;text-decoration:none;}
-.overlay a:hover {color:white;text-decoration:underline;}
-.overlay a:visited {color:white;text-decoration:none;}
-
-.exit-button {
-	text-align:right;
-	position:relative;
-	top:8px;
-	right:10px;
-}
-
 .app-title {
 	font-size:1.2em;
 	text-align:left;
-}
-
-.overlayContent {
-	display:none;
-}
-
-.instances {
-	float:right;
-	text-align:left;
-	width:150;
-	padding-left:5px;
-	padding-right:20px;
 }
 
 .description {
@@ -186,17 +144,19 @@ footer ul li {
 
 
 /* Documentation Page */
+.nav-list .nav-header {
+	color: #FFFFFF;
+	}
 
 .navmenu {
 	color:#444456;
-	width:200px;
+	width:185px;
 	float:left;
 	position:relative;
-	left:-30px;
-	margin-top: 75px;
+	margin-top: 70px;
 }
 .navmenu a:visited {
-	color:#3366CC;
+	color:#3366CC;	
 }
 .navmenu ul {
 	list-style:none;

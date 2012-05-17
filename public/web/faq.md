@@ -246,7 +246,7 @@ Yes, currently developers can download the latest build of VWF from github and s
 
 <h3><a href="#">34. Will the VWF be available to coalition partners? </a></h3>
 <div markdown="1">
-VWF is currently available freely and openly on github to any and all persons, regardless of origin. VWF content specifically designed for operations will be negotiated on a case-by-case basis depending on the content, training objectives, and coalition goals being exercised. There is no standing reason why VWF cannot be shared and there are no security restrictions on the original code <ref>As an open source program, there are currently no restrictions to anyone downloading the original source code on [github](https://www.github.com/virtual-world-framework).
+VWF is currently available freely and openly on github to any and all persons, regardless of origin. VWF content specifically designed for operations will be negotiated on a case-by-case basis depending on the content, training objectives, and coalition goals being exercised. There is no standing reason why VWF cannot be shared and there are no security restrictions on the original code As an open source program, there are currently no restrictions to anyone downloading the original source code on [github](https://www.github.com/virtual-world-framework).
 </div>
 
 
@@ -271,7 +271,7 @@ Absolutely. VWF is meant to interface content via the web, but it also contains 
 
 <h3><a href="#">36. Who are the advisors to the Virtual World Framework project? </a></h3>
 <div markdown="1">
-VWF is currently available freely and openly on github to any and all persons, regardless of origin. VWF content specifically designed for operations will be negotiated on a case-by-case basis depending on the content, training objectives, and coalition goals being exercised. There is no standing reason why VWF cannot be shared and there are no security restrictions on the original code <ref>As an open source program, there are currently no restrictions to anyone downloading the original source code on <a href="https://www.github.com/virtual-world-framework/vwf">GitHub</a>.
+VWF is currently available freely and openly on github to any and all persons, regardless of origin. VWF content specifically designed for operations will be negotiated on a case-by-case basis depending on the content, training objectives, and coalition goals being exercised. There is no standing reason why VWF cannot be shared and there are no security restrictions on the original code As an open source program, there are currently no restrictions to anyone downloading the original source code on <a href="https://www.github.com/virtual-world-framework/vwf">GitHub</a>.
 </div>
 </div>
 
