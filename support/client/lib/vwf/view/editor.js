@@ -763,6 +763,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 self.allScripts[id][s_id].text = undefined;
                 vwf.execute( id, $("#scriptTextArea").val() );
             });
+            jQuery('#scriptTextArea').change( function(evt) { 
+                evt.stopPropagation();
+            });
         }
         
         $(topdownName).hide('slide', {direction: 'left'}, 175); 
