@@ -494,6 +494,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                         for (var clientID in value.clients) { 
                             clients$.append("<div class='clientEntry'>" + clientID + "</div><hr>"); 
                         }
+
+                        clients$.append("<div style='padding:6px'><input class='update_button' type='button' id='load' value='Load' /><input class='update_button' type='button' id='save' value='Save' /></div>");
+                        $('#load').click(function(evt) {
+                            // Call function here
+                        });
+                        $('#save').click(function(evt) {
+                            // Call function here
+                        });
                     }
                 }
             } );
