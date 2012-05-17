@@ -31,33 +31,31 @@
     <script type='text/javascript'>
       function showInfo(app, query)
       {
-        $('.overlay').css('visibility', 'visible');
-        $('.overlay').html($('#'+ app + '-content').html());
-        function update(app) {
-          var instances$ = $('.overlay').children('.instances');
-          var match;
-          if ( $('.overlay').children('.app-title').attr('id') == app && $('.overlay').css('visibility') == 'visible' ) {
-            jQuery.getJSON( "../" + app + "/admin/instances", function( data ) {
-              if ( $('.overlay').children('.app-title').attr('id') == app && $('.overlay').css('visibility') == 'visible' ) {
-                instances$.empty();
-                instances$.html("<p><b>Instances</b></p>");
-                jQuery.each( data, function( key, value ) {
-                  if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
-                    var instanceHTML = htmlEscape( match[1] );
-                    var size = Object.size(value.clients); 
-                    instances$.append( "<a href='../" + app + "/" + instanceHTML + ( query || "" ) + "'>" + instanceHTML + "</a>" + " (" + size + ")" + "<br />" );
-                  }
-                } );
-                setTimeout(update, 1000, app);
-              }
-            } );
-          }
-        };
+        function update(app) 
+		{
+			 var instances$ = $('.'+ app + 'instances');
+			 var match;
+			 jQuery.getJSON( "../" + app + "/admin/instances", function( data ) {
+			 instances$.empty();
+			 instances$.html("<p><b>Current Sessions</b></p>");
+					jQuery.each
+						( 
+						data, function( key, value ) 
+							{
+							  if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) // assignment is intentional
+							  { 
+									var instanceHTML = htmlEscape( match[1] );
+									var size = Object.size(value.clients); 
+									instances$.append("<table style='width:75%;'><tr><td style='width:10%;'><span class='badge badge-success'>" + size + "</span>"+"</td><td style='width:60%;'>Name: " + instanceHTML + "</td><td style='text-align:right;width:30%;'><a class='btn btn-success btn-small' target='_blank' href='../" + app + "/" + instanceHTML + ( query || "" ) + "'>Join Session</a>" + "</td></tr></table>" );
+							  }
+							} 
+						);
+					setTimeout(update, 1000, app);
+				  });
+				
+		}
         update(app);
-      }
-      function closeInfo()
-      {
-        $('.overlay').css('visibility', 'hidden');
+
       }
     </script>
     <script>
@@ -102,7 +100,8 @@
 	</header>
 			
 <div class="container" style="margin-top:50px;">
-	<h2>VWF Demos</h2>
+	<h1>VWF Demos</h1>
+	<hr style="margin:18px 0 18px 0;border-bottom:1px solid #1C1E22;"/>
 <% while applications.any? do %>
       <div class="span12">
 
@@ -120,10 +119,22 @@
 					<td tyle="width:75%">
 						  <h3 style="float:left;vertical-align:middle;"><%= name %></h3> 
 						  <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../<%= application + ( application == "earth" ? "?connected=1" : "" ) %>">
-						  Launch</a>
+						  Launch New Session</a>
 						  <br/>
 						  <hr>
 						  <p style="font-size:13px;"><%= description %></p>
+						  <br/>
+						  <div id='<%= application %>-content' class='overlayContent'>
+							  <div class="overlay">
+								  <div class='<%= application %>instances'>
+									<p><b>Current Sessions</b></p>
+								</div>
+								<script type="text/javascript">
+								$(document.getElementById('instances')).ready(showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>'));
+								</script>
+								<!--  -->
+							</div>
+						</div>
 					</td>
 				</tr>
 			</table>

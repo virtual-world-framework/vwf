@@ -1,4 +1,8 @@
-<div style='width:1000px;margin: -45px auto auto auto;text-align:left;padding-top:-15px'>
+<div style="width:1000px;">
+	<h1>VWF Demos</h1>
+	<hr style="margin:18px 0 18px 0;border-bottom:1px solid #1C1E22;"/>
+</div>
+<div style='width:1000px;text-align:left;margin-top:-45px;'>
 <div class='navmenu'>
 		<ul class="nav nav-list" id="myTab">
 		<li class="nav-header">Glossary Index</li>
@@ -11,7 +15,7 @@
 		  <li><a href="#WZ">W-Z</a></li>
 		</ul>
 </div>
-<div class='content' style="margin-top: 50px;"><br>
+<div class='content' style="margin-top: 50px;"><br/>
 	
 <div class="tab-content" markdown="1">
 <div class="tab-pane active" id="AC" markdown="1">

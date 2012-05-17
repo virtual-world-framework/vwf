@@ -45,7 +45,11 @@
 				</div>
 			</div>
 		</header>
-		<div style='width:1000px;margin:auto;text-align:left;padding-top:10px'>
+	<div style="width:1000px;margin-left:auto;margin-right:auto;margin-top: 50px;">
+		<h1>VWF Documentation</h1>
+		<hr style="margin:18px 0px 18px 0px;border-bottom:1px solid #1C1E22;"/>		
+	</div>
+		<div style='width:1000px;margin:auto;text-align:left;'>
 			<div class='navmenu'>
 				<ul>
 					<li><a href='reqs.html' title='Requirements'>Requirements</a></li>
@@ -58,8 +62,10 @@
 					<!-- <li><a href='jsdoc/index.html' title='API Reference'>API Reference</a></li> -->
 					<li><a href='system.html' title='API Reference'>API Reference</a></li>
 				</ul>
-			</div>
-			<div class='content' style="margin-top: 50px;"><br>
+			</div>	
+			<div class='content' markdown="1">
+
+			<br/>
 				<!-- Convert source.txt using markdown converter: http://daringfireball.net/projects/markdown/dingus -->
 				
 				<!-- INSERT MARKDOWN HERE -->
