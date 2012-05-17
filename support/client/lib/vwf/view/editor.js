@@ -51,7 +51,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             this.currentNodeID = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='about' src='images/tab_About.png' alt='about' /><img id='models' src='images/tab_About.png' alt='models' /></div></div></div>" + 
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='about' src='images/tab_About.png' alt='about' /><img id='models' src='images/tab_Models.png' alt='models' /></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
@@ -1149,7 +1149,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 }
                 var url = value['url'];
 
-                $(models).append("<div class='childContainer'><div id='" + divId + "' class='modelEntry' draggable='true' data-url='" + url + "'>"
+                $(models).append("<div><div id='" + divId + "' class='modelEntry' draggable='true' data-url='" + url + "'>"
                     + fileName + "</div><hr></div>");
                 $("#" + divId).on("dragstart", function (e) {
                     var fileData = "{\"fileName\":\""+e.target.textContent+"\", \"fileUrl\":\""+e.target.getAttribute("data-url")+"\"}";
