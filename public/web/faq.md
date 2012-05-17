@@ -1,11 +1,12 @@
-<script src="css/jquery-ui-1.8.20.custom.min.js"></script>
+<script src="js/jquery-ui-1.8.20.custom.min.js"></script>
 <link rel='stylesheet' type='text/css' href='css/jquery-ui-1.8.20.custom.css' />
 
 Frequently Asked Questions
 =====================
 ----------------
-General Information
-----------------
+
+##General Information
+
 
 <div id="accordion" markdown="1">
 
@@ -59,8 +60,9 @@ VWF means a massive savings in preventing redundancy, in linking different syste
 </div>
 
 ----------------
-Licensing and Ownership
-----------------
+
+## Licensing and Ownership
+
 
 <div id="accordion2" markdown="1">
 <h3><a href="#">8. Who owns the Virtual World Framework?</a></h3>
@@ -93,8 +95,10 @@ VWF is currently posted on [github](https://github.com/virtual-world-framework),
 
 </div>
 ----------------
-Development Path
-----------------
+
+## Development Path
+
+
 <div id="accordion3" markdown="1">
 
 <h3><a href="#">13. How will the Virtual World Framework evolve and how will it be managed? </a></h3>
@@ -120,8 +124,9 @@ Currently VWF information is available on two sites: <a href="http://www.virtual
 </div>	
 
 ----------------
-VWF Applications
-----------------
+
+## VWF Applications
+
 <div id="accordion4" markdown="1">
 
 <h3><a href="#">17. For what training tasks can I expect the VWF to be useful and by when?</a></h3>
@@ -150,8 +155,9 @@ Presently developers use the VWF to build simulations using Java script and func
 </div>
 </div>
 ----------------
-Security Considerations
-----------------
+
+## Security Considerations
+
 <div id="accordion5" markdown="1">
 <h3><a href="#">22. Is the web secure enough for a virtual world framework?</a></h3>
 <div markdown="1">
@@ -164,8 +170,9 @@ The problem with opening a continuous connection between two computers via a web
 </div>
 </div>
 ----------------
-WebGL
-----------------
+
+## WebGL
+
 <div id="accordion6" markdown="1">
 
 <h3><a href="#">24. What is WebGL? </a></h3>
@@ -196,8 +203,9 @@ Currently all PCs, laptops, and tablets support WebGL capable browsers. Mobile s
 </div>
 </div>
 ----------------
-Javascript
-----------------
+
+## Javascript
+
 <div id="accordion7" markdown="1">
 
 <h3><a href="#">29. What is JavaScript?</a></h3>
@@ -216,8 +224,9 @@ Java Script runs locally in the browsers, does not require additional plug ins o
 </div>
 </div>
 ----------------
-Standards
-----------------
+
+## Standards
+
 <div id="accordion8" markdown="1">
 
 <h3><a href="#">32. What standards does the Virtual World Framework plan to support?</a></h3>
@@ -226,8 +235,9 @@ HTML 5.0, ECMAScript5, WebGL, Web Sockets, Collada (or other later file formats)
 </div>
 </div>
 ----------------
-Community and Governance
-----------------
+
+## Community and Governance
+
 <div id="accordion9" markdown="1">
 <h3><a href="#">33. Is there a process in place for developers to contribute code and ideas to VWF?</a></h3>
 <div markdown="1">
@@ -242,8 +252,9 @@ VWF is currently available freely and openly on github to any and all persons, r
 
 </div>
 ----------------
-Business Models
-----------------
+
+## Business Models
+
 <div id="accordion10" markdown="1">
 
 <h3><a href="#">35. Can commercial entities build servies or games with VWF? </a></h3>
@@ -252,8 +263,9 @@ Absolutely. VWF is meant to interface content via the web, but it also contains 
 </div>
 </div>
 ----------------
-Advisors
-----------------
+
+## Advisors
+
 <div id="accordion11" markdown="1">
 
 
@@ -263,8 +275,6 @@ VWF is currently available freely and openly on github to any and all persons, r
 </div>
 </div>
 
-<!-- insert new accordions here -->
-</div>
 <script>
   $(document).ready(function() {
     $("#accordion").accordion();

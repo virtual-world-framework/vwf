@@ -47,7 +47,7 @@ h2 {
 
 p {
   font-size: 1.1em;
-  line-height: 1.7em;
+  line-height: 1.5em;
 }
 
 /* header */
@@ -68,7 +68,15 @@ p {
   color: #fff;
   text-decoration: none;
 }
+iframe {
+  background-color: white;
+}
 
+.span3 {
+	width: 260px;
+	line-height: .5em;
+}
+	
 /* footer */
 
 footer {
