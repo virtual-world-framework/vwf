@@ -69,7 +69,7 @@ task :compress => "build.js" do |task|
     MODULES.each do |path|
         
         sh <<-SH.strip.gsub %r{ +}, " "
-            java -jar bin/compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --language_in ECMASCRIPT5 \
+            java -jar bin/compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --language_in ECMASCRIPT5_STRICT \
                 --js '#{DESTINATION}/#{path}.js' --js_output_file '#{DESTINATION}/#{path}.js.z'
         SH
 
