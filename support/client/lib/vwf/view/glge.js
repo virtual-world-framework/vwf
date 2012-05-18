@@ -59,7 +59,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 window.onkeydown = function (event) {
                     var key = undefined;
                     var validKey = false;
-                    var keyAlreadyDown = false;
                     switch (event.keyCode) {
                         case 17:
                         case 16:
@@ -69,7 +68,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                             break;
                         default:
                             key = getKeyValue.call( glgeView, event.keyCode);
-                            keyAlreadyDown = !!glgeView.keyStates.keysDown[key.key];
                             glgeView.keyStates.keysDown[key.key] = key;
                             validKey = true;
                             break;
@@ -82,7 +80,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     glgeView.keyStates.mods.meta = event.metaKey;
 
                     var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
-                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
+                    if (validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
                         //var params = JSON.stringify( glgeView.keyStates );
                         glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
                     }
