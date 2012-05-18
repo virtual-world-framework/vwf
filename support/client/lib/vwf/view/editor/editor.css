@@ -202,3 +202,11 @@ textarea:focus, input:focus{
 
 .about a:visited {
 	color:white;
+}
+
+.modelEntry {
+	font:10pt Arial;
+	font-weight:bold;
+	padding-left:10px;
+	padding-right:10px;
+}

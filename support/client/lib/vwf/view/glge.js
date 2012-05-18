@@ -227,7 +227,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
 			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
-				lastPick = mousePick.call( this, mouse, sceneNode );
+                var newPick = mousePick.call( this, mouse, sceneNode );
+                if(newPick) {
+    				lastPick = newPick;
+                }
 				oldMouseX = mouse.getMousePosition().x;
 				oldMouseY = mouse.getMousePosition().y;
 				lastPickTime = time;
@@ -491,7 +494,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         }
                     }
                 }
-
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
             pointerDownID = undefined;
@@ -575,6 +577,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
+            sceneCanvas.mouseX=e.clientX;
+            sceneCanvas.mouseY=e.clientY;
             var eData = getEventData( e, false );
             if ( eData ) {
                 e.dataTransfer.dropEffect = "copy";
@@ -585,132 +589,53 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- drop ---------------------------------------------------------------------------------
 
         canvas.ondrop = function( e ) {
+            e.preventDefault();
             var eData = getEventData( e, false );
             if ( eData ) {
-            
-                var object, match, fn;
-                var files = e.dataTransfer.files;
-                var file = files[0];
-                var ext = (/[.]/.exec(file.name)) ? /[^.]+$/.exec(file.name) : undefined;
+                var object, match, fileName, fileUrl;
+                var fileData = $.parseJSON(e.dataTransfer.getData('text/plain'));
+                fileName = decodeURIComponent(fileData.fileName);
+                fileUrl = decodeURIComponent(fileData.fileUrl);
+                var ext = (/[.]/.exec(fileName)) ? /[^.]+$/.exec(fileName) : undefined;
 
                 switch ( ext[0].toLowerCase() ) {
                     case "dae":
                         object = {
                           extends: "http://vwf.example.com/node3.vwf",
-                          source: file.name,
+                          source: fileUrl,
                           type: "model/vnd.collada+xml",
                           properties: { 
                             translation: eData.eventNodeData[""][0].globalPosition,
                           },   
                         };
 
-                        switch ( file.name ) { // hack it since setting this data through components isn't working
-
-                            case "blackhawk.dae": // from cityblock
-                                object.properties.rotation = [ 1, 0, 0, 0 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "blackhawkGW.dae": // from sandtable
-                                object.properties.translation[2] += 20;
-                                object.properties.rotation = [ 1, 0, 0, 0 ];
-                                object.properties.scale = [ 2, 2, 2 ];
-                                break;
-
-                            case "Predator.dae": // from sandtable
-                                object["implements"] = [ "http://vwf.example.com/fly.vwf" ];
-                                object.properties.translation[2] += 20;
-                                object.properties.rotation = [ 0, 0, 1, 180 ];
-                                object.properties.scale = [ 15, 15, 15 ];
-                                break;
-
-                            case "apache.DAE": // from sandtable
-                                object.properties.translation[2] += 40;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "awac.DAE": // from sandtable
-                                object.properties.translation[2] += 100;
-                                object.properties.rotation = [ 1, 0, 0, 90  ];
-                                object.properties.scale = [ 0.5, 0.5, 0.5 ];
-                                break;
-
-                            case "blackhawk.DAE": // from sandtable
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "cobra.DAE": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "f117.DAE": // from sandtable
-                                object.properties.translation[2] += 40;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "humvee.dae": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "lmtv.dae": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "mlrs.DAE": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            default:
-
-                                if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
-
-                                    object = {
-                                      extends: match[1],
-                                      properties: { 
-                                        translation: eData.eventNodeData[""][0].globalPosition,
-                                      },
-                                      scripts: [
-                                          "this.initialize = function() { this.rotation = this.rotation ; this.scale = this.scale }"
-                                      ]
-                                    };
-
-                                } else if ( match = file.name.match( /\.dae$/i ) ) { // assignment is intentional
-
-                                    object.properties.scale = [ 1, 1, 1 ];
-
-                                } else {
-
-                                     object = undefined;
-                                }
-
-                                break;
-
+                        if ( match = fileName.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+                            object = {
+                              extends: match[1],
+                              properties: { 
+                                translation: eData.eventNodeData[""][0].globalPosition,
+                              },
+                              scripts: [
+                                  "this.initialize = function() { this.rotation = this.rotation ; this.scale = this.scale }"
+                              ]
+                            };
+                        } else if ( match = fileName.match( /\.dae$/i ) ) { // assignment is intentional
+                            object.properties.scale = [ 1, 1, 1 ];
+                        } else {
+                             object = undefined;
                         }
+
                         if ( object ) {
-                            sceneView.kernel.createChild( "index-vwf", file.name, object, undefined );
+                            sceneView.kernel.createChild( "index-vwf", fileName, object, undefined );
                         }
                         break;
                     case "yaml":
-                        fn = file.name.substr( 0, file.name.length - 5 );
-                        sceneView.kernel.createChild( "index-vwf", fn, fn, undefined );                
+                        fileName = fileName.substr( 0, fileName.length - 5 );
+                        fileUrl = fileUrl.substr( 0, fileUrl.length - 5 )
+                        sceneView.kernel.createChild( "index-vwf", fileName, fileUrl, undefined );                
                         break;
                 }
-                
-
             }
-
-            e.preventDefault();            
         };
          
     };
