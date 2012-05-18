@@ -18,7 +18,7 @@ require "yaml"
 
 
 CLOBBER.include "web/**/*.html"
-
+CLOBBER.include "web/*.html"
 
 task :default => [ :clean, :clobber, :build ]
 
