@@ -14,7 +14,7 @@
 require "rubygems"
 
 require "bundler"
-Bundler.require
+Bundler.require :default, ENV["RACK_ENV"]
 
 $LOAD_PATH << File.expand_path( File.join( File.dirname(__FILE__), "lib" ) )
 
