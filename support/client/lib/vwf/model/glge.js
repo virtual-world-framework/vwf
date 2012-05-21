@@ -495,13 +495,26 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         // decompose camera assignments.
 
                         if ( glgeObject instanceof GLGE.Camera || glgeObject instanceof GLGE.ParticleSystem ) { // setStaticMatrix doesn't work for cameras
+
                             var translation = goog.vec.Vec3.create();
                             goog.vec.Mat4.getColumn( transform, 3, translation );
                             goog.vec.Mat4.setColumnValues( transform, 3, 0, 0, 0, 1 );
                             goog.vec.Mat4.transpose( transform, transform );
                             glgeObject.setRotMatrix( transform );
                             glgeObject.setLoc( translation[0], translation[1], translation[2] );
+
                         } else {
+
+                            // Set loc[XYZ] so that GLGE.Placeable.getPosition() will return correct
+                            // values for lookAt. setLoc() clears the static matrix, so call it
+                            // before setStaticMatrix().
+
+                            var translation = goog.vec.Vec3.create();
+                            goog.vec.Mat4.getColumn( transform, 3, translation );
+                            glgeObject.setLoc( translation[0], translation[1], translation[2] );
+
+                            // Set the full matrix.
+
                             glgeObject.setStaticMatrix(
                                 goog.vec.Mat4.transpose( transform, goog.vec.Mat4.create() )
                             );
