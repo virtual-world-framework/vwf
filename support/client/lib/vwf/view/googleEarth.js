@@ -102,6 +102,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                                     var la = node.earthInst.getView().copyAsLookAt(node.earthInst.ALTITUDE_RELATIVE_TO_GROUND);
                                     la.setRange( 100000 );
+                                    la.setLatitude( 38.9 );
+                                    la.setLongitude( -77 );
                                     node.earthInst.getView().setAbstractView(la);
     
                                     view.control = false;
