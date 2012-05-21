@@ -108,6 +108,13 @@ footer ul li {
   margin-left: 10px;
 }
 
+/* Glossary Page */
+
+.glossarymain{
+	width:1000px;
+	text-align:left;
+	margin-top:-45px;
+}
 
 
 /* Catalog Page */
@@ -147,13 +154,13 @@ footer ul li {
 .nav-list .nav-header {
 	color: #FFFFFF;
 	}
-
+	
 .navmenu {
 	color:#444456;
 	width:185px;
 	float:left;
 	position:relative;
-	margin-top: 70px;
+	margin-top: 45px;
 }
 .navmenu a:visited {
 	color:#3366CC;	
@@ -203,7 +210,9 @@ footer ul li {
 	font-weight:bold;
 }
 
-
+.contentmargin {
+margin-top: 50px;
+}
 
 
 /* 

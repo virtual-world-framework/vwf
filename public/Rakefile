@@ -29,10 +29,17 @@ task :build => "web/catalog.html" do
     original_path = ENV["PATH"]
     ENV["PATH"] = FileList[ "../support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
 
-    FileList[ "web/*.md" ].each do |md|
-        sh "( cat web/format/preamble ; kramdown '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
+ 	md = FileList[ "web/*.md" ]
+	md.each do |md|
+		if md == "web/about.md"
+			sh "( cat web/format/preamble ; kramdown 'web/format/carousel.md' ;  kramdown 'web/about.md' ; cat web/format/postamble ) > 'web/about.html'"
+		elsif md == "web/glossary.md"
+			sh "( cat web/format/preamble ; kramdown 'web/format/glossarypre.md' ;  kramdown 'web/glossary.md' ; cat web/format/postamble ) > 'web/glossary.html'"
+		else
+			sh "( cat web/format/preamble ; kramdown '#{md}' ; cat web/format/postamble ) > '#{ md.ext ".html" }'"
+		end
     end
-
+	
     FileList[ "web/docs/**/*.md" ].each do |md|
         sh "( cat web/docs/format/preamble ; kramdown '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
     end
