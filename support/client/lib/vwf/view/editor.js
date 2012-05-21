@@ -156,10 +156,12 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             
             if ( nodeID === this.currentNodeID && this.editingScript == false )
             {
+                $('#children hr:last').css('height', '1px');
                 $("#children").append("<div id='" + childID + "' class='childContainer'><div class='childEntry'><b>" + childName + "</b></div><hr></div>");
                 $('#' + childID).click( function(evt) {
                     drillDown.call(self, $(this).attr("id"));
                 });
+                $('#children hr:last').css('height', '3px');
             }
         },
         
@@ -195,7 +197,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var node = this.nodes[ nodeID ];
             node.parent.children.splice( node );
             $('#' + nodeID).remove();
-            $(this.topdownName + ' hr:last').css('height', '3px');
+            $('#children hr:last').css('height', '3px');
         },
 
         //addedChild: [ /* nodeID, childID, childName */ ],
@@ -564,9 +566,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         // Add node behaviors
-        $(topdownTemp).append("<div id='behaviors'>");
+        $(topdownTemp).append("<div id='behaviors'></div>");
         for ( var i = 0; i < node.implementsIDs.length; i++ ) {
-            $(topdownTemp).append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
+            $('#behaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
 
             /* 
             //Placeholder to Enable/Disable behaviors
@@ -575,19 +577,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }); 
             */
         }
-        $(topdownTemp).append("</div>"); // End behaviors
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#behaviors hr:last').css('height', '3px');
 
         // Add node scripts
-        $(topdownTemp).append("<div id='scripts'>");
+        $(topdownTemp).append("<div id='scripts'></div>");
         for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
         {
             var scriptFull = this.allScripts[nodeID][i].text;
             if(scriptFull != undefined)
             {
                 var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $(topdownTemp).append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
+                $('#scripts').append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
                 $('#script-' + nodeID + "-" + i).click( function(evt) {
                     var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
                     var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
@@ -595,17 +596,16 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 });
             }
         }
-        $(topdownTemp).append("</div>"); // End scripts
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#scripts hr:last').css('height', '3px');
         
         // Add node properties
-        $(topdownTemp).append("<div id='properties'>");
+        $(topdownTemp).append("<div id='properties'></div>");
         var displayedProperties = {};
         for ( var i = 0; i < node.properties.length; i++ ) {
             if ( !displayedProperties[ node.properties[i].name ] ) {
                 displayedProperties[ node.properties[i].name ] = "instance";
-                $(topdownTemp).append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div><hr>");
+                $('#properties').append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div><hr>");
             
                 $('#input-' + nodeID + '-' + node.properties[i].name).change( function(evt) {
                     var inputID = ($(this).attr("id"));
@@ -635,14 +635,13 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 });
             }
         }
-        $(topdownTemp).append("</div>"); // End properties
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#properties hr:last').css('height', '3px');
 
         this.logger.info(self + "    " + nodeID);
 
         // Add prototype properties
-        $(topdownTemp).append("<div id='prototypeProperties'>");
+        $(topdownTemp).append("<div id='prototypeProperties'></div>");
         var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeProperties ) {
             var prop = prototypeProperties[key].prop;
@@ -652,7 +651,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 {
                     prop.value = JSON.stringify( vwf.getProperty( nodeID, prop.name, []) );
                 }
-                $(topdownTemp).append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
+                $('#prototypeProperties').append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div><hr>");
             
                 $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
                     var inputID = ($(this).attr("id"));
@@ -682,27 +681,25 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 });
             }
         }
-        $(topdownTemp).append("</div>"); // End prototype properties
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#prototypeProperties hr:last').css('height', '3px');
         
         // Add node children
-        $(topdownTemp).append("<div id='children'>");
+        $(topdownTemp).append("<div id='children'></div>");
         for ( var i = 0; i < node.children.length; i++ ) {
-            $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div><hr></div>");
+            $('#children').append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div><hr></div>");
             $('#' + node.children[i].ID).click( function(evt) {
                 drillDown.call(self, $(this).attr("id"));
             });
         }
-        $(topdownTemp).append("</div>"); // End children
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#children hr:last').css('height', '3px');
 
         // Add node methods
-        $(topdownTemp).append("<div id='methods'>");
+        $(topdownTemp).append("<div id='methods'></div>");
         for ( var key in node.methods ) {
             var method = node.methods[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#methods').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -716,16 +713,15 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
             });
         }
-        $(topdownTemp).append("</div>"); // End methods
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#methods hr:last').css('height', '3px');
 
         // Add prototype methods
-        $(topdownTemp).append("<div id='prototypeMethods'>");
+        $(topdownTemp).append("<div id='prototypeMethods'></div>");
         var prototypeMethods = getMethods.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeMethods ) {
             var method = prototypeMethods[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#prototypeMethods').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -739,15 +735,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
             });
         }
-        $(topdownTemp).append("</div>"); // End prototype methods
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#prototypeMethods hr:last').css('height', '3px');
 
         // Add node events
-        $(topdownTemp).append("<div id='events'>");
+        $(topdownTemp).append("<div id='events'></div>");
         for ( var key in node.events ) {
             var nodeEvent = node.events[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#events').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -761,16 +756,15 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
             });
         }
-        $(topdownTemp).append("</div>"); // End events
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#events hr:last').css('height', '3px');
 
         // Add prototype events
-        $(topdownTemp).append("<div id='prototypeEvents'>");
+        $(topdownTemp).append("<div id='prototypeEvents'></div>");
         var prototypeEvents = getEvents.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
-            $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
+            $('#prototypeEvents').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
             $('#rollover-' + key).mouseover( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
@@ -784,9 +778,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
             });
         }
-        $(topdownTemp).append("</div>"); // End prototype events
 
-        $(topdownTemp + ' hr:last').css('height', '3px');
+        $('#prototypeEvents hr:last').css('height', '3px');
     }
 
     // -- viewScript ------------------------------------------------------------------------
