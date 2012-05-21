@@ -257,6 +257,8 @@ input {
   position:relative;
   left:82px;
   top:35px;
+  width:64px;
+  height:64px;
 }
 
 .requirements {
