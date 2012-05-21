@@ -156,12 +156,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             
             if ( nodeID === this.currentNodeID && this.editingScript == false )
             {
-                $(this.topdownName + ' hr:last').css('height', '1px');
-                $(this.topdownName).append("<div id='" + childID + "' class='childContainer'><div class='childEntry'><b>" + childName + "</b></div><hr></div>");
+                $("#children").append("<div id='" + childID + "' class='childContainer'><div class='childEntry'><b>" + childName + "</b></div><hr></div>");
                 $('#' + childID).click( function(evt) {
                     drillDown.call(self, $(this).attr("id"));
                 });
-                $(this.topdownName + ' hr:last').css('height', '3px');
             }
         },
         
@@ -566,6 +564,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         // Add node behaviors
+        $(topdownTemp).append("<div id='behaviors'>");
         for ( var i = 0; i < node.implementsIDs.length; i++ ) {
             $(topdownTemp).append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
 
@@ -576,10 +575,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }); 
             */
         }
+        $(topdownTemp).append("</div>"); // End behaviors
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
         // Add node scripts
+        $(topdownTemp).append("<div id='scripts'>");
         for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
         {
             var scriptFull = this.allScripts[nodeID][i].text;
@@ -594,11 +595,13 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 });
             }
         }
+        $(topdownTemp).append("</div>"); // End scripts
 
         $(topdownTemp + ' hr:last').css('height', '3px');
         
-        var displayedProperties = {};
         // Add node properties
+        $(topdownTemp).append("<div id='properties'>");
+        var displayedProperties = {};
         for ( var i = 0; i < node.properties.length; i++ ) {
             if ( !displayedProperties[ node.properties[i].name ] ) {
                 displayedProperties[ node.properties[i].name ] = "instance";
@@ -632,12 +635,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 });
             }
         }
+        $(topdownTemp).append("</div>"); // End properties
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
         this.logger.info(self + "    " + nodeID);
 
         // Add prototype properties
+        $(topdownTemp).append("<div id='prototypeProperties'>");
         var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeProperties ) {
             var prop = prototypeProperties[key].prop;
@@ -677,20 +682,24 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 });
             }
         }
+        $(topdownTemp).append("</div>"); // End prototype properties
 
         $(topdownTemp + ' hr:last').css('height', '3px');
         
         // Add node children
+        $(topdownTemp).append("<div id='children'>");
         for ( var i = 0; i < node.children.length; i++ ) {
             $(topdownTemp).append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div><hr></div>");
             $('#' + node.children[i].ID).click( function(evt) {
                 drillDown.call(self, $(this).attr("id"));
             });
         }
+        $(topdownTemp).append("</div>"); // End children
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
         // Add node methods
+        $(topdownTemp).append("<div id='methods'>");
         for ( var key in node.methods ) {
             var method = node.methods[key];
             $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
@@ -707,10 +716,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
             });
         }
+        $(topdownTemp).append("</div>"); // End methods
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
         // Add prototype methods
+        $(topdownTemp).append("<div id='prototypeMethods'>");
         var prototypeMethods = getMethods.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeMethods ) {
             var method = prototypeMethods[key];
@@ -728,10 +739,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
             });
         }
+        $(topdownTemp).append("</div>"); // End prototype methods
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
         // Add node events
+        $(topdownTemp).append("<div id='events'>");
         for ( var key in node.events ) {
             var nodeEvent = node.events[key];
             $(topdownTemp).append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div><hr>");
@@ -748,10 +761,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
             });
         }
+        $(topdownTemp).append("</div>"); // End events
 
         $(topdownTemp + ' hr:last').css('height', '3px');
 
         // Add prototype events
+        $(topdownTemp).append("<div id='prototypeEvents'>");
         var prototypeEvents = getEvents.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
@@ -769,6 +784,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
             });
         }
+        $(topdownTemp).append("</div>"); // End prototype events
 
         $(topdownTemp + ' hr:last').css('height', '3px');
     }
