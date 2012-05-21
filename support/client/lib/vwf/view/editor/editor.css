@@ -2,14 +2,6 @@
 	position:relative;
 }
 
-.eImg {
-	width:100%;
-	text-align:right;
-	position:absolute;
-	top:-10px;
-	pointer-events:none;
-}
-
 .uiContainer {
 	text-align:right;
 	position:absolute;

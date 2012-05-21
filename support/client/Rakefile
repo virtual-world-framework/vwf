@@ -132,7 +132,7 @@ task :documentation do |task|
 
                 java -jar #{build}/jsdoc_toolkit-2.4.0/jsrun.jar #{build}/jsdoc_toolkit-2.4.0/app/run.js \
                     -Djsdoc.dir=#{build}/jsdoc_toolkit-2.4.0 \
-                    --template=#{build}/jsdoc_toolkit-2.4.0/templates/jsdoc --allfunctions --recurse=10 --directory=#{documentation} \
+                    --template=#{build}/jsdoc_toolkit-2.4.0/templates/jsdoc --allfunctions --quiet --recurse=10 --directory=#{documentation} \
                     #{ FileList.new( PATTERNS ).sort.map { |path| "'" + path + "'" } .join " " }
 
             SH
