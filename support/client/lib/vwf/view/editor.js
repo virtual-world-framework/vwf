@@ -473,11 +473,13 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
     function updateClients() {
         var app = window.location.pathname;
+        var root = app.substring(1, app.length-18);
+        var inst = app.substring(app.length-17, app.length-1);
         var match;
 
         var clients$ = $(this.clientList);
 
-        jQuery.getJSON( "/" + app.substring(1, app.indexOf('/', 1)) + "/admin/instances", function( data ) {
+        jQuery.getJSON( "/" + root + "/admin/instances", function( data ) {
             jQuery.each( data, function( key, value ) {
                 if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
 
@@ -488,7 +490,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                       replace( /</g, "&lt;" ).
                       replace( />/g, "&gt;" );
 
-                    if(instanceHTML == app.substring(app.indexOf('/', 1)+1, app.lastIndexOf('/')))
+                    if(instanceHTML == inst)
                     {
                         clients$.html("<div class='header'>Users</div>");
                         for (var clientID in value.clients) { 
