@@ -23,6 +23,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.rootSelector = rootSelector;
             this.canvasQuery = undefined;
  
+            this.lastPick = undefined;
             this.keyStates = { keysDown: {}, mods: {} };
 
             this.height = 600;
@@ -185,9 +186,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     // GLGE private functions
     // -- initScene ------------------------------------------------------------------------
-	var lastPick;
     function initScene( sceneNode ) {
 	
+        var self = this;
 		var requestAnimFrame, cancelAnimFrame;
 		(function() {
 			var lastTime = 0;
@@ -221,7 +222,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				cancelAnimFrame = window.cancelAnimationFrame;
 			}
 		}());
-
+        
 		var lastPickTime = 0;
         function renderScene(time) {
 			requestAnimFrame( renderScene );
@@ -229,7 +230,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
                 if(newPick) {
-    				lastPick = newPick;
+    				self.lastPick = newPick;
                 }
 				oldMouseX = mouse.getMousePosition().x;
 				oldMouseY = mouse.getMousePosition().y;
@@ -302,9 +303,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var mouse = new GLGE.MouseInput( sceneCanvas );
         var mouseOverCanvas = false;
 
+        var self = this;
+
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
-            var pickInfo = lastPick;
+            var pickInfo = self.lastPick;
             pointerPickID = undefined;
 
             glgeActualObj = pickInfo ? pickInfo.object : undefined;
