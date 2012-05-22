@@ -19,12 +19,10 @@
 		<link href="minesweeper.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
 			$(function() {
-				$("a", ".toolstyle").button({disabled:true});
+				$("a", ".toolstyle").button();
 			});
 			
 			function startGame() {
-				$("#winMessage").dialog("close");
-				$("#loseMessage").dialog("close");
 				vwf_view.kernel.callMethod("index-vwf", "startGame");
 			}
 		</script>
@@ -33,14 +31,14 @@
 		<div id = "wrapper" class="wrapper">
 			<div id="toolbar" class="toolstyle">
 				<a id="startButton" href="#" role="button" onclick="startGame()">
-					<span>Restart</span>
+					<span>Start</span>
 				</a>
 			</div>
 			<div id="winMessage" style="display:none" title="You Win!">
-				<span>Click the Restart button to play again.</span>
+				<span>Click the Start button to play again.</span>
 			</div>
 			<div id="loseMessage" style="display:none" title="You Lose!">
-				<span>Click the Restart button to play again.</span>
+				<span>Click the Start button to play again.</span>
 			</div>
 		</div>
 		<script type="text/javascript">

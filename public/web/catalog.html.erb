@@ -50,7 +50,7 @@
 							  }
 							} 
 						);
-					setTimeout(update, 1000, app);
+					setTimeout(update, 60000, app);
 				  });
 				
 		}
@@ -130,9 +130,8 @@
 									<p><b>Current Sessions</b></p>
 								</div>
 								<script type="text/javascript">
-								$(document.getElementById('instances')).ready(showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>'));
+								$(document.getElementById('<%= application %>instances')).ready(showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>'));
 								</script>
-								<!--  -->
 							</div>
 						</div>
 					</td>
