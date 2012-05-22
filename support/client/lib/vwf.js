@@ -1484,6 +1484,22 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                             if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
                                 vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) {
                                     childPrototypeID = prototypeID;
+// TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
+if ( ! childComponent.source ) {
+    var prototype_name_source_type = vwf.models.object.name_source_type( prototypeID );
+    if ( prototype_name_source_type.source ) {
+        var prototype_uri = vwf.models.object.uri( prototypeID );
+        var prototype_properties = vwf.getProperties( prototypeID );
+        childComponent.source = require( "vwf/utility" ).resolveURI( prototype_name_source_type.source, prototype_uri );
+        childComponent.type = prototype_name_source_type.type;
+        childComponent.properties = childComponent.properties || {};
+        Object.keys( prototype_properties ).forEach( function( prototype_property_name ) {
+            if ( childComponent.properties[prototype_property_name] === undefined && prototype_property_name != "transform" ) {
+                childComponent.properties[prototype_property_name] = prototype_properties[prototype_property_name];
+            }
+        } );
+    }
+}
                                     parallel_callback( undefined, undefined );
                                 } );
                             } else {
@@ -1524,7 +1540,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                         var driver_ready = true;
 
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                            childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                 vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
@@ -1552,7 +1568,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                         var driver_ready = true;
 
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                            childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                 vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
