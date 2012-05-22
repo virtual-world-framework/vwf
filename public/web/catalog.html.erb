@@ -93,6 +93,7 @@
 					  <li><a href="docs/reqs.html">Documentation</a></li>
 					  <li><a href="glossary.html">Glossary</a></li>
 					  <li><a href="faq.html">FAQ</a></li>
+					  <li><a href="forum.html">Forum</a></li>
 					</ul>
 			  </nav>
 			</div>
@@ -108,7 +109,7 @@
 <%     if applications.any? %>
 <%       application, image, name, description = *applications.shift %>
         <!-- <%= application %> -->
-		<div style="padding-top: 15px;">
+		<div style="padding-top: 15px;" class="<%= application %>hover">
 			<table class="table table-striped">
 				<tr>
 					<td style="width:25%">
@@ -130,7 +131,7 @@
 									<p><b>Current Sessions</b></p>
 								</div>
 								<script type="text/javascript">
-								$(document.getElementById('<%= application %>instances')).ready(showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>'));
+								$(document.getElementById('<%= application %>instances')).ready(showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>'));							
 								</script>
 							</div>
 						</div>
