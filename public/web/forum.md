@@ -1,1 +1,1 @@
-<IFRAME SRC="http://virtualworldframework.freeforums.org" TITLE="Virtual World Framework Forum" width="100%" height="1000">
+<IFRAME SRC="http://virtualworldframework.freeforums.org" TITLE="Virtual World Framework Forum" width="980" height="1000">
