@@ -2577,7 +2577,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             if ( typeof candidate == "object" && candidate != null ) {
 
                 componentAttributes.forEach( function( attributeName ) {
-                    isComponent = isComponent || Boolean( candidate[attributeName] );
+                    isComponent = isComponent || candidate.hasOwnProperty( attributeName );
                 } );
 
             }
@@ -2636,7 +2636,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             if ( typeof candidate == "object" && candidate != null ) {
 
                 accessorAttributes.forEach( function( attributeName ) {
-                    hasAccessors = hasAccessors || Boolean( candidate[attributeName] );
+                    hasAccessors = hasAccessors || candidate.hasOwnProperty( attributeName );
                 } );
 
             }
@@ -2662,7 +2662,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             if ( typeof candidate == "object" && candidate != null ) {
 
                 bodyAttributes.forEach( function( attributeName ) {
-                    hasBody = hasBody || Boolean( candidate[attributeName] );
+                    hasBody = hasBody || candidate.hasOwnProperty( attributeName );
                 } );
 
             }
@@ -2688,7 +2688,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             if ( typeof candidate == "object" && candidate != null ) {
 
                 typeAttributes.forEach( function( attributeName ) {
-                    hasType = hasType || Boolean( candidate[attributeName] );
+                    hasType = hasType || candidate.hasOwnProperty( attributeName );
                 } );
 
             }
