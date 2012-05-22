@@ -41,7 +41,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childName, callback /* ( ready ) */) {
+            childSource, childType, childURI, childName, callback /* ( ready ) */) {
 
             if (childExtendsID === undefined /* || childName === undefined */)
                 return;

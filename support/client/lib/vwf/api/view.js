@@ -29,12 +29,13 @@ define( {
     /// @param {String[]} childImplementsIDs
     /// @param {String} childSource
     /// @param {String} childType
+    /// @param {String} childURI
     /// @param {String} childName
     /// @param {Function} [callback]
     /// 
     /// @returns {}
 
-    createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /- ( ready ) -/ */ ],
+    createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /- ( ready ) -/ */ ],
 
     /// Description.
     /// 

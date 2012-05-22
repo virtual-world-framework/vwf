@@ -107,7 +107,6 @@
         // are anonymous and are not indexed here.
 
         var components = this.private.components = {}; // maps component node ID => component specification
-        var uris = this.private.uris = {}; // maps component nodeID => component URI
 
         // The proto-prototype of all nodes is "node", identified by this URI. This type is
         // intrinsic to the system and nothing is loaded from the URI.
@@ -995,7 +994,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         nodeDescriptor = nodeComponent;
 
-if ( nodeURI ) nodeDescriptor.uri = nodeURI;
+                        if ( nodeURI ) {
+                            nodeDescriptor.uri = nodeURI;  // TODO: pass this as an (optional) parameter to createChild() so that we don't have to modify the descriptor?
+                        }
 
                         // Create the node as an unnamed child global object.
 
@@ -1043,7 +1044,6 @@ if ( nodeURI ) nodeDescriptor.uri = nodeURI;
                 if ( nodeURI ) {
                     var create_callbacks = components[nodeURI];
                     components[nodeURI] = nodeID;
-                    uris[nodeID] = nodeURI;  // TODO: move to vwf/model/object
                 }
 
                 // Pass the ID to our callback.
@@ -1222,8 +1222,10 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             var nodeComponent = {};
 
-            if ( uris[nodeID] ) {
-                nodeComponent.patches = uris[nodeID];
+            var nodeURI = this.models.object.uri( nodeID );
+
+            if ( nodeURI ) {
+                nodeComponent.patches = nodeURI;
             }
 
             var child_full = full;
@@ -1533,7 +1535,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                             var driver_ready = true;
 
                             model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
 
                                 if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                     vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
@@ -1561,7 +1563,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                             var driver_ready = true;
 
                             view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                    childComponent.source, childComponent.type, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
 
                                 if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                     vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );

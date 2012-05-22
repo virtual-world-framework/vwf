@@ -33,7 +33,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
             this.objects[childID] = {
 
@@ -45,6 +45,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 source: childSource,
                 type: childType,
+
+                uri: childURI,
 
                 properties: {},
 
@@ -171,6 +173,19 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
             }
 
             return result;
+        },
+
+        // -- uri ----------------------------------------------------------------------------------
+
+        uri: function( nodeID ) {
+
+            var object = this.objects[nodeID];
+
+            if ( object ) {
+                return object.uri;
+            }
+
+            return undefined;
         },
 
         // -- changed ------------------------------------------------------------------------------

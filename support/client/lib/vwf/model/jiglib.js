@@ -38,12 +38,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        // -- creatingNode -------------------------------------------------------------------------
 
        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-          childSource, childType, childName, callback /* ( ready ) */) {
+          childSource, childType, childURI, childName, callback /* ( ready ) */) {
 
           var kernel = this.kernel.kernel.kernel;
           //this.logger.enable = true;
           //this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-          //                  childSource, childType, childName );
+          //                  childSource, childType, childURI, childName );
           //this.logger.enabled = false;
 
           var prototypes = getPrototypes.call( this, kernel, childExtendsID );
