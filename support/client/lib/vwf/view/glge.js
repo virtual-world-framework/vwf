@@ -592,52 +592,54 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- drop ---------------------------------------------------------------------------------
 
         canvas.ondrop = function( e ) {
+
             e.preventDefault();
             var eData = getEventData( e, false );
-            if ( eData ) {
-                var object, match, fileName, fileUrl;
-                var fileData = $.parseJSON(e.dataTransfer.getData('text/plain'));
-                fileName = decodeURIComponent(fileData.fileName);
-                fileUrl = decodeURIComponent(fileData.fileUrl);
-                var ext = (/[.]/.exec(fileName)) ? /[^.]+$/.exec(fileName) : undefined;
 
-                switch ( ext[0].toLowerCase() ) {
-                    case "dae":
+            if ( eData ) {
+
+                var fileData, fileName, fileUrl, match, object;
+
+                try {
+
+                    fileData = JSON.parse( e.dataTransfer.getData('text/plain') );
+                    fileName = decodeURIComponent(fileData.fileName);
+                    fileUrl = decodeURIComponent(fileData.fileUrl);
+
+                    if ( match = fileUrl.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+
+                        object = {
+                          extends: match[1],
+                          properties: { 
+                            translation: eData.eventNodeData[""][0].globalPosition,
+                            scale: [ 1, 1, 1 ],
+                          },
+                        };
+
+                        fileName = fileName.replace( /\.(json|yaml)$/i, "" );
+
+                    } else if ( match = fileUrl.match( /\.dae$/i ) ) { // assignment is intentional
+
                         object = {
                           extends: "http://vwf.example.com/node3.vwf",
                           source: fileUrl,
                           type: "model/vnd.collada+xml",
                           properties: { 
                             translation: eData.eventNodeData[""][0].globalPosition,
+                            scale: [ 1, 1, 1 ],
                           },   
                         };
 
-                        if ( match = fileName.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
-                            object = {
-                              extends: match[1],
-                              properties: { 
-                                translation: eData.eventNodeData[""][0].globalPosition,
-                              },
-                              scripts: [
-                                  "this.initialize = function() { this.rotation = this.rotation ; this.scale = this.scale }"
-                              ]
-                            };
-                        } else if ( match = fileName.match( /\.dae$/i ) ) { // assignment is intentional
-                            object.properties.scale = [ 1, 1, 1 ];
-                        } else {
-                             object = undefined;
-                        }
+                    }
 
-                        if ( object ) {
-                            sceneView.kernel.createChild( "index-vwf", fileName, object, undefined );
-                        }
-                        break;
-                    case "yaml":
-                        fileName = fileName.substr( 0, fileName.length - 5 );
-                        fileUrl = fileUrl.substr( 0, fileUrl.length - 5 )
-                        sceneView.kernel.createChild( "index-vwf", fileName, fileUrl, undefined );                
-                        break;
+                    if ( object ) {
+                        sceneView.kernel.createChild( "index-vwf", fileName, object, undefined );                
+                    }
+
+                } catch ( e ) {
+                    // TODO: invalid JSON
                 }
+
             }
         };
          
