@@ -810,7 +810,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
                 var s_id = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-') + 1);
                 self.allScripts[id][s_id].text = undefined;
-                vwf.execute( id, $("#scriptTextArea").val() );
+                self.kernel.execute( id, $("#scriptTextArea").val() );
             });
             jQuery('#scriptTextArea').change( function(evt) { 
                 evt.stopPropagation();
