@@ -31,15 +31,19 @@ define( [ "module" ], function( module ) {
         /// @name vwf.utility#transform
         /// @function
         /// 
-        /// @param {Object} object The object to transform. Object and Array contents are
-        ///   recursively transformed using the same transformation function.
-        /// @param {Function} Transformation function:
-        ///   function( object, names, depth ) { return object }
-        /// @param {(Number|String)[]} [names] Array of names or indexes to Object in its ancestors,
-        ///   parent first (recursive calls only).
-        /// @param {Number} [depth] Recursion depth (recursive calls only).
+        /// @param {Object} object
+        ///   The object to transform. Object and Array contents are recursively transformed using
+        ///   the same transformation function.
+        /// @param {Function} transformation
+        ///   The transformation function: function( object, names, depth ) { return object }
+        /// @param {(Number|String)[]} [names]
+        ///   Array of names or indexes to Object in its ancestors, parent first (recursive calls
+        ///   only).
+        /// @param {Number} [depth]
+        ///   Recursion depth (recursive calls only).
         /// 
-        /// @returns {Object} The transformed object.
+        /// @returns {Object}
+        ///   The transformed object.
 
         transform: function( object, transformation /* ( object, names, depth ) */, names, depth ) {
 
@@ -95,9 +99,11 @@ define( [ "module" ], function( module ) {
         /// @name vwf.utility#exceptionMessage
         /// @function
         /// 
-        /// @param {Error} error An Error object, generally provided by a catch statement.
+        /// @param {Error} error
+        ///   An Error object, generally provided by a catch statement.
         /// 
-        /// @returns {String} An error message that may be written to the console or a log.
+        /// @returns {String}
+        ///   An error message that may be written to the console or a log.
 
         exceptionMessage: function( error ) {
 
