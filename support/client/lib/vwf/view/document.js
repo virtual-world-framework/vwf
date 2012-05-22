@@ -25,7 +25,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     // And receive view calls:
 
     //     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childName, callback /* ( ready ) */ ) {
+    //         childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
     //         ...
     //     }
 

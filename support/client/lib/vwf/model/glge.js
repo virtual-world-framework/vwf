@@ -45,7 +45,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingNode ------------------------------------------------------------------------
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childName, callback ) {
+                                childSource, childType, childURI, childName, callback ) {
 
             var node, parentNode, glgeChild, prototypes;
             var kernel = this.kernel.kernel.kernel;
@@ -55,7 +55,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 //            this.logger.enabled = true;
 //            this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-//                                childSource, childType, childName );
+//                                childSource, childType, childURI, childName );
 //            this.logger.enable = false;
 
             // find the parent node

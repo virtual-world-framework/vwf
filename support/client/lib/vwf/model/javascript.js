@@ -52,7 +52,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
             var self = this;
 

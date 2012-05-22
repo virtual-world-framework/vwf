@@ -126,7 +126,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         },
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
             
             var kernel = this.kernel.kernel;
             var self = this;
