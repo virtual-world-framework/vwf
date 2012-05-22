@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
 
@@ -121,7 +121,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     switch ( childType ) {
                         case "model/x-glge":
                             callback( false );
-                            sceneNode.glgeDocument.load( childSource );
+                            sceneNode.glgeDocument.load( utility.resolveURI( childSource, childURI ) );
                             sceneNode.pendingLoads++;
                             break;
                     }
@@ -191,7 +191,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         node = this.state.nodes[childID] = {
                             name: childName,  
                             glgeObject: undefined,
-                            source: childSource,
+                            source: utility.resolveURI( childSource, childURI ),
                             ID: childID,
                             parentID: nodeID,
                             sourceType: childType,
@@ -205,7 +205,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         node = this.state.nodes[childID] = {
                             name: childName,  
                             glgeObject: undefined,
-                            source: childSource,
+                            source: utility.resolveURI( childSource, childURI ),
                             ID: childID,                                
                             parentID: nodeID,
                             type: childExtendsID,
@@ -233,7 +233,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 name: childName,  
                                 glgeObject: undefined,
                                 glgeParent: glgeParent,
-                                source: childSource,
+                                source: utility.resolveURI( childSource, childURI ),
                                 ID: childID,                                
                                 parentID: nodeID,
                                 type: childExtendsID,
