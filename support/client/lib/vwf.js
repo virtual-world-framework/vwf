@@ -1160,7 +1160,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                         var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
 
                         if ( creating ) {
-                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], function( childID ) {  // TODO: add in original order from nodeComponent.children
+                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], function( childID ) {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id
                                 each_callback( undefined );
                             } );
                         } else {
@@ -1460,288 +1460,277 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                     childComponent : JSON.stringify( loggableComponent( childComponent ) )
             ) );
 
-            if(typeof childComponent == "string" || childComponent instanceof String) {
-                loadComponent(childComponent, function( nodeDescriptor ) {
-                    if(nodeDescriptor["source"] && childComponent.indexOf("/") != -1) {
-                        var glgeDocument = new GLGE.Document();
-                        nodeDescriptor["source"] = glgeDocument.getAbsolutePath(nodeDescriptor["source"], childComponent);
-                    }
-                    vwf.createChild(nodeID, childName, nodeDescriptor, create_callback);
-                } );
-            }
-            else {
+            childComponent = normalizedComponent( childComponent );
 
-                childComponent = normalizedComponent( childComponent );
+            // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
 
-                // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
+            var childID = childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
 
-                var childID = childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
+            var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
-                var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
+            async.series( [
 
-                async.series( [
+                function( series_callback /* ( err, results ) */ ) {
 
-                    function( series_callback /* ( err, results ) */ ) {
+                    // Create the prototype and behavior nodes (or locate previously created
+                    // instances).
 
-                        // Create the prototype and behavior nodes (or locate previously created
-                        // instances).
+                    async.parallel( [
 
-                        async.parallel( [
+                        function( parallel_callback /* ( err, results ) */ ) {
 
-                            function( parallel_callback /* ( err, results ) */ ) {
+                            // Create or find the prototype and save the ID in childPrototypeID.
 
-                                // Create or find the prototype and save the ID in childPrototypeID.
-
-                                if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                    vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) {
-                                        childPrototypeID = prototypeID;
-                                        parallel_callback( undefined, undefined );
-                                    } );
-                                } else {
-                                    childPrototypeID = undefined;
+                            if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
+                                vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) {
+                                    childPrototypeID = prototypeID;
                                     parallel_callback( undefined, undefined );
-                                }
-
-                            },
-
-                            function( parallel_callback /* ( err, results ) */ ) {
-
-                                // Create or find the behaviors and save the IDs in childBehaviorIDs.
-
-                                async.map( childComponent["implements"] || [], function( behaviorComponent, map_callback /* ( err, result ) */ ) {
-                                    vwf.createNode( behaviorComponent, function( behaviorID ) {
-                                        map_callback( undefined, behaviorID );
-                                    } );
-                                }, function( err, behaviorIDs ) {
-                                    childBehaviorIDs = behaviorIDs;
-                                    parallel_callback( err, undefined );
                                 } );
+                            } else {
+                                childPrototypeID = undefined;
+                                parallel_callback( undefined, undefined );
+                            }
 
-                            },
+                        },
 
-                        ], function( err, results ) {
-                            series_callback( err, undefined );
-                        } );
+                        function( parallel_callback /* ( err, results ) */ ) {
 
-                    },
+                            // Create or find the behaviors and save the IDs in childBehaviorIDs.
 
-                    function( series_callback /* ( err, results ) */ ) {
-
-                        // Call creatingNode() on each model. The node is considered to be constructed after
-                        // each model has run.
-
-                        async.forEachSeries( vwf.models, function( model, each_callback /* ( err ) */ ) {
-
-                            var driver_ready = true;
-
-                            model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
-
-                                if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                    vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
-                                    driver_ready = ready;
-                                    driver_ready && each_callback( undefined );
-                                }
-
+                            async.map( childComponent["implements"] || [], function( behaviorComponent, map_callback /* ( err, result ) */ ) {
+                                vwf.createNode( behaviorComponent, function( behaviorID ) {
+                                    map_callback( undefined, behaviorID );
+                                } );
+                            }, function( err, behaviorIDs ) {
+                                childBehaviorIDs = behaviorIDs;
+                                parallel_callback( err, undefined );
                             } );
 
-                            driver_ready && each_callback( undefined );
+                        },
 
-                        }, function( err ) {
-                            series_callback( err, undefined );
-                        } );
+                    ], function( err, results ) {
+                        series_callback( err, undefined );
+                    } );
 
-                    },
+                },
 
-                    function( series_callback /* ( err, results ) */ ) {
+                function( series_callback /* ( err, results ) */ ) {
 
-                        // Call createdNode() on each view. The view is being notified of a node that has
-                        // been constructed.
+                    // Call creatingNode() on each model. The node is considered to be constructed after
+                    // each model has run.
 
-                        async.forEach( vwf.views, function( view, each_callback /* ( err ) */ ) {
+                    async.forEachSeries( vwf.models, function( model, each_callback /* ( err ) */ ) {
 
-                            var driver_ready = true;
+                        var driver_ready = true;
 
-                            view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
+                        model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                            childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
 
-                                if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                    vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
-                                    driver_ready = ready;
-                                    driver_ready && each_callback( undefined );
-                                }
-
-                            } );
-
-                            driver_ready && each_callback( undefined );
-
-                        }, function( err ) {
-                            series_callback( err, undefined );
-                        } );
-
-                    },
-
-                    function( series_callback /* ( err, results ) */ ) {
-
-                        // Suppress kernel reentry so that we can read the state without coloring from
-                        // any scripts.
-
-                        isolateProperties && vwf.models.kernel.disable();
-
-                        // Create the properties, methods, and events. For each item in each set, invoke
-                        // createProperty(), createMethod(), or createEvent() to create the field. Each
-                        // delegates to the models and views as above.
-
-                        childComponent.properties && jQuery.each( childComponent.properties, function( propertyName, propertyValue ) {
-
-                            var value = propertyValue, get, set, create;
-
-                            if ( valueHasAccessors( propertyValue ) ) {
-                                value = propertyValue.value;
-                                get = propertyValue.get;
-                                set = propertyValue.set;
-                                create = propertyValue.create;
-                            }
-
-                            // Is the property specification directing us to create a new property, or
-                            // initialize a property already defined on a prototype?
-
-                            // Create a new property if an explicit getter or setter are provided or if
-                            // the property is not defined on a prototype. Initialize the property when
-                            // the property is already defined on a prototype and no explicit getter or
-                            // setter are provided.
-
-                            var creating = create || // explicit create directive, or
-                                get !== undefined || set !== undefined || // explicit accessor, or
-                                ! nodeHasProperty.call( vwf, childID, propertyName ); // not defined on prototype
-
-                            // Are we assigning the value here, or deferring assignment until the node
-                            // is constructed because setters will run?
-
-                            var assigning = value === undefined || // no value, or
-                                set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, childID, propertyName ) ); // no setter
-
-                            if ( ! assigning ) {
-                                deferredInitializations[propertyName] = value;
-                                value = undefined;
-                            }
-
-                            // Create or initialize the property.
-
-                            if ( creating ) {
-                                vwf.createProperty( childID, propertyName, value, get, set );
-                            } else {
-                                vwf.setProperty( childID, propertyName, value );
+                            if ( Boolean( ready ) != Boolean( driver_ready ) ) {
+                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
+                                driver_ready = ready;
+                                driver_ready && each_callback( undefined );
                             }
 
                         } );
 
-                        childComponent.methods && jQuery.each( childComponent.methods, function( methodName, methodValue ) {
+                        driver_ready && each_callback( undefined );
 
-                            if ( valueHasBody( methodValue ) ) {
-                                vwf.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
-                            } else {
-                                vwf.createMethod( childID, methodName, undefined, methodValue );
+                    }, function( err ) {
+                        series_callback( err, undefined );
+                    } );
+
+                },
+
+                function( series_callback /* ( err, results ) */ ) {
+
+                    // Call createdNode() on each view. The view is being notified of a node that has
+                    // been constructed.
+
+                    async.forEach( vwf.views, function( view, each_callback /* ( err ) */ ) {
+
+                        var driver_ready = true;
+
+                        view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
+                            childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
+
+                            if ( Boolean( ready ) != Boolean( driver_ready ) ) {
+                                vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
+                                driver_ready = ready;
+                                driver_ready && each_callback( undefined );
                             }
 
                         } );
 
-                        childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
+                        driver_ready && each_callback( undefined );
 
-                            if ( valueHasBody( eventValue ) ) {
-                                vwf.createEvent( childID, eventName, eventValue.parameters );
-                            } else {
-                                vwf.createEvent( childID, eventName, undefined );
-                            }
+                    }, function( err ) {
+                        series_callback( err, undefined );
+                    } );
 
+                },
+
+                function( series_callback /* ( err, results ) */ ) {
+
+                    // Suppress kernel reentry so that we can read the state without coloring from
+                    // any scripts.
+
+                    isolateProperties && vwf.models.kernel.disable();
+
+                    // Create the properties, methods, and events. For each item in each set, invoke
+                    // createProperty(), createMethod(), or createEvent() to create the field. Each
+                    // delegates to the models and views as above.
+
+                    childComponent.properties && jQuery.each( childComponent.properties, function( propertyName, propertyValue ) {
+
+                        var value = propertyValue, get, set, create;
+
+                        if ( valueHasAccessors( propertyValue ) ) {
+                            value = propertyValue.value;
+                            get = propertyValue.get;
+                            set = propertyValue.set;
+                            create = propertyValue.create;
+                        }
+
+                        // Is the property specification directing us to create a new property, or
+                        // initialize a property already defined on a prototype?
+
+                        // Create a new property if an explicit getter or setter are provided or if
+                        // the property is not defined on a prototype. Initialize the property when
+                        // the property is already defined on a prototype and no explicit getter or
+                        // setter are provided.
+
+                        var creating = create || // explicit create directive, or
+                            get !== undefined || set !== undefined || // explicit accessor, or
+                            ! nodeHasProperty.call( vwf, childID, propertyName ); // not defined on prototype
+
+                        // Are we assigning the value here, or deferring assignment until the node
+                        // is constructed because setters will run?
+
+                        var assigning = value === undefined || // no value, or
+                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, childID, propertyName ) ); // no setter
+
+                        if ( ! assigning ) {
+                            deferredInitializations[propertyName] = value;
+                            value = undefined;
+                        }
+
+                        // Create or initialize the property.
+
+                        if ( creating ) {
+                            vwf.createProperty( childID, propertyName, value, get, set );
+                        } else {
+                            vwf.setProperty( childID, propertyName, value );
+                        }
+
+                    } );
+
+                    childComponent.methods && jQuery.each( childComponent.methods, function( methodName, methodValue ) {
+
+                        if ( valueHasBody( methodValue ) ) {
+                            vwf.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
+                        } else {
+                            vwf.createMethod( childID, methodName, undefined, methodValue );
+                        }
+
+                    } );
+
+                    childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
+
+                        if ( valueHasBody( eventValue ) ) {
+                            vwf.createEvent( childID, eventName, eventValue.parameters );
+                        } else {
+                            vwf.createEvent( childID, eventName, undefined );
+                        }
+
+                    } );
+
+                    // Restore kernel reentry.
+
+                    isolateProperties && vwf.models.kernel.enable();
+
+                    series_callback( undefined, undefined );
+                },
+
+                function( series_callback /* ( err, results ) */ ) {
+
+                    // Create and attach the children. For each child, call createNode() with the
+                    // child's component specification, then once loaded, call addChild() to attach the
+                    // new node as a child. addChild() delegates to the models and views as before.
+
+                    async.forEach( Object.keys( childComponent.children || {} ), function( childName, each_callback /* ( err ) */ ) {
+                        var childValue = childComponent.children[childName];
+
+                        vwf.createChild( childID, childName, childValue, function( childID ) {  // TODO: add in original order from childComponent.children
+                            each_callback( undefined );
                         } );
 
-                        // Restore kernel reentry.
+                    }, function( err ) {
+                        series_callback( err, undefined );
+                    } );
 
-                        isolateProperties && vwf.models.kernel.enable();
+                },
 
-                        series_callback( undefined, undefined );
-                    },
+                function( series_callback /* ( err, results ) */ ) {
 
-                    function( series_callback /* ( err, results ) */ ) {
+                    // Attach the scripts. For each script, load the network resource if the script is
+                    // specified as a URI, then once loaded, call execute() to direct any model that
+                    // manages scripts of this script's type to evaluate the script where it will
+                    // perform any immediate actions and retain any callbacks as appropriate for the
+                    // script type.
 
-                        // Create and attach the children. For each child, call createNode() with the
-                        // child's component specification, then once loaded, call addChild() to attach the
-                        // new node as a child. addChild() delegates to the models and views as before.
+                    childComponent.scripts && childComponent.scripts.forEach( function( script ) {
+                        if ( valueHasType( script ) ) {
+                            script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                        } else {
+                            script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
+                        }
+                    } );
 
-                        async.forEach( Object.keys( childComponent.children || {} ), function( childName, each_callback /* ( err ) */ ) {
-                            var childValue = childComponent.children[childName];
+                    series_callback( undefined, undefined );
+                },
 
-                            vwf.createChild( childID, childName, childValue, function( childID ) {  // TODO: add in original order from childComponent.children
-                                each_callback( undefined );
-                            } );
+                function( series_callback /* ( err, results ) */ ) {
 
-                        }, function( err ) {
-                            series_callback( err, undefined );
-                        } );
+                    // Perform initializations for properties with setter functions. These are
+                    // assigned here so that the setters run on a fully-constructed node.
 
-                    },
+                    Object.keys( deferredInitializations ).forEach( function( propertyName ) {
+                        vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                    } );
 
-                    function( series_callback /* ( err, results ) */ ) {
+// TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
-                        // Attach the scripts. For each script, load the network resource if the script is
-                        // specified as a URI, then once loaded, call execute() to direct any model that
-                        // manages scripts of this script's type to evaluate the script where it will
-                        // perform any immediate actions and retain any callbacks as appropriate for the
-                        // script type.
+if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
+    vwf.tickable.nodeIDs.push( childID );
+}
 
-                        childComponent.scripts && childComponent.scripts.forEach( function( script ) {
-                            if ( valueHasType( script ) ) {
-                                script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
-                            } else {
-                                script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
-                            }
-                        } );
+                    // Call initializingNode() on each model and initializedNode() on each view to
+                    // indicate that the node is fully constructed.
 
-                        series_callback( undefined, undefined );
-                    },
+                    vwf.models.forEach( function( model ) {
+                        model.initializingNode && model.initializingNode( nodeID, childID );
+                    } );
 
-                    function( series_callback /* ( err, results ) */ ) {
+                    vwf.views.forEach( function( view ) {
+                        view.initializedNode && view.initializedNode( nodeID, childID );
+                    } );
 
-                        // Perform initializations for properties with setter functions. These are
-                        // assigned here so that the setters run on a fully-constructed node.
+                    series_callback( undefined, undefined );
+                },
 
-                        Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                            vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
-                        } );
+            ], function( err, results ) {
 
-    // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
+if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
+vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) implicit in createChild( parent-id, child-name, child-component ); remove this
 
-    if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
-        vwf.tickable.nodeIDs.push( childID );
-    }
+                // The node is complete. Invoke the callback method and pass the new node ID and the
+                // ID of its prototype. If this was the root node for the application, the
+                // application is now fully initialized.
 
-                        // Call initializingNode() on each model and initializedNode() on each view to
-                        // indicate that the node is fully constructed.
+                create_callback && create_callback( childID );
+            } );
 
-                        vwf.models.forEach( function( model ) {
-                            model.initializingNode && model.initializingNode( nodeID, childID );
-                        } );
-
-                        vwf.views.forEach( function( view ) {
-                            view.initializedNode && view.initializedNode( nodeID, childID );
-                        } );
-
-                        series_callback( undefined, undefined );
-                    },
-
-                ], function( err, results ) {
-
-    if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
-    vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) implicit in createChild( parent-id, child-name, child-component ); remove this
-
-                    // The node is complete. Invoke the callback method and pass the new node ID and the
-                    // ID of its prototype. If this was the root node for the application, the
-                    // application is now fully initialized.
-
-                    create_callback && create_callback( childID );
-                } );
-            }
             this.logger.groupEnd();
         };
 
