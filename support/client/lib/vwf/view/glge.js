@@ -548,22 +548,46 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             mouseOverCanvas = false;
         }
 
-        canvas.onmousewheel = function( e ) {
-            var eData = getEventData( e, false );
-            if ( eData ) {
-                eData.eventNodeData[""][0].wheel = {
-                    delta: e.wheelDelta,
-                    deltaX: e.wheelDeltaX,
-                    deltaY: e.wheelDeltaY,
-                };
-                var id = sceneID;
-                if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
-                    id = pointerDownID;
-                else if ( pointerOverID )
-                    id = pointerOverID; 
-                    
-                sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
-            }
+        canvas.setAttribute("onmousewheel", '');
+        if(typeof canvas.onmousewheel == "function") {
+            canvas.removeAttribute("onmousewheel");
+            canvas.onmousewheel = function( e ) {
+                var eData = getEventData( e, false );
+                if ( eData ) {
+                    eData.eventNodeData[""][0].wheel = {
+                        delta: e.wheelDelta,
+                        deltaX: e.wheelDeltaX,
+                        deltaY: e.wheelDeltaY,
+                    };
+                    var id = sceneID;
+                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                        id = pointerDownID;
+                    else if ( pointerOverID )
+                        id = pointerOverID; 
+                        
+                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+                }
+            };
+        }
+        else {
+            canvas.removeAttribute("onmousewheel");
+            canvas.addEventListener('DOMMouseScroll', function( e ) {
+                var eData = getEventData( e, false );
+                if ( eData ) {
+                    eData.eventNodeData[""][0].wheel = {
+                        delta: e.detail * -40,
+                        deltaX: e.detail * -40,
+                        deltaY: e.detail * -40,
+                    };
+                    var id = sceneID;
+                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                        id = pointerDownID;
+                    else if ( pointerOverID )
+                        id = pointerOverID; 
+                        
+                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+                }
+            });
         }
 
         // == Draggable Content ========================================================================
