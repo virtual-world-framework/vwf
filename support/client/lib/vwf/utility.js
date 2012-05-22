@@ -152,7 +152,7 @@ define( [ "module" ], function( module ) {
 
             // Create a temporary document.
 
-            var doc = document.implementation.createHTMLDocument();
+            var doc = document.implementation.createHTMLDocument("resolveURI");
 
             // Insert a <base/> with the reference URI: <head><base href=*baseURI*/></head>.
 
