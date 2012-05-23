@@ -140,34 +140,41 @@ define( [ "module" ], function( module ) {
         /// 
         /// @param {String} uri
         ///   The URI to resolve. If uri is relative, it will be interpreted with respect to
-        ///   baseURI.
+        ///   baseURI, or with respect to the document if baseURI is not provided.
         /// @param {String} [baseURI]
-        ///   An absolute URI that provides the reference for uri. If baseURI is not provided, uri
-        ///   will be returned unchanged.
+        ///   An optional URI that provides the reference for uri. If baseURI is not provided, uri
+        ///   will be interpreted with respect to the document. If baseURI is relative, it will be
+        ///   interpreted with respect to the document before resolving uri.
         /// 
         /// @returns {String}
         ///   uri as an absolute URI.
 
         resolveURI: function( uri, baseURI ) {
 
-            // Create a temporary document.
+            var doc = document;
 
-            var doc = document.implementation.createHTMLDocument("resolveURI");
+            if ( baseURI ) {
 
-            // Insert a <base/> with the reference URI: <head><base href=*baseURI*/></head>.
+                // Create a temporary document anchored at baseURI.
 
-            var base = doc.createElement( "base" );
-            base.href = baseURI || "";
+                var doc = document.implementation.createHTMLDocument( "resolveURI" );
 
-            var head = doc.getElementsByTagName( "head" )[0];
-            head.appendChild( base );
+                // Insert a <base/> with the reference URI: <head><base href=*baseURI*/></head>.
+
+                var base = doc.createElement( "base" );
+                base.href = this.resolveURI( baseURI ); // resolve wrt the document
+
+                var head = doc.getElementsByTagName( "head" )[0];
+                head.appendChild( base );
+
+            }
 
             // Create an <a/> and resolve the URI.
 
             var a = doc.createElement( "a" );
             a.href = uri;
 
-            return baseURI ? a.href : uri;
+            return a.href;
         },
 
     };
