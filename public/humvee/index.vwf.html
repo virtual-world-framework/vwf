@@ -41,11 +41,13 @@
       	if (nodeId == "http-vwf-example-com-node3-vwf-Tire01" ) {
        	  switch (propertyName) {
          		case "rotation":
-              if(!active) jQuery( ".humvee.wheels.slider" ).slider( "value", -propertyValue[3]);
+              if(!active) jQuery( ".humvee.wheels.slider" ).slider( "value", -propertyValue[3] * propertyValue[2]);
          		  break;
           }
         }
       }
+
+      vwf_view.kernel.execute( "http-vwf-example-com-node3-vwf-Tire01", "this.rotation = this.rotation" );
 
     </script>
   </head>
