@@ -551,6 +551,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var self = this;
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
+
+        $(topdownName).html(''); // Clear alternate div first to ensure content is added correctly
         
         var node = this.nodes[ nodeID ];
         this.currentNodeID = nodeID;
