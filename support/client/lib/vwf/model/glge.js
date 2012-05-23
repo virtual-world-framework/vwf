@@ -205,7 +205,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         node = this.state.nodes[childID] = {
                             name: childName,  
                             glgeObject: undefined,
-                            source: utility.resolveURI( childSource, childURI ),
+                            source: childSource,
                             ID: childID,                                
                             parentID: nodeID,
                             type: childExtendsID,
@@ -233,7 +233,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 name: childName,  
                                 glgeObject: undefined,
                                 glgeParent: glgeParent,
-                                source: utility.resolveURI( childSource, childURI ),
+                                source: childSource,
                                 ID: childID,                                
                                 parentID: nodeID,
                                 type: childExtendsID,
