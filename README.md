@@ -37,7 +37,7 @@ and then execute the _run.bat_ file provided at the root level of the extracted 
 
 Manual Installations
 -
-For addition information please visit: http://www.virtual.wf/web/docs/install.html
+For additional information please visit: http://www.virtual.wf/web/docs/install.html
 
 VWF Examples
 =====================
