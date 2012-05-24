@@ -105,6 +105,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     la.setLatitude( 38.9 );
                                     la.setLongitude( -77 );
                                     node.earthInst.getView().setAbstractView(la);
+
+                                    view.kernel.execute("http-vwf-example-com-node3-vwf-lookAt", "this.cameraData = this.cameraData");
     
                                     view.control = false;
 
