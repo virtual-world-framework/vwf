@@ -12,13 +12,4 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
-properties: 
-  gravity: 
-    set: |
-      this.gravity = value;
-    value: [ 0, 0, -50.8, 0 ]
-  collisionSystem:
-    get: |
-      this.logger.info( "WARNING: scene.collisionSystem can only be set, get is not implemented" );
-    value: [ false ]
+extends: http://vwf.example.com/canvas.vwf
