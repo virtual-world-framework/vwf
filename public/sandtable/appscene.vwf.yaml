@@ -191,11 +191,12 @@ scripts:
           
           faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
           
-          line.properties.meshDefinition.positions = pos;
-          line.properties.meshDefinition.faces = faces;
-          line.properties.meshDefinition.color = this.lineColor;
+          var newLine = $.extend(true, {}, line);
+          newLine.properties.meshDefinition.positions = pos;
+          newLine.properties.meshDefinition.faces = faces;
+          newLine.properties.meshDefinition.color = this.lineColor;
           
-          this.children.create("line"+lineIndex, line);
+          this.children.create("line"+lineIndex, newLine);
           this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
           lineIndex++;
           
