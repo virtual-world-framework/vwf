@@ -1,18 +1,27 @@
-About
-=====================
----------------------
 
-The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing secure, scalable, component-based, and collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers. These technologies include:
+<div class="span11" style="margin-left:30px;" markdown="1">
 
-* HTML 5 – a significant upgrade in expressive power for the web
-* WebGL – an integrated 3D graphics capability
-* WebSockets – providing a full TCP/IP connection between the client and server
-* JavaScript – the programming language of the web  
+<div class="span3" markdown="1" style="margin-left:25px;padding-right: 5px;" >
+###WHAT![Virtual World Framework Compass](images/compass.png)
 
-The application below provides the basic functionality achievable with the VWF. It is representative of a sandtable, allowing a user to navigate the environment, place push pin markers, and draw on the terrain. In addition, 2D HTML components are used in conjunction with the 3D environment in order to change colors and select tool mode. Click the image below to launch an instance of the application. Note: Certain browser requirements must be met to successfully run the VWF. Please see the [Requirements](docs/reqs.html) section for details.
+The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing secure, scalable, component-based, and collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers.
+</div>
 
-<a href='../sandtable/'><img src='sandtable.png' alt='sandtable' style='border:2px black solid' /></a>
+<div class="span3" markdown="1" style="padding-right: 5px;">
+###WHY![Virtual World Framework](images/framework.png)
 
-The VWF serves as a replicated computing platform for multi-user interactive 2D and 3D components with a high degree of customizability of the environment and high bandwidth communication between users. These are environments that are focused on work and working together – whether for training, collaboration and/or entertainment. It is a zero-install platform, where additional software components can be added dynamically. VWF spaces can be embedded in virtually any application including web pages and emails. Furthermore, VWF spaces can embed existing applications and browsers. The next big 3D platform is simply the current world wide web with additional capabilities, and the Virtual World Framework embraces this ever growing technology.
+The VWF serves as a replicated computing platform for multi-user interactive 2D and 3D components with a high degree of customizability of the environment and high bandwidth communication between users. These are environments that are focused on work and working together – whether for training, collaboration and/or entertainment. 
 
-The VWF source can be downloaded from GitHub: [https://github.com/virtual-world-framework](https://github.com/virtual-world-framework)
+VWF is a zero-install platform that can be extended dynamically in production. VWF spaces can be embedded anywhere HTML lives including websites and e-mail. Correspondingly, VWF can embed applications in any virtual space.
+</div>
+
+<div class="span3" markdown="1">
+###WHERE[![Virtual World Framework Download from GitHub](images/Downloads.png)](https://github.com/virtual-world-framework/vwf)
+
+The VWF installation is available on [GitHub](https://github.com/virtual-world-framework/vwf) for Debian/Ubuntu, Red Hat Linux, and Windows.
+
+To see the system live check out any of our [demonstrations available](https://www.virtual.wf).
+
+We also offer quick installation scripts to [setup your own VWF server](https://github.com/virtual-world-framework/vwf).
+</div>
+</div>

@@ -11,7 +11,6 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-
 class VWF < Sinatra::Base
 
   require "vwf/pattern"
@@ -28,12 +27,22 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
   end
 
   configure :production do
+
     enable :logging
+
+	  set :protection, :except => :frame_options # allow embedding into an iframe
+
   end
 
   configure :development do
+
+    register Sinatra::Reloader
+
     require "logger"
     set :logging, ::Logger::DEBUG
+
+    set :protection, :except => :frame_options # allow embedding into an iframe
+
   end
 
   get Pattern.new do |public_path, application, instance, private_path|

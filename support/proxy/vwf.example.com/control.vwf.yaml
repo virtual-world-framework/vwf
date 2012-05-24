@@ -1,0 +1,279 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: |
+  http://vwf.example.com/node3.vwf
+properties:
+  # controlValue: The current value of the control. Must be between minValue and maxValue. 
+  # This multipled by transformIncrement describes how much the translation/rotation/scale has changed.
+  controlValue:
+    set: |
+      if(this.controlValue == undefined) {
+        this.controlValue = value;
+      }
+      else {
+        if(value > this.maxValue) {
+          value = this.maxValue - 1;
+          this.direction = -1;
+        }
+        else if(value < this.minValue) {
+          value = this.minValue + 1;
+          this.direction = 1;
+        }
+        var incrementBy = Math.abs(value - this.controlValue) * this.direction;
+        this.controlValue = value;
+        switch(this.controlType) {
+          case "translate": 
+            this.deltaTranslation(incrementBy);
+            break;
+          case "rotate":
+            this.deltaRotation(incrementBy);
+            break;
+          case "scale":
+            this.deltaScale(incrementBy);
+            break;
+        }
+      }
+    value: 0
+  # controlType: What property the control modifies. Possible values are "translate", "rotate", and "scale".
+  controlType: 
+    set: |
+        switch ( value ) {
+          case "translate":
+          case "rotate":
+          case "scale":
+            this.editMode = value;
+            break;  
+        }
+  # controlMode: How the control modifies the property. Possible values are "momentary", "positions", and "continuous". 
+  # If set to momentary, the control value is set to maxValue on mouse down and minValue on mouseUp.
+  # If set to positions, the control value will increment by the direction. 
+  controlMode:
+    set: |
+      switch (value) {
+        case "momentary":
+        case "positions":
+        case "continuous":
+          this.controlMode = value;
+          break;
+      }
+  # transformAxis: Determines which axes the changes will be made to.
+  transformAxis: [1, 0, 0]
+  # transformIncrement: How much the translation/rotation/scale will change for each increment of controlValue. 
+  # For example, if the controlType is rotate, a transformIncrement of 30 will rotate the object 30 degrees at controlValue of 1, 60 at controlValue of 2, etc.
+  # This multipled by controlValue describes how much the translation/rotation/scale has changed.
+  transformIncrement: 1
+  # minValue: The minimum controlValue can be set to.
+  minValue: 0
+  # maxValue: The maximum controlValue can be set to.
+  maxValue: 1
+  # direction: Determines whether the controlValue will increase or decrease on a mouse click and the sign of the value passed into the delta methods. Is either 1 or -1.
+  direction: 
+    set: |
+      switch(value) {
+        case 1:
+        case -1:
+          this.direction = value;
+          break;
+      }
+    value: 1
+  # dragSpeed: How quickly the object will move when the mouse is dragged. Larger values result in faster dragging. 
+  # A value of 1 would mean that the mouse would have to be dragged from one side of the screen to increment the controlValue.
+  dragSpeed: 50
+methods:
+  init:
+  deltaTranslation: 
+  deltaRotation:
+  deltaScale:
+  deltaTransform:
+scripts:
+- |
+  // Sets up the mouse pointer information used for dragging.
+  this.init = function() {
+    this.input = {
+      "pointerInfo": undefined,
+      "pickInfo": undefined,
+      "previous": {
+        "pointerInfo": undefined,
+        "pickInfo": undefined,        
+      },
+      pointerDown: {
+        "pointerInfo": undefined,
+        "pickInfo": undefined,        
+      },
+      update: function( pointerInfo, pickInfo ){
+        if(!this.previous.pointerInfo) {
+          this.previous.pointerInfo = this.pointerInfo;
+          this.previous.pickInfo = this.pickInfo;
+        }
+        this.pointerInfo = pointerInfo;
+        this.pickInfo = pickInfo;
+      }, 
+      clear: function(){
+        this.previous.pointerInfo = undefined;
+        this.previous.pickInfo = undefined;
+        this.pointerInfo = undefined;
+        this.pickInfo = undefined;        
+      },
+      change: function() {
+        var ret = [ 0, 0 ]
+        if ( this.pointerInfo && this.previous.pointerInfo ) {
+          ret[0] = this.pointerInfo.position[0] - this.previous.pointerInfo.position[0];
+          ret[1] = this.pointerInfo.position[1] - this.previous.pointerInfo.position[1];
+        }
+        return ret;
+      }
+    };
+  }
+  // Sets the starting values for the mouse pointer if in positions or continuous mode. Sets controlValue to the maxValue if in momentary mode.
+  this.pointerDown = function( pointerInfo, pickInfo ) {
+    if ( !this.input ) this.init();
+    this.input.clear();
+    if(this.controlMode == "momentary") {
+      this.direction = 1;
+      this.controlValue = this.maxValue;
+    }
+    else {
+      this.input.pointerDown.pointerInfo = pointerInfo;
+      this.input.pointerDown.pointerInfo = pickInfo;
+    }
+  }
+  // If the mouse has not moved, add the direction to the controlValue if in positions or continuous mode. Sets controlValue to the minValue if in momentary mode.
+  this.pointerUp = function( pointerInfo, pickInfo ) {
+    if(this.controlMode == "momentary") {
+      this.direction = -1;
+      this.controlValue = this.minValue;
+    }
+    else {
+      if(this.input.previous.pointerInfo == undefined) {
+        this.controlValue = this.controlValue + this.direction;
+      }
+      else if (this.controlMode == "continuous") {
+        this.direction = (Math.round(this.controlValue) >= this.controlValue) ? 1 : -1;
+        this.controlValue = Math.round(this.controlValue);
+      }
+      this.input.clear();
+    }
+  }
+  this.pointerMove = function( pointerInfo, pickInfo ) {
+    if(this.controlMode != "momentary") {
+      this.input.update( pointerInfo, pickInfo );
+      var diff = this.input.change();
+      var speed = 1 / this.dragSpeed;
+
+      // If in positions mode, wait until the change in mouse position is greater than 1/dragSpeed, then increment or decrement controlValue based on the direction of mouse movement.
+      if(this.controlMode == "positions") {
+        if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
+          if(diff[0] > speed && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            this.controlValue = this.controlValue + 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+          else if(diff[0] < (speed * -1) && this.controlValue > this.minValue) {
+            this.direction = -1;
+            this.controlValue = this.controlValue - 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+        }
+        else {
+          if(diff[1] > speed && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            this.controlValue = this.controlValue + 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+          else if(diff[1] < (speed * -1) && this.controlValue > this.minValue) {
+            this.direction = -1;
+            this.controlValue = this.controlValue - 1;
+            this.input.previous.pointerInfo = pointerInfo;
+            this.input.previous.pickInfo = pickInfo;
+          }
+        }
+      }
+      else if(this.controlMode == "continuous") {
+        if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
+          var changeBy = diff[0] * this.dragSpeed;
+          if(diff[0] > 0 && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            if((this.controlValue + changeBy) < this.maxValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+          else if(diff[0] < 0 && this.controlValue > this.minValue) {
+            this.direction = -1;
+            if((this.controlValue + changeBy) > this.minValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+        }
+        else {
+          var changeBy = diff[1] * this.dragSpeed;
+          if(diff[1] > 0 && this.controlValue < this.maxValue) {
+            this.direction = 1;
+            if((this.controlValue + changeBy) < this.maxValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+          else if(diff[1] < 0 && this.controlValue > this.minValue) {
+            this.direction = -1;
+            if((this.controlValue + changeBy) > this.minValue) {
+              this.controlValue = this.controlValue + changeBy;
+            }
+          }
+        }
+        this.input.previous.pointerInfo = pointerInfo;
+        this.input.previous.pickInfo = pickInfo;
+      }
+    }
+  }
+
+  this.deltaTranslation = function(incrementBy) {
+    this.translateBy([(this.transformAxis[0] * this.transformIncrement * incrementBy), 
+      (this.transformAxis[1] * this.transformIncrement * incrementBy), 
+      (this.transformAxis[2] * this.transformIncrement * incrementBy)]);
+  }
+  this.deltaRotation = function(incrementBy) {
+    this.rotateBy([this.transformAxis[0], this.transformAxis[1], this.transformAxis[2], (incrementBy * this.transformIncrement)]);
+  }
+  this.deltaScale = function(incrementBy) {
+    var newScale = [1, 1, 1];
+    var scaleFactor = Math.pow(Math.abs(this.transformIncrement), incrementBy);
+    if(this.transformAxis[0] > 0) {
+      if(this.transformIncrement > 0) {
+        newScale[0] = newScale[0] * scaleFactor;
+      }
+      else {
+        newScale[0] = newScale[0] / scaleFactor;
+      }
+    }
+    if(this.transformAxis[1] > 0) {
+      if(this.transformIncrement > 0) {
+        newScale[1] = newScale[1] * scaleFactor;
+      }
+      else {
+        newScale[1] = newScale[1] / scaleFactor;
+      }
+    }
+    if(this.transformAxis[2] > 0) {
+      if(this.transformIncrement > 0) {
+        newScale[2] = newScale[2] * scaleFactor;
+      }
+      else {
+        newScale[2] = newScale[2] / scaleFactor;
+      }
+    }
+    this.scaleBy(newScale);
+  }

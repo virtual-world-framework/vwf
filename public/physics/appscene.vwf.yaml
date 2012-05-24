@@ -14,6 +14,7 @@
 --- 
 extends: http://vwf.example.com/physics2.vwf
 properties:
+  nodesCreated: 
   createCube: true
   cubesCreated: 0
   spheresCreated: 0
@@ -56,9 +57,9 @@ scripts:
         "physics": [ "box", 3.0, 3.0, 3.0 ], 
         "friction": 0.5, 
         "mass": 400, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ],  
         "linVelocityDamping": [ 1, 1, 1, 0 ], 
         "restitution": 0.10, 
+        "private": null,
         } 
       };
     var sphere = { 
@@ -71,9 +72,9 @@ scripts:
         "physics": [ "sphere", 2.0 ], 
         "friction": 0.5, 
         "mass": 100, 
-        "transform": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ], 
         "linVelocityDamping": [ 0.99, 0.99, 0.99, 0 ], 
         "restitution": 0.10, 
+        "private": null,
         } 
       };
     this.initialize = function() {
@@ -125,7 +126,7 @@ scripts:
             cube.scripts = [];
             cube.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
 
-            this.children.create( cube, newObjName );        
+            this.children.create( newObjName, cube );
             this.createCube = false;
           } else {
             this.spheresCreated += 1;
@@ -139,11 +140,12 @@ scripts:
             sphere.scripts = [];
             sphere.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
             
-            this.children.create( sphere, newObjName );
+            this.children.create( newObjName, sphere );
             this.createCube = true;      
           }
           if ( newObjName && newObjName != "" ) {
-            this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+newObjName );
+            this.nodesCreated.push( "http-vwf-example-com-physics3-vwf-"+newObjName );
+            this.nodesCreated = this.nodesCreated;
           }
         }
       }

@@ -15,21 +15,6 @@
 
 define( [ "module", "vwf/view" ], function( module, view ) {
 
-    // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
-    // is active, scripts on the main page may make (reflected) kernel calls:
-
-    //     window.vwf_view.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childName, function( childID ) {
-    //         ...
-    //     } );
-
-    // And receive view calls:
-
-    //     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childName, callback /* ( ready ) */ ) {
-    //         ...
-    //     }
-
     return view.load( module, {
 
         // == Module Definition ====================================================================
@@ -59,12 +44,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
   
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
             if ( childExtendsID === undefined )
                 return;
 
-            this.logger.infoc( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            this.logger.infoc( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName );
             var node = {
                 parentID: nodeID,
                 ID: childID,
@@ -117,6 +102,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                                     var la = node.earthInst.getView().copyAsLookAt(node.earthInst.ALTITUDE_RELATIVE_TO_GROUND);
                                     la.setRange( 100000 );
+                                    la.setLatitude( 38.9 );
+                                    la.setLongitude( -77 );
                                     node.earthInst.getView().setAbstractView(la);
     
                                     view.control = false;

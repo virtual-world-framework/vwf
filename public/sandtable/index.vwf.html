@@ -113,6 +113,12 @@
         }
       }
       
+      // vwf_view doesn't currently get messages from the document launch. Force a property update
+      // so that vwf_view.satProperty() can update the toolbar with the current values.
+
+      vwf_view.kernel.execute( "http-vwf-example-com-node-vwf-toolbar", "this.selectedColor = this.selectedColor" );
+      vwf_view.kernel.execute( "http-vwf-example-com-node-vwf-toolbar", "this.inputMode = this.inputMode" );
+
     </script>
   </head>
   <body>
