@@ -17921,6 +17921,7 @@ GLGE.Collada.prototype.getNode=function(node,ref){
 GLGE.Collada.prototype.initVisualScene=function(){
     var metadata=this.xml.getElementsByTagName("asset");
     var up_axis="Z_UP";
+    var app_up_axis = "Z_UP";
     if(metadata.length) {
         var up_axis_node=metadata[0].getElementsByTagName("up_axis");
         if (up_axis_node.length) {
@@ -17930,23 +17931,50 @@ GLGE.Collada.prototype.initVisualScene=function(){
                 up_axis=cur_axis;
         }
     }
+    console.info( "THE UP axis for this collada document is: " + up_axis[0] );
     var transformRoot=this;
-    if (up_axis[0]!="Y"&&up_axis[0]!="y") {
-        transformRoot = this.newGroup( undefined );
-        this.addChild(transformRoot);
-        if (up_axis[0]!="Z"&&up_axis[0]!="z") {
-            transformRoot.setRotMatrix(GLGE.Mat4([0, -1 , 0,  0,
-					                     1, 0, 0, 0,
-					                     0, 0, 1, 0,
-					                     0, 0, 0, 1]));
-          
-        }else {
-            transformRoot.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
-					                     0, 0, 1, 0,
-					                     0, -1, 0, 0,
-					                     0, 0, 0, 1]));
+    if ( app_up_axis == "Z_UP" ) {
+      switch ( up_axis[0] ) {
+        case "Z":
+        case "z":
+          // do nothing
+          break;
+        case "Y":
+        case "y":
+          transformRoot = this.newGroup( undefined );
+          this.addChild( transformRoot );   
+          transformRoot.setRotMatrix( GLGE.Mat4(
+            [1, 0, 0, 0,
+             0, 0, -1, 0,
+             0, 1, 0, 0,
+             0, 0, 0, 1] ));           
+          break;
+        case "X":
+        case "x":
+          break;
+      }
+      //{1,0,0,0,
+      //0,0,-1,0,
+      //0,1,0,"11":0,"12":0,
+      //"13":0,"14":0,"15":1,"length":16,"buffer":{"byteLength":64},"byteLength":64,"byteOffset":0}
+    } else {
+      if (up_axis[0]!="Y"&&up_axis[0]!="y") {
+          transformRoot = this.newGroup( undefined );
+          this.addChild(transformRoot);
+          if (up_axis[0]!="Z"&&up_axis[0]!="z") {
+              transformRoot.setRotMatrix(GLGE.Mat4([0, -1 , 0,  0,
+  					                     1, 0, 0, 0,
+  					                     0, 0, 1, 0,
+  					                     0, 0, 0, 1]));
             
-        }
+          }else {
+              transformRoot.setRotMatrix(GLGE.Mat4([1, 0 , 0,  0,
+  					                     0, 0, 1, 0,
+  					                     0, -1, 0, 0,
+  					                     0, 0, 0, 1]));
+              
+          }
+      }
     }
 	if(!this.rootId){
 		var scene=this.xml.getElementsByTagName("scene");
@@ -17964,6 +17992,7 @@ GLGE.Collada.prototype.initVisualScene=function(){
 		}
 	}
 	
+  console.info( "   useCamera?: " + this.useCamera );
 	if(this.useCamera){
 		// JHD
 		var tempCamera;
