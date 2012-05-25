@@ -1,19 +1,14 @@
-# :DK-BEG: missing DevKit/build tool convenience notice
+# :DK-BEG: override 'gem install' to enable RubyInstaller DevKit usage
 Gem.pre_install do |gem_installer|
   unless gem_installer.spec.extensions.empty?
-    have_tools = %w{gcc make sh}.all? do |t|
-      system("#{t} --version > NUL 2>&1")
+    unless ENV['PATH'].include?('C:\\Develop\\glge-v0.9\\support\\build\\ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx\\mingw\\bin') then
+      Gem.ui.say 'Temporarily enhancing PATH to include DevKit...' if Gem.configuration.verbose
+      ENV['PATH'] = 'C:\\Develop\\glge-v0.9\\support\\build\\ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx\\bin;C:\\Develop\\glge-v0.9\\support\\build\\ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx\\mingw\\bin;' + ENV['PATH']
     end
-
-    unless have_tools
-      raise Gem::InstallError,<<-EOT
-The '#{gem_installer.spec.name}' native gem requires installed build tools.
-
-Please update your PATH to include build tools or download the DevKit
-from 'http://rubyinstaller.org/downloads' and follow the instructions
-at 'http://github.com/oneclick/rubyinstaller/wiki/Development-Kit'
-EOT
-    end
+    ENV['RI_DEVKIT'] = 'C:\\Develop\\glge-v0.9\\support\\build\\ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx'
+    ENV['CC'] = 'gcc'
+    ENV['CXX'] = 'g++'
+    ENV['CPP'] = 'cpp'
   end
 end
 # :DK-END:

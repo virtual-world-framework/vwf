@@ -122,6 +122,7 @@ properties:
   playing: false
   looping: false
   lookAt: ""
+  visible: true
 methods:
   # Translate by translation over duration.
   translateBy:

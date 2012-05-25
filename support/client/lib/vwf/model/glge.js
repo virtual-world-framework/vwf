@@ -546,6 +546,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
                         break;
 
+                    case "visible":
+                        if ( glgeObject.setVisible ) {
+                            glgeObject.setVisible( propertyValue );
+                        }
+                        break;
+
                     default:
                         switch ( node[ "type" ] ) {
                             case "http-vwf-example-com-material-vwf":
@@ -695,6 +701,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             if ( lookAtObject ) {
                                 value = getObjectID.call( glgeModel, lookAtObject, false, false );
                             }
+                        }
+                        break;
+
+                    case "visible":
+                        if ( glgeObject.getVisible ) {
+                            value = glgeObject.getVisible();
                         }
                         break;
 

@@ -23,7 +23,7 @@ children:
     source: seymourplane_triangulate.dae
     type: model/vnd.collada+xml
     properties:
-      rotation: [ 0.57735, -0.57735, -0.57735, 120 ]
+      rotation: [ 0, 0, 1, -90 ]
       # sway-on-click configuration parameters
       sway-axis: [ 1, 0, 0 ]
     children:

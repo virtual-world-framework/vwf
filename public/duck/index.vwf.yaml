@@ -25,7 +25,7 @@ children:
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
-      rotation: [ 1, 0, 0, 90 ]
+      rotation: [ 1, 0, 0, 0 ]
       # spin-on-click configuration parameters
       spin-rate: 1
       spin-axis: [ 0, 0, 1 ]
