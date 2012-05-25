@@ -17931,7 +17931,6 @@ GLGE.Collada.prototype.initVisualScene=function(){
                 up_axis=cur_axis;
         }
     }
-    console.info( "THE UP axis for this collada document is: " + up_axis[0] );
     var transformRoot=this;
     if ( app_up_axis == "Z_UP" ) {
       switch ( up_axis[0] ) {
@@ -17992,7 +17991,6 @@ GLGE.Collada.prototype.initVisualScene=function(){
 		}
 	}
 	
-  console.info( "   useCamera?: " + this.useCamera );
 	if(this.useCamera){
 		// JHD
 		var tempCamera;
