@@ -47,6 +47,7 @@ scripts:
       this.preloadImages();
     }
     this.preloadImages = function() {
+      var i;
       for(i = 0; i < this.channelImages.length; i++) {
         new Image().src = this.channelImages[i];
       }
@@ -84,6 +85,7 @@ children:
     type: model/vnd.collada+xml
     properties:
       translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, -90 ]
       powerOn:
         set: |
           if ( this.powerOwn != Boolean( value ) ){

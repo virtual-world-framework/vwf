@@ -711,14 +711,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
         var objectIDFound = -1;
-            
+        var self = this;    
+
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
                 this.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path.call(this,objectToLookFor) );
             }
             jQuery.each( this.state.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
+                    if ( debug ) { self.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });
