@@ -349,14 +349,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     // timeout must also be increased.
                     // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
 
-                    // transportOptions: {
-                        // "websocket": { timeout: 90000 },
+                    transportOptions: {
+                        "websocket": { timeout: 90000 }
                         // "flashsocket": { timeout: 90000 },
                         // "htmlfile": { timeout: 90000 },
                         // "xhr-multipart": { timeout: 90000 },
                         // "xhr-polling": { timeout: 90000 },
                         // "jsonp-polling": { timeout: 90000 },
-                    // }
+                    }
 
                 } );
 
