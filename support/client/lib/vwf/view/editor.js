@@ -333,8 +333,15 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 this.topdownTemp = topdownName;
             }
 
+            else
+            {
+                // Reset width if on script
+                $('#editor').animate({ 'left' : "-260px" }, 175);
+                $('.vwf-tree').animate({ 'width' : "260px" }, 175);
+            }
+
             // User List
-            else if(eView == 2)
+            if(eView == 2)
             {
                 $(this.topdownName).hide();
                 $(this.topdownTemp).hide();
@@ -382,7 +389,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             {
                 window.slideOffset = 260;
                 $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
-                $('#editor').animate({ 'left' : "-=260px" }, 175);
+                $('#editor').animate({ 'left' : "-260px" }, 175);
                 $('#x').delay(1000).css({ 'display' : 'inline' });
             }
 
@@ -445,7 +452,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
         
         $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
-        $('#editor').animate({ 'left' : "+=260px" }, 175);
+        $('#editor').animate({ 'left' : "0px" }, 175);
         $('#x').css({ 'display' : 'none' });
         this.editorView = 0;
         this.editorOpen = false;
@@ -543,6 +550,23 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
     }
+
+    // -- drillBack---------------------------------------------------------------------------
+
+    function drillBack(nodeID) // invoke with the view as "this"
+    {
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
+        
+        drill.call(this, nodeID);
+        
+        // No slide motion, when resizing script window back to normal
+        $(topdownName).hide();
+        $(topdownTemp).show();
+        
+        this.topdownName = topdownTemp;
+        this.topdownTemp = topdownName;
+    }
     
     // -- drill -----------------------------------------------------------------------------
 
@@ -584,6 +608,16 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $('#behaviors hr:last').css('height', '3px');
 
+        // Add prototype behaviors
+        $(topdownTemp).append("<div id='prototypeBehaviors'></div>");
+        var prototypeNode = this.nodes[ node.extendsID ];
+        for ( var i=0; i < prototypeNode.implementsIDs.length; i++)
+        {
+            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeNode.implementsIDs[i] + "</b></td><td><input id='" + prototypeNode.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
+        }
+
+        $('#prototypeBehaviors hr:last').css('height', '3px');
+
         // Add node scripts
         $(topdownTemp).append("<div id='scripts'></div>");
         for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
@@ -596,13 +630,32 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $('#script-' + nodeID + "-" + i).click( function(evt) {
                     var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
                     var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
-                    viewScript.call(self, id, scriptID);
+                    viewScript.call(self, id, scriptID, undefined);
                 });
             }
         }
 
         $('#scripts hr:last').css('height', '3px');
-        
+
+        // Add prototype scripts
+        $(topdownTemp).append("<div id='prototypeScripts'></div>");
+        for( var i=0; i < this.allScripts[ node.extendsID ].length; i++ )
+        {
+            var scriptFull = this.allScripts[node.extendsID][i].text;
+            if(scriptFull != undefined)
+            {
+                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                $('#prototypeScripts').append("<div id='script-" + node.extendsID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
+                $('#script-' + node.extendsID + "-" + i).click( function(evt) {
+                    var extendsID = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                    viewScript.call(self, nodeID, scriptID, extendsID);
+                });
+            }
+        }
+
+        $('#prototypeScripts hr:last').css('height', '3px');
+
         // Add node properties
         $(topdownTemp).append("<div id='properties'></div>");
         var displayedProperties = {};
@@ -699,6 +752,21 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $('#children hr:last').css('height', '3px');
 
+        // Add prototype children
+        $(topdownTemp).append("<div id='prototypeChildren'></div>");
+        var prototypeChildren = getChildren.call( this, this.kernel.kernel, node.extendsID ); 
+        for ( var key in prototypeChildren)       
+        {
+            var child = prototypeChildren[key];
+            $('#prototypeChildren').append("<div id='" + child.ID + "' class='childContainer'><div class='childEntry'><b>" + child.name + "</b></div><hr></div>");
+            $('#' + child.ID).click( function(evt) {
+                // needs to go back to nodeID, not the prototypeID
+                drillDown.call(self, $(this).attr("id"));
+            });
+        }
+
+        $('#prototypeChildren hr:last').css('height', '3px');
+
         // Add node methods
         $(topdownTemp).append("<div id='methods'></div>");
         for ( var key in node.methods ) {
@@ -788,7 +856,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
     // -- viewScript ------------------------------------------------------------------------
 
-    function viewScript (nodeID, scriptID) // invoke with the view as "this"
+    function viewScript (nodeID, scriptID, extendsID) // invoke with the view as "this"
     {
         var self = this;
         var topdownName = this.topdownName;
@@ -801,8 +869,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         jQuery('#script-' + nodeID + '-back').click ( function(evt) {
             self.editingScript = false;
             var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
-            drillUp.call(self, id);
+            drillBack.call(self, id);
+
+            // Return editor to normal width
+            $('#editor').animate({ 'left' : "-260px" }, 175);
+            $('.vwf-tree').animate({ 'width' : "260px" }, 175);
         });
+
+        if(extendsID) nodeID = extendsID;
 
         var scriptText = self.allScripts[nodeID][scriptID].text;
         if(scriptText != undefined)
@@ -814,13 +888,18 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 self.allScripts[id][s_id].text = undefined;
                 self.kernel.execute( id, $("#scriptTextArea").val() );
             });
+            jQuery('#scriptTextArea').focus( function(evt) { 
+                // Expand the script editor
+                $('#editor').animate({ 'left' : "-500px" }, 175);
+                $('.vwf-tree').animate({ 'width' : "500px" }, 175);
+            });
             jQuery('#scriptTextArea').change( function(evt) { 
                 evt.stopPropagation();
             });
         }
         
-        $(topdownName).hide('slide', {direction: 'left'}, 175); 
-        $(topdownTemp).show('slide', {direction: 'right'}, 175);
+        $(topdownName).hide();
+        $(topdownTemp).show();
         
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
@@ -945,6 +1024,22 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
         }
         return pProperties;
+    }
+
+    function getChildren( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var pChildren = {};
+        if ( pTypes ) {
+            for ( var i=0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if ( nd && nd.children ) {
+                    for ( var key in nd.children ) {
+                        pChildren[ key ] = nd.children[key];
+                    }
+                }
+            }
+        }
+        return pChildren;
     }
 
     function getEvents( kernel, extendsID ) {
