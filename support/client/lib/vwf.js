@@ -985,7 +985,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
-                        nodeURI = nodeComponent;
+                        nodeURI = nodeComponent;  // TODO: canonicalize uri
 
                         // Load the document if we haven't seen this URI yet. Mark the components
                         // list to indicate that this component is loading.
@@ -1026,7 +1026,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         nodeDescriptor = nodeComponent;
 
-                        if ( nodeURI ) {
+                        if ( ! nodeDescriptor.id ) {
+                            nodeDescriptor.id = nodeURI ||  // TODO: hash uri => id to shorten for faster lookups?  
+                                Crypto.MD5( JSON.stringify( nodeDescriptor ) ).toString();  // TODO: MD5 may be too slow here
+                        }
+
+                        if ( ! nodeDescriptor.uri && nodeURI ) {
                             nodeDescriptor.uri = nodeURI;  // TODO: pass this as an (optional) parameter to createChild() so that we don't have to modify the descriptor?
                         }
 
@@ -1494,9 +1499,15 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             childComponent = normalizedComponent( childComponent );
 
-            // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
+            // Allocate an ID for the node. IDs must be unique and consistent across all clients
+            // sharing the same instance regardless of the component load order. Each node maintains
+            // a sequence counter, and we allocate the ID based on the parent's sequence counter and
+            // ID. An existing ID is used when synchronizing to state drawn from another client or
+            // to a previously-saved state.
 
-            var childID = childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
+            var childID = childComponent.id ||
+                nodeID + ":" + this.models.object.sequence( nodeID ) +
+                    ( this.configuration["humanize-ids"] && childName ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
@@ -2215,7 +2226,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 if ( propertyValue === undefined ) {
                     var prototypeID = nodePrototypeID.call( this, nodeID );
-                    if ( prototypeID != nodeTypeURI.replace( /[^0-9A-Za-z_]+/g, "-" ) ) {
+                    if ( prototypeID != nodeTypeURI ) {
                         propertyValue = this.getProperty( prototypeID, propertyName );
                     }
                 }

@@ -50,6 +50,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 properties: {},
 
+                sequence: 0,
+
                 initialized: false,
                 changed: false, // any changes since initialization?
                 added: false, // added since parent's initialization?
@@ -173,6 +175,19 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
             }
 
             return result;
+        },
+
+        // -- sequence -----------------------------------------------------------------------------
+
+        sequence: function( nodeID ) {
+
+            var object = this.objects[nodeID];
+
+            if ( object ) {
+                return ++object.sequence; // TODO: different function to increment and return?
+            }
+
+            return undefined;
         },
 
         // -- uri ----------------------------------------------------------------------------------

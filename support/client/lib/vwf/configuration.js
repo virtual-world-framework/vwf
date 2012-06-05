@@ -162,18 +162,24 @@ define( function() {
 
         production: {
             "log-level": "warn",  // TODO: use in logger
+            "randomize-ids": false,
+            "humanize-ids": false,
         },
 
         // Development configuration.
 
         development: {
             "log-level": "info",  // TODO: use in logger
+            "randomize-ids": true,
+            "humanize-ids": true,
         },
 
         // Testing configuration.
 
         testing: {
             "log-level": "warn",  // TODO: use in logger
+            "randomize-ids": false,
+            "humanize-ids": false,
         },
 
     };
