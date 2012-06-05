@@ -29,6 +29,11 @@
 
         // == Public variables =====================================================================
 
+        // The runtime environment (production, development, testing) and other configuration
+        // settings appear here.
+
+        this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+
         // Each model and view module loaded by the main page registers itself here.
 
         this.modules = [];
@@ -192,6 +197,11 @@
             [ viewInitializers ] */ ) {
 
             var args = Array.prototype.slice.call( arguments );
+
+            // Load the runtime configuration. Start with the factory defaults. The reflector may
+            // provide additional settings when we connect.
+
+            this.configuration = require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
 
             // Get the application specification if one is provided in the query string. Parse it
             // into an application specification object if it's valid JSON, otherwise keep the query
@@ -762,6 +772,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             async.series( [
 
+                // Set the runtime configuration.
+
+                function( series_callback /* ( err, results ) */ ) {
+
+                    require( "vwf/configuration" ).instance = applicationState.configuration;
+
+                    series_callback( undefined, undefined );
+                },
+
+                // Create or update global nodes and their descendants.
+
                 function( series_callback /* ( err, results ) */ ) {
 
                     async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback /* ( err ) */ ) {
@@ -775,6 +796,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     } );
 
                 },
+
+                // Set the message queue.
 
                 function( series_callback /* ( err, results ) */ ) {
 
@@ -844,9 +867,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             var applicationState = {
 
+                // Runtime configuration.
+
+                configuration:
+                    require( "vwf/configuration" ).instance,
+
+                // Global node and descendant deltas.
+
                 nodes: [  // TODO: all global objects
                     require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), transitTransformation ),
                 ],
+
+                // Message queue.
 
                 queue: 
                     require( "vwf/utility" ).transform( queue, queueTransitTransformation ),
