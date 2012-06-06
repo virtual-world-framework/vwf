@@ -41,14 +41,12 @@ define( {
     /// @name vwf.api.kernel#createNode
     /// @function
     /// 
-    /// @param {ID} nodeID
-    /// @param {String|Object} childComponent
-    /// @param {String} childName
+    /// @param {String|Object} nodeComponent
     /// @param {Function} [callback]
     /// 
     /// @returns {}
 
-    createNode: [ /* nodeID, childComponent, childName, callback /- ( childID ) -/ */ ],
+    createNode: [ /* nodeComponent, callback /- ( nodeID ) -/ */ ],
 
     /// Delete node will delete a node specified by the id given on each model and view.
     /// 
@@ -106,6 +104,18 @@ define( {
     /// @returns {ID[]}
 
     prototypes: [ /* nodeID */ ],
+
+    /// @name vwf.api.kernel#createChild
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} childName
+    /// @param {String|Object} childComponent
+    /// @param {Function} [callback]
+    /// 
+    /// @returns {}
+
+    createChild: [ /* nodeID, childName, childComponent, callback /- ( childID ) -/ */ ],
 
     /// addChild calls addingChild() on each model. The child is considered added after each model has
     /// run.  Additionally, it calls addedChild() on each view. The view is being notified that a 

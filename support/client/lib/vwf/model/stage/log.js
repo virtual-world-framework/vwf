@@ -33,8 +33,12 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             switch ( kernelFunctionName ) {
 
-                case "createNode": // nodeID, childComponent, childName, callback /* ( childID ) */
-                    objectIsComponent( logees[1] ) && ( logees[1] = JSON.stringify( loggableComponent( logees[0] ) ) ); // childComponent
+                case "createNode": // nodeComponent, callback /* ( nodeID ) */
+                    objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // nodeComponent
+                    break;
+
+                case "createChild": // nodeID, childName, childComponent, callback /* ( childID ) */
+                    objectIsComponent( logees[2] ) && ( logees[2] = JSON.stringify( loggableComponent( logees[2] ) ) ); // childComponent
                     break;
 
                 case "createProperty":
@@ -71,8 +75,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
                 switch ( modelFunctionName ) {
 
-                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /* ( ready ) */
-                        logees[7] = undefined; // callback /* ( ready ) */
+                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */
+                        logees[8] = undefined; // callback /* ( ready ) */
                         break;
 
                     case "creatingProperty":
@@ -119,7 +123,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         var isComponent = false;
 
-        if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+        if ( typeof candidate == "object" && candidate != null ) {
 
             componentAttributes.forEach( function( attributeName ) {
                 isComponent = isComponent || Boolean( candidate[attributeName] );
@@ -213,7 +217,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         var hasAccessors = false;
 
-        if ( ( typeof candidate == "object" || candidate instanceof Object ) && candidate != null ) {
+        if ( typeof candidate == "object" && candidate != null ) {
 
             accessorAttributes.forEach( function( attributeName ) {
                 hasAccessors = hasAccessors || Boolean( candidate[attributeName] );

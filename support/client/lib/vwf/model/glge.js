@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
 
@@ -45,7 +45,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingNode ------------------------------------------------------------------------
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childName, callback ) {
+                                childSource, childType, childURI, childName, callback ) {
 
             var node, parentNode, glgeChild, prototypes;
             var kernel = this.kernel.kernel.kernel;
@@ -55,7 +55,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
 //            this.logger.enabled = true;
 //            this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
-//                                childSource, childType, childName );
+//                                childSource, childType, childURI, childName );
 //            this.logger.enable = false;
 
             // find the parent node
@@ -108,7 +108,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 initCamera.call( this, sceneNode.glgeScene.camera );
 
                 var camType = "http://vwf.example.com/camera.vwf";
-                vwf.createNode( childID, { "extends": camType }, "camera", undefined );    
+                vwf.createChild( childID, "camera", { "extends": camType }, undefined );    
 
                 var model = this;
                 var xmlDocLoadedCallback = callback;
@@ -121,7 +121,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     switch ( childType ) {
                         case "model/x-glge":
                             callback( false );
-                            sceneNode.glgeDocument.load( childSource );
+                            sceneNode.glgeDocument.load( utility.resolveURI( childSource, childURI ) );
                             sceneNode.pendingLoads++;
                             break;
                     }
@@ -191,7 +191,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         node = this.state.nodes[childID] = {
                             name: childName,  
                             glgeObject: undefined,
-                            source: childSource,
+                            source: utility.resolveURI( childSource, childURI ),
                             ID: childID,
                             parentID: nodeID,
                             sourceType: childType,
@@ -389,7 +389,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     switch ( propertyName ) {
 
                         case "meshDefinition":
-                            createMesh( propertyValue, node );
+                            createMesh.call( this, propertyValue, node );
                             break;
 
                         default:
@@ -495,13 +495,26 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         // decompose camera assignments.
 
                         if ( glgeObject instanceof GLGE.Camera || glgeObject instanceof GLGE.ParticleSystem ) { // setStaticMatrix doesn't work for cameras
+
                             var translation = goog.vec.Vec3.create();
                             goog.vec.Mat4.getColumn( transform, 3, translation );
                             goog.vec.Mat4.setColumnValues( transform, 3, 0, 0, 0, 1 );
                             goog.vec.Mat4.transpose( transform, transform );
                             glgeObject.setRotMatrix( transform );
                             glgeObject.setLoc( translation[0], translation[1], translation[2] );
+
                         } else {
+
+                            // Set loc[XYZ] so that GLGE.Placeable.getPosition() will return correct
+                            // values for lookAt. setLoc() clears the static matrix, so call it
+                            // before setStaticMatrix().
+
+                            var translation = goog.vec.Vec3.create();
+                            goog.vec.Mat4.getColumn( transform, 3, translation );
+                            glgeObject.setLoc( translation[0], translation[1], translation[2] );
+
+                            // Set the full matrix.
+
                             glgeObject.setStaticMatrix(
                                 goog.vec.Mat4.transpose( transform, goog.vec.Mat4.create() )
                             );
@@ -530,6 +543,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 if ( glgeObject.getLookat && glgeObject.getLookat() ) 
                                     glgeObject.setLookat( null );
                             }
+                        }
+                        break;
+
+                    case "visible":
+                        if ( glgeObject.setVisible ) {
+                            glgeObject.setVisible( propertyValue );
                         }
                         break;
 
@@ -682,6 +701,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             if ( lookAtObject ) {
                                 value = getObjectID.call( glgeModel, lookAtObject, false, false );
                             }
+                        }
+                        break;
+
+                    case "visible":
+                        if ( glgeObject.getVisible ) {
+                            value = glgeObject.getVisible();
                         }
                         break;
 

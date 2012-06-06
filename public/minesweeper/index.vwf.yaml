@@ -748,7 +748,7 @@ scripts:
           var tempTile = $.extend(true, {}, mineTile);
           tempTile.properties.rotation = [1, 0, 0, 0];
           var name = "flippedTile" + obj.properties.position;
-          obj.children.create(tempTile, name);
+          obj.children.create(name, tempTile);
           this.gameInProgress = false;
           $("#loseMessage").dialog({
             resizable: false,
@@ -762,7 +762,7 @@ scripts:
           var tempTile = this.getNumberedTile(obj.properties.position);
           tempTile.properties.rotation = [0, 0, 1, 180];
           var name = "flippedTile" + obj.properties.position;
-          obj.children.create(tempTile, name);
+          obj.children.create(name, tempTile);
         }
         obj.isFlipped = true;
         this.checkForGameOver();
