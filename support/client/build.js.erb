@@ -7,15 +7,15 @@
     baseUrl: "<%= source %>",
     dir: "<%= destination %>",
 
-    // Neither UglifyJS nor Closure can successfully run the optimizations on all of the files.
-    // Optimize one file at a time in a separate Rake task.
+    // Neither UglifyJS nor Closure can successfully run the optimizations on all of the files. A
+    // separate Rake task will optimize one file at a time.
 
     optimize: "none", // "closure",
 
     closure: {
         CompilerOptions: {
             "languageIn": java.lang.Class.forName( "com.google.javascript.jscomp.CompilerOptions$LanguageMode" ).
-                getEnumConstants()[1], // ECMASCRIPT5
+                getEnumConstants()[2], // ECMASCRIPT5_STRICT
         },
     },
 

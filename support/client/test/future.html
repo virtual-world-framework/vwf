@@ -12,7 +12,6 @@
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
-    <script type="text/javascript" src="../lib/vwf-view.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
 
@@ -32,6 +31,7 @@
         "vwf/model/stage/log",
         "vwf/kernel/view",
         "vwf/view/document",
+        "vwf/utility",
         "logger",
 
       ], function( ready ) {
@@ -108,10 +108,10 @@
                     deepEqual( vwf.execute( fixtureID, "this.property" )[ time1 ], [ "tick" ], "tick when a future action executes" ) } },
 
                 { absolute: time2, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time2 ], [ "one", "tick" ], "tick is after the future action" ) } },
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time2 ], [ "tick", "one" ], "tick is before the future action" ) } },
 
                 { absolute: time3, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time3 ], [ "two", "three", "tick" ], "one tick per group of future actions" ) } },
+                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time3 ], [ "tick", "two", "three" ], "one tick per group of future actions" ) } },
 
                 { absolute: timeStop, assertion: function() {
                     deepEqual( vwf.execute( fixtureID, "this.property" )[ timeStop ], [ "tick" ], "one tick with the future action at the periodic interval time" ) } },
@@ -330,7 +330,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createNode( 0, {
+            vwf.createChild( 0, unique_name( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -351,7 +351,7 @@
                 "this.event = this.events.add( function() { this.property = arguments[0] }, this )",
               ],
 
-            }, unique_name( "fixture" ), function( fixtureID ) {
+            }, function( fixtureID ) {
 
               callback( fixtureID );
 
@@ -363,7 +363,7 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( 0, {
+            vwf.createNode( {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -372,18 +372,18 @@
                 base: "base",
               },
 
-            }, unique_name( "base" ), function( baseID ) {
+            }, function( baseID ) {
 
-              vwf.createNode( 0, {
+              vwf.createNode( {
 
                 extends:
-                  "@" + JSON.stringify( baseID ),
+                  baseID,
                 
                 properties: {
                   derived: "derived",
                 },
 
-              }, unique_name( "derived" ), function( derivedID ) {
+              }, function( derivedID ) {
 
                 callback( derivedID, baseID );
 
@@ -443,8 +443,8 @@
 
             function ready( assertion, time ) {
 
-              return assertion.absolute && time >= assertion.absolute ||
-                assertion.relative && time >= reference + assertions[next].relative;
+              return assertion.absolute && time > assertion.absolute ||
+                assertion.relative && time > reference + assertions[next].relative;
               
             }
             

@@ -12,7 +12,6 @@
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
-    <script type="text/javascript" src="../lib/vwf-view.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
 
@@ -32,6 +31,7 @@
         "vwf/model/stage/log",
         "vwf/kernel/view",
         "vwf/view/document",
+        "vwf/utility",
         "logger",
 
       ], function( ready ) {
@@ -105,7 +105,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createNode( 0, {
+            vwf.createChild( 0, unique_name( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -141,7 +141,7 @@
                 "this.test = undefined",
               ],
 
-            }, unique_name( "fixture" ), function( fixtureID ) {
+            }, function( fixtureID ) {
 
               callback( fixtureID );
 
@@ -199,8 +199,8 @@
 
             function ready( assertion, time ) {
 
-              return assertion.absolute && time >= assertion.absolute ||
-                assertion.relative && time >= reference + assertions[next].relative;
+              return assertion.absolute && time > assertion.absolute ||
+                assertion.relative && time > reference + assertions[next].relative;
               
             }
             
