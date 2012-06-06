@@ -8,11 +8,12 @@ The VWF source can be downloaded from GitHub: [https://github.com/virtual-world-
 
 The Virtual World Framework (VWF) can be run on both Windows and Linux. 
 
-There are two options for running VWF on Windows: the self-contained version and using Cygwin. 
-
-The simplest way is to run the self-contained version. Download and extract the contents of the VWF.zip file. Double click 'run.bat' in the extracted folder. 
-
-Linux requires setting up a ruby server environment. 
+Windows
+==============
+There are two options for running VWF on Windows: 
+	
+*   Simple (Automatic Version) The simplest way is to run the self-contained version. Download and extract the contents of the VWF.zip file. Double click 'run.bat' in the extracted folder. 
+*   Hands on - Install the Ruby Server
 
 * * *
  
@@ -155,10 +156,15 @@ Now you can install the RubyGems to the system (as root):
 	
 * * *
 
+Build the Server
+-----------------
+
+    # bundle exec rake build
+
 Launch the Server
 -----------------
 
-	# bin/thin start
+	# bundle exec thin start
 	
 * * *
 

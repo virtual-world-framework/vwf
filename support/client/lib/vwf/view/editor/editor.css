@@ -2,14 +2,6 @@
 	position:relative;
 }
 
-.eImg {
-	width:100%;
-	text-align:right;
-	position:absolute;
-	top:-10px;
-	pointer-events:none;
-}
-
 .uiContainer {
 	text-align:right;
 	position:absolute;
@@ -83,6 +75,10 @@ form
 	margin:0px;
 }
 
+textarea:focus, input:focus{
+    outline: none;
+}
+
 .header 
 {
 	font:16pt Arial;
@@ -134,6 +130,54 @@ form
 	padding-right:10px;
 }
 
+.scriptEntry 
+{
+	padding-left:10px;
+	padding-right:10px;
+	height:90%;
+}
+
+.scriptCode
+{
+	height:100%;
+}
+
+.scriptEdit
+{
+	width:99%;
+	height:99%;
+	color:white;
+	background-color:#1F497D;
+	border: 1px solid #153255;
+}
+
+.scriptCode textarea:focus
+{
+	border: 1px solid #153255;
+}
+
+.scriptEdit::-webkit-scrollbar {
+    height:12px;
+	width:12px;
+	background:#1B456F;
+}
+.scriptEdit::-webkit-scrollbar-thumb {
+    background:#153255;
+    -webkit-border-radius: 0.8ex;
+}
+.scriptEdit::-webkit-scrollbar-corner {
+    background: #153255;
+}
+
+.update_button
+{
+	width:100%;
+	font:10pt Arial;
+	padding:2px;
+	color:white;
+	background:#153255;
+}
+
 /* TIMELINE */
 .rate.slider {
 	display: inline-block;
@@ -150,3 +194,11 @@ form
 
 .about a:visited {
 	color:white;
+}
+
+.modelEntry {
+	font:10pt Arial;
+	font-weight:bold;
+	padding-left:10px;
+	padding-right:10px;
+}

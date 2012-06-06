@@ -15,21 +15,6 @@
 
 define( [ "module", "vwf/view" ], function( module, view ) {
 
-    // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
-    // is active, scripts on the main page may make (reflected) kernel calls:
-
-    //     window.vwf_view.createNode( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childName, function( childID ) {
-    //         ...
-    //     } );
-
-    // And receive view calls:
-
-    //     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childName, callback /* ( ready ) */ ) {
-    //         ...
-    //     }
-
     return view.load( module, {
 
         initialize: function( rootSelector ) {
@@ -38,6 +23,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.rootSelector = rootSelector;
             this.canvasQuery = undefined;
  
+            this.lastPick = undefined;
             this.keyStates = { keysDown: {}, mods: {} };
 
             this.height = 600;
@@ -55,7 +41,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childName, callback /* ( ready ) */) {
+            childSource, childType, childURI, childName, callback /* ( ready ) */) {
 
             if (childExtendsID === undefined /* || childName === undefined */)
                 return;
@@ -200,9 +186,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     // GLGE private functions
     // -- initScene ------------------------------------------------------------------------
-	var lastPick;
     function initScene( sceneNode ) {
 	
+        var self = this;
 		var requestAnimFrame, cancelAnimFrame;
 		(function() {
 			var lastTime = 0;
@@ -236,13 +222,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 				cancelAnimFrame = window.cancelAnimationFrame;
 			}
 		}());
-
+        
 		var lastPickTime = 0;
         function renderScene(time) {
 			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
 			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
-				lastPick = mousePick.call( this, mouse, sceneNode );
+                var newPick = mousePick.call( this, mouse, sceneNode );
+                if(newPick) {
+    				self.lastPick = newPick;
+                }
 				oldMouseX = mouse.getMousePosition().x;
 				oldMouseY = mouse.getMousePosition().y;
 				lastPickTime = time;
@@ -314,9 +303,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var mouse = new GLGE.MouseInput( sceneCanvas );
         var mouseOverCanvas = false;
 
+        var self = this;
+
         var getEventData = function( e, debug ) {
             var returnData = { eventData: undefined, eventNodeData: undefined };
-            var pickInfo = lastPick;
+            var pickInfo = self.lastPick;
             pointerPickID = undefined;
 
             glgeActualObj = pickInfo ? pickInfo.object : undefined;
@@ -506,7 +497,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         }
                     }
                 }
-
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
             pointerDownID = undefined;
@@ -558,22 +548,46 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             mouseOverCanvas = false;
         }
 
-        canvas.onmousewheel = function( e ) {
-            var eData = getEventData( e, false );
-            if ( eData ) {
-                eData.eventNodeData[""][0].wheel = {
-                    delta: e.wheelDelta,
-                    deltaX: e.wheelDeltaX,
-                    deltaY: e.wheelDeltaY,
-                };
-                var id = sceneID;
-                if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
-                    id = pointerDownID;
-                else if ( pointerOverID )
-                    id = pointerOverID; 
-                    
-                sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
-            }
+        canvas.setAttribute("onmousewheel", '');
+        if(typeof canvas.onmousewheel == "function") {
+            canvas.removeAttribute("onmousewheel");
+            canvas.onmousewheel = function( e ) {
+                var eData = getEventData( e, false );
+                if ( eData ) {
+                    eData.eventNodeData[""][0].wheel = {
+                        delta: e.wheelDelta,
+                        deltaX: e.wheelDeltaX,
+                        deltaY: e.wheelDeltaY,
+                    };
+                    var id = sceneID;
+                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                        id = pointerDownID;
+                    else if ( pointerOverID )
+                        id = pointerOverID; 
+                        
+                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+                }
+            };
+        }
+        else {
+            canvas.removeAttribute("onmousewheel");
+            canvas.addEventListener('DOMMouseScroll', function( e ) {
+                var eData = getEventData( e, false );
+                if ( eData ) {
+                    eData.eventNodeData[""][0].wheel = {
+                        delta: e.detail * -40,
+                        deltaX: e.detail * -40,
+                        deltaY: e.detail * -40,
+                    };
+                    var id = sceneID;
+                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                        id = pointerDownID;
+                    else if ( pointerOverID )
+                        id = pointerOverID; 
+                        
+                    sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
+                }
+            });
         }
 
         // == Draggable Content ========================================================================
@@ -590,6 +604,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
+            sceneCanvas.mouseX=e.clientX;
+            sceneCanvas.mouseY=e.clientY;
             var eData = getEventData( e, false );
             if ( eData ) {
                 e.dataTransfer.dropEffect = "copy";
@@ -600,132 +616,55 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- drop ---------------------------------------------------------------------------------
 
         canvas.ondrop = function( e ) {
-            var eData = getEventData( e, false );
-            if ( eData ) {
-            
-                var object, match, fn;
-                var files = e.dataTransfer.files;
-                var file = files[0];
-                var ext = (/[.]/.exec(file.name)) ? /[^.]+$/.exec(file.name) : undefined;
 
-                switch ( ext[0].toLowerCase() ) {
-                    case "dae":
+            e.preventDefault();
+            var eData = getEventData( e, false );
+
+            if ( eData ) {
+
+                var fileData, fileName, fileUrl, match, object;
+
+                try {
+
+                    fileData = JSON.parse( e.dataTransfer.getData('text/plain') );
+                    fileName = decodeURIComponent(fileData.fileName);
+                    fileUrl = decodeURIComponent(fileData.fileUrl);
+
+                    if ( match = fileUrl.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+
+                        object = {
+                          extends: match[1],
+                          properties: { 
+                            translation: eData.eventNodeData[""][0].globalPosition,
+                            scale: [ 1, 1, 1 ],
+                          },
+                        };
+
+                        fileName = fileName.replace( /\.(json|yaml)$/i, "" );
+
+                    } else if ( match = fileUrl.match( /\.dae$/i ) ) { // assignment is intentional
+
                         object = {
                           extends: "http://vwf.example.com/node3.vwf",
-                          source: file.name,
+                          source: fileUrl,
                           type: "model/vnd.collada+xml",
                           properties: { 
                             translation: eData.eventNodeData[""][0].globalPosition,
+                            scale: [ 1, 1, 1 ],
                           },   
                         };
 
-                        switch ( file.name ) { // hack it since setting this data through components isn't working
+                    }
 
-                            case "blackhawk.dae": // from cityblock
-                                object.properties.rotation = [ 1, 0, 0, 0 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
+                    if ( object ) {
+                        sceneView.kernel.createChild( "index-vwf", fileName, object, undefined );                
+                    }
 
-                            case "blackhawkGW.dae": // from sandtable
-                                object.properties.translation[2] += 20;
-                                object.properties.rotation = [ 1, 0, 0, 0 ];
-                                object.properties.scale = [ 2, 2, 2 ];
-                                break;
-
-                            case "Predator.dae": // from sandtable
-                                object["implements"] = [ "http://vwf.example.com/fly.vwf" ];
-                                object.properties.translation[2] += 20;
-                                object.properties.rotation = [ 0, 0, 1, 180 ];
-                                object.properties.scale = [ 15, 15, 15 ];
-                                break;
-
-                            case "apache.DAE": // from sandtable
-                                object.properties.translation[2] += 40;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "awac.DAE": // from sandtable
-                                object.properties.translation[2] += 100;
-                                object.properties.rotation = [ 1, 0, 0, 90  ];
-                                object.properties.scale = [ 0.5, 0.5, 0.5 ];
-                                break;
-
-                            case "blackhawk.DAE": // from sandtable
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "cobra.DAE": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "f117.DAE": // from sandtable
-                                object.properties.translation[2] += 40;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "humvee.dae": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "lmtv.dae": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            case "mlrs.DAE": // from sandtable
-                                object.properties.translation[2] += 50;
-                                object.properties.rotation = [ 1, 0, 0, 90 ];
-                                object.properties.scale = [ 0.2, 0.2, 0.2 ];
-                                break;
-
-                            default:
-
-                                if ( match = file.name.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
-
-                                    object = {
-                                      extends: match[1],
-                                      properties: { 
-                                        translation: eData.eventNodeData[""][0].globalPosition,
-                                      },
-                                      scripts: [
-                                          "this.initialize = function() { this.rotation = this.rotation ; this.scale = this.scale }"
-                                      ]
-                                    };
-
-                                } else if ( match = file.name.match( /\.dae$/i ) ) { // assignment is intentional
-
-                                    object.properties.scale = [ 1, 1, 1 ];
-
-                                } else {
-
-                                     object = undefined;
-                                }
-
-                                break;
-
-                        }
-                        if ( object ) {
-                            sceneView.kernel.createNode( "index-vwf", object, file.name, undefined );
-                        }
-                        break;
-                    case "yaml":
-                        fn = file.name.substr( 0, file.name.length - 5 );
-                        sceneView.kernel.createNode( "index-vwf", fn, fn, undefined );                
-                        break;
+                } catch ( e ) {
+                    // TODO: invalid JSON
                 }
-                
 
             }
-
-            e.preventDefault();            
         };
          
     };
@@ -772,14 +711,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
         var objectIDFound = -1;
-            
+        var self = this;    
+
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
                 this.logger.info("====>>>  vwf.view-glge.mousePick: searching for: " + path.call(this,objectToLookFor) );
             }
             jQuery.each( this.state.nodes, function (nodeID, node) {
                 if ( node.glgeObject == objectToLookFor && !node.glgeMaterial ) {
-                    if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
+                    if ( debug ) { self.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
             });

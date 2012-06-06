@@ -32,7 +32,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingNode -----------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childName, callback /* ( ready ) */ ) {
+            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
             if ( childSource && childType == "application/vnd.unity" ) {
 
@@ -92,9 +92,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }, 15000 );
 
                         setTimeout( function() { // TODO: horrible hack to work around timing problems for testing
-                            this.createNode( 0, { extends: "http://vwf.example.com/node3.vwf" }, "RedCube" );
-                            this.createNode( 0, { extends: "http://vwf.example.com/node3.vwf" }, "GreenCube" );
-                            this.createNode( 0, { extends: "http://vwf.example.com/node3.vwf" }, "infusion_pump_door" );
+                            this.createChild( 0, "RedCube", { extends: "http://vwf.example.com/node3.vwf" } );
+                            this.createChild( 0, "GreenCube", { extends: "http://vwf.example.com/node3.vwf" } );
+                            this.createChild( 0, "infusion_pump_door", { extends: "http://vwf.example.com/node3.vwf" } );
                         }, 16000 );
 
                         setTimeout( function() { // TODO: horrible hack to work around timing problems for testing

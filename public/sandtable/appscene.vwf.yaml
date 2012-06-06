@@ -191,11 +191,12 @@ scripts:
           
           faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
           
-          line.properties.meshDefinition.positions = pos;
-          line.properties.meshDefinition.faces = faces;
-          line.properties.meshDefinition.color = this.lineColor;
+          var newLine = $.extend(true, {}, line);
+          newLine.properties.meshDefinition.positions = pos;
+          newLine.properties.meshDefinition.faces = faces;
+          newLine.properties.meshDefinition.color = this.lineColor;
           
-          this.children.create(line, "line"+lineIndex);
+          this.children.create("line"+lineIndex, newLine);
           this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
           lineIndex++;
           
@@ -221,7 +222,7 @@ scripts:
           pushpin.source = "models/pushPinYellow.dae";
         
         var name = "pushpin"+pushpinIndex;
-        this.children.create(pushpin, name);
+        this.children.create(name, pushpin);
         this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+name );
         pushpinIndex++;        
         
@@ -285,7 +286,7 @@ scripts:
       cube.properties.meshDefinition.faces = faces;
       cube.properties.meshDefinition.color = color;
       
-      this.children.create(cube, "cube"+cubeIndex);
+      this.children.create("cube"+cubeIndex, cube);
       if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cube"+cubeIndex );
       cubeIndex++;
     }
@@ -352,7 +353,7 @@ scripts:
       line.properties.meshDefinition.faces = faces;
       line.properties.meshDefinition.color = color;
       
-      this.children.create(line, "line"+lineIndex);
+      this.children.create("line"+lineIndex, line);
       if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
       lineIndex++;    
     }
@@ -382,7 +383,7 @@ scripts:
       cone.properties.meshDefinition.faces = faces;
       cone.properties.meshDefinition.color = color;
       
-      this.children.create(cone, "cone"+coneIndex);
+      this.children.create("cone"+coneIndex, cone);
       if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cone"+coneIndex );
       coneIndex++; 
     } //@ sourceURL=appScene.vwf

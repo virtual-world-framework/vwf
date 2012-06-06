@@ -12,7 +12,6 @@
     <script type="text/javascript" src="../lib/async.js"></script>
 
     <script type="text/javascript" src="../lib/vwf.js"></script>
-    <script type="text/javascript" src="../lib/vwf-view.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
 
@@ -31,6 +30,7 @@
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
+        "vwf/utility",
         "logger",
 
       ], function( ready ) {
@@ -309,7 +309,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createNode( 0, {
+            vwf.createChild( 0, unique_name( "node" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -327,7 +327,7 @@
                 "this.parameters = this.events.add( function() { this.test.event = 'parameters'; this.test.result = Array.prototype.slice.call( arguments ) }, this )",
               ],
 
-            }, unique_name( "node" ), function( nodeID ) {
+            }, function( nodeID ) {
 
                 callback( nodeID );
 
@@ -341,28 +341,28 @@
 
             // Prototype for the nodes.
 
-            vwf.createNode( 0, {
+            vwf.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
               events: { base: undefined },
 
-            }, unique_name( "base" ), function( baseID ) {
+            }, function( baseID ) {
 
               // Parent node.
 
-              vwf.createNode( 0, {
+              vwf.createChild( 0, unique_name( "parent" ), {
 
-                extends: "@" + JSON.stringify( baseID ),
+                extends: baseID,
 
-              }, unique_name( "parent" ), function( parentID ) {
+              }, function( parentID ) {
 
                 // Child node.
 
-                vwf.createNode( parentID, {
+                vwf.createChild( parentID, unique_name( "child" ), {
 
-                  extends: "@" + JSON.stringify( baseID ),
+                  extends: baseID,
 
-                }, unique_name( "child" ), function( childID ) {
+                }, function( childID ) {
 
                   callback( parentID, childID, baseID );
 
@@ -378,21 +378,21 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( 0, {
+            vwf.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
               events: { base: undefined },
               scripts: [ ],
 
-            }, unique_name( "base" ), function( baseID ) {
+            }, function( baseID ) {
 
-              vwf.createNode( 0, {
+              vwf.createNode( {
 
-                extends: "@" + JSON.stringify( baseID ),
+                extends: baseID,
                 events: { derived: undefined },
                 scripts: [ ],
 
-              }, unique_name( "derived" ), function( derivedID ) {
+              }, function( derivedID ) {
 
                 callback( derivedID, baseID );
 

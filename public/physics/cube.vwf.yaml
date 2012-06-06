@@ -26,3 +26,4 @@ properties:
     linVelocityDamping: [ 1, 1, 1, 0 ]
     restitution: 0.1
     friction: 0.5
+    private: null

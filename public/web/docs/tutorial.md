@@ -197,7 +197,7 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	      pushpin.properties.translation = pickInfo.globalPosition;
 
 	      var name = "pushpin"+pushpinIndex;
-	      this.children.create( pushpin, name );
+	      this.children.create( name, pushpin );
 	      pushpinIndex++;
 	    }
 	  }

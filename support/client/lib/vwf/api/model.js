@@ -29,12 +29,13 @@ define( {
     /// @param {String[]} childImplementsIDs
     /// @param {String} childSource
     /// @param {String} childType 
+    /// @param {String} childURI
     /// @param {String} childName
     /// @param {Function} [callback]
     /// 
     /// @returns {} 
 
-    creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName, callback /- ( ready ) -/ */ ],
+    creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /- ( ready ) -/ */ ],
 
     /// Description.
     /// 
@@ -159,7 +160,7 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.model#creatingProperties
+    /// @name vwf.api.model#creatingProperty
     /// @function
     /// 
     /// @param {} 

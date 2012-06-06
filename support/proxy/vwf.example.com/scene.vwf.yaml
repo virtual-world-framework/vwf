@@ -69,5 +69,5 @@ scripts:
       return this.activeCameraComp;
     }
     this.load = function( obj, objName ){
-      this.children.create( obj, objName );
+      this.children.create( objName, obj );
     } //@ sourceURL=scene.vwf
