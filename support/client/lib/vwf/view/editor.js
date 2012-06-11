@@ -595,30 +595,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
         }
 
-        // Add node behaviors
-        $(topdownTemp).append("<div id='behaviors'></div>");
-        for ( var i = 0; i < node.implementsIDs.length; i++ ) {
-            $('#behaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
-
-            /* 
-            //Placeholder to Enable/Disable behaviors
-            $('#' + node.implementsID[i] + '-enable').change( function(evt) {
-            
-            }); 
-            */
-        }
-
-        $('#behaviors hr:last').css('height', '3px');
-
-        // Add prototype behaviors
-        $(topdownTemp).append("<div id='prototypeBehaviors'></div>");
-        var prototypeNode = this.nodes[ node.extendsID ];
-        for ( var i=0; i < prototypeNode.implementsIDs.length; i++)
-        {
-            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeNode.implementsIDs[i] + "</b></td><td><input id='" + prototypeNode.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
-        }
-
-        $('#prototypeBehaviors hr:last').css('height', '3px');
+        // Create new script
+        $(topdownTemp).append("<div id='createScript'></div>");
+        $('#createScript').append("<div class='childContainer'><div class='childEntry'><b>New Script</div><hr style='height:3px'></div>");
+        $('#createScript').click( function (evt) {
+            createScript.call(self, nodeID);
+        });
 
         // Add node scripts
         $(topdownTemp).append("<div id='scripts'></div>");
@@ -657,6 +639,31 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         $('#prototypeScripts hr:last').css('height', '3px');
+
+        // Add node behaviors
+        $(topdownTemp).append("<div id='behaviors'></div>");
+        for ( var i = 0; i < node.implementsIDs.length; i++ ) {
+            $('#behaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
+
+            /* 
+            //Placeholder to Enable/Disable behaviors
+            $('#' + node.implementsID[i] + '-enable').change( function(evt) {
+            
+            }); 
+            */
+        }
+
+        $('#behaviors hr:last').css('height', '3px');
+
+        // Add prototype behaviors
+        $(topdownTemp).append("<div id='prototypeBehaviors'></div>");
+        var prototypeNode = this.nodes[ node.extendsID ];
+        for ( var i=0; i < prototypeNode.implementsIDs.length; i++)
+        {
+            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeNode.implementsIDs[i] + "</b></td><td><input id='" + prototypeNode.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
+        }
+
+        $('#prototypeBehaviors hr:last').css('height', '3px');
 
         // Add node properties
         $(topdownTemp).append("<div id='properties'></div>");
@@ -855,6 +862,49 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         $('#prototypeEvents hr:last').css('height', '3px');
     }
 
+    // -- createScript ----------------------------------------------------------------------
+
+    function createScript (nodeID) // invoke with the view as "this"
+    {
+        var self = this;
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
+        var allScripts = this.allScripts;
+
+        this.editingScript = true;
+        
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeID + "-back' alt='back'/> script</div>");
+        jQuery('#script-' + nodeID + '-back').click ( function(evt) {
+            self.editingScript = false;
+            var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
+            drillBack.call(self, id);
+
+            // Return editor to normal width
+            $('#editor').animate({ 'left' : "-260px" }, 175);
+            $('.vwf-tree').animate({ 'width' : "260px" }, 175);
+        });
+
+        $(topdownTemp).append("<div class='scriptEntry'><pre class='scriptCode'><textarea id='newScriptArea' class='scriptEdit' spellcheck='false' wrap='off'></textarea></pre><input class='update_button' type='button' id='create-" + nodeID + "' value='Create' /></div><hr>");
+        $("#create-" + nodeID).click ( function(evt) {
+            var id = $(this).attr("id").substring(7);
+            self.kernel.execute( id, $("#newScriptArea").val() );
+        });
+        jQuery('#newScriptArea').focus( function(evt) { 
+            // Expand the script editor
+            $('#editor').animate({ 'left' : "-500px" }, 175);
+            $('.vwf-tree').animate({ 'width' : "500px" }, 175);
+        });
+        jQuery('#newScriptArea').keydown( function(evt) { 
+            evt.stopPropagation();
+        });
+
+        $(topdownName).hide();
+        $(topdownTemp).show();
+        
+        this.topdownName = topdownTemp;
+        this.topdownTemp = topdownName;
+    }
+
     // -- viewScript ------------------------------------------------------------------------
 
     function viewScript (nodeID, scriptID, extendsID) // invoke with the view as "this"
@@ -894,7 +944,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $('#editor').animate({ 'left' : "-500px" }, 175);
                 $('.vwf-tree').animate({ 'width' : "500px" }, 175);
             });
-            jQuery('#scriptTextArea').change( function(evt) { 
+            jQuery('#scriptTextArea').keydown( function(evt) { 
                 evt.stopPropagation();
             });
         }
