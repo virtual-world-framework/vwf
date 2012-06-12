@@ -47,8 +47,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             this.clientList = '#client_list';
             this.timeline = '#time_control';
             this.about = '#about_tab';
-            this.models = '#model_tab';
+            this.models = '#model_a';
+            this.modelsTemp = '#model_b';
             this.currentNodeID = '';
+            this.currentModelID = '';
+            this.currentModelURL = '';
             
             jQuery('body').append(
                 "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
@@ -57,7 +60,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='time_control'></div></div></div>" +
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='about_tab'></div></div></div>" +
-                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_tab'></div></div></div>"
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_a'></div></div></div>" +
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_b'></div></div></div>"
             );
             
             $('#tabs').stop().animate({ opacity:0.0 }, 0);
@@ -103,7 +107,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             $('#client_list').hide();
             $('#time_control').hide();
             $('#about_tab').hide();
-            $('#model_tab').hide();
+            $('#model_a').hide();
+            $('#model_b').hide();
             
             var canvas = document.getElementById("index-vwf");
             if ( canvas ) {
@@ -112,7 +117,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 $('#client_list').height(canvas.height);
                 $('#time_control').height(canvas.height);
                 $('#about_tab').height(canvas.height);
-                $('#model_tab').height(canvas.height);
+                $('#model_a').height(canvas.height);
+                $('#model_b').height(canvas.height);
             }
             else
             {    
@@ -121,7 +127,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 $('#client_list').height(window.innerHeight-20);
                 $('#time_control').height(window.innerHeight-20);
                 $('#about_tab').height(window.innerHeight-20);
-                $('#model_tab').height(window.innerHeight-20);
+                $('#model_a').height(window.innerHeight-20);
+                $('#model_b').height(window.innerHeight-20);
             }
         },
         
@@ -348,6 +355,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.timeline).hide();
                 $(this.about).hide();
                 $(this.models).hide();
+                $(this.modelsTemp).hide();
                 showUserList.call(this);
             }
 
@@ -359,6 +367,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.clientList).hide();
                 $(this.about).hide();
                 $(this.models).hide();
+                $(this.modelsTemp).hide();
                 showTimeline.call(this);
             }
 
@@ -370,18 +379,36 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.clientList).hide();
                 $(this.timeline).hide();
                 $(this.models).hide();
+                $(this.modelsTemp).hide();
                 showAboutTab.call(this);
             }
 
             // Models
             else if(eView == 5)
             {
+                var models = this.models;
+                var modelsTemp = this.modelsTemp;
+
+                showModelsTab.call(this, this.currentModelID, this.currentModelURL);
                 $(this.topdownName).hide();
                 $(this.topdownTemp).hide();
                 $(this.clientList).hide();
                 $(this.timeline).hide();
                 $(this.about).hide();
-                showModelsTab.call(this);
+
+                if(this.editorOpen)
+                {
+                    $(models).hide();
+                    $(modelsTemp).show();
+                }
+
+                else
+                {                
+                    $(modelsTemp).show('slide', {direction: 'right'}, 175);    
+                }
+
+                this.models = modelsTemp;
+                this.modelsTemp = models;
             }
 
 
@@ -1299,42 +1326,127 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
     //  -- showModelsTab ----------------------------------------------------------------------
 
-    function showModelsTab() // invoke with the view as "this"
+    function showModelsTab(modelID, modelURL) // invoke with the view as "this"
+    {
+        var self = this;
+        var models = this.models;
+        var modelsTemp = this.modelsTemp;
+        this.currentModelID = modelID;
+        this.currentModelURL = modelURL;
+
+        $(models).html("");
+        
+        if(modelID == "") {
+            $(modelsTemp).html("<div class='header'>Models</div>");
+
+            $.getJSON("admin/models", function( data ) {
+                $.each( data, function( key, value ) {
+                    var fileName = encodeURIComponent(value['basename']);
+                    var divId = fileName;
+                    if(divId.indexOf('.') != -1) {
+                        divId = divId.replace(/\./g, "_");
+                    }
+                    var url = value['url'];
+
+                    $(modelsTemp).append("<div class='childContainer'><div id='" + divId + "' class='modelEntry' data-url='" + url + "'>"
+                        + fileName + "</div><hr></div>");
+                    $("#" + divId).click(function(e) {
+                        modelDrillDown.call(self, e.target.textContent, e.target.getAttribute("data-url"));
+                    })
+                });
+            } );
+        }
+        else {
+            var divId = modelID;
+            if(divId.indexOf('.') != -1) {
+                divId = divId.replace(/\./g, "_");
+            }
+            $(modelsTemp).html("<div id='" + divId + "-backDiv' class='header'><img src='images/back.png' id='" + divId + "-back' alt='back'/>" + modelID + "</div>");
+            $("#" + divId + "-back").click(function(e) {
+                modelDrillUp.call(self, '');
+            });
+
+            $(modelsTemp).append("<div id='" + divId + "-rotation' class='propEntry'><table><tr><td><b>Rotation</b></td><td>" +
+                "<input type='text' class='input_text' id='input-" + divId + "-rotation' value='[1,0,0,0]'></td></tr></table></div><hr>");
+            $('#input-' + divId + '-rotation').keydown( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-rotation').keypress( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-rotation').keyup( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $(modelsTemp).append("<div id='" + divId + "-scale' class='propEntry'><table><tr><td><b>Scale</b></td><td>" +
+                "<input type='text' class='input_text' id='input-" + divId + "-scale' value='[1,1,1]'></td></tr></table></div><hr>");
+            $('#input-' + divId + '-scale').keydown( function(evt) {
+                    evt.stopPropagation();
+                });
+            $('#input-' + divId + '-scale').keypress( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-scale').keyup( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $(modelsTemp).append("<div id='" + divId + "-translation' class='propEntry'><table><tr><td><b>Translation Offset</b></td><td>" +
+                "<input type='text' class='input_text' id='input-" + divId + "-translation' value='[0,0,0]'></td></tr></table></div><hr>");
+            $('#input-' + divId + '-translation').keydown( function(evt) {
+                    evt.stopPropagation();
+                });
+            $('#input-' + divId + '-translation').keypress( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-translation').keyup( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $(modelsTemp).append("<div><div id='" + divId + "-drag' class='modelEntry' draggable='true' data-escaped-name='" + divId +"' data-url='" + modelURL + "'>Drag onto canvas to create</div><hr></div>");
+
+            $("#" + divId + "-drag").on("dragstart", function (e) {
+                var fileName = $("#" + e.target.getAttribute("data-escaped-name") + "-backDiv").text();
+                var rotation = encodeURIComponent($("#input-" + e.target.getAttribute("data-escaped-name") + "-rotation").val());
+                var scale = encodeURIComponent($("#input-" + e.target.getAttribute("data-escaped-name") + "-scale").val());
+                var translation = encodeURIComponent($("#input-" + e.target.getAttribute("data-escaped-name") + "-translation").val());
+                var fileData = "{\"fileName\":\""+fileName+"\", \"fileUrl\":\""+e.target.getAttribute("data-url")+"\", " +
+                    "\"rotation\":\"" + rotation + "\", \"scale\":\"" + scale + "\", \"translation\":\"" + translation + "\"}";
+                e.originalEvent.dataTransfer.setData('text/plain', fileData);
+                e.originalEvent.dataTransfer.setDragImage(e.target, 0, 0);
+                return true;
+            });
+        }
+    }
+
+    // -- Model drillDown -------------------------------------------------------------------------
+
+    function modelDrillDown(modelID, modelURL) // invoke with the view as "this"
     {
         var models = this.models;
-        if(!this.modelsInit) {
-            $(models).append("<div class='header'>Models</div>");
-            this.modelsInit = true;
-        }
-        else {
-            $(models+' .childContainer').remove();
-        }
+        var modelsTemp = this.modelsTemp;
+        
+        showModelsTab.call(this, modelID, modelURL);
+        
+        if(modelID != "") $(models).hide('slide', {direction: 'left'}, 175); 
+        $(modelsTemp).show('slide', {direction: 'right'}, 175);    
+        
+        this.models = modelsTemp;
+        this.modelsTemp = models;
+    }
+    
+    // -- Model drillUp ---------------------------------------------------------------------------
 
-        $.getJSON("admin/models", function( data ) {
-            $.each( data, function( key, value ) {
-                var fileName = encodeURIComponent(value['basename']);
-                var divId = fileName;
-                if(divId.indexOf('.') != -1) {
-                    divId = divId.replace(/\./g, "_");
-                }
-                var url = value['url'];
-
-                $(models).append("<div><div id='" + divId + "' class='modelEntry' draggable='true' data-url='" + url + "'>"
-                    + fileName + "</div><hr></div>");
-                $("#" + divId).on("dragstart", function (e) {
-                    var fileData = "{\"fileName\":\""+e.target.textContent+"\", \"fileUrl\":\""+e.target.getAttribute("data-url")+"\"}";
-                    e.originalEvent.dataTransfer.setData('text/plain', fileData);
-                    e.originalEvent.dataTransfer.setDragImage(e.target, 0, 0);
-                    return true;
-                });
-            });
-        } );
-
-        if(!this.editorOpen) {
-            $(models).show('slide', {direction: 'right'}, 175);
-        }
-        else {
-            $(models).show();
-        }
+    function modelDrillUp(modelID) // invoke with the view as "this"
+    {
+        var models = this.models;
+        var modelsTemp = this.modelsTemp;
+        
+        showModelsTab.call(this, modelID);
+        
+        $(models).hide('slide', {direction: 'right'}, 175); 
+        $(modelsTemp).show('slide', {direction: 'left'}, 175);    
+        
+        this.models = modelsTemp;
+        this.modelsTemp = models;
     }
 } );
