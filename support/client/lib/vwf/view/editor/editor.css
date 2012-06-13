@@ -202,3 +202,17 @@ textarea:focus, input:focus{
 	padding-left:10px;
 	padding-right:10px;
 }
+
+.drag {
+	padding-top:5px;
+	padding-bottom:5px;
+	border-style:solid;
+	border-width:medium;
+	border-color: #153255;
+	text-align: center;
+}
+
+.drag:hover {
+	cursor: move;
+	background-color: #4C6D97;
+}
