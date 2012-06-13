@@ -1391,7 +1391,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
 
             $(modelsTemp).append("<div id='" + divId + "-translation' class='propEntry'><table><tr><td><b>Translation Offset</b></td><td>" +
-                "<input type='text' class='input_text' id='input-" + divId + "-translation' value='[0,0,0]'></td></tr></table></div><hr>");
+                "<input type='text' class='input_text' id='input-" + divId + "-translation' value='[0,0,0]'></td></tr></table></div>");
             $('#input-' + divId + '-translation').keydown( function(evt) {
                     evt.stopPropagation();
                 });
@@ -1402,7 +1402,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 evt.stopPropagation();
             });
 
-            $(modelsTemp).append("<div><div id='" + divId + "-drag' class='modelEntry' draggable='true' data-escaped-name='" + divId +"' data-url='" + modelURL + "'>Drag onto canvas to create</div><hr></div>");
+            $(modelsTemp).append("<div class='drag'><div id='" + divId + "-drag' class='modelEntry' draggable='true' data-escaped-name='" + divId +"' data-url='" + modelURL + "'>Drag To Create</div></div>");
 
             $("#" + divId + "-drag").on("dragstart", function (e) {
                 var fileName = $("#" + e.target.getAttribute("data-escaped-name") + "-backDiv").text();
