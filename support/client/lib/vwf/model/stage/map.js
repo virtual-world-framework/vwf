@@ -40,10 +40,6 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // == Kernel API ===========================================================================
 
-        // TODO: setState
-        // TODO: getState
-        // TODO: hashState
-
         // -- createNode ---------------------------------------------------------------------------
 
         createNode: function( nodeComponent, callback /* ( nodeID ) */ ) {
@@ -55,10 +51,6 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
         deleteNode: function( node ) {
             return this.kernel.deleteNode( this.model_to_kernel[this.object_id(node)] || node );
         },
-
-        // TODO: setNode
-        // TODO: getNode
-        // TODO: hashNode
 
         // -- createChild --------------------------------------------------------------------------
 
@@ -81,8 +73,29 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 this.model_to_kernel[this.object_id(child)] || child );
         },
 
-        // TODO: setProperties
-        // TODO: getProperties
+        // -- ancestors -------------------------------------------------------------------------------
+
+        ancestors: function( node ) {
+            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- parent -------------------------------------------------------------------------------
+
+        parent: function( node ) {
+            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- children -----------------------------------------------------------------------------
+
+        children: function( node ) {
+            return this.kernel.children( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- name ---------------------------------------------------------------------------------
+
+        name: function( node ) {
+            return this.kernel.name( this.model_to_kernel[this.object_id(node)] || node );
+        },
 
         // -- createProperty -----------------------------------------------------------------------
 
@@ -157,60 +170,6 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         time: function() {
             return this.kernel.time();
-        },
-
-        // -- client -------------------------------------------------------------------------------
-
-        client: function() {
-            return this.kernel.client();
-        },
-
-        // -- moniker ------------------------------------------------------------------------------
-
-        moniker: function() {
-            return this.kernel.moniker();
-        },
-
-        // -- prototype ----------------------------------------------------------------------------
-
-        prototype: function( node ) {
-            return this.kernel.prototype( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- prototypes ---------------------------------------------------------------------------
-
-        prototypes: function( node ) {
-            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- behaviors ----------------------------------------------------------------------------
-
-        behaviors: function( node ) {
-            return this.kernel.behaviors( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- ancestors ----------------------------------------------------------------------------
-
-        ancestors: function( node ) {
-            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- parent -------------------------------------------------------------------------------
-
-        parent: function( node ) {
-            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- children -----------------------------------------------------------------------------
-
-        children: function( node ) {
-            return this.kernel.children( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- name ---------------------------------------------------------------------------------
-
-        name: function( node ) {
-            return this.kernel.name( this.model_to_kernel[this.object_id(node)] || node );
         },
 
         // == Model API ============================================================================

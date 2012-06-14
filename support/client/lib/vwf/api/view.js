@@ -35,7 +35,7 @@ define( {
     /// 
     /// @returns {}
 
-    createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback( ready ) */ ],
+    createdNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /- ( ready ) -/ */ ],
 
     /// Description.
     /// 
@@ -219,5 +219,6 @@ define( {
     /// @returns {}
 
     ticked: [ /* time */ ],
+
 
 } );

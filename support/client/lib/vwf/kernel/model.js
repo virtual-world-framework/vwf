@@ -41,12 +41,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         switch ( kernelFunctionName ) {
 
-            // -- Read-write functions -------------------------------------------------------------
-
-            // TODO: setState
-            // TODO: getState
-            // TODO: hashState
-
             case "createNode":
 
                 return function( nodeComponent, when, callback /* ( nodeID ) */ ) {
@@ -82,9 +76,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     }
 
                 };
-
-            // TODO: setNode
-            // TODO: getNode
 
             case "createChild":
 
@@ -332,28 +323,16 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
 
-            // -- Read-only functions --------------------------------------------------------------
-
             case "time":
             case "client":
             case "moniker":
 
                 return function() {
-                    return this.kernel[kernelFunctionName]();
-                };
 
-            case "prototype":
-            case "prototypes":
-            case "behaviors":
+                    if ( this.state.enabled ) {
+                        return this.kernel[kernelFunctionName]();
+                    }
 
-            case "ancestors":
-            case "parent":
-            case "children":
-
-            case "name":
-
-                return function( nodeID ) {
-                    return this.kernel[kernelFunctionName]( nodeID );
                 };
 
         }
