@@ -37,16 +37,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             this.objects[childID] = {
 
-                name: childName,
-
                 id: childID,
-                extends: childExtendsID,
-                implements: childImplementsIDs,
+                uri: childURI,
 
+                name: childName,
                 source: childSource,
                 type: childType,
 
-                uri: childURI,
+                extends: childExtendsID,
+                implements: childImplementsIDs,
+
+                parent: undefined,
+                children: [],
 
                 properties: {},
 
@@ -75,25 +77,37 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
+
+            var child = this.objects[nodeID];
+            var object = child.parent;
+
+            if ( object ) {
+
+                var index = object.children.indexOf( child );
+
+                if ( index >= 0 ) {
+                    object.children.splice( index, 1 );
+                }
+
+                child.parent = undefined;
+
+            }
+
             delete this.objects[nodeID];
-        },
 
-        // -- prototyping --------------------------------------------------------------------------
-
-        prototyping: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].extends;
-        },
-
-        // -- behavioring --------------------------------------------------------------------------
-
-        behavioring: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].implements;
         },
 
         // -- addingChild --------------------------------------------------------------------------
 
-        // addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-        // },
+        addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
+
+            var object = this.objects[nodeID];
+            var child = this.objects[childID];
+
+            child.parent = object;
+            object.children.push( child );
+
+        },
 
         // -- removingChild ------------------------------------------------------------------------
 
@@ -158,19 +172,19 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
             return this.objects[nodeID].properties[propertyName];
         },
 
-        // -- name_source_type ---------------------------------------------------------------------
+        // -- intrinsics ---------------------------------------------------------------------------
 
-        name_source_type: function( nodeID, result ) {
-
-            result = result || {};
+        intrinsics: function( nodeID, result ) {
 
             var object = this.objects[nodeID];
 
-            if ( object ) {
-                result.name = object.name;
-                result.source = object.source;
-                result.type = object.type;
-            }
+            result = result || {};
+
+            result.id = object.id;
+            result.uri = object.uri;
+            result.name = object.name;
+            result.source = object.source;
+            result.type = object.type;
 
             return result;
         },
@@ -178,40 +192,58 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
         // -- uri ----------------------------------------------------------------------------------
 
         uri: function( nodeID ) {
+            return this.objects[nodeID].uri;
+        },
 
+        // -- name ---------------------------------------------------------------------------------
+
+        name: function( nodeID ) {
+            return this.objects[nodeID].name || "";
+        },
+
+        // -- prototype ----------------------------------------------------------------------------
+
+        prototype: function( nodeID ) {  // TODO: not for global anchor node 0
+            return this.objects[nodeID].extends;
+        },
+
+        // -- behaviors ----------------------------------------------------------------------------
+
+        behaviors: function( nodeID ) {  // TODO: not for global anchor node 0
+            return this.objects[nodeID].implements;
+        },
+
+        // -- parent -------------------------------------------------------------------------------
+
+        parent: function( nodeID ) {
             var object = this.objects[nodeID];
+            return object.parent && object.parent.id || 0;
+        },
 
-            if ( object ) {
-                return object.uri;
-            }
+        // -- children -----------------------------------------------------------------------------
 
-            return undefined;
+        children: function( nodeID ) {
+            return this.objects[nodeID].children.map( function( child ) {
+                return child.id;
+            } );
+        },
+
+        // -- exists -------------------------------------------------------------------------------
+
+        exists: function( nodeID ) {
+            return !! this.objects[nodeID];
         },
 
         // -- changed ------------------------------------------------------------------------------
 
         changed: function( nodeID ) {
-
-            var object = this.objects[nodeID];
-
-            if ( object ) {
-                return object.changed;
-            }
-
-            return undefined;
+            return this.objects[nodeID].changed;
         },
 
         // -- added --------------------------------------------------------------------------------
 
         added: function( nodeID ) {
-
-            var object = this.objects[nodeID];
-
-            if ( object ) {
-                return object.added;
-            }
-
-            return undefined;
+            return this.objects[nodeID].added;
         },
 
     } );

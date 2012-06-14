@@ -171,46 +171,58 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return this.kernel.moniker();
         },
 
-        // -- prototype ----------------------------------------------------------------------------
+        // -- intrinsics ---------------------------------------------------------------------------
 
-        prototype: function( node ) {
-            return this.kernel.prototype( this.model_to_kernel[this.object_id(node)] || node );
+        intrinsics: function( node, result ) {
+            return this.kernel.intrinsics( this.model_to_kernel[this.object_id(node)] || node, result );
         },
 
-        // -- prototypes ---------------------------------------------------------------------------
+        // -- uri ----------------------------------------------------------------------------------
 
-        prototypes: function( node ) {
-            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- behaviors ----------------------------------------------------------------------------
-
-        behaviors: function( node ) {
-            return this.kernel.behaviors( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- ancestors ----------------------------------------------------------------------------
-
-        ancestors: function( node ) {
-            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- parent -------------------------------------------------------------------------------
-
-        parent: function( node ) {
-            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- children -----------------------------------------------------------------------------
-
-        children: function( node ) {
-            return this.kernel.children( this.model_to_kernel[this.object_id(node)] || node );
+        uri: function( node ) {
+            return this.kernel.uri( this.model_to_kernel[this.object_id(node)] || node );
         },
 
         // -- name ---------------------------------------------------------------------------------
 
         name: function( node ) {
             return this.kernel.name( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- prototype ----------------------------------------------------------------------------
+
+        prototype: function( node ) {
+            return this.kernel.prototype( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- prototypes ---------------------------------------------------------------------------
+
+        prototypes: function( node ) {
+            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- behaviors ----------------------------------------------------------------------------
+
+        behaviors: function( node ) {
+            return this.kernel.behaviors( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- ancestors ----------------------------------------------------------------------------
+
+        ancestors: function( node ) {
+            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- parent -------------------------------------------------------------------------------
+
+        parent: function( node ) {
+            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- children -----------------------------------------------------------------------------
+
+        children: function( node ) {
+            return this.kernel.children( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
         },
 
         // == Model API ============================================================================
@@ -260,24 +272,6 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
         removingChild: function( nodeID, childID ) {
             return this.model.removingChild && this.model.removingChild(
                 this.kernel_to_model[nodeID] || nodeID, this.kernel_to_model[childID] || childID );
-        },
-
-        // -- parenting ----------------------------------------------------------------------------
-
-        parenting: function( nodeID ) {
-            return this.model.parenting && this.model.parenting( this.kernel_to_model[nodeID] || nodeID );
-        },
-
-        // -- childrening --------------------------------------------------------------------------
-
-        childrening: function( nodeID ) {
-            return this.model.childrening && this.model.childrening( this.kernel_to_model[nodeID] || nodeID );
-        },
-
-        // -- naming -------------------------------------------------------------------------------
-
-        naming: function( nodeID ) {
-            return this.model.naming && this.model.naming( this.kernel_to_model[nodeID] || nodeID );
         },
 
         // -- creatingProperty ---------------------------------------------------------------------

@@ -48,7 +48,7 @@ define( {
     /// @returns {}
 
     initializedNode: [ /* nodeID, childID */ ],
-   
+
     /// Description.
     /// 
     /// @name vwf.api.view#deletedNode
@@ -110,8 +110,8 @@ define( {
     /// @returns {}
 
     initializedProperty: [ /* nodeID, propertyName, propertyValue */ ],
-    
-    /* TODO: deletedProperty, */
+
+    // TODO: deletedProperty
 
     /// Description.
     /// 
@@ -136,7 +136,7 @@ define( {
     /// @param {Value} propertyValue
     /// 
     /// @returns {}
-    
+
     gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
 
     /// Description.
@@ -153,7 +153,7 @@ define( {
 
     createdMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
-    /* TODO: deletedMethod, */
+    // TODO: deletedMethod
 
     /// Description.
     /// 
@@ -181,7 +181,7 @@ define( {
 
     createdEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-    /* TODO: deletedEvent, */
+    // TODO: deletedEvent
 
     /// Description.
     /// 

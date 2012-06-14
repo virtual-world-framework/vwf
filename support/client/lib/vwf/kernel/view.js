@@ -162,6 +162,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     return this.kernel[kernelFunctionName]();
                 };
 
+            case "intrinsics":
+
+                return function( nodeID, result ) {
+                    return this.kernel[kernelFunctionName]( nodeID, result );
+                }            
+
+            case "uri":
+            case "name":
+
             case "prototype":
             case "prototypes":
             case "behaviors":
@@ -169,8 +178,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             case "ancestors":
             case "parent":
             case "children":
-
-            case "name":
 
                 return function( nodeID ) {
                     return this.kernel[kernelFunctionName]( nodeID );

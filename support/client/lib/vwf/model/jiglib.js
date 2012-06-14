@@ -163,21 +163,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         //removingChild: function( nodeID, childID, childName ) {
         //},
 
-        // -- parenting ----------------------------------------------------------------------------
-
-        //parenting: function( nodeID ) {
-        //},
-
-        // -- childrening --------------------------------------------------------------------------
-
-        //childrening: function( nodeID ) {
-        //},
-
-        // -- naming -------------------------------------------------------------------------------
-
-        //naming: function( nodeID ) {
-        //},
-
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {

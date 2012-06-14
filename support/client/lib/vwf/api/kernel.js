@@ -326,6 +326,54 @@ define( {
 
     moniker: [],
 
+    /// Return the node's intrinsic state. This consists of:
+    /// 
+    ///   id -- the nodeID
+    ///   uri -- the node's uri, also available as vwf.api.kernel#uri
+    ///   name -- the node's name, also available as vwf.api.kernel#name
+    ///   source -- the URI of the node's data blob
+    ///   type -- the MIME type of the node's data blob
+    /// 
+    /// The values are returned in an Object with the named properties. If the optional result
+    /// parameter is provided, the fields are added there (without disturbing any other fields) and
+    /// result is returned. Otherwise, a new object is created, filled, and returned.
+    /// 
+    /// @name vwf.api.kernel#intrinsics
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    ///   ID of the node to query.
+    /// @param {Object} [result]
+    ///   An optional Object to receive the result.
+    /// 
+    /// @returns {Object}
+
+    intrinsics: [ /* nodeID, result */ ],
+
+    /// Return the node's URI. This value will be the component URI for the root node of a component
+    /// loaded from a URI, and undefined in all other cases.
+    /// 
+    /// @name vwf.api.kernel#uri
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {String}
+
+    uri: [ /* nodeID */ ],
+
+    /// Name calls naming() on each model. The first model to return a non-undefined value dictates
+    /// the return value.
+    /// 
+    /// @name vwf.api.kernel#name
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {String}
+
+    name: [ /* nodeID */ ],
+
     /// Prototype calls prototyping() on each model. The first model to return a non-undefined value
     /// dictates the return value.
     /// 
@@ -394,17 +442,5 @@ define( {
     /// @returns {ID[]}
 
     children: [ /* nodeID */ ],
-
-    /// Name calls naming() on each model. The first model to return a non-undefined value dictates
-    /// the return value.
-    /// 
-    /// @name vwf.api.kernel#name
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {String}
-
-    name: [ /* nodeID */ ],
 
 } );

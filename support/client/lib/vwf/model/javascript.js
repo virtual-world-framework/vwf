@@ -83,6 +83,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             } );
 
 node.id = childID; // TODO: move to vwf/model/object
+node.uri = childURI; // TODO: move to vwf/model/object
 
             node.name = childName;
 
@@ -325,35 +326,6 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         },
 
         // TODO: removingChild
-
-        // -- parenting ----------------------------------------------------------------------------
-
-        parenting: function( nodeID ) {  // TODO: move to vwf/model/object
-
-            var node = this.nodes[nodeID];
-
-            return node.parent && node.parent.id || 0;
-        },
-
-        // -- childrening --------------------------------------------------------------------------
-
-        childrening: function( nodeID ) {  // TODO: move to vwf/model/object
-
-            var node = this.nodes[nodeID];
-
-            return jQuery.map( node.children, function( child ) {
-                return child.id;
-            } );
-        },
-
-        // -- naming -------------------------------------------------------------------------------
-
-        naming: function( nodeID ) {  // TODO: move to vwf/model/object
-
-            var node = this.nodes[nodeID];
-
-            return node.name || "";
-        },
 
         // -- settingProperties --------------------------------------------------------------------
 
