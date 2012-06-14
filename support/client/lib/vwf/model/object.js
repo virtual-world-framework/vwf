@@ -44,8 +44,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 source: childSource,
                 type: childType,
 
-                extends: childExtendsID,
-                implements: childImplementsIDs,
+                prototype: childExtendsID &&
+                    this.objects[childExtendsID],
+
+                behaviors: ( childImplementsIDs || [] ).map( function( childImplementsID ) {
+                    return this.objects[childImplementsID];
+                }, this ),
 
                 parent: undefined,
                 children: [],
@@ -204,13 +208,16 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
         // -- prototype ----------------------------------------------------------------------------
 
         prototype: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].extends;
+            var object = this.objects[nodeID];
+            return object.prototype && object.prototype.id;
         },
 
         // -- behaviors ----------------------------------------------------------------------------
 
         behaviors: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].implements;
+            return this.objects[nodeID].behaviors.map( function( behavior ) {
+                return behavior.id;
+            } );
         },
 
         // -- parent -------------------------------------------------------------------------------
