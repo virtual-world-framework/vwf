@@ -18,6 +18,10 @@
 
 define( {
 
+    // TODO: setState
+    // TODO: getState
+    // TODO: hashState
+
     /// Create a node from a component specification. Construction may require loading data from
     /// multiple remote documents. This function returns before construction is complete. A
     /// callback is invoked once the node has fully loaded. 
@@ -46,7 +50,7 @@ define( {
     /// 
     /// @returns {}
 
-    createNode: [ /* nodeComponent, callback /- ( nodeID ) -/ */ ],
+    createNode: [ /* nodeComponent, callback( nodeID ) */ ],
 
     /// Delete node will delete a node specified by the id given on each model and view.
     /// 
@@ -82,28 +86,7 @@ define( {
 
     getNode: [ /* nodeID */ ],
 
-    /// Prototype calls prototyping() on each model. The first model to return a non-undefined value
-    /// dictates the return value.
-    /// 
-    /// @name vwf.api.kernel#prototype
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {ID}
-
-    prototype: [ /* nodeID */ ],
-
-    /// Prototypes returns a list of all the prototype ids for a given node id.
-    /// 
-    /// @name vwf.api.kernel#prototypes
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {ID[]}
-
-    prototypes: [ /* nodeID */ ],
+    // TODO: hashNode
 
     /// @name vwf.api.kernel#createChild
     /// @function
@@ -115,7 +98,7 @@ define( {
     /// 
     /// @returns {}
 
-    createChild: [ /* nodeID, childName, childComponent, callback /- ( childID ) -/ */ ],
+    createChild: [ /* nodeID, childName, childComponent, callback( childID ) */ ],
 
     /// addChild calls addingChild() on each model. The child is considered added after each model has
     /// run.  Additionally, it calls addedChild() on each view. The view is being notified that a 
@@ -145,53 +128,6 @@ define( {
     /// @returns {}
 
     removeChild: [ /* nodeID, childID */ ],
-
-    /// Returns an array of node ids for all of the parents for the given child node id.
-    /// 
-    /// @name vwf.api.kernel#ancestors
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {ID[]}
-
-    ancestors: [ /* nodeID */ ],
-
-    /// Parent calls parenting() on each model. The first model to return a non-undefined value
-    /// dictates the return value.
-    /// 
-    /// @name vwf.api.kernel#parent
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {ID}
-
-    parent: [ /* nodeID */ ],
-
-    /// Children Calls childrening() on each model. The return value is the union of the non-undefined
-    /// results.
-    /// 
-    /// @name vwf.api.kernel#children
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {ID[]}
-
-    children: [ /* nodeID */ ],
-
-    /// Name calls naming() on each model. The first model to return a non-undefined value dictates
-    /// the return value.
-    /// 
-    /// @name vwf.api.kernel#name
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {String}
-
-    name: [ /* nodeID */ ],
 
     /// setProperties sets all of the properties for a node.  It will call settingProperties() 
     /// on each model and satProperties() on each view.
@@ -236,7 +172,7 @@ define( {
 
     createProperty: [ /* nodeID, propertyName, propertyValue, propertyGet, propertySet */ ],
 
-    /* TODO: deleteProperty, */
+    // TODO: deleteProperty
 
     /// setProperty setsa specific property value on a node.  It will call settingProperty() 
     /// on each model. The first model to return a non-undefined value has performed the
@@ -285,7 +221,7 @@ define( {
 
     createMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
-    /* TODO: deleteMethod, */
+    // TODO: deleteMethod
 
     /// It will call callingMethod() on each model. The first model to return a non-undefined value
     /// dictates the return value.  It will also call calledMethod() on each view.
@@ -316,7 +252,7 @@ define( {
 
     createEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-    /* TODO: deleteEvent, */
+    // TODO: deleteEvent
 
     /// It will call firingEvent() on each model and firedEvent() on each view.
     /// 
@@ -389,5 +325,122 @@ define( {
     /// @returns {String}
 
     moniker: [],
+
+    /// Return the node's intrinsic state. This consists of:
+    /// 
+    ///   id -- the nodeID
+    ///   uri -- the node's uri, also available as vwf.api.kernel#uri
+    ///   name -- the node's name, also available as vwf.api.kernel#name
+    ///   source -- the URI of the node's data blob
+    ///   type -- the MIME type of the node's data blob
+    /// 
+    /// The values are returned in an Object with the named properties. If the optional result
+    /// parameter is provided, the fields are added there (without disturbing any other fields) and
+    /// result is returned. Otherwise, a new object is created, filled, and returned.
+    /// 
+    /// @name vwf.api.kernel#intrinsics
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    ///   ID of the node to query.
+    /// @param {Object} [result]
+    ///   An optional Object to receive the result.
+    /// 
+    /// @returns {Object}
+
+    intrinsics: [ /* nodeID, result */ ],
+
+    /// Return the node's URI. This value will be the component URI for the root node of a component
+    /// loaded from a URI, and undefined in all other cases.
+    /// 
+    /// @name vwf.api.kernel#uri
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {String}
+
+    uri: [ /* nodeID */ ],
+
+    /// Name calls naming() on each model. The first model to return a non-undefined value dictates
+    /// the return value.
+    /// 
+    /// @name vwf.api.kernel#name
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {String}
+
+    name: [ /* nodeID */ ],
+
+    /// Prototype calls prototyping() on each model. The first model to return a non-undefined value
+    /// dictates the return value.
+    /// 
+    /// @name vwf.api.kernel#prototype
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {ID}
+
+    prototype: [ /* nodeID */ ],
+
+    /// Prototypes returns a list of all the prototype ids for a given node id.
+    /// 
+    /// @name vwf.api.kernel#prototypes
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {ID[]}
+
+    prototypes: [ /* nodeID */ ],
+
+    /// Behaviors returns a list of all the behavior ids for a given node id.
+    /// 
+    /// @name vwf.api.kernel#behaviors
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {ID[]}
+
+    behaviors: [ /* nodeID */ ],
+
+    /// Returns an array of node ids for all of the parents for the given child node id.
+    /// 
+    /// @name vwf.api.kernel#ancestors
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {ID[]}
+
+    ancestors: [ /* nodeID */ ],
+
+    /// Parent calls parenting() on each model. The first model to return a non-undefined value
+    /// dictates the return value.
+    /// 
+    /// @name vwf.api.kernel#parent
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {ID}
+
+    parent: [ /* nodeID */ ],
+
+    /// Children Calls childrening() on each model. The return value is the union of the non-undefined
+    /// results.
+    /// 
+    /// @name vwf.api.kernel#children
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {ID[]}
+
+    children: [ /* nodeID */ ],
 
 } );

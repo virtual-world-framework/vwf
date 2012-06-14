@@ -1259,7 +1259,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             var nodeComponent = {};
 
-            var nodeURI = this.models.object.uri( nodeID );
+            var nodeURI = this.uri( nodeID );
 
             if ( nodeURI ) {
                 nodeComponent.patches = nodeURI;
@@ -1293,10 +1293,11 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                 nodeComponent.implements.length || delete nodeComponent.implements;
 
-                this.models.object.name_source_type( nodeID, nodeComponent ); // get name, source, type
+                var intrinsics = this.intrinsics( nodeID ); // get name, source, type
 
-                nodeComponent.source === undefined && delete nodeComponent.source;
-                nodeComponent.type === undefined && delete nodeComponent.type;
+                if ( intrinsics.name !== undefined ) nodeComponent.name = intrinsics.name;
+                if ( intrinsics.source !== undefined ) nodeComponent.source = intrinsics.source;
+                if ( intrinsics.type !== undefined ) nodeComponent.type = intrinsics.type;
 
             }
 
@@ -1426,57 +1427,6 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             return hashi + ( hashp ? "." + hashp : "" ) + ( hashc ? "/" + hashc : "" );
         };
 
-        // -- prototype ----------------------------------------------------------------------------
-
-        this.prototype = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            // Call prototyping() on each model. The first model to return a non-undefined value
-            // dictates the return value.
-
-            var prototypeID = undefined;
-
-            this.models.some( function( model ) {
-                prototypeID = model.prototyping && model.prototyping( nodeID );
-                return prototypeID !== undefined;
-            } );
-
-            return prototypeID;
-        };
-
-        // -- prototypes ---------------------------------------------------------------------------
-
-        this.prototypes = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            var prototypeIDs = [];
-            var prototypeID = undefined;
-            
-            while ( nodeID !== undefined ) {
-                if ( ( prototypeID = prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
-                    prototypeIDs.push( prototypeID );
-                }
-                nodeID = prototypeID;
-            }
-            
-            return prototypeIDs;
-        };
-
-        // -- behaviors ----------------------------------------------------------------------------
-
-        this.behaviors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            // Call behavioring() on each model. The first model to return a non-undefined value
-            // dictates the return value.
-
-            var behaviorIDs = undefined;
-
-            this.models.some( function( model ) {
-                behaviorIDs = model.behavioring && model.behavioring( nodeID );
-                return behaviorIDs !== undefined && behaviorIDs.length > 0;
-            } );
-
-            return behaviorIDs || [];
-        };
-
         // -- createChild --------------------------------------------------------------------------
 
         // When we arrive here, we have a prototype node in hand (by way of its ID) and an object
@@ -1529,12 +1479,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                                     childPrototypeID = prototypeID;
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
 if ( ! childComponent.source ) {
-    var prototype_name_source_type = vwf.models.object.name_source_type( prototypeID );
-    if ( prototype_name_source_type.source ) {
-        var prototype_uri = vwf.models.object.uri( prototypeID );
+    var prototype_intrinsics = vwf.intrinsics( prototypeID );
+    if ( prototype_intrinsics.source ) {
+        var prototype_uri = vwf.uri( prototypeID );
         var prototype_properties = vwf.getProperties( prototypeID );
-        childComponent.source = require( "vwf/utility" ).resolveURI( prototype_name_source_type.source, prototype_uri );
-        childComponent.type = prototype_name_source_type.type;
+        childComponent.source = require( "vwf/utility" ).resolveURI( prototype_intrinsics.source, prototype_uri );
+        childComponent.type = prototype_intrinsics.type;
         childComponent.properties = childComponent.properties || {};
         Object.keys( prototype_properties ).forEach( function( prototype_property_name ) {
             if ( childComponent.properties[prototype_property_name] === undefined && prototype_property_name != "transform" ) {
@@ -1837,77 +1787,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
 
             this.logger.groupEnd();
-        };
-
-        // -- ancestors ----------------------------------------------------------------------------
-
-        this.ancestors = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            var ancestors = [];
-
-            nodeID = this.parent( nodeID );
-
-            while ( nodeID && nodeID !== 0 ) {
-                ancestors.push( nodeID );
-                nodeID = this.parent( nodeID );
-            }
-
-            return ancestors;
-        };
-
-        // -- parent -------------------------------------------------------------------------------
-
-        this.parent = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            // Call parenting() on each model. The first model to return a non-undefined value
-            // dictates the return value.
-
-            var parent = undefined;
-
-            this.models.forEach( function( model ) {
-                var modelParent = model.parenting && model.parenting( nodeID );
-                parent = modelParent !== undefined ? modelParent  : parent;
-            } );
-
-            return parent;
-        };
-
-        // -- children -----------------------------------------------------------------------------
-
-        this.children = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            this.logger.group( "vwf.children " + nodeID );
-
-            // Call childrening() on each model. The return value is the union of the non-undefined
-            // results.
-
-            var children = [];
-
-            this.models.forEach( function( model ) {
-                var modelChildren = model.childrening && model.childrening( nodeID ) || [];
-                Array.prototype.push.apply( children, modelChildren );
-            } );
-
-            this.logger.groupEnd();
-
-            return children; // TODO: remove duplicates, hopefully without re-ordering.
-        };
-
-        // -- name ---------------------------------------------------------------------------------
-
-        this.name = function( nodeID ) {  // TODO: no need to pass through all models; maintain a single truth in vwf/model/object and delegate there directly
-
-            // Call naming() on each model. The first model to return a non-undefined value dictates
-            // the return value.
-
-            var name = undefined;
-
-            this.models.forEach( function( model ) {
-                var modelName = model.naming && model.naming( nodeID );
-                name = modelName !== undefined ? modelName : name;
-            } );
-
-            return name;
         };
 
         // -- setProperties ------------------------------------------------------------------------
@@ -2485,6 +2364,81 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return this.moniker_;
         };
 
+        // -- intrinsics ---------------------------------------------------------------------------
+
+        this.intrinsics = function( nodeID, result ) {
+            return this.models.object.intrinsics( nodeID, result );
+        };
+
+        // -- uri ----------------------------------------------------------------------------------
+
+        this.uri = function( nodeID ) {
+            return this.models.object.uri( nodeID );
+        };
+
+        // -- name ---------------------------------------------------------------------------------
+
+        this.name = function( nodeID ) {
+            return this.models.object.name( nodeID );
+        };
+
+        // -- prototype ----------------------------------------------------------------------------
+
+        this.prototype = function( nodeID ) {
+            return this.models.object.prototype( nodeID );
+        };
+
+        // -- prototypes ---------------------------------------------------------------------------
+
+        this.prototypes = function( nodeID ) {
+
+            var prototypeIDs = [];
+            var prototypeID = undefined;
+            
+            while ( nodeID !== undefined ) {
+                if ( ( prototypeID = prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                    prototypeIDs.push( prototypeID );
+                }
+                nodeID = prototypeID;
+            }
+            
+            return prototypeIDs;
+        };
+
+        // -- behaviors ----------------------------------------------------------------------------
+
+        this.behaviors = function( nodeID ) {
+            return this.models.object.behaviors( nodeID ) || [];
+        };
+
+        // -- ancestors ----------------------------------------------------------------------------
+
+        this.ancestors = function( nodeID ) {
+
+            var ancestors = [];
+
+            nodeID = this.parent( nodeID );
+
+            while ( nodeID && nodeID !== 0 ) {
+                ancestors.push( nodeID );
+                nodeID = this.parent( nodeID );
+            }
+
+            return ancestors;
+        };
+
+        // -- parent -------------------------------------------------------------------------------
+
+        this.parent = function( nodeID ) {
+            return this.models.object.parent( nodeID );
+        };
+
+        // -- children -----------------------------------------------------------------------------
+
+        this.children = function( nodeID ) {
+            return [].concat( this.models.object.children( nodeID ) ); // make a copy
+        };
+
         // -- logger -------------------------------------------------------------------------------
 
         this.logger = {
@@ -2577,8 +2531,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         // Is a component specifier an ID?
 
         var componentIsID = function( candidate ) {
-            return isPrimitive( candidate ) &&
-vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
+            return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
         };
 
         // Is a primitive or a boxed primitive.

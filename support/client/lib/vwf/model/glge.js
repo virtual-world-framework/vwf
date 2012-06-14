@@ -354,21 +354,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 //        removingChild: function( nodeID, childID, childName ) {
 //        },
 
-        // -- parenting ----------------------------------------------------------------------------
-
-//        parenting: function( nodeID ) {  // TODO: move to a backstop model
-//        },
-
-        // -- childrening --------------------------------------------------------------------------
-
-//        childrening: function( nodeID ) {  // TODO: move to a backstop model
-//        },
-
-        // -- naming -------------------------------------------------------------------------------
-
-//        naming: function( nodeID ) {  // TODO: move to a backstop model
-//        },
-
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
