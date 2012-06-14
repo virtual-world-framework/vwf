@@ -1691,6 +1691,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         cam = sceneNode.camera.glgeCameras[childID];
                     }
 
+                    var glgeParent = parent.glgeObject;
+                    if ( glgeParent && ( glgeParent instanceof GLGE.Scene || glgeParent instanceof GLGE.Group )) {
+                        glgeParent.addObject( cam );
+                    }
+
                     child.name = childName;
                     child.glgeObject = cam;
                     child.uid = child.glgeObject.uid;
