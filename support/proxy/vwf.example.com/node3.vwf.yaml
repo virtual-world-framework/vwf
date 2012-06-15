@@ -14,6 +14,11 @@
 ---
 extends: http://vwf.example.com/node.vwf
 properties:
+  worldTransform:
+    set: |
+      var parentInverse = goog.vec.Mat4.invert( this.transformFromValue( parent.transform ), goog.vec.Vec3.create() );
+      var transform = goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Vec3.create() );
+      this.transform = transform;
   transform:
     set: |
       var transform = this.transformFromValue( value ); // parse incoming value
