@@ -348,7 +348,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
             if ( camera ) { 
-                worldCamPos = [ camera.getLocX(), camera.getLocY(), camera.getLocZ() ]; 
+                worldCamTrans = camera.getModelMatrix();
+                worldCamPos = [ worldCamTrans[3], worldCamTrans[7], worldCamTrans[11] ];
+                //worldCamPos = [ camera.getLocX(), camera.getLocY(), camera.getLocZ() ]; 
 //                worldCamTrans = goog.vec.Mat4.createFromArray( camera.getLocalMatrix() );
 //                goog.vec.Mat4.transpose( worldCamTrans, worldCamTrans );
 //                camInverse = goog.vec.Mat4.create();
