@@ -140,6 +140,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         $('#client_list').height(canvas.height);
                         $('#time_control').height(canvas.height);
                         $('#about_tab').height(canvas.height);
+                        $('#model_a').height(canvas.height);
+                        $('#model_b').height(canvas.height);
                     }
                 }
 
@@ -624,21 +626,36 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             if ( eData ) {
 
-                var fileData, fileName, fileUrl, match, object;
+                var fileData, fileName, fileUrl, rotation, scale, translation, match, object;
 
                 try {
 
                     fileData = JSON.parse( e.dataTransfer.getData('text/plain') );
                     fileName = decodeURIComponent(fileData.fileName);
                     fileUrl = decodeURIComponent(fileData.fileUrl);
+                    rotation = decodeURIComponent(fileData.rotation);
+                    rotation = rotation ? JSON.parse(rotation) : undefined;
+                    scale = decodeURIComponent(fileData.scale);
+                    scale = scale ? JSON.parse(scale) : [1, 1, 1];
+                    translation = decodeURIComponent(fileData.translation);
+                    translation = translation ? JSON.parse(translation) : [0, 0, 0];
+                    if($.isArray(translation) && translation.length == 3) {
+                        translation[0] += eData.eventNodeData[""][0].globalPosition[0];
+                        translation[1] += eData.eventNodeData[""][0].globalPosition[1];
+                        translation[2] += eData.eventNodeData[""][0].globalPosition[2];
+                    }
+                    else {
+                        translation = eData.eventNodeData[""][0].globalPosition;
+                    }
 
                     if ( match = fileUrl.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
 
                         object = {
                           extends: match[1],
                           properties: { 
-                            translation: eData.eventNodeData[""][0].globalPosition,
-                            scale: [ 1, 1, 1 ],
+                            translation: translation,
+                            rotation : rotation,
+                            scale: scale,
                           },
                         };
 
@@ -651,8 +668,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                           source: fileUrl,
                           type: "model/vnd.collada+xml",
                           properties: { 
-                            translation: eData.eventNodeData[""][0].globalPosition,
-                            scale: [ 1, 1, 1 ],
+                            translation: translation,
+                            rotation : rotation,
+                            scale: scale,
                           },   
                         };
 
