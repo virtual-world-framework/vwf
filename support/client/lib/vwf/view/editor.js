@@ -340,9 +340,10 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 this.topdownTemp = topdownName;
             }
 
-            else
+            else if (this.editingScript)
             {
                 // Reset width if on script
+                this.editingScript = false;
                 $('#editor').animate({ 'left' : "-260px" }, 175);
                 $('.vwf-tree').animate({ 'width' : "260px" }, 175);
             }
@@ -897,8 +898,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         var allScripts = this.allScripts;
-
-        this.editingScript = true;
         
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeID + "-back' alt='back'/> script</div>");
         jQuery('#script-' + nodeID + '-back').click ( function(evt) {
@@ -918,6 +917,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         });
         jQuery('#newScriptArea').focus( function(evt) { 
             // Expand the script editor
+            self.editingScript = true;
             $('#editor').animate({ 'left' : "-500px" }, 175);
             $('.vwf-tree').animate({ 'width' : "500px" }, 175);
         });
@@ -940,8 +940,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         var allScripts = this.allScripts;
-
-        this.editingScript = true;
         
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeID + "-back' alt='back'/> script</div>");
         jQuery('#script-' + nodeID + '-back').click ( function(evt) {
@@ -968,6 +966,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
             jQuery('#scriptTextArea').focus( function(evt) { 
                 // Expand the script editor
+                self.editingScript = true;
                 $('#editor').animate({ 'left' : "-500px" }, 175);
                 $('.vwf-tree').animate({ 'width' : "500px" }, 175);
             });
