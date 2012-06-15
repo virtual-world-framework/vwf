@@ -47,8 +47,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             this.clientList = '#client_list';
             this.timeline = '#time_control';
             this.about = '#about_tab';
-            this.models = '#model_tab';
+            this.models = '#model_a';
+            this.modelsTemp = '#model_b';
             this.currentNodeID = '';
+            this.currentModelID = '';
+            this.currentModelURL = '';
             
             jQuery('body').append(
                 "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
@@ -57,7 +60,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='time_control'></div></div></div>" +
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='about_tab'></div></div></div>" +
-                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_tab'></div></div></div>"
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_a'></div></div></div>" +
+                "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_b'></div></div></div>"
             );
             
             $('#tabs').stop().animate({ opacity:0.0 }, 0);
@@ -103,7 +107,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             $('#client_list').hide();
             $('#time_control').hide();
             $('#about_tab').hide();
-            $('#model_tab').hide();
+            $('#model_a').hide();
+            $('#model_b').hide();
             
             var canvas = document.getElementById("index-vwf");
             if ( canvas ) {
@@ -112,7 +117,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 $('#client_list').height(canvas.height);
                 $('#time_control').height(canvas.height);
                 $('#about_tab').height(canvas.height);
-                $('#model_tab').height(canvas.height);
+                $('#model_a').height(canvas.height);
+                $('#model_b').height(canvas.height);
             }
             else
             {    
@@ -121,7 +127,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 $('#client_list').height(window.innerHeight-20);
                 $('#time_control').height(window.innerHeight-20);
                 $('#about_tab').height(window.innerHeight-20);
-                $('#model_tab').height(window.innerHeight-20);
+                $('#model_a').height(window.innerHeight-20);
+                $('#model_b').height(window.innerHeight-20);
             }
         },
         
@@ -159,7 +166,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 $('#children hr:last').css('height', '1px');
                 $("#children").append("<div id='" + childID + "' class='childContainer'><div class='childEntry'><b>" + childName + "</b></div><hr></div>");
                 $('#' + childID).click( function(evt) {
-                    drillDown.call(self, $(this).attr("id"));
+                    drillDown.call(self, $(this).attr("id"), nodeID);
                 });
                 $('#children hr:last').css('height', '3px');
             }
@@ -312,7 +319,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     this.currentNodeID = "index-vwf";
                 }
 
-                drill.call(this, this.currentNodeID);
+                drill.call(this, this.currentNodeID, undefined);
                 $(this.clientList).hide();
                 $(this.timeline).hide();
                 $(this.about).hide();
@@ -333,14 +340,23 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 this.topdownTemp = topdownName;
             }
 
+            else if (this.editingScript)
+            {
+                // Reset width if on script
+                this.editingScript = false;
+                $('#editor').animate({ 'left' : "-260px" }, 175);
+                $('.vwf-tree').animate({ 'width' : "260px" }, 175);
+            }
+
             // User List
-            else if(eView == 2)
+            if(eView == 2)
             {
                 $(this.topdownName).hide();
                 $(this.topdownTemp).hide();
                 $(this.timeline).hide();
                 $(this.about).hide();
                 $(this.models).hide();
+                $(this.modelsTemp).hide();
                 showUserList.call(this);
             }
 
@@ -352,6 +368,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.clientList).hide();
                 $(this.about).hide();
                 $(this.models).hide();
+                $(this.modelsTemp).hide();
                 showTimeline.call(this);
             }
 
@@ -363,18 +380,36 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 $(this.clientList).hide();
                 $(this.timeline).hide();
                 $(this.models).hide();
+                $(this.modelsTemp).hide();
                 showAboutTab.call(this);
             }
 
             // Models
             else if(eView == 5)
             {
+                var models = this.models;
+                var modelsTemp = this.modelsTemp;
+
+                showModelsTab.call(this, this.currentModelID, this.currentModelURL);
                 $(this.topdownName).hide();
                 $(this.topdownTemp).hide();
                 $(this.clientList).hide();
                 $(this.timeline).hide();
                 $(this.about).hide();
-                showModelsTab.call(this);
+
+                if(this.editorOpen)
+                {
+                    $(models).hide();
+                    $(modelsTemp).show();
+                }
+
+                else
+                {                
+                    $(modelsTemp).show('slide', {direction: 'right'}, 175);    
+                }
+
+                this.models = modelsTemp;
+                this.modelsTemp = models;
             }
 
 
@@ -382,7 +417,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             {
                 window.slideOffset = 260;
                 $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
-                $('#editor').animate({ 'left' : "-=260px" }, 175);
+                $('#editor').animate({ 'left' : "-260px" }, 175);
                 $('#x').delay(1000).css({ 'display' : 'inline' });
             }
 
@@ -445,7 +480,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
         
         $('#vwf-root').animate({ 'left' : "+=260px" }, 175);
-        $('#editor').animate({ 'left' : "+=260px" }, 175);
+        $('#editor').animate({ 'left' : "0px" }, 175);
         $('#x').css({ 'display' : 'none' });
         this.editorView = 0;
         this.editorOpen = false;
@@ -514,12 +549,12 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
     // -- drillDown -------------------------------------------------------------------------
 
-    function drillDown(nodeID) // invoke with the view as "this"
+    function drillDown(nodeID, drillBackID) // invoke with the view as "this"
     {
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         
-        drill.call(this, nodeID);
+        drill.call(this, nodeID, drillBackID);
         
         if(nodeID != "index-vwf") $(topdownName).hide('slide', {direction: 'left'}, 175); 
         $(topdownTemp).show('slide', {direction: 'right'}, 175);    
@@ -535,7 +570,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         
-        drill.call(this, nodeID);
+        drill.call(this, nodeID, undefined);
         
         $(topdownName).hide('slide', {direction: 'right'}, 175); 
         $(topdownTemp).show('slide', {direction: 'left'}, 175);    
@@ -543,10 +578,27 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
     }
+
+    // -- drillBack---------------------------------------------------------------------------
+
+    function drillBack(nodeID) // invoke with the view as "this"
+    {
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
+        
+        drill.call(this, nodeID, undefined);
+        
+        // No slide motion, when resizing script window back to normal
+        $(topdownName).hide();
+        $(topdownTemp).show();
+        
+        this.topdownName = topdownTemp;
+        this.topdownTemp = topdownName;
+    }
     
     // -- drill -----------------------------------------------------------------------------
 
-    function drill(nodeID) // invoke with the view as "this"
+    function drill(nodeID, drillBackID) // invoke with the view as "this"
     {
         var self = this;
         var topdownName = this.topdownName;
@@ -556,6 +608,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         
         var node = this.nodes[ nodeID ];
         this.currentNodeID = nodeID;
+
+        if(!drillBackID) drillBackID = node.parentID;
      
         if(nodeID == "index-vwf") 
         {
@@ -565,9 +619,54 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         {
             $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + nodeID + "-back' alt='back'/> " + node.name + "</div>");
             jQuery('#' + nodeID + '-back').click ( function(evt) {
-                drillUp.call(self, node.parentID);
+                drillUp.call(self, drillBackID);
             });
         }
+
+        // Create new script
+        $(topdownTemp).append("<div id='createScript'></div>");
+        $('#createScript').append("<div class='childContainer'><div class='childEntry'><b>New Script</div><hr style='height:3px'></div>");
+        $('#createScript').click( function (evt) {
+            createScript.call(self, nodeID);
+        });
+
+        // Add node scripts
+        $(topdownTemp).append("<div id='scripts'></div>");
+        for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
+        {
+            var scriptFull = this.allScripts[nodeID][i].text;
+            if(scriptFull != undefined)
+            {
+                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                $('#scripts').append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
+                $('#script-' + nodeID + "-" + i).click( function(evt) {
+                    var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                    viewScript.call(self, id, scriptID, undefined);
+                });
+            }
+        }
+
+        $('#scripts hr:last').css('height', '3px');
+
+        // Add prototype scripts
+        $(topdownTemp).append("<div id='prototypeScripts'></div>");
+        for( var i=0; i < this.allScripts[ node.extendsID ].length; i++ )
+        {
+            var scriptFull = this.allScripts[node.extendsID][i].text;
+            if(scriptFull != undefined)
+            {
+                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                $('#prototypeScripts').append("<div id='script-" + node.extendsID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
+                $('#script-' + node.extendsID + "-" + i).click( function(evt) {
+                    var extendsId = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                    viewScript.call(self, nodeID, scriptID, extendsId);
+                });
+            }
+        }
+
+        $('#prototypeScripts hr:last').css('height', '3px');
 
         // Add node behaviors
         $(topdownTemp).append("<div id='behaviors'></div>");
@@ -584,25 +683,16 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         $('#behaviors hr:last').css('height', '3px');
 
-        // Add node scripts
-        $(topdownTemp).append("<div id='scripts'></div>");
-        for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
+        // Add prototype behaviors
+        $(topdownTemp).append("<div id='prototypeBehaviors'></div>");
+        var prototypeNode = this.nodes[ node.extendsID ];
+        for ( var i=0; i < prototypeNode.implementsIDs.length; i++)
         {
-            var scriptFull = this.allScripts[nodeID][i].text;
-            if(scriptFull != undefined)
-            {
-                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $('#scripts').append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div><hr></div>");
-                $('#script-' + nodeID + "-" + i).click( function(evt) {
-                    var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
-                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
-                    viewScript.call(self, id, scriptID);
-                });
-            }
+            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeNode.implementsIDs[i] + "</b></td><td><input id='" + prototypeNode.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div><hr>");
         }
 
-        $('#scripts hr:last').css('height', '3px');
-        
+        $('#prototypeBehaviors hr:last').css('height', '3px');
+
         // Add node properties
         $(topdownTemp).append("<div id='properties'></div>");
         var displayedProperties = {};
@@ -693,11 +783,25 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         for ( var i = 0; i < node.children.length; i++ ) {
             $('#children').append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div><hr></div>");
             $('#' + node.children[i].ID).click( function(evt) {
-                drillDown.call(self, $(this).attr("id"));
+                drillDown.call(self, $(this).attr("id"), nodeID);
             });
         }
 
         $('#children hr:last').css('height', '3px');
+
+        // Add prototype children
+        $(topdownTemp).append("<div id='prototypeChildren'></div>");
+        var prototypeChildren = getChildren.call( this, this.kernel.kernel, node.extendsID ); 
+        for ( var key in prototypeChildren)       
+        {
+            var child = prototypeChildren[key];
+            $('#prototypeChildren').append("<div id='" + child.ID + "' class='childContainer'><div class='childEntry'><b>" + child.name + "</b></div><hr></div>");
+            $('#' + child.ID).click( function(evt) {
+                drillDown.call(self, $(this).attr("id"), nodeID);
+            });
+        }
+
+        $('#prototypeChildren hr:last').css('height', '3px');
 
         // Add node methods
         $(topdownTemp).append("<div id='methods'></div>");
@@ -786,23 +890,69 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         $('#prototypeEvents hr:last').css('height', '3px');
     }
 
-    // -- viewScript ------------------------------------------------------------------------
+    // -- createScript ----------------------------------------------------------------------
 
-    function viewScript (nodeID, scriptID) // invoke with the view as "this"
+    function createScript (nodeID) // invoke with the view as "this"
     {
         var self = this;
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
         var allScripts = this.allScripts;
-
-        this.editingScript = true;
         
         $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeID + "-back' alt='back'/> script</div>");
         jQuery('#script-' + nodeID + '-back').click ( function(evt) {
             self.editingScript = false;
             var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
-            drillUp.call(self, id);
+            drillBack.call(self, id);
+
+            // Return editor to normal width
+            $('#editor').animate({ 'left' : "-260px" }, 175);
+            $('.vwf-tree').animate({ 'width' : "260px" }, 175);
         });
+
+        $(topdownTemp).append("<div class='scriptEntry'><pre class='scriptCode'><textarea id='newScriptArea' class='scriptEdit' spellcheck='false' wrap='off'></textarea></pre><input class='update_button' type='button' id='create-" + nodeID + "' value='Create' /></div><hr>");
+        $("#create-" + nodeID).click ( function(evt) {
+            var id = $(this).attr("id").substring(7);
+            self.kernel.execute( id, $("#newScriptArea").val() );
+        });
+        jQuery('#newScriptArea').focus( function(evt) { 
+            // Expand the script editor
+            self.editingScript = true;
+            $('#editor').animate({ 'left' : "-500px" }, 175);
+            $('.vwf-tree').animate({ 'width' : "500px" }, 175);
+        });
+        jQuery('#newScriptArea').keydown( function(evt) { 
+            evt.stopPropagation();
+        });
+
+        $(topdownName).hide();
+        $(topdownTemp).show();
+        
+        this.topdownName = topdownTemp;
+        this.topdownTemp = topdownName;
+    }
+
+    // -- viewScript ------------------------------------------------------------------------
+
+    function viewScript (nodeID, scriptID, extendsID) // invoke with the view as "this"
+    {
+        var self = this;
+        var topdownName = this.topdownName;
+        var topdownTemp = this.topdownTemp;
+        var allScripts = this.allScripts;
+        
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='script-" + nodeID + "-back' alt='back'/> script</div>");
+        jQuery('#script-' + nodeID + '-back').click ( function(evt) {
+            self.editingScript = false;
+            var id = $(this).attr("id").substring(7, $(this).attr("id").lastIndexOf('-'));
+            drillBack.call(self, id);
+
+            // Return editor to normal width
+            $('#editor').animate({ 'left' : "-260px" }, 175);
+            $('.vwf-tree').animate({ 'width' : "260px" }, 175);
+        });
+
+        if(extendsID) nodeID = extendsID;
 
         var scriptText = self.allScripts[nodeID][scriptID].text;
         if(scriptText != undefined)
@@ -814,13 +964,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 self.allScripts[id][s_id].text = undefined;
                 self.kernel.execute( id, $("#scriptTextArea").val() );
             });
-            jQuery('#scriptTextArea').change( function(evt) { 
+            jQuery('#scriptTextArea').focus( function(evt) { 
+                // Expand the script editor
+                self.editingScript = true;
+                $('#editor').animate({ 'left' : "-500px" }, 175);
+                $('.vwf-tree').animate({ 'width' : "500px" }, 175);
+            });
+            jQuery('#scriptTextArea').keydown( function(evt) { 
                 evt.stopPropagation();
             });
         }
         
-        $(topdownName).hide('slide', {direction: 'left'}, 175); 
-        $(topdownTemp).show('slide', {direction: 'right'}, 175);
+        $(topdownName).hide();
+        $(topdownTemp).show();
         
         this.topdownName = topdownTemp;
         this.topdownTemp = topdownName;
@@ -945,6 +1101,22 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
         }
         return pProperties;
+    }
+
+    function getChildren( kernel, extendsID ) {
+        var pTypes = getPrototypes( kernel, extendsID );
+        var pChildren = {};
+        if ( pTypes ) {
+            for ( var i=0; i < pTypes.length; i++ ) {
+                var nd = this.nodes[ pTypes[i] ];
+                if ( nd && nd.children ) {
+                    for ( var key in nd.children ) {
+                        pChildren[ key ] = nd.children[key];
+                    }
+                }
+            }
+        }
+        return pChildren;
     }
 
     function getEvents( kernel, extendsID ) {
@@ -1153,42 +1325,127 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
     //  -- showModelsTab ----------------------------------------------------------------------
 
-    function showModelsTab() // invoke with the view as "this"
+    function showModelsTab(modelID, modelURL) // invoke with the view as "this"
+    {
+        var self = this;
+        var models = this.models;
+        var modelsTemp = this.modelsTemp;
+        this.currentModelID = modelID;
+        this.currentModelURL = modelURL;
+
+        $(models).html("");
+        
+        if(modelID == "") {
+            $(modelsTemp).html("<div class='header'>Models</div>");
+
+            $.getJSON("admin/models", function( data ) {
+                $.each( data, function( key, value ) {
+                    var fileName = encodeURIComponent(value['basename']);
+                    var divId = fileName;
+                    if(divId.indexOf('.') != -1) {
+                        divId = divId.replace(/\./g, "_");
+                    }
+                    var url = value['url'];
+
+                    $(modelsTemp).append("<div class='childContainer'><div id='" + divId + "' class='modelEntry' data-url='" + url + "'>"
+                        + fileName + "</div><hr></div>");
+                    $("#" + divId).click(function(e) {
+                        modelDrillDown.call(self, e.target.textContent, e.target.getAttribute("data-url"));
+                    })
+                });
+            } );
+        }
+        else {
+            var divId = modelID;
+            if(divId.indexOf('.') != -1) {
+                divId = divId.replace(/\./g, "_");
+            }
+            $(modelsTemp).html("<div id='" + divId + "-backDiv' class='header'><img src='images/back.png' id='" + divId + "-back' alt='back'/>" + modelID + "</div>");
+            $("#" + divId + "-back").click(function(e) {
+                modelDrillUp.call(self, '');
+            });
+
+            $(modelsTemp).append("<div id='" + divId + "-rotation' class='propEntry'><table><tr><td><b>Rotation</b></td><td>" +
+                "<input type='text' class='input_text' id='input-" + divId + "-rotation' value='[1,0,0,0]'></td></tr></table></div><hr>");
+            $('#input-' + divId + '-rotation').keydown( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-rotation').keypress( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-rotation').keyup( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $(modelsTemp).append("<div id='" + divId + "-scale' class='propEntry'><table><tr><td><b>Scale</b></td><td>" +
+                "<input type='text' class='input_text' id='input-" + divId + "-scale' value='[1,1,1]'></td></tr></table></div><hr>");
+            $('#input-' + divId + '-scale').keydown( function(evt) {
+                    evt.stopPropagation();
+                });
+            $('#input-' + divId + '-scale').keypress( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-scale').keyup( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $(modelsTemp).append("<div id='" + divId + "-translation' class='propEntry'><table><tr><td><b>Translation Offset</b></td><td>" +
+                "<input type='text' class='input_text' id='input-" + divId + "-translation' value='[0,0,0]'></td></tr></table></div>");
+            $('#input-' + divId + '-translation').keydown( function(evt) {
+                    evt.stopPropagation();
+                });
+            $('#input-' + divId + '-translation').keypress( function(evt) {
+                evt.stopPropagation();
+            });
+            $('#input-' + divId + '-translation').keyup( function(evt) {
+                evt.stopPropagation();
+            });
+
+            $(modelsTemp).append("<div class='drag'><div id='" + divId + "-drag' class='modelEntry' draggable='true' data-escaped-name='" + divId +"' data-url='" + modelURL + "'>Drag To Create</div></div>");
+
+            $("#" + divId + "-drag").on("dragstart", function (e) {
+                var fileName = $("#" + e.target.getAttribute("data-escaped-name") + "-backDiv").text();
+                var rotation = encodeURIComponent($("#input-" + e.target.getAttribute("data-escaped-name") + "-rotation").val());
+                var scale = encodeURIComponent($("#input-" + e.target.getAttribute("data-escaped-name") + "-scale").val());
+                var translation = encodeURIComponent($("#input-" + e.target.getAttribute("data-escaped-name") + "-translation").val());
+                var fileData = "{\"fileName\":\""+fileName+"\", \"fileUrl\":\""+e.target.getAttribute("data-url")+"\", " +
+                    "\"rotation\":\"" + rotation + "\", \"scale\":\"" + scale + "\", \"translation\":\"" + translation + "\"}";
+                e.originalEvent.dataTransfer.setData('text/plain', fileData);
+                e.originalEvent.dataTransfer.setDragImage(e.target, 0, 0);
+                return true;
+            });
+        }
+    }
+
+    // -- Model drillDown -------------------------------------------------------------------------
+
+    function modelDrillDown(modelID, modelURL) // invoke with the view as "this"
     {
         var models = this.models;
-        if(!this.modelsInit) {
-            $(models).append("<div class='header'>Models</div>");
-            this.modelsInit = true;
-        }
-        else {
-            $(models+' .childContainer').remove();
-        }
+        var modelsTemp = this.modelsTemp;
+        
+        showModelsTab.call(this, modelID, modelURL);
+        
+        if(modelID != "") $(models).hide('slide', {direction: 'left'}, 175); 
+        $(modelsTemp).show('slide', {direction: 'right'}, 175);    
+        
+        this.models = modelsTemp;
+        this.modelsTemp = models;
+    }
+    
+    // -- Model drillUp ---------------------------------------------------------------------------
 
-        $.getJSON("admin/models", function( data ) {
-            $.each( data, function( key, value ) {
-                var fileName = encodeURIComponent(value['basename']);
-                var divId = fileName;
-                if(divId.indexOf('.') != -1) {
-                    divId = divId.replace(/\./g, "_");
-                }
-                var url = value['url'];
-
-                $(models).append("<div><div id='" + divId + "' class='modelEntry' draggable='true' data-url='" + url + "'>"
-                    + fileName + "</div><hr></div>");
-                $("#" + divId).on("dragstart", function (e) {
-                    var fileData = "{\"fileName\":\""+e.target.textContent+"\", \"fileUrl\":\""+e.target.getAttribute("data-url")+"\"}";
-                    e.originalEvent.dataTransfer.setData('text/plain', fileData);
-                    e.originalEvent.dataTransfer.setDragImage(e.target, 0, 0);
-                    return true;
-                });
-            });
-        } );
-
-        if(!this.editorOpen) {
-            $(models).show('slide', {direction: 'right'}, 175);
-        }
-        else {
-            $(models).show();
-        }
+    function modelDrillUp(modelID) // invoke with the view as "this"
+    {
+        var models = this.models;
+        var modelsTemp = this.modelsTemp;
+        
+        showModelsTab.call(this, modelID);
+        
+        $(models).hide('slide', {direction: 'right'}, 175); 
+        $(modelsTemp).show('slide', {direction: 'left'}, 175);    
+        
+        this.models = modelsTemp;
+        this.modelsTemp = models;
     }
 } );
