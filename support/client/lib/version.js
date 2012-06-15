@@ -14,5 +14,5 @@
 // the License.
 
 define( function() {
-	return [ 0, 5, 2, 0 ]; // major, minor, patch, build
+	return [ 0, 5, 3, 0 ]; // major, minor, patch, build
 } );
