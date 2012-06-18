@@ -98,6 +98,26 @@ The server runs on port 3000 in development mode by default. Use Google Chrome t
 Installing the Ruby Server - For Linux
 =========
 
+Ubuntu/Debian
+-------
+Perform the following shell command at a user shell prompt:
+
+	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh  | bash
+
+	* * *
+	
+Red Hat Enterprise Linux
+-------
+Perform the following shell command at a user shell prompt:
+
+	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh  | bash
+	
+* * *
+
+
+
+Manual Installation on Linux
+-------
 Ensure RubyGems is installed (for Debian/Ubuntu). 
 
 	# apt-get install ruby rubygems
