@@ -1,0 +1,2 @@
+description:
+  Cesium is a web-based globe and map engine for visualizing dynamic data. This demo application allows a user to have synchronized camera views across multiple clients. Pressing the "R" key will reset the synchronized views across all instances.

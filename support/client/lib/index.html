@@ -83,9 +83,10 @@
             "vwf/view/document",
             "vwf/view/editor",
             "vwf/view/glge",
-            "vwf/view/googleEarth",
             "vwf/utility",
-
+            connected && "vwf/view/googleEarth",
+            connected && "vwf/view/cesium"
+			
         ], function( ready ) {
 
             ready( function() {
@@ -132,7 +133,8 @@
 						{ "vwf/view/glge": "#vwf-root" },
                         "vwf/view/document",
                         "vwf/view/editor",
-                    	"vwf/view/googleEarth",
+						connected && "vwf/view/googleEarth",
+						connected && "vwf/view/cesium"
                     ]
 
                 );
