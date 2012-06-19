@@ -24,6 +24,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.canvasQuery = undefined;
  
             this.lastPick = undefined;
+            this.lastEventData = undefined;
+            this.mouseOverCanvas = false;
             this.keyStates = { keysDown: {}, mods: {} };
 
             this.height = 600;
@@ -229,15 +231,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         function renderScene(time) {
 			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
+            if((time - lastPickTime) > 100) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
-                if(newPick) {
-    				self.lastPick = newPick;
+                self.lastPick = newPick;
+    			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
+    				oldMouseX = mouse.getMousePosition().x;
+    				oldMouseY = mouse.getMousePosition().y;
+                    hovering = false;
+    			}
+                else if(self.lastEventData && self.mouseOverCanvas && !hovering) {
+                    var pickId = newPick ? getPickObjectID.call( view, self.lastPick, false ) : view.state.sceneRootID;
+                    view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                    hovering = true;
                 }
-				oldMouseX = mouse.getMousePosition().x;
-				oldMouseY = mouse.getMousePosition().y;
-				lastPickTime = time;
-			}
+                lastPickTime = time;
+            }
             renderer.render();
         };
 
@@ -247,6 +255,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			var mouse = new GLGE.MouseInput( canvas );
 			var oldMouseX = mouse.getMousePosition().x;
 			var oldMouseY = mouse.getMousePosition().y;
+            var hovering = false;
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
@@ -303,7 +312,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var container = document.getElementById("container");
         var sceneCanvas = canvas;
         var mouse = new GLGE.MouseInput( sceneCanvas );
-        var mouseOverCanvas = false;
 
         var self = this;
 
@@ -343,6 +351,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         meta: e.metaKey,
                     },
                 position: [ mouseXPos.call( this,e)/sceneView.width, mouseYPos.call( this,e)/sceneView.height ],
+                screenPosition: [mouseXPos.call(this,e), mouseYPos.call(this,e)]
             } ];
 
 
@@ -435,6 +444,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 }
             }
+            self.lastEventData = returnData;
             return returnData;
         }          
 
@@ -507,7 +517,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         canvas.onmouseover = function( e ) {
-            mouseOverCanvas = true;
+            self.mouseOverCanvas = true;
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
@@ -527,8 +537,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
                                 pointerOverID = pointerPickID;
                                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
-                            } else {
-                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerHover", eData.eventData, eData.eventNodeData );
                             }
                         } else {
                             pointerOverID = pointerPickID;
@@ -549,7 +557,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave" );
                 pointerOverID = undefined;
             }
-            mouseOverCanvas = false;
+            self.mouseOverCanvas = false;
         }
 
         canvas.setAttribute("onmousewheel", '');
