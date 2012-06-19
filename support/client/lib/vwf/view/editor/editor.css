@@ -103,6 +103,10 @@ textarea:focus, input:focus{
 	background-repeat:no-repeat;
 }
 
+.childContainerHighlight {
+	background-color: #4C6D97;
+}
+
 .childEntry {
 	padding-left:10px;
 	padding-right:10px;

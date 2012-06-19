@@ -52,6 +52,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             this.currentNodeID = '';
             this.currentModelID = '';
             this.currentModelURL = '';
+            this.highlightedChild = '';
             
             jQuery('body').append(
                 "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
@@ -246,9 +247,11 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }         
         },
 
-        //firedEvent: function ( nodeID, eventName, eventParameters ) {
-
-        //},
+        firedEvent: function ( nodeID, eventName, eventParameters ) {
+            if(eventName == "pointerHover") {
+                highlightChildInHierarchy.call(this, nodeID);
+            }
+        },
 
         executed: function( nodeID, scriptText, scriptType ) {
 
@@ -1160,6 +1163,23 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         return foundGlge;
+    }
+
+    function highlightChildInHierarchy(nodeID) {
+        if (this.editorOpen && this.editorView == 1) // Hierarchy view open
+        {
+            var childDiv = $("div[id='" + nodeID +"']");
+            if(childDiv.length > 0) {
+                var previousChild = $("div[id='" + this.highlightedChild +"']");
+                if(previousChild.length > 0) {
+                    previousChild.removeClass('childContainerHighlight');
+                }
+                $('div #' + nodeID)[0].scrollIntoView(true);
+                childDiv.addClass('childContainerHighlight');
+                childDiv.prev().children('hr').addClass('childContainerHighlight');
+                this.highlightedChild = nodeID;
+            }
+        }
     }
 
     // -- showTimeline ----------------------------------------------------------------------
