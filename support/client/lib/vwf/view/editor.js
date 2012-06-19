@@ -1176,7 +1176,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 }
                 $('div #' + nodeID)[0].scrollIntoView(true);
                 childDiv.addClass('childContainerHighlight');
-                childDiv.prev().children('hr').addClass('childContainerHighlight');
                 this.highlightedChild = nodeID;
             }
         }
