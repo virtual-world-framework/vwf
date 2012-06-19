@@ -26,7 +26,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.lastPick = undefined;
             this.lastEventData = undefined;
             this.mouseOverCanvas = false;
-            this.keyStates = { keysDown: {}, mods: {} };
+            this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 
             this.height = 600;
             this.width = 800;
@@ -62,6 +62,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 window.onkeydown = function (event) {
                     var key = undefined;
                     var validKey = false;
+                    var keyAlreadyDown = false;
                     switch (event.keyCode) {
                         case 17:
                         case 16:
@@ -71,6 +72,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                             break;
                         default:
                             key = getKeyValue.call( glgeView, event.keyCode);
+                            keyAlreadyDown = !!glgeView.keyStates.keysDown[key.key];
                             glgeView.keyStates.keysDown[key.key] = key;
                             validKey = true;
                             break;
@@ -83,7 +85,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     glgeView.keyStates.mods.meta = event.metaKey;
 
                     var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
-                    if (validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
+                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
                         //var params = JSON.stringify( glgeView.keyStates );
                         glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
                     }
@@ -102,6 +104,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         default:
                             key = getKeyValue.call( glgeView, event.keyCode);
                             delete glgeView.keyStates.keysDown[key.key];
+                            glgeView.keyStates.keysUp[key.key] = key;
                             validKey = true;
                             break;
                     }
@@ -115,6 +118,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     if (validKey && sceneNode) {
                         //var params = JSON.stringify( glgeView.keyStates );
                         glgeView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [glgeView.keyStates]);
+                        delete glgeView.keyStates.keysUp[key.key];
                     }
 
                 };
@@ -567,9 +571,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
                     eData.eventNodeData[""][0].wheel = {
-                        delta: e.wheelDelta,
-                        deltaX: e.wheelDeltaX,
-                        deltaY: e.wheelDeltaY,
+                        delta: e.wheelDelta / -40,
+                        deltaX: e.wheelDeltaX / -40,
+                        deltaY: e.wheelDeltaY / -40,
                     };
                     var id = sceneID;
                     if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
@@ -587,9 +591,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
                     eData.eventNodeData[""][0].wheel = {
-                        delta: e.detail * -40,
-                        deltaX: e.detail * -40,
-                        deltaY: e.detail * -40,
+                        delta: e.detail,
+                        deltaX: e.detail,
+                        deltaY: e.detail,
                     };
                     var id = sceneID;
                     if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
