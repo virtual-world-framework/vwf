@@ -1175,7 +1175,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 if(previousChild.length > 0) {
                     previousChild.removeClass('childContainerHighlight');
                 }
-                $('div #' + nodeID)[0].scrollIntoView(true);
                 childDiv.addClass('childContainerHighlight');
                 this.highlightedChild = nodeID;
             }
