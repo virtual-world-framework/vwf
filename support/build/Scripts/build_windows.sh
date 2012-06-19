@@ -13,9 +13,12 @@
 # the License.
 
 ###################################################################################################
-# This script installs Virtual World Framework on Cygwin
-# This script can be called from a shell prompt using: 
-# curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_windows.sh  | bash OptProxyAddress
+# This script installs Virtual World Framework on Cygwin.  
+# Please visit https://github.com/virtual-world-framework/vwf/tree/master/support/build/Scripts
+# and download the build_windows.sh file to execute. This script should then be executed at a Cygwin Prompt using: 
+# bash -x build_windows.sh
+# Or for Proxy Environments:
+# bash -x build_windows.sh --proxy ProxyAddress 
 ###################################################################################################
 
 set -e
@@ -27,31 +30,31 @@ ruby setup.rb install
 gem install bundler --no-ri --no-rdoc
 
 # Download the latest VWF Master Branch Baseline to the local system
-if [ -d "/var/www/vwf" ];then
-rm -rf /var/www/vwf
+if [ -d "vwf" ];then
+rm -rf vwf
 fi
 git config --global http.proxy $1
-git clone http://www.github.com/virtual-world-framework/vwf /var/www/vwf
+git clone http://www.github.com/virtual-world-framework/vwf 
 
 # Download and Install Ruby Gems Referenced by VWF
-cd /var/www/vwf
-cd /var/www/vwf/support/build
+cd vwf
+cd support/build
 curl -k https://cloud.github.com/downloads/virtual-world-framework/vwf/ruby-1.8.7-p357-i386-mingw32.tar.gz --proxy $1 --O ruby-1.8.7-p357-i386-mingw32.tar.gz
 tar -xvzf ruby-1.8.7-p357-i386-mingw32.tar.gz
 curl -k https://cloud.github.com/downloads/virtual-world-framework/vwf/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz --proxy $1 --O ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz
 tar -xvzf ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz
 
 
-cd /var/www/vwf
+cd ../../
 bundle install
 bundle install --binstubs
 
 # Setup correct permissions for build support files
-cd /var/www/vwf/support/build
+cd support/build
 chmod 744 -R *
 
 # Execute Build Process
-cd /var/www/vwf
+cd ../../
 bundle exec rake build
 
 # Download, and Setup Ruby Thin Server Service 
