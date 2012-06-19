@@ -22,17 +22,23 @@
 
 # Download the latest VWF Master Branch Baseline to the local system
 if [ ! -d "/support/build/ruby-1.8.7-p357-i386-mingw32" ];then
-		echo "If you are behind a proxy, please make sure your http_proxy variable is set for Cygwin. Otherwise, the build cannot continue. You may set your proxy using the bash command export http_proxy=http://proxy-server.mycorp.com:3128/"
-		cd /support/build
-		curl -k https://cloud.github.com/downloads/virtual-world-framework/vwf/ruby-1.8.7-p357-i386-mingw32.tar.gz --O ruby-1.8.7-p357-i386-mingw32.tar.gz
+		echo "If you are behind a proxy, please make sure your http_proxy variable is set for Cygwin. Otherwise, the build cannot continue. You may set your proxy using the bash command export http_proxy=http://proxy-server.mycorp.com:3128/
+		
+		"
+		cd support/build
+		curl -k https://cloud.github.com/downloads/virtual-world-framework/vwf/ruby-1.8.7-p357-i386-mingw32.tar.gz --O ruby-1.8.7-p357-i386-mingw32.tar.gz --proxy $http_proxy
 		tar -xvzf ruby-1.8.7-p357-i386-mingw32.tar.gz
+		rm -rf ruby-1.8.7-p357-i386-mingw32.tar.gz
 		cd ../..
 fi
 
 if [ ! -d "/support/build/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx" ];then
-		echo "If you are behind a proxy, please make sure your http_proxy variable is set for Cygwin. Otherwise, the build cannot continue. You may set your proxy using the bash command export http_proxy=http://proxy-server.mycorp.com:3128/"
-		cd /support/build
-		curl -k https://cloud.github.com/downloads/virtual-world-framework/vwf/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz --O ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz
+		echo "If you are behind a proxy, please make sure your http_proxy variable is set for Cygwin. Otherwise, the build cannot continue. You may set your proxy using the bash command export http_proxy=http://proxy-server.mycorp.com:3128/
+		
+		"
+		cd support/build
+		curl -k https://cloud.github.com/downloads/virtual-world-framework/vwf/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz --O ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz --proxy $http_proxy
 		tar -xvzf ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz
+		rm -rf ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz
 		cd ../..
 fi

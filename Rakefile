@@ -24,6 +24,10 @@ CLOBBER.include "bin/*", "run.bat"
 
 DELEGATED_TASKS = [ :build, :test, :clean, :clobber ]
 
+if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
+	sh "support/build/scripts/update_ruby.sh"
+end
+	
 FileList[ "*/Rakefile", "*/*/Rakefile" ].map do |rakefile| # could use "*/**/Rakefile" to reach an arbitrary depth
 
     rakefile[ %r{(.*)/Rakefile}, 1 ]
