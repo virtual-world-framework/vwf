@@ -52,8 +52,8 @@ Sample URL: *http://vwf.example.com/web/example/1/*
 
 <!-- <iframe src="../../web/example/1">Example 1</iframe> -->
 <div style="text-align:center">
-<span style="color:3399FF" onclick="document.getElementById('ex1_frame').src = '../../web/example/1'">Activate Application</span>
-<iframe id="ex1_frame" src="about:blank"></iframe>
+<span style="color:3399FF" onclick="document.getElementById('ex1_frame').src = '../../web/example/1'">Activate Application</span><br/><br/>
+<iframe id="ex1_frame" src="about:blank" style="width:100%;"></iframe>
 </div>
 
 * * *
@@ -103,8 +103,8 @@ Sample URL: *http://vwf.example.com/web/example/2/*
 
 <!-- <iframe src="../../web/example/2">Example 2</iframe> -->
 <div style="text-align:center">
-<span style="color:3399FF" onclick="document.getElementById('ex2_frame').src = '../../web/example/2'">Activate Application</span>
-<iframe id="ex2_frame" src="about:blank"></iframe>
+<span style="color:3399FF" onclick="document.getElementById('ex2_frame').src = '../../web/example/2'">Activate Application</span><br/><br/>
+<iframe id="ex2_frame" src="about:blank" style="width:100%;"></iframe>
 </div>
 
 * * *
@@ -180,8 +180,8 @@ URL: *http://vwf.example.com/web/example/3/*
 
 <!-- <iframe src="../../web/example/3">Example 3</iframe> -->
 <div style="text-align:center">
-<span style="color:3399FF" onclick="document.getElementById('ex3_frame').src = '../../web/example/3'">Activate Application</span>
-<iframe id="ex3_frame" src="about:blank"></iframe>
+<span style="color:3399FF" onclick="document.getElementById('ex3_frame').src = '../../web/example/3'">Activate Application</span><br/><br/>
+<iframe id="ex3_frame" src="about:blank" style="width:100%;"></iframe>
 </div>
 
 * * *
@@ -310,8 +310,8 @@ In this example, clicking on an object will run the pointerClick function, chang
 
 <!-- <iframe src="../../web/example/4">Example 4</iframe> -->
 <div style="text-align:center">
-<span style="color:3399FF" onclick="document.getElementById('ex4_frame').src = '../../web/example/4'">Activate Application</span>
-<iframe id="ex4_frame" src="about:blank"></iframe>
+<span style="color:3399FF" onclick="document.getElementById('ex4_frame').src = '../../web/example/4'">Activate Application</span><br/><br/>
+<iframe id="ex4_frame" src="about:blank" style="width:100%;"></iframe>
 </div>
 
 * * *
