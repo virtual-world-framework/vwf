@@ -25,7 +25,12 @@ CLOBBER.include "bin/*", "run.bat"
 DELEGATED_TASKS = [ :build, :test, :clean, :clobber ]
 
 if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
-	sh "support/build/scripts/update_ruby.sh"
+		puts "If you are behind a proxy, please make sure your http_proxy variable is set for Cygwin. Otherwise, the build cannot continue. You may set your proxy using the bash command:
+
+		export http_proxy=http://proxy-server.mycorp.com:3128/
+		
+		"
+	sh "bash support/build/Scripts/update_ruby.sh"
 end
 	
 FileList[ "*/Rakefile", "*/*/Rakefile" ].map do |rakefile| # could use "*/**/Rakefile" to reach an arbitrary depth

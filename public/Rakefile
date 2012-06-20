@@ -25,22 +25,21 @@ task :default => [ :clean, :clobber, :build ]
 desc "Generate the catalog and documentation."
 
 task :build => "web/catalog.html" do
-	cd "#{ENV['PWD']}"
 	sh "bundle install"
 	sh "bundle install --binstubs"
-	cd "#{ENV['PWD']}/public"
-	#ENV["PATH"] = FileList[ "#{ENV['PWD']}/support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
-	#sh "cp #{ENV["HOME"]}/.bashrc #{ENV["HOME"]}/.bashrcbackup"
-	#sh "echo 'export PATH=#{ENV["PATH"]}'>> #{ENV["HOME"]}/.bashrc"
-	#sh "export PS1='$ '"
-	#sh "source ~/.bashrc"
-	sh "cp #{ENV['PWD']}/support/build/Pygments-1.4/pygmentize /usr/bin/pygmentize"
-	# sh "python setup.py install"
-	cd "#{ENV['PWD']}/public"
-	#sh "cp #{ENV["HOME"]}/.bashrcbackup #{ENV["HOME"]}/.bashrc"
-	#sh "source ~/.bashrc"
+	
+	ORG_PATH = ENV["PATH"]
+	ENV["PATH"] = FileList[ "#{ENV['PWD']}/support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
+	
+    if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
+		sh "cp #{ENV['PWD']}/support/build/Pygments-1.4/pygmentize /usr/bin/pygmentize"
+	end
+
+	
 	sh "../bin/rocco web/docs/application/*.vwf.yaml"
     sh "../bin/rocco web/docs/application/example.js"
+	
+	ENV["PATH"] = ORG_PATH
 	
  	md = FileList[ "web/*.md" ]
 	md.each do |md|
