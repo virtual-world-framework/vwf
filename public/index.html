@@ -18,17 +18,13 @@
 		<title>Virtual World Framework</title>
 		
 		<script type="text/javascript">
-			function UrlExists()
-			{
 				var http = new XMLHttpRequest();
 				http.open('HEAD', 'web/about.html', false);
 				http.send();
-				return http.status!=404;
-			};
-			function go_now ()   { window.location.href = "web/about.html"; }
+				if(http.status!=404;){window.location.href = "web/about.html"; };
 		</script>	
   	</head>
-	<body onload="javascript:if(UrlExists()){go_now()};">
+	<body>
 	<h2>Virtual World Framework</h2><br/><br/>
 	Virtual World Framework is minimally installed and running at this point. Please return to your command line and run "bundle exec rake build" to compile the VWF Framework and then execute run.bat (Windows), or restart your Thin Server (Linux).
 
