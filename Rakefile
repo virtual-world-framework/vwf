@@ -87,12 +87,13 @@ task :windows => :common do
 
     if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
 
-        DEVKIT = "support/build/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx"
-        RUBY = "support/build/ruby-1.8.7-p357-i386-mingw32"
+        DEVKIT = "../cache/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx"
+        RUBY = "../cache/ruby-1.8.7-p357-i386-mingw32"
+		CURPATH = `cygpath -w -p $PWD`
 
         File.open( "#{DEVKIT}/config.yml", "w" ) do |io|
             io.puts "---"
-            io.puts "- ../../../#{RUBY}"
+            io.puts "- ../#{RUBY}"
         end
 
         sh "echo '" + <<-BAT.strip.gsub( %r{^ *}, "" ) + "' | CMD.EXE"
@@ -106,17 +107,19 @@ task :windows => :common do
             REM Install DevKit in the local ruby
             SET DEVKIT=#{ DEVKIT.gsub( "/", "\\" ) }
             CD %DEVKIT%
-            SET RUBY=..\\..\\..\\#{ RUBY.gsub( "/", "\\" ) }
+            SET RUBY=..\\#{ RUBY.gsub( "/", "\\" ) }
             SET PATH=%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem
             SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin
             ruby dk.rb install
             REM Configure the local ruby
-            CD ..\\..\\..
+            CD ..\\
             SET RUBY=#{ RUBY.gsub( "/", "\\" ) }
             SET PATH=%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem
             SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin
             gem install bundler --no-rdoc --no-ri
-            bundle install --system
+			SET PWDPATH=#{ CURPATH }
+            CD %PWDPATH%
+			bundle install --system
         BAT
 
         File.open( "run.bat", "w" ) do |io|
@@ -125,7 +128,7 @@ task :windows => :common do
             io.puts "SET RUBY=#{ RUBY.gsub( "/", "\\" ) }"
             io.puts "SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin"
             io.puts ""
-            io.puts "ruby bin\\thin start %*"
+            io.puts "call ruby bin\\thin start %*"
         end
 
     end

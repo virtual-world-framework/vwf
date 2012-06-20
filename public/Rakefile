@@ -25,10 +25,23 @@ task :default => [ :clean, :clobber, :build ]
 desc "Generate the catalog and documentation."
 
 task :build => "web/catalog.html" do
-
-    original_path = ENV["PATH"]
-    ENV["PATH"] = FileList[ "../support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
-
+	cd "#{ENV['PWD']}"
+	sh "bundle install"
+	sh "bundle install --binstubs"
+	cd "#{ENV['PWD']}/public"
+	#ENV["PATH"] = FileList[ "#{ENV['PWD']}/support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
+	#sh "cp #{ENV["HOME"]}/.bashrc #{ENV["HOME"]}/.bashrcbackup"
+	#sh "echo 'export PATH=#{ENV["PATH"]}'>> #{ENV["HOME"]}/.bashrc"
+	#sh "export PS1='$ '"
+	#sh "source ~/.bashrc"
+	sh "cp #{ENV['PWD']}/support/build/Pygments-1.4/pygmentize /usr/bin/pygmentize"
+	# sh "python setup.py install"
+	cd "#{ENV['PWD']}/public"
+	#sh "cp #{ENV["HOME"]}/.bashrcbackup #{ENV["HOME"]}/.bashrc"
+	#sh "source ~/.bashrc"
+	sh "../bin/rocco web/docs/application/*.vwf.yaml"
+    sh "../bin/rocco web/docs/application/example.js"
+	
  	md = FileList[ "web/*.md" ]
 	md.each do |md|
 		if md == "web/about.md"
@@ -44,10 +57,6 @@ task :build => "web/catalog.html" do
         sh "( cat web/docs/format/preamble ; kramdown '#{md}' ; cat web/docs/format/postamble ) > '#{ md.ext ".html" }'"
     end
 
-    sh "bundle exec ../bin/rocco web/docs/application/*.vwf.yaml"
-    sh "bundle exec ../bin/rocco web/docs/application/example.js"
-    
-    ENV["PATH"] = original_path
 
 end
 
