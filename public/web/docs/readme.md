@@ -335,18 +335,21 @@ Code View: *index.vwf.html*
 	  <head>
 		<script type="text/javascript">
 		  function sample() {
-			// Get property value from the application
-			var pos = vwf.getProperty("http-vwf-example-com-node-vwf-game", 
-									  "position01");
-
 			// Set property value in the application
-			vwf.views[0].setProperty( "http-vwf-example-com-node-vwf-game", 
+			vwf_view.kernel.setProperty( "http-vwf-example-com-node-vwf-game", 
 									  "position01", some_position );
 		  }
 
-		  // Defines a function to execute upon an application property
-		  vwf.property( "http-vwf-example-com-node-vwf-game", "position01",         
-			function() { doSomething(); } );
+		  // Defines a function to execute upon an application property change	
+		  vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
+      		if (nodeId == "http-vwf-example-com-node-vwf-game" ) {
+      	  	  switch (propertyName) {
+      			case "position01":
+      		  	  doSomething( propertyValue );
+      		  	  break;
+          	  }
+        	}
+      	  }
 		</script>
 	  </head>
 	  <body>
