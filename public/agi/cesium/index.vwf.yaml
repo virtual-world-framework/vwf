@@ -19,5 +19,5 @@ children:
   cesiumInstance:
     extends: http://vwf.example.com/node3.vwf
     properties:
-      cameraControllerData:
-      cameraViewData:
+       cameraControllerData: 
+       cameraViewData: 
