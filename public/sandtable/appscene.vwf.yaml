@@ -45,7 +45,7 @@ properties:
           break;
       }
     value: "orbit"
-  speed: 40.0
+  speed: 4.0
 methods:
   clear: |
     if ( this.nodesCreated ) {

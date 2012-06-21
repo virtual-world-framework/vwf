@@ -29,7 +29,7 @@ properties:
     value: "walk"
   orbitRadius: -1  
   orbitObjectID: "http-vwf-example-com-node3-vwf-sceneCenter"
-  speed: 10.0
+  speed: 1.0
   maxSpeed: 500
   dragModeMove: false
 events:
@@ -463,9 +463,9 @@ scripts:
       }
     }
     this.distance = function(){
-      var dist = this.speed;
+      var dist = this.speed * 10;
       if(this.timeElapsed() > 0) {
-        dist = this.speed * this.timeElapsed();
+        dist = dist * this.timeElapsed();
       }
       return dist;
     }
