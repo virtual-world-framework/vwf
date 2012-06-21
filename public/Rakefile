@@ -32,7 +32,9 @@ task :build => "web/catalog.html" do
 	ENV["PATH"] = FileList[ "#{ENV['PWD']}/support/build/*" ].join( ":" ) + ":" + ENV["PATH"]
 	
     if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
-		sh "cp #{ENV['PWD']}/support/build/Pygments-1.4/pygmentize /usr/bin/pygmentize"
+	sh "touch /usr/bin/pygmentize"
+	sh "chmod -R 777 /usr/bin/pygmentize"
+	sh "cp #{ENV['PWD']}/support/build/Pygments-1.4/pygmentize /usr/bin/pygmentize"
 	end
 
 	
