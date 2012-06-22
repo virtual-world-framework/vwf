@@ -44,3 +44,6 @@ The <code>rotation</code> property controls the direction the camera is pointing
 The <code>translation</code> property controls the position of the camera. Changing the property will move the camera to the new coordinates, and the view will automatically update with it. <code>translation</code> defaults to [0,0,0] and can be set using the following syntax.
 
 	camera.translation = [100, -20, 30]; // Moves the camera to 100 on the x-axis, -20 on the y-axis, and 30  on the z-axis
+
+-------------------
+
