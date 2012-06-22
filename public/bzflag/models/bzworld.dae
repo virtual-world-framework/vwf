@@ -1,0 +1,3382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.59.0 r39307</authoring_tool>
+    </contributor>
+    <created>2012-06-21T15:40:28</created>
+    <modified>2012-06-21T15:40:28</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="pyrwall-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.64 0.64 0.8 1</color>
+            </diffuse>
+            <specular>
+              <color>0 0 0 1</color>
+            </specular>
+            <shininess>
+              <float>1</float>
+            </shininess>
+            <transparency>
+              <float>1</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="boxwall-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.8 0.72 0.64 1</color>
+            </diffuse>
+            <specular>
+              <color>0 0 0 1</color>
+            </specular>
+            <shininess>
+              <float>1</float>
+            </shininess>
+            <transparency>
+              <float>1</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="boxtop-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.8 0.8 0.72 1</color>
+            </diffuse>
+            <specular>
+              <color>0 0 0 1</color>
+            </specular>
+            <shininess>
+              <float>1</float>
+            </shininess>
+            <transparency>
+              <float>1</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="teleback-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0 0.8 0 1</color>
+            </diffuse>
+            <specular>
+              <color>0 0 0 1</color>
+            </specular>
+            <shininess>
+              <float>1</float>
+            </shininess>
+            <transparency>
+              <float>0.5</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="telefront-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.8 0 0 1</color>
+            </diffuse>
+            <specular>
+              <color>0 0 0 1</color>
+            </specular>
+            <shininess>
+              <float>1</float>
+            </shininess>
+            <transparency>
+              <float>0.5</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="telerim-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.8 0.8 0 1</color>
+            </diffuse>
+            <specular>
+              <color>0 0 0 1</color>
+            </specular>
+            <shininess>
+              <float>1</float>
+            </shininess>
+            <transparency>
+              <float>0.5</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="std_ground-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.4 0.4 0.4 1</color>
+            </diffuse>
+            <specular>
+              <color>0 0 0 1</color>
+            </specular>
+            <shininess>
+              <float>1</float>
+            </shininess>
+            <transparency>
+              <float>1</float>
+            </transparency>
+            <index_of_refraction>
+              <float>1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="pyrwall-material" name="pyrwall">
+      <instance_effect url="#pyrwall-effect"/>
+    </material>
+    <material id="boxwall-material" name="boxwall">
+      <instance_effect url="#boxwall-effect"/>
+    </material>
+    <material id="boxtop-material" name="boxtop">
+      <instance_effect url="#boxtop-effect"/>
+    </material>
+    <material id="teleback-material" name="teleback">
+      <instance_effect url="#teleback-effect"/>
+    </material>
+    <material id="telefront-material" name="telefront">
+      <instance_effect url="#telefront-effect"/>
+    </material>
+    <material id="telerim-material" name="telerim">
+      <instance_effect url="#telerim-effect"/>
+    </material>
+    <material id="std_ground-material" name="std_ground">
+      <instance_effect url="#std_ground-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="bzpyr_18-mesh">
+      <mesh>
+        <source id="bzpyr_18-mesh-positions">
+          <float_array id="bzpyr_18-mesh-positions-array" count="15">165.9051 -76.42808 10.25 154.8989 -80.08081 0 169.5579 -87.43433 0 176.9114 -72.77536 0 162.2524 -65.42183 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_18-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_18-mesh-normals">
+          <float_array id="bzpyr_18-mesh-normals-array" count="15">-0.3501303 -0.697972 0.624695 0.6979717 -0.3501306 0.6246951 0.3501303 0.697972 0.624695 -0.6979717 0.3501306 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_18-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_18-mesh-map-0">
+          <float_array id="bzpyr_18-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_18-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_18-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_18-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_18-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_18-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_18-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_19-mesh">
+      <mesh>
+        <source id="bzpyr_19-mesh-positions">
+          <float_array id="bzpyr_19-mesh-positions-array" count="15">177.3596 -164.2543 10.25 178.5598 -152.72 0 165.8253 -163.0541 0 176.1595 -175.7886 0 188.8939 -165.4544 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_19-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_19-mesh-normals">
+          <float_array id="bzpyr_19-mesh-normals-array" count="15">-0.4920496 0.6063358 0.6246952 -0.6063358 -0.4920496 0.6246952 0.4920496 -0.6063358 0.6246952 0.6063358 0.4920496 0.6246952 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_19-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_19-mesh-map-0">
+          <float_array id="bzpyr_19-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_19-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_19-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_19-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_19-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_19-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_19-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_8-mesh">
+      <mesh>
+        <source id="bzbox_8-mesh-positions">
+          <float_array id="bzbox_8-mesh-positions-array" count="24">-305.0589 2.416081 0 -323.5025 59.51103 0 -266.4076 77.95463 0 -247.964 20.85968 0 -247.964 20.85968 9.420001 -266.4076 77.95463 9.420001 -323.5025 59.51103 9.420001 -305.0589 2.416081 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_8-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_8-mesh-normals">
+          <float_array id="bzbox_8-mesh-normals-array" count="18">0 0 -1 0 0 1 0.9515826 0.3073931 0 -0.3073931 0.9515826 0 -0.9515826 -0.3073934 0 0.3073933 -0.9515826 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_8-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_8-mesh-map-0">
+          <float_array id="bzbox_8-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_8-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_8-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_8-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_8-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_8-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_8-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_8-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_8-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_8-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_9-mesh">
+      <mesh>
+        <source id="bzbox_9-mesh-positions">
+          <float_array id="bzbox_9-mesh-positions-array" count="24">137.3032 -276.9796 0 91.64379 -238.0538 0 130.5696 -192.3944 0 176.229 -231.3202 0 176.229 -231.3202 9.420001 130.5696 -192.3944 9.420001 91.64379 -238.0538 9.420001 137.3032 -276.9796 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_9-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_9-mesh-normals">
+          <float_array id="bzbox_9-mesh-normals-array" count="18">0 0 -1 0 0 1 0.6487636 0.76099 0 -0.76099 0.6487637 0 -0.6487637 -0.7609899 0 0.76099 -0.6487634 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_9-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_9-mesh-map-0">
+          <float_array id="bzbox_9-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_9-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_9-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_9-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_9-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_9-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_9-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_9-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_9-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_9-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_6-mesh">
+      <mesh>
+        <source id="bzbox_6-mesh-positions">
+          <float_array id="bzbox_6-mesh-positions-array" count="24">-103.5288 374.6685 0 -64.95751 328.7093 0 -110.9168 290.138 0 -149.4881 336.0972 0 -149.4881 336.0972 9.420001 -110.9168 290.138 9.420001 -64.95751 328.7093 9.420001 -103.5288 374.6685 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_6-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_6-mesh-normals">
+          <float_array id="bzbox_6-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.7659878 -0.6428552 0 0.6428552 -0.7659878 0 0.7659878 0.6428552 0 -0.6428552 0.7659878 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_6-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_6-mesh-map-0">
+          <float_array id="bzbox_6-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_6-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_6-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_6-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_6-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_6-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_6-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_6-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_6-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_6-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_15-mesh">
+      <mesh>
+        <source id="bzpyr_15-mesh-positions">
+          <float_array id="bzpyr_15-mesh-positions-array" count="15">-236.1478 -84.25646 10.25 -247.5325 -82.04993 0 -238.3543 -95.64115 0 -224.7631 -86.46298 0 -233.9412 -72.87177 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_15-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_15-mesh-normals">
+          <float_array id="bzpyr_15-mesh-normals-array" count="15">-0.6471318 -0.4370087 0.624695 0.4370087 -0.6471318 0.624695 0.6471318 0.4370087 0.624695 -0.4370087 0.6471318 0.624695 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_15-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_15-mesh-map-0">
+          <float_array id="bzpyr_15-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_15-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_15-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_15-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_15-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_15-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_15-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_16-mesh">
+      <mesh>
+        <source id="bzpyr_16-mesh-positions">
+          <float_array id="bzpyr_16-mesh-positions-array" count="15">-318.4632 -369.0735 10.25 -314.2033 -358.2877 0 -329.249 -364.8136 0 -322.7231 -379.8593 0 -307.6774 -373.3334 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_16-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_16-mesh-normals">
+          <float_array id="bzpyr_16-mesh-normals-array" count="15">-0.3107243 0.7163843 0.6246951 -0.7163843 -0.3107243 0.6246951 0.3107243 -0.7163843 0.6246951 0.7163843 0.3107243 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_16-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_16-mesh-map-0">
+          <float_array id="bzpyr_16-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_16-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_16-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_16-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_16-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_16-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_16-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_17-mesh">
+      <mesh>
+        <source id="bzpyr_17-mesh-positions">
+          <float_array id="bzpyr_17-mesh-positions-array" count="15">328.1026 109.9303 10.25 338.8016 114.4038 0 323.6291 120.6292 0 317.4037 105.4568 0 332.5761 99.23133 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_17-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_17-mesh-normals">
+          <float_array id="bzpyr_17-mesh-normals-array" count="15">0.2964178 0.7224214 0.624695 -0.7224218 0.2964177 0.6246947 -0.2964178 -0.7224214 0.624695 0.7224218 -0.2964177 0.6246947 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_17-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_17-mesh-map-0">
+          <float_array id="bzpyr_17-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_17-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_17-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_17-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_17-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_17-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_17-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_2-mesh">
+      <mesh>
+        <source id="bzbox_2-mesh-positions">
+          <float_array id="bzbox_2-mesh-positions-array" count="24">-242.4265 -127.8931 0 -189.5649 -156.2771 0 -217.9489 -209.1387 0 -270.8105 -180.7547 0 -270.8105 -180.7547 9.420001 -217.9489 -209.1387 9.420001 -189.5649 -156.2771 9.420001 -242.4265 -127.8931 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_2-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_2-mesh-normals">
+          <float_array id="bzbox_2-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.4730671 -0.8810264 0 0.8810265 -0.4730669 0 0.4730669 0.8810265 0 -0.8810266 0.4730668 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_2-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_2-mesh-map-0">
+          <float_array id="bzbox_2-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_2-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_2-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_2-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_2-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_2-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_2-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_2-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_2-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_2-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_3-mesh">
+      <mesh>
+        <source id="bzbox_3-mesh-positions">
+          <float_array id="bzbox_3-mesh-positions-array" count="24">-252.8651 134.5672 0 -297.6701 94.66089 0 -337.5764 139.4658 0 -292.7715 179.3722 0 -292.7715 179.3722 9.420001 -337.5764 139.4658 9.420001 -297.6701 94.66089 9.420001 -252.8651 134.5672 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_3-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_3-mesh-normals">
+          <float_array id="bzbox_3-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.6651057 0.7467493 0 -0.7467493 -0.6651057 0 0.6651057 -0.7467493 0 0.7467493 0.6651057 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_3-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_3-mesh-map-0">
+          <float_array id="bzbox_3-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_3-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_3-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_3-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_3-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_3-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_3-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_3-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_3-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_3-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_0-mesh">
+      <mesh>
+        <source id="bzbox_0-mesh-positions">
+          <float_array id="bzbox_0-mesh-positions-array" count="24">-7.98131 -153.2259 0 -15.15601 -93.65641 0 44.41348 -86.48171 0 51.58818 -146.0512 0 51.58818 -146.0512 9.42 44.41348 -86.48171 9.42 -15.15601 -93.65641 9.42 -7.98131 -153.2259 9.42</float_array>
+          <technique_common>
+            <accessor source="#bzbox_0-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_0-mesh-normals">
+          <float_array id="bzbox_0-mesh-normals-array" count="18">0 0 -1 0 0 1 0.9928248 0.1195782 0 -0.1195783 0.9928249 0 -0.9928248 -0.1195783 0 0.119578 -0.9928249 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_0-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_0-mesh-map-0">
+          <float_array id="bzbox_0-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_0-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_0-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_0-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_0-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_0-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_0-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_0-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_0-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_0-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_1-mesh">
+      <mesh>
+        <source id="bzbox_1-mesh-positions">
+          <float_array id="bzbox_1-mesh-positions-array" count="24">-77.98508 76.53245 0 -133.7344 98.71393 0 -111.5529 154.4632 0 -55.8036 132.2817 0 -55.8036 132.2817 9.420001 -111.5529 154.4632 9.420001 -133.7344 98.71393 9.420001 -77.98508 76.53245 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_1-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_1-mesh-normals">
+          <float_array id="bzbox_1-mesh-normals-array" count="18">0 0 -1 0 0 1 0.3696914 0.9291545 0 -0.9291546 0.3696914 0 -0.3696913 -0.9291546 0 0.9291546 -0.3696913 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_1-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_1-mesh-map-0">
+          <float_array id="bzbox_1-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_1-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_1-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_1-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_1-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_1-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_1-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_1-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_1-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_1-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_30-mesh">
+      <mesh>
+        <source id="bzpyr_30-mesh-positions">
+          <float_array id="bzpyr_30-mesh-positions-array" count="15">186.8319 -288.9004 10.25 195.5798 -281.2876 0 179.2191 -280.1525 0 178.084 -296.5131 0 194.4447 -297.6483 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_30-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_30-mesh-normals">
+          <float_array id="bzpyr_30-mesh-normals-array" count="15">0.05404806 0.7789963 0.6246948 -0.7789961 0.05404883 0.6246951 -0.05404806 -0.7789963 0.6246948 0.7789961 -0.05404883 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_30-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_30-mesh-map-0">
+          <float_array id="bzpyr_30-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_30-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_30-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_30-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_30-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_30-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_30-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_31-mesh">
+      <mesh>
+        <source id="bzpyr_31-mesh-positions">
+          <float_array id="bzpyr_31-mesh-positions-array" count="15">185.0354 390.5277 10.25 187.2662 379.1477 0 196.4154 392.7585 0 182.8047 401.9077 0 173.6554 388.297 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_31-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_31-mesh-normals">
+          <float_array id="bzpyr_31-mesh-normals-array" count="15">0.64806 -0.435631 0.6246951 0.435631 0.64806 0.6246951 -0.64806 0.435631 0.6246951 -0.435631 -0.64806 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_31-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_31-mesh-map-0">
+          <float_array id="bzpyr_31-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_31-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_31-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_31-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_31-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_31-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_31-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_40-mesh">
+      <mesh>
+        <source id="bztele_40-mesh-positions">
+          <float_array id="bztele_40-mesh-positions-array" count="24">58.79513 -113.9876 0 72.20314 -114.9145 0 72.20314 -114.9145 21.28 58.79513 -113.9876 21.28 72.28038 -113.7972 0 58.87238 -112.8703 0 58.87238 -112.8703 21.28 72.28038 -113.7972 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_40-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_40-mesh-normals">
+          <float_array id="bztele_40-mesh-normals-array" count="18">-0.0689671 -0.9976189 0 0.0689671 0.9976189 0 0 0 -1 0 0 1 -0.9976189 0.0689677 0 0.9976187 -0.06897109 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_40-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_40-mesh-map-0">
+          <float_array id="bztele_40-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_40-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_40-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_40-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_40-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_40-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_40-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_40-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_40-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_40-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_40-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_40-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_40-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_36-mesh">
+      <mesh>
+        <source id="bztele_36-mesh-positions">
+          <float_array id="bztele_36-mesh-positions-array" count="24">182.6311 17.81219 0 176.3832 29.71164 0 176.3832 29.71164 21.28 182.6311 17.81219 21.28 175.3916 29.19098 0 181.6395 17.29153 0 181.6395 17.29153 21.28 175.3916 29.19098 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_36-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_36-mesh-normals">
+          <float_array id="bztele_36-mesh-normals-array" count="18">0.8853756 0.4648764 0 -0.8853756 -0.4648764 0 0 0 -1 0 0 1 0.4648748 -0.8853765 0 -0.4648748 0.8853765 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_36-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_36-mesh-map-0">
+          <float_array id="bztele_36-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_36-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_36-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_36-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_36-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_36-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_36-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_36-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_36-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_36-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_36-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_36-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_36-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_38-mesh">
+      <mesh>
+        <source id="bztele_38-mesh-positions">
+          <float_array id="bztele_38-mesh-positions-array" count="24">-283.7998 -72.65676 0 -297.2315 -73.13073 0 -297.2315 -73.13073 21.28 -283.7998 -72.65676 21.28 -297.192 -74.25003 0 -283.7604 -73.77606 0 -283.7604 -73.77606 21.28 -297.192 -74.25003 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_38-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_38-mesh-normals">
+          <float_array id="bztele_38-mesh-normals-array" count="18">-0.03526604 0.9993779 0 0.03526604 -0.9993779 0 0 0 -1 0 0 1 0.9993782 0.03525876 0 -0.9993782 -0.03525876 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_38-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_38-mesh-map-0">
+          <float_array id="bztele_38-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_38-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_38-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_38-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_38-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_38-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_38-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_38-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_38-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_38-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_38-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_38-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_38-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_43-mesh">
+      <mesh>
+        <source id="bztele_43-mesh-positions">
+          <float_array id="bztele_43-mesh-positions-array" count="24">296.6402 -266.7606 0 305.4819 -256.6384 0 305.4819 -256.6384 21.28 296.6402 -266.7606 21.28 304.6383 -255.9016 0 295.7967 -266.0238 0 295.7967 -266.0238 21.28 304.6383 -255.9016 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_43-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_43-mesh-normals">
+          <float_array id="bztele_43-mesh-normals-array" count="18">0.7531385 -0.657862 0 -0.753138 0.6578626 0 0 0 -1 0 0 1 -0.6578717 -0.7531301 0 0.6578639 0.7531368 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_43-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_43-mesh-map-0">
+          <float_array id="bztele_43-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_43-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_43-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_43-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_43-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_43-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_43-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_43-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_43-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_43-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_43-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_43-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_43-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_7-mesh">
+      <mesh>
+        <source id="bzbox_7-mesh-positions">
+          <float_array id="bzbox_7-mesh-positions-array" count="24">-350.2461 -42.39392 0 -408.8861 -55.09657 0 -421.5887 3.543373 0 -362.9487 16.24602 0 -362.9487 16.24602 9.420001 -421.5887 3.543373 9.420001 -408.8861 -55.09657 9.420001 -350.2461 -42.39392 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_7-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_7-mesh-normals">
+          <float_array id="bzbox_7-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.2117108 0.9773324 0 -0.9773325 -0.2117106 0 0.2117108 -0.9773324 0 0.9773325 0.2117106 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_7-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_7-mesh-map-0">
+          <float_array id="bzbox_7-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_7-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_7-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_7-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_7-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_7-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_7-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_7-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_7-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_7-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_29-mesh">
+      <mesh>
+        <source id="bzpyr_29-mesh-positions">
+          <float_array id="bzpyr_29-mesh-positions-array" count="15">-224.6693 -368.169 10.25 -213.106 -367.2915 0 -225.5468 -356.6057 0 -236.2326 -369.0465 0 -223.7919 -379.7323 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_29-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_29-mesh-normals">
+          <float_array id="bzpyr_29-mesh-normals-array" count="15">0.5087945 0.5923551 0.6246949 -0.5923544 0.5087953 0.624695 -0.5087945 -0.5923551 0.6246949 0.5923544 -0.5087953 0.624695 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_29-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_29-mesh-map-0">
+          <float_array id="bzpyr_29-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_29-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_29-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_29-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_29-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_29-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_29-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_4-mesh">
+      <mesh>
+        <source id="bzbox_4-mesh-positions">
+          <float_array id="bzbox_4-mesh-positions-array" count="24">-270.4323 374.3948 0 -210.4345 373.8754 0 -210.9539 313.8777 0 -270.9517 314.3971 0 -270.9517 314.3971 9.420001 -210.9539 313.8777 9.420001 -210.4345 373.8754 9.420001 -270.4323 374.3948 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_4-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_4-mesh-normals">
+          <float_array id="bzbox_4-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.008656799 -0.9999625 0 0.9999625 -0.008657038 0 0.008656799 0.9999625 0 -0.9999625 0.008657276 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_4-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_4-mesh-map-0">
+          <float_array id="bzbox_4-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_4-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_4-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_4-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_4-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_4-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_4-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_4-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_4-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_4-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_28-mesh">
+      <mesh>
+        <source id="bzpyr_28-mesh-positions">
+          <float_array id="bzpyr_28-mesh-positions-array" count="15">-255.5959 -20.27621 10.25 -265.8427 -25.70605 0 -250.1661 -30.52301 0 -245.3491 -14.84638 0 -261.0257 -10.02941 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_28-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_28-mesh-normals">
+          <float_array id="bzpyr_28-mesh-normals-array" count="15">-0.2293548 -0.7464263 0.6246952 0.7464267 -0.229355 0.6246948 0.229355 0.7464264 0.624695 -0.7464261 0.2293556 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_28-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_28-mesh-map-0">
+          <float_array id="bzpyr_28-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_28-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_28-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_28-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_28-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_28-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_28-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_32-mesh">
+      <mesh>
+        <source id="bztele_32-mesh-positions">
+          <float_array id="bztele_32-mesh-positions-array" count="24">-321.6871 -93.28147 0 -313.6084 -82.54053 0 -313.6084 -82.54053 21.28 -321.6871 -93.28147 21.28 -314.5035 -81.8673 0 -322.5822 -92.60823 0 -322.5822 -92.60823 21.28 -314.5035 -81.8673 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_32-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_32-mesh-normals">
+          <float_array id="bztele_32-mesh-normals-array" count="18">0.7991767 -0.6010963 0 -0.7991767 0.6010963 0 0 0 -1 0 0 1 -0.6010981 -0.7991753 0 0.6010981 0.7991753 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_32-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_32-mesh-map-0">
+          <float_array id="bztele_32-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_32-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_32-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_32-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_32-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_32-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_32-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_32-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_32-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_32-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_32-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_32-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_32-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_33-mesh">
+      <mesh>
+        <source id="bztele_33-mesh-positions">
+          <float_array id="bztele_33-mesh-positions-array" count="24">368.7528 -358.3156 0 368.744 -371.7556 0 368.744 -371.7556 21.28 368.7528 -358.3156 21.28 369.864 -371.7563 0 369.8728 -358.3163 0 369.8728 -358.3163 21.28 369.864 -371.7563 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_33-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_33-mesh-normals">
+          <float_array id="bztele_33-mesh-normals-array" count="18">-0.9999998 6.58489e-4 0 0.9999998 -6.58489e-4 0 0 0 -1 0 0 1 6.53951e-4 0.9999998 0 -6.53951e-4 -0.9999998 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_33-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_33-mesh-map-0">
+          <float_array id="bztele_33-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_33-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_33-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_33-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_33-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_33-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_33-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_33-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_33-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_33-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_33-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_33-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_33-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_34-mesh">
+      <mesh>
+        <source id="bztele_34-mesh-positions">
+          <float_array id="bztele_34-mesh-positions-array" count="24">-120.7262 -248.4072 0 -128.9781 -237.7987 0 -128.9781 -237.7987 21.28 -120.7262 -248.4072 21.28 -129.8621 -238.4864 0 -121.6103 -249.0949 0 -121.6103 -249.0949 21.28 -129.8621 -238.4864 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_34-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_34-mesh-normals">
+          <float_array id="bztele_34-mesh-normals-array" count="18">0.7893239 0.6139768 0 -0.7893237 -0.6139772 0 0 0 -1 0 0 1 0.613977 -0.789324 0 -0.6139736 0.7893266 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_34-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_34-mesh-map-0">
+          <float_array id="bztele_34-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_34-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_34-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_34-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_34-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_34-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_34-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_34-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_34-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_34-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_34-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_34-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_34-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_35-mesh">
+      <mesh>
+        <source id="bztele_35-mesh-positions">
+          <float_array id="bztele_35-mesh-positions-array" count="24">-98.01048 65.65174 0 -89.95462 54.89363 0 -89.95462 54.89363 21.28 -98.01048 65.65174 21.28 -89.05812 55.56496 0 -97.11397 66.32306 0 -97.11397 66.32306 21.28 -89.05812 55.56496 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_35-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_35-mesh-normals">
+          <float_array id="bztele_35-mesh-normals-array" count="18">-0.800454 -0.5993942 0 0.8004541 0.599394 0 0 0 -1 0 0 1 -0.5993971 0.8004518 0 0.5993949 -0.8004534 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_35-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_35-mesh-map-0">
+          <float_array id="bztele_35-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_35-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_35-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_35-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_35-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_35-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_35-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_35-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_35-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_35-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_35-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_35-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_35-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_5-mesh">
+      <mesh>
+        <source id="bzbox_5-mesh-positions">
+          <float_array id="bzbox_5-mesh-positions-array" count="24">-149.5047 -239.6172 0 -204.2476 -264.1775 0 -228.8079 -209.4346 0 -174.065 -184.8742 0 -174.065 -184.8742 9.420001 -228.8079 -209.4346 9.420001 -204.2476 -264.1775 9.420001 -149.5047 -239.6172 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_5-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_5-mesh-normals">
+          <float_array id="bzbox_5-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.4093386 0.9123825 0 -0.9123826 -0.4093383 0 0.4093386 -0.9123825 0 0.9123826 0.4093383 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_5-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_5-mesh-map-0">
+          <float_array id="bzbox_5-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_5-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_5-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_5-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_5-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_5-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_5-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_5-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_5-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_5-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_37-mesh">
+      <mesh>
+        <source id="bztele_37-mesh-positions">
+          <float_array id="bztele_37-mesh-positions-array" count="24">325.0957 321.5919 0 316.098 331.5757 0 316.098 331.5757 21.28 325.0957 321.5919 21.28 315.266 330.8259 0 324.2637 320.8421 0 324.2637 320.8421 21.28 315.266 330.8259 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_37-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_37-mesh-normals">
+          <float_array id="bztele_37-mesh-normals-array" count="18">0.7428392 0.6694699 0 -0.7428392 -0.6694699 0 0 0 -1 0 0 1 0.6694794 -0.7428306 0 -0.6694794 0.7428306 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_37-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_37-mesh-map-0">
+          <float_array id="bztele_37-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_37-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_37-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_37-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_37-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_37-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_37-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_37-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_37-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_37-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_37-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_37-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_37-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_21-mesh">
+      <mesh>
+        <source id="bzpyr_21-mesh-positions">
+          <float_array id="bzpyr_21-mesh-positions-array" count="15">35.32538 177.527 10.25 38.77661 188.5981 0 24.2543 180.9783 0 31.87417 166.4559 0 46.39648 174.0758 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_21-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_21-mesh-normals">
+          <float_array id="bzpyr_21-mesh-normals-array" count="15">-0.3628123 0.6914647 0.6246949 -0.6914647 -0.3628122 0.6246951 0.3628123 -0.6914647 0.6246949 0.6914647 0.3628122 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_21-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_21-mesh-map-0">
+          <float_array id="bzpyr_21-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_21-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_21-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_21-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_21-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_21-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_21-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_20-mesh">
+      <mesh>
+        <source id="bzpyr_20-mesh-positions">
+          <float_array id="bzpyr_20-mesh-positions-array" count="15">-304.3806 11.50126 10.25 -306.2605 0.05809545 0 -292.9375 9.621401 0 -302.5008 22.94443 0 -315.8238 13.38113 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_20-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_20-mesh-normals">
+          <float_array id="bzpyr_20-mesh-normals-array" count="15">0.4553467 -0.634362 0.6246953 0.6343619 0.4553474 0.624695 -0.4553467 0.634362 0.6246953 -0.6343619 -0.4553474 0.624695 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_20-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_20-mesh-map-0">
+          <float_array id="bzpyr_20-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_20-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_20-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_20-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_20-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_20-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_20-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_23-mesh">
+      <mesh>
+        <source id="bzpyr_23-mesh-positions">
+          <float_array id="bzpyr_23-mesh-positions-array" count="15">-166.6664 -174.5719 10.25 -178.2612 -174.7731 0 -166.4651 -186.1667 0 -155.0716 -174.3706 0 -166.8676 -162.9771 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_23-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_23-mesh-normals">
+          <float_array id="bzpyr_23-mesh-normals-array" count="15">-0.5424908 -0.5616582 0.6246951 0.5616582 -0.5424908 0.6246951 0.5424908 0.5616582 0.6246951 -0.5616582 0.5424908 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_23-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_23-mesh-map-0">
+          <float_array id="bzpyr_23-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_23-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_23-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_23-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_23-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_23-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_23-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_22-mesh">
+      <mesh>
+        <source id="bzpyr_22-mesh-positions">
+          <float_array id="bzpyr_22-mesh-positions-array" count="15">105.9355 -93.18708 10.25 94.42183 -94.57084 0 107.3193 -104.7008 0 117.4492 -91.80331 0 104.5518 -81.67338 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_22-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_22-mesh-normals">
+          <float_array id="bzpyr_22-mesh-normals-array" count="15">-0.482326 -0.6140991 0.624695 0.6140991 -0.482326 0.624695 0.482326 0.6140991 0.624695 -0.6140991 0.482326 0.624695 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_22-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_22-mesh-map-0">
+          <float_array id="bzpyr_22-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_22-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_22-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_22-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_22-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_22-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_22-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_25-mesh">
+      <mesh>
+        <source id="bzpyr_25-mesh-positions">
+          <float_array id="bzpyr_25-mesh-positions-array" count="15">-56.56781 385.0965 10.25 -50.87914 374.9911 0 -46.46241 390.7851 0 -62.25648 395.2019 0 -66.67321 379.4078 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_25-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_25-mesh-normals">
+          <float_array id="bzpyr_25-mesh-normals-array" count="15">0.7520177 -0.210298 0.6246953 0.2102987 0.7520176 0.6246951 -0.7520177 0.210298 0.6246953 -0.2102987 -0.7520176 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_25-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_25-mesh-map-0">
+          <float_array id="bzpyr_25-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_25-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_25-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_25-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_25-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_25-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_25-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_24-mesh">
+      <mesh>
+        <source id="bzpyr_24-mesh-positions">
+          <float_array id="bzpyr_24-mesh-positions-array" count="15">-121.2094 -162.2689 10.25 -123.8021 -150.9659 0 -132.5124 -164.8616 0 -118.6167 -173.5719 0 -109.9064 -159.6762 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_24-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_24-mesh-normals">
+          <float_array id="bzpyr_24-mesh-normals-array" count="15">-0.6616302 0.4147309 0.6246949 -0.4147303 -0.6616304 0.6246951 0.6616302 -0.4147309 0.6246949 0.4147303 0.6616304 0.6246951 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_24-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_24-mesh-map-0">
+          <float_array id="bzpyr_24-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_24-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_24-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_24-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_24-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_24-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_24-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_27-mesh">
+      <mesh>
+        <source id="bzpyr_27-mesh-positions">
+          <float_array id="bzpyr_27-mesh-positions-array" count="15">-52.39963 265.6135 10.25 -48.64394 254.6419 0 -41.42809 269.3692 0 -56.15533 276.5851 0 -63.37118 261.8578 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_27-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_27-mesh-normals">
+          <float_array id="bzpyr_27-mesh-normals-array" count="15">0.7012222 -0.3435748 0.6246949 0.343575 0.7012215 0.6246955 -0.7012223 0.3435745 0.6246951 -0.3435745 -0.7012221 0.6246953 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_27-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_27-mesh-map-0">
+          <float_array id="bzpyr_27-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_27-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_27-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_27-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_27-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_27-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_27-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzpyr_26-mesh">
+      <mesh>
+        <source id="bzpyr_26-mesh-positions">
+          <float_array id="bzpyr_26-mesh-positions-array" count="15">-346.6376 -64.4789 10.25 -354.8765 -56.31807 0 -354.7984 -72.71788 0 -338.3986 -72.63973 0 -338.4767 -56.23991 0</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_26-mesh-positions-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_26-mesh-normals">
+          <float_array id="bzpyr_26-mesh-normals-array" count="15">-0.78086 -0.003721237 0.624695 0.003721237 -0.78086 0.624695 0.78086 0.003721237 0.624695 -0.003721237 0.78086 0.624695 0 0 -1</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_26-mesh-normals-array" count="5" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzpyr_26-mesh-map-0">
+          <float_array id="bzpyr_26-mesh-map-0-array" count="32">0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0.5125 1.640801 0 0 1.025 0 0 0 1.025 0 1.025 1.025 0 1.025</float_array>
+          <technique_common>
+            <accessor source="#bzpyr_26-mesh-map-0-array" count="16" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzpyr_26-mesh-vertices">
+          <input semantic="POSITION" source="#bzpyr_26-mesh-positions"/>
+        </vertices>
+        <polylist material="pyrwall1" count="5">
+          <input semantic="VERTEX" source="#bzpyr_26-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzpyr_26-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzpyr_26-mesh-map-0" offset="2" set="0"/>
+          <vcount>3 3 3 3 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 0 1 3 2 1 4 3 1 5 0 2 6 3 2 7 4 2 8 0 3 9 4 3 10 1 3 11 4 4 12 3 4 13 2 4 14 1 4 15</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_39-mesh">
+      <mesh>
+        <source id="bztele_39-mesh-positions">
+          <float_array id="bztele_39-mesh-positions-array" count="24">280.5702 -373.425 0 284.7472 -386.1995 0 284.7472 -386.1995 21.28 280.5702 -373.425 21.28 285.8117 -385.8514 0 281.6348 -373.0769 0 281.6348 -373.0769 21.28 285.8117 -385.8514 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_39-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_39-mesh-normals">
+          <float_array id="bztele_39-mesh-normals-array" count="18">-0.9504799 -0.3107859 0 0.9504799 0.3107859 0 0 0 -1 0 0 1 -0.3107867 0.9504798 0 0.3107867 -0.9504798 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_39-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_39-mesh-map-0">
+          <float_array id="bztele_39-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_39-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_39-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_39-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_39-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_39-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_39-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_39-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_39-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_39-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_39-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_39-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_39-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_42-mesh">
+      <mesh>
+        <source id="bztele_42-mesh-positions">
+          <float_array id="bztele_42-mesh-positions-array" count="24">-250.0368 3.048944 0 -236.6874 1.491397 0 -236.6874 1.491397 21.28 -250.0368 3.048944 21.28 -236.5576 2.60385 0 -249.907 4.161397 0 -249.907 4.161397 21.28 -236.5576 2.60385 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_42-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_42-mesh-normals">
+          <float_array id="bztele_42-mesh-normals-array" count="18">-0.1158889 -0.9932622 0 0.1158889 0.9932622 0 0 0 -1 0 0 1 -0.993261 0.1158986 0 0.993261 -0.1158986 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_42-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_42-mesh-map-0">
+          <float_array id="bztele_42-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_42-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_42-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_42-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_42-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_42-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_42-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_42-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_42-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_42-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_42-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_42-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_42-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_12-mesh">
+      <mesh>
+        <source id="bzbox_12-mesh-positions">
+          <float_array id="bzbox_12-mesh-positions-array" count="24">353.0349 -56.01355 0 348.6014 -115.8495 0 288.7654 -111.416 0 293.1989 -51.58007 0 293.1989 -51.58007 9.42 288.7654 -111.416 9.42 348.6014 -115.8495 9.42 353.0349 -56.01355 9.42</float_array>
+          <technique_common>
+            <accessor source="#bzbox_12-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_12-mesh-normals">
+          <float_array id="bzbox_12-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.9972662 0.07389169 0 -0.07389158 -0.9972662 0 0.9972663 -0.07389169 0 0.07389146 0.9972662 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_12-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_12-mesh-map-0">
+          <float_array id="bzbox_12-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_12-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_12-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_12-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_12-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_12-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_12-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_12-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_12-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_12-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_13-mesh">
+      <mesh>
+        <source id="bzbox_13-mesh-positions">
+          <float_array id="bzbox_13-mesh-positions-array" count="24">38.53815 -353.3272 0 95.65888 -371.6908 0 77.29522 -428.8116 0 20.1745 -410.4479 0 20.1745 -410.4479 9.420001 77.29522 -428.8116 9.420001 95.65888 -371.6908 9.420001 38.53815 -353.3272 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_13-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_13-mesh-normals">
+          <float_array id="bzbox_13-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.3060607 -0.9520119 0 0.952012 -0.3060609 0 0.3060607 0.9520119 0 -0.952012 0.3060609 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_13-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_13-mesh-map-0">
+          <float_array id="bzbox_13-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_13-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_13-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_13-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_13-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_13-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_13-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_13-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_13-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_13-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_10-mesh">
+      <mesh>
+        <source id="bzbox_10-mesh-positions">
+          <float_array id="bzbox_10-mesh-positions-array" count="24">115.5728 105.696 0 175.5684 104.9664 0 174.8388 44.97087 0 114.8432 45.70046 0 114.8432 45.70046 9.420001 174.8388 44.97087 9.420001 175.5684 104.9664 9.420001 115.5728 105.696 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_10-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_10-mesh-normals">
+          <float_array id="bzbox_10-mesh-normals-array" count="18">0 0 -1 0 0 1 -0.01215982 -0.9999261 0 0.999926 -0.0121597 0 0.01215982 0.999926 0 -0.999926 0.01215982 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_10-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_10-mesh-map-0">
+          <float_array id="bzbox_10-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_10-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_10-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_10-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_10-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_10-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_10-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_10-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_10-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_10-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_11-mesh">
+      <mesh>
+        <source id="bzbox_11-mesh-positions">
+          <float_array id="bzbox_11-mesh-positions-array" count="24">50.83429 -3.325636 0 107.064 17.60818 0 127.9978 -38.62149 0 71.76811 -59.5553 0 71.76811 -59.5553 9.420001 127.9978 -38.62149 9.420001 107.064 17.60818 9.420001 50.83429 -3.325636 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_11-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_11-mesh-normals">
+          <float_array id="bzbox_11-mesh-normals-array" count="18">0 0 -1 0 0 1 0.3488969 -0.9371612 0 0.9371612 0.3488969 0 -0.3488969 0.9371612 0 -0.9371612 -0.3488969 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_11-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_11-mesh-map-0">
+          <float_array id="bzbox_11-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_11-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_11-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_11-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_11-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_11-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_11-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_11-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_11-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_11-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzbox_14-mesh">
+      <mesh>
+        <source id="bzbox_14-mesh-positions">
+          <float_array id="bzbox_14-mesh-positions-array" count="24">-38.79636 -380.7115 0 13.5131 -351.3223 0 42.90221 -403.6318 0 -9.407248 -433.0209 0 -9.407248 -433.0209 9.420001 42.90221 -403.6318 9.420001 13.5131 -351.3223 9.420001 -38.79636 -380.7115 9.420001</float_array>
+          <technique_common>
+            <accessor source="#bzbox_14-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_14-mesh-normals">
+          <float_array id="bzbox_14-mesh-normals-array" count="18">0 0 -1 0 0 1 0.4898188 -0.8718243 0 0.8718245 0.4898185 0 -0.4898188 0.8718243 0 -0.8718245 -0.4898185 0</float_array>
+          <technique_common>
+            <accessor source="#bzbox_14-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzbox_14-mesh-map-0">
+          <float_array id="bzbox_14-mesh-map-0-array" count="48">0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 3.75 0 3.75 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775 0 0 3.75 0 3.75 1.1775 0 1.1775</float_array>
+          <technique_common>
+            <accessor source="#bzbox_14-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzbox_14-mesh-vertices">
+          <input semantic="POSITION" source="#bzbox_14-mesh-positions"/>
+        </vertices>
+        <polylist material="boxwall1" count="4">
+          <input semantic="VERTEX" source="#bzbox_14-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_14-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_14-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>3 2 8 2 2 9 5 2 10 4 2 11 2 3 12 1 3 13 6 3 14 5 3 15 1 4 16 0 4 17 7 4 18 6 4 19 0 5 20 3 5 21 4 5 22 7 5 23</p>
+        </polylist>
+        <polylist material="boxtop2" count="2">
+          <input semantic="VERTEX" source="#bzbox_14-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzbox_14-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzbox_14-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3 4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bzground-mesh">
+      <mesh>
+        <source id="bzground-mesh-positions">
+          <float_array id="bzground-mesh-positions-array" count="12">-400 -400 0 400 -400 0 400 400 0 -400 400 0</float_array>
+          <technique_common>
+            <accessor source="#bzground-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzground-mesh-normals">
+          <float_array id="bzground-mesh-normals-array" count="3">0 0 1</float_array>
+          <technique_common>
+            <accessor source="#bzground-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bzground-mesh-map-0">
+          <float_array id="bzground-mesh-map-0-array" count="8">-8 -8 8 -8 8 8 -8 8</float_array>
+          <technique_common>
+            <accessor source="#bzground-mesh-map-0-array" count="4" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bzground-mesh-vertices">
+          <input semantic="POSITION" source="#bzground-mesh-positions"/>
+        </vertices>
+        <polylist material="std_ground1" count="1">
+          <input semantic="VERTEX" source="#bzground-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bzground-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bzground-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+    <geometry id="bztele_41-mesh">
+      <mesh>
+        <source id="bztele_41-mesh-positions">
+          <float_array id="bztele_41-mesh-positions-array" count="24">141.2486 -137.1155 0 154.5573 -135.2415 0 154.5573 -135.2415 21.28 141.2486 -137.1155 21.28 154.4011 -134.1324 0 141.0924 -136.0065 0 141.0924 -136.0065 21.28 154.4011 -134.1324 21.28</float_array>
+          <technique_common>
+            <accessor source="#bztele_41-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_41-mesh-normals">
+          <float_array id="bztele_41-mesh-normals-array" count="18">0.1394374 -0.9902309 0 -0.1394374 0.9902309 0 0 0 -1 0 0 1 -0.9902304 -0.1394412 0 0.9902304 0.1394412 0</float_array>
+          <technique_common>
+            <accessor source="#bztele_41-mesh-normals-array" count="6" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bztele_41-mesh-map-0">
+          <float_array id="bztele_41-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 1 1 0 1 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#bztele_41-mesh-map-0-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bztele_41-mesh-vertices">
+          <input semantic="POSITION" source="#bztele_41-mesh-positions"/>
+        </vertices>
+        <polylist material="teleback1" count="1">
+          <input semantic="VERTEX" source="#bztele_41-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_41-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_41-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>4 1 4 5 1 5 6 1 6 7 1 7</p>
+        </polylist>
+        <polylist material="telefront2" count="1">
+          <input semantic="VERTEX" source="#bztele_41-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_41-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_41-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>0 0 0 1 0 1 2 0 2 3 0 3</p>
+        </polylist>
+        <polylist material="telerim3" count="4">
+          <input semantic="VERTEX" source="#bztele_41-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bztele_41-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bztele_41-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 4 4 4 </vcount>
+          <p>0 2 8 5 2 9 4 2 10 1 2 11 6 3 12 3 3 13 2 3 14 7 3 15 5 4 16 0 4 17 3 4 18 6 4 19 1 5 20 4 5 21 7 5 22 2 5 23</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Mesh_044" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_18-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_043" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_19-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_042" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_8-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_041" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_9-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_040" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_6-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_039" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_15-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_038" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_16-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_037" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_17-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_036" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_2-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_035" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_3-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_034" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_0-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_033" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_1-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_032" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_30-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_031" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_31-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_030" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_40-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_029" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_36-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_028" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_38-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_027" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_43-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_026" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_7-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_025" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_29-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_024" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_4-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_023" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_28-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_022" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_32-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_021" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_33-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_020" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_34-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_019" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_35-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_018" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_5-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_017" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_37-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_016" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_21-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_015" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_20-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_014" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_23-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_013" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_22-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_012" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_25-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_011" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_24-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_010" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_27-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_009" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzpyr_26-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="pyrwall1" target="#pyrwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_008" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_39-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_007" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_42-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_006" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_12-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_005" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_13-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_004" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_10-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_003" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_11-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_002" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzbox_14-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boxwall1" target="#boxwall-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="boxtop2" target="#boxtop-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh_001" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bzground-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="std_ground1" target="#std_ground-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Mesh" type="NODE">
+        <translate sid="location">0 0 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#bztele_41-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="teleback1" target="#teleback-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telefront2" target="#telefront-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+              <instance_material symbol="telerim3" target="#telerim-material">
+                <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>
