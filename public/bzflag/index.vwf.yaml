@@ -16,18 +16,44 @@ extends: http://vwf.example.com/navscene.vwf
 properties:
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
+  ambientColor: [ 250, 250, 250 ]
   navmode: "walk"
+  # navmode: "orbit"
+  speed: 8
 children:
   bz_world:
     extends: http://vwf.example.com/node3.vwf
-    source: models/bzworld.dae
+    source: models/bzworld_tex.dae
     type: model/vnd.collada+xml
     properties:
       translation: [ 0, 0, 0 ]
       rotation: [ 1, 0, 0, -90 ]
-      scale: 5
+      scale: 4
+  mountains:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/mountains.dae
+    type: model/vnd.collada+xml
+    properties: 
+      rotation: [ 1, 0, 0, 0 ]
+      translation: [ 0, 0, -5000 ]
+      scale: 1500
+  background:
+    extends: http://vwf.example.com/node3.vwf
+    source: models/skydome.dae
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+      translation: [ 0, 0, -1500 ]
+      scale: 300
+  # sceneCenter:
+  #   extends: http://vwf.example.com/node3.vwf
+  #   properties:
+  #     translation: [ 0, 0, 0 ]
 scripts:
 - |
   this.initialize = function() {
-    this.camera.translation = [ 0, 0, 10 ];
+    this.camera.translation = [ 0, 0, 800 ];
+    this.camera.far = 100000000;
+    this.camera.near = 1;
+    //this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
   }
