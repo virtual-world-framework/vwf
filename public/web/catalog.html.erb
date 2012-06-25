@@ -33,7 +33,7 @@
       {
         function update(app) 
 		{
-			 var instances$ = $('.'+ app + 'instances');
+			 var instances$ = $('.'+ app.replace(/\//g,'') + 'instances');
 			 var match;
 			 jQuery.getJSON( "../" + app + "/admin/instances", function( data ) {
 			 instances$.empty();
@@ -117,7 +117,7 @@
 							<img src="../<%= image %>" alt="<%= name %>" / style="vertical-align:middle;">            
 					  </a>
 					</td>
-					<td tyle="width:75%">
+					<td style="width:75%">
 						  <h3 style="float:left;vertical-align:middle;"><%= name %></h3> 
 						  <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../<%= application + ( application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == 'agi' ? "?connected=1" : "" )  %>">
 						  Launch New Session</a>
@@ -127,11 +127,11 @@
 						  <br/>
 						  <div id='<%= application %>-content' class='overlayContent'>
 							  <div class="overlay">
-								  <div class='<%= application %>instances'>
+								  <div class='<%= application.gsub("/","") %>instances'>
 									<p><b>Current Sessions</b></p>
 								</div>
 								<script type="text/javascript">
-								$(document.getElementById('<%= application %>instances')).ready(showInfo('<%= application %>', '<%= application == "earth" ? "?connected=1" : "" %>'));							
+								$(document.getElementById('<%= application.gsub("/","") %>instances')).ready(showInfo('<%= application %>', '<%= application + ( application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == "agi" ? "?connected=1" : "" )  %>'));							
 								</script>
 							</div>
 						</div>
