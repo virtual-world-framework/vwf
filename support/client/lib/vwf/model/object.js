@@ -238,6 +238,10 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
             } );
         },
 
+        properties: function( nodeID ) {
+            return this.objects[nodeID].properties;
+        },
+
         // -- sequence -----------------------------------------------------------------------------
 
         sequence: function( nodeID ) {

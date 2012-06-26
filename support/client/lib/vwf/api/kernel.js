@@ -454,4 +454,95 @@ define( {
 
     descendants: [ /* nodeID */ ],
 
+    /// Locate nodes matching a search pattern. matchPattern supports an XPath subset consisting of
+    /// the following:
+    /// 
+    ///   "/" -- the application root node
+    ///   "/*" -- children of the application
+    ///   "/name" -- a child of the application having the specified name
+    ///   "/name1/name2/name3/..." -- a descendant of the application along the specified path
+    ///   "//name" -- descendants of the application having the specified name
+    ///   "//*" -- all descendants of the application
+    ///   "//element(*,uri)" -- descendants of the application having uri in their prototype chain
+    ///   
+    ///   ".." -- the reference node's parent
+    ///   "." -- the reference node
+    ///   "*", "./*" -- children of the reference node
+    ///   "name", "./name" -- a child of the reference node having the specified name
+    ///   "name1/name2/name3/..." -- a descendant of the reference node along the specified path
+    ///   ".//name" -- descendants of the reference node having the specified name
+    ///   ".//*" -- all descendants of the reference node
+    ///   ".//element(name)" -- same as ".//name"
+    ///   ".//element(*)" -- same as ".//*"
+    ///   ".//element(name,uri)" -- descendants having the specified name and extending uri
+    ///   ".//element(*,uri)" -- descendants extending uri
+    ///   
+    ///   "name[name2]" -- a child "name" which also has a child having the second name
+    ///   "name[name2/name3/...]" -- a child "name" which also has a descendant along the path
+    ///   "*[*]" -- children which also have at least one child
+    ///   "name[@property]" -- a child "name" which also has a truthy property with the provided name
+    ///   "*[@*]" -- children which also have at least one truthy property
+    ///  
+    /// XPath elements are interpreted as VWF nodes and XPath attributes are interpreted as VWF
+    /// properties. The expression must evaluate to an element (node) set since only nodes are
+    /// distinctly addressable entities in VWF. Properties may be used in predicates.
+    ///  
+    /// The following XPath axes are supported:
+    ///   ancestor-or-self, ancestor, parent, self, child, descendant, descendant-or-self, and
+    ///     attribute (predicates only)
+    /// along with the following node tests:
+    ///   element(name,type), attribute(name) (in predicates only), and node()
+    /// the shortcut notation:
+    ///   "//": descendant-or-self:node(), ".": self::node(), "..": "parent::node()",
+    ///   "name": "child::name", "@name": "attribute::name"
+    /// and the wildcard name:
+    ///   "*"
+    /// 
+    /// This is a naive implementation with several limitations. There is no particular
+    /// optimization, and some queries can yield large intermediate or final results. Use caution
+    /// when applying the descendant operators. The results will not necessarily maintain document
+    /// order. Overlapping queries will cause nodes to be repeated in the results. For example, the
+    /// query "*/.." will return the reference node several times, once for each of its children.
+    /// 
+    ///  Names in XPath expressions may only contain the characters A-Z, a-z, 0-9, -, and .
+    ///  (period). As an extension, this implementation allows names to contain any character so
+    ///  long as it is quoted using either double or single quotes. Within a quoted name, use the
+    ///  charater "\" to escape the quoting character or the escape character. When assembling an
+    ///  expression, use vwf.utility.xpath.quoteName() to quote names that may have invalid
+    ///  characters.
+    ///
+    /// @name vwf.api.kernel#find
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    ///   The reference node. Relative patterns are resolved with respect to this node.
+    /// @param {String} matchPattern
+    ///   The search pattern.
+    /// @param {Function} [callback]
+    ///   A callback to receive the search results. If callback is provided, find invokes
+    ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
+    /// 
+    /// @returns {ID[]|undefined}
+    ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
+
+    find: [ /* nodeID, matchPattern, callback( matchID ) */ ],
+
+    /// Test a node against a search pattern. See vwf.api.kernel#find for details of the query
+    /// syntax.
+    /// 
+    /// @name vwf.api.kernel#test
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    ///   The reference node. Relative patterns are resolved with respect to this node.
+    /// @param {String} matchPattern
+    ///   The search pattern.
+    /// @param {ID} testID
+    ///   A node to test against the pattern.
+    /// 
+    /// @returns {Boolean}
+    ///   true when testID matches the pattern.
+
+    test: [ /* nodeID, matchPattern, testID */ ],
+
 } );

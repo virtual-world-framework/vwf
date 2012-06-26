@@ -2453,6 +2453,65 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return descendants;
         };
 
+        /// Locate nodes matching a search pattern. See vwf.api.kernel#find for details.
+        ///
+        /// @name vwf#find
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Function} [callback]
+        ///   A callback to receive the search results. If callback is provided, find invokes
+        ///   callback( matchID ) for each match. Otherwise the result is returned as an array.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
+
+        this.find = function( nodeID, matchPattern, find_callback /* ( matchID ) */ ) {
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+
+            if ( find_callback ) {
+
+                matchIDs.forEach( function( matchID ) {
+                    find_callback( matchID );
+                } );
+
+            } else {  // TODO: future iterator proxy
+
+                return matchIDs;
+
+            }
+
+        };
+
+        /// Test a node against a search pattern. See vwf.api.kernel#test for details.
+        /// 
+        /// @name vwf#test
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {ID} testID
+        ///   A node to test against the pattern.
+        /// 
+        /// @returns {Boolean}
+        ///   true when testID matches the pattern.
+
+        this.test = function( nodeID, matchPattern, testID ) {
+
+            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+
+            return matchIDs.some( function( matchID ) {
+                return matchID == testID;
+            } );
+
+        };
+
         // -- logger -------------------------------------------------------------------------------
 
         this.logger = {
@@ -2955,6 +3014,191 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
         };
+
+        // -- xpathResolver ------------------------------------------------------------------------
+
+        /// Interpret the steps of an XPath expression being resolved. Use with
+        /// vwf.utility.xpath#resolve.
+        ///
+        /// @name vwf#xpathResolver
+        /// @function
+        /// @private
+        /// 
+        /// @param {Object} step
+        /// @param {ID} contextID
+        /// @param {Boolean} [resolveAttributes]
+        /// 
+        /// @returns {ID[]}
+
+        var xpathResolver = function( step, contextID, resolveAttributes ) {
+
+            var resultIDs = [];
+
+            switch ( step.axis ) {
+
+                // case "preceding":  // TODO
+                // case "preceding-sibling":  // TODO
+
+                case "ancestor-or-self":
+                    resultIDs.push( contextID );
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    break;
+
+                case "ancestor":
+                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                    break;
+
+                case "parent":
+                    var parentID = this.parent( contextID );
+                    parentID && resultIDs.push( parentID );
+                    break;
+
+                case "self":
+                    resultIDs.push( contextID );
+                    break;
+
+                case "child":
+                    Array.prototype.push.apply( resultIDs, this.children( contextID ) );
+                    break;
+
+                case "descendant":
+                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    break;
+
+                case "descendant-or-self":
+                    resultIDs.push( contextID );
+                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    break;
+
+                // case "following-sibling":  // TODO
+                // case "following":  // TODO
+
+                case "attribute":
+                    if ( resolveAttributes ) {
+                        resultIDs.push( "@" + contextID );  // TODO: @?
+                    }
+                    break;
+
+                // n/a: case "namespace":
+                // n/a:   break;
+
+            }
+
+            switch ( step.kind ) {
+
+                // Name test.
+
+                case undefined:
+
+                    resultIDs = resultIDs.filter( function( resultID ) {
+                        if ( resultID[0] != "@" ) {  // TODO: @?
+                            return xpathNodeMatchesStep.call( this, resultID, step.name );
+                        } else {
+                            return xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
+                        }
+                    }, this );
+
+                    break;
+
+                // Element test.
+
+                case "element":
+
+                    // Cases: kind(node,type)
+
+                    // element()
+                    // element(name)
+                    // element(,type)
+                    // element(name,type)
+
+                    resultIDs = resultIDs.filter( function( resultID ) {
+                        return resultID[0] != "@" && xpathNodeMatchesStep.call( this, resultID, step.name, step.type );  // TODO: @?
+                    }, this );
+
+                    break;
+
+                case "attribute":
+
+                    resultIDs = resultIDs.filter( function( resultID ) {
+                        return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
+                    }, this );
+
+                    break;
+
+                // Any-kind test.
+
+                case "node":
+
+                    break;
+
+                // Unimplemented test.
+
+                default:
+
+                    resultIDs = [];
+
+                    break;
+
+            }
+
+            return resultIDs;
+        }
+
+        // -- xpathNodeMatchesStep -----------------------------------------------------------------
+
+        /// Determine if a node matches a step of an XPath expression being resolved.
+        ///
+        /// @name vwf#xpathNodeMatchesStep
+        /// @function
+        /// @private
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} [name]
+        /// @param {String} [type]
+        /// 
+        /// @returns {Boolean}
+
+        var xpathNodeMatchesStep = function( nodeID, name, type ) {
+
+            if ( name && this.name( nodeID ) != name ) {
+                return false;
+            }
+
+            var matches_type = ! type || this.prototypes( nodeID ).some( function( prototypeID ) {
+                if ( this.uri( prototypeID ) == type ) {
+                    return true;
+                }
+            }, this );
+
+            return matches_type;
+        }
+
+        // -- xpathPropertyMatchesStep -------------------------------------------------------------
+
+        /// Determine if a property matches a step of an XPath expression being resolved.
+        ///
+        /// @name vwf#xpathPropertyMatchesStep
+        /// @function
+        /// @private
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} [name]
+        /// 
+        /// @returns {Boolean}
+
+        var xpathPropertyMatchesStep = function( nodeID, name ) {
+
+            var properties = this.models.object.properties( nodeID );
+
+            if ( name ) {
+                return properties[name];
+            } else {
+                return Object.keys( properties ).some( function( propertyName ) {
+                    return properties[propertyName];
+                }, this );
+            }
+
+        }
 
         // -- getQueryString -----------------------------------------------------------------------
 

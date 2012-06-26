@@ -364,6 +364,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     return this.kernel[kernelFunctionName]( nodeID );
                 };
 
+            case "find":
+
+                return function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
+                    return this.kernel[kernelFunctionName]( nodeID, matchPattern, callback );
+                };
+
+            case "test":
+
+                return function( nodeID, matchPattern, testID ) {
+                    return this.kernel[kernelFunctionName]( nodeID, matchPattern, testID );
+                };
+
         }
 
     }, function( modelFunctionName ) {

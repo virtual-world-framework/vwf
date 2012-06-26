@@ -250,6 +250,26 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 prototype.private.future : Object.prototype
             );
 
+            Object.defineProperty( node, "find", {
+                value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
+                    if ( callback ) {
+                        self.kernel.find( this.id, matchPattern, function( matchID ) {
+                            callback.call( node, self.nodes[matchID] );
+                        } );
+                    } else {  // TODO: future iterator proxy
+                        return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
+                            return self.nodes[matchID];
+                        } );
+                    }
+                }
+            } );
+
+            Object.defineProperty( node, "test", {
+                value: function( matchPattern, testNode ) { // "this" is node
+                    return self.kernel.test( this.id, matchPattern, testNode.id );
+                }
+            } );
+
             Object.defineProperty( node.private.future, "private", {
                 value: {
                     when: 0,

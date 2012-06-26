@@ -26,6 +26,8 @@
 
         ready( function() {
 
+          // == transform ==========================================================================
+
           test( "Identity", function() {
 
             // Transformation function
@@ -183,6 +185,337 @@
             ok( transformedArrayBecomingObject.zero.replaced, "replacement object container traversed and contained element replaced" );
 
           } );
+
+          // == exceptionMessage ===================================================================
+
+          // TODO
+
+          // == resolveURI =========================================================================
+
+          // TODO
+
+          // == xpath.resolve ======================================================================
+
+          test ( "XPath resolved", function() {
+
+            deepEqual( utility.xpath.resolve( "element()", "root", "start", xpathResolver ), [ "start children matching element()" ], "element()" );
+            deepEqual( utility.xpath.resolve( "element(*)", "root", "start", xpathResolver ), [ "start children matching element()" ], "element(*)" );
+            deepEqual( utility.xpath.resolve( "element(a)", "root", "start", xpathResolver ), [ "start children matching element() named a" ], "element(a)" );
+            deepEqual( utility.xpath.resolve( "element(*,t)", "root", "start", xpathResolver ), [ "start children matching element() typed t" ], "element(*,t)" );
+            deepEqual( utility.xpath.resolve( "element(a,t)", "root", "start", xpathResolver ), [ "start children matching element() named a typed t" ], "element(a,t)" );
+
+            deepEqual( utility.xpath.resolve( "a/child::*", "root", "start", xpathResolver ), [ "start children named a children matching element()" ], "a/child::*" );
+            deepEqual( utility.xpath.resolve( "a/child::b", "root", "start", xpathResolver ), [ "start children named a children named b" ], "a/child::b" );
+
+            deepEqual( utility.xpath.resolve( "a/ancestor::b", "root", "start", xpathResolver ), [ "start children named a ancestors named b" ], "a/ancestor::b" );
+            deepEqual( utility.xpath.resolve( "a/ancestor-or-self::b", "root", "start", xpathResolver ), [ "start children named a and ancestors named b" ], "a/ancestor-or-self::b" );
+
+            deepEqual( utility.xpath.resolve( "a/descendant::b", "root", "start", xpathResolver ), [ "start children named a descendants named b" ], "a/descendant::b" );
+            deepEqual( utility.xpath.resolve( "a/descendant-or-self::b", "root", "start", xpathResolver ), [ "start children named a and descendants named b" ], "a/descendant-or-self::b" );
+
+            deepEqual( utility.xpath.resolve( "//", "root", "start", xpathResolver ), [ "root and descendants" ], "//" );
+            deepEqual( utility.xpath.resolve( "/", "root", "start", xpathResolver ), [ "root" ], "/" );
+            deepEqual( utility.xpath.resolve( "", "root", "start", xpathResolver ), [ "start" ], "empty string" );
+
+            deepEqual( utility.xpath.resolve( [ "" ], "root", "root", xpathResolver ), [ "root and descendants" ], "//, pre-split" );
+            deepEqual( utility.xpath.resolve( [], "root", "root", xpathResolver ), [ "root" ], "/, pre-split" );
+            deepEqual( utility.xpath.resolve( [], "root", "start", xpathResolver ), [ "start" ], "empty string, pre-split" );
+
+            deepEqual( utility.xpath.resolve( "'*'", "root", "start", xpathResolver ), [ "start children named *" ], "'*', quoted special character" );
+
+            deepEqual( utility.xpath.resolve( "*", "root", "start", xpathResolver ), [ "start children matching element()" ], "*" );
+            deepEqual( utility.xpath.resolve( "a", "root", "start", xpathResolver ), [ "start children named a" ], "a" );
+
+            deepEqual( utility.xpath.resolve( [ "*" ], "root", "start", xpathResolver ), [ "start children matching element()" ], "*, pre-split" );
+            deepEqual( utility.xpath.resolve( [ "a" ], "root", "start", xpathResolver ), [ "start children named a" ], "a, pre-split" );
+
+            deepEqual( utility.xpath.resolve( "a/*", "root", "start", xpathResolver ), [ "start children named a children matching element()" ], "a/*" );
+            deepEqual( utility.xpath.resolve( "a/b", "root", "start", xpathResolver ), [ "start children named a children named b" ], "a/b" );
+            deepEqual( utility.xpath.resolve( "a//*", "root", "start", xpathResolver ), [ "start children named a and descendants children matching element()" ], "a//*" );
+            deepEqual( utility.xpath.resolve( "a//b", "root", "start", xpathResolver ), [ "start children named a and descendants children named b" ], "a//b" );
+
+            deepEqual( utility.xpath.resolve( "a/./b", "root", "start", xpathResolver ), [ "start children named a children named b" ], "a/./b" );
+            deepEqual( utility.xpath.resolve( "a/../b", "root", "start", xpathResolver ), [ "start children named a parent children named b" ], "a/../b" );
+
+            deepEqual( utility.xpath.resolve( [ "a", "*" ], "root", "start", xpathResolver ), [ "start children named a children matching element()" ], "a/*, pre-split" );
+            deepEqual( utility.xpath.resolve( [ "a", "b" ], "root", "start", xpathResolver ), [ "start children named a children named b" ], "a/b, pre-split" );
+            deepEqual( utility.xpath.resolve( [ "a", "", "*" ], "root", "start", xpathResolver ), [ "start children named a and descendants children matching element()" ], "a//*, pre-split" );
+            deepEqual( utility.xpath.resolve( [ "a", "", "b" ], "root", "start", xpathResolver ), [ "start children named a and descendants children named b" ], "a//b, pre-split" );
+
+            deepEqual( utility.xpath.resolve( [ "a", ".", "b" ], "root", "start", xpathResolver ), [ "start children named a children named b" ], "a/./b, pre-split" );
+            deepEqual( utility.xpath.resolve( [ "a", "..", "b" ], "root", "start", xpathResolver ), [ "start children named a parent children named b" ], "a/../b, pre-split" );
+
+            deepEqual( utility.xpath.resolve( [ { axis: "child", name: "a" }, { axis: "child", kind: "element" } ], "root", "start", xpathResolver ), [ "start children named a children matching element()" ], "a/*, pre-parsed" );
+            deepEqual( utility.xpath.resolve( [ { axis: "child", name: "a" }, { axis: "child", name: "b" } ], "root", "start", xpathResolver ), [ "start children named a children named b" ], "a/b, pre-parsed" );
+            deepEqual( utility.xpath.resolve( [ { axis: "child", name: "a" }, { axis: "descendant-or-self", kind: "node" }, { axis: "child", kind: "element" } ], "root", "start", xpathResolver ), [ "start children named a and descendants children matching element()" ], "a//*, pre-parsed" );
+            deepEqual( utility.xpath.resolve( [ { axis: "child", name: "a" }, { axis: "descendant-or-self", kind: "node" }, { axis: "child", name: "b" } ], "root", "start", xpathResolver ), [ "start children named a and descendants children named b" ], "a//b, pre-parsed" );
+
+            deepEqual( utility.xpath.resolve( [ { axis: "child", name: "a" }, { axis: "self",  kind: "node" }, { axis: "child", name: "b" } ], "root", "start", xpathResolver ), [ "start children named a children named b" ], "a/./b, pre-parsed" );
+            deepEqual( utility.xpath.resolve( [ { axis: "child", name: "a" }, { axis: "parent", kind: "node" }, { axis: "child", name: "b" } ], "root", "start", xpathResolver ), [ "start children named a parent children named b" ], "a/../b, pre-parsed" );
+
+            deepEqual( utility.xpath.resolve( "@*", "root", "start", xpathResolver ), [ "start attributes matching attribute()" ], "*" );
+            deepEqual( utility.xpath.resolve( "@r", "root", "start", xpathResolver ), [ "start attributes named r" ], "r" );
+
+            deepEqual( utility.xpath.resolve( "a/@*", "root", "start", xpathResolver ), [ "start children named a attributes matching attribute()" ], "*" );
+            deepEqual( utility.xpath.resolve( "a/@r", "root", "start", xpathResolver ), [ "start children named a attributes named r" ], "r" );
+
+            deepEqual( utility.xpath.resolve( "a", "root", [ "alpha" ], xpathResolver ), [ "alpha children named a" ], "a, original context as array" );
+            deepEqual( utility.xpath.resolve( "a", "root", [ "beta", "gamma" ], xpathResolver ), [ "beta children named a", "gamma children named a" ], "a, plural original context" );
+
+            // Examples from http://www.w3.org/TR/xpath20/#unabbrev
+
+            deepEqual( utility.xpath.resolve( "child::para", "root", "start", xpathResolver ), [ "start children named para" ], "child::para" );
+            deepEqual( utility.xpath.resolve( "child::*", "root", "start", xpathResolver ), [ "start children matching element()" ], "child::*" );
+            deepEqual( utility.xpath.resolve( "child::text()", "root", "start", xpathResolver ), [ "start children matching text()" ], "child::text()" );
+            deepEqual( utility.xpath.resolve( "child::node()", "root", "start", xpathResolver ), [ "start children" ], "child::node()" );
+            deepEqual( utility.xpath.resolve( "attribute::name", "root", "start", xpathResolver ), [ "start attributes named name" ], "attribute::name" );
+            deepEqual( utility.xpath.resolve( "attribute::*", "root", "start", xpathResolver ), [ "start attributes matching attribute()" ], "attribute::*" );
+            deepEqual( utility.xpath.resolve( "parent::node()", "root", "start", xpathResolver ), [ "start parent" ], "parent::node()" );
+            deepEqual( utility.xpath.resolve( "descendant::para", "root", "start", xpathResolver ), [ "start descendants named para" ], "descendant::para" );
+            deepEqual( utility.xpath.resolve( "ancestor::div", "root", "start", xpathResolver ), [ "start ancestors named div" ], "ancestor::div" );
+            deepEqual( utility.xpath.resolve( "ancestor-or-self::div", "root", "start", xpathResolver ), [ "start and ancestors named div" ], "ancestor-or-self::div" );
+            deepEqual( utility.xpath.resolve( "descendant-or-self::para", "root", "start", xpathResolver ), [ "start and descendants named para" ], "descendant-or-self::para" );
+            deepEqual( utility.xpath.resolve( "self::para", "root", "start", xpathResolver ), [ "start named para" ], "self::para" );
+            deepEqual( utility.xpath.resolve( "child::chapter/descendant::para", "root", "start", xpathResolver ), [ "start children named chapter descendants named para" ], "child::chapter/descendant::para" );
+            deepEqual( utility.xpath.resolve( "child::*/child::para", "root", "start", xpathResolver ), [ "start children matching element() children named para" ], "child::*/child::para" );
+            deepEqual( utility.xpath.resolve( "/", "root", "start", xpathResolver ), [ "root" ], "/" );
+            deepEqual( utility.xpath.resolve( "/descendant::para", "root", "start", xpathResolver ), [ "root descendants named para" ], "/descendant::para" );
+            deepEqual( utility.xpath.resolve( "/descendant::list/child::member", "root", "start", xpathResolver ), [ "root descendants named list children named member" ], "/descendant::list/child::member" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::para[fn:position() = 1]", "root", "start", xpathResolver ), [ "n/a" ], "child::para[fn:position() = 1]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::para[fn:position() = fn:last()]", "root", "start", xpathResolver ), [ "n/a" ], "child::para[fn:position() = fn:last()]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::para[fn:position() = fn:last()-1]", "root", "start", xpathResolver ), [ "n/a" ], "child::para[fn:position() = fn:last()-1]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::para[fn:position() > 1]", "root", "start", xpathResolver ), [ "n/a" ], "child::para[fn:position() > 1]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "following-sibling::chapter[fn:position() = 1]", "root", "start", xpathResolver ), [ "n/a" ], "following-sibling::chapter[fn:position() = 1]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "preceding-sibling::chapter[fn:position() = 1]", "root", "start", xpathResolver ), [ "n/a" ], "preceding-sibling::chapter[fn:position() = 1]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "/descendant::figure[fn:position() = 42]", "root", "start", xpathResolver ), [ "n/a" ], "/descendant::figure[fn:position() = 42]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "/child::book/child::chapter[fn:position() = 5]/child::section[fn:position() = 2]", "root", "start", xpathResolver ), [ "n/a" ], "/child::book/child::chapter[fn:position() = 5]/child::section[fn:position() = 2]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::para[attribute::type eq 'warning]", "root", "start", xpathResolver ), [ "n/a" ], "child::para[attribute::type eq 'warning]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::para[attribute::type eq 'warning'][fn:position() = 5]", "root", "start", xpathResolver ), [ "n/a" ], "child::para[attribute::type eq 'warning'][fn:position() = 5]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::para[fn:position() = 5][attribute::type eq 'warning']", "root", "start", xpathResolver ), [ "n/a" ], "child::para[fn:position() = 5][attribute::type eq 'warning']" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::chapter[child::title = 'Introduction']", "root", "start", xpathResolver ), [ "n/a" ], "child::chapter[child::title = 'Introduction']" );
+            // n/a: predicate -- deepEqual( utility.xpath.resolve( "child::chapter[child::title]", "root", "start", xpathResolver ), [ "n/a" ], "child::chapter[child::title]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::*[self::chapter or self::appendix]", "root", "start", xpathResolver ), [ "n/a" ], "child::*[self::chapter or self::appendix]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "child::*[self::chapter or self::appendix][fn:position() = fn:last()]", "root", "start", xpathResolver ), [ "n/a" ], "child::*[self::chapter or self::appendix][fn:position() = fn:last()]" );
+
+            // Examples from http://www.w3.org/TR/xpath20/#abbrev
+
+            deepEqual( utility.xpath.resolve( "para", "root", "start", xpathResolver ), [ "start children named para" ], "para" );
+            deepEqual( utility.xpath.resolve( "*", "root", "start", xpathResolver ), [ "start children matching element()" ], "*" );
+            deepEqual( utility.xpath.resolve( "text()", "root", "start", xpathResolver ), [ "start children matching text()" ], "text()" );
+            deepEqual( utility.xpath.resolve( "@name", "root", "start", xpathResolver ), [ "start attributes named name" ], "@name" );
+            deepEqual( utility.xpath.resolve( "@*", "root", "start", xpathResolver ), [ "start attributes matching attribute()" ], "@*" );
+            // n/a: predicate -- deepEqual( utility.xpath.resolve( "para[1]", "root", "start", xpathResolver ), [ "n/a" ], "para[1]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "para[fn:last()]", "root", "start", xpathResolver ), [ "n/a" ], "para[fn:last()]" );
+            deepEqual( utility.xpath.resolve( "*/para", "root", "start", xpathResolver ), [ "start children matching element() children named para" ], "*/para" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "/book/chapter[5]/section[2]", "root", "start", xpathResolver ), [ "n/a" ], "/book/chapter[5]/section[2]" );
+            deepEqual( utility.xpath.resolve( "chapter//para", "root", "start", xpathResolver ), [ "start children named chapter and descendants children named para" ], "chapter//para" );
+            deepEqual( utility.xpath.resolve( "//para", "root", "start", xpathResolver ), [ "root and descendants children named para" ], "//para" );
+            deepEqual( utility.xpath.resolve( "//@version", "root", "start", xpathResolver ), [ "root and descendants attributes named version" ], "//@version" );
+            deepEqual( utility.xpath.resolve( "//list/member", "root", "start", xpathResolver ), [ "root and descendants children named list children named member" ], "//list/member" );
+            deepEqual( utility.xpath.resolve( ".//para", "root", "start", xpathResolver ), [ "start and descendants children named para" ], ".//para" );
+            deepEqual( utility.xpath.resolve( "..", "root", "start", xpathResolver ), [ "start parent" ], ".." );
+            deepEqual( utility.xpath.resolve( "../@lang", "root", "start", xpathResolver ), [ "start parent attributes named lang" ], "../@lang" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "para[@type='warning']", "root", "start", xpathResolver ), [ "n/a" ], "para[@type='warning']" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "para[@type='warning'][5]", "root", "start", xpathResolver ), [ "n/a" ], "para[@type='warning'][5]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "para[5][@type='warning']", "root", "start", xpathResolver ), [ "n/a" ], "para[5][@type='warning']" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "chapter[title='Introduction']", "root", "start", xpathResolver ), [ "n/a" ], "chapter[title='Introduction']" );
+            // n/a: predicate -- deepEqual( utility.xpath.resolve( "chapter[title]", "root", "start", xpathResolver ), [ "n/a" ], "chapter[title]" );
+            // n/a: predicate+expression -- deepEqual( utility.xpath.resolve( "employee[@secretary and @assistant]", "root", "start", xpathResolver ), [ "n/a" ], "employee[@secretary and @assistant]" );
+            // n/a: expression -- deepEqual( utility.xpath.resolve( "book/(chapter|appendix)/section", "root", "start", xpathResolver ), [ "n/a" ], "book/(chapter|appendix)/section" );
+
+          } );
+
+          // == xpath.parse ========================================================================
+
+          test( "XPath parsed", function() {
+
+            var result = [ { axis: "child", kind: undefined, name: "a", type: undefined }, { axis: "child", kind: undefined, name: "b", type: undefined } ];
+
+            deepEqual( utility.xpath.parse( "a/b" ), result, "string" );
+            deepEqual( utility.xpath.parse( [ "a", "b" ] ), result, "pre-split" );
+            deepEqual( utility.xpath.parse( result ), result, "pre-parsed" );
+
+          } );
+
+          // == xpath.parseStep ====================================================================
+
+          test( "XPath steps", function() {
+
+            deepEqual( utility.xpath.parseStep( "" ), { axis: "descendant-or-self", kind: "node", name: undefined, type: undefined }, "AbbreviatedRelativeLocationPath" ); // http://www.w3.org/TR/xpath/#NT-AbbreviatedRelativeLocationPath
+            deepEqual( utility.xpath.parseStep( "." ), { axis: "self",  kind: "node", name: undefined, type: undefined }, "AbbreviatedStep, self" ); // http://www.w3.org/TR/xpath/#NT-AbbreviatedStep
+            deepEqual( utility.xpath.parseStep( ".." ), { axis: "parent", kind: "node", name: undefined, type: undefined }, "AbbreviatedStep, parent" ); // http://www.w3.org/TR/xpath/#NT-AbbreviatedStep
+
+            deepEqual( utility.xpath.parseStep( "child::a" ), { axis: "child", kind: undefined, name: "a", type: undefined }, "AxisSpecifier, child" ); // http://www.w3.org/TR/xpath/#NT-AxisSpecifier
+            deepEqual( utility.xpath.parseStep( "a" ), { axis: "child", kind: undefined, name: "a", type: undefined }, "AbbreviatedAxisSpecifier, child" ); // http://www.w3.org/TR/xpath/#NT-AbbreviatedAxisSpecifier
+
+            deepEqual( utility.xpath.parseStep( "attribute::a" ), { axis: "attribute", kind: undefined, name: "a", type: undefined }, "AxisSpecifier, attribute" ); // http://www.w3.org/TR/xpath/#NT-AxisSpecifier
+            deepEqual( utility.xpath.parseStep( "@a" ), { axis: "attribute", kind: undefined, name: "a", type: undefined }, "AbbreviatedAxisSpecifier, attribute" ); // http://www.w3.org/TR/xpath/#NT-AbbreviatedAxisSpecifier
+
+            deepEqual( utility.xpath.parseStep( "child::*" ), { axis: "child", kind: "element", name: undefined, type: undefined }, "AxisSpecifier+NameTest, wildcard" ); // http://www.w3.org/TR/xpath/#NT-NameTest
+            deepEqual( utility.xpath.parseStep( "*" ), { axis: "child", kind: "element", name: undefined, type: undefined }, "AbbreviatedAxisSpecifier+NameTest, wildcard" ); // http://www.w3.org/TR/xpath/#NT-NameTest
+
+            deepEqual( utility.xpath.parseStep( "node()" ), { axis: "child", kind: "node", name: undefined, type: undefined }, "KindTest" ); // http://www.w3.org/TR/xpath20/#prod-xpath-KindTest
+            deepEqual( utility.xpath.parseStep( "node(b)" ), { axis: "child", kind: "node", name: "b", type: undefined }, "KindTest, node name" ); // http://www.w3.org/TR/xpath20/#prod-xpath-KindTest
+            deepEqual( utility.xpath.parseStep( "node(b,t)" ), { axis: "child", kind: "node", name: "b", type: "t" }, "KindTest, node name, node type" ); // http://www.w3.org/TR/xpath20/#prod-xpath-KindTest
+
+            deepEqual( utility.xpath.parseStep( "'a+b'" ), { axis: "child", kind: undefined, name: "a+b", type: undefined }, "quoted NameTest, single quotes" );
+            deepEqual( utility.xpath.parseStep( "'a\\'\"\\+\"\\'b'" ), { axis: "child", kind: undefined, name: "a'\"\\+\"'b", type: undefined }, "quoted NameTest, single quotes with embedded escapes" );
+
+            deepEqual( utility.xpath.parseStep( '"a+a"' ), { axis: "child", kind: undefined, name: "a+a", type: undefined }, "quoted NameTest, double quotes" );
+            deepEqual( utility.xpath.parseStep( '"a\'\\"\\+\\"\'a"' ), { axis: "child", kind: undefined, name: "a'\"\\+\"'a", type: undefined }, "quoted NameTest, double quotes with embedded escapes" );
+
+            deepEqual( utility.xpath.parseStep( 'node("b+b")' ), { axis: "child", kind: "node", name: "b+b", type: undefined }, "KindTest, quoted node name" );
+            deepEqual( utility.xpath.parseStep( 'node(b,"http://vwf.example.com/node.vwf")' ), { axis: "child", kind: "node", name: "b", type: "http://vwf.example.com/node.vwf" }, "KindTest, node name, quoted node type" );
+
+            deepEqual( utility.xpath.parseStep( '"."' ), { axis: "child", kind: undefined, name: ".", type: undefined }, "quoted NameTest, xpath token: abbreviated step self" );
+            deepEqual( utility.xpath.parseStep( '".."' ), { axis: "child", kind: undefined, name: "..", type: undefined }, "quoted NameTest, xpath token: abbreviated step parent" );
+            deepEqual( utility.xpath.parseStep( '"@a"' ), { axis: "child", kind: undefined, name: "@a", type: undefined }, "quoted NameTest, xpath token: abbreviated axis attribute" );
+            deepEqual( utility.xpath.parseStep( '"axis::"' ), { axis: "child", kind: undefined, name: "axis::", type: undefined }, "quoted NameTest, xpath token: axis" );
+            deepEqual( utility.xpath.parseStep( '"*"' ), { axis: "child", kind: undefined, name: "*", type: undefined }, "quoted NameTest, xpath token: wildcard" );
+
+          } );
+
+          // == xpath.parsePredicate ===============================================================
+
+          test( "XPath predicates", function() {
+
+            var xpath;
+
+            deepEqual( utility.xpath.parsePredicate( "" ), undefined, "empty" );
+            deepEqual( utility.xpath.parsePredicate( "a" ), undefined, "step" );
+            deepEqual( utility.xpath.parsePredicate( "/" ), undefined, "separator" );
+
+            xpath = "[a]";
+            deepEqual( utility.xpath.parsePredicate( xpath ), [ { axis: "child", kind: undefined, name: "a", type: undefined } ], "string" );
+
+            xpath = { string: "[a]", index: 0 };
+            deepEqual( utility.xpath.parsePredicate( xpath ), [ { axis: "child", kind: undefined, name: "a", type: undefined } ], "object" );
+            deepEqual( xpath, { string: "[a]", index: 3 }, "object" );
+
+            xpath = { string: "['[]']", index: 0 };
+            deepEqual( utility.xpath.parsePredicate( xpath ), [ { axis: "child", kind: undefined, name: "[]", type: undefined } ], "quoted brackets" );
+            deepEqual( xpath, { string: "['[]']", index: 6 }, "quoted brackets" );
+
+            xpath = { string: "[a][b]", index: 0 };
+            deepEqual( utility.xpath.parsePredicate( xpath ), [ { axis: "child", kind: undefined, name: "a", type: undefined } ], "predicate terminator" );
+            deepEqual( xpath, { string: "[a][b]", index: 3 }, "predicate terminator" );
+
+            // not implemented: xpath = { string: "[a[b]]", index: 0 };
+            // not implemented: deepEqual( utility.xpath.parsePredicate( xpath ), [ { axis: "child", kind: undefined, name: "a", type: undefined, predicates: [ { axis: "child", kind: undefined, name: "b", type: undefined } ] } ], "nested" );
+            // not implemented: deepEqual( xpath, { string: "[a[b]]", index: 6 }, "nested" );
+
+            xpath = { string: "[a]/", index: 0 };
+            deepEqual( utility.xpath.parsePredicate( xpath ), [ { axis: "child", kind: undefined, name: "a", type: undefined } ], "separator terminator" );
+            deepEqual( xpath, { string: "[a]/", index: 3 }, "separator terminator" );
+
+          } );
+
+          // == xpath.parseSeparator ===============================================================
+
+          test( "XPath separator", function() {
+
+            var xpath;
+
+            xpath = "/";
+            equal( utility.xpath.parseSeparator( xpath ), true, "string" );
+
+            xpath = { string: "/", index: 0 };
+            equal( utility.xpath.parseSeparator( xpath ), true, "object" );
+
+            xpath = { string: "/", index: 0 };
+            equal( utility.xpath.parseSeparator( xpath ), true, "single" );
+            deepEqual( xpath, { string: "/", index: 1 }, "single" );
+
+            xpath = { string: "a/b", index: 1 };
+            equal( utility.xpath.parseSeparator( xpath ), true, "middle" );
+            deepEqual( xpath, { string: "a/b", index: 2 }, "middle" );
+
+            xpath = { string: "a", index: 0 };
+            equal( utility.xpath.parseSeparator( xpath ), undefined, "missing" );
+            deepEqual( xpath, { string: "a", index: 0 }, "missing" );
+
+            xpath = { string: "", index: 0 };
+            equal( utility.xpath.parseSeparator( xpath ), undefined, "empty" );
+            deepEqual( xpath, { string: "", index: 0 }, "empty" );
+
+          } );
+
+          // == xpath.quoteName, xpath.unquoteName =================================================
+
+          test( "XPath quoting", function() {
+
+            deepEqual( utility.xpath.quoteName( 'a' ), '"a"', "plain" );
+            deepEqual( utility.xpath.quoteName( "'a'" ), '"\'a\'"', "embedded single quote" );
+            deepEqual( utility.xpath.quoteName( '"a"' ), '"\\"a\\""', "embedded double quote" );
+            deepEqual( utility.xpath.quoteName( '\\a\\' ), '"\\\\a\\\\"', "embedded escape" );
+
+            deepEqual( utility.xpath.unquoteName( '"a"' ), 'a', "plain" );
+            deepEqual( utility.xpath.unquoteName( '"\'a\'"' ), "'a'", "embedded single quote" );
+            deepEqual( utility.xpath.unquoteName( '"\\"a\\""' ), '"a"', "embedded double quote" );
+            deepEqual( utility.xpath.unquoteName( '"\\\\a\\\\"' ), '\\a\\', "embedded escape" );
+
+          } );
+
+          // == Helper functions ===================================================================
+
+          // Resolve an xpath step with a description of the work to be done.
+
+          function xpathResolver( step, id ) {
+
+            var result = id;
+
+            switch ( step.axis ) {
+
+              // case "preceding":
+              // case "preceding-sibling":
+
+              case "ancestor-or-self":
+                result += " and ancestors";
+                break;
+
+              case "ancestor":
+                result += " ancestors";
+                break;
+
+              case "parent":
+                result += " parent";
+                break;
+
+              case "self":
+                break;
+
+              case "child":
+                result += " children";
+                break;
+
+              case "descendant":
+                result += " descendants";
+                break;
+
+              case "descendant-or-self":
+                result += " and descendants";
+                break;
+
+              // case "following-sibling":
+              // case "following":
+
+              case "attribute":
+                result += " attributes";
+                break;
+
+              // case "namespace":
+
+            }
+
+            if ( step.kind && step.kind != "node" ) {
+              result += " matching " + step.kind + "()";
+            }
+
+            if ( step.name ) result += " named " + step.name;
+            if ( step.type ) result += " typed " + step.type;
+
+            return [ result ];
+          }
 
         } );
 

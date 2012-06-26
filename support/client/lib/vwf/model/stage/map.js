@@ -231,6 +231,20 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return this.kernel.descendants( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
         },
 
+        // -- find ---------------------------------------------------------------------------------
+
+        find: function( node, matchPattern, callback /* ( matchID ) */ ) { // TODO remap return value and callback parameter
+            return this.kernel.find( this.model_to_kernel[this.object_id(node)] || node,
+                matchPattern, callback );
+        },
+
+        // -- test ---------------------------------------------------------------------------------
+
+        test: function( node, matchPattern, test */ ) {
+            return this.kernel.test( this.model_to_kernel[this.object_id(node)] || node,
+                matchPattern, this.model_to_kernel[this.object_id(test)] || test );
+        },
+
         // == Model API ============================================================================
 
         // -- creatingNode -------------------------------------------------------------------------
