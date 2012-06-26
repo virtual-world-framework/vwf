@@ -129,7 +129,17 @@ task :windows => :common do
 
         File.open( "run.bat", "w" ) do |io|
             io.puts "@ECHO OFF"
-            io.puts ""
+            io.puts "ECHO ****************************************************"
+			io.puts "ECHO ****************************************************"
+			io.puts "ECHO ---------"
+			io.puts "ECHO   NOTE:  "
+			io.puts "ECHO ---------"
+			io.puts "ECHO Once Thin Server displays 'Listening on 0.0.0.0....' "
+			io.puts "ECHO this window must remain open (it is your server).    "
+			io.puts "ECHO Please use your web browser (Chrome/Firefox)         "
+			io.puts "ECHO and navigate to http://localhost:3000	to use VWF.    "
+			io.puts "ECHO *****************************************************"
+            io.puts "ECHO *****************************************************"
             io.puts "SET RUBY=#{ RUBY.gsub( "/", "\\" ) }"
             io.puts "SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin"
             io.puts ""
