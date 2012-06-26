@@ -131,7 +131,7 @@
 									<p><b>Current Sessions</b></p>
 								</div>
 								<script type="text/javascript">
-								$(document.getElementById('<%= application.gsub("/","") %>instances')).ready(showInfo('<%= application %>', '<%= application + ( application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == "agi" ? "?connected=1" : "" )  %>'));							
+								$(document.getElementById('<%= application.gsub("/","") %>instances')).ready(showInfo('<%= application %>', '<%= (application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == "agi" ? "?connected=1" : "" )  %>'));							
 								</script>
 							</div>
 						</div>
