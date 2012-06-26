@@ -2396,7 +2396,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             var prototypeID = undefined;
             
             while ( nodeID !== undefined ) {
-                if ( ( prototypeID = prototypeIDs.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                if ( ( prototypeID = this.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
                     prototypeIDs.push( prototypeID );
                 }
                 nodeID = prototypeID;
@@ -2408,7 +2408,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         // -- behaviors ----------------------------------------------------------------------------
 
         this.behaviors = function( nodeID ) {
-            return this.models.object.behaviors( nodeID ) || [];
+            return this.models.object.behaviors( nodeID );
         };
 
         // -- ancestors ----------------------------------------------------------------------------
@@ -2436,7 +2436,21 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         // -- children -----------------------------------------------------------------------------
 
         this.children = function( nodeID ) {
-            return [].concat( this.models.object.children( nodeID ) ); // make a copy
+            return this.models.object.children( nodeID );
+        };
+
+        // -- descendants --------------------------------------------------------------------------
+
+        this.descendants = function( nodeID ) {
+
+            var descendants = [];
+
+            this.children( nodeID ).forEach( function( childID ) {
+                descendants.push( childID );
+                Array.prototype.push.apply( descendants, this.descendants( childID ) );
+            }, this );             
+
+            return descendants;
         };
 
         /// Locate nodes matching a search pattern. See vwf.api.kernel#find for details.

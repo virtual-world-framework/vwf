@@ -431,7 +431,7 @@ define( {
 
     parent: [ /* nodeID */ ],
 
-    /// Children Calls childrening() on each model. The return value is the union of the non-undefined
+    /// Children calls childrening() on each model. The return value is the union of the non-undefined
     /// results.
     /// 
     /// @name vwf.api.kernel#children
@@ -442,6 +442,17 @@ define( {
     /// @returns {ID[]}
 
     children: [ /* nodeID */ ],
+
+    /// Return a node's children, grandchildren, their children, etc.
+    /// 
+    /// @name vwf.api.kernel#descendants
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {ID[]}
+
+    descendants: [ /* nodeID */ ],
 
     /// Locate nodes matching a search pattern. matchPattern supports an XPath subset consisting of
     /// the following:
