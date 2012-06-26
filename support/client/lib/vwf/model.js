@@ -62,13 +62,17 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/model" ], function( mod
             }
 
             modelGenerator && Object.keys( model_api ).forEach( function( modelFunctionName ) {
-                var modelFunction = modelGenerator.call( instance, modelFunctionName );
-                modelFunction && ( instance[modelFunctionName] = modelFunction );
+                if ( ! instance.hasOwnProperty( modelFunctionName ) ) {
+                    instance[modelFunctionName] = modelGenerator.call( instance, modelFunctionName );
+                    instance[modelFunctionName] || delete instance[modelFunctionName];
+                }
             } );
-                
+
             kernelGenerator && Object.keys( kernel_api ).forEach( function( kernelFunctionName ) {
-                var kernelFunction = kernelGenerator.call( instance, kernelFunctionName );
-                kernelFunction && ( instance[kernelFunctionName] = kernelFunction );
+                if ( ! instance.hasOwnProperty( kernelFunctionName ) ) {
+                    instance[kernelFunctionName] = kernelGenerator.call( instance, kernelFunctionName );
+                    instance[kernelFunctionName] || delete instance[kernelFunctionName];
+                }
             } );
 
             return instance;

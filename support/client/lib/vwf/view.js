@@ -55,13 +55,17 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
             }
 
             viewGenerator && Object.keys( view_api ).forEach( function( viewFunctionName ) {
-                var viewFunction = viewGenerator.call( instance, viewFunctionName );
-                viewFunction && ( instance[viewFunctionName] = viewFunction );
+                if ( ! instance.hasOwnProperty( viewFunctionName ) ) {
+                    instance[viewFunctionName] = viewGenerator.call( instance, viewFunctionName );
+                    instance[viewFunctionName] || delete instance[viewFunctionName];
+                }
             } );
 
             kernelGenerator && Object.keys( kernel_api ).forEach( function( kernelFunctionName ) {
-                var kernelFunction = kernelGenerator.call( instance, kernelFunctionName );
-                kernelFunction && ( instance[kernelFunctionName] = kernelFunction );
+                if ( ! instance.hasOwnProperty( kernelFunctionName ) ) {
+                    instance[kernelFunctionName] = kernelGenerator.call( instance, kernelFunctionName );
+                    instance[kernelFunctionName] || delete instance[kernelFunctionName];
+                }
             } );
 
             return instance;
