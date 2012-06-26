@@ -33,22 +33,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         },
         
-    }, function( kernelFunctionName ) {
-
-        // == Kernel API ===========================================================================
-
-        return function() {  // TODO: possible to return this.kernel[kernelFunctionName] instead for passthrough?
-            return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
-        };
-        
     }, function( modelFunctionName ) {
         
         // == Model API ============================================================================
 
-        return function() {  // TODO: possible to return this.model[modelFunctionName] instead for passthrough?
+        return function() {
             return this.model[modelFunctionName] && this.model[modelFunctionName].apply( this.model, arguments );
         };
 
+    }, function( kernelFunctionName ) {
+
+        // == Kernel API ===========================================================================
+
+        return function() {
+            return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
+        };
+        
     } );
 
 } );

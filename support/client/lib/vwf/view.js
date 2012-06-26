@@ -37,7 +37,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
         logger: logger.for( context ),
 
-        load: function( module, initializer, kernelGenerator, viewGenerator ) {
+        load: function( module, initializer, viewGenerator, kernelGenerator ) {
 
             var instance = Object.create( this );
 
@@ -54,14 +54,14 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
                 instance[key] = initializer[key]; 
             }
 
-            kernelGenerator && Object.keys( kernel_api ).forEach( function( kernelFunctionName ) {
-                var kernelFunction = kernelGenerator.call( instance, kernelFunctionName );
-                kernelFunction && ( instance[kernelFunctionName] = kernelFunction );
-            } );
-
             viewGenerator && Object.keys( view_api ).forEach( function( viewFunctionName ) {
                 var viewFunction = viewGenerator.call( instance, viewFunctionName );
                 viewFunction && ( instance[viewFunctionName] = viewFunction );
+            } );
+
+            kernelGenerator && Object.keys( kernel_api ).forEach( function( kernelFunctionName ) {
+                var kernelFunction = kernelGenerator.call( instance, kernelFunctionName );
+                kernelFunction && ( instance[kernelFunctionName] = kernelFunction );
             } );
 
             return instance;

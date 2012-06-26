@@ -37,10 +37,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             window.vwf_view = this;
         },
         
-    }, function( kernelFunctionName ) {  // TODO: swap kernelGenerator and viewGenerator? we shouldn't need to provide a kernel function generator for view & model modules--only for stages
-
-        // == Kernel API ===========================================================================
-        
     }, function( viewFunctionName ) {
 
         // == View API =============================================================================
