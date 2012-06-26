@@ -45,7 +45,7 @@ properties:
           break;
       }
     value: "orbit"
-  speed: 4.0
+  translationSpeed: 4.0
 methods:
   clear: |
     if ( this.nodesCreated ) {
@@ -97,7 +97,6 @@ scripts:
       this.mouseMode = "orbit";
       this.minDistanceSquared = this.minDrawDistance * this.minDrawDistance;
       this.nodesCreated = [];
-      this.originalSpeed = this.speed;
     }
     this.pointerDown = function( parms, pickInfo ){
       if ( pickInfo ) {
