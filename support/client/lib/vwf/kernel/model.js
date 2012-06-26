@@ -358,7 +358,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             case "ancestors":
             case "parent":
             case "children":
-            case "descendants":
 
                 return function( nodeID ) {
                     return this.kernel[kernelFunctionName]( nodeID );
