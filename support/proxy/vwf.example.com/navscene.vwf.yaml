@@ -61,8 +61,8 @@ scripts:
         timeSinceDownEvent: function() { return this.time - this.pointerDownTime; },
         pointerDelta: function() { 
           if ( this.pointerInfo && this.lastPointerInfo ) {
-            return [ this.lastPointerInfo.position[0] - this.pointerInfo.position[0],
-                     this.lastPointerInfo.position[1] - this.pointerInfo.position[1] 
+            return [ (this.lastPointerInfo.position[0] - this.pointerInfo.position[0]) * 50,
+                     (this.lastPointerInfo.position[1] - this.pointerInfo.position[1]) * 50 
                    ];
           }
           return undefined;
@@ -176,24 +176,9 @@ scripts:
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
         var active = this.input.futureActive();
         var delta = this.input.pointerDelta();
-        var valid = false;
-        if ( delta ) {
-          switch( this.navmode ) {
-            case "orbit":
-              this.orbit( delta[0], delta[1]);
-              valid = true;
-              break;          
-            case "walk":
-              if ( this.dragModeMove )
-                this.move( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
-              else
-                this.look( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
-              valid = true;
-              break;
-          }
-          if ( valid && !active ) {
-            this.future( 0.1 ).update();
-          }
+        var valid = this.navmode == "none" ? false : true;
+        if ( valid && !active ) {
+          this.future( 0.1 ).update();
         }
       } 
       this.input.lastInputTime = this.time;   
@@ -494,14 +479,9 @@ scripts:
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
         this.updateRadius();
-        if(xDelta != 0 || yDelta != 0) {
-          var deltas = goog.vec.Vec3.createFromValues(xDelta, yDelta, 0);
-          goog.vec.Vec3.normalize(deltas, deltas);
-          xDelta = deltas[0];
-          yDelta = deltas[1];
-        }
+
         var pixelToRadian = this.distance() / 25;
-        var phiDelta = -yDelta * pixelToRadian;
+        var phiDelta = -yDelta * pixelToRadian * 0.5;
         var thetaDelta = -xDelta * pixelToRadian;
         
         phi = phi - phiDelta;
