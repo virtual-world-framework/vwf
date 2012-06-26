@@ -12,7 +12,7 @@
 # the License.
 
 ---
-extends: |
+extends:
   http://vwf.example.com/node3.vwf
 properties:
   # controlValue: The current value of the control. Must be between minValue and maxValue. 
