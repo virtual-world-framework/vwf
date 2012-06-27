@@ -1,6 +1,8 @@
 Tutorial
 ==========================
 --------------------------
+<iframe width="560" height="315" src="http://www.youtube.com/embed/mMhgA9fwdWs" frameborder="0" allowfullscreen></iframe>
+
  
 The goal of the following tutorial is to allow a developer to build an application from a simple primitive to small sandtable application. The tutorial is broken up into four stages, each building upon itself to create a more complex application.
 
@@ -197,7 +199,7 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	      pushpin.properties.translation = pickInfo.globalPosition;
 
 	      var name = "pushpin"+pushpinIndex;
-	      this.children.create( pushpin, name );
+	      this.children.create( name, pushpin );
 	      pushpinIndex++;
 	    }
 	  }

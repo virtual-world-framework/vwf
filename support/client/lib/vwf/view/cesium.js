@@ -146,16 +146,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         	"rightZooming": rightZooming,
                         	"wheelZooming": wheelZooming,
                         	"spinMovement": spinMovement,
-                        	"spinTs": spinHandler.getButtonPressTime(),
-                        	"spinTr":  spinHandler.getButtonReleaseTime(),
+                        	"spinTouchStart": spinHandler.getButtonPressTime(),
+                        	"spinTouchRelease":  spinHandler.getButtonReleaseTime(),
                         	"spinLastMovement": spinHandler.getLastMovement(),
                         	"rightZoomMovement": rightZoomMovement,
-                        	"rightZoomTs": rightZoom.getButtonPressTime(),
-                        	"rightZoomTr":  rightZoom.getButtonReleaseTime(),
+                        	"rightZoomTouchStart": rightZoom.getButtonPressTime(),
+                        	"rightZoomTouchRelease":  rightZoom.getButtonReleaseTime(),
                         	"rightZoomLastMovement": rightZoom.getLastMovement(),
                         	"wheelZoomMovement": wheelZoomMovement,
-                        	"wheelZoomTs": wheelZoom.getButtonPressTime(),
-                        	"wheelZoomTr":  wheelZoom.getButtonReleaseTime(),
+                        	"wheelZoomTouchStart": wheelZoom.getButtonPressTime(),
+                        	"wheelZoomTouchRelease":  wheelZoom.getButtonReleaseTime(),
                         	"wheelZoomLastMovement": wheelZoom.getLastMovement(),
                         	"freeLookIsMoving": freeLookIsMoving,
                         	"freeLookMovement": freeLookMovement
@@ -249,16 +249,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     	var rightZoomMovement = propertyValue.rightZoomMovement;
                                     	var wheelZoomMovement = propertyValue.wheelZoomMovement;
 
-                                    	var spinTs = propertyValue.spinTs;
-                                    	var spinTr = propertyValue.spinTr;
+                                    	var spinTouchStart = propertyValue.spinTouchStart;
+                                    	var spinTouchRelease = propertyValue.spinTouchRelease;
                                     	var spinLastMovement = propertyValue.spinLastMovement;
                                     	
-                                    	var rightZoomTs = propertyValue.righZoomTs;
-                                    	var rightZoomTr = propertyValue.rightZoomTr;
+                                    	var rightZoomTouchStart = propertyValue.righZoomTouchStart;
+                                    	var rightZoomTouchRelease = propertyValue.rightZoomTouchRelease;
                                     	var rightZoomLastMovement = propertyValue.rightZoomLastMovement;
                                     	
-                                    	var wheelZoomTs = propertyValue.wheelZoomTs;
-                                    	var wheelZoomTr = propertyValue.wheelZoomTr;
+                                    	var wheelZoomTouchStart = propertyValue.wheelZoomTouchStart;
+                                    	var wheelZoomTouchRelease = propertyValue.wheelZoomTouchRelease;
                                     	var wheelZoomLastMovement = propertyValue.wheelZoomLastMovement;
                                     	
                                     	var freeLookIsMoving = propertyValue.freeLookIsMoving;
@@ -276,13 +276,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                         }
                                         
                                         if (!rotating && spindle.inertiaSpin < 1.0) {
-                                            Cesium.CameraHelpers.createInertia(spinTs, spinTr, spinLastMovement, spindle.inertiaSpin, spindle._spin, spindle, '_lastInertiaSpinMovement');
+                                            Cesium.CameraHelpers.createInertia(spinTouchStart, spinTouchRelease, spinLastMovement, spindle.inertiaSpin, spindle._spin, spindle, '_lastInertiaSpinMovement');
                                         }
                                         if (!rightZooming && spindle.inertiaZoom < 1.0) {
-                                        	Cesium.CameraHelpers.createInertia(rightZoomTs, rightZoomTr, rightZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaZoomMovement');
+                                        	Cesium.CameraHelpers.createInertia(rightZoomTouchStart, rightZoomTouchRelease, rightZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaZoomMovement');
                                         }
                                         if (!wheelZooming && spindle.inertiaZoom < 1.0) {
-                                        	Cesium.CameraHelpers.createInertia(wheelZoomTs, wheelZoomTr, wheelZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaWheelZoomMovement');
+                                        	Cesium.CameraHelpers.createInertia(wheelZoomTouchStart, wheelZoomTouchRelease, wheelZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaWheelZoomMovement');
                                         }
                                         
                                         if(freeLookIsMoving) {

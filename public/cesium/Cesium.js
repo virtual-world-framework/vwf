@@ -10454,7 +10454,7 @@ define('Core/JulianDate',[
         var secondsOfDay = (date - julianDayNumber) * TimeConstants.SECONDS_PER_DAY;
         return new JulianDate(julianDayNumber, secondsOfDay, timeStandard);
     };
-
+    
     /**
      * Compares two {JulianDate} instances.
      *
@@ -20054,32 +20054,31 @@ define('Scene/CameraHelpers',[
     }
     
     /**
-     * This function is similar to maintainInertia except that it does not require a handler. 
+     * This function is similar to maintainInertia except that it does not require a handler.
      * Instead, the touch start time, touch release time, and last movement are passed as arguments.
-     * 
-     * @param {JulianDate} ts The time the mouse touch started.
-     * @param {JulianDate} tr The time the mouse touch released.
-     * @param {Object} lastMovement
-     * @param {Number} decayCoef
-     * @param {Function} action 
+     *
+     * @param {JulianDate} touchStarted The starting time of the movement to create inertia for.
+     * @param {JulianDate} touchReleased The ending time of the movement to create inertia for.
+     * @param {Object} lastMovement The movement to create inertia for.
+     * @param {Number} decayCoefficient
+     * @param {Function} action
      * @param {Object} object
      * @param {String} lastMovementName
      */
-    function createInertia(ts, tr, lastMovement, decayCoef, action, object, lastMovementName) {
-    	if(ts && tr) {
-    		// In VWF, ts and tr will be untyped objects that were originally JulianDates.
-    		ts = new Cesium.JulianDate(ts._julianDayNumber, ts._secondsOfDay, ts._timeStandard);
-        	tr = new Cesium.JulianDate(tr._julianDayNumber, tr._secondsOfDay, tr._timeStandard);
-    	}
-    	var threshold = ts && tr && ts.getSecondsDifference(tr);
-        if (ts && tr && threshold < inertiaMaxClickTimeThreshold) {
+    function createInertia(touchStarted, touchReleased, lastMovement, decayCoefficient, action, object, lastMovementName) {
+        if(touchStarted && touchReleased) {
+            touchStarted = new JulianDate(touchStarted._julianDayNumber, touchStarted._secondsOfDay, touchStarted._timeStandard);
+            touchReleased = new JulianDate(touchReleased._julianDayNumber, touchReleased._secondsOfDay, touchReleased._timeStandard);
+        }
+        var threshold = touchStarted && touchReleased && touchStarted.getSecondsDifference(touchReleased);
+        if (touchStarted && touchReleased && threshold < inertiaMaxClickTimeThreshold) {
             var now = new JulianDate();
-            var fromNow = tr.getSecondsDifference(now);
+            var fromNow = touchReleased.getSecondsDifference(now);
             if (fromNow > inertiaMaxTimeThreshold) {
                 return;
             }
 
-            var d = decay(fromNow, decayCoef);
+            var d = decay(fromNow, decayCoefficient);
 
             if (!object[lastMovementName]) {
                 if (!lastMovement) {

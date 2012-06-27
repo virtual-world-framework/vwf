@@ -449,7 +449,7 @@ scripts:
       }
     }
     this.updateRadius = function() {
-      var pos = this.activeCameraComp.translation;
+      var pos = this.activeCameraComp.translation || [ 1, 1, 1 ];
       var oldRadius = this.orbitRadius;
       
       this.orbitRadius = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2]) );

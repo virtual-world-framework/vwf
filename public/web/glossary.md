@@ -1,283 +1,188 @@
-<a name='Top'>
-[Top]: #Top
+<!-- Glossary Menu Begin -->
 
-Glossary
-=====================
+<div class='glossarymain'>
+<div class='navmenu'>
+		<ul class="nav nav-list" id="myTab">
+		<li class="nav-header">Glossary Index</li>
+		  <li class="active"><a href="#AC">A-C</a></li>
+		  <li><a href="#DF">D-F</a></li>
+		  <li><a href="#GJ">G-J</a></li>
+		  <li><a href="#KN">K-N</a></li>
+		  <li><a href="#OR">O-R</a></li>
+		  <li><a href="#SV">S-V</a></li>
+		  <li><a href="#WZ">W-Z</a></li>
+		</ul>
+</div>
+<div class='content contentmargin'>	
+<div class="tab-content" markdown="1">
+<div class="tab-pane active" id="AC" markdown="1">
 
-[A][A] | [B][B] | [C][C] | [D][D] | [E][E] | [F][F] | [G][G] | [H][H] | [I][I] | [J][J] | [K][K] | [L][L] | [M][M] | [N][N] | [O][O] | [P][P] | [Q][Q] | [R][R] | [S][S] | [T][T] | [U][U] | [V][V] | [W][W] | [X][X] | [Y][Y] | [Z][Z]
+<!-- Glossary Menu End -->
 
-[A]:#A
----------------------
-## A <a name='A' /> 
+### Accessor
+A script that monitors, modifies, or intercepts property get or set operations.
 
-> ### Accessor
 
-> A script that monitors, modifies, or intercepts property get or set operations.
+### Action
+State change executed by the kernel.
 
-> ### Action
 
-> State change executed by the kernel.
+### Application
+A component loaded as the top definition of a VWF instance. 
 
-> ### Application
 
-> A component loaded as the top definition of a VWF instance.
+### Behavior
+A fractional component that adds functionality to a component.
 
-> [Back To Top][Top]
 
-[B]:#B
----------------------
-## B <a name='B' />
+### Bubbling
+Flowing an object up to the previous method calls until it either reaches the top or it reaches a method that is implemented to handle it.
 
-> ### Behavior
 
-> A fractional component that adds functionality to a component.
+### Capturing
+Means of gathering specific data
 
-> ### Bubbling
 
-> Flowing an object up to the previous method calls until it either reaches the top or it reaches a method that is implemented to handle it.
+### Catalog
+A listing of applications and components.
 
-> [Back To Top][Top]
 
-[C]:#C
----------------------
-## C <a name='C' />
+### Child
+A node that is spawned by an existing node that is hierarchically higher.
 
-> ### Capturing
 
-> Means of gathering specific data
+### Client
+Connection to the reflector.du
 
-> ### Catalog
 
-> A listing of applications and components.
+### Component
+A piece of a VWF application, serving as a prototype, behavior, child, or the application itself. Components are stored collections of configured nodes.
 
-> ### Child
 
-> A node that is spawned by an existing node that is hierarchically higher.
+</div>
 
-> ### Client
+<div class="tab-pane" id="DF" markdown="1">
 
-> Connection to the reflector.du
+### Dispatched Event
+Event that captures down and bubbles up all the path from the application root to the target node.
 
-> ### Component
 
-> A piece of a VWF application, serving as a prototype, behavior, child, or the application itself. Components are stored collections of configured nodes.
+### Driver
+Module that extends the kernel.
 
-> [Back To Top][Top]
 
-[D]:#D
----------------------
-## D <a name='D' />
+### Event
+Outgoing function call.
 
-> ### Dispatched Event
 
-> Event that captures down and bubbles up all the path from the application root to the target node.
+### Event Data
+Data delivered to all nodes for a dispatched event.
 
-> ### Driver
 
-> Module that extends the kernel.
+### Event Node Data
+Data delivered per node for a dispatched event.
 
-> [Back To Top][Top]
 
-[E]:#E
----------------------
-## E  <a name='E' />
+### Future
+Method call that will be triggered in a certain amount of time specified by the parameter
 
-> ### Event
 
-> Outgoing function call.
+</div>
+<div class="tab-pane" id="GJ" markdown="1">
 
-> ### Event Data
+### ID
+Unique identifier that is used to represent objects
 
-> Data delivered to all nodes for a dispatched event.
 
-> ### Event Node Data
+</div>
+<div class="tab-pane" id="KN" markdown="1">
 
-> Data delivered per node for a dispatched event.
+### Kernel
+Machinery that creates the application environment.
 
-> [Back To Top][Top]
 
-[F]:#F
----------------------
-## F <a name='F' />
+### Member
+Property, method, event, or child of a node that an action is executed on.
 
-> ### Future
 
-> Method call that will be triggered in a certain amount of time specified by the parameter
+### Method
+Incoming function call.
 
-> [Back To Top][Top]
 
-[G]:#G
----------------------
-## G <a name='G' />
+### Model
+Driver that executes within the shared state.
 
-> [Back To Top][Top]
 
-[H]:#H
----------------------
-## H <a name='H' />
+### Module
+The kernel (future), drivers, and supporting libraries (future) are JavaScript modules in loaded on demand. Modules are in the RequireJS format.
 
-> [Back To Top][Top]
 
-[I]:#I
----------------------
-## I <a name='I' />
+### Node
+The atomic unit of a VWF application. Nodes maintain state in properties, provide methods for incoming function calls, provide events for outgoing function calls, reference child nodes, and contain scripts to glue the pieces together.
 
-> ### ID
 
-> Unique identifier that is used to represent objects
+</div> 
 
-> [Back To Top][Top]
+<div class="tab-pane" id="OR" markdown="1">
 
-[J]:#J
----------------------
-## J <a name='J' />
+### Parent
+A node that has knowledge of exactly one hierarchically higher node and multiple child nodes.
 
-> [Back To Top][Top]
 
-[K]:#K
----------------------
-## K <a name='K' />
+### Property
+Node state
 
-> ### Kernel
 
-> Machinery that creates the application environment.
+### Prototype
+A component that provides base functionality for a component.
 
-> [Back To Top][Top]
 
-[L]:#L
----------------------
-## L <a name='L' />
+### Reflector
+Server managing an instance, synchronizing state, and ticking time.
 
-> [Back To Top][Top]
 
-[M]:#M
----------------------
-## M <a name='M' />
+</div>
+<div class="tab-pane" id="SV" markdown="1">
 
-> ### Member
+### Scripts
+A collection of property and function definitions.
 
-> Property, method, event, or child of a node that an action is executed on.
 
-> ### Method
+### Time
+Quantized forward progression generated by the reflector.
 
-> Incoming function call.
 
-> ### Model
+### View
+Driver that executes outside of the shared state.
 
-> Driver that executes within the shared state.
 
-> ### Module
+</div>
+<div class="tab-pane" id="WZ" markdown="1">
+No entries at this time.
+</div>
+</div>
 
-> The kernel (future), drivers, and supporting libraries (future) are JavaScript modules in loaded on demand. Modules are in the RequireJS format.
+<script type="text/javascript">
+  $(function () {
+    $('#myTab a:first').tab('show');
+  });
+  $('#myTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+})
+</script>
 
-> [Back To Top][Top]
+</div>
+</div>
 
-[N]:#N
----------------------
-## N <a name='N' />
 
-> ### Node
 
-> The atomic unit of a VWF application. Nodes maintain state in properties, provide methods for incoming function calls, provide events for outgoing function calls, reference child nodes, and contain scripts to glue the pieces together.
 
-> [Back To Top][Top]
 
-[O]:#O
----------------------
-## O <a name='O' />
 
-> [Back To Top][Top]
 
-[P]:#P
----------------------
-## P <a name='P' />
 
-> ### Parent
 
-> A node that has knowledge of exactly one hierarchically higher node and multiple child nodes.
 
-> ### Property
 
-> Node state
 
-> ### Prototype
-
-> A component that provides base functionality for a component.
-
-> [Back To Top][Top]
-
-[Q]:#Q
----------------------
-## Q <a name='Q' />
-
-> [Back To Top][Top]
-
-[R]:#R
----------------------
-## R <a name='R' />
-
-> ### Reflector
-
-> Server managing an instance, synchronizing state, and ticking time.
-
-> [Back To Top][Top]
-
-[S]:#S
----------------------
-## S <a name='S' />
-
-> ### Scripts
-
-> A collection of property and function definitions.
-
-> [Back To Top][Top]
-
-[T]:#T
----------------------
-## T <a name='T' />
-
-> ### Time
-
-> Quantized forward progression generated by the reflector.
-
-> [Back To Top][Top]
-
-[U]:#U
----------------------
-## U <a name='U' />
-
-> [Back To Top][Top]
-
-[V]:#V
----------------------
-## V <a name='V' />
-
-> ### View
-
-> Driver that executes outside of the shared state.
-
-> [Back To Top][Top]
-
-[W]:#W
----------------------
-## W <a name='W' />
-
-> [Back To Top][Top]
-
-[X]:#X
----------------------
-## X <a name='X' />
-
-> [Back To Top][Top]
-
-[Y]:#Y
----------------------
-## Y <a name='Y' />
-
-> [Back To Top][Top]
-
-[Z]:#Z
----------------------
-## Z <a name='Z' />
-
-> [Back To Top][Top]
