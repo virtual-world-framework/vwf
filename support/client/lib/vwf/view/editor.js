@@ -1358,20 +1358,25 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             $(modelsTemp).html("<div class='header'>Models</div>");
 
             $.getJSON("admin/models", function( data ) {
-                $.each( data, function( key, value ) {
-                    var fileName = encodeURIComponent(value['basename']);
-                    var divId = fileName;
-                    if(divId.indexOf('.') != -1) {
-                        divId = divId.replace(/\./g, "_");
-                    }
-                    var url = value['url'];
+                if(data.length > 0) {
+                    $.each( data, function( key, value ) {
+                        var fileName = encodeURIComponent(value['basename']);
+                        var divId = fileName;
+                        if(divId.indexOf('.') != -1) {
+                            divId = divId.replace(/\./g, "_");
+                        }
+                        var url = value['url'];
 
-                    $(modelsTemp).append("<div class='childContainer'><div id='" + divId + "' class='modelEntry' data-url='" + url + "'>"
-                        + fileName + "</div></div>");
-                    $("#" + divId).click(function(e) {
-                        modelDrillDown.call(self, e.target.textContent, e.target.getAttribute("data-url"));
-                    })
-                });
+                        $(modelsTemp).append("<div class='childContainer'><div id='" + divId + "' class='modelEntry' data-url='" + url + "'>"
+                            + fileName + "</div></div>");
+                        $("#" + divId).click(function(e) {
+                            modelDrillDown.call(self, e.target.textContent, e.target.getAttribute("data-url"));
+                        })
+                    });
+                }
+                else {
+                    $(modelsTemp).append("<div class='childEntry'><p style='font:bold 12pt Arial'>No Models Found</p></div>");
+                }
             } );
         }
         else {

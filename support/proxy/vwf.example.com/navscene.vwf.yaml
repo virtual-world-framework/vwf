@@ -29,7 +29,9 @@ properties:
     value: "walk"
   orbitRadius: -1  
   orbitObjectID: "http-vwf-example-com-node3-vwf-sceneCenter"
-  speed: 1.0
+  # rotationSpeed: At a speed of 1, will take 4 seconds to go around 360 degrees.
+  rotationSpeed: 1.0
+  translationSpeed: 1.0
   maxSpeed: 500
   dragModeMove: false
 events:
@@ -61,8 +63,8 @@ scripts:
         timeSinceDownEvent: function() { return this.time - this.pointerDownTime; },
         pointerDelta: function() { 
           if ( this.pointerInfo && this.lastPointerInfo ) {
-            return [ this.lastPointerInfo.position[0] - this.pointerInfo.position[0],
-                     this.lastPointerInfo.position[1] - this.pointerInfo.position[1] 
+            return [ (this.lastPointerInfo.position[0] - this.pointerInfo.position[0]) * 50,
+                     (this.lastPointerInfo.position[1] - this.pointerInfo.position[1]) * 50 
                    ];
           }
           return undefined;
@@ -86,7 +88,6 @@ scripts:
         lastUpdateTime: undefined,
         lastInputTime: undefined,
       };
-      this.originalSpeed = this.speed;
       this.setNavMode( this.navmode );
     }
     this.timeElapsed = function() {
@@ -176,24 +177,9 @@ scripts:
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
         var active = this.input.futureActive();
         var delta = this.input.pointerDelta();
-        var valid = false;
-        if ( delta ) {
-          switch( this.navmode ) {
-            case "orbit":
-              this.orbit( delta[0], delta[1]);
-              valid = true;
-              break;          
-            case "walk":
-              if ( this.dragModeMove )
-                this.move( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
-              else
-                this.look( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
-              valid = true;
-              break;
-          }
-          if ( valid && !active ) {
-            this.future( 0.1 ).update();
-          }
+        var valid = this.navmode == "none" ? false : true;
+        if ( valid && !active ) {
+          this.future( 0.1 ).update();
         }
       } 
       this.input.lastInputTime = this.time;   
@@ -413,9 +399,9 @@ scripts:
       
       if ( this.activeCameraComp ) {
         if ( this.input.pointerInfo && this.input.pointerInfo.modifiers.ctrl ) {
-          if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y * this.distance() ], 0 ) }
+          if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y * this.angularDistance() ], 0 ) }
         } else {
-          if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * 1.5 * this.distance()], 0 ) }
+          if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * this.angularDistance() ], 0 ) }
         } 
       }
     }    
@@ -463,7 +449,15 @@ scripts:
       }
     }
     this.distance = function(){
-      var dist = this.speed * 10;
+      var dist = this.translationSpeed * 10;
+      if(this.timeElapsed() > 0) {
+        dist = dist * this.timeElapsed();
+      }
+      return dist;
+    }
+    this.angularDistance = function() {
+      // Should take 4 seconds to go around 360 degrees
+      var dist = this.rotationSpeed * 90;
       if(this.timeElapsed() > 0) {
         dist = dist * this.timeElapsed();
       }
@@ -494,13 +488,8 @@ scripts:
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
         this.updateRadius();
-        if(xDelta != 0 || yDelta != 0) {
-          var deltas = goog.vec.Vec3.createFromValues(xDelta, yDelta, 0);
-          goog.vec.Vec3.normalize(deltas, deltas);
-          xDelta = deltas[0];
-          yDelta = deltas[1];
-        }
-        var pixelToRadian = this.distance() / 25;
+
+        var pixelToRadian = _2PI * this.angularDistance() / 360;
         var phiDelta = -yDelta * pixelToRadian;
         var thetaDelta = -xDelta * pixelToRadian;
         

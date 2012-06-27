@@ -35,6 +35,14 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.state.enabled = false;
         },
         
+    }, function( modelFunctionName ) {
+
+        // == Model API ============================================================================
+
+        // The kernel bypasses vwf/kernel/model and calls directly into the first driver stage.
+
+        return undefined;
+
     }, function( kernelFunctionName ) {
 
         // == Kernel API ===========================================================================
@@ -336,12 +344,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 };
 
         }
-
-    }, function( modelFunctionName ) {
-
-        // == Model API ============================================================================
-
-        return undefined;
 
     } );
 

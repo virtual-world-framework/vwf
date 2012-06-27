@@ -235,7 +235,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         function renderScene(time) {
 			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-            if((time - lastPickTime) > 100) {
+            if((time - lastPickTime) > 10) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
                 self.lastPick = newPick;
     			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {

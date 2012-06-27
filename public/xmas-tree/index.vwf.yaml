@@ -28,7 +28,7 @@ scripts:
       this.camera.translation = [ 30, 138, 40 ];
       this.camera.rotation = [ 0, 0, 1, 180 ];
       this.camera.far = 50000; 
-      this.speed = 3;
+      this.translationSpeed = 3;
     }
     this.clearButton.events.clearing = this.events.add( function() { 
       this.clear(); 

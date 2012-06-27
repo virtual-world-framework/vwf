@@ -18,7 +18,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
     // is active, scripts on the main page may make (reflected) kernel calls:
 
-    //     window.vwf_view.createChild( nodeID, childName, childComponent, function( childID ) {
+    //     window.vwf_view.kernel.createChild( nodeID, childName, childComponent, function( childID ) {
     //         ...
     //     } );
 
@@ -36,10 +36,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         initialize: function() {
             window.vwf_view = this;
         },
-        
-    }, function( kernelFunctionName ) {  // TODO: swap kernelGenerator and viewGenerator? we shouldn't need to provide a kernel function generator for view & model modules--only for stages
-
-        // == Kernel API ===========================================================================
         
     }, function( viewFunctionName ) {
 
