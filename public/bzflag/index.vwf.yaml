@@ -23,28 +23,30 @@ properties:
 children:
   bz_world:
     extends: http://vwf.example.com/node3.vwf
-    source: models/bzworld_tex.dae
+    source: models/bzworld.dae
+    # source: models/bzworld_desert.dae
     type: model/vnd.collada+xml
     properties:
       translation: [ 0, 0, 0 ]
       rotation: [ 1, 0, 0, -90 ]
       scale: 4
-  mountains:
-    extends: http://vwf.example.com/node3.vwf
-    source: models/mountains.dae
-    type: model/vnd.collada+xml
-    properties: 
-      rotation: [ 1, 0, 0, 0 ]
-      translation: [ 0, 0, -5000 ]
-      scale: 1500
+  # mountains:
+  #   extends: http://vwf.example.com/node3.vwf
+  #   source: models/mountains.dae
+  #   type: model/vnd.collada+xml
+  #   properties: 
+  #     rotation: [ 1, 0, 0, 0 ]
+  #     translation: [ 0, 0, -5000 ]
+  #     scale: 1500
   background:
     extends: http://vwf.example.com/node3.vwf
+    # source: models/desert_skydome.dae
     source: models/skydome.dae
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
-      translation: [ 0, 0, -1500 ]
-      scale: 300
+      translation: [ 0, 0, -5000 ]
+      scale: 110
   # sceneCenter:
   #   extends: http://vwf.example.com/node3.vwf
   #   properties:

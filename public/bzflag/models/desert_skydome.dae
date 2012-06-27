@@ -12,7 +12,7 @@
   </asset>
   <library_images>
     <image id="texture1_jpg" name="texture1_jpg">
-      <init_from>images/skydomePolar.png</init_from>
+      <init_from>images/desertPolar.png</init_from>
     </image>
     <image id="texture0_bmp" name="texture0_bmp">
       <init_from>images/skydome_texture0.bmp</init_from>
