@@ -800,7 +800,8 @@
                         fields = queue.shift();
 
                         vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 ? Array.prototype.slice.call( object ) : object
+                            return depth == 2 && objectIsArraylike( object ) ?
+                                Array.prototype.slice.call( object ) : object
                         } ), "from queue" );
 
                         fields.respond && private_queue.push( fields );
@@ -812,7 +813,8 @@
                         fields = private_queue.shift();
 
                         vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 ? Array.prototype.slice.call( object ) : object
+                            return depth == 2 && objectIsArraylike( object ) ?
+                                Array.prototype.slice.call( object ) : object
                         } ), "to queue" );
 
                         queue.push( fields );
@@ -2604,36 +2606,25 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             return isComponent; 
         };
 
-        // -- objectIsTypedArray  ------------------------------------------------------------------
+        // -- objectIsArraylike --------------------------------------------------------------------
 
-        // Determine if a JavaScript object is a component specification by searching for component
-        // specification attributes in the candidate object.
+        // Determine if an object is Array-like--but not an Array--to identify objects that need to
+        // be converted to Arrays for normalization.
 
-        var objectIsTypedArray = function( candidate ) {
+        var objectIsArraylike = function( candidate ) {
 
-            var typedArrayTypes = [
-                Int8Array,
-                Uint8Array,
-                // Uint8ClampedArray,
-                Int16Array,
-                Uint16Array,
-                Int32Array,
-                Uint32Array,
-                Float32Array,
-                Float64Array,
-            ];
+            var isArraylike = false;
 
-            var isTypedArray = false;
+            // Filter with typeof and instanceof since they're much faster than toString(). Then
+            // check the type string for typed arrays (Int8Array, Uint8Array, ...) or the Arguments
+            // object.
 
-            if ( typeof candidate == "object" && candidate != null ) {
-
-                typedArrayTypes.forEach( function( typedArrayType ) {
-                    isTypedArray = isTypedArray || candidate instanceof typedArrayType;
-                } );
-
+            if ( typeof candidate == "object" && candidate != null && ! ( candidate instanceof Array ) ) {
+                var typeString = Object.prototype.toString.call( candidate ) // "[object *Type*]""
+                isArraylike = ( typeString.slice( -6 ) == "Array]" || typeString == "[object Arguments]" );
             }
-            
-            return isTypedArray; 
+
+            return isArraylike;
         };
 
         // -- valueHasAccessors --------------------------------------------------------------------
@@ -2875,7 +2866,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
             // Convert typed arrays to regular arrays.
 
-            return objectIsTypedArray( object ) ?
+            return objectIsArraylike( object ) ?
                 Array.prototype.slice.call( object ) : object;
 
         };
@@ -2911,9 +2902,9 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
                 return filtered;
 
-            } else if ( depth == 3 ) {
+            } else if ( depth == 3 && objectIsArraylike( object ) ) {
 
-                // Convert array-like arguments objects to regular arrays.  // TODO: only safe so long as parameters is the only container in queue messages
+                // Convert array-like parameters to regular arrays.
 
                 return Array.prototype.slice.call( object );
 
