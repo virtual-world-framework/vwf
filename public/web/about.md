@@ -20,7 +20,7 @@ VWF is a zero-install platform that can be extended dynamically in production. V
 
 The VWF installation is available on [GitHub](https://github.com/virtual-world-framework/vwf) for Debian/Ubuntu, Red Hat Linux, and Windows.
 
-To see the system live check out any of our [demonstrations available](https://www.virtual.wf).
+To see the system live check out any of our [demonstrations available](catalog.html).
 
 We also offer quick installation scripts to [setup your own VWF server](https://github.com/virtual-world-framework/vwf).
 </div>

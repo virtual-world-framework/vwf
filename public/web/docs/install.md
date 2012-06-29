@@ -47,14 +47,26 @@ Click through to *Finish* to close Cygwin setup. Save setup.exe for later since 
 
 * * *
 
-Install RubyGems
+Option 1: Automatic Windows Installation
+--------------
+Perform the following shell command at a user shell prompt within Cygwin:
+
+	curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_windows.sh | bash optProxyAddress
+
+* * *
+
+Option 2: Manual Windows Installation
 ----------------
 
 Cygwin's ruby installs without the library manager, so we have to install it from source. Open a new Cygwin terminal session and issue the following commands.
 
-	curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.5.tgz | tar xzcd rubygems-1.8.5ruby setup.rb install 
+	curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.24.tgz | tar xz
 
-* * *	
+	cd rubygems-1.8.24
+
+	ruby setup.rb install 
+
+* * *
 
 Extract VWF from ZIP File
 -------------------------
@@ -75,6 +87,7 @@ The easiest way is to type c-d-space as above, drag a VWF directory icon from Wi
 Then enter these commands:
 
 	gem install bundler
+
 	bundle install --binstubs
 	
 Ignore the warning about sudo not found for bundle install. If you get linker relocation errors, you probably need to tell Cygwin to rebaseall. See [Cygwin rebaseall](http://www.heikkitoivonen.net/blog/2008/11/26/cygwin-upgrades-and-rebaseall) for details. The required rebase and dash packages should already be installed.
@@ -85,7 +98,7 @@ Launch the Server
 -----------------
 
 	bin/thin start 
-	
+
 * * *
 
 Connect
@@ -98,6 +111,26 @@ The server runs on port 3000 in development mode by default. Use Google Chrome t
 Installing the Ruby Server - For Linux
 =========
 
+Ubuntu/Debian
+-------
+Perform the following shell command at a user shell prompt:
+
+	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh  | bash
+
+* * *
+
+Red Hat Enterprise Linux
+-------
+Perform the following shell command at a user shell prompt:
+
+	sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh  | bash
+
+* * *
+
+
+
+Manual Installation on Linux
+-------
 Ensure RubyGems is installed (for Debian/Ubuntu). 
 
 	# apt-get install ruby rubygems
@@ -118,7 +151,7 @@ Extract VWF from TAR File
 Download and extract the contents of the vwf.tar to your development directory.
 
 	$ tar -xvzf vwf.tar
-	
+
 * * *
 
 Install the Gems
@@ -153,7 +186,7 @@ And make them look like this:
 Now you can install the RubyGems to the system (as root):
 
 	# bundle install --binstubs
-	
+
 * * *
 
 Build the Server
@@ -165,7 +198,7 @@ Launch the Server
 -----------------
 
 	# bundle exec thin start
-	
+
 * * *
 
 Connect
