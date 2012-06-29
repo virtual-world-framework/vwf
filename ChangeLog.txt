@@ -1,5 +1,9 @@
 VIRTUAL WORLD FRAMEWORK CHANGE LOG
 
+0.5.2.x Patch
+----------------------------------------------------------------------------
+	Repaired an issue with URL links on the about page.
+
 0.5.2.x Release
 ----------------------------------------------------------------------------
 	Added the VWF Forum for General and Technical Questions.  All server instances point back to the same Forum instance.
