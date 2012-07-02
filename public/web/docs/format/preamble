@@ -61,9 +61,7 @@
 						<li><span style='position:relative;left:20px'><a href='reqs.html' title='Requirements'>Requirements</a></span></li>
 				    	<li><span style='position:relative;left:20px'><a href='install.html' title='Installation'>Installation</a></span></li>
 						<li><span style='position:relative;left:20px'><a href='architecture.html' title='Architecture'>Architecture</a></span></li>
-						<li><span style='position:relative;left:20px'><a href='synch.html' title='Synchronization'>Synchronization</a></span></li>
-						<li><span style='position:relative;left:20px'><a href='ids.html' title='Node IDs'>Node IDs</a></span></li>
-						<li><span style='position:relative;left:20px'><a href='common.html' title='Common'>Common</a></span></li>
+						<li><span style='position:relative;left:20px'><a href='multiuser.html' title='Multiuser'>Multiuser</a></span></li>
 						<li><span style='position:relative;left:20px'><a href='components.html' title='Components'>Components</a></span></li>
 						<li><span style='position:relative;left:20px'><a href='cameras.html' title='Cameras'>Cameras</a></span></li>
 						<li><span style='position:relative;left:20px'><a href='lights.html' title='Lights'>Lights</a></span></li>
@@ -76,6 +74,7 @@
 					<li><a href='readme.html' title='Samples'>Samples</a></li>
 						<li><span style='position:relative;left:20px'><a href='readme.html' title='Getting Started with VWF'>Getting Started</a></span></li>
 						<li><span style='position:relative;left:20px'><a href='tutorial.html' title='Tutorial'>Tutorial</a></span></li>
+						<li><span style='position:relative;left:20px'><a href='query.html' title='Querying'>Querying</a></span></li>
 					<li><a href='application.html' title='Application'>Application</a></li>
 					    <li><span style='position:relative;left:20px'><a href='specification.html' title='Specification'>Specification</a></span></li>
 					    <li><span style='position:relative;left:20px'><a href='binding.html' title='Binding'>JavaScript Binding</a></span></li>
