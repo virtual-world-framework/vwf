@@ -1,7 +1,7 @@
 Cameras
 ===================
 -------------------
-The camera capability provides the users viewpoint into the application. Every application automatically creates a camera with the id <code>http-vwf-example-com-camera-vwf-camera</code>. This camera can be accessed in javascript through the camera property of the index-vwf component, or through the editor. New cameras can also be created by creating a component that extends <code>http://vwf.example.com/camera.vwf</code>. The application uses the <code>activeCamera</code> property to determine which camera to use as the main viewpoint.
+The camera capability provides the users viewpoint into the application. Every application automatically creates a camera with the id <code>http-vwf-example-com-camera-vwf-camera</code>. This camera can be accessed in javascript through the camera property of the index-vwf component, or through the editor. New cameras can also be created by creating a component that extends <code>http://vwf.example.com/camera.vwf</code>. 
 
 -------------------
 
@@ -47,3 +47,13 @@ The <code>translation</code> property controls the position of the camera. Chang
 
 -------------------
 
+Using Multiple Cameras
+-------------------
+-------------------
+
+The application uses the <code>activeCamera</code> property of the scene to determine which camera to use as the main viewpoint. Other cameras can be created, but they will not affect what is displayed in the browser unless they have been set as the active camera. Setting <code>activeCamera</code> to the id of a camera will automatically switch the view that is displayed in the browser to the view of that camera.
+
+	// this is the scene
+	this.activeCamera = "http-vwf-example-com-camera-vwf-newcamera";
+
+-------------------
