@@ -664,7 +664,7 @@
             // Return the result.
 
             respond && this.respond( nodeID, actionName, memberName, parameters,
-                require( "vwf/utility" ).transform( result, transitTransformation ) );
+                require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
         };
 
@@ -728,7 +728,7 @@
         this.log = function() {
 
             this.respond( undefined, "log", undefined, undefined,
-                require( "vwf/utility" ).transform( arguments, transitTransformation ) );
+                require( "vwf/utility" ).transform( arguments, require( "vwf/utility" ).transforms.transit ) );
 
         }
 
@@ -799,10 +799,8 @@
 
                         fields = queue.shift();
 
-                        vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 && objectIsArraylike( object ) ?
-                                Array.prototype.slice.call( object ) : object
-                        } ), "from queue" );
+                        vwf.logger.info( "setState:", "removing",
+                            JSON.stringify( loggableFields( fields ) ), "from queue" );
 
                         fields.respond && private_queue.push( fields );
 
@@ -812,10 +810,8 @@
 
                         fields = private_queue.shift();
 
-                        vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 && objectIsArraylike( object ) ?
-                                Array.prototype.slice.call( object ) : object
-                        } ), "to queue" );
+                        vwf.logger.info( "setState:", "returning",
+                            JSON.stringify( loggableFields( fields ) ), "to queue" );
 
                         queue.push( fields );
 
@@ -859,7 +855,7 @@
             var applicationState = {
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), transitTransformation ),
+                    require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 queue: 
@@ -873,11 +869,11 @@
 
                 applicationState.nodes.forEach( function( node, index ) {
                     applicationState.nodes[index] =
-                        require( "vwf/utility" ).transform( applicationState.nodes[index], hashTransformation );
+                        require( "vwf/utility" ).transform( applicationState.nodes[index], require( "vwf/utility" ).transforms.hash );
                 } );
 
                 applicationState.queue =
-                    require( "vwf/utility" ).transform( applicationState.queue, hashTransformation );
+                    require( "vwf/utility" ).transform( applicationState.queue, require( "vwf/utility" ).transforms.hash );
 
             }
     
@@ -2606,27 +2602,6 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             return isComponent; 
         };
 
-        // -- objectIsArraylike --------------------------------------------------------------------
-
-        // Determine if an object is Array-like--but not an Array--to identify objects that need to
-        // be converted to Arrays for normalization.
-
-        var objectIsArraylike = function( candidate ) {
-
-            var isArraylike = false;
-
-            // Filter with typeof and instanceof since they're much faster than toString(). Then
-            // check the type string for typed arrays (Int8Array, Uint8Array, ...) or the Arguments
-            // object.
-
-            if ( typeof candidate == "object" && candidate != null && ! ( candidate instanceof Array ) ) {
-                var typeString = Object.prototype.toString.call( candidate ) // "[object *Type*]""
-                isArraylike = ( typeString.slice( -6 ) == "Array]" || typeString == "[object Arguments]" );
-            }
-
-            return isArraylike;
-        };
-
         // -- valueHasAccessors --------------------------------------------------------------------
 
         // Determine if a property initializer is a detailed initializer containing explicit
@@ -2838,6 +2813,12 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             return loggable;
         };
 
+        // -- loggableFields -----------------------------------------------------------------------
+
+        var loggableFields = function( fields ) {
+            return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
+        }
+
         // -- remappedURI --------------------------------------------------------------------------
 
         // Remap a component URI to its location in a local cache.
@@ -2854,20 +2835,6 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             }
 
             return uri;
-
-        };
-
-        // -- transitTransformation ----------------------------------------------------------------
-
-        // vwf/utility/transform() transformation function to convert an object for proper JSON
-        // serialization.
-
-        var transitTransformation = function( object ) {
-
-            // Convert typed arrays to regular arrays.
-
-            return objectIsArraylike( object ) ?
-                Array.prototype.slice.call( object ) : object;
 
         };
 
@@ -2902,48 +2869,9 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
                 return filtered;
 
-            } else if ( depth == 3 && objectIsArraylike( object ) ) {
-
-                // Convert array-like parameters to regular arrays.
-
-                return Array.prototype.slice.call( object );
-
             } else {
 
-                return object;
-
-            }
-
-        };
-
-        // -- hashTransformation -------------------------------------------------------------------
-
-        // vwf/utility/transform() transformation function to normalize an object so that it can be
-        // serialized and hashed with consistent results.
-
-        var hashTransformation = function( object ) {
-
-            if ( typeof object == "number" ) {
-
-                // Reduce precision slightly to match what passes through the reflector.
-
-                return Number( object.toPrecision(15) );
-
-            } else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
-                
-                // Order objects alphabetically.
-
-                var ordered = {};
-
-                Object.keys( object ).sort().forEach( function( key ) {
-                    ordered[key] = object[key];
-                } );
-
-                return ordered;
-
-            } else {
-
-                return object;
+                return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
 
             }
 

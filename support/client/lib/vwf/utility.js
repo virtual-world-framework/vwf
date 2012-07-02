@@ -92,6 +92,109 @@ define( [ "module" ], function( module ) {
             return result;
         },
 
+        // -- transform ----------------------------------------------------------------------------
+
+        /// vwf.utility#transform transformation functions. Invoke as:
+        /// 
+        ///   utility.transform( object, utility.transforms.*transform* )
+        ///
+        /// to apply the transform utility.transforms.*transform* to object.
+        /// 
+        /// @name vwf.utility#transforms
+        /// @namespace
+
+        transforms: {
+
+            // -- transit --------------------------------------------------------------------------
+
+            /// vwf.utility#transform transformation function to convert an object for proper JSON
+            /// serialization. Array-like objects are converted to actual Arrays. All other objects
+            /// are unchanged. Invoke as: utility.transform( object, utility.transforms.transit ).
+            /// 
+            /// @name vwf.utility.transforms#transit
+            /// @function
+            /// 
+            /// @param {Object} object
+            ///   The object being transformed or one of its descendants.
+            /// 
+            /// @returns {Object}
+            ///   An Array-like converted to an Array, or *object*.
+
+            transit: function( object ) {
+
+                // Determine if an object is Array-like (but not an Array) to identify objects that
+                // need to be converted to Arrays for normalization.
+
+                function isArraylike( candidate ) {
+
+                    var arraylike = false;
+
+                    // Filter with typeof and instanceof since they're much faster than toString().
+                    // Then check for typed arrays (Int8Array, Uint8Array, ...) or the Arguments
+                    // object using the type string.
+
+                    if ( typeof candidate == "object" && candidate != null && ! ( candidate instanceof Array ) ) {
+                        var typeString = Object.prototype.toString.call( candidate ) // eg, "[object *Type*]"
+                        arraylike = ( typeString.slice( -6 ) == "Array]" || typeString == "[object Arguments]" );
+                    }
+
+                    return arraylike;
+                };
+
+                // Convert typed arrays to regular arrays.
+
+                return isArraylike( object ) ?
+                    Array.prototype.slice.call( object ) : object;
+
+            },
+
+            // -- hash -----------------------------------------------------------------------------
+
+            /// vwf.utility#transform transformation function to normalize an object so that it can
+            /// be serialized and hashed with consistent results. Numeric precision is reduced to
+            /// match the precision retained by the reflector. Non-Array objects are reordered so
+            /// that their keys are in alphabetic order. Other objects are unchanged. Invoke as:
+            /// utility.transform( object, utility.transforms.hash ).
+            /// 
+            /// @name vwf.utility.transforms#hash
+            /// @function
+            /// 
+            /// @param {Object} object
+            ///   The object being transformed or one of its descendants.
+            /// 
+            /// @returns {Object}
+            ///   A reduced-precision number, an Object with alphabetic keys, or *object*.
+
+            hash: function( object ) {
+
+                if ( typeof object == "number" ) {
+
+                    // Reduce precision slightly to match what passes through the reflector.
+
+                    return Number( object.toPrecision(15) );
+
+                } else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
+                    
+                    // Order objects alphabetically.
+
+                    var ordered = {};
+
+                    Object.keys( object ).sort().forEach( function( key ) {
+                        ordered[key] = object[key];
+                    } );
+
+                    return ordered;
+
+                } else {
+
+                    return object;
+
+                }
+
+            },
+
+        },
+
         // -- exceptionMessage ---------------------------------------------------------------------
 
         /// Format the stack trace for readability.
