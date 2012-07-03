@@ -1,63 +1,65 @@
 Querying
 ===================
 -------------------
-Within VWF, there are several ways to query for a specific node for use in any application script. The vwf.match function takes in the searchable node as the first parameter. In this case, *index-vwf* is the application root node, so all queries will be run on the whole application. The second parameter takes the criteria for the query. 
+Within VWF, there are several ways to query for a specific node for use in any application script. The *vwf.find* function runs a search and returns a set of matching nodes. The *vwf.test* function takes in a parameter to test against and returns a boolean value depending on whether the search was successful. 
 
-The following query searches for all children nodes of the application.
+From a component of the application, the function takes in a search criteria parameter and will run a search on the specified component. Thus, if the function is called on the main application, it will search all nodes of the application. The functions may also be called on any other component of the application, and will run a search on all the children of that node. 
 
-	vwf.match( "index-vwf", "/" );
+The following query searches for all children nodes of the component on which it is called.
 
-The follwoing query searches for all children nodes of type *camera*.
+	vwf.find( "/" );
 
-	vwf.match( "index-vwf", "/camera" );
+The following query searches for all children nodes of type *camera*.
 
-Additional queries: 
+	vwf.find( "/camera" );
 
-	vwf.match( "index-vwf", "/camera", "http-vwf-example-com-camera-vwf-camera" );
+The following query searches for all children nodes of type *camera* with the given ID. 
 
+	vwf.find( "/camera", "http-vwf-example-com-camera-vwf-camera" );
 
+The following query will return a value of false, as a child node of type camera with the given ID does not exist in the application. 
 
-	vwf.match( "index-vwf", "/camera", "http-vwf-example-com-camera-vwf-camera-not" );
+	vwf.test( "/camera", "http-vwf-example-com-camera-vwf-camera-not" );
 
+Additional Queries:
 
-
-	vwf.match( "index-vwf", "/*" );
-
-
-
-	vwf.match( "index-vwf", "/*", function( id ) { console.info( vwf.name( id ) ) } );
+	vwf.find( "/*" );
 
 
 
-	vwf.match( "index-vwf", "/radio/bone1/MaxScene/Radio" );
+	vwf.find( "/*", function( id ) { console.info( vwf.name( id ) ) } );
 
 
 
-	vwf.match( "index-vwf", [ "radio", "bone1", "MaxScene", "Radio" ] );
+	vwf.find( "/radio/bone1/MaxScene/Radio" );
 
 
 
-	vwf.match( "index-vwf", "//Radio" );
+	vwf.find( [ "radio", "bone1", "MaxScene", "Radio" ] );
 
 
 
-	vwf.match( "index-vwf", "//Radio/*" );
+	vwf.find( "//Radio" );
 
 
 
-	vwf.match( "index-vwf", "/dir2" );
+	vwf.find( "//Radio/*" );
 
 
 
-	vwf.match( "index-vwf", [ "", "dir2" ] );
+	vwf.find( "/dir2" );
 
 
 
-	vwf.match( "index-vwf", [ "", "element(dir2)" ] );
+	vwf.find( [ "", "dir2" ] );
 
 
 
-	vwf.match( "index-vwf", [ "", "element(*,'http://vwf.example.com/light.vwf')" ] );
+	vwf.find( [ "", "element(dir2)" ] );
+
+
+
+	vwf.find( [ "", "element(*,'http://vwf.example.com/light.vwf')" ] );
 
 -------------------
 
