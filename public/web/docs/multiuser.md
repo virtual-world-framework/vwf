@@ -1,4 +1,4 @@
-Synchronization
+Multiuser Applications
 ===================
 -------------------
 Coming soon!

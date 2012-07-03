@@ -17,7 +17,7 @@ The following query searches for all children nodes of type *camera* with the gi
 
 	vwf.find( "/camera", "http-vwf-example-com-camera-vwf-camera" );
 
-The following query will return a value of false, as a child node of type camera with the given ID does not exist in the application. 
+The following query will return a value of *false*, as a child node of type camera with the given ID does not exist in the application. 
 
 	vwf.test( "/camera", "http-vwf-example-com-camera-vwf-camera-not" );
 
