@@ -1,4 +1,4 @@
-﻿<div id="wrapper" style="height:100%;width:100%;">
+﻿<div id="wrapper" style="height:100%;width:100%;z-index:2;position:absolute;top:0px;left:0px;">
    		<!-- JAVASCRIPT -->
 
 				<script src="js/jquery-1.7.2.min.js" type="text/javascript"></script>
@@ -12,9 +12,11 @@
 					$(function(){
 								$( "#tabs" ).tabs();
 								});
+								
 				</script>
 				
 				<script type="text/javascript">
+						$(document).ready(function () {document.getElementById('wrapper').style.height = document.getElementById('vwf-root').style.height;});
 				    	$('#wrapper').appendTo('#vwf-root');
 				</script>
 				
@@ -44,7 +46,7 @@
 				   </style>
 
 
-   <table style="width: 100%; height: 100%;position:absolute;top:0px;left:0px;z-index:3;">
+   <table style="width: 100%; height: 100%;">
       <tr>
         <td class="style1" style="width: 33%" valign="top">
          	<div id="userName" style="float: left;color:#4A7347;font-size:1.2em;">Username:&nbsp;</div>
@@ -66,9 +68,8 @@
       </tr>
       <tr>
          <td class="style1" style="width: 33%" valign="bottom">Map</td>
-         <td colspan="2" style="height: 33%" valign="bottom" class="style1">
+         <td colspan="2" style="height: 33%;" valign="bottom" class="style1">
 <div>
-
 <div id="tabs" class="style1">
 	<ul>
 		<li><a href="#tabs-1">All</a></li>
