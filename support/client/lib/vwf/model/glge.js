@@ -2009,7 +2009,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" );    
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" || prototypes[i] == "http-vwf-example-com-scene-vwf" );    
             }
         }
 

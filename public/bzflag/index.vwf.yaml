@@ -12,14 +12,17 @@
 # the License.
 
 ---
-extends: http://vwf.example.com/navscene.vwf
+extends: appscene.vwf
 properties:
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
   ambientColor: [ 250, 250, 250 ]
   navmode: "walk"
   # navmode: "orbit"
-  speed: 8
+  translationSpeed: 800
+  colorIndex: 0
+methods:
+  createPlayer:
 children:
   bz_world:
     extends: http://vwf.example.com/node3.vwf
@@ -53,9 +56,53 @@ children:
   #     translation: [ 0, 0, 0 ]
 scripts:
 - |
+  var tankMaterials = [ "models/images/blue_tank.png", "models/images/green_tank.png", "models/images/hunter_tank.png", 
+    "models/images/purple_tank.png", "models/images/rabbit_tank.png", "models/images/red_tank.png", 
+    "models/images/rogue_tank.png" ];
+  var playerTank = {
+    extends: "http://vwf.example.com/node3.vwf",
+    properties: {
+      translation: [0, 10, 200]
+    },
+    children: {
+      playerModel: {
+        extends: "http://vwf.example.com/node3.vwf",
+        source: "models/tank.dae",
+        type: "model/vnd.collada+xml",
+        properties: {
+          rotation: [0, 0, 1, 180]
+        },
+        children: {
+          TankMaterial1: {
+            extends: "http://vwf.example.com/material.vwf",
+            properties: {
+              texture: ""
+            }
+          }
+        }
+      }
+    }
+  };
+  var playerCamera = {
+    extends: "http://vwf.example.com/camera.vwf",
+    properties: {
+      translation: [0, 300, 450],
+      far: 100000000,
+      near: 1,
+    }
+  };
   this.initialize = function() {
     this.camera.translation = [ 0, 0, 800 ];
     this.camera.far = 100000000;
     this.camera.near = 1;
     //this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
+  }
+  this.createPlayer = function() {
+    if(this.colorIndex < tankMaterials.length) {
+      var newPlayer = $.extend(true, {}, playerTank);
+      newPlayer.children["playerCamera" + this.colorIndex] = playerCamera;
+      newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
+      this.children.create("player" + this.colorIndex, newPlayer);
+      this.colorIndex += 1;
+    }
   }

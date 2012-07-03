@@ -1,0 +1,270 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/scene.vwf
+properties:
+  translationSpeed: 1
+  rotationSpeed: 1
+events:
+  keyUp:
+  keyDown:
+  pointerDown:
+  pointerUp:
+  pointerMove:
+  pointerLeave:
+  pointerWheel:
+methods:
+  update: 
+  translate: 
+scripts:
+- |
+  this.initialize = function() {
+    this.input = { 
+      futureActive: function() {
+        return ( this.lookActive || this.moveActive || this.button1Down || this.button2Down || this.keysAreDown() ); 
+      },
+      timeSinceLastEvent: function() { return this.time - this.pointerEventTime; },
+      timeSinceDownEvent: function() { return this.time - this.pointerDownTime; },
+      pointerDelta: function() { 
+        if ( this.pointerInfo && this.lastPointerInfo ) {
+          return [ (this.lastPointerInfo.position[0] - this.pointerInfo.position[0]) * 50,
+                   (this.lastPointerInfo.position[1] - this.pointerInfo.position[1]) * 50 
+                 ];
+        }
+        return undefined;
+      },        
+      keysAreDown: function() { return ( this.keyInfo && Object.keys( this.keyInfo.keysDown ).length > 0 ); },
+      keyInfo: undefined,
+      pointerInfo: undefined,
+      lastPointerInfo: undefined,       
+      pointerDownTime: undefined,
+      pointerEventTime: undefined,
+      lookActive: false, 
+      moveActive: false, 
+      look: [ 0, 0 ],
+      move: [ 0, 0 ],
+      button1Down: false,
+      button2Down: false,
+      turnLeftDown: false,
+      turnRightDown: false,
+      lastUpdateTime: undefined,
+      lastInputTime: undefined,
+    };
+  }
+  this.timeElapsed = function() {
+    var timeElapsed = this.time - this.input.lastInputTime;
+    if ( !this.input.lastInputTime || timeElapsed > 1 ) {
+      timeElapsed = 1;  
+    }
+    return timeElapsed;
+  }
+  this.pointerIsDown = function() {
+    if ( this.input && this.input.pointerInfo ) {
+      var bInfo = this.input.pointerInfo.buttons;
+      if ( bInfo ) {
+        return bInfo.left || bInfo.right || bInfo.middle;        
+      }
+    }
+    return false;
+  }        
+  this.pointerDown = function( activeNode, parms ){
+    this.input.lastPointerInfo = undefined;
+    this.input.pointerInfo = parms;
+    this.input.pointerDownTime = this.time;
+    this.input.lastInputTime = this.time;
+  }
+  this.pointerUp = function( activeNode, parms ){
+    this.input.lastPointerInfo = this.input.pointerInfo;
+    this.input.pointerInfo = undefined;
+    this.input.lastInputTime = this.time;            
+  }
+  this.pointerMove = function( activeNode, parms ){
+    this.input.pointerEventTime = this.time;
+    this.input.lastPointerInfo = this.input.pointerInfo;
+    this.input.pointerInfo = parms;
+    var active = this.input.futureActive();
+    var delta = this.input.pointerDelta();
+    if ( !active ) {
+      this.future( 0.1 ).update(activeNode);
+    }
+    this.input.lastInputTime = this.time;   
+  }
+  this.pointerLeave = function( activeNode, parms ){
+    this.input.lastPointerInfo = this.input.pointerInfo;
+    this.input.pointerInfo = undefined;
+    this.input.lastInputTime = this.time;             
+  }
+  this.keyDown = function( activeNode, parms ) {
+    var active = this.input.futureActive();
+
+    // capture the event input locally
+    this.input.keyInfo = parms;
+
+    // store the current Time
+    this.input.lastInputTime = this.time;
+
+    // call future.update if update was not currently occurring
+    if ( !active ) {
+      this.future( 0.1 ).update(activeNode);
+    }
+  }
+  this.keyUp = function( activeNode, parms ) {
+    this.input.keyInfo = parms;
+    if ( Object.keys( parms.keysDown ).length == 0 ){
+      this.handleKeyDown(activeNode);
+      this.input.lastInputTime = undefined;
+    } else {
+      this.input.lastInputTime = this.time;
+    }
+  }
+  this.handleKeyDown = function(activeNode) {
+    var player = this.children[activeNode];
+    if ( player ) {
+
+      var deltaZ = 0;
+      var kd = $.extend(true, {}, this.input.keyInfo.keysDown, this.input.keyInfo.keysUp);
+
+      this.input.look = [ 0, 0 ];
+      this.input.move = [ 0, 0 ];
+      
+      var temp;
+      for ( var keyPress in kd ) {
+        switch ( Number( keyPress ) ) {
+          case 87:  //w
+          case 38:  //up
+            this.input.move[1] += 1;
+            break;
+          case 83:  //s
+          case 40:  //down
+            this.input.move[1] += -1;
+            break;
+          case 37: // left              
+          case 65:  //a
+            this.input.look[0] += -1;
+            break;
+          case 39: // right              
+          case 68:  //d
+            this.input.look[0] += 1;
+            break;
+          case 81: // q
+            break;
+          case 69: // e
+            break;
+          case 90: // z
+            temp = this.logger.enabled;
+            this.logger.enabled = true;
+            this.logger.info( "translation: [ " + Array.prototype.slice.call( player.translation ) + " ]" );
+            this.logger.info( " quaternion: [ " + Array.prototype.slice.call( player.quaternion ) + " ]" );              
+            this.logger.info( "   rotation: [ " + Array.prototype.slice.call( player.rotation ) + " ]" );
+            this.logger.info( "  transform: [ " + Array.prototype.slice.call( player.transform )  + " ]" );
+            this.logger.enabled = temp;
+            break;
+          case 88: // x
+            break;
+          case 82: // r
+            break;
+          case 67: // c
+            break;
+          case 13: // enter key
+            break;
+          case 32: // spacebar
+            break;
+          default:
+            break;
+        }
+      }
+
+      this.input.keyInfo.keysUp = {};
+      
+      if ( this.input.look[0] != 0 || this.input.look[1] != 0 ) {
+        this.look( activeNode, this.input.look[0], this.input.look[1] );
+      }
+      if ( this.input.move[0] != 0 || this.input.move[1] != 0 ) {
+        this.translate( activeNode, this.input.move[0], this.input.move[1] );
+      }       
+    } 
+  }
+  this.look = function( activeNode, x, y ) {
+    var player = this.children[activeNode];
+    if ( player ) {
+      if ( this.input.pointerInfo && this.input.pointerInfo.modifiers.ctrl ) {
+        if ( y != 0 ) { player.rotateBy( [ 1, 0, 0, -y * this.angularDistance() ], 0 ) }
+      } else {
+        if ( x != 0 ) { player.rotateBy( [ 0, 0, 1, -x * this.angularDistance() ], 0 ) }
+      } 
+    }
+  }    
+  this.distance = function(){
+    var dist = this.translationSpeed * 10;
+    if(this.timeElapsed() > 0) {
+      dist = dist * this.timeElapsed();
+    }
+    return dist;
+  }
+  this.angularDistance = function() {
+    // Should take 4 seconds to go around 360 degrees
+    var dist = this.rotationSpeed * 90;
+    if(this.timeElapsed() > 0) {
+      dist = dist * this.timeElapsed();
+    }
+    return dist;
+  }          
+  this.getCameraVec = function( activeNode, x, y, z ) {
+      var camRotMat = this.children[activeNode].rotationMatrix;
+      var camAt = goog.vec.Mat4.multVec4(
+        camRotMat,
+        goog.vec.Vec4.createFromValues( x, y, z, 1 ),
+        goog.vec.Vec3.create()
+      );
+      return camAt;      
+  }
+  this.translate = function( activeNode, x, y ) {
+    var player = this.children[activeNode];
+    if ( player ) {
+      var trans = this.getCameraVec( activeNode, x, y, 0 );
+      trans[2] = 0;
+
+      if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
+        player.translation = goog.vec.Vec3.add(
+          player.translation,
+          goog.vec.Vec3.scale(
+            trans,
+            this.distance(),
+            trans
+          ),
+          trans
+        );
+      }
+    }      
+  }
+  this.update = function(activeNode) {
+    if ( this.input ) {
+      if ( this.input.pointerInfo && this.input.pointerInfo.buttons.right ) {
+        var pi = this.input.pointerInfo;
+        if(pi.position[0] > 0.6 || pi.position[0] < 0.4) {
+          this.look( activeNode, (pi.position[0]*2.0)-1, 0 );
+        }
+        if(pi.position[1] > 0.6 || pi.position[1] < 0.4) {
+          this.translate( activeNode, 0,((1-pi.position[1])*2.0)-1 );
+        }
+      }
+      if ( this.input.keysAreDown() ) {
+        this.handleKeyDown(activeNode);
+      }        
+      if ( this.input.futureActive() ) {
+        this.future( 0.1 ).update(activeNode);
+      }
+    } 
+    this.input.lastInputTime = this.time;
+  }
