@@ -62,7 +62,7 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               Brake:
                 extends:
                   http://vwf.example.com/node3.vwf
@@ -76,28 +76,28 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { z: true }
+                  articulate-axes: { y: true }
               DoorDriverRear:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { z: true }
+                  articulate-axes: { y: true }
               DoorPassFront:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { z: true }
+                  articulate-axes: { y: true }
               DoorPassRear:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { z: true }
+                  articulate-axes: { y: true }
               EmergencyBrake:
                 extends:
                   http://vwf.example.com/node3.vwf
@@ -111,7 +111,7 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               GearShift:
                 extends:
                   http://vwf.example.com/node3.vwf
@@ -125,21 +125,23 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { z: true }
-              GunMountHatch01:
+                  articulate-axes: { y: true }
+                children:
+              GunMountHatch01: # TODO: should be a child of GunMount to match .dae
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
-              GunMountHatch02:
+                  articulate-axes: { y: true }
+                children:
+              GunMountHatch02: # TODO: should be a child of GunMountHatch01 to match .dae
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               HighLowSelector:
                 extends:
                   http://vwf.example.com/node3.vwf
@@ -160,29 +162,42 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               HoodLatchPass:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
-              # HumveeBody
+                  articulate-axes: { y: true }
+              # HumveeBody:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
               Ignition:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               OilNeedle:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
+              ParkingBrake:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                # implements:
+                # - articulate.vwf
+                # properties:
+                #   articulate-axes: { x: true, y: true, z: true }
               RearHatch:
                 extends:
                   http://vwf.example.com/node3.vwf
@@ -196,8 +211,9 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { z: true }
-              SpareTire:
+                  articulate-axes: { y: true }
+                children:
+              SpareTire: # TODO: should be a child of SpareMount to match .dae
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
@@ -210,42 +226,50 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               SteeringWheel:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
+                children:
+              Horn: # TODO: should be a child of SteeringWheel to match .dae
+                extends:
+                  http://vwf.example.com/node3.vwf
+                # implements:
+                # - articulate.vwf
+                # properties:
+                #   articulate-axes: { x: true, y: true, z: true }
               Switch01:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               Switch02:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               Switch03:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               TempNeedle:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               TireDriverFront:
                 extends:
                   http://vwf.example.com/node3.vwf
@@ -280,28 +304,56 @@ children:
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { z: true }
+                  articulate-axes: { y: true }
               VoltMeter:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
+              WaitToStart:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                # implements:
+                # - articulate.vwf
+                # properties:
+                #   articulate-axes: { x: true, y: true, z: true }
               WiperDriver:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
               WiperPass:
                 extends:
                   http://vwf.example.com/node3.vwf
                 implements:
                 - articulate.vwf
                 properties:
-                  articulate-axes: { x: true }
+                  articulate-axes: { y: true }
+              # Omni001:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
+              # Omni002:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
+              # Ground:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
           EnvironmentAmbientLight:
             extends: http://vwf.example.com/node3.vwf
           Omni001:
@@ -331,3 +383,5 @@ scripts:
     this.camera.lookAt = "http-vwf-example-com-node3-vwf-humvee";
     this.camera.far = 3000;
   }
+
+# Paste into the console to jump to an inside view: vwf.execute( "index-vwf", "this.navmode = 'walk' ; this.camera.transform = [-0.4292135238647461, 0.9031997919082642, -0.000008751301720621996, 0, -0.8462061285972595, -0.40213271975517273, -0.34959691762924194, 0, -0.31576135754585266, -0.150045245885849, 0.9368997812271118, 0, -15.161749839782715, -28.28612518310547, 72.89060974121094, 1]" )
