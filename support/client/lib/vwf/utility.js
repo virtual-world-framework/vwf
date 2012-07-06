@@ -60,10 +60,11 @@ define( [ "module" ], function( module ) {
 
                     for ( var index = 0; index < object.length; index++ ) {
 
-                        if ( ( item = this.transform( object[index], transformation, [ index ].concat( names ), depth + 1 ) ) !== object[index] ) {
+                        if ( ( item = this.transform( object[index], transformation, [ index ].concat( names ), depth + 1 ) ) !==
+                                object[index] ) {
 
                             if ( result === object ) {
-                                result = [].concat( object ); // shallow copy into new Array
+                                result = [].concat( object ); // shallow copy into a new Array
                             }
 
                             result[index] = item;
@@ -74,10 +75,12 @@ define( [ "module" ], function( module ) {
 
                     Object.keys( object ).forEach( function( key ) {
 
-                        if ( ( item = this.transform( object[key], transformation, [ key ].concat( names ), depth + 1 ) ) !== object[key] ) {
+                        if ( ( item = this.transform( object[key], transformation, [ key ].concat( names ), depth + 1 ) ) !==
+                                object[key] ) {
 
                             if ( result === object ) {
-                                result = {}; Object.keys( object ).forEach( function( k ) { result[k] = object[k] } ); // shallow copy into new Object
+                                result = {};
+                                Object.keys( object ).forEach( function( k ) { result[k] = object[k] } ); // shallow copy into a new Object
                             }
 
                             result[key] = item;
@@ -92,9 +95,9 @@ define( [ "module" ], function( module ) {
             return result;
         },
 
-        // -- transform ----------------------------------------------------------------------------
+        // -- transforms ---------------------------------------------------------------------------
 
-        /// vwf.utility#transform transformation functions. Invoke as:
+        /// Transformation functions for vwf.utility#transform. Invoke these as:
         /// 
         ///   utility.transform( object, utility.transforms.*transform* )
         ///

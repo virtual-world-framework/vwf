@@ -937,10 +937,7 @@
 
         this.createNode = function( nodeComponent, create_callback /* ( nodeID ) */ ) {
 
-            this.logger.group( "vwf.createNode " + (
-                typeof nodeComponent == "string" || nodeComponent instanceof String ?
-                    nodeComponent : JSON.stringify( loggableComponent( nodeComponent ) )
-            ) );
+            this.logger.group( "vwf.createNode " + JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             var nodePatch;
 
@@ -1110,7 +1107,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.setNode = function( nodeID, nodeComponent, set_callback /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
-            this.logger.group( "vwf.setNode " + JSON.stringify( loggableComponent( nodeComponent ) ) );
+            this.logger.group( "vwf.setNode " + nodeID + " " + JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             // Direct property accessors to suppress kernel reentry so that we can write the state
             // without coloring from scripts.
@@ -1465,10 +1462,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.createChild = function( nodeID, childName, childComponent, create_callback /* ( childID ) */ ) {
 
-            this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
-                typeof childComponent == "string" || childComponent instanceof String ?
-                    childComponent : JSON.stringify( loggableComponent( childComponent ) )
-            ) );
+            this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " +
+                JSON.stringify( loggableComponent( childComponent ) ) );
 
             childComponent = normalizedComponent( childComponent );
 
@@ -1989,7 +1984,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
-            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );  // TODO: add truncated propertyGet, propertySet to log
+            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " +
+                JSON.stringify( loggableValue( propertyValue ) ) );  // TODO: add truncated propertyGet, propertySet to log
 
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
@@ -2016,7 +2012,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " +
+                JSON.stringify( loggableValue( propertyValue ) ) );
 
             var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
 
@@ -2240,7 +2237,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName + " " + methodParameters );
+            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName + " " +
+                JSON.stringify( loggableValues( methodParameters ) ) );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2290,7 +2288,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.fireEvent = function( nodeID, eventName, eventParameters ) {
 
-            this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " + eventParameters );
+            this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " +
+                JSON.stringify( loggableValues( eventParameters ) ) );
 
             // Call firingEvent() on each model.
 
@@ -2690,8 +2689,11 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             // prototype.
 
             if ( componentIsURI( component ) ) {
-                component = component.match( /\.vwf$/ ) ?
-                    { extends: component } : { source: component };  // TODO: detect component from mime-type instead of extension?
+                if ( component.match( /\.vwf$/ ) ) {  // TODO: detect component from mime-type instead of extension?
+                    component = { extends: component };
+                } else {
+                    component = component = { source: component };
+                }
             } else if ( componentIsID( component ) ) {
                 component = { extends: component };
             }
@@ -2735,89 +2737,34 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
             return component;
         };
 
-        // -- loggableComponent --------------------------------------------------------------------
-
-        // Return a copy of a component with the verbose bits truncated so that it may be written to
-        // a log.
-
-        var loggableComponent = function( component ) {
-
-            var loggable = {};
-
-            for ( var elementName in component ) {
-
-                switch ( elementName ) {
-
-                    case "properties":
-
-                        loggable.properties = {};
-
-                        for ( var propertyName in component.properties ) {
-
-                            var componentPropertyValue = component.properties[propertyName];
-                            var loggablePropertyValue = loggable.properties[propertyName] = {};
-
-                            if ( valueHasAccessors( componentPropertyValue ) ) {
-                                for ( var propertyElementName in componentPropertyValue ) {
-                                    if ( propertyElementName == "set" || propertyElementName == "get" ) {
-                                        loggablePropertyValue[propertyElementName] = "...";
-                                    } else {
-                                        loggablePropertyValue[propertyElementName] = componentPropertyValue[propertyElementName];
-                                    }
-                                }
-                            } else {
-                                loggable.properties[propertyName] = componentPropertyValue;
-                            }
-
-                        }
-
-                        break;
-
-                    case "children":
-
-                        loggable.children = {};
-
-                        for ( var childName in component.children ) {
-                            loggable.children[childName] = {};
-                        }
-
-                        break;
-
-                    case "scripts":
-
-                        loggable.scripts = [];
-
-                        component.scripts.forEach( function( script ) {
-
-                            var loggableScript = {};
-
-                            for ( var scriptElementName in script ) {
-                                loggableScript[scriptElementName] = scriptElementName == "text" ? "..." : script[scriptElementName];
-                            }
-
-                            loggable.scripts.push( loggableScript );
-
-                        } );
-
-                        break;
-
-                    default:
-
-                        loggable[elementName] = component[elementName];
-
-                        break;
-                }
-
-            }
-
-            return loggable;
-        };
-
         // -- loggableFields -----------------------------------------------------------------------
 
         var loggableFields = function( fields ) {
             return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
-        }
+        };
+
+        // -- loggableComponent --------------------------------------------------------------------
+
+        var loggableComponent = function( component ) {
+            return require( "vwf/utility" ).transform( component, loggableComponentTransformation );
+        };
+
+        // -- loggableValue ------------------------------------------------------------------------
+
+        var loggableValue = function( value ) {
+            return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
+                object = require( "vwf/utility" ).transforms.transit( object, names, depth );
+                if ( typeof object == "number" ) {
+                    return Number( object.toPrecision(5) ); // reduce precision to remove visual noise
+                }
+            } );
+        };
+
+        // -- loggableValues -----------------------------------------------------------------------
+
+        var loggableValues = function( values ) {
+            return loggableValue( values );
+        };
 
         // -- remappedURI --------------------------------------------------------------------------
 
@@ -2845,7 +2792,7 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
         // queue: [ { ..., parameters: [ [ arguments ] ], ... }, { ... }, ... ]
 
-        var queueTransitTransformation = function( object, index, depth ) {
+        var queueTransitTransformation = function( object, names, depth ) {
 
             if ( depth == 0 ) {
 
@@ -2875,6 +2822,158 @@ vwf.models.javascript.nodes[candidate];  // TODO: move to vwf/model/object
 
             }
 
+        };
+
+        // -- loggableComponentTransformation ------------------------------------------------------
+
+        // vwf/utility/transform() transformation function to truncate the verbose bits of a
+        // component so that it may be written to a log.
+
+        var loggableComponentTransformation = function( object, names, depth ) {
+
+            // Find the index of the lowest nested component in the names list.
+
+            var componentIndex = names.length;
+
+            while ( componentIndex > 2 && names[componentIndex-1] == "children" ) {
+                componentIndex -= 2;
+            }
+
+            // depth                                                  names  notes
+            // -----                                                  -----  -----
+            // 0:                                                        []  the component
+            // 1:                                          [ "properties" ]  its properties object
+            // 2:                          [ "propertyName", "properties" ]  one property
+            // 1:                                            [ "children" ]  the children object
+            // 2:                               [ "childName", "children" ]  one child
+            // 3:                 [ "properties", "childName", "children" ]  the child's properties
+            // 4: [ "propertyName", "properties", "childName", "children" ]  one child property
+
+            if ( componentIndex > 0 ) {
+
+                // Locate the container ("properties", "methods", "events", etc.) below the
+                // component in the names list.
+
+                var containerIndex = componentIndex - 1;
+                var containerName = names[containerIndex];
+
+                // Locate the member as appropriate for the container.
+
+                if ( containerName == "extends" ) {
+
+                    var memberIndex = containerIndex;
+                    var memberName = names[memberIndex];
+
+                } else if ( containerName == "implements" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+
+                } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
+                        containerName == "children" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+    
+                } else if ( containerName == "scripts" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+
+                } else {
+
+                    containerIndex = undefined;
+                    containerName = undefined;
+
+                }
+
+            }
+
+            // Transform the object at the current recusion level.
+
+            switch ( containerName ) {
+
+                case "extends":
+
+                    // Omit a component descriptor for the prototype.
+
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "implements":
+
+                    // Omit component descriptors for the behaviors.
+
+                    if ( memberIndex == 1 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "properties":
+
+                    // Convert property values to a loggable version, and omit getter and setter
+                    // text.
+
+                    if ( memberIndex == 0 && ! valueHasAccessors( object ) ||
+                            memberIndex == 1 && names[0] == "value" ) {
+                        return loggableValue( object );
+                    } else if ( memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "methods":
+
+                    // Omit method body text.
+
+                    if ( memberIndex == 0 && ! valueHasBody( object ) || 
+                            memberIndex == 1 && names[0] == "body" ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "events":
+
+                    // Nothing for events.
+
+                    break;
+
+                case "children":
+
+                    // Omit child component descriptors.
+
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "scripts":
+
+                    // Shorten script text.
+
+                    if ( memberIndex == 0 && ! valueHasType( object ) || 
+                            memberIndex == 1 && names[0] == "text" ) {
+                        return "...";
+                    }
+
+                    break;
+
+            }
+
+            return object;
         };
 
         // -- getQueryString -----------------------------------------------------------------------
