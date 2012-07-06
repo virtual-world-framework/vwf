@@ -35,7 +35,7 @@ module Tilt
   class VWFJSONTemplate < VWFTemplate
 
     def prepare
-data.gsub!("\xEF\xBB\xBF", '')  # TODO: handle encodings properly
+data.gsub!( /^\xEF\xBB\xBF/, "" )  # TODO: handle encodings properly
 # TODO: catch parse errors
       @component = JSON.parse data.empty? ? "{}" : data  # receives empty string first time
     end
@@ -47,6 +47,7 @@ data.gsub!("\xEF\xBB\xBF", '')  # TODO: handle encodings properly
   class VWFYAMLTemplate < VWFTemplate
 
     def prepare
+data.gsub!( /^\xEF\xBB\xBF/, "" )  # TODO: handle encodings properly
       @component = YAML::load data
     end
 
