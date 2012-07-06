@@ -75,9 +75,23 @@ canvas.onmouseup = function(e) {
     }
 }
 
-canvas.onmouseover = undefined;
+canvas.onmouseover = function(e) {
+    if(playerNode) {
+        var eData = getMouseEventData( e, false );
+        if ( eData ) {
+            vwf_view.kernel.dispatchEvent( sceneNode, "pointerEnter", [playerName, eData] );
+        }
+    }
+}
 
-canvas.onmouseout = undefined;
+canvas.onmouseout = function(e) {
+    if(playerNode) {
+        var eData = getMouseEventData( e, false );
+        if ( eData ) {
+            vwf_view.kernel.dispatchEvent( sceneNode, "pointerLeave", [playerName, eData] );
+        }
+    }
+}
 
 canvas.onmousemove = function(e) {
     if(playerNode) {

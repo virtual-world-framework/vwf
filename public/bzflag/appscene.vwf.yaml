@@ -23,7 +23,7 @@ events:
   pointerUp:
   pointerMove:
   pointerLeave:
-  pointerWheel:
+  pointerEnter:
 methods:
   update: 
   translate: 
@@ -56,8 +56,6 @@ scripts:
       move: [ 0, 0 ],
       button1Down: false,
       button2Down: false,
-      turnLeftDown: false,
-      turnRightDown: false,
       lastUpdateTime: undefined,
       lastInputTime: undefined,
     };
@@ -93,17 +91,20 @@ scripts:
     this.input.pointerEventTime = this.time;
     this.input.lastPointerInfo = this.input.pointerInfo;
     this.input.pointerInfo = parms;
-    var active = this.input.futureActive();
-    var delta = this.input.pointerDelta();
-    if ( !active ) {
-      this.future( 0.1 ).update(activeNode);
-    }
     this.input.lastInputTime = this.time;   
   }
   this.pointerLeave = function( activeNode, parms ){
     this.input.lastPointerInfo = this.input.pointerInfo;
     this.input.pointerInfo = undefined;
-    this.input.lastInputTime = this.time;             
+    this.input.lastInputTime = this.time; 
+    this.input.moveActive = false;
+  }
+  this.pointerEnter = function( activeNode, parms ){
+    this.input.lastPointerInfo = this.input.pointerInfo;
+    this.input.pointerInfo = parms;
+    this.input.lastInputTime = this.time; 
+    this.input.moveActive = true;
+    this.future( 0.1 ).update(activeNode);
   }
   this.keyDown = function( activeNode, parms ) {
     var active = this.input.futureActive();
@@ -250,7 +251,7 @@ scripts:
   }
   this.update = function(activeNode) {
     if ( this.input ) {
-      if ( this.input.pointerInfo && this.input.pointerInfo.buttons.right ) {
+      if ( this.input.pointerInfo ) {
         var pi = this.input.pointerInfo;
         if(pi.position[0] > 0.6 || pi.position[0] < 0.4) {
           this.look( activeNode, (pi.position[0]*2.0)-1, 0 );
@@ -261,7 +262,7 @@ scripts:
       }
       if ( this.input.keysAreDown() ) {
         this.handleKeyDown(activeNode);
-      }        
+      }
       if ( this.input.futureActive() ) {
         this.future( 0.1 ).update(activeNode);
       }
