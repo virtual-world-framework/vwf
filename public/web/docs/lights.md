@@ -6,6 +6,7 @@ The VWF Lights capability provides control of lighting within a VWF application.
 ---
 
 ###Light Types
+
 ####Point
 A point light is represented by a point source. It radiates light in all directions, and has a certain position in space. The differences between a point light and a directional light are: the directional light lights all object from the same direction, while a point light lights an object depending on the position of the object relative to the light. Also, a point light only illuminates objects that are close to it. The further the object is, the less illuminated it becomes. This gives us a great advantage. Because only objects that are close enough to the lights are lit, we only need to apply the lighting computations to a certain area on the screen, instead of applying a full-screen pass. This means that if the lights do not overlap too much in the screen-space, many small point lights will, on the whole, be as expensive as one directional light (which is applied on the whole screen).
  
@@ -45,6 +46,7 @@ Mathematically, the attenuation of a 100% quadratic light is exponential (quadra
 ---
 
 ###Spot Light Properties
+
 ####SpotCosCutOff  
   
 The first element spotCosCutOff represents the cosine of the angle beyond which the light is cut off. This angle is measured from the light's spot direction compared with the light location vector. In effect, it is a check to see if the fragment is within the cone of the light. The use of the *cosine* of the angle is to allow for very fast checks against the dot-product of the normalized vectors.
@@ -56,6 +58,7 @@ The second element, spotExponent, is used to calculate the amount of "spotiness"
 ---
 
 ###Lighting Effects  
+
 ####Diffuse Reflection  
    
 Diffuse reflection is the reflection of light from a surface such that an incident ray is reflected at many angles rather than at just one angle as in the case of specular reflection. An illuminated ideal diffuse reflecting surface will have equal luminance from all directions in the hemisphere surrounding the surface.
@@ -71,6 +74,7 @@ The specular property determines what color the highlight (a.k.a the specular re
 ---
 
 ###Shadows
+
 ####Samples  
    
 The number of samples for this shadow. 
