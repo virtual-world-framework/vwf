@@ -23,6 +23,12 @@ properties:
         var transform = goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Mat4.create() );
         this.transform = transform;
       }
+    get: |
+      if( this.parent && this.parent.worldTransform )
+      {
+        return goog.vec.Mat4.multMat( this.parent.worldTransform, this.transform, goog.vec.Mat4.create() );
+      }
+      else return this.transform;
   transform:
     set: |
       var transform = this.transformFromValue( value ); // parse incoming value
