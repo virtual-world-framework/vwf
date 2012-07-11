@@ -10,9 +10,25 @@
 				
 				<script type="text/javascript">
 					$(function(){
-								$( "#tabs" ).tabs();
-								});
-								
+						$( "#tabs" ).tabs();
+                        
+                        $('#createUser').dialog( {
+                            height: 'auto',
+                            width: 300,
+                            modal: true,
+                            resizable: false,
+                            draggable: false,
+                            buttons: {
+                                "Create": function() {
+                                    if($('#playerName').val().length > 0) {
+                                        playerName = $('#playerName').val();
+                                        vwf_view.kernel.callMethod("index-vwf", "createPlayer", [$('#playerName').val()]);
+                                        $(this).dialog("close");
+                                    }
+                                }
+                            }
+                        });
+					});
 				</script>
 				
 				<script type="text/javascript">
@@ -90,4 +106,8 @@
 </div></td>
       </tr>
    </table>
+<div id="createUser" title="Create new user">
+    <label for="playerName">Name</label>
+    <input type="text" name="playerName" id="playerName" class="text ui-widget-content ui-corner-all" />
+</div>
 </div>

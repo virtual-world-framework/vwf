@@ -47,11 +47,10 @@ var input = {
 
 vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs,
 	childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
-	if(vwf.client() == vwf.moniker() && nodeID == sceneNode) {
+	if(childName == playerName) {
 		playerNode = childID;
-		playerName = childName;
 	}
-	else if(vwf.client() == vwf.moniker() && childExtendsID == "http-vwf-example-com-camera-vwf") {
+	else if(childName == (playerName + "Camera")) {
 		var glgeCamera = vwf.views[0].state.nodes[ childID ].glgeObject;
 		glgeCamera.setAspect(canvas.width / canvas.height);
 		vwf.views[0].state.cameraInUse = glgeCamera;

@@ -97,12 +97,12 @@ scripts:
     this.camera.near = 1;
     //this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
   }
-  this.createPlayer = function() {
+  this.createPlayer = function(playerName) {
     if(this.colorIndex < tankMaterials.length) {
       var newPlayer = $.extend(true, {}, playerTank);
-      newPlayer.children["playerCamera" + this.colorIndex] = playerCamera;
+      newPlayer.children[playerName + "Camera"] = playerCamera;
       newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
-      this.children.create("player" + this.colorIndex, newPlayer);
+      this.children.create(playerName, newPlayer);
       this.colorIndex += 1;
     }
   }
