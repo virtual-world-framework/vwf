@@ -657,7 +657,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     }
 
                     if ( object ) {
-                        sceneView.kernel.createChild( "index-vwf", fileName, object, undefined );                
+                        sceneView.kernel.createChild( "index-vwf", fileName, object );                
                     }
 
                 } catch ( e ) {

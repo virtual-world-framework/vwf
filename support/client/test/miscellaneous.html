@@ -124,7 +124,7 @@
                 node.properties = node.properties || {};
                 node.properties.property = node.properties.property || null;
 
-                vwf.createChild( 0, unique_name( "node" ), node, function( nodeID ) {
+                vwf.createChild( 0, unique_name( "node" ), node, undefined, function( nodeID ) {
                     callback( nodeID, prototypeID );
                 } );
 

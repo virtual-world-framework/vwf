@@ -50,9 +50,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "createChild":
 
-                return function( nodeID, childName, childComponent, when, callback /* ( childID ) */ ) {
+                return function( nodeID, childName, childComponent, childURI, when, callback /* ( childID ) */ ) {
                     this.kernel.send( nodeID, kernelFunctionName, childName,
-                        [ childComponent ], when || 0, callback /* ( result ) */ );
+                        [ childComponent, childURI ], when || 0, callback /* ( result ) */ );
                 };
 
             case "addChild":

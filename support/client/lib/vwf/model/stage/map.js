@@ -62,9 +62,9 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- createChild --------------------------------------------------------------------------
 
-        createChild: function( node, childName, childComponent, callback /* ( childID ) */ ) {
+        createChild: function( node, childName, childComponent, childURI, callback /* ( childID ) */ ) {
             return this.kernel.createChild( this.model_to_kernel[this.object_id(node)] || node,
-                childName, childComponent, callback );  // TODO: remap callback parameter
+                childName, childComponent, childURI, callback );  // TODO: remap callback parameter
         },
 
         // -- addChild -----------------------------------------------------------------------------

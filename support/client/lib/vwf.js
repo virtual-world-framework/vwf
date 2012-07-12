@@ -1026,18 +1026,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         nodeDescriptor = nodeComponent;
 
-                        if ( ! nodeDescriptor.id ) {
-                            nodeDescriptor.id = nodeURI ||  // TODO: hash uri => id to shorten for faster lookups?  
-                                Crypto.MD5( JSON.stringify( nodeDescriptor ) ).toString();  // TODO: MD5 may be too slow here
-                        }
-
-                        if ( ! nodeDescriptor.uri && nodeURI ) {
-                            nodeDescriptor.uri = nodeURI;  // TODO: pass this as an (optional) parameter to createChild() so that we don't have to modify the descriptor?
-                        }
-
                         // Create the node as an unnamed child global object.
 
-                        vwf.createChild( 0, undefined, nodeDescriptor, function( nodeID ) {
+                        vwf.createChild( 0, undefined, nodeDescriptor, nodeURI, function( nodeID ) {
                             nodeComponent = nodeID;
                             series_callback( undefined, undefined );
                         } );
@@ -1197,7 +1188,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                         var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
 
                         if ( creating ) {
-                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], function( childID ) {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id
+                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
                                 each_callback( undefined );
                             } );
                         } else {
@@ -1293,9 +1284,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                 nodeComponent.implements.length || delete nodeComponent.implements;
 
-                var intrinsics = this.intrinsics( nodeID ); // get name, source, type
+                var intrinsics = this.intrinsics( nodeID ); // get source, type
 
-                if ( intrinsics.name !== undefined ) nodeComponent.name = intrinsics.name;
                 if ( intrinsics.source !== undefined ) nodeComponent.source = intrinsics.source;
                 if ( intrinsics.type !== undefined ) nodeComponent.type = intrinsics.type;
 
@@ -1399,7 +1389,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Hash the intrinsic state.
 
-            var internal = { id: nodeComponent.id, name: nodeComponent.name, source: nodeComponent.source, type: nodeComponent.type };  // TODO: get subset same way as getNode() puts them in without calling out specific field names
+            var internal = { id: nodeComponent.id, source: nodeComponent.source, type: nodeComponent.type };  // TODO: get subset same way as getNode() puts them in without calling out specific field names
 
             internal.source === undefined && delete internal.source;
             internal.type === undefined && delete internal.type;
@@ -1440,24 +1430,28 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        this.createChild = function( nodeID, childName, childComponent, create_callback /* ( childID ) */ ) {
+        this.createChild = function( nodeID, childName, childComponent, childURI, create_callback /* ( childID ) */ ) {
 
             this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
                     childComponent : JSON.stringify( loggableComponent( childComponent ) )
-            ) );
+            ) + " " + childURI );
 
             childComponent = normalizedComponent( childComponent );
 
             // Allocate an ID for the node. IDs must be unique and consistent across all clients
             // sharing the same instance regardless of the component load order. Each node maintains
             // a sequence counter, and we allocate the ID based on the parent's sequence counter and
-            // ID. An existing ID is used when synchronizing to state drawn from another client or
-            // to a previously-saved state.
+            // ID. Top-level nodes take the ID from their origin URI when available or from a hash
+            // of the descriptor. An existing ID is used when synchronizing to state drawn from
+            // another client or to a previously-saved state.
 
-            var childID = childComponent.id ||
-                nodeID + ":" + this.models.object.sequence( nodeID ) +
-                    ( this.configuration["humanize-ids"] && childName ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+            var childID = childComponent.id ||  // pre-calculated id from incoming sychronization
+                nodeID === 0 ?  // direct child of the global root, or deeper descendant?
+                    childURI ||  // global: component's URI or hash of descriptor  // TODO: hash uri => id to shorten for faster lookups?
+                        Crypto.MD5( JSON.stringify( childComponent ) ).toString() :  // TODO: MD5 may be too slow here
+                    nodeID + ":" + this.models.object.sequence( nodeID ) +  // descendant: parent id + next from parent's sequence
+                        ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
@@ -1533,10 +1527,10 @@ if ( ! childComponent.source ) {
                         var driver_ready = true;
 
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childURI, childName, function( ready ) {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.construct: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
+                                vwf.logger.debug( "vwf.createChild: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
                                 driver_ready && each_callback( undefined );
                             }
@@ -1561,10 +1555,10 @@ if ( ! childComponent.source ) {
                         var driver_ready = true;
 
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childComponent.uri, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childURI, childName, function( ready ) {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.construct: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
+                                vwf.logger.debug( "vwf.createChild: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
                                 driver_ready && each_callback( undefined );
                             }
@@ -1670,7 +1664,7 @@ if ( ! childComponent.source ) {
                     async.forEach( Object.keys( childComponent.children || {} ), function( childName, each_callback /* ( err ) */ ) {
                         var childValue = childComponent.children[childName];
 
-                        vwf.createChild( childID, childName, childValue, function( childID ) {  // TODO: add in original order from childComponent.children
+                        vwf.createChild( childID, childName, childValue, undefined, function( childID ) {  // TODO: add in original order from childComponent.children  // TODO: propagate childURI + fragment identifier to children of a URI component?
                             each_callback( undefined );
                         } );
 

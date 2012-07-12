@@ -88,17 +88,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "createChild":
 
-                return function( nodeID, childName, childComponent, when, callback /* ( childID ) */ ) {
+                return function( nodeID, childName, childComponent, childURI, when, callback /* ( childID ) */ ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, childName, childComponent, function( childID ) {
+                            return this.kernel[kernelFunctionName]( nodeID, childName, childComponent, childURI, function( childID ) {
                                 callback && callback( childID );
                             } );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, childName,
-                                [ childComponent ], when, callback /* ( result ) */ );
+                                [ childComponent, childURI ], when, callback /* ( result ) */ );
                         }
 
                     }

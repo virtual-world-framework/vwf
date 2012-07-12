@@ -94,11 +94,12 @@ define( {
     /// @param {ID} nodeID
     /// @param {String} childName
     /// @param {String|Object} childComponent
+    /// @param {String} [childURI]
     /// @param {Function} [callback]
     /// 
     /// @returns {}
 
-    createChild: [ /* nodeID, childName, childComponent, callback( childID ) */ ],
+    createChild: [ /* nodeID, childName, childComponent, childURI, callback( childID ) */ ],
 
     /// addChild calls addingChild() on each model. The child is considered added after each model has
     /// run.  Additionally, it calls addedChild() on each view. The view is being notified that a 
@@ -328,9 +329,6 @@ define( {
 
     /// Return the node's intrinsic state. This consists of:
     /// 
-    ///   id -- the nodeID
-    ///   uri -- the node's uri, also available as vwf.api.kernel#uri
-    ///   name -- the node's name, also available as vwf.api.kernel#name
     ///   source -- the URI of the node's data blob
     ///   type -- the MIME type of the node's data blob
     /// 

@@ -423,7 +423,7 @@
                 extends: baseID,
                 properties: { result: result.top },
 
-              }, function( topID ) {
+              }, undefined, function( topID ) {
 
                 // Child node.
 
@@ -432,7 +432,7 @@
                   extends: baseID,
                   properties: { result: result.middle },
 
-                }, function( middleID ) {
+                }, undefined, function( middleID ) {
 
                   // Grandchild node.
 
@@ -441,7 +441,7 @@
                     extends: baseID,
                     properties: { result: result.bottom },
 
-                  }, function( bottomID ) {
+                  }, undefined, function( bottomID ) {
 
                     callback( topID, middleID, bottomID, baseID );
 

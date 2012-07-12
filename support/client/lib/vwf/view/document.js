@@ -18,7 +18,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
     // is active, scripts on the main page may make (reflected) kernel calls:
 
-    //     window.vwf_view.createChild( nodeID, childName, childComponent, function( childID ) {
+    //     window.vwf_view.createChild( nodeID, childName, childComponent, childURI, function( childID ) {
     //         ...
     //     } );
 

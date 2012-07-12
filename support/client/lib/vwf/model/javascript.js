@@ -183,7 +183,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
             Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
                     if ( callback ) {
-                        self.kernel.createChild( this.node.id, name, component, undefined, function( childID ) {
+                        self.kernel.createChild( this.node.id, name, component, undefined, undefined, function( childID ) {
                             callback.call( node, self.nodes[childID] );
                         } );
                     } else { 

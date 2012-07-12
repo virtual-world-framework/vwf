@@ -331,7 +331,7 @@
                 "this.parameters = this.events.add( function() { this.result.event = 'parameters'; this.result.result = Array.prototype.slice.call( arguments ) }, this )",
               ],
 
-            }, function( nodeID ) {
+            }, undefined, function( nodeID ) {
 
                 callback( nodeID );
 
@@ -358,7 +358,7 @@
 
                 extends: baseID,
 
-              }, function( parentID ) {
+              }, undefined, function( parentID ) {
 
                 // Child node.
 
@@ -366,7 +366,7 @@
 
                   extends: baseID,
 
-                }, function( childID ) {
+                }, undefined, function( childID ) {
 
                   callback( parentID, childID, baseID );
 

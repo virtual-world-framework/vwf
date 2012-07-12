@@ -186,10 +186,6 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
 
             result = result || {};
 
-            result.id = object.id;
-            result.uri = object.uri;
-
-            result.name = object.name;
             result.source = object.source;
             result.type = object.type;
 
