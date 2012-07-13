@@ -196,7 +196,7 @@ define( [ "module" ], function( module ) {
             /// 
             /// @returns {ID[]|undefined}
 
-            resolve: function( xpath, rootID, contextIDs, step_callback /* ( step, id, resolve_attributes ) */, thisArg ) {
+            resolve: function( xpath, rootID, contextIDs, callback /* ( step, id, resolveAttributes ) */, thisArg ) {
 
                 // Accept contextIDs as either a single id or an array of ids.
 
@@ -222,13 +222,13 @@ define( [ "module" ], function( module ) {
 
                         contextIDs = Array.prototype.concat.apply( [], contextIDs.map( function( id ) {
 
-                            var stepIDs = step_callback.call( thisArg, step, id );
+                            var stepIDs = callback.call( thisArg, step, id );
 
                             step.predicates && step.predicates.forEach( function( predicate ) {
 
                                 stepIDs = stepIDs.filter( function( step_id ) {
                                     return this.resolve( predicate, rootID, step_id, function( step, id ) {
-                                        return step_callback.call( this, step, id, true );
+                                        return callback.call( this, step, id, true );
                                     }, thisArg ).length;
                                 }, this );
 

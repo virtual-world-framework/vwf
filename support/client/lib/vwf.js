@@ -761,7 +761,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // -- setState -----------------------------------------------------------------------------
 
-        this.setState = function( applicationState, set_callback_async /* () */ ) {
+        this.setState = function( applicationState, callback_async /* () */ ) {
 
             this.logger.group( "vwf.setState" );  // TODO: loggableState
 
@@ -845,7 +845,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 isolateProperties--;
 
-                set_callback_async && set_callback_async();
+                callback_async && callback_async();
 
             } );
 
@@ -957,7 +957,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
 
-        this.createNode = function( nodeComponent, create_callback_async /* ( nodeID ) */ ) {
+        this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
 
             this.logger.group( "vwf.createNode " + (
                 typeof nodeComponent == "string" || nodeComponent instanceof String ?
@@ -1003,13 +1003,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // the list. The original load's completion will call our callback too.
 
                         } else if ( components[nodeURI] instanceof Array ) { // loading
-                            create_callback_async && components[nodeURI].push( create_callback_async );
+                            callback_async && components[nodeURI].push( callback_async );
 
                         // If this URI has already loaded, skip to the end and call the callback
                         // with the ID.
 
                         } else { // loaded
-                            create_callback_async && create_callback_async( components[nodeURI] );
+                            callback_async && callback_async( components[nodeURI] );
                         }
 
                     } else { // descriptor, ID or error
@@ -1070,19 +1070,19 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // completion and update the component list with the ID.
 
                 if ( nodeURI ) {
-                    var create_callbacks_async = components[nodeURI];
+                    var callbacks_async = components[nodeURI];
                     components[nodeURI] = nodeID;
                 }
 
                 // Pass the ID to our callback.
 
-                create_callback_async && create_callback_async( nodeID );  // TODO: handle error if invalid id
+                callback_async && callback_async( nodeID );  // TODO: handle error if invalid id
 
                 // Call the other callbacks.
 
                 if ( nodeURI ) {
-                    create_callbacks_async.forEach( function( create_callback_async ) {
-                        create_callback_async && create_callback_async( nodeID );
+                    callbacks_async.forEach( function( callback_async ) {
+                        callback_async && callback_async( nodeID );
                     } );
                 }
 
@@ -1126,7 +1126,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         // -- setNode ------------------------------------------------------------------------------
 
-        this.setNode = function( nodeID, nodeComponent, set_callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
+        this.setNode = function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
             this.logger.group( "vwf.setNode " + JSON.stringify( loggableComponent( nodeComponent ) ) );
 
@@ -1228,7 +1228,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                 isolateProperties--;
 
-                set_callback_async && set_callback_async( nodeID );
+                callback_async && callback_async( nodeID );
 
             } );
 
@@ -1430,7 +1430,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
-        this.createChild = function( nodeID, childName, childComponent, childURI, create_callback_async /* ( childID ) */ ) {
+        this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
 
             this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
                 typeof childComponent == "string" || childComponent instanceof String ?
@@ -1731,7 +1731,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // ID of its prototype. If this was the root node for the application, the
                 // application is now fully initialized.
 
-                create_callback_async && create_callback_async( childID );
+                callback_async && callback_async( childID );
             } );
 
             this.logger.groupEnd();
@@ -2463,14 +2463,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @returns {ID[]|undefined}
         ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
 
-        this.find = function( nodeID, matchPattern, find_callback /* ( matchID ) */ ) {
+        this.find = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
             var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
 
-            if ( find_callback ) {
+            if ( callback ) {
 
                 matchIDs.forEach( function( matchID ) {
-                    find_callback( matchID );
+                    callback( matchID );
                 } );
 
             } else {  // TODO: future iterator proxy
@@ -2525,7 +2525,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // -- loadComponent ------------------------------------------------------------------------
 
-        var loadComponent = function( nodeURI, load_callback_async /* ( nodeDescriptor ) */ ) {
+        var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {
 
             if ( nodeURI != nodeTypeURI ) {
 
@@ -2535,13 +2535,13 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     dataType: "jsonp",
 
                     success: function( nodeDescriptor ) /* async */ {
-                        load_callback_async( nodeDescriptor );
+                        callback_async( nodeDescriptor );
                     }
 
                 } );
 
             } else {
-                load_callback_async( nodeTypeDescriptor );
+                callback_async( nodeTypeDescriptor );
             }
 
         };
