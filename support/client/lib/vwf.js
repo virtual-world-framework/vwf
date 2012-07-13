@@ -514,7 +514,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // -- plan ---------------------------------------------------------------------------------
 
-        this.plan = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
+        this.plan = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
@@ -526,7 +526,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 action: actionName,
                 member: memberName,
                 parameters: parameters,
-                // callback: callback,  // TODO
+                // callback: callback_async,  // TODO
             };
 
             if ( this.client_ ) {
@@ -542,7 +542,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // Send a message to the reflector. The message will be reflected back to all participants
         // in the instance.
 
-        this.send = function( nodeID, actionName, memberName, parameters, when, callback /* ( result ) */ ) {
+        this.send = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
@@ -556,7 +556,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 action: actionName,
                 member: memberName,
                 parameters: parameters,
-                // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
+                // callback: callback_async,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
             if ( ! socket ) { // single-user mode
@@ -631,27 +631,35 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             // Insert the ready callback for potentially-asynchronous actions.
 
+            var callbackIndex;
+
             switch ( actionName ) {
 
-                case "createNode": // nodeComponent, create_callback_async /* ( nodeID ) */
-
-                    callback_async( false ); // suspend the queue
-
-                    args[1] = function( nodeID ) /* async */ {
-                        callback_async( true ); // resume the queue when the action completes
-                    };
-
+                case "setState": // applicationState, callback_async /* () */
+                    callbackIndex = 1;
                     break;
 
-                case "setState": // applicationState, set_callback_async /* () */
-
-                    callback_async( false ); // suspend the queue
-
-                    args[1] = function() /* async */ {
-                        callback_async( true ); // resume the queue when the action completes
-                    };
-
+                case "createNode": // nodeComponent, callback_async /* ( nodeID ) */
+                    callbackIndex = 1;
                     break;
+
+                case "setNode": // nodeID, nodeComponent, callback_async /* ( nodeID ) */
+                    callbackIndex = 2;
+                    break;
+
+                case "createChild": // nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */
+                    callbackIndex = 4;
+                    break;
+
+            }
+
+            if ( callbackIndex !== undefined ) {
+
+                callback_async( false ); // suspend the queue
+
+                args[callbackIndex] = function() /* async */ {
+                    callback_async( true ); // resume the queue when the action completes
+                };
 
             }
 
