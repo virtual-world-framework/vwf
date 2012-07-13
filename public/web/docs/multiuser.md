@@ -1,4 +1,4 @@
-Multiuser Applications
+Multiuser Tutorial
 ===================
 -------------------
 Coming soon!

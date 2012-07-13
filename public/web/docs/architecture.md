@@ -7,7 +7,7 @@ The architecture behind the Virtual World Framework is by design:
 * Component-based
 * Multi-user collaborative
 
-The VWF architecture allows an application developer to focus on creating content in the mindeset of a single user application. Provided development is performed using the standard framework conventions, there is nothing additional to do in order to achieve a synchronized state across multiple users in the environment. 
+The VWF architecture allows an application developer to focus on creating content in the mindset of a single-user application. If development is performed using the standard framework conventions, nothing else must be done to achieve a synchronized state across multiple users in the environment. 
 
 -------------------
 
