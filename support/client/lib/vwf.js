@@ -1525,58 +1525,58 @@ if ( ! childComponent.source ) {
 
                 },
 
-                function( series_callback /* ( err, results ) */ ) {
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     // Call creatingNode() on each model. The node is considered to be constructed after
                     // each model has run.
 
-                    async.forEachSeries( vwf.models, function( model, each_callback /* ( err ) */ ) {
+                    async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
 
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childURI, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                 vwf.logger.debug( "vwf.createChild: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
-                                driver_ready && each_callback( undefined );
+                                driver_ready && each_callback_async( undefined );
                             }
 
                         } );
 
-                        driver_ready && each_callback( undefined );
+                        driver_ready && each_callback_async( undefined );
 
-                    }, function( err ) {
-                        series_callback( err, undefined );
+                    }, function( err ) /* async */ {
+                        series_callback_async( err, undefined );
                     } );
 
                 },
 
-                function( series_callback /* ( err, results ) */ ) {
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     // Call createdNode() on each view. The view is being notified of a node that has
                     // been constructed.
 
-                    async.forEach( vwf.views, function( view, each_callback /* ( err ) */ ) {
+                    async.forEach( vwf.views, function( view, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
 
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childURI, childName, function( ready ) {
+                                childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
                                 vwf.logger.debug( "vwf.createChild: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
-                                driver_ready && each_callback( undefined );
+                                driver_ready && each_callback_async( undefined );
                             }
 
                         } );
 
-                        driver_ready && each_callback( undefined );
+                        driver_ready && each_callback_async( undefined );
 
-                    }, function( err ) {
-                        series_callback( err, undefined );
+                    }, function( err ) /* async */ {
+                        series_callback_async( err, undefined );
                     } );
 
                 },
