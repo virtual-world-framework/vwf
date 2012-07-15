@@ -120,6 +120,7 @@ define( function() {
     /// 
     /// @name vwf.configuration#update
     /// @function
+    /// @private
 
     function update() {
 

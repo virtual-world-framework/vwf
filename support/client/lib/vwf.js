@@ -122,16 +122,6 @@
 
         var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
 
-        // Control messages from the reflector are stored here in a priority queue, ordered by
-        // execution time.
-
-        var queue = this.private.queue = [];
-
-        queue.time = 0; // current server time
-        queue.ready = true;
-
-        queue.sequence = 0; // message counter to ensure a stable sort
-
         // This is the connection to the reflector. In this sample implementation, "socket" is a
         // socket.io client that communicates over a channel provided by the server hosting the
         // client documents.
@@ -377,10 +367,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Start a timer to monitor the incoming queue and dispatch the messages as though
                 // they were received from the server.
 
-                this.dispatch( 0 );
+                this.dispatch();
 
                 setInterval( function() {
-                    vwf.dispatch( vwf.now + 0.010 ); // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+
+                    var fields = {
+                        time: vwf.now + 0.010 // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                    };
+
+                    queue.insert( fields, true );
+
+                    vwf.dispatch();
+
                 }, 10 );
 
             }
@@ -416,11 +414,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
 
-                        // Add the message to the queue.
+                        // Update the queue. Insert the message (unless it is only a time tick), and
+                        // advance the queue's record of the current time. Messages in the queue are
+                        // ordered by time, then by order of arrival.
 
-                        // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
-                            vwf.queue( fields );
-                        // }
+                        queue.insert( fields, true );
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -430,7 +428,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // may post actions to the queue to be performed in the future. But we only
                         // move time forward for items arriving in the queue from the reflector.
 
-                        vwf.dispatch( fields.time );
+                        // Dispatch messages from the queue that are executable at the current time.
+
+                        vwf.dispatch();
 
                     } catch ( e ) {
 
@@ -478,40 +478,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         };
 
-        // -- queue --------------------------------------------------------------------------------
-
-        this.queue = function( fields ) {
-
-            if ( ! ( fields instanceof Array ) ) {
-
-                // Add a single message.
-
-                fields.sequence = ++queue.sequence; // to stabilize the sort
-                queue.push( fields );
-
-            } else {
-
-                // Add an array of messages.
-
-                var messages = fields;
-
-                messages.forEach( function( fields ) {
-                    fields.sequence = ++queue.sequence; // to stabilize the sort
-                    queue.push( fields );
-                } );
-
-            }
-
-            // Sort by time, then by sequence.  // TODO: use a better-performing priority queue
-
-            queue.sort( function( a, b ) {
-                return a.time != b.time ?
-                    a.time - b.time :
-                    a.sequence - b.sequence;
-            } );
-
-        };
-
         // -- plan ---------------------------------------------------------------------------------
 
         this.plan = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
@@ -533,7 +499,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 fields.client = this.client_; // propagate the current originating client
             }
 
-            this.queue( fields );
+            queue.insert( fields );
 
         };
 
@@ -564,7 +530,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Loop the message back to the incoming queue.
 
                 fields.client = this.moniker_; // stamp with the originating client like the reflector does
-                this.queue( fields );
+                queue.insert( fields, true );
+
+                vwf.dispatch();
     
             } else {
                 
@@ -614,7 +582,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( nodeID, actionName, memberName, parameters, respond, callback_async /* ( ready ) */ ) {
+        this.receive = function( nodeID, actionName, memberName, parameters, respond ) {
 
 // TODO: delegate parsing and validation to each action.
 
@@ -655,10 +623,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             if ( callbackIndex !== undefined ) {
 
-                callback_async( false ); // suspend the queue
+                queue.suspend( "vwf.dispatch", actionName ); // suspend the queue
 
                 args[callbackIndex] = function() /* async */ {
-                    callback_async( true ); // resume the queue when the action completes
+                    queue.resume( "vwf.dispatch", actionName ); // resume the queue when the action completes
                 };
 
             }
@@ -680,22 +648,16 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // simulation time that we should advance to and was taken from the time stamp of the last
         // message received from the reflector.
 
-        this.dispatch = function( currentTime ) {
+        this.dispatch = function() {
 
-            // Handle messages until we empty the queue or reach the new current time. For each,
-            // remove the message and perform the action. The simulation time is advanced to the
-            // message time as each one is processed.
-
-            queue.time = Math.max( queue.time, currentTime ); // save current server time for pause/resume
+            var fields;
 
             // Actions may use receive's ready function to suspend the queue for asynchronous
             // operations, and to resume it when the operation is complete.
 
-            while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time ) {
+            while ( fields = /* assignment! */ queue.pull() ) {
 
-                var fields = queue.shift();
-
-                // Advance the time.
+                // Advance time to the message time.
 
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
@@ -708,19 +670,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Perform the action.
 
-                this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, function( ready ) /* async */ {
-                    if ( Boolean( ready ) != Boolean( queue.ready ) ) {
-                        vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
-                        queue.ready = ready;
-                        queue.ready && vwf.dispatch( queue.time );
-                    }
-                } );
+                this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond );
 
             }
 
-            // Set the simulation time to the new current time. Tick if the time advances.
+            // Advance time to the most recent time received from the server. Tick if the time
+            // advanced.
 
-            if ( queue.ready && this.now != queue.time ) {
+            if ( queue.ready() && this.now != queue.time ) {
                 this.now = queue.time;
                 this.tick();
             }
@@ -810,13 +767,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 function( series_callback /* ( err, results ) */ ) {
 
                     // Clear the queue, but leave any private direct messages in place. Update the queue
-                    // array in place so that existing references remain valid.
+                    // array in place so that existing references remain valid.  // TODO: move to the queue object
 
                     var private_queue = [], fields;
 
-                    while ( queue.length > 0 ) {
+                    while ( queue.queue.length > 0 ) {
 
-                        fields = queue.shift();
+                        fields = queue.queue.shift();
 
                         vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
                             return depth == 2 ? Array.prototype.slice.call( object ) : object
@@ -834,14 +791,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                             return depth == 2 ? Array.prototype.slice.call( object ) : object
                         } ), "to queue" );
 
-                        queue.push( fields );
+                        queue.queue.push( fields );
 
                     }
 
                     // Add the incoming items to the queue.
 
                     if ( applicationState.queue ) {
-                        vwf.queue( applicationState.queue );
+                        queue.insert( applicationState.queue );
                     }
 
                     series_callback( undefined, undefined );
@@ -888,8 +845,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Message queue.
 
-                queue: 
-                    require( "vwf/utility" ).transform( queue, queueTransitTransformation ),
+                queue:
+                    require( "vwf/utility" ).transform( queue.queue, queueTransitTransformation ),  // TODO: move to the queue object
 
             };
 
@@ -1538,7 +1495,7 @@ if ( ! childComponent.source ) {
                                 childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.createChild: creatingNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
+                                vwf.logger.debug( "vwf.createChild: creatingNode", ready ? "resuming" : "suspending", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
                                 driver_ready && each_callback_async( undefined );
                             }
@@ -1566,7 +1523,7 @@ if ( ! childComponent.source ) {
                                 childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
 
                             if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.createChild: createdNode", ready ? "resuming" : "pausing", "at", childID, "for", childComponent.source );
+                                vwf.logger.debug( "vwf.createChild: createdNode", ready ? "resuming" : "suspending", "at", childID, "for", childComponent.source );
                                 driver_ready = ready;
                                 driver_ready && each_callback_async( undefined );
                             }
@@ -3229,6 +3186,149 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 queryStringParams = parseParams();
 
             return queryStringParams[name];
+        };
+
+        // == Private variables ====================================================================
+
+        // Control messages from the reflector are stored here in a priority queue, ordered by
+        // execution time.
+
+        var queue = this.private.queue = {
+
+            /// Insert a message into the queue.
+            ///
+            /// @name vwf-configuration#insert
+            /// @function
+            /// @private
+
+            insert: function( fields, external ) {
+
+                var messages = fields instanceof Array ? fields : [ fields ];
+
+                messages.forEach( function( fields ) {
+
+                    // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+
+                        fields.sequence = ++this.sequence; // to stabilize the sort
+                        this.queue.push( fields );
+
+                    // }
+
+                    if ( external ) {
+                        this.time = Math.max( this.time, fields.time ); // save current server time for suspend/resume
+                    }
+
+                }, this );
+
+                // Sort by time, then by sequence.  // TODO: we probably want a priority queue here for better performance
+
+                this.queue.sort( function( a, b ) {
+
+                    return a.time != b.time ?
+                        a.time - b.time :
+                        a.sequence - b.sequence;
+
+                } );
+
+            },
+
+            /// Pull the next message from the queue.
+            ///
+            /// @name vwf-configuration#pull
+            /// @function
+            /// @private
+            /// 
+            /// @returns {Object|undefined} The next message if available, otherwise undefined.
+
+            pull: function() {
+
+                if ( this.suspension == 0 && this.queue.length > 0 && this.queue[0].time <= this.time ) {
+                    return this.queue.shift();                
+                }
+
+            },
+
+            /// Return the ready state of the queue.
+            ///
+            /// @name vwf-configuration#suspend
+            /// @function
+            /// @private
+            /// 
+            /// @returns {Number} The current suspension count.
+
+            suspend: function( who, why ) {
+
+                if ( this.suspension++ == 0 ) {
+                    vwf.logger.info( who + ":", "suspending", "queue at time", this.time, "for", why );  // TODO: handle by caller?
+                }
+
+                return this.suspension;            
+            },
+
+            /// Return the ready state of the queue.
+            ///
+            /// @name vwf-configuration#resume
+            /// @function
+            /// @private
+            /// 
+            /// @returns {Number} The current suspension count.
+
+            resume: function( who, why ) {
+
+                if ( --this.suspension == 0 ) {
+                    vwf.logger.info( who + ":", "resuming", "queue at time", this.time, "for", why );  // TODO: handle by caller?
+                    vwf.dispatch();  // TODO: handle by caller?
+                }
+
+                return this.suspension;            
+            },
+
+            /// Return the ready state of the queue.
+            ///
+            /// @name vwf-configuration#ready
+            /// @function
+            /// @private
+            /// 
+            /// @returns {Boolean}
+
+            ready: function() {
+                return this.suspension == 0;
+            },
+
+            /// Current time as provided by the reflector. Messages to be executed at this time or
+            /// earlier are available from #pull.
+            /// 
+            /// @name vwf-queue#time
+            /// @field
+            /// @private
+
+            time: 0,
+
+            /// Suspension count. Queue processing is suspended when suspension is greater than 0.
+            /// 
+            /// @name vwf-queue#suspension
+            /// @field
+            /// @private
+
+            suspension: 0,
+
+            /// Sequence counter for tagging messages by arrival order. Messages are sorted by time,
+            /// then by order of arrival.
+            /// 
+            /// @name vwf-queue#sequence
+            /// @field
+            /// @private
+
+            sequence: 0,
+
+            /// Array containing the messages in the queue.
+            /// 
+            /// @name vwf-queue#queue
+            /// @field
+            /// @private
+
+            queue: [],
+
         };
 
     };
