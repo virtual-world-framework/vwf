@@ -623,10 +623,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             if ( callbackIndex !== undefined ) {
 
-                queue.suspend( "vwf.dispatch", actionName ); // suspend the queue
+                if ( queue.suspend() ) { // suspend the queue
+                    vwf.logger.info( "vwf.dispatch:", "suspending", "queue at time", this.time, "for", actionName );
+                }
 
                 args[callbackIndex] = function() /* async */ {
-                    queue.resume( "vwf.dispatch", actionName ); // resume the queue when the action completes
+
+                    if ( queue.resume() ) { // resume the queue when the action completes
+                        vwf.logger.info( "vwf.dispatch:", "resuming", "queue at time", this.time, "for", actionName );
+                        vwf.dispatch();
+                    }
+
                 };
 
             }
@@ -3254,15 +3261,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             /// @function
             /// @private
             /// 
-            /// @returns {Number} The current suspension count.
+            /// @returns {Boolean} true if the queue was suspended by this call.
 
             suspend: function( who, why ) {
-
-                if ( this.suspension++ == 0 ) {
-                    vwf.logger.info( who + ":", "suspending", "queue at time", this.time, "for", why );  // TODO: handle by caller?
-                }
-
-                return this.suspension;            
+                return this.suspension++ == 0;
             },
 
             /// Return the ready state of the queue.
@@ -3271,16 +3273,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             /// @function
             /// @private
             /// 
-            /// @returns {Number} The current suspension count.
+            /// @returns {Boolean} true if the queue was resumed by this call.
 
             resume: function( who, why ) {
-
-                if ( --this.suspension == 0 ) {
-                    vwf.logger.info( who + ":", "resuming", "queue at time", this.time, "for", why );  // TODO: handle by caller?
-                    vwf.dispatch();  // TODO: handle by caller?
-                }
-
-                return this.suspension;            
+                return --this.suspension == 0;
             },
 
             /// Return the ready state of the queue.
