@@ -1761,9 +1761,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function getLocalBoundingBox( glgeObject ) {
 
-        var bBox = { xMin: Number.MAX_VALUE, xMax: Number.MIN_VALUE,
-                     yMin: Number.MAX_VALUE, yMax: Number.MIN_VALUE,
-                     zMin: Number.MAX_VALUE, zMax: Number.MIN_VALUE };
+        var bBox = { xMin: Number.MAX_VALUE, xMax: -Number.MAX_VALUE,
+                     yMin: Number.MAX_VALUE, yMax: -Number.MAX_VALUE,
+                     zMin: Number.MAX_VALUE, zMax: -Number.MAX_VALUE };
 
         var glgeObjectList = [];
         findAllGlgeObjects.call( this, glgeObject, glgeObjectList );
