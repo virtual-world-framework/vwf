@@ -17,7 +17,6 @@ properties:
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
   navmode: "orbit"
-  speed: 80.0
 children:
   flat_terrain:
     extends: http://vwf.example.com/node3.vwf

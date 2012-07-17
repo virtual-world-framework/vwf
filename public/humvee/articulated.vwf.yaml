@@ -1,0 +1,387 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/navscene.vwf
+properties:
+  activeCamera: "http-vwf-example-com-camera-vwf-camera"
+  navmode: "orbit"
+  speed: 4.0
+children:
+  humvee:
+    extends: http://vwf.example.com/node3.vwf
+    source: humvee.DAE
+    type: model/vnd.collada+xml
+    children:
+      MaxScene:
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          Humvee:
+            extends: http://vwf.example.com/node3.vwf
+            scripts:
+            - |
+              this.initialize = function() {
+                this.children.forEach( function( child ) {
+                  if ( child.articulate ) {
+                    this.logger.info( "articulating", child.name, Array.prototype.slice.apply( child.rotation ) );
+                    if ( child["articulate-axes"].x && Math.abs(child.rotation[3]) > 0.01 && ( Math.abs(child.rotation[1]) > 0.01 || Math.abs(child.rotation[2]) > 0.01 ) ) this.logger.warn( child.name, "expecting to rotate around x after default rotations around y or z" );
+                    if ( child["articulate-axes"].y && Math.abs(child.rotation[3]) > 0.01 && ( Math.abs(child.rotation[2]) > 0.01 || Math.abs(child.rotation[0]) > 0.01 ) ) this.logger.warn( child.name, "expecting to rotate around y after default rotations around z or x" );
+                    if ( child["articulate-axes"].z && Math.abs(child.rotation[3]) > 0.01 && ( Math.abs(child.rotation[0]) > 0.01 || Math.abs(child.rotation[1]) > 0.01 ) ) this.logger.warn( child.name, "expecting to rotate around z after default rotations around x or y" );
+                    child.at( 0 ).articulate();
+                  }
+                }, this );
+              }
+            children:
+              Accelerator:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              AirFan:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              AirTemp:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              Brake:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              DoorDriverFront:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              DoorDriverRear:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              DoorPassFront:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              DoorPassRear:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              EmergencyBrake:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              FuelNeedle:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              GearShift:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              GunMount:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+                children:
+              GunMountHatch01: # TODO: should be a child of GunMount to match .dae
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+                children:
+              GunMountHatch02: # TODO: should be a child of GunMountHatch01 to match .dae
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              HighLowSelector:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              Hood:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              HoodLatchDriver:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              HoodLatchPass:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              # HumveeBody:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
+              Ignition:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              OilNeedle:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              ParkingBrake:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                # implements:
+                # - articulate.vwf
+                # properties:
+                #   articulate-axes: { x: true, y: true, z: true }
+              RearHatch:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              SpareMount:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+                children:
+              SpareTire: # TODO: should be a child of SpareMount to match .dae
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { x: true }
+              SpeedNeedle:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              SteeringWheel:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+                children:
+              Horn: # TODO: should be a child of SteeringWheel to match .dae
+                extends:
+                  http://vwf.example.com/node3.vwf
+                # implements:
+                # - articulate.vwf
+                # properties:
+                #   articulate-axes: { x: true, y: true, z: true }
+              Switch01:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              Switch02:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              Switch03:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              TempNeedle:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              TireDriverFront:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true, z: true }
+              TireDriverRear:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true, z: true }
+              TirePassFront:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true, z: true }
+              TirePassRear:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true, z: true }
+              TurnSignal:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              VoltMeter:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              WaitToStart:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                # implements:
+                # - articulate.vwf
+                # properties:
+                #   articulate-axes: { x: true, y: true, z: true }
+              WiperDriver:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              WiperPass:
+                extends:
+                  http://vwf.example.com/node3.vwf
+                implements:
+                - articulate.vwf
+                properties:
+                  articulate-axes: { y: true }
+              # Omni001:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
+              # Omni002:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
+              # Ground:
+              #   extends:
+              #     http://vwf.example.com/node3.vwf
+              #   implements:
+              #   - articulate.vwf
+              #   properties:
+              #     articulate-axes: { x: true, y: true, z: true }
+          EnvironmentAmbientLight:
+            extends: http://vwf.example.com/node3.vwf
+          Omni001:
+            extends: http://vwf.example.com/node3.vwf
+          Omni002:
+            extends: http://vwf.example.com/node3.vwf
+          Ground:
+            extends: http://vwf.example.com/node3.vwf
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      quadraticAttenuation: 10
+      specular: false # the highlights are way too hot (materials or light?)
+      rotation: [ 1, 0, 0, -10 ]
+  dir2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      quadraticAttenuation: 10
+      specular: false # the highlights are way too hot (materials or light?)
+      rotation: [ -1, 0, 0, 200 ]
+scripts:
+- |
+  this.initialize = function() {
+    this.camera.translation = [ -500, -500, 235 ];
+    this.camera.lookAt = "http-vwf-example-com-node3-vwf-humvee";
+    this.camera.far = 3000;
+  }
+
+# Paste into the console to jump to an inside view: vwf.execute( "index-vwf", "this.navmode = 'walk' ; this.camera.transform = [-0.4292135238647461, 0.9031997919082642, -0.000008751301720621996, 0, -0.8462061285972595, -0.40213271975517273, -0.34959691762924194, 0, -0.31576135754585266, -0.150045245885849, 0.9368997812271118, 0, -15.161749839782715, -28.28612518310547, 72.89060974121094, 1]" )
