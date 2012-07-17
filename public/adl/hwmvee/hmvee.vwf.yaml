@@ -143,7 +143,7 @@ scripts:
                 document[this.PlayerNumber +'link'] = this;
                 if(document.PlayerNumber == this.PlayerNumber)
                   {
-                    //alert('binding');                   
+                                   
                     $(document).keydown(function(e){  document[this.PlayerNumber +'link'].keydown(e);});
                     $(document).keyup(function(e){document[this.PlayerNumber +'link'].keyup(e);});
                   }
@@ -200,12 +200,16 @@ scripts:
                  SceneDestroy();
                  LogFailure();
                  $('#Logon').dialog({title:'Game Over!',modal:true,buttons:{"Respawn":function(){$('#Logon').dialog('close');Begin();}}});
+                 
+                 $(document).unbind('keydown');
+                 $(document).unbind('keyup');
                 }
              }
                  
          }
          this.fire = function()
          {
+                
                 this.numfired++;
                 var proto = { 
                     id: 'Missile',
@@ -214,7 +218,7 @@ scripts:
                     type: 'model/vnd.collada+xml',
                     properties: {
                         translation: [10,10,10],
-                        rotation: [1,0,0,0],
+                        rotation: [1,0,0,90],
                         position: {set:"this.translation = value; this.position = value; this.updateCamera();"},
                         orientation: {set:"this.rotation = value; this.orientation = value; this.updateCamera();"},
                         shooter: "",
@@ -231,7 +235,8 @@ scripts:
                                 "this.targetpoint = null;"+
                                 "if(this.target) {this.targetpoint = this.target.translation;}"+
                                 "}",
-                                "this.update = function(){                                         "+
+                                "this.update = function(){    "+
+                                
                                 "this.age++;"+
                                 "if(this.age > 200) this.delete();"+
                                 "if(this.translation[2] < document.TerrainFunctions.SampleTerrainByPos(this.translation[0],this.translation[1])) this.delete();"+
@@ -264,7 +269,7 @@ scripts:
                                 "    this.rotation = [axis[0],axis[1],axis[2],angle/0.0174532925];   "+
                                 "}"+
                                 "if(dist < 3 && this.active==true) {this.hit();}"+
-                                "}"+
+                                "}"+ 
                                 "this.future(1.0/60.0).update();"+
                                 //"this.updateCamera();"+
                                 "}",
@@ -293,7 +298,7 @@ scripts:
                                 "this.GetNearist = function() { "+
                                 "var dot = -1;"+
                                 "var pos = null;"+
-                                "for(var node in vwf_view.kernel.kernel.getNode()) { var lnode = vwf_view.kernel.kernel.getNode()[node];"+
+                                "for(var node in vwf_view.kernel.kernel.models[0].model.nodes) { var lnode = vwf_view.kernel.kernel.models[0].model.nodes[node];"+
                                     "if(lnode.PlayerNumber && lnode.PlayerNumber != this.shooter){"+
                                     "   var thisdir = GLGE.subVec3(lnode.translation,this.translation);"+
                                     "    thisdir = document.TerrainFunctions.normalize(thisdir);"+
@@ -309,19 +314,35 @@ scripts:
                 proto.properties.translation[0] = this.translation[0];
                 proto.properties.translation[1] = this.translation[1];
                 proto.properties.translation[2] = this.translation[2] + 4;
-                proto.properties.rotation[0] = this.rotation[0];
-                proto.properties.rotation[1] = this.rotation[1];
-                proto.properties.rotation[2] = this.rotation[2];
-                proto.properties.rotation[3] = this.rotation[3];
+                
+                var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,1,0]);
+                var missilerotation = [];
+                var pointfront = [0,0,-1];
+                var to = forward;
+                to = document.TerrainFunctions.normalize(to);
+                var a = GLGE.crossVec3(pointfront,to);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(pointfront,to) );    
+                var angle = 0; var axis = [0,0,1];
+                var  tofront_norm = [];
+                goog.vec.Quaternion.normalize(tofront,tofront_norm);    
+                var currentrot = [];
+               
+                angle = goog.vec.Quaternion.toAngleAxis(tofront_norm,axis);
+                missilerotation = [axis[0],axis[1],axis[2],angle/0.0174532925];   
+                
+                proto.properties.rotation[0] = missilerotation[0];
+                proto.properties.rotation[1] = missilerotation[1];
+                proto.properties.rotation[2] = missilerotation[2];
+                proto.properties.rotation[3] = missilerotation[3];
                 proto.properties.shooter = this.PlayerNumber;
-                if(this.PlayerNumber == 1)
-                   proto.properties.target = "hmvee-vwf-HUMVEE2";
-                if(this.PlayerNumber == 2)
-                   proto.properties.target = "hmvee-vwf-HUMVEE";
+               
                 
                 var newid = "missile" + this.numfired + "" + this.PlayerNumber;
+                console.log(newid);
                 this.camtarget = newid;
-                this.parent.children.create(newid, proto);
+                proto.uri = newid;
+                //this.parent.children.create(proto, newid);
+                vwf_view.kernel.kernel.createNode(proto, null);
                 
          }
          this.turn = function(dir)
@@ -377,6 +398,7 @@ scripts:
                  this.WDown = true;                 
          }
          this.update = function(){
+         
             //if(document["MY_HMVEE"] == this)
             {
                   
@@ -386,14 +408,14 @@ scripts:
                   if(this.ADown == true) this.steerAmt +=.03
                   if(this.DDown == true) this.steerAmt -=.03
                  
-                  if(this.WDown == true) this.Momentum -= .2;
-                  if(this.SDown == true) this.Momentum += .2;
+                  if(this.WDown == true) this.Momentum += .2;
+                  if(this.SDown == true) this.Momentum -= .2;
                  
                   //build quaternion to rotate from local up to terrain normal
                   var norm = [0,0,1];
                   if(document.TerrainFunctions)
                     norm = document.TerrainFunctions.SampleNormalByPos(this.translation[0],this.translation[1]);
-                  var up = [0,1,0];
+                  var up = [0,0,1];
                   if(document.TerrainFunctions)
                     norm = document.TerrainFunctions.normalize(norm);
                   if(document.TerrainFunctions)
@@ -421,20 +443,20 @@ scripts:
                     
                  
                   //vwf_view.kernel.setProperty(this.id, 'wheelRotate',this.wheelRotate -.01 * this.Momentum);
-                  this.wheelRotate=this.wheelRotate -.01 * this.Momentum;
+                  this.wheelRotate=this.wheelRotate +.01 * this.Momentum;
                       
                     
-                  var front = GLGE.mulMat4Vec3(GLGE.angleAxis(angle,axis),[0,0,1]);
+                  var front = GLGE.mulMat4Vec3(GLGE.angleAxis(angle,axis),[0,1,0]);
                   var flat = document.TerrainFunctions.normalize([0,0,1]);
                   var slope = GLGE.dotVec3(front,flat);
-                  
+                  document.title = slope;
                   this.Momentum += (slope*.25);
                   var speedforward  =-this.Momentum*.007;  
                   
                   front = GLGE.scaleVec3(front,speedforward);
                   //vwf_view.kernel.setProperty(this.id, 'position' , [this.position[0] + front[0],this.position[1] + front[1],z + front[2]]);
                   this.translation = [this.translation[0] + front[0],this.translation[1] + front[1],z + front[2]]   
-                  this.turn(1);
+                  this.turn(-1);
                   this.updateCamera();    
                  
                   
@@ -481,9 +503,10 @@ scripts:
          }
          this.updateCamera = function()
          {
+                  
                   if(document["PlayerNumber"] != this.PlayerNumber)
                       return;
-                  var cameraTarget = vwf.getNode()['http-vwf-example-com-node3-vwf-' + this.camtarget];
+                  var cameraTarget = vwf_view.kernel.kernel.models[0].model.nodes['http-vwf-example-com-node3-vwf-' + this.camtarget];
                   if(!cameraTarget)
                         cameraTarget = this;
                   else

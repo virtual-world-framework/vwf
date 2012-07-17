@@ -217,6 +217,7 @@
 	function Begin()
 	{
 	    
+		
 		var name = $('#name').val();
 		gUserData.Name = name;
 		gUserData.Email = name + "@test.com";
@@ -226,7 +227,7 @@
 		PlayerProto.properties.initialPos[0] = (Math.random() * 80)-40;
 		PlayerProto.properties.initialPos[1] = (Math.random() * 80)-40;
 		PlayerProto.properties.initialPos[2] = (Math.random() * 80)-40;
-		PlayerProto.properties.initialRot[0] = 0;
+		PlayerProto.properties.initialRot[0] = 90;
 		PlayerProto.properties.initialRot[1] = 0;
 		PlayerProto.properties.initialRot[2] = 1;
 		PlayerProto.properties.initialRot[3] = 0;
@@ -242,7 +243,8 @@
 		document["PlayerNumber"] = name;
 		var parms = new Array();
 		parms.push(JSON.stringify(PlayerProto));
-		//alert(JSON.stringify(parms));
+		
+		console.log(vwf_view);
 		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
 		
 		
