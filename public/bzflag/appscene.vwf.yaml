@@ -144,17 +144,51 @@ scripts:
       trans[2] = 0;
 
       if ( goog.vec.Vec3.magnitudeSquared( trans ) > goog.vec.EPSILON ) {
-        player.translation = goog.vec.Vec3.add(
-          player.translation,
-          goog.vec.Vec3.scale(
+        trans = goog.vec.Vec3.scale(
             trans,
             this.distance(input),
             trans
-          ),
-          trans
-        );
+          );
+        if(!this.collisionDetection(trans, player.worldBoundingBox)) {
+          player.translation = goog.vec.Vec3.add(
+            player.translation,
+            trans,
+            trans
+          );
+        }
       }
     }      
+  }
+  this.collisionDetection = function(deltaTranslation, playerBoundingBox) {
+    var collision = false;
+    playerBoundingBox.max[0] += deltaTranslation[0];
+    playerBoundingBox.min[0] += deltaTranslation[0];
+    playerBoundingBox.max[1] += deltaTranslation[1];
+    playerBoundingBox.min[1] += deltaTranslation[1];
+    playerBoundingBox.max[2] += deltaTranslation[2];
+    playerBoundingBox.min[2] += deltaTranslation[2];
+    var sceneObjects = this.bz_world.bone2.ID1.SketchUp.instance_0.skp7582.instance_1.Component;
+    for(var i=0;i<sceneObjects.children.length;i++) {
+      var sceneBoundingBox = sceneObjects.children[i].worldBoundingBox;
+      if(sceneBoundingBox.max[0] == Infinity || sceneBoundingBox.max[1] == Infinity || sceneBoundingBox.max[2] == Infinity || 
+          sceneBoundingBox.min[0] == -Infinity || sceneBoundingBox.min[1] == -Infinity || sceneBoundingBox.min[2] == -Infinity) {
+        continue;
+      }
+
+      if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
+          playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
+          playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
+        collision = true;
+        return collision;
+      }
+      else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
+          playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
+          playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+        collision = true;
+        return collision;
+      }
+    }
+    return collision;
   }
   this.update = function(activeNode, input) {
     if ( input ) {

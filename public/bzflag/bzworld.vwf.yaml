@@ -1,0 +1,292 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/node3.vwf
+source: models/bzworld.dae
+# source: models/bzworld_desert.dae
+type: model/vnd.collada+xml
+properties:
+  translation: [ 0, 0, 0 ]
+  rotation: [ 1, 0, 0, -90 ]
+  scale: 4
+children:
+  bone2:
+    extends: http://vwf.example.com/node3.vwf 
+    children: 
+      ID1: 
+        extends: http://vwf.example.com/node3.vwf 
+        children: 
+          SketchUp: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              instance_0: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  skp7582: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      instance_1: 
+                        extends: http://vwf.example.com/node3.vwf 
+                        children: 
+                          Component: 
+                            extends: http://vwf.example.com/node3.vwf 
+                            children: 
+                              glgeObj1:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj2: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj3: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj4: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj5: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj6: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj7: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj8: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj9:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj10: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj11: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj12:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj13:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj14:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj15:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj16:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj17:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj18:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj19:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj20:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj21:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj22:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj23:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj24:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj25:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj26:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj27:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj28:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj29:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj30:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj31:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj32:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj33:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj34:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj35:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj36:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj37:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj38:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj39:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj40:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj41:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj42:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj43:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj44:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj45:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj46:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj47:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj48:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj49:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj50:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj51:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj52:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj53:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj54:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj55:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj56:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj57:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj58:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj59:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj60:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj61:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj62:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj63:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj64:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj65:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj66: 
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj67:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj68:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj69:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj70:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj71:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj72:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj73:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj74:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj75:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj76:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj77:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj78:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj79:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj80:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj81:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj82:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj83:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj84:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj85:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj86:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj87:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj88:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj89:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj90:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj91:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj92:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj93:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj94:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj95:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj96:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj97:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj98:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj99:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj100:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj101:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj102:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj103:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj104:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj105:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj106:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj107:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj108:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj109:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj110:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj111:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj112:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj113:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj114:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj115:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj116:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj117:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj118:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj119:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj121:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj122:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj123:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj124:
+                                extends: http://vwf.example.com/node3.vwf 
+                              glgeObj125:
+                                extends: http://vwf.example.com/node3.vwf 

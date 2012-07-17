@@ -23,16 +23,10 @@ properties:
   colorIndex: 0
 methods:
   createPlayer:
+  fireLaser:
 children:
   bz_world:
-    extends: http://vwf.example.com/node3.vwf
-    source: models/bzworld.dae
-    # source: models/bzworld_desert.dae
-    type: model/vnd.collada+xml
-    properties:
-      translation: [ 0, 0, 0 ]
-      rotation: [ 1, 0, 0, -90 ]
-      scale: 4
+    extends: bzworld.vwf
   # mountains:
   #   extends: http://vwf.example.com/node3.vwf
   #   source: models/mountains.dae
