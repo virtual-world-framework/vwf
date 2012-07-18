@@ -19,7 +19,7 @@ properties:
   ambientColor: [ 250, 250, 250 ]
   navmode: "walk"
   # navmode: "orbit"
-  translationSpeed: 800
+  translationSpeed: 400
   colorIndex: 0
 methods:
   createPlayer:
@@ -44,6 +44,8 @@ children:
       rotation: [ 1, 0, 0, 0 ]
       translation: [ 0, 0, -5000 ]
       scale: 110
+  players:
+    extends: http://vwf.example.com/node3.vwf
   # sceneCenter:
   #   extends: http://vwf.example.com/node3.vwf
   #   properties:
@@ -56,7 +58,8 @@ scripts:
   var playerTank = {
     extends: "http://vwf.example.com/node3.vwf",
     properties: {
-      translation: [0, 10, 200]
+      translation: [0, 10, 200],
+      scale: 0.5
     },
     children: {
       playerModel: {
@@ -67,6 +70,32 @@ scripts:
           rotation: [0, 0, 1, 180]
         },
         children: {
+          bone1: {
+            extends: "http://vwf.example.com/node3.vwf",
+            children: {
+              bone3: {
+                extends: "http://vwf.example.com/node3.vwf",
+                children: {
+                  Scene: {
+                    extends: "http://vwf.example.com/node3.vwf",
+                    children: {
+                      Tank: {
+                        extends: "http://vwf.example.com/node3.vwf",
+                        children: {
+                          glgeObj1: {
+                            extends: "http://vwf.example.com/node3.vwf",
+                            children: {
+                              
+                            }
+                          },
+                        }
+                      },
+                    }
+                  },
+                }
+              },
+            }
+          },
           TankMaterial1: {
             extends: "http://vwf.example.com/material.vwf",
             properties: {
@@ -96,7 +125,7 @@ scripts:
       var newPlayer = $.extend(true, {}, playerTank);
       newPlayer.children[playerName + "Camera"] = playerCamera;
       newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
-      this.children.create(playerName, newPlayer);
+      this.players.children.create(playerName, newPlayer);
       this.colorIndex += 1;
     }
   }

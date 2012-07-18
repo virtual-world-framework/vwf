@@ -37,7 +37,7 @@ scripts:
     return false;
   } 
   this.handleKeyDown = function(activeNode, input) {
-    var player = this.children[activeNode];
+    var player = this.players.children[activeNode];
     if ( player ) {
 
       var deltaZ = 0;
@@ -104,12 +104,17 @@ scripts:
     } 
   }
   this.look = function( activeNode, input, x, y ) {
-    var player = this.children[activeNode];
+    var player = this.players.children[activeNode];
     if ( player ) {
       if ( input.pointerInfo && input.pointerInfo.modifiers.ctrl ) {
         if ( y != 0 ) { player.rotateBy( [ 1, 0, 0, -y * this.angularDistance(input) ], 0 ) }
       } else {
-        if ( x != 0 ) { player.rotateBy( [ 0, 0, 1, -x * this.angularDistance(input) ], 0 ) }
+        if ( x != 0 ) { 
+          player.rotateBy( [ 0, 0, 1, -x * this.angularDistance(input) ], 0 );
+          if(this.collisionDetection([0,0,0], player)) {
+            player.rotateBy( [ 0, 0, 1, x * this.angularDistance(input) ], 0 );
+          }
+        }
       } 
     }
   }    
@@ -129,7 +134,7 @@ scripts:
     return dist;
   }          
   this.getCameraVec = function( activeNode, x, y, z ) {
-      var camRotMat = this.children[activeNode].rotationMatrix;
+      var camRotMat = this.players.children[activeNode].rotationMatrix;
       var camAt = goog.vec.Mat4.multVec4(
         camRotMat,
         goog.vec.Vec4.createFromValues( x, y, z, 1 ),
@@ -138,7 +143,7 @@ scripts:
       return camAt;      
   }
   this.translate = function( activeNode, input, x, y ) {
-    var player = this.children[activeNode];
+    var player = this.players.children[activeNode];
     if ( player ) {
       var trans = this.getCameraVec( activeNode, x, y, 0 );
       trans[2] = 0;
@@ -149,7 +154,7 @@ scripts:
             this.distance(input),
             trans
           );
-        if(!this.collisionDetection(trans, player.worldBoundingBox)) {
+        if(!this.collisionDetection(trans, player)) {
           player.translation = goog.vec.Vec3.add(
             player.translation,
             trans,
@@ -157,38 +162,73 @@ scripts:
           );
         }
       }
-    }      
+    }
   }
-  this.collisionDetection = function(deltaTranslation, playerBoundingBox) {
+  this.collisionDetection = function(deltaTranslation, player) {
     var collision = false;
+    var playerBoundingBox = player.worldBoundingBox;
     playerBoundingBox.max[0] += deltaTranslation[0];
     playerBoundingBox.min[0] += deltaTranslation[0];
     playerBoundingBox.max[1] += deltaTranslation[1];
     playerBoundingBox.min[1] += deltaTranslation[1];
     playerBoundingBox.max[2] += deltaTranslation[2];
     playerBoundingBox.min[2] += deltaTranslation[2];
-    var sceneObjects = this.bz_world.bone2.ID1.SketchUp.instance_0.skp7582.instance_1.Component;
-    for(var i=0;i<sceneObjects.children.length;i++) {
-      var sceneBoundingBox = sceneObjects.children[i].worldBoundingBox;
-      if(sceneBoundingBox.max[0] == Infinity || sceneBoundingBox.max[1] == Infinity || sceneBoundingBox.max[2] == Infinity || 
-          sceneBoundingBox.min[0] == -Infinity || sceneBoundingBox.min[1] == -Infinity || sceneBoundingBox.min[2] == -Infinity) {
-        continue;
-      }
+    collision = this.checkForCollision(player.id, playerBoundingBox, this.bz_world.bone2.ID1.SketchUp.instance_0.skp7582.instance_1.Component.children) || 
+        this.checkForCollision(player.id, playerBoundingBox, this.players.children);
+    return collision;
+  }
+  this.checkForCollision = function(playerId, playerBoundingBox, sceneObjects) {
+    for(var i=0;i<sceneObjects.length;i++) {
+      if(playerId != sceneObjects[i].id) {
+        var sceneBoundingBox = sceneObjects[i].cachedBoundingBox ? sceneObjects[i].cachedBoundingBox : sceneObjects[i].worldBoundingBox;
+        if(sceneBoundingBox.max[0] == Infinity || sceneBoundingBox.max[1] == Infinity || sceneBoundingBox.max[2] == Infinity || 
+            sceneBoundingBox.min[0] == -Infinity || sceneBoundingBox.min[1] == -Infinity || sceneBoundingBox.min[2] == -Infinity) {
+          continue;
+        }        
 
-      if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
-          playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
-          playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
-        collision = true;
-        return collision;
-      }
-      else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
-          playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
-          playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
-        collision = true;
-        return collision;
+        if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
+        else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
+        else if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
+        else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
+        else if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
+        else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
+        else if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
+        else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
+            playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
+            playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
+          return true;
+        }
       }
     }
-    return collision;
+    return false;
   }
   this.update = function(activeNode, input) {
     if ( input ) {

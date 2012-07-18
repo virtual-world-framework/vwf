@@ -53,3 +53,7 @@ properties:
       }
     value: "perspective"
   speed: 2.0
+  worldBoundingBox:
+    get: |
+      return null;
+    value: null
