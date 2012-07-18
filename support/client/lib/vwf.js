@@ -1225,6 +1225,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             this.logger.group( "vwf.getNode " + nodeID + " " + full );
 
+            full = true;
+
             // Direct property accessors to suppress kernel reentry so that we can read the state
             // without coloring from scripts.
 
@@ -1475,6 +1477,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
 
             var childID = childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
+
+            if ( childName == "material" || childName == "glgeObj1" ) childID += "-" + this.models.object.sequence( nodeID ) + '-' + nodeID;  // TODO: work-around for id conflicts with multiple type+name instances until unique synchronous ids are properly calculated
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 

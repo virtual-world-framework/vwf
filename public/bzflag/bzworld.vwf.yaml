@@ -42,15 +42,15 @@ children:
                           Component: 
                             extends: http://vwf.example.com/node3.vwf 
                             children: 
-                              # glgeObj1:
-                              #   extends: http://vwf.example.com/node3.vwf 
-                              #   properties:
-                              #     cachedBoundingBox: 
-                              #       get: |
-                              #         if(!this.cachedBoundingBox) {
-                              #           this.cachedBoundingBox = this.worldBoundingBox;
-                              #         }
-                              #         return this.cachedBoundingBox;
+                              glgeObj1:
+                                extends: http://vwf.example.com/node3.vwf 
+                                properties:
+                                  cachedBoundingBox: 
+                                    get: |
+                                      if(!this.cachedBoundingBox) {
+                                        this.cachedBoundingBox = this.worldBoundingBox;
+                                      }
+                                      return this.cachedBoundingBox;
                               glgeObj2: 
                                 extends: http://vwf.example.com/node3.vwf 
                                 properties:
