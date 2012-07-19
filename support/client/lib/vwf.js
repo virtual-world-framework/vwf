@@ -375,9 +375,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         time: vwf.now + 0.010 // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
                     };
 
-                    queue.insert( fields, true );
-
-                    vwf.dispatch();
+                    queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
 
                 }, 10 );
 
@@ -418,7 +416,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // advance the queue's record of the current time. Messages in the queue are
                         // ordered by time, then by order of arrival.
 
-                        queue.insert( fields, true );
+                        queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -427,10 +425,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // The simulation may perform immediate actions at the current time or it
                         // may post actions to the queue to be performed in the future. But we only
                         // move time forward for items arriving in the queue from the reflector.
-
-                        // Dispatch messages from the queue that are executable at the current time.
-
-                        vwf.dispatch();
 
                     } catch ( e ) {
 
@@ -482,6 +476,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.plan = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
+            this.logger.group( "vwf.plan " + nodeID + " " + actionName + " " + memberName + " " +
+                ( parameters && parameters.length ) + " " + when + " " + ( callback_async && "callback" ) );
+
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
                 this.now + ( -when );
@@ -501,6 +498,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             queue.insert( fields );
 
+            this.logger.groupEnd();
         };
 
         // -- send ---------------------------------------------------------------------------------
@@ -509,6 +507,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // in the instance.
 
         this.send = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
+
+            this.logger.group( "vwf.send " + nodeID + " " + actionName + " " + memberName + " " +
+                ( parameters && parameters.length ) + " " + when + " " + ( callback_async && "callback" ) );
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
@@ -530,9 +531,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Loop the message back to the incoming queue.
 
                 fields.client = this.moniker_; // stamp with the originating client like the reflector does
-                queue.insert( fields, true );
-
-                vwf.dispatch();
+                queue.insert( fields );
     
             } else {
                 
@@ -543,6 +542,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             }
 
+            this.logger.groupEnd();
         };
 
         // -- respond ------------------------------------------------------------------------------
@@ -550,6 +550,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // Return a result for a function invoked by the server.
 
         this.respond = function( nodeID, actionName, memberName, parameters, result ) {
+
+            this.logger.group( "vwf.respond " + nodeID + " " + actionName + " " + memberName + " " +
+                ( parameters && parameters.length ) + " " + "..." );
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
@@ -576,6 +579,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             }
 
+            this.logger.groupEnd();
         };
 
         // -- receive ------------------------------------------------------------------------------
@@ -583,6 +587,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
         this.receive = function( nodeID, actionName, memberName, parameters, respond ) {
+
+            this.logger.group( "vwf.receive " + nodeID + " " + actionName + " " + memberName + " " +
+                ( parameters && parameters.length ) + " " + respond );
 
 // TODO: delegate parsing and validation to each action.
 
@@ -597,47 +604,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             if ( memberName ) args.push( memberName );
             if ( parameters ) args = args.concat( parameters ); // flatten
 
-            // Insert the ready callback for potentially-asynchronous actions.
-
-            var callbackIndex;
-
-            switch ( actionName ) {
-
-                case "setState": // applicationState, callback_async /* () */
-                    callbackIndex = 1;
-                    break;
-
-                case "createNode": // nodeComponent, callback_async /* ( nodeID ) */
-                    callbackIndex = 1;
-                    break;
-
-                case "setNode": // nodeID, nodeComponent, callback_async /* ( nodeID ) */
-                    callbackIndex = 2;
-                    break;
-
-                case "createChild": // nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */
-                    callbackIndex = 4;
-                    break;
-
-            }
-
-            if ( callbackIndex !== undefined ) {
-
-                if ( queue.suspend() ) { // suspend the queue
-                    vwf.logger.info( "vwf.dispatch:", "suspending", "queue at time", this.time, "for", actionName );
-                }
-
-                args[callbackIndex] = function() /* async */ {
-
-                    if ( queue.resume() ) { // resume the queue when the action completes
-                        vwf.logger.info( "vwf.dispatch:", "resuming", "queue at time", this.time, "for", actionName );
-                        vwf.dispatch();
-                    }
-
-                };
-
-            }
-
             // Invoke the action.
 
             var result = this[actionName] && this[actionName].apply( this, args );
@@ -647,6 +613,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             respond && this.respond( nodeID, actionName, memberName, parameters,
                 require( "vwf/utility" ).transform( result, transitTransformation ) );
 
+            this.logger.groupEnd();
         };
 
         // -- dispatch -----------------------------------------------------------------------------
@@ -655,7 +622,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // simulation time that we should advance to and was taken from the time stamp of the last
         // message received from the reflector.
 
-        this.dispatch = function() {
+        this.dispatch = function( why ) {
 
             var fields;
 
@@ -667,17 +634,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Advance time to the message time.
 
                 if ( this.now != fields.time ) {
+                    this.client_ = undefined; // clear after the previous action
                     this.now = fields.time;
                     this.tick();
                 }
 
-                // Record the originating client.
-
-                this.client_ = fields.client;
-
                 // Perform the action.
 
-                this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond );
+                if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                    this.client_ = fields.client; // note the originating client for the duration of the action
+                    this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond );
+                }
 
             }
 
@@ -685,6 +652,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // advanced.
 
             if ( queue.ready() && this.now != queue.time ) {
+                this.client_ = undefined; // clear after the previous action
                 this.now = queue.time;
                 this.tick();
             }
@@ -733,6 +701,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         // -- setState -----------------------------------------------------------------------------
 
+        // setState may complete asynchronously due to its dependence on createNode. To prevent
+        // actions from executing out of order, queue processing must be suspended while setState is
+        // in progress. createNode suspends the queue when necessary, but additional calls to
+        // suspend and resume the queue may be needed if other async operations are added.
+
         this.setState = function( applicationState, callback_async /* () */ ) {
 
             this.logger.group( "vwf.setState" );  // TODO: loggableState
@@ -750,6 +723,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                     require( "vwf/configuration" ).instance = applicationState.configuration;
 
+                    series_callback( undefined, undefined );
+                },
+
+                // Update the internal kernel state.
+
+                function( series_callback /* ( err, results ) */ ) {
+
+                    if ( applicationState.kernel ) {
+                        vwf.now = applicationState.kernel.time;
+                    }
+ 
                     series_callback( undefined, undefined );
                 },
 
@@ -802,10 +786,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                     }
 
-                    // Add the incoming items to the queue.
+                    // Set the queue time and add the incoming items to the queue.
 
                     if ( applicationState.queue ) {
-                        queue.insert( applicationState.queue );
+                        queue.time = applicationState.queue.time;
+                        queue.insert( applicationState.queue.queue || [] );
                     }
 
                     series_callback( undefined, undefined );
@@ -844,6 +829,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 configuration:
                     require( "vwf/configuration" ).instance,
 
+                // Internal kernel state.
+
+                kernel: {
+                    time: vwf.now,
+                },
+
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
@@ -852,23 +843,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Message queue.
 
-                queue:
-                    require( "vwf/utility" ).transform( queue.queue, queueTransitTransformation ),  // TODO: move to the queue object
+                queue: {  // TODO: move to the queue object
+                    time: queue.time,
+                    queue: require( "vwf/utility" ).transform( queue.queue, queueTransitTransformation ),
+                },
 
             };
 
             // Normalize for consistency.
 
             if ( normalize ) {
-
-                applicationState.nodes.forEach( function( node, index ) {
-                    applicationState.nodes[index] =
-                        require( "vwf/utility" ).transform( applicationState.nodes[index], hashTransformation );
-                } );
-
-                applicationState.queue =
-                    require( "vwf/utility" ).transform( applicationState.queue, hashTransformation );
-
+                applicationState =
+                    require( "vwf/utility" ).transform( applicationState, hashTransformation );
             }
     
             // Restore kernel reentry from property accessors.
@@ -894,14 +880,17 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             // Hash the queue.
 
-            var hashq = applicationState.queue.length ?
-                "q" + Crypto.MD5( JSON.stringify( applicationState.queue ) ).toString().substring( 0, 16 ) : undefined;
+            var hashq = "q" + Crypto.MD5( JSON.stringify( applicationState.queue ) ).toString().substring( 0, 16 );
+
+            // Hash the other kernel properties.
+
+            var hashk = "k" + Crypto.MD5( JSON.stringify( applicationState.kernel ) ).toString().substring( 0, 16 );
 
             this.logger.groupEnd();
 
             // Generate the combined hash.
 
-            return hashn + ( hashq ? ":" + hashq : "" );
+            return hashn + ":" + hashq + ":" + hashk;
         }
 
         // -- createNode ---------------------------------------------------------------------------
@@ -928,6 +917,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // according to the component specification. Then we load an add any children, again
         // recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         // an initialization function.
+
+        // createNode may complete asynchronously due to its dependence on setNode, createChild and
+        // loadComponent. To prevent actions from executing out of order, queue processing must be
+        // suspended while createNode is in progress. setNode, createChild and loadComponent suspend
+        // the queue when necessary, but additional calls to suspend and resume the queue may be
+        // needed if other async operations are added.
 
         this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
 
@@ -1097,6 +1092,11 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         };
 
         // -- setNode ------------------------------------------------------------------------------
+
+        // setNode may complete asynchronously due to its dependence on createChild. To prevent
+        // actions from executing out of order, queue processing must be suspended while setNode is
+        // in progress. createChild suspends the queue when necessary, but additional calls to
+        // suspend and resume the queue may be needed if other async operations are added.
 
         this.setNode = function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
@@ -1402,6 +1402,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         // To create a node, we simply assign a new ID, then invoke a notification on each model and
         // a notification on each view.
 
+        // createChild may complete asynchronously due to its dependence on createNode and the
+        // creatingNode and createdNode driver calls. To prevent actions from executing out of
+        // order, queue processing must be suspended while createChild is in progress. createNode
+        // and the driver callbacks suspend the queue when necessary, but additional calls to
+        // suspend and resume the queue may be needed if other async operations are added.
+
         this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
 
             this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
@@ -1501,10 +1507,13 @@ if ( ! childComponent.source ) {
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                                 childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
 
-                            if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.createChild: creatingNode", ready ? "resuming" : "suspending", "at", childID, "for", childComponent.source );
-                                driver_ready = ready;
-                                driver_ready && each_callback_async( undefined );
+                            if ( driver_ready && ! ready ) {
+                                queue.suspend( "while loading " + childComponent.source + " for " + childID + " in creatingNode" ); // suspend the queue
+                                driver_ready = false;
+                            } else if ( ! driver_ready && ready ) {
+                                each_callback_async( undefined ); // resume createChild()
+                                queue.resume( "after loading " + childComponent.source + " for " + childID + " in creatingNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                driver_ready = true;
                             }
 
                         } );
@@ -1529,10 +1538,13 @@ if ( ! childComponent.source ) {
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                                 childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
 
-                            if ( Boolean( ready ) != Boolean( driver_ready ) ) {
-                                vwf.logger.debug( "vwf.createChild: createdNode", ready ? "resuming" : "suspending", "at", childID, "for", childComponent.source );
-                                driver_ready = ready;
-                                driver_ready && each_callback_async( undefined );
+                            if ( driver_ready && ! ready ) {
+                                queue.suspend( "while loading " + childComponent.source + " for " + childID + " in createdNode" ); // suspend the queue
+                                driver_ready = false;
+                            } else if ( ! driver_ready && ready ) {
+                                each_callback_async( undefined ); // resume createChild()
+                                queue.resume( "after loading " + childComponent.source + " for " + childID + " in createdNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                driver_ready = true;
                             }
 
                         } );
@@ -2497,9 +2509,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // -- loadComponent ------------------------------------------------------------------------
 
-        var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {
+        var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
             if ( nodeURI != nodeTypeURI ) {
+
+                queue.suspend( "while loading " + nodeURI ); // suspend the queue
 
                 jQuery.ajax( {
 
@@ -2508,11 +2522,16 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                     success: function( nodeDescriptor ) /* async */ {
                         callback_async( nodeDescriptor );
-                    }
+                        queue.resume( "after loading " + nodeURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                    },
+
+                    // error: function() {  // TODO
+                    // },
 
                 } );
 
             } else {
+
                 callback_async( nodeTypeDescriptor );
             }
 
@@ -2830,6 +2849,31 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                         break;
 
+                    case "methods":
+
+                        loggable.methods = {};
+
+                        for ( var methodName in component.methods ) {
+
+                            var componentMethodValue = component.methods[methodName];
+                            var loggablemethodValue = loggable.methods[methodName] = {};
+
+                            if ( valueHasBody( componentMethodValue ) ) {
+                                for ( var methodElementName in componentMethodValue ) {
+                                    if ( methodElementName == "body" ) {
+                                        loggablemethodValue[methodElementName] = "...";
+                                    } else {
+                                        loggablemethodValue[methodElementName] = componentMethodValue[methodElementName];
+                                    }
+                                }
+                            } else {
+                                loggable.methods[methodName] = componentMethodValue;
+                            }
+
+                        }
+
+                        break;
+
                     case "children":
 
                         loggable.children = {};
@@ -2846,11 +2890,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                         component.scripts.forEach( function( script ) {
 
-                            var loggableScript = {};
+                            var loggableScript = "..."; // {};
 
-                            for ( var scriptElementName in script ) {
-                                loggableScript[scriptElementName] = scriptElementName == "text" ? "..." : script[scriptElementName];
-                            }
+                            // for ( var scriptElementName in script ) {
+                            //     loggableScript[scriptElementName] = scriptElementName == "text" ? "..." : script[scriptElementName];
+                            // }
 
                             loggable.scripts.push( loggableScript );
 
@@ -2917,7 +2961,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // Omit private direct messages to this client.
 
                 return object.filter( function( fields ) {
-                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages
+                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                 } );
 
             } else if ( depth == 1 ) {
@@ -3202,13 +3246,22 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         var queue = this.private.queue = {
 
-            /// Insert a message into the queue.
+            /// Insert a message or messages into the queue. Optionally execute the simulation
+            /// through the time marked on the message.
+            /// 
+            /// When chronic (chron-ic) is set, vwf#dispatch is called to execute the simulation up
+            /// through the indicated time. To prevent actions from executing out of order, insert
+            /// should be the caller's last operation before returning to the host when invoked with
+            /// chronic.
             ///
-            /// @name vwf-configuration#insert
+            /// @name vwf-queue#insert
             /// @function
             /// @private
+            /// 
+            /// @param {Object|Object[]} fields
+            /// @param {Boolean} [chronic]
 
-            insert: function( fields, external ) {
+            insert: function( fields, chronic ) {
 
                 var messages = fields instanceof Array ? fields : [ fields ];
 
@@ -3221,8 +3274,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                     // }
 
-                    if ( external ) {
-                        this.time = Math.max( this.time, fields.time ); // save current server time for suspend/resume
+                    if ( chronic ) {
+                        this.time = Math.max( this.time, fields.time ); // save the latest allowed time for suspend/resume
                     }
 
                 }, this );
@@ -3237,11 +3290,20 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 } );
 
+                // Execute the simulation through the new time.
+
+                // To prevent actions from executing out of order, callers should immediately return
+                // to the host after invoking insert with chronic set.
+
+                if ( chronic ) {
+                    vwf.dispatch( "vwf-queue#resume" );
+                }
+
             },
 
             /// Pull the next message from the queue.
             ///
-            /// @name vwf-configuration#pull
+            /// @name vwf-queue#pull
             /// @function
             /// @private
             /// 
@@ -3255,33 +3317,54 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             },
 
-            /// Return the ready state of the queue.
+            /// Suspend message execution.
             ///
-            /// @name vwf-configuration#suspend
+            /// @name vwf-queue#suspend
             /// @function
             /// @private
             /// 
             /// @returns {Boolean} true if the queue was suspended by this call.
 
-            suspend: function( who, why ) {
-                return this.suspension++ == 0;
+            suspend: function( why ) {
+
+                if ( this.suspension++ == 0 ) {
+                    vwf.logger.info( "vwf-queue#suspend: suspending queue at time", vwf.now, why ? why : "" );
+                    return true;
+                } else {
+                    vwf.logger.debug( "vwf-queue#suspend: further suspending queue at time", vwf.now, why ? why : "" );
+                    return false;
+                }
+
             },
 
-            /// Return the ready state of the queue.
+            /// Resume message execution.
             ///
-            /// @name vwf-configuration#resume
+            /// vwf#dispatch may be called to continue the simulation. To prevent actions from
+            /// executing out of order, resume should be the caller's last operation before
+            /// returning to the host.
+            ///
+            /// @name vwf-queue#resume
             /// @function
             /// @private
             /// 
             /// @returns {Boolean} true if the queue was resumed by this call.
 
-            resume: function( who, why ) {
-                return --this.suspension == 0;
+            resume: function( why ) {
+
+                if ( --this.suspension == 0 ) {
+                    vwf.logger.info( "vwf-queue#resume: resuming queue at time", vwf.now, why ? why : "" );
+                    vwf.dispatch( "vwf-queue#resume" );
+                    return true;
+                } else {
+                    vwf.logger.debug( "vwf-queue#resume: partially resuming queue at time", vwf.now, why ? why : "" );
+                    return false;
+                }
+
             },
 
             /// Return the ready state of the queue.
             ///
-            /// @name vwf-configuration#ready
+            /// @name vwf-queue#ready
             /// @function
             /// @private
             /// 
