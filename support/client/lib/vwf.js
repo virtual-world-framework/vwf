@@ -622,7 +622,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // simulation time that we should advance to and was taken from the time stamp of the last
         // message received from the reflector.
 
-        this.dispatch = function( why ) {
+        this.dispatch = function() {
 
             var fields;
 
@@ -3296,7 +3296,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // to the host after invoking insert with chronic set.
 
                 if ( chronic ) {
-                    vwf.dispatch( "vwf-queue#resume" );
+                    vwf.dispatch();
                 }
 
             },
@@ -3353,7 +3353,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 if ( --this.suspension == 0 ) {
                     vwf.logger.info( "vwf-queue#resume: resuming queue at time", vwf.now, why ? why : "" );
-                    vwf.dispatch( "vwf-queue#resume" );
+                    vwf.dispatch();
                     return true;
                 } else {
                     vwf.logger.debug( "vwf-queue#resume: partially resuming queue at time", vwf.now, why ? why : "" );
