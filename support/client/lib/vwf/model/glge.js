@@ -682,8 +682,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
-                        var scale = this.kernel.getProperty( nodeID, "scale", undefined );
-                        value = { min: [ bbox.xMin * scale[0], bbox.yMin* scale[1], bbox.zMin*scale[2] ], max: [ bbox.xMax * scale[0], bbox.yMax* scale[1], bbox.zMax*scale[2] ] };
+                        value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
                         break;
 
                     case "centerOffset":

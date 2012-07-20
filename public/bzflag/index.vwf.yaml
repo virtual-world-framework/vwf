@@ -46,6 +46,8 @@ children:
       scale: 110
   players:
     extends: http://vwf.example.com/node3.vwf
+  lasers:
+    extends: http://vwf.example.com/node3.vwf
   # sceneCenter:
   #   extends: http://vwf.example.com/node3.vwf
   #   properties:
@@ -58,6 +60,7 @@ scripts:
   var playerTank = {
     extends: "http://vwf.example.com/node3.vwf",
     properties: {
+      laserCount: 0,
       translation: [0, 10, 200],
       scale: 0.5
     },
@@ -84,9 +87,7 @@ scripts:
                         children: {
                           glgeObj1: {
                             extends: "http://vwf.example.com/node3.vwf",
-                            children: {
-                              
-                            }
+                            children: { }
                           },
                         }
                       },
@@ -114,11 +115,28 @@ scripts:
       near: 1,
     }
   };
+  var bolt = {
+    extends: "laser.vwf",
+    source: "models/bolt.dae",
+    type: "model/vnd.collada+xml",
+    properties: {
+      laserDirection: [],
+      translation: [],
+      scale: 100
+    },
+    children: {
+      SphereMaterial1: {
+        extends: "http://vwf.example.com/material.vwf",
+        properties: {
+          texture: "" 
+        }
+      }
+    }
+  };
   this.initialize = function() {
     this.camera.translation = [ 0, 0, 800 ];
     this.camera.far = 100000000;
     this.camera.near = 1;
-    //this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
   }
   this.createPlayer = function(playerName) {
     if(this.colorIndex < tankMaterials.length) {
@@ -127,5 +145,16 @@ scripts:
       newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
       this.players.children.create(playerName, newPlayer);
       this.colorIndex += 1;
+    }
+  }
+  this.fireLaser = function(playerName) {
+    var player = this.players.children[playerName];
+    if(player) {
+      var newBolt = $.extend(true, {}, bolt);
+      newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2]];
+      newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
+      newBolt.children.SphereMaterial1.properties.texture = player.laserMaterial;
+      this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
+      player.laserCount += 1;
     }
   }
