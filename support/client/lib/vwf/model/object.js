@@ -173,6 +173,7 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
                 result.source = object.source;
                 result.type = object.type;
             }
+            result.sequence = object.sequence;
 
             return result;
         },

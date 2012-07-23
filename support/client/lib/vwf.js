@@ -1478,7 +1478,35 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             var childID = childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
 
-            if ( childName == "material" || childName == "glgeObj1" ) childID += "-" + this.models.object.sequence( nodeID ) + '-' + nodeID;  // TODO: work-around for id conflicts with multiple type+name instances until unique synchronous ids are properly calculated
+            if ( childComponent.id ) {
+                // console.warn( "createChild", nodeID, "using provided id for", childName, ":", childComponent.id );
+                childID = childComponent.id;
+            } else {
+                var shouldInitialize = true;
+                // TODO: work-around for id conflicts with multiple type+name instances until unique synchronous ids are properly calculated
+                switch( childName ) {
+                    case "material":
+                    case "plane":
+                    case "border":
+                    case "button":
+                    case "window":       
+                    case "controlBar":
+                    case "titlebar":
+                    case "closeButton":
+                    case "minButton":
+                    case "maxButton":
+                    case "glgeObj1":
+                    case "bone1":
+                    case "bone3":
+                    case "Scene":
+                    case "Tank":
+                    case "playerModel":
+                        childID += "-" + this.models.object.sequence( nodeID ) + '-' + nodeID; 
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
@@ -1567,6 +1595,10 @@ if ( ! childComponent.source ) {
                         driver_ready && each_callback( undefined );
 
                     }, function( err ) {
+                        if ( childComponent.sequence ) {
+                            // console.warn( "createChild", nodeID, "using provided sequence for", childName, ":", childComponent.sequence );
+                            vwf.models.object.objects[childID].sequence = childComponent.sequence;  // omitted if 0
+                        }
                         series_callback( err, undefined );
                     } );
 
@@ -1735,16 +1767,20 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
 
-                    // Call initializingNode() on each model and initializedNode() on each view to
-                    // indicate that the node is fully constructed.
+                    if ( shouldInitialize ) {
+                        // Call initializingNode() on each model and initializedNode() on each view to
+                        // indicate that the node is fully constructed.
 
-                    vwf.models.forEach( function( model ) {
-                        model.initializingNode && model.initializingNode( nodeID, childID );
-                    } );
+                        vwf.models.forEach( function( model ) {
+                            model.initializingNode && model.initializingNode( nodeID, childID );
+                        } );
 
-                    vwf.views.forEach( function( view ) {
-                        view.initializedNode && view.initializedNode( nodeID, childID );
-                    } );
+                        vwf.views.forEach( function( view ) {
+                            view.initializedNode && view.initializedNode( nodeID, childID );
+                        } );
+                    } else {
+                        // console.warn( "createChild", nodeID, "skipping initialization for", childName, ":", childID );
+                    }
 
                     series_callback( undefined, undefined );
                 },
