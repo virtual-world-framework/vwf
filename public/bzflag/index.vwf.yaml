@@ -24,6 +24,8 @@ properties:
 methods:
   createPlayer:
   fireLaser:
+events:
+  playerDestroyed: 
 children:
   bz_world:
     extends: bzworld.vwf
@@ -60,6 +62,11 @@ scripts:
   var playerTank = {
     extends: "http://vwf.example.com/node3.vwf",
     properties: {
+      active: {
+        get: "return this.active;",
+        set: "this.visible = this.active = value;",
+        value: true
+      },
       laserCount: 0,
       translation: [0, 10, 200],
       scale: 0.5
@@ -121,6 +128,7 @@ scripts:
     type: "model/vnd.collada+xml",
     properties: {
       laserDirection: [],
+      parentTank: "",
       translation: [],
       scale: 100
     },
@@ -139,7 +147,13 @@ scripts:
     this.camera.near = 1;
   }
   this.createPlayer = function(playerName) {
-    if(this.colorIndex < tankMaterials.length) {
+    if(this.players[playerName]) {
+      if(!this.players[playerName].active) {
+        this.players[playerName].active = true;
+        this.players[playerName].translation = [0, 10, 200];
+      }
+    }
+    else if(this.colorIndex < tankMaterials.length) {
       var newPlayer = $.extend(true, {}, playerTank);
       newPlayer.children[playerName + "Camera"] = playerCamera;
       newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
@@ -149,10 +163,11 @@ scripts:
   }
   this.fireLaser = function(playerName) {
     var player = this.players.children[playerName];
-    if(player) {
+    if(player && player.active) {
       var newBolt = $.extend(true, {}, bolt);
       newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2]];
       newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
+      newBolt.properties.parentTank = player.id;
       newBolt.children.SphereMaterial1.properties.texture = player.laserMaterial;
       this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
       player.laserCount += 1;

@@ -60,34 +60,28 @@ scripts:
             goog.vec.Vec3.create()
           );
         var laserBoundingBox = this.worldBoundingBox;
-        laserBoundingBox.max[0] += trans[0];
-        laserBoundingBox.min[0] += trans[0];
-        laserBoundingBox.max[1] += trans[1];
-        laserBoundingBox.min[1] += trans[1];
-        laserBoundingBox.max[2] += trans[2];
-        laserBoundingBox.min[2] += trans[2];
-        inBounds = this.parent.parent.checkForCollision(this.id, laserBoundingBox, [this.parent.parent.bz_world]);
-        if(!inBounds) {
-          // If the laser is not within the map, destroy it
-          this.parent.children.delete(this);
-        } 
+        collision = this.parent.parent.collisionDetection(trans, this);
+        if(!collision) {
+          this.translation = goog.vec.Vec3.add(
+            this.translation,
+            trans,
+            trans
+          );
+        }
         else {
-          collision = this.parent.parent.checkForCollision(this.id, laserBoundingBox, this.parent.parent.bz_world.bone2.ID1.SketchUp.instance_0.skp7582.instance_1.Component.children);
-          if(!collision) {
-            this.translation = goog.vec.Vec3.add(
-              this.translation,
-              trans,
-              trans
-            );
+          var players = this.parent.parent.players;
+          for(var i=0;i<players.children.length;i++) {
+            if(players.children[i].id == collision.id) {
+              players.children[i].active = false;
+              this.parent.parent.events.playerDestroyed(players.children[i].id);
+            }
           }
-          else {
-            this.parent.children.delete(this);
-            // TODO: If it hit a tank, destroy the tank
-          }
+
+          this.parent.children.delete(this);
         }
       }
-    }
-    if(!collision && inBounds) {
-      this.future(0.1).fire();
+      if(!collision) {
+        this.future(0.1).fire();
+      }
     }
   }

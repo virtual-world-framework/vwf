@@ -173,13 +173,20 @@ scripts:
     playerBoundingBox.min[1] += deltaTranslation[1];
     playerBoundingBox.max[2] += deltaTranslation[2];
     playerBoundingBox.min[2] += deltaTranslation[2];
-    collision = this.checkForCollision(player.id, playerBoundingBox, this.bz_world.bone2.ID1.SketchUp.instance_0.skp7582.instance_1.Component.children) || 
-        this.checkForCollision(player.id, playerBoundingBox, this.players.children);
+    // If the player is not within the bounding box of the world, it's colliding with the outer walls
+    var inBounds = this.checkForCollision(player, playerBoundingBox, [this.bz_world]);
+    if(inBounds) {
+      collision = this.checkForCollision(player.id, playerBoundingBox, this.bz_world.bone2.ID1.SketchUp.instance_0.skp7582.instance_1.Component.children) || 
+          this.checkForCollision(player, playerBoundingBox, this.players.children);
+    }
+    else {
+      collision = this.bz_world;
+    }
     return collision;
   }
-  this.checkForCollision = function(playerId, playerBoundingBox, sceneObjects) {
+  this.checkForCollision = function(player, playerBoundingBox, sceneObjects) {
     for(var i=0;i<sceneObjects.length;i++) {
-      if(playerId != sceneObjects[i].id) {
+      if(player.id != sceneObjects[i].id && (!player.parentTank || player.parentTank != sceneObjects[i].id) && sceneObjects[i].active != false) {
         var sceneBoundingBox = sceneObjects[i].cachedBoundingBox ? sceneObjects[i].cachedBoundingBox : sceneObjects[i].worldBoundingBox;
         if(sceneBoundingBox.max[0] == Infinity || sceneBoundingBox.max[1] == Infinity || sceneBoundingBox.max[2] == Infinity || 
             sceneBoundingBox.min[0] == -Infinity || sceneBoundingBox.min[1] == -Infinity || sceneBoundingBox.min[2] == -Infinity) {
@@ -232,17 +239,20 @@ scripts:
   }
   this.update = function(activeNode, input) {
     if ( input ) {
-      if ( input.pointerInfo ) {
-        var pi = input.pointerInfo;
-        if(pi.position[0] > 0.6 || pi.position[0] < 0.4) {
-          this.look( activeNode, input, (pi.position[0]*2.0)-1, 0 );
+      var player = this.players.children[activeNode];
+      if(player.active) {
+        if ( input.pointerInfo ) {
+          var pi = input.pointerInfo;
+          if(pi.position[0] > 0.6 || pi.position[0] < 0.4) {
+            this.look( activeNode, input, (pi.position[0]*2.0)-1, 0 );
+          }
+          if(pi.position[1] > 0.6 || pi.position[1] < 0.4) {
+            this.translate( activeNode, input, 0,((1-pi.position[1])*2.0)-1 );
+          }
         }
-        if(pi.position[1] > 0.6 || pi.position[1] < 0.4) {
-          this.translate( activeNode, input, 0,((1-pi.position[1])*2.0)-1 );
+        if ( input.keyInfo && Object.keys( input.keyInfo.keysDown ).length > 0) {
+          this.handleKeyDown(activeNode, input);
         }
-      }
-      if ( input.keyInfo && Object.keys( input.keyInfo.keysDown ).length > 0) {
-        this.handleKeyDown(activeNode, input);
       }
     } 
   }

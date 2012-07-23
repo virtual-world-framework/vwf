@@ -28,6 +28,24 @@
                                 }
                             }
                         });
+
+                        $('#gameOver').dialog( {
+                            autoOpen: false,
+                            height: 'auto',
+                            width: 300,
+                            modal: true,
+                            resizable: false,
+                            draggable: false,
+                            buttons: {
+                                "Yes": function () {
+                                    vwf_view.kernel.callMethod("index-vwf", "createPlayer", [playerName]);
+                                    $(this).dialog("close");
+                                },
+                                "No": function () {
+                                    $(this).dialog("close");
+                                }
+                            }
+                        });
 					});
 				</script>
 				
@@ -109,5 +127,8 @@
 <div id="createUser" title="Create new user">
     <label for="playerName">Name</label>
     <input type="text" name="playerName" id="playerName" class="text ui-widget-content ui-corner-all" />
+</div>
+<div id="gameOver" title="Game Over">
+    <p>Your tank was destroyed. Do you want to play again?</p>
 </div>
 </div>
