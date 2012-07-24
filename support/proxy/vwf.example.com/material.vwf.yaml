@@ -11,45 +11,110 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a material
+## 
+## @name material.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node.vwf
 properties:
+  
+  ## Texture
+  ## 
+  ## @name material.vwf#texture
+  ## @property
+
   texture:
     set: |
       this.texture = value;
-    value:   
+    value: 
+
+  ## Color
+  ## 
+  ## @name material.vwf#color
+  ## @property
+
   color: 
     set: |
       this.color = value;
     value: 
+
+  ## Specular color
+  ## 
+  ## @name material.vwf#specColor
+  ## @property
+
   specColor:
     set: |
       this.specColor = value;
     value: 
+
+  ## Reflective value
+  ## 
+  ## @name material.vwf#reflect
+  ## @property
+
   reflect:
     set: |
       this.reflect = value;
     value: 
+
+  ## Shininess value
+  ## 
+  ## @name material.vwf#shininess
+  ## @property
+
   shininess:
     set: |
       this.shininess = value;
     value: 
+
+  ## Specular value
+  ## 
+  ## @name material.vwf#specular
+  ## @property
+
   specular:
     set: |
       this.specular = value;
     value: 
+
+  ## Emit
+  ## 
+  ## @name material.vwf#emit
+  ## @property
+
   emit:
     set: |
       this.emit = value;
     value: 
+
+  ## Alpha value
+  ## 
+  ## @name material.vwf#alpha
+  ## @property
+
   alpha:
     set: |
       this.alpha = value;
-    value:  
+    value: 
+
+  ## Ambient value
+  ## 
+  ## @name material.vwf#ambient
+  ## @property
+
   ambient: 
     set: |
       this.ambient = value;
-    value:  
+    value: 
+
+  ## Binary alpha
+  ## 
+  ## @name material.vwf#binaryAlpha
+  ## @property
+
   binaryAlpha:
     set: |
       this.binaryAlpha = value;

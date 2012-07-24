@@ -11,9 +11,20 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of an editable node3 behavior
+## 
+## @name node3edit.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties:
+  
+  ## Edit mode
+  ## 
+  ## @name node3edit.vwf#editMode
+  ## @property
+
   editMode:
     set: |
       switch ( value ) {
@@ -23,14 +34,70 @@ properties:
           this.editMode = value;
           break;	
       }
+
+  ## Axis
+  ## 
+  ## @name node3edit.vwf#axis
+  ## @property
+
   axis: [ 0, 0, 1 ]
+
 methods:
+
+  ## Translate
+  ## 
+  ## @name node3edit.vwf#translate
+  ## @function
+  ##
+  ## @returns undefined
+
   translate:
+
+  ## Rotate
+  ## 
+  ## @name node3edit.vwf#rotate
+  ## @function
+  ##
+  ## @returns undefined
+
   rotate:
+
+  ## Scaling
+  ## 
+  ## @name node3edit.vwf#scaling
+  ## @function
+  ##
+  ## @returns undefined
+
   scaling:
+
+  ## Edit
+  ## 
+  ## @name node3edit.vwf#edit
+  ## @function
+  ##
+  ## @returns undefined
+
   edit:
+
+  ## Set Axis
+  ## 
+  ## @name node3edit.vwf#setAxis
+  ## @function
+  ##
+  ## @returns undefined
+
   setAxis:
+
+  ## Initialize function
+  ## 
+  ## @name node3edit.vwf#init
+  ## @function
+  ##
+  ## @returns undefined
+
   init:
+
 scripts:
 - |
     this.init = function() {

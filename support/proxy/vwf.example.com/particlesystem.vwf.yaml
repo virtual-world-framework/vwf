@@ -11,22 +11,117 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a particle system
+## 
+## @name particlesystem.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties:
+  
+  ## Number of particles
+  ## 
+  ## @name particlesystem.vwf#numberParticles
+  ## @property
+
   numberParticles:
+
+  ## Maximum lifetime of particle
+  ## 
+  ## @name particlesystem.vwf#maxLifeTime
+  ## @property
+
   maxLifeTime:
+  
+  ## Minimum lifetime of particle
+  ## 
+  ## @name particlesystem.vwf#minLifeTime
+  ## @property
+
   minLifeTime:
+
+  ## Start size of particle
+  ## 
+  ## @name particlesystem.vwf#startSize
+  ## @property
+
   startSize:
+
+  ## End size of particle
+  ## 
+  ## @name particlesystem.vwf#endSize
+  ## @property
+
   endSize:
+
+  ## Loop
+  ## 
+  ## @name particlesystem.vwf#loop
+  ## @property
+
   loop:
+
+  ## Maximum velocity
+  ## 
+  ## @name particlesystem.vwf#maxVelocity
+  ## @property
+
   maxVelocity:
-  minVelocity:   
+
+  ## Minimum velocity
+  ## 
+  ## @name particlesystem.vwf#minVelocity
+  ## @property
+
+  minVelocity:
+
+  ## Maximum start acceleration
+  ## 
+  ## @name particlesystem.vwf#maxStartAcceleration
+  ## @property
+
   maxStartAcceleration:
-  minStartAcceleration:  
+
+  ## Minimum start acceleration
+  ## 
+  ## @name particlesystem.vwf#minStartAcceleration
+  ## @property
+
+  minStartAcceleration:
+
+  ## Maximum end acceleration
+  ## 
+  ## @name particlesystem.vwf#maxEndAcceleration
+  ## @property
+
   maxEndAcceleration:
+
+  ## Minimum end acceleration
+  ## 
+  ## @name particlesystem.vwf#minEndAcceleration
+  ## @property
+
   minEndAcceleration:
+
+  ## Start color
+  ## 
+  ## @name particlesystem.vwf#startColor
+  ## @property
+
   startColor:
+
+  ## End color
+  ## 
+  ## @name particlesystem.vwf#endColor
+  ## @property
+
   endColor:
+
+  ## Image
+  ## 
+  ## @name particlesystem.vwf#image
+  ## @property
+
   image:
 

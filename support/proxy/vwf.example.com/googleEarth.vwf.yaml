@@ -11,5 +11,10 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## Google earth component
+## 
+## @name googleEarth.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/scene.vwf

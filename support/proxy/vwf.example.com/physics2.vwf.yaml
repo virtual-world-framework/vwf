@@ -11,13 +11,30 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of physics scene
+## 
+## @name physics2.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/navscene.vwf
 properties: 
+  
+  ## Gravity
+  ## 
+  ## @name physics2.vwf#gravity
+  ## @property
+
   gravity: 
     set: |
       this.gravity = value;
     value: [ 0, 0, -50.8, 0 ]
+
+  ## Collision System
+  ## 
+  ## @name physics2.vwf#collisionSystem
+  ## @property
+
   collisionSystem:
     get: |
       this.logger.info( "WARNING: scene.collisionSystem can only be set, get is not implemented" );

@@ -11,6 +11,11 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of info behavior (on click)
+## 
+## @name info-on-click.vwf
+## @namespace
+
 --- 
 extends:
   http://vwf.example.com/node3.vwf

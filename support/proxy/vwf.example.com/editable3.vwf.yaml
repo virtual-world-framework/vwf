@@ -11,9 +11,21 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of an editable node3
+## 
+## @name editable3.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties:
+
+  ## Edit mode
+  ## 
+  ## @name editable3.vwf#editMode
+  ## @property
+
   editMode: "translate"
+  
 implements:
 - http://vwf.example.com/node3edit.vwf

@@ -11,9 +11,20 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a light in 3D space
+## 
+## @name light.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties: 
+
+  ## The type of light (point, directional, spot)
+  ## 
+  ## @name light.vwf#lightType
+  ## @property
+
   lightType:
     set: |
       switch( value ) {
@@ -24,52 +35,136 @@ properties:
           break;
       }
     value: 
+
+  ## Constant attenuation
+  ## 
+  ## @name light.vwf#constantAttenuation
+  ## @property
+
   constantAttenuation:
     set: |
       this.constantAttenuation = value;
     value: 
+
+  ## Linear attenuation
+  ## 
+  ## @name light.vwf#linearAttenuation
+  ## @property
+
   linearAttenuation:
     set: |
       this.linearAttenuation = value;
     value: 
+
+  ## Quadratic attenuation
+  ## 
+  ## @name light.vwf#quadraticAttenuation
+  ## @property
+
   quadraticAttenuation:
     set: |
       this.quadraticAttenuation = value;
     value: 
+
+  ## Represents the cosine ofthe angle beyond which the light is cut off
+  ## 
+  ## @name light.vwf#spotCosCutOff
+  ## @property
+
   spotCosCutOff:
     set: |
       this.spotCosCutOff = value;
     value: 
+
+  ## Amount of "spottiness" of the spotlight
+  ## 
+  ## @name light.vwf#spotExponent
+  ## @property
+
   spotExponent:
     set: |
       this.spotExponent = value;
     value: 
+
+  ## Diffuse value
+  ## 
+  ## @name light.vwf#diffuse
+  ## @property
+
   diffuse:
+
+  ## Specular value
+  ## 
+  ## @name light.vwf#specular
+  ## @property
+
   specular:
+
+  ## The number of samples for shadow
+  ## 
+  ## @name light.vwf#samples
+  ## @property
+
   samples:
     set: |
       this.samples = value;
     value: 
+
+  ## The softness value of shadow
+  ## 
+  ## @name light.vwf#softness
+  ## @property
+
   softness:
     set: |
       this.softness = value;
     value: 
+
+  ## The Shadow Buffer Memory size for the resolution height of the shadow
+  ## 
+  ## @name light.vwf#bufferHeight
+  ## @property
+
   bufferHeight:
     set: |
       this.bufferHeight = value;
     value: 
+
+  ## The Shadow Buffer Memory size for the resolution width of the shadow
+  ## 
+  ## @name light.vwf#bufferWidth
+  ## @property
+
   bufferWidth:
     set: |
       this.bufferWidth = value;
     value: 
+
+  ## The shadow buffer bias. Map bias moves the shadow toward or away from the shadow-casting object(s)
+  ## 
+  ## @name light.vwf#shadowBias
+  ## @property
+
   shadowBias:
     set: |
       this.shadowBias = value;
     value: 
+
+  ## The shadow casting distance
+  ## 
+  ## @name light.vwf#distance
+  ## @property
+
   distance:
     set: |
       this.distance = value;
     value: 
+
+  ## The shadow casting flag. True if casting shadows is enabled.
+  ## 
+  ## @name light.vwf#castShadows
+  ## @property
+
   castShadows:
     set: |
       this.castShadows = value;

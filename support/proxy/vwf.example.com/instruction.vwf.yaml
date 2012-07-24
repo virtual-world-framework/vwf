@@ -11,33 +11,75 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of an instruction
+## 
+## @name instruction.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node.vwf
 properties: 
+
+  ## Success
+  ## 
+  ## @name instruction.vwf#success
+  ## @property
+
   success:
     set: |
       this.success = value;
     value: false
+
+  ## Instruction text
+  ## 
+  ## @name instruction.vwf#instructionText
+  ## @property
+
   instructionText:
     set: |
       this.instructionText = value;
     value: ""
+
+  ## Action text
+  ## 
+  ## @name instruction.vwf#actionText
+  ## @property
+
   actionText:
     set: |
       this.actionText = value;
     value: ""
+
+  ## Active boolean
+  ## 
+  ## @name instruction.vwf#active
+  ## @property
+
   active:
     set: |
       this.active = value;
     value: false
+
+  ## The position of the camera
+  ## 
+  ## @name instruction.vwf#cameraPosition
+  ## @property
+
   cameraPosition:
     set: |
       this.cameraPosition = value;
     value: ""
+
+  ## Number
+  ## 
+  ## @name instruction.vwf#number
+  ## @property
+
   number:
     set: |
       this.number = value;
     value: 0
+
 scripts:
 - |
     this.onEntry = function() {
