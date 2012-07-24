@@ -73,10 +73,11 @@
 						<li><span style='position:relative;left:20px'><a href='drivers.html' title='Drivers'>Drivers</a></span></li>
 						<li><span style='position:relative;left:20px'><a href='editor.html' title='Editor'>Editor</a></span></li>
 						<li><span style='position:relative;left:20px'><a href='query.html' title='Querying'>Querying</a></span></li>
-					<li><a href='application.html' title='Application'>Application</a></li>
+					<!-- <li><a href='application.html' title='Application'>Application</a></li>
 					    <li><span style='position:relative;left:20px'><a href='specification.html' title='Specification'>Specification</a></span></li>
-					    <li><span style='position:relative;left:20px'><a href='binding.html' title='Binding'>Binding</a></span></li>
-					<li><a href='system.html' title='API Reference'>API Reference</a></li>
+					    <li><span style='position:relative;left:20px'><a href='binding.html' title='Binding'>Binding</a></span></li> -->
+					<li><a href='application.html' title='Application API'>Application API</a></li>
+					<li><a href='system.html' title='System API'>System API</a></li>
 				</ul>
 			</div>	
 			<div class='content' style='width:80%;margin:0px 30px 0 30px;' markdown="1">
