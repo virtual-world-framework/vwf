@@ -191,7 +191,7 @@ scripts:
         if(sceneBoundingBox.max[0] == Infinity || sceneBoundingBox.max[1] == Infinity || sceneBoundingBox.max[2] == Infinity || 
             sceneBoundingBox.min[0] == -Infinity || sceneBoundingBox.min[1] == -Infinity || sceneBoundingBox.min[2] == -Infinity) {
           continue;
-        }        
+        }
 
         if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
             playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
@@ -247,7 +247,7 @@ scripts:
             this.look( activeNode, input, (pi.position[0]*2.0)-1, 0 );
           }
           if(pi.position[1] > 0.6 || pi.position[1] < 0.4) {
-            this.translate( activeNode, input, 0,((1-pi.position[1])*2.0)-1 );
+            this.translate( activeNode, input, 0,(((1-pi.position[1])*2.0)-1)*1.5 );
           }
         }
         if ( input.keyInfo && Object.keys( input.keyInfo.keysDown ).length > 0) {
