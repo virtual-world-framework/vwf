@@ -353,16 +353,6 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
         // TODO: removingChild
 
-        // -- settingProperties --------------------------------------------------------------------
-
-        settingProperties: function( nodeID, properties ) {  // TODO: these are here as a hack to keep scripts from coloring the setNode()/getNode() property values; vwf/kernel/model's disable and set/getProperties need to handle this properly (problem: getters can still return a value even when reentry is blocked)
-        },
-
-        // -- gettingProperties --------------------------------------------------------------------
-
-        gettingProperties: function( nodeID, properties ) {  // TODO: these are here as a hack to keep scripts from coloring the setNode()/getNode() property values; vwf/kernel/model's disable and set/getProperties need to handle this properly (problem: getters can still return a value even when reentry is blocked)
-        },
-
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {

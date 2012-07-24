@@ -509,7 +509,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         this.send = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
             this.logger.group( "vwf.send " + nodeID + " " + actionName + " " + memberName + " " +
-                ( parameters && parameters.length ) + " " + when + " " + ( callback_async && "callback" ) );
+                ( parameters && parameters.length ) + " " + when + " " + ( callback_async && "callback" ) );  // TODO: loggableParameters()
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
@@ -552,7 +552,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
             this.logger.group( "vwf.respond " + nodeID + " " + actionName + " " + memberName + " " +
-                ( parameters && parameters.length ) + " " + "..." );
+                ( parameters && parameters.length ) + " " + "..." );  // TODO: loggableParameters(), loggableResult()
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
@@ -589,7 +589,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         this.receive = function( nodeID, actionName, memberName, parameters, respond ) {
 
             this.logger.group( "vwf.receive " + nodeID + " " + actionName + " " + memberName + " " +
-                ( parameters && parameters.length ) + " " + respond );
+                ( parameters && parameters.length ) + " " + respond );  // TODO: loggableParameters()
 
 // TODO: delegate parsing and validation to each action.
 
@@ -1055,7 +1055,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Load the UI chrome if available.
 
-                if ( nodeURI ) {  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
+                if ( nodeURI && ! nodeURI.match( /^data:/ ) ) {  // TODO: normalizedComponent() on component["extends"] and use component.extends || component.source?
 if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  // TODO: any better way to only attempt to load chrome for the main application and not the prototypes?
                     jQuery("body").append( "<div />" ).children( ":last" ).load( remappedURI( nodeURI ) + ".html", function() {  // TODO: move to index.html; don't reach out to the window from the kernel; connect through a future vwf.initialize callback.
                         $('#loadstatus').remove(); // remove 'loading' overlay
@@ -1073,6 +1073,16 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         this.deleteNode = function( nodeID ) {
 
             this.logger.group( "vwf.deleteNode " + nodeID );
+
+            // Remove the entry in the components list if this was the root of a component loaded
+            // from a URI.
+
+            Object.keys( components ).some( function( nodeURI ) { // components: nodeURI => nodeID
+                if (  components[nodeURI] == nodeID ) {
+                    delete components[nodeURI];
+                    return true;
+                }
+            } );
 
             // Call deletingNode() on each model. The node is considered deleted after each model
             // has run.
@@ -1111,6 +1121,15 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                 function( series_callback /* ( err, results ) */ ) {
 
+                    // Set the internal state.
+
+                    vwf.models.object.internals( nodeID, nodeComponent );
+
+                    series_callback( undefined, undefined );
+                },
+
+                function( series_callback /* ( err, results ) */ ) {
+
                     // Suppress kernel reentry so that we can write the state without coloring from
                     // any scripts.
 
@@ -1128,7 +1147,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                         // Create a new property if the property is not defined on a prototype.
                         // Otherwise, initialize the property.
 
-                        var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on prototype
+                        var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on node or prototype
 
                         // Create or initialize the property.
 
@@ -1164,7 +1183,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                                 each_callback_async( undefined );
                             } );
                         } else {
-                            vwf.setNode( nodeComponent.children[childName].id, nodeComponent.children[childName], function( childID ) /* async */ {  // TODO: match id from patch with current id
+                            vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
+                                    nodeComponent.children[childName], function( childID ) /* async */ {
                                 each_callback_async( undefined );
                             } );
                         }  // TODO: delete when nodeComponent.children[childName] === null in patch
@@ -1220,47 +1240,56 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             isolateProperties++;
 
+            // Start the descriptor.
+
             var nodeComponent = {};
 
-            var nodeURI = this.uri( nodeID );
+            // Arrange the component as a patch if the node originated in a URI component. We want
+            // to refer to the original URI but apply any changes that have been made to the node
+            // since it was loaded.
 
-            if ( nodeURI ) {
-                nodeComponent.patches = nodeURI;
+            var patches = this.models.object.patches( nodeID ),
+                patching = !! patches,
+                patched = false;
+
+            if ( patching ) {
+                nodeComponent.patches = this.uri( nodeID ) || nodeID;
+            } else {
+                nodeComponent.id = nodeID;
             }
 
-            var child_full = full;
+            // Intrinsic state. These don't change once created, so they can be omitted if we're
+            // patching.
 
-            if ( full === undefined ) {
-                full = ! Boolean( nodeComponent.patches );
-            }
+            if ( full || ! patching ) {
 
-            if ( child_full === undefined && nodeComponent.patches ) {
-                child_full = false;
-            }
-
-            // Intrinsic state.
-
-            nodeComponent.id = nodeID;
-
-            if ( full || this.models.object.changed( nodeID ) ) {
+                var intrinsics = this.intrinsics( nodeID ); // source, type
 
                 var prototypeID = this.prototype( nodeID );
 
-                if ( prototypeID !== undefined ) {
-                    nodeComponent.extends = this.getNode( prototypeID );
+                if ( prototypeID === undefined ) {
+                    nodeComponent.extends = null;
+                } else if ( prototypeID !== nodeTypeURI ) {
+                    nodeComponent.extends = this.getNode( prototypeID );  // TODO: move to vwf/model/object and get from intrinsics
                 }
 
                 nodeComponent.implements = this.behaviors( nodeID ).map( function( behaviorID ) {
-                    return this.getNode( behaviorID );
+                    return this.getNode( behaviorID );  // TODO: move to vwf/model/object and get from intrinsics
                 }, this );
 
                 nodeComponent.implements.length || delete nodeComponent.implements;
 
-                var intrinsics = this.intrinsics( nodeID ); // get source, type
-
                 if ( intrinsics.source !== undefined ) nodeComponent.source = intrinsics.source;
                 if ( intrinsics.type !== undefined ) nodeComponent.type = intrinsics.type;
 
+            }
+
+            // Internal state.
+
+            var internals = this.models.object.internals( nodeID ); // sequence
+
+            if ( internals.sequence ) { // omit if 0 (default)
+                nodeComponent.sequence = internals.sequence;
             }
 
             // Suppress kernel reentry so that we can read the state without coloring from any
@@ -1270,7 +1299,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Properties.
 
-            if ( full || this.models.object.changed( nodeID ) ) {  // TODO: properties changed only
+            if ( full || ! patching || patches.properties ) {  // TODO: properties changed only
 
                 nodeComponent.properties = this.getProperties( nodeID );
 
@@ -1280,8 +1309,11 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                     }
                 }
 
-                Object.keys( nodeComponent.properties ).length ||
+                if ( Object.keys( nodeComponent.properties ).length == 0 ) { 
                     delete nodeComponent.properties;
+                } else {
+                    patched = true;
+                }
 
             }
 
@@ -1318,17 +1350,20 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             nodeComponent.children = {};
 
             this.children( nodeID ).forEach( function( childID ) {
-                nodeComponent.children[ this.name( childID ) ] = this.getNode( childID, child_full );  // TODO: full = propagated for existing, full = undefined for new
+                nodeComponent.children[ this.name( childID ) ] = this.getNode( childID, full );
             }, this );
 
             for ( var childName in nodeComponent.children ) {  // TODO: distinguish add, change, remove
-                if ( nodeComponent.children[childName] === undefined ) { // ... delete if not changed
+                if ( nodeComponent.children[childName] === undefined ) {
                     delete nodeComponent.children[childName];
                 }
             }
 
-            Object.keys( nodeComponent.children ).length ||
+            if ( Object.keys( nodeComponent.children ).length == 0 ) { 
                 delete nodeComponent.children;
+            } else {
+                patched = true;
+            }
 
             // Scripts.
 
@@ -1340,10 +1375,12 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             this.logger.groupEnd();
 
-            if ( full || nodeComponent.properties || nodeComponent.methods || nodeComponent.events ||
-                    nodeComponent.children || nodeComponent.scripts ) {
+            // Return the descriptor created, unless it was arranged as a patch and there were no
+            // changes. Otherwise, return the URI if this is the root of a URI component.
+
+            if ( full || ! patching || patched ) {
                 return nodeComponent;
-            } else if ( nodeComponent.patches ) {
+            } else if ( patches.root ) {
                 return nodeComponent.patches;
             } else {
                 return undefined;
@@ -1417,6 +1454,10 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             childComponent = normalizedComponent( childComponent );
 
+            // Determine if we're replicating previously-saved state, or creating a fresh object.
+
+            var replicating = !! childComponent.id;
+
             // Allocate an ID for the node. IDs must be unique and consistent across all clients
             // sharing the same instance regardless of the component load order. Each node maintains
             // a sequence counter, and we allocate the ID based on the parent's sequence counter and
@@ -1449,6 +1490,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                             if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
                                 vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
+
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
 if ( ! childComponent.source ) {
     var prototype_intrinsics = vwf.intrinsics( prototypeID );
@@ -1559,6 +1601,15 @@ if ( ! childComponent.source ) {
 
                 function( series_callback /* ( err, results ) */ ) {
 
+                    // Set the internal state.
+
+                    vwf.models.object.internals( childID, childComponent );
+
+                    series_callback( undefined, undefined );
+                },
+
+                function( series_callback /* ( err, results ) */ ) {
+
                     // Suppress kernel reentry so that we can read the state without coloring from
                     // any scripts.
 
@@ -1595,7 +1646,8 @@ if ( ! childComponent.source ) {
                         // is constructed because setters will run?
 
                         var assigning = value === undefined || // no value, or
-                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, childID, propertyName ) ); // no setter
+                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, childID, propertyName ) ) || // no setter, or
+                            replicating; // replicating previously-saved state (setters never run during replication)
 
                         if ( ! assigning ) {
                             deferredInitializations[propertyName] = value;
@@ -1692,6 +1744,11 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
     vwf.tickable.nodeIDs.push( childID );
 }
 
+                    // Suppress kernel reentry so that initialization functions don't make any
+                    // changes during replication.
+
+                    isolateProperties && vwf.models.kernel.disable();
+
                     // Call initializingNode() on each model and initializedNode() on each view to
                     // indicate that the node is fully constructed.
 
@@ -1702,6 +1759,10 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     vwf.views.forEach( function( view ) {
                         view.initializedNode && view.initializedNode( nodeID, childID );
                     } );
+
+                    // Restore kernel reentry.
+
+                    isolateProperties && vwf.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1791,9 +1852,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 }
 
                 for ( var propertyName in model_properties ) {
-                    if ( model_properties[propertyName] !== undefined || // copy values from this model
-                            intermediate_properties[propertyName] === undefined ) { // as well as any new keys
+                    if ( model_properties[propertyName] !== undefined && // copy values from this model
+                            ( typeof model_properties[propertyName] != "number" || ! isNaN( model_properties[propertyName] ) ) ) { // ignore NaN, presuming it's via a blocked getter
                         intermediate_properties[propertyName] = model_properties[propertyName];
+                    } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
+                        intermediate_properties[propertyName] = undefined;
                     }
                 }
 
@@ -1844,9 +1907,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 }
 
                 for ( var propertyName in model_properties ) {
-                    if ( model_properties[propertyName] !== undefined || // copy values from this model
-                            intermediate_properties[propertyName] === undefined ) { // as well as any new keys
+                    if ( model_properties[propertyName] !== undefined && // copy values from this model
+                            ( typeof model_properties[propertyName] != "number" || ! isNaN( model_properties[propertyName] ) ) ) { // ignore NaN, presuming it's via a blocked getter
                         intermediate_properties[propertyName] = model_properties[propertyName];
+                    } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
+                        intermediate_properties[propertyName] = undefined;
                     }
                 }
 
@@ -2511,7 +2576,18 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
-            if ( nodeURI != nodeTypeURI ) {
+            if ( nodeURI == nodeTypeURI ) {
+
+                callback_async( nodeTypeDescriptor );
+
+            } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
+
+                // Primarly for testing, parse one specific form of data URIs. We need to parse
+                // these ourselves since Chrome can't load data URIs (with a cross origin error).
+
+                callback_async( JSON.parse( atob( nodeURI.substring( 29 ) ) ) );  // TODO: support all data URIs
+
+            } else {
 
                 queue.suspend( "while loading " + nodeURI ); // suspend the queue
 
@@ -2530,9 +2606,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 } );
 
-            } else {
-
-                callback_async( nodeTypeDescriptor );
             }
 
         };
