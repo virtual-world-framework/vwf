@@ -1501,6 +1501,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                     case "Scene":
                     case "Tank":
                     case "playerModel":
+                    case "TankMaterial1":
                         childID += "-" + this.models.object.sequence( nodeID ) + '-' + nodeID; 
                         break;
                     default:

@@ -62,11 +62,7 @@ scripts:
   var playerTank = {
     extends: "http://vwf.example.com/node3.vwf",
     properties: {
-      active: {
-        get: "return this.active;",
-        set: "this.visible = this.active = value;",
-        value: true
-      },
+      active: true,
       laserCount: 0,
       translation: [0, 10, 200],
       scale: 0.5
@@ -150,6 +146,7 @@ scripts:
     if(this.players[playerName]) {
       if(!this.players[playerName].active) {
         this.players[playerName].active = true;
+        this.players[playerName].visible = true;
         this.players[playerName].translation = [0, 10, 200];
       }
     }

@@ -73,6 +73,7 @@ scripts:
           for(var i=0;i<players.children.length;i++) {
             if(players.children[i].id == collision.id) {
               players.children[i].active = false;
+              players.children[i].visible = false;
               this.parent.parent.events.playerDestroyed(players.children[i].id);
             }
           }
