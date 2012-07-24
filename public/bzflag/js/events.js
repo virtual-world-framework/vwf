@@ -197,7 +197,7 @@ window.onkeyup = function(e) {
 
 function updateModel(time) {
     if(time - lastUpdateTime > 100) {
-        vwf_view.kernel.callMethod(sceneNode, "update", [playerName, input]);
+        vwf_view.kernel.callMethod(playerNode, "update", [input]);
         input.lastInputTime = vwf_view.kernel.time();
         lastUpdateTime = time;
     }
