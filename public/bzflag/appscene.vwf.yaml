@@ -22,7 +22,7 @@ scripts:
 - |
   this.collisionDetection = function(deltaTranslation, player) {
     var collision = false;
-    var playerBoundingBox = player.worldBoundingBox;
+    var playerBoundingBox = player.cachedBoundingBox;
     playerBoundingBox.max[0] += deltaTranslation[0];
     playerBoundingBox.min[0] += deltaTranslation[0];
     playerBoundingBox.max[1] += deltaTranslation[1];
@@ -56,26 +56,6 @@ scripts:
         }
         else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
             playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
-            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
-          return sceneObjects[i];
-        }
-        else if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
-            playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
-            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
-          return sceneObjects[i];
-        }
-        else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
-            playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
-            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
-          return sceneObjects[i];
-        }
-        else if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
-            playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
-            playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
-          return sceneObjects[i];
-        }
-        else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
-            playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
             playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
           return sceneObjects[i];
         }
@@ -89,6 +69,26 @@ scripts:
             playerBoundingBox.max[2] <= sceneBoundingBox.max[2] && playerBoundingBox.max[2] >= sceneBoundingBox.min[2]) {
           return sceneObjects[i];
         }
+        //else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
+        //    playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
+        //    playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+        //  return sceneObjects[i];
+        //}
+        //else if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
+        //    playerBoundingBox.min[1] <= sceneBoundingBox.max[1] && playerBoundingBox.min[1] >= sceneBoundingBox.min[1] && 
+        //    playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+        //  return sceneObjects[i];
+        //}
+        //else if(playerBoundingBox.min[0] <= sceneBoundingBox.max[0] && playerBoundingBox.min[0] >= sceneBoundingBox.min[0] &&
+        //    playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
+        //    playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+        //  return sceneObjects[i];
+        //}
+        //else if(playerBoundingBox.max[0] <= sceneBoundingBox.max[0] && playerBoundingBox.max[0] >= sceneBoundingBox.min[0] &&
+        //    playerBoundingBox.max[1] <= sceneBoundingBox.max[1] && playerBoundingBox.max[1] >= sceneBoundingBox.min[1] && 
+        //    playerBoundingBox.min[2] <= sceneBoundingBox.max[2] && playerBoundingBox.min[2] >= sceneBoundingBox.min[2]) {
+        //  return sceneObjects[i];
+        //}
       }
     }
     return undefined;

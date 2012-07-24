@@ -16,6 +16,7 @@ extends: http://vwf.example.com/node3.vwf
 properties:
   translationSpeed: 1200
   laserDirection: 
+  cachedBoundingBox: 
 methods:
   fire:
 scripts:
@@ -60,7 +61,7 @@ scripts:
             this.distance(),
             goog.vec.Vec3.create()
           );
-        var laserBoundingBox = this.worldBoundingBox;
+        this.cachedBoundingBox = this.worldBoundingBox;
         collision = this.parent.parent.collisionDetection(trans, this);
         if(!collision) {
           this.translation = goog.vec.Vec3.add(
