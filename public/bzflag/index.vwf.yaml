@@ -114,7 +114,7 @@ scripts:
     extends: "http://vwf.example.com/camera.vwf",
     properties: {
       translation: [0, 300, 450],
-      far: 100000000,
+      far: 1000000,
       near: 1,
     }
   };
@@ -139,7 +139,7 @@ scripts:
   };
   this.initialize = function() {
     this.camera.translation = [ 0, 0, 800 ];
-    this.camera.far = 100000000;
+    this.camera.far = 1000000;
     this.camera.near = 1;
   }
   this.createPlayer = function(playerName) {
