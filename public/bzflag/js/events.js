@@ -17,6 +17,7 @@ var sceneNode = 'index-vwf';
 var canvas = $('#' + sceneNode).get(0);
 var keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 var buttonStates = {left: false, middle: false, right: false};
+var lastUpdateTime = (+new Date);
 var input = { 
     futureActive: function() {
         return ( this.lookActive || this.moveActive || this.button1Down || this.button2Down || this.keysAreDown() ); 
@@ -93,11 +94,11 @@ canvas.onmouseover = function(e) {
     if(playerNode) {
         var eData = getMouseEventData( e, false );
         if ( eData ) {
-            // input.lastPointerInfo = input.pointerInfo;
-            // input.pointerInfo = eData;
-            // input.lastInputTime = vwf_view.kernel.time(); 
-            // input.moveActive = true;
-            // updateModel();
+            input.lastPointerInfo = input.pointerInfo;
+            input.pointerInfo = eData;
+            input.lastInputTime = vwf_view.kernel.time(); 
+            input.moveActive = true;
+            updateModel((+new Date));
         }
     }
 }
@@ -106,10 +107,10 @@ canvas.onmouseout = function(e) {
     if(playerNode) {
         var eData = getMouseEventData( e, false );
         if ( eData ) {
-            // input.lastPointerInfo = input.pointerInfo;
-            // input.pointerInfo = undefined;
-            // input.lastInputTime = vwf_view.kernel.time(); 
-            // input.moveActive = false;
+            input.lastPointerInfo = input.pointerInfo;
+            input.pointerInfo = undefined;
+            input.lastInputTime = vwf_view.kernel.time(); 
+            input.moveActive = false;
         }
     }
 }
@@ -118,11 +119,11 @@ canvas.onmousemove = function(e) {
     if(playerNode) {
         var eData = getMouseEventData( e, false );
         if ( eData ) {
-            // input.pointerEventTime = vwf_view.kernel.time();
-            // input.lastInputTime = input.pointerEventTime;
-            // input.lastPointerInfo = input.pointerInfo;
-            // input.pointerInfo = eData;
-            // input.lastInputTime = vwf_view.kernel.time(); 
+            input.pointerEventTime = vwf_view.kernel.time();
+            input.lastInputTime = input.pointerEventTime;
+            input.lastPointerInfo = input.pointerInfo;
+            input.pointerInfo = eData;
+            input.lastInputTime = vwf_view.kernel.time(); 
         }
     }
 }
@@ -157,7 +158,7 @@ window.onkeydown = function(e) {
             input.keyInfo = keyStates;
             input.lastInputTime = vwf_view.kernel.time();
             if(!active) {
-                updateModel();
+                updateModel((+new Date));
             }
 		}
 	}
@@ -188,17 +189,20 @@ window.onkeyup = function(e) {
         input.keyInfo = keyStates;
         input.lastInputTime = vwf_view.kernel.time();
         if(!active) {
-            updateModel();
+            updateModel((+new Date));
         }
         delete keyStates.keysUp[e.keyCode];
 	}
 }
 
-function updateModel() {
-    vwf_view.kernel.callMethod(sceneNode, "update", [playerName, input]);
-    input.lastInputTime = vwf_view.kernel.time();
+function updateModel(time) {
+    if(time - lastUpdateTime > 100) {
+        vwf_view.kernel.callMethod(sceneNode, "update", [playerName, input]);
+        input.lastInputTime = vwf_view.kernel.time();
+        lastUpdateTime = time;
+    }
     if(input.futureActive()) {
-        window.setTimeout(updateModel, 100);
+        window.requestAnimationFrame(updateModel);
     }
 }
 

@@ -208,7 +208,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
 
             if (!window.requestAnimationFrame) {
-                requestAnimFrame = function(callback, element) {
+                requestAnimFrame = window.requestAnimationFrame = function(callback, element) {
                     var currTime = +new Date;
                     var timeToCall = Math.max(0, 16 - (currTime - lastTime));
                     var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
@@ -222,7 +222,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
 
             if (!window.cancelAnimationFrame) {
-                cancelAnimFrame = function(id) {
+                cancelAnimFrame = window.cancelAnimationFrame = function(id) {
                     clearTimeout(id);
                 };
             }
