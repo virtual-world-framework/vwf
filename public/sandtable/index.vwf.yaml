@@ -88,10 +88,10 @@ children:
               pos = [ x, y, z ];
               this.path.push( { translation: pos, time: 1 } );
             }
-            this.nextPathIndex = this.lastPathIndex+1;
+            this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
             this.timeSinceLast = this.time;
-            this.planeGroup1.translation = this.path[ this.lastPathIndex ].translation;
-            this.goal1.translation = this.path[ this.nextPathIndex ].translation;
+            this.planeGroup1.translation = this.path[ this.lastPathIndex || 0 ].translation;
+            this.goal1.translation = this.path[ this.nextPathIndex || 0 ].translation;
 
             this.animating = true;
           }
@@ -148,6 +148,8 @@ children:
             }
           }
         value: 0
+      nextPathIndex: 0
+      timeSinceLast: 0
       animating:
         set: |
           if ( value && !this.animating ) {
@@ -253,10 +255,10 @@ children:
             this.path.push( { translation: pos, time: 2 } );
           }            
          
-          this.nextPathIndex = this.lastPathIndex+1;
+          this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
           this.timeSinceLast = this.time;
-          this.planeGroup2.translation = this.path[ this.lastPathIndex ].translation;
-          this.goal2.translation = this.path[ this.nextPathIndex ].translation;
+          this.planeGroup2.translation = this.path[ this.lastPathIndex || 0 ].translation;
+          this.goal2.translation = this.path[ this.nextPathIndex || 0 ].translation;
           
           this.animating = true;
         }
@@ -315,6 +317,8 @@ children:
             }
           }
         value: 0
+      nextPathIndex: 0
+      timeSinceLast: 0
       animating:
         set: |
           if ( value && !this.animating ) {
