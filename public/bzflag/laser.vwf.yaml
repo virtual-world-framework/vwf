@@ -14,7 +14,7 @@
 ---
 extends: http://vwf.example.com/node3.vwf
 properties:
-  translationSpeed: 600
+  translationSpeed: 1200
   laserDirection: 
 methods:
   fire:
@@ -45,6 +45,7 @@ scripts:
     if(this.timeElapsed() > 0) {
       dist = dist * this.timeElapsed();
     }
+    this.lastUpdateTime = this.time;
     return dist;
   }
   this.fire = function() {
