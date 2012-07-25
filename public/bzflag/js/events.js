@@ -94,11 +94,11 @@ canvas.onmouseover = function(e) {
     if(playerNode) {
         var eData = getMouseEventData( e, false );
         if ( eData ) {
-            input.lastPointerInfo = input.pointerInfo;
-            input.pointerInfo = eData;
-            input.lastInputTime = vwf_view.kernel.time(); 
-            input.moveActive = true;
-            updateModel((+new Date));
+            // input.lastPointerInfo = input.pointerInfo;
+            // input.pointerInfo = eData;
+            // input.lastInputTime = vwf_view.kernel.time(); 
+            // input.moveActive = true;
+            // updateModel((+new Date));
         }
     }
 }
@@ -107,10 +107,10 @@ canvas.onmouseout = function(e) {
     if(playerNode) {
         var eData = getMouseEventData( e, false );
         if ( eData ) {
-            input.lastPointerInfo = input.pointerInfo;
-            input.pointerInfo = undefined;
-            input.lastInputTime = vwf_view.kernel.time(); 
-            input.moveActive = false;
+            // input.lastPointerInfo = input.pointerInfo;
+            // input.pointerInfo = undefined;
+            // input.lastInputTime = vwf_view.kernel.time(); 
+            // input.moveActive = false;
         }
     }
 }
@@ -119,11 +119,11 @@ canvas.onmousemove = function(e) {
     if(playerNode) {
         var eData = getMouseEventData( e, false );
         if ( eData ) {
-            input.pointerEventTime = vwf_view.kernel.time();
-            input.lastInputTime = input.pointerEventTime;
-            input.lastPointerInfo = input.pointerInfo;
-            input.pointerInfo = eData;
-            input.lastInputTime = vwf_view.kernel.time(); 
+            // input.pointerEventTime = vwf_view.kernel.time();
+            // input.lastInputTime = input.pointerEventTime;
+            // input.lastPointerInfo = input.pointerInfo;
+            // input.pointerInfo = eData;
+            // input.lastInputTime = vwf_view.kernel.time(); 
         }
     }
 }
@@ -136,6 +136,9 @@ window.onkeydown = function(e) {
         var validKey = false;
         var keyAlreadyDown = false;
         switch (e.keyCode) {
+            case 13:
+                vwf_view.kernel.callMethod(sceneNode, "fireLaser", [playerName]);
+                break;
             case 17:
             case 16:
             case 18:
