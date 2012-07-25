@@ -7,32 +7,35 @@ A behavior is a component that is used to add functionality to another component
 	implements:
 	- http://vwf.example.com/path/to/behavior.vwf
 
-When a behavior is loaded, it copies all behaviors, properties, methods, events, children and scripts are copied to the new component. All the copied functionality can be used as part of the component. Also, because the functionality was copied, it can be configured individually on each component that uses the behavior. For example, in this behavior, <code>someMethod</code> will perform an action based on the value of <code>someProperty</code>, which defaults to true.
+When a behavior is loaded, all behaviors, properties, methods, events, children and scripts are inherited by the new component. All the inherited functionality can be used as part of the component. Behaviors can also use properties from the component that implement the behavior. For example, in this behavior, <code>someMethod</code> will perform an action based on the value of <code>behavior-someProperty</code>, which defaults to true. The convention for properties from the behavior is to prefix the property name with the name of the behavior, to avoid accidently overriding the value with a property from the implementing component.
 
 	---
 	properties:
-	  someProperty: true
+	  behavior-someProperty: true 
 	methods:
 	  someMethod: |
-	    if(this.someProperty) {
+	    if(this.behavior-someProperty && this.anotherProperty) {
 	      // Do something
 	    }
 	    else {
 	      // Do something else
 	    }
 
-If the component that is implementing the behavior needs <code>someProperty</code> to be false, it simply overrides the value in its own properties.
+<code>anotherProperty</code> is definied in the implementing component, but is still usable in the behavior. If the component that is implementing the behavior needs <code>behavior-someProperty</code> to be false, it simply overrides the value in its own properties. 
 
 	---
 	implements:
 	- http://vwf.example.com/path/to/behavior.vwf
 	properties:
-	  someProperty: false
+	  behavior-someProperty: false
+	  anotherProperty: true
 	scripts:
 	- |
 	  this.doSomething = function() {
 	    this.someMethod();
 	  }
+
+When <code>someMethod</code> executes, it will read the overridden value of <code>behavior-someProperty</code>, and go into the else statement.
 
 -------------------
 
