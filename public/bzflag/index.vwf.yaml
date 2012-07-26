@@ -124,14 +124,6 @@ scripts:
       parentTank: "",
       translation: [],
       scale: 100
-    },
-    children: {
-      SphereMaterial1: {
-        extends: "http://vwf.example.com/material.vwf",
-        properties: {
-          texture: "" 
-        }
-      }
     }
   };
   this.initialize = function() {
@@ -142,9 +134,10 @@ scripts:
   this.createPlayer = function(playerName) {
     if(this.players[playerName]) {
       if(!this.players[playerName].active) {
+        this.players[playerName].translation = [0, 10, 200];
+        this.players[playerName].cachedBoundingBox = this.players[playerName].worldBoundingBox;
         this.players[playerName].active = true;
         this.players[playerName].visible = true;
-        this.players[playerName].translation = [0, 10, 200];
       }
     }
     else if(this.colorIndex < tankMaterials.length) {
@@ -162,7 +155,6 @@ scripts:
       newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2]];
       newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
       newBolt.properties.parentTank = player.id;
-      newBolt.children.SphereMaterial1.properties.texture = player.laserMaterial;
       this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
       player.laserCount += 1;
     }

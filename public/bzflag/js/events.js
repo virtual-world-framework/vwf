@@ -64,7 +64,6 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
 vwf_view.firedEvent = function ( nodeID, eventName, eventParameters ) {
     if(eventName == "playerDestroyed" && eventParameters[0] == playerNode) {
         $( "#gameOver" ).dialog( "open" );
-        console.info("received player destroyed");
     }
 }
 
