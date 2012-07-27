@@ -710,11 +710,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.logger.group( "vwf.setState" );  // TODO: loggableState
 
-            // Direct property accessors to suppress kernel reentry so that we can write the state
-            // without coloring from scripts.
-
-            isolateProperties++;
-
             async.series( [
 
                 // Set the runtime configuration.
@@ -798,10 +793,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             ], function( err, results ) /* async */ {
 
-                // Restore kernel reentry from property accessors.
-
-                isolateProperties--;
-
                 callback_async && callback_async();
 
             } );
@@ -814,11 +805,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         this.getState = function( full, normalize ) {
 
             this.logger.group( "vwf.getState", full, normalize );
-
-            // Direct property accessors to suppress kernel reentry so that we can read the state
-            // without coloring from scripts.
-
-            isolateProperties++;
 
             // Get the application nodes and queue.
 
@@ -857,10 +843,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     require( "vwf/utility" ).transform( applicationState, hashTransformation );
             }
     
-            // Restore kernel reentry from property accessors.
-
-            isolateProperties--;
-
             this.logger.groupEnd();
 
             return applicationState;
@@ -1112,11 +1094,6 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             this.logger.group( "vwf.setNode " + JSON.stringify( loggableComponent( nodeComponent ) ) );
 
-            // Direct property accessors to suppress kernel reentry so that we can write the state
-            // without coloring from scripts.
-
-            isolateProperties++;
-
             async.series( [
 
                 function( series_callback /* ( err, results ) */ ) {
@@ -1133,7 +1110,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                     // Suppress kernel reentry so that we can write the state without coloring from
                     // any scripts.
 
-                    isolateProperties && vwf.models.kernel.disable();
+                    vwf.models.kernel.disable();
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
@@ -1163,7 +1140,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     // Restore kernel reentry.
 
-                    isolateProperties && vwf.models.kernel.enable();
+                    vwf.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1216,10 +1193,6 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             ], function( err, results ) /* async */ {
 
-                // Restore kernel reentry from property accessors.
-
-                isolateProperties--;
-
                 callback_async && callback_async( nodeID );
 
             } );
@@ -1234,11 +1207,6 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         this.getNode = function( nodeID, full ) {  // TODO: include/exclude children, prototypes
 
             this.logger.group( "vwf.getNode " + nodeID + " " + full );
-
-            // Direct property accessors to suppress kernel reentry so that we can read the state
-            // without coloring from scripts.
-
-            isolateProperties++;
 
             // Start the descriptor.
 
@@ -1295,7 +1263,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Suppress kernel reentry so that we can read the state without coloring from any
             // scripts.
 
-            isolateProperties && vwf.models.kernel.disable();
+            vwf.models.kernel.disable();
 
             // Properties.
 
@@ -1343,7 +1311,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Restore kernel reentry.
 
-            isolateProperties && vwf.models.kernel.enable();
+            vwf.models.kernel.enable();
 
             // Children.
 
@@ -1368,10 +1336,6 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Scripts.
 
             // TODO: scripts
-
-            // Restore kernel reentry from property accessors.
-
-            isolateProperties--;
 
             this.logger.groupEnd();
 
@@ -1465,12 +1429,15 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-            var childID = childComponent.id ||  // pre-calculated id from incoming sychronization
-                nodeID === 0 ?  // direct child of the global root, or deeper descendant?
-                    childURI ||  // global: component's URI or hash of descriptor  // TODO: hash uri => id to shorten for faster lookups?
-                        Crypto.MD5( JSON.stringify( childComponent ) ).toString() :  // TODO: MD5 may be too slow here
-                    nodeID + ":" + this.models.object.sequence( nodeID ) +  // descendant: parent id + next from parent's sequence
-                        ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+            if ( childComponent.id ) {  // pre-calculated id from an incoming replication
+                var childID = childComponent.id;
+            } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
+                var childID = childURI ||  // TODO: hash uri => id to shorten for faster lookups?
+                    Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
+            } else {  // descendant: parent id + next from parent's sequence
+                var childID = nodeID + ":" + this.models.object.sequence( nodeID ) +
+                    ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+            }
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
@@ -1613,7 +1580,7 @@ if ( ! childComponent.source ) {
                     // Suppress kernel reentry so that we can read the state without coloring from
                     // any scripts.
 
-                    isolateProperties && vwf.models.kernel.disable();
+                    replicating && vwf.models.kernel.disable();
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
@@ -1686,7 +1653,7 @@ if ( ! childComponent.source ) {
 
                     // Restore kernel reentry.
 
-                    isolateProperties && vwf.models.kernel.enable();
+                    replicating && vwf.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1712,6 +1679,11 @@ if ( ! childComponent.source ) {
 
                 function( series_callback /* ( err, results ) */ ) {
 
+                    // Suppress kernel reentry so that initialization functions don't make any
+                    // changes during replication.
+
+                    replicating && vwf.models.kernel.disable();
+
                     // Attach the scripts. For each script, load the network resource if the script is
                     // specified as a URI, then once loaded, call execute() to direct any model that
                     // manages scripts of this script's type to evaluate the script where it will
@@ -1725,6 +1697,10 @@ if ( ! childComponent.source ) {
                             script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
                         }
                     } );
+
+                    // Restore kernel reentry.
+
+                    replicating && vwf.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1747,7 +1723,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
                     // Suppress kernel reentry so that initialization functions don't make any
                     // changes during replication.
 
-                    isolateProperties && vwf.models.kernel.disable();
+                    replicating && vwf.models.kernel.disable();
 
                     // Call initializingNode() on each model and initializedNode() on each view to
                     // indicate that the node is fully constructed.
@@ -1762,7 +1738,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
 
                     // Restore kernel reentry.
 
-                    isolateProperties && vwf.models.kernel.enable();
+                    replicating && vwf.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },

@@ -105,15 +105,30 @@
               prototype.change( 2 );
               deepEqual( vwf.getNode( id ), prototype.state( 2 ), "prototype modified again" );
 
-              vwf.setNode( id, prototype.state( 1 ) );
-              deepEqual( vwf.getNode( id ), prototype.state( 1 ), "modified prototype restored" );
+              vwf.setNode( id, prototype.state( 1 ), function( id ) {
 
-              // vwf.setNode( id, prototype.state() );  TODO: support property deletes
-              // deepEqual( vwf.getNode( id ), prototype.state(), "unmodified prototype restored" );
+                deepEqual( vwf.getNode( id ), prototype.state( 1 ), "modified prototype restored" );
 
-              vwf.deleteNode( id );
+                // vwf.setNode( id, prototype.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), prototype.state(), "unmodified prototype restored" );
 
-              start();
+                var state1 = prototype.state( 1 );
+
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  prototype.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
             } );
 
           } );
@@ -173,15 +188,32 @@
               node.change( 2 );
               deepEqual( vwf.getNode( id ), node.state( 2 ), "node modified again" );
 
-              vwf.setNode( id, node.state( 1 ) );
-              deepEqual( vwf.getNode( id ), node.state( 1 ), "modified node restored" );
+              vwf.setNode( id, node.state( 1 ), function( id ) {
 
-              // vwf.setNode( id, node.state() );  TODO: support property deletes
-              // deepEqual( vwf.getNode( id ), node.state(), "unmodified node restored" );
+                deepEqual( vwf.getNode( id ), node.state( 1 ), "modified node restored" );
 
-              vwf.deleteNode( id );
+                // vwf.setNode( id, node.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), node.state(), "unmodified node restored" );
 
-              start();
+                var state1 = node.state( 1 );
+
+                vwf.deleteNode( vwf.prototype( id ) );
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  node.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified node regenerated" );
+
+                  vwf.deleteNode( vwf.prototype( id ) );
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
             } );
 
           } );
@@ -254,15 +286,32 @@
               prototypeWithChild.change( 2 );
               deepEqual( vwf.getNode( id ), prototypeWithChild.state( 2 ), "prototype modified again" );
 
-              vwf.setNode( id, prototypeWithChild.state( 1 ) );
-              deepEqual( vwf.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype restored" );
+              vwf.setNode( id, prototypeWithChild.state( 1 ), function( id ) {
 
-              // vwf.setNode( id, prototypeWithChild.state() );  TODO: support property deletes
-              // deepEqual( vwf.getNode( id ), prototypeWithChild.state(), "unmodified prototype restored" );
+                deepEqual( vwf.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype restored" );
 
-              vwf.deleteNode( id );
+                // vwf.setNode( id, prototypeWithChild.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), prototypeWithChild.state(), "unmodified prototype restored" );
 
-              start();
+                var state1 = prototypeWithChild.state( 1 );
+
+                vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  prototypeWithChild.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+
+                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
             } );
 
           } );
@@ -314,6 +363,7 @@
               } else { // default state
                 return this.uri;
               }
+
             },
 
           };
@@ -331,15 +381,32 @@
               prototypeWithInitializerChild.change( 2 );
               deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 2 ), "prototype modified again" );
 
-              vwf.setNode( id, prototypeWithInitializerChild.state( 1 ) );
-              deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype restored" );
+              vwf.setNode( id, prototypeWithInitializerChild.state( 1 ), function( id ) {
 
-              // vwf.setNode( id, prototypeWithInitializerChild.state() );  TODO: support property deletes
-              // deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype restored" );
+                deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype restored" );
 
-              vwf.deleteNode( id );
+                // vwf.setNode( id, prototypeWithInitializerChild.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype restored" );
 
-              start();
+                var state1 = prototypeWithInitializerChild.state( 1 );
+
+                vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  prototypeWithInitializerChild.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+
+                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
             } );
 
           } );
@@ -396,17 +463,43 @@
               deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node" );
 
               nodeWithPrototypeInitializerChild.change( 2 );
-              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 2 ), "prototype modified again" );
+              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 2 ), "node modified again" );
 
-              vwf.setNode( id, nodeWithPrototypeInitializerChild.state( 1 ) );
-              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified prototype restored" );
+              vwf.setNode( id, nodeWithPrototypeInitializerChild.state( 1 ), function( id ) {
 
-              vwf.setNode( id, nodeWithPrototypeInitializerChild.state() );
-              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified prototype restored" );
+                deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node restored" );
 
-              vwf.deleteNode( id );
+                vwf.setNode( id, nodeWithPrototypeInitializerChild.state(), function( id ) {
 
-              start();
+                  deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified node restored" );
+
+                  var state1 = nodeWithPrototypeInitializerChild.state( 1 );
+
+                  vwf.deleteNode( vwf.execute( vwf.prototype( id ), "this.c.id" ) );
+                  vwf.deleteNode( vwf.prototype( id ) );
+
+                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                  vwf.deleteNode( id );
+
+                  vwf.createNode( state1, function( id ) {
+                    nodeWithPrototypeInitializerChild.id = id;
+
+                    deepEqual( vwf.getNode( id ), state1, "modified node regenerated" );
+
+                    vwf.deleteNode( vwf.execute( vwf.prototype( id ), "this.c.id" ) );
+                    vwf.deleteNode( vwf.prototype( id ) );
+
+                    vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                    vwf.deleteNode( id );
+
+                    start();
+
+                  } );
+
+                } );
+
+              } );
+
             } );
 
           } );
