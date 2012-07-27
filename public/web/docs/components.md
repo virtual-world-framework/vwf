@@ -1,7 +1,7 @@
 Components
 ===================
 -------------------
-Components define the behavior, state and visual representation of an object, and are the basic building blocks of VWF. Components make up a hierarchical structure, with each component acting as the parent or child to another component. At the root of the structure is the index-vwf node, which is created automatically from the index file when the application loads.
+Components define the behavior, state and visual representation of an object, and are the basic building blocks of VWF. Components make up a hierarchical structure, with each component acting as the parent or child to another component. At the root of the structure is the application, which is also a component, and is created automatically when the application loads.
 
 -------------------
 
@@ -25,64 +25,79 @@ There are eight parts that make up a component, seen here as a skeleton in YAML.
 
 Each part is optional and only needs to be include in the component definition if that part needs to be customized in the component. All relative paths are resolved using the current component as the base.
 
-**Extends**
+**extends**
 
-This specifies the URI of the prototype component that is extended to make the new component. All behaviors, properties, methods, events, children and scripts are inherited by the component. The default prototype is <code>http://vwf.example.com/node.vwf</code>.
+This specifies the URI or descriptor of the prototype component that is extended to make the new component. All behaviors, properties, methods, events, children and scripts are inherited by the component. The default prototype is <code>http://vwf.example.com/node.vwf</code>.
+
+To specify a prototype using a URI, simply provide the URI.
 
 	extends: http://vwf.example.com/path/to/prototype.vwf
 
+Since a prototype is also a component, it can be specified using the same format.
+
+	extends:
+	  extends:
+	  implements:
+	  source:
+	  type:
+	  properties:
+	  methods:
+	  events:
+	  children:
+	  scripts:
+
 See [prototypes](prototypes.html) for more information.
 
-**Implements**
+**implements**
 
-Implements specifies the URIs of components that will be used as behaviors. All behaviors, properties, methods, events, children and scripts are copied from the behavior to the new component, allowing functionality to be added from a seperate file.
+This specifies the URIs of components that will be used as behaviors. All behaviors, properties, methods, events, children and scripts are inherited by the component, allowing functionality to be added from a seperate file.
 
 	implements:
 	- http://vwf.example.com/path/to/behavior.vwf
 
 See [behaviors](behaviors.html) for more information.
 
-**Source/Type**
+**source/type**
 
-Source and type allow the component to load a seperate data blob, usually in the form of a 3D model or image. Source is the URI of the data, and type is the MIME type. If type is not specified, it will default to the MIME type taken from the server's response.
+The source and type allow the component to load a seperate data blob, usually in the form of a 3D model or image. Source is the URI of the data, and type is the MIME type. If type is not specified, it will default to the MIME type taken from the server's response.
 
-	source: asset.dat
-	type: mime/type
+	source: model.dae
+	type: model/vnd.collada+xml
 
-**Properties**
+**properties**
 
-Properties are the public variables of the component. The component inherits properties from its prototype and receives copies of properties declared in its behaviors. Initializing a property will override any default values from the prototype or behavior.
+properties are the public variables of the component. The component inherits properties from its prototype and any behaviors. Initializing a property will override any default values from the prototype or behavior.
 
-The basic declaration for a property provides only a name, and an optional value.
-
-	properties:
-	  propertyName: value
-
-Properties can also be declared with accessor functions that allow the component to detect changes, allow only acceptable values, or serve as a proxy for another property. Declaring <code>get</code> as null will prevent reads, and declaring <code>set</code> as null will prevent writes.
+The declaration for a property provides only a name, and an optional value.
 
 	properties:
-	  propertyName:
+	  aProperty: value
+
+Properties can also be declared with accessor functions that allow the component to detect changes, allow only acceptable values, or serve as a proxy for another property. 
+
+	properties:
+	  aProperty:
 	    set: | # calculate and set the value
-	      this.propertyName = value
+	      this.aProperty = value
 	    get: | # calculate and return the value
-	      return this.propertyName
+	      return this.aProperty
 	    value: # the value is available to the accessor functions
 	      value
 
-**Methods**
+**methods**
 
-Methods are the public functions of the component. The component inherits methods from its prototype and receives copies of methods defined in its behaviors. Redefining those methods here will override the inherited ones.
+Methods are the public functions of the component. The component inherits methods from its prototype and behaviors. Redefining those methods here will override the inherited ones.
 
-The short method specifier only provides the body of the method.
+The method declaration only provides the body of the method.
 
 	methods:
 	  aMethod: |
 	  	// method body
 
-The long method specifier allows named parameters. Additional parameters can still be parsed out of the arguments object when needed.
+The extended method specifier allows named parameters. Additional parameters can still be parsed out of the arguments object when needed.
 
 	methods:
-	  aMethod:
+	  anotherMethod:
 	    parameters:
 	    - one
 	    - two
@@ -100,19 +115,16 @@ Methods can also be declared empty, and intialized in a script later.
 
 	  }
 
-**Events**
+**events**
 
-Java style event listener and fire events
-Operating system events (pointerHover) uses kernel method to fire events from itself
+events define the outgoing messages a node can trigger. The component inherits events from its prototype and behaviors. 
 
-Events define the outgoing messages a node can trigger. The component inherits events from its prototype and receives copies of events defined in its behaviors. 
-
-The short event specifier only provides the name of the event.
+The event specifier only provides the name of the event.
 
 	events:
 	  anEvent:
 
-The long event specifier describes the arguments passed to the event. As with methods, additional parameters can still be parsed out of the arguments object in the event handler.
+The extended event specifier describes the arguments passed to the event. As with methods, additional parameters can still be parsed out of the arguments object in the event handler.
 
 	events:
 	  anotherEvent:
@@ -130,7 +142,7 @@ To listen for events, a javascript function that matches the event name is added
 
 	  }
 
-VWF also defines several system events. These are triggered when outside actions, such as a key press or mouse click occur. When one of these events occurs, the system automatically finds any nodes that have been definined as triggering the event, and dispatches the event from those nodes. Currently, the system events used by VWF are:
+VWF also defines several dispatched events. These are triggered when outside actions, such as a key press or mouse click occur. When one of these events occurs, the system automatically finds any nodes that have been definined as triggering the event, and dispatches the event from those nodes. Currently, the dispatched events defined by VWF are:
 
 * keyDown
 * keyUp
@@ -143,17 +155,17 @@ VWF also defines several system events. These are triggered when outside actions
 * pointerUp
 * pointerWheel
 
-**Children**
+**children**
 
 Children are instances of other components that are attached to this component. A child can be a simple reference to a seperate component, or the reference can include a configuration. The format for a child specification is the same as for a component.
 
 	children:
-	  simple: http://vwf.example.com/path/to/component.vwf
-	  configured:
+	  childFromURI: http://vwf.example.com/path/to/component.vwf
+	  childFromDescriptor:
 	    extends: http://vwf.example.com/path/to/component.vwf
 	    properties:
           something: value
-      detailed:
+      childFromDescriptorDetailed:
         extends: http://vwf.example.com/path/to/prototype.vwf
         implements:
         - http://vwf.example.com/path/to/behavior.vwf
@@ -164,19 +176,19 @@ Children are instances of other components that are attached to this component. 
           mime/type
         properties:
           name:
-            initializer
+            descriptor
           another:
-            initializer
+            descriptor
         methods:
           name:
-            initializer
+            descriptor
           another:
-            initializer
+            descriptor
         events:
           name:
-            initializer
+            descriptor
           another:
-            initializer
+            descriptor
         children:
         - name:
             component
@@ -186,68 +198,104 @@ Children are instances of other components that are attached to this component. 
         - specifier
         - specifier
 
-**Scripts**
+**scripts**
 
-Scripts define the component's internal behavior and can be used to create private variables and methods, and event handlers. Currently the only language supported for scripts is JavaScript.
+Scripts define the component's internal behavior and can be used to create and use private variables and methods, and event handlers. Currently the only language supported for scripts is JavaScript.
 
 	scripts:
 	- |
 	  var aVariable;
 	  this.aFunction = function() {
-
+	  	...
 	  }
 
-External scripts can also be loaded using the following syntax.
+Inside a script <code>this</code> always refers to the component that owns the script. Other components can be accessed by navigating up or down the component hierarchy using <code>this.parent</code> and <code>this.children.childName</code>. VWF also defines an <code>intialize</code> function that is automatically executed when a component is intialized. In order to use this function, define it like any other function.
 
 	scripts:
-	- source:
-        http://vwf.example.com/path/to/script.js
-      type:
-        application/javascript
-
-Inside a script <code>this</code> always refers to the component that owns the script. Other components can be accessed by navigating up or down the component hierarchy using <code>this.parent</code> and <code>this.children.childName</code>.
+	- |
+	  this.initialize = function() {
+	  	...
+	  }
 
 -------------------
 
-Creating Components With JavaScript
+Manipulating Components With JavaScript
 -------------------
 -------------------
 
-Components can also be created after the application has loaded through JavaScript. A component can be written as a JavaScript object in the following format.
+The various parts of a component can also be modified from JavaScript after the component has been initialized as a node. VWF defines several functions to make these changes.
+
+**properties**
+
+New properties can be added using the following syntax.
+
+	this.properties.create("propertyName", value);
+
+The first parameter is the name of the new property, and the second is the value the property will be initialized with. There are also two optional parameters that customize the getter and setter of the parameter. These are passed in as strings.
+	
+	this.properties.create("propertyName", value, "return this.propertyName;", "this.propertyName = value;");
+
+**methods**
+
+New methods can be added using the following syntax.
+
+	this.methods.create("methodName", [methodParameters,...], methodBody);
+
+The first parameter is the name of the new method, the second is an array of any parameters the method will take, and the third is the body of the method, as a string.
+
+**events**
+
+Creating a new event uses the following syntax.
+
+	this.events.create("eventName", [eventParameters]);
+
+The first parameter is the name of the new event and the second is an array of any parameters the event will take.
+
+New event listeners can also be added.
+
+	this.events.eventName = this.events.add(function() { ... }, phases, this.children.listeningNode);
+
+The first parameter is the function that will be executed when the event occurs. The second parameter is optional and defaults to "bubble". Setting phases to "capture" will prevent the event from propagating to other nodes. The final parameter is the node that is listening for the event. 
+
+**children**
+
+A component can be written as a JavaScript object in the following format.
 
 	var component = {
 	  extends: "http://vwf.example.com/path/to/prototype.vwf",
+	  implements: ["http://vwf.example.com/path/to/behavior.vwf"],
 	  properties: {
-	    name: value,
-        another: value,
+	    aProperty: value
 	  },
 	  methods: {
-	    name: function( parameter, ... ) { ... },
-        another: function( parameter, ... ) { ... },
-        unique: function( parameter, ... ) { ... },
+	    aMethod: function( parameter, ... ) { ... },
+        anotherMethod: function( parameter, ... ) { ... }
 	  },
 	  events: {
-	    name: function() { ... },
-        another: function() { ... },
-        different: function() { ... },
+	    anEvent: function() { ... },
+        anotherEvent: function() { ... }
 	  },
 	  children: {
-	    name: name,
-        another: another,
-	  }
+	    childFromURI: "http://vwf.example.com/path/to/component.vwf",
+        childFromDescriptor: {
+	      extends: "http://vwf.example.com/path/to/component.vwf",
+	      properties: {
+              something: "value"
+          }
+        }
+	  },
+	  scripts: [  "this.aFunction = function() { ... }"]
 	};
 
-From inside an existing component, the new component can be created using the following syntax.
+From inside an existing node, the new component can be created using the following syntax.
 
-	existingComponent.children.create("componentName", component);
+	this.children.create("componentName", component);
 
-The first argument is the name the new component will be created with, and the second is the JavaScript object for the component itself. The new component will be created as a child of existingComponent, and will be treated the same as any other children that were already present.
+The first argument is the name the new component will be created with, and the second is the JavaScript object for the component itself. The new component will be created as a child of <code>this</code>, and will be treated the same as any other children that were already present.
 
-From outside a component, such as in the javascript of an HTML file, the component can be created with the following syntax.
+Children can also be deleted. The delete function takes the JavaScript object of the child that will be deleted.
 
-	vwf_view.kernel.createChild("index-vwf", "componentName", component, callback);
-
-The first argument is the name of the node that will be the parent of the new component. The second argument is the name of the new component, and the third is the JavaScript object defining the new component. The final argument is optional, and is a function that will be called after the new component has been created.
+	this.children.delete(this.children.component);
 
 -------------------
 
