@@ -239,6 +239,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 type: childExtendsID,
                                 sourceType: childType 
                             };
+                            createMesh.call( this, node );
                         }
                         break;
 
@@ -374,7 +375,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     switch ( propertyName ) {
 
                         case "meshDefinition":
-                            createMesh.call( this, propertyValue, node );
+                            defineMesh.call( this, propertyValue, node );
                             break;
 
                         default:
@@ -2150,7 +2151,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function createMesh( def, node ) {
+    function createMesh( node ) {
         if ( !node.glgeParent ) {
             node.glgeParent = this.state.nodes[ node.parentID ];    
         }
@@ -2158,6 +2159,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         if ( node.glgeParent ) {
             node.glgeObject = new GLGE.Group();
             node.glgeParent.addObject( node.glgeObject );
+        }        
+    }
+
+    function defineMesh( def, node ) {
+        if ( node.glgeObject ) {
             var obj = new GLGE.Object();
             var mat = new GLGE.Material();
             var mesh = new GLGE.Mesh();
