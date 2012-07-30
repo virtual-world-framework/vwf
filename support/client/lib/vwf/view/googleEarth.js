@@ -141,6 +141,18 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                                 }, function(errorCode) {
                                     this.logger.info( "google earth load error: " + errorCode );
+                                }, {
+
+                                    // https://developers.google.com/earth/documentation/#sidedatabase
+                                    // https://developers.google.com/earth/documentation/reference/google_earth_namespace#a70288485024d8129dd1c290fb2e5553b
+
+                                    // Alternate database server:
+                                    // database: "http://khmdb.google.com/?db=moon",
+
+                                    // If required by the server:
+                                    // username: "",
+                                    // password: "",
+
                                 } );
                                 win.clearInterval( interval );
                             }
