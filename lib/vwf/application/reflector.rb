@@ -45,28 +45,20 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     unless clients.length > session[:pending_clients].size
 
-      # Initialize the client configuration from the runtime environment.  # TODO: the createNode can probably be pulled into the stateState and save a network message.
+      # Initialize the client configuration from the runtime environment.
 
       fields_setState = {
         "time" => time,
         "action" => "setState",
         "parameters" => [ {
           "configuration" =>
-            { "environment" => ENV['RACK_ENV'] || "development" }
+            { "environment" => ENV['RACK_ENV'] || "development" },
+          "nodes" =>
+            [ env["vwf.application"] ]
         } ]
       }
 
       send fields_setState
-
-      # Initialize to the application starting state.
-
-      fields_createNode = {
-        "time" => time,
-        "action" => "createNode",
-        "parameters" => [ env["vwf.application"] ]
-      }
-
-      send fields_createNode
 
       session[:pending_clients].delete self
 

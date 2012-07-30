@@ -716,7 +716,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 function( series_callback /* ( err, results ) */ ) {
 
-                    require( "vwf/configuration" ).instance = applicationState.configuration;
+                    if ( applicationState.configuration ) {
+                        require( "vwf/configuration" ).instance = applicationState.configuration;                        
+                    }
 
                     series_callback( undefined, undefined );
                 },
@@ -726,7 +728,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 function( series_callback /* ( err, results ) */ ) {
 
                     if ( applicationState.kernel ) {
-                        vwf.now = applicationState.kernel.time;
+                        if ( applicationState.kernel.time !== undefined ) vwf.now = applicationState.kernel.time;
                     }
  
                     series_callback( undefined, undefined );
@@ -752,40 +754,44 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 function( series_callback /* ( err, results ) */ ) {
 
-                    // Clear the queue, but leave any private direct messages in place. Update the queue
-                    // array in place so that existing references remain valid.  // TODO: move to the queue object
-
                     var private_queue = [], fields;
 
-                    while ( queue.queue.length > 0 ) {
-
-                        fields = queue.queue.shift();
-
-                        vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 ? Array.prototype.slice.call( object ) : object
-                        } ), "from queue" );
-
-                        fields.respond && private_queue.push( fields );
-
-                    }
-
-                    while ( private_queue.length > 0 ) {
-
-                        fields = private_queue.shift();
-
-                        vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 ? Array.prototype.slice.call( object ) : object
-                        } ), "to queue" );
-
-                        queue.queue.push( fields );
-
-                    }
-
-                    // Set the queue time and add the incoming items to the queue.
-
                     if ( applicationState.queue ) {
-                        queue.time = applicationState.queue.time;
-                        queue.insert( applicationState.queue.queue || [] );
+
+                        // Clear the queue, but leave any private direct messages in place. Update
+                        // the queue array in place so that existing references remain valid.  // TODO: move to the queue object
+
+                        while ( queue.queue.length > 0 ) {
+
+                            fields = queue.queue.shift();
+
+                            vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
+                                return depth == 2 ? Array.prototype.slice.call( object ) : object
+                            } ), "from queue" );
+
+                            fields.respond && private_queue.push( fields );
+
+                        }
+
+                        while ( private_queue.length > 0 ) {
+
+                            fields = private_queue.shift();
+
+                            vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
+                                return depth == 2 ? Array.prototype.slice.call( object ) : object
+                            } ), "to queue" );
+
+                            queue.queue.push( fields );
+
+                        }
+
+                        // Set the queue time and add the incoming items to the queue.
+
+                        if ( applicationState.queue ) {
+                            queue.time = applicationState.queue.time;
+                            queue.insert( applicationState.queue.queue || [] );
+                        }
+
                     }
 
                     series_callback( undefined, undefined );
@@ -917,7 +923,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             if ( componentIsDescriptor( nodeComponent ) && nodeComponent.patches ) {
                 nodePatch = nodeComponent;
-                nodeComponent = nodeComponent.patches;
+                nodeComponent = nodeComponent.patches;  // TODO: possible sync errors if the patched node is a URI component and the kernel state (time, random) is different from when the node was created on the originating client
             }
 
             // nodeComponent may be a URI, a descriptor, or an ID, and while being created will
