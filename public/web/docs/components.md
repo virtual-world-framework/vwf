@@ -50,7 +50,7 @@ See [prototypes](prototypes.html) for more information.
 
 **implements**
 
-This specifies the URIs of components that will be used as behaviors. All behaviors, properties, methods, events, children and scripts are inherited by the component, allowing functionality to be added from a seperate file.
+This specifies the URIs of components that will be used as behaviors. All behaviors, properties, methods, events, children and scripts are inherited by the component, allowing functionality to be added from a separate file.
 
 	implements:
 	- http://vwf.example.com/path/to/behavior.vwf
