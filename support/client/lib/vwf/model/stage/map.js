@@ -240,7 +240,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- test ---------------------------------------------------------------------------------
 
-        test: function( node, matchPattern, test */ ) {
+        test: function( node, matchPattern, test ) {
             return this.kernel.test( this.model_to_kernel[this.object_id(node)] || node,
                 matchPattern, this.model_to_kernel[this.object_id(test)] || test );
         },
