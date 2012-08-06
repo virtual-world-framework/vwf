@@ -20,19 +20,31 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // == Module Definition ====================================================================
 
         initialize: function() {
-            this.state.enabled = true;
+            this.state.enabled = true; // kernel reentry allowed?
+            this.state.blocked = false; // kernel reentry attempted?
         },
 
         // Allow kernel reentry from the drivers.
 
         enable: function() {
             this.state.enabled = true;
+            this.state.blocked = false;
         },
         
         // Prevent kernel reentry from the drivers.
 
         disable: function() {
             this.state.enabled = false;
+            this.state.blocked = false;
+        },
+
+        // Indicate if a driver attempted to call back into the kernel while reentry was disabled,
+        // and clear the *blocked* flag.
+        
+        blocked: function() {
+            var blocked = this.state.blocked;
+            this.state.blocked = false;
+            return blocked;
         },
         
     }, function( kernelFunctionName ) {
@@ -62,6 +74,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ childComponent ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -79,6 +93,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 undefined, when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -101,6 +117,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ childComponent, childURI ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -118,6 +136,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ childID, childName ], when, callback /* ( result ) */ );  // TODO: swap childID & childName?
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -135,6 +155,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ childID ], when, callback /* ( result ) */ );  // TODO: swap childID & childName?
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -152,6 +174,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ properties ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
     
                 };
@@ -169,6 +193,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 undefined, when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -186,6 +212,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ propertyValue, propertyGet, propertySet ], when, callback /* ( result ) */ );  // TODO: { value: propertyValue, get: propertyGet, set: propertySet } ? -- vwf.receive() needs to parse
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -205,6 +233,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ propertyValue ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -222,6 +252,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 undefined, when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -239,6 +271,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ methodParameters, methodBody ], when, callback /* ( result ) */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- vwf.receive() needs to parse
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -258,6 +292,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ methodParameters ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -275,6 +311,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ eventParameters ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -294,6 +332,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ eventParameters ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -311,6 +351,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ eventParameters, eventNodeParameters ], when, callback /* ( result ) */ );
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };
@@ -328,6 +370,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                 [ scriptText, scriptType ], when, callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
                         }
 
+                    } else {
+                        this.state.blocked = true;
                     }
 
                 };

@@ -1814,7 +1814,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // Set all of the properties for a node.
 
-        this.setProperties = function( nodeID, properties ) {
+        this.setProperties = function( nodeID, properties ) {  // TODO: rework as a cover for setProperty(), or remove; passing all properties to each driver is impractical since initializing and setting are different, and reentry can't be controlled when multiple sets are in progress.
 
             this.logger.group( "vwf.setProperties " + nodeID + " " + properties );
 
@@ -1830,12 +1830,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     for ( var propertyName in properties ) {
                         model_properties[propertyName] =
                             model.settingProperty( nodeID, propertyName, properties[propertyName] );
+                        if ( vwf.models.kernel.blocked() ) {
+                            model_properties[propertyName] = undefined; // ignore result from a blocked setter
+                        }
                     }
                 }
 
                 for ( var propertyName in model_properties ) {
-                    if ( model_properties[propertyName] !== undefined && // copy values from this model
-                            ( typeof model_properties[propertyName] != "number" || ! isNaN( model_properties[propertyName] ) ) ) { // ignore NaN, presuming it's via a blocked getter
+                    if ( model_properties[propertyName] !== undefined ) { // copy values from this model
                         intermediate_properties[propertyName] = model_properties[propertyName];
                     } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
                         intermediate_properties[propertyName] = undefined;
@@ -1869,7 +1871,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // Get all of the properties for a node.
 
-        this.getProperties = function( nodeID ) {
+        this.getProperties = function( nodeID ) {  // TODO: rework as a cover for getProperty(), or remove; passing all properties to each driver is impractical since reentry can't be controlled when multiple gets are in progress.
 
             this.logger.group( "vwf.getProperties " + nodeID );
 
@@ -1885,12 +1887,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     for ( var propertyName in intermediate_properties ) {
                         model_properties[propertyName] =
                             model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );
+                        if ( vwf.models.kernel.blocked() ) {
+                            model_properties[propertyName] = undefined; // ignore result from a blocked getter
+                        }
                     }
                 }
 
                 for ( var propertyName in model_properties ) {
-                    if ( model_properties[propertyName] !== undefined && // copy values from this model
-                            ( typeof model_properties[propertyName] != "number" || ! isNaN( model_properties[propertyName] ) ) ) { // ignore NaN, presuming it's via a blocked getter
+                    if ( model_properties[propertyName] !== undefined ) { // copy values from this model
                         intermediate_properties[propertyName] = model_properties[propertyName];
                     } else if ( intermediate_properties[propertyName] === undefined ) { // as well as recording any new keys
                         intermediate_properties[propertyName] = undefined;
@@ -1998,6 +2002,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                         value = reentry.value;
                     }
 
+                    // Ignore the result if reentry is disabled and the driver attempted to call
+                    // back into the kernel. Kernel reentry is disabled during replication to 
+                    // prevent coloring from accessor scripts.
+
+                    if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
+                        value = undefined;
+                    }
+
                     // Record the value actually assigned. This may differ from the incoming value
                     // if it was range limited, quantized, etc. by the model. This is the value
                     // passed to the views.
@@ -2013,7 +2025,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     return ! initializing && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
                 }
 
-            } );
+            }, this );
 
             if ( entry.index !== undefined ) {
 
@@ -2098,6 +2110,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                         value = reentry.value;
                     }
 
+                    // Ignore the result if reentry is disabled and the driver attempted to call
+                    // back into the kernel. Kernel reentry is disabled during replication to 
+                    // prevent coloring from accessor scripts.
+
+                    if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
+                        value = undefined;
+                    }
+
                     // Record the value retrieved.
 
                     if ( value !== undefined ) {
@@ -2109,7 +2129,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     return value !== undefined;
                 }
 
-            } );
+            }, this );
 
             if ( entry.index !== undefined ) {
 

@@ -144,7 +144,7 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
                 if ( ! node_properties.hasOwnProperty( propertyName ) ) {
                     this.kernel.setProperty( nodeID, propertyName, properties[propertyName] );
-                }  // TODO: this needs to be handled in vwf.js for setProperties() the way it's now handling setProperty() create vs. initiailize vs. set
+                }  // TODO: this needs to be handled in vwf.js for setProperties() the way it's now handling setProperty() create vs. initialize vs. set
 
                 node_properties[propertyName] = properties[propertyName];
 
