@@ -209,10 +209,12 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
     if (nodeId == sceneNode ) {
         switch (eventName) {
           case "playerDestroyed":
-            if(eventParameters[0] == playerNode)
-            {
-                $( "#gameOver" ).dialog( "open" );
-            }
+            if(eventParameters[0] == playerNode) $( "#gameOver" ).dialog( "open" );
+            $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " destroyed.</b><br/></span>" );
+            $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " destroyed.</b><br/></span>" );
+            $("#serverContent").scrollTop($("#allContent")[0].scrollHeight);
+            $("#allContent").scrollTop($("#allContent")[0].scrollHeight);
+            break;
           case "chatSent":
             $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ":</b> " + eventParameters[1] + "<br/></span>" );
             $('#allContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ":</b> " + eventParameters[1] + "<br/></span>" );
