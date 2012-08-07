@@ -208,20 +208,28 @@ $('#chatInput').keydown(function(e) {
 vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
     if (nodeId == sceneNode ) {
         switch (eventName) {
+          case "playerJoined":
+            $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
+            $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
+            break;
+          case "playerRespawned":
+            $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " respawned.</b><br/></span>" );
+            $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " respawned.</b><br/></span>" );
+            break;
           case "playerDestroyed":
             if(eventParameters[0] == playerNode) $( "#gameOver" ).dialog( "open" );
-            $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " destroyed.</b><br/></span>" );
-            $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " destroyed.</b><br/></span>" );
-            $("#serverContent").scrollTop($("#allContent")[0].scrollHeight);
-            $("#allContent").scrollTop($("#allContent")[0].scrollHeight);
+            var name = eventParameters[0].substring(9);
+            $('#serverContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
+            $('#allContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
             break;
           case "chatSent":
-            $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ":</b> " + eventParameters[1] + "<br/></span>" );
-            $('#allContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ":</b> " + eventParameters[1] + "<br/></span>" );
-            $("#chatContent").scrollTop($("#chatContent")[0].scrollHeight);
-            $("#allContent").scrollTop($("#allContent")[0].scrollHeight);
+            $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ": " + eventParameters[1] + "</b><br/></span>" );
+            $('#allContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ": " + eventParameters[1] + "</b><br/></span>" );
             break;
         }
+        $("#serverContent").scrollTop($("#allContent")[0].scrollHeight);
+        $("#chatContent").scrollTop($("#chatContent")[0].scrollHeight);
+        $("#allContent").scrollTop($("#allContent")[0].scrollHeight);
     }
 }
 

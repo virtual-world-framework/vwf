@@ -23,7 +23,9 @@ methods:
   fireLaser:
   sendChat:
 events:
+  playerJoined:
   playerDestroyed: 
+  playerRespawned:
   chatSent:
 children:
   bz_world:
@@ -142,6 +144,7 @@ scripts:
         this.players[playerName].cachedBoundingBox = this.players[playerName].worldBoundingBox;
         this.players[playerName].active = true;
         this.players[playerName].visible = true;
+        this.playerRespawned( playerName );
       }
     }
     else if(this.colorIndex < tankMaterials.length) {
@@ -150,6 +153,7 @@ scripts:
       newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
       newPlayer.properties.color = tankColors[this.colorIndex];
       this.players.children.create(playerName, newPlayer);
+      this.playerJoined( playerName );
       this.colorIndex += 1;
     }
   }
