@@ -21,8 +21,10 @@ properties:
 methods:
   createPlayer:
   fireLaser:
+  sendChat:
 events:
   playerDestroyed: 
+  chatSent:
 children:
   bz_world:
     extends: bzworld.vwf
@@ -56,11 +58,13 @@ scripts:
   var tankMaterials = [ "models/images/blue_tank.png", "models/images/green_tank.png", "models/images/hunter_tank.png", 
     "models/images/purple_tank.png", "models/images/rabbit_tank.png", "models/images/red_tank.png", 
     "models/images/rogue_tank.png" ];
+  var tankColors = [ "#1647C4", "#537737", "#F2521E", "#61378A", "#FFFFFF", "#FF0000", "#000000" ];
   var playerTank = {
     extends: "tank.vwf",
     properties: {
       active: true,
       laserCount: 0,
+      color: '',
       translation: [0, 10, 200],
       scale: 0.5
     },
@@ -70,7 +74,7 @@ scripts:
         source: "models/tank.dae",
         type: "model/vnd.collada+xml",
         properties: {
-          rotation: [0, 0, 1, 180]
+          rotation: [0, 0, 1, 180],
         },
         children: {
           bone1: {
@@ -144,6 +148,7 @@ scripts:
       var newPlayer = $.extend(true, {}, playerTank);
       newPlayer.children[playerName + "Camera"] = playerCamera;
       newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
+      newPlayer.properties.color = tankColors[this.colorIndex];
       this.players.children.create(playerName, newPlayer);
       this.colorIndex += 1;
     }
@@ -158,4 +163,7 @@ scripts:
       this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
       player.laserCount += 1;
     }
+  }
+  this.sendChat = function(playerName, chatToSend) {
+    this.chatSent( playerName, chatToSend, this.players[playerName].color );
   }

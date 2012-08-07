@@ -61,12 +61,6 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
 	}
 }
 
-vwf_view.firedEvent = function ( nodeID, eventName, eventParameters ) {
-    if(eventName == "playerDestroyed" && eventParameters[0] == playerNode) {
-        $( "#gameOver" ).dialog( "open" );
-    }
-}
-
 canvas.onmousedown = function(e) {
     if(playerNode) {
         switch( e.button ) {
@@ -195,6 +189,38 @@ window.onkeyup = function(e) {
         }
         delete keyStates.keysUp[e.keyCode];
 	}
+}
+
+$('#chatInput').keydown(function(e) {
+    e.stopPropagation();
+    var code = (e.keyCode ? e.keyCode : e.which);
+    if (code == 13) { //Enter
+        vwf_view.kernel.callMethod(sceneNode, 'sendChat', [ playerName, $(this).val() ]);
+    }
+}).keyup(function(e) {
+    e.stopPropagation();
+    var code = (e.keyCode ? e.keyCode : e.which);
+    if (code == 13) { //Enter
+        $(this).val('');
+    }
+});
+
+vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
+    if (nodeId == sceneNode ) {
+        switch (eventName) {
+          case "playerDestroyed":
+            if(eventParameters[0] == playerNode)
+            {
+                $( "#gameOver" ).dialog( "open" );
+            }
+          case "chatSent":
+            $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ":</b> " + eventParameters[1] + "<br/></span>" );
+            $('#allContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ":</b> " + eventParameters[1] + "<br/></span>" );
+            $("#chatContent").scrollTop($("#chatContent")[0].scrollHeight);
+            $("#allContent").scrollTop($("#allContent")[0].scrollHeight);
+            break;
+        }
+    }
 }
 
 function updateModel(time) {
