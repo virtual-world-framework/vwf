@@ -128,12 +128,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     var rightZoom = spindle._zoomHandler;
                     var wheelZoom = spindle._zoomWheel;
                     var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
+                    var centralBody = scene.getCamera().getControllers().get(0);
+                    var rotateHandler = scene.getCamera().getControllers().get(0)._rotateHandler;
                     
                     (function tick() {
-                        var rotating = spinHandler && spinHandler.isMoving() && spinHandler.getMovement();
+                        var spinning = spinHandler && spinHandler.isMoving() && spinHandler.getMovement();
+                        var rotating = rotateHandler && rotateHandler.isMoving();
                         var rightZooming = rightZoom && rightZoom.isMoving();
                         var wheelZooming = wheelZoom && wheelZoom.isMoving();
                         var spinMovement = spinHandler.getMovement();
+                        var rotateMovement = rotateHandler.getMovement();
                         var rightZoomMovement = rightZoom.getMovement();
                         var wheelZoomMovement = wheelZoom.getMovement();
                         
@@ -141,6 +145,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         var freeLookMovement = freeLook._handler.getMovement();
                         
                         broadcastCameraControllerData.call(view, {
+                        	"spinning": spinning,
                         	"rotating": rotating,
                         	"rightZooming": rightZooming,
                         	"wheelZooming": wheelZooming,
@@ -148,6 +153,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         	"spinTouchStart": spinHandler.getButtonPressTime() ? spinHandler.getButtonPressTime().getTime() : undefined,
                         	"spinTouchRelease": spinHandler.getButtonReleaseTime() ? spinHandler.getButtonReleaseTime().getTime() : undefined,
                         	"spinLastMovement": spinHandler.getLastMovement(),
+                        	"rotateMovement": rotateMovement,
                         	"rightZoomMovement": rightZoomMovement,
                         	"rightZoomTouchStart": rightZoom.getButtonPressTime() ? rightZoom.getButtonPressTime().getTime() : undefined,
                         	"rightZoomTouchRelease": rightZoom.getButtonReleaseTime() ? rightZoom.getButtonReleaseTime().getTime() : undefined,
@@ -160,9 +166,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         	"freeLookMovement": freeLookMovement
                         });
                         
-                        if (rotating) {
+                        if (spinning) {
                         	spindle._spin(spinMovement);
                         } 
+                        
+                        if (rotating) {
+                        	centralBody._rotate(rotateMovement);
+                        }
 
                         if (rightZooming) {
                         	spindle._zoom(rightZoomMovement);
@@ -238,17 +248,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     case "cameraControllerData":
                                     	var spindle = scene.getCamera().getControllers().get(0).spindleController;
                                     	var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
+                                    	var centralBody = scene.getCamera().getControllers().get(0);
                                     	
                                     	var rightZoom = spindle._zoomHandler;
                                         var wheelZoom = spindle._zoomWheel;
                                         
+                                        var spinning = propertyValue.spinning;
                                         var rotating = propertyValue.rotating;
                                     	var rightZooming = propertyValue.rightZooming;
                                     	var wheelZooming = propertyValue.wheelZooming;
                                     	var spinMovement = propertyValue.spinMovement;
+                                    	var rotateMovement = propertyValue.rotateMovement;
                                     	var rightZoomMovement = propertyValue.rightZoomMovement;
                                     	var wheelZoomMovement = propertyValue.wheelZoomMovement;
-
+                                    	
                                     	var spinTouchStart = propertyValue.spinTouchStart;
                                     	var spinTouchRelease = propertyValue.spinTouchRelease;
                                     	var spinLastMovement = propertyValue.spinLastMovement;
@@ -264,9 +277,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     	var freeLookIsMoving = propertyValue.freeLookIsMoving;
                                     	var freeLookMovement = propertyValue.freeLookMovement;
                                     	
-                                        if (rotating) {
+                                        if (spinning) {
                                         	spindle._spin(spinMovement);                                        	
-                                        } 
+                                        }
+                                        
+                                        if (rotating) {
+                                        	centralBody._rotate(rotateMovement);
+                                        }
 
                                         if (rightZooming) {
                                         	spindle._zoom(rightZoomMovement);
