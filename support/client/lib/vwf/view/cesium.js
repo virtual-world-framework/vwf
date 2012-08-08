@@ -90,7 +90,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     var view = this;
                    
                     var canvas = document.getElementById("glCanvas");
-                    var ellipsoid = Cesium.Ellipsoid.getWgs84();
+                    var ellipsoid = Cesium.Ellipsoid.WGS84;
                     var scene = new Cesium.Scene(canvas);
                     var primitives = scene.getPrimitives();
                 
@@ -100,7 +100,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         mapStyle : Cesium.BingMapsStyle.AERIAL
                     });
                 
-                    var cb = new Cesium.CentralBody(scene.getCamera(), ellipsoid);
+                    var cb = new Cesium.CentralBody(ellipsoid);
                     cb.dayTileProvider = bing;
                     cb.nightImageSource = "images/land_ocean_ice_lights_2048.jpg";
                     cb.specularMapSource = "images/earthspec1k.jpg";
@@ -114,8 +114,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 
                     scene.getCamera().frustum.near = 1.0;
                 
-                    scene.getCamera().getControllers().addSpindle();
-                    scene.getCamera().getControllers().addFreeLook();
+                    scene.getCamera().getControllers().addCentralBody();
                     
                     scene.setAnimation(function() {
                         scene.setSunPosition(Cesium.SunPosition.compute().position);
@@ -124,11 +123,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     view = this;
                     node.scene = scene;
                     
-                    var spindle = scene.getCamera().getControllers().get(0);
+                    var spindle = scene.getCamera().getControllers().get(0).spindleController;
                     var spinHandler = spindle._spinHandler;
                     var rightZoom = spindle._zoomHandler;
                     var wheelZoom = spindle._zoomWheel;
-                    var freeLook = scene.getCamera().getControllers().get(1);
+                    var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
                     
                     (function tick() {
                         var rotating = spinHandler && spinHandler.isMoving() && spinHandler.getMovement();
@@ -146,16 +145,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         	"rightZooming": rightZooming,
                         	"wheelZooming": wheelZooming,
                         	"spinMovement": spinMovement,
-                        	"spinTouchStart": spinHandler.getButtonPressTime(),
-                        	"spinTouchRelease":  spinHandler.getButtonReleaseTime(),
+                        	"spinTouchStart": spinHandler.getButtonPressTime() ? spinHandler.getButtonPressTime().getTime() : undefined,
+                        	"spinTouchRelease": spinHandler.getButtonReleaseTime() ? spinHandler.getButtonReleaseTime().getTime() : undefined,
                         	"spinLastMovement": spinHandler.getLastMovement(),
                         	"rightZoomMovement": rightZoomMovement,
-                        	"rightZoomTouchStart": rightZoom.getButtonPressTime(),
-                        	"rightZoomTouchRelease":  rightZoom.getButtonReleaseTime(),
+                        	"rightZoomTouchStart": rightZoom.getButtonPressTime() ? rightZoom.getButtonPressTime().getTime() : undefined,
+                        	"rightZoomTouchRelease": rightZoom.getButtonReleaseTime() ? rightZoom.getButtonReleaseTime().getTime() : undefined,
                         	"rightZoomLastMovement": rightZoom.getLastMovement(),
                         	"wheelZoomMovement": wheelZoomMovement,
-                        	"wheelZoomTouchStart": wheelZoom.getButtonPressTime(),
-                        	"wheelZoomTouchRelease":  wheelZoom.getButtonReleaseTime(),
+                        	"wheelZoomTouchStart": wheelZoom.getButtonPressTime() ? wheelZoom.getButtonPressTime().getTime() : undefined,
+                        	"wheelZoomTouchRelease": wheelZoom.getButtonReleaseTime() ? wheelZoom.getButtonReleaseTime().getTime() : undefined,
                         	"wheelZoomLastMovement": wheelZoom.getLastMovement(),
                         	"freeLookIsMoving": freeLookIsMoving,
                         	"freeLookMovement": freeLookMovement
@@ -179,23 +178,24 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         scene.render();
                         Cesium.requestAnimationFrame(tick);
                     }());
-                    
-                    var resetHandler = new Cesium.EventHandler();
-                    resetHandler.setKeyAction(
-                		function () {
-	                    	console.log("Synchronize views");
-	                    	var direction = scene.getCamera().direction;
-	                        var position = scene.getCamera().position;
-	                        var up = scene.getCamera().up;
-	                        var right = scene.getCamera().right;
-	                    	broadcastCameraViewData.call(view, {
-	                    		"direction": direction,
-	                        	"position": position,
-	                        	"up": up,
-	                        	"right": scene.getCamera().right
-	                    	});
-                		}, 
-                		"r");
+					
+					var keydownHandler = function(e) {
+						var keyCode = e.keyCode;
+						if (keyCode === 82) {	// "R"
+							console.log("Synchronize views");
+							var direction = scene.getCamera().direction;
+							var position = scene.getCamera().position;
+							var up = scene.getCamera().up;
+							var right = scene.getCamera().right;
+							broadcastCameraViewData.call(view, {
+								"direction": direction,
+								"position": position,
+								"up": up,
+								"right": scene.getCamera().right
+							});
+						}
+					}
+					document.addEventListener('keydown', keydownHandler, false);
                     
                     document.oncontextmenu = function() { return false; };                    
             } 
@@ -236,8 +236,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     	camera.right = right;
                                     	break;
                                     case "cameraControllerData":
-                                    	var spindle = scene.getCamera().getControllers().get(0);
-                                    	var freeLook = scene.getCamera().getControllers().get(1);
+                                    	var spindle = scene.getCamera().getControllers().get(0).spindleController;
+                                    	var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
                                     	
                                     	var rightZoom = spindle._zoomHandler;
                                         var wheelZoom = spindle._zoomWheel;
@@ -327,7 +327,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             return value;
         },
     } );
-
+	
     function broadcastCameraViewData(cameraData) {
         var node, scene;   
         if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-cesiumInstance" ] ) {
