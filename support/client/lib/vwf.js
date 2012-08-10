@@ -32,7 +32,11 @@
         // The runtime environment (production, development, testing) and other configuration
         // settings appear here.
 
-        this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+        this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/configuration" as a dependency
+
+        // The kernel logger.
+
+        this.logger = undefined; // require( "logger" ).for( undefined, this );  // TODO: for( "vwf", ... ), and update existing calls  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/logger" as a dependency
 
         // Each model and view module loaded by the main page registers itself here.
 
@@ -188,10 +192,14 @@
 
             var args = Array.prototype.slice.call( arguments );
 
-            // Load the runtime configuration. Start with the factory defaults. The reflector may
+            // Load the runtime configuration. We start with the factory defaults. The reflector may
             // provide additional settings when we connect.
 
             this.configuration = require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+
+            // Create the logger.
+
+            this.logger = require( "logger" ).for( undefined, this );  // TODO: for( "vwf", ... ), and update existing calls
 
             // Get the application specification if one is provided in the query string. Parse it
             // into an application specification object if it's valid JSON, otherwise keep the query
@@ -717,7 +725,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 function( series_callback /* ( err, results ) */ ) {
 
                     if ( applicationState.configuration ) {
-                        require( "vwf/configuration" ).instance = applicationState.configuration;                        
+                        require( "vwf/configuration" ).instance = applicationState.configuration;
                     }
 
                     series_callback( undefined, undefined );
@@ -2555,21 +2563,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 return matchID == testID;
             } );
 
-        };
-
-        // -- logger -------------------------------------------------------------------------------
-
-        this.logger = {
-
-            enabled: false,
-            log: function() { this.enabled && window.console && console.log && console.log.apply( console, arguments ) },
-            debug: function() { this.enabled && window.console && console.debug && console.debug.apply( console, arguments ) },
-            info: function() { this.enabled && window.console && console.info && console.info.apply( console, arguments ) },
-            warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
-            error: function() { window.console && console.error && console.error.apply( console, arguments ) },
-            group: function() { this.enabled && window.console && console.group && console.group.apply( console, arguments ) },
-            groupCollapsed: function() { this.enabled && window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) },
-            groupEnd: function() { this.enabled && window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) },
         };
 
         // == Private functions ====================================================================

@@ -110,6 +110,27 @@ define( function() {
 
         },
 
+        // -- changed ------------------------------------------------------------------------------
+
+        /// Register a notification function to be called when the configuration in active changes.
+        /// 
+        /// @name vwf.configuration#changed
+        /// @function
+        /// 
+        /// @param {Function} callback
+        ///   The function to call, invoked as callback( active ).
+        /// @param {Object} [context]
+        ///   The value of *this* in the call to callback. If context is not provided, *this* will
+        ///   be the configuration module.
+
+        changed: {
+
+            value: function( callback, context ) {
+                callbacks.push( { callback: callback, context: context || this } );
+            },
+
+        },
+
     } );
 
     // == Private functions ========================================================================
@@ -128,8 +149,7 @@ define( function() {
 
         environment = instance.environment || factory.default.environment;
 
-        // Clear active so that we may update it in place. This lets us preserve any existing
-        // references.
+        // Clear active so that we may update it in place. This preserves any existing references.
 
         Object.keys( active ).forEach( function( key ) {
             delete active[key];
@@ -138,6 +158,12 @@ define( function() {
         // Merge the factory defaults and the instance settings into the active configuration.
 
         jQuery.extend( true, active, factory.default, factory[environment] || {}, instance );
+
+        // Call the notification callbacks.
+
+        callbacks.forEach( function( callback ) {
+            callback.callback.call( callback.context, active );
+        }, this );
 
     }
 
@@ -162,7 +188,7 @@ define( function() {
         // Production configuration.
 
         production: {
-            "log-level": "warn",  // TODO: use in logger
+            "log-level": "warn",
             "randomize-ids": false,
             "humanize-ids": false,
         },
@@ -170,7 +196,7 @@ define( function() {
         // Development configuration.
 
         development: {
-            "log-level": "info",  // TODO: use in logger
+            "log-level": "info",
             "randomize-ids": true,
             "humanize-ids": true,
         },
@@ -178,7 +204,7 @@ define( function() {
         // Testing configuration.
 
         testing: {
-            "log-level": "warn",  // TODO: use in logger
+            "log-level": "warn",
             "randomize-ids": false,
             "humanize-ids": false,
         },
@@ -215,7 +241,21 @@ define( function() {
 
     var environment;
 
-    // The define() result.
+    // -- callbacks --------------------------------------------------------------------------------
+
+    /// Update callbacks.
+    /// 
+    /// @name vwf.configuration#callbacks
+    /// @field
+    /// @private
+
+    var callbacks = [];
+
+    // Force the first update.
+
+    configuration.instance = configuration.instance;
+
+    // Return the module.
 
     return configuration;
 

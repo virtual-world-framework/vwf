@@ -54,7 +54,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 return;
 
 //            this.logger.enabled = true;
-//            this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+//            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childURI, childName );
 //            this.logger.enable = false;
 
