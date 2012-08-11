@@ -22,6 +22,15 @@ define( [ "vwf/configuration" ], function( configuration ) {
 
     var logger = {
 
+        levels: {
+            trace: TRACE,
+            debug: DEBUG,
+            info: INFO,
+            warn: WARN,
+            error: ERROR,
+            // fatal: FATAL,
+        },
+
         label: undefined,
         context: undefined,
 
@@ -40,15 +49,15 @@ define( [ "vwf/configuration" ], function( configuration ) {
 
             this.context = context || proto && proto.context;
 
-            this.level = WARN; // default
+            this.level = { name: "warn", number: WARN }; // default
 
             switch( level ) {
-                case "trace": case "TRACE": this.level = TRACE; break;
-                case "debug": case "DEBUG": this.level = DEBUG; break;
-                case "info":  case "INFO":  this.level = INFO;  break;
-                case "warn":  case "WARN":  this.level = WARN;  break;
-                case "error": case "ERROR": this.level = ERROR; break;
-                case "fatal": case "FATAL": this.level = FATAL; break;
+                case "trace": case "TRACE": this.level = { name: "trace", number: TRACE }; break;
+                case "debug": case "DEBUG": this.level = { name: "debug", number: DEBUG }; break;
+                case "info":  case "INFO":  this.level = { name: "info",  number: INFO };  break;
+                case "warn":  case "WARN":  this.level = { name: "warn",  number: WARN };  break;
+                case "error": case "ERROR": this.level = { name: "error", number: ERROR }; break;
+                // case "fatal": case "FATAL": this.level = { name: "fatal", number: FATAL }; break;
                 default: proto && delete this.level; break; // inherit from the prototype
             }
 
@@ -65,8 +74,10 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         group: function( /* ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.group, console ) ||
-                INFO >= this.level && log.call( this, arguments, console && console.info, console );
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.group, console ) ||
+            INFO >= this.level.number &&
+                log.call( this, arguments, console && console.info, console );
         },
 
         /// Log a message and start a group if the log threshold is "trace" or below. The group will
@@ -77,8 +88,10 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         groupCollapsed: function( /* ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.groupCollapsed, console ) ||
-                INFO >= this.level && log.call( this, arguments, console && console.info, console );
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.groupCollapsed, console ) ||
+            INFO >= this.level.number &&
+                log.call( this, arguments, console && console.info, console );
         },
 
         /// End a group if the log threshold is "trace" or below.
@@ -87,7 +100,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         groupEnd: function( /* ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.groupEnd, console );
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.groupEnd, console );
         },
 
         /// Log a message if the log threshold is "trace" or below.
@@ -96,7 +110,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         trace: function( /* ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.debug, console ); // not console.trace(), which would log the stack
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.debug, console ); // not console.trace(), which would log the stack
         },
 
         /// Log a message if the log threshold is "debug" or below.
@@ -105,7 +120,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         debug: function( /* ... */ ) {
-            DEBUG >= this.level && log.call( this, arguments, console && console.debug, console );
+            DEBUG >= this.level.number &&
+                log.call( this, arguments, console && console.debug, console );
         },
 
         /// Log a message if the log threshold is "info" or below.
@@ -114,7 +130,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         info: function( /* ... */ ) {
-            INFO >= this.level && log.call( this, arguments, console && console.info, console );
+            INFO >= this.level.number &&
+                log.call( this, arguments, console && console.info, console );
         },
 
         /// Log a message if the log threshold is "warn" or below.
@@ -123,7 +140,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         warn: function( /* ... */ ) {
-            WARN >= this.level && log.call( this, arguments, console && console.warn, console );
+            WARN >= this.level.number &&
+                log.call( this, arguments, console && console.warn, console );
         },
 
         /// Log a message if the log threshold is "error" or below.
@@ -132,7 +150,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         error: function( /* ... */ ) {
-            ERROR >= this.level && log.call( this, arguments, console && console.error, console );
+            ERROR >= this.level.number &&
+                log.call( this, arguments, console && console.error, console );
         },
 
         /// Log a message.
@@ -155,8 +174,10 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         groupx: function( /* label, ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.group, console, true ) ||
-                INFO >= this.level && log.call( this, arguments, console && console.info, console, true );
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.group, console, true ) ||
+            INFO >= this.level.number &&
+                log.call( this, arguments, console && console.info, console, true );
         },
 
         /// Log a message with an extra one-time label and start a group if the log threshold is
@@ -168,8 +189,10 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         groupxCollapsed: function( /* label, ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.groupCollapsed, console, true ) ||
-                INFO >= this.level && log.call( this, arguments, console && console.info, console, true );
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.groupCollapsed, console, true ) ||
+            INFO >= this.level.number &&
+                log.call( this, arguments, console && console.info, console, true );
         },
 
         /// End a group if the log threshold is "trace" or below.
@@ -178,7 +201,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         groupxEnd: function( /* label, ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.groupEnd, console, true );
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.groupEnd, console, true );
         },
 
         /// Log a message with an extra one-time label if the log threshold is "trace" or below.
@@ -187,7 +211,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         tracex: function( /* ... */ ) {
-            TRACE >= this.level && log.call( this, arguments, console && console.debug, console, true ); // not console.trace(), which would log the stack
+            TRACE >= this.level.number &&
+                log.call( this, arguments, console && console.debug, console, true ); // not console.trace(), which would log the stack
         },
 
         /// Log a message with an extra one-time label if the log threshold is "debug" or below.
@@ -196,7 +221,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         debugx: function( /* label, ... */ ) {
-            DEBUG >= this.level && log.call( this, arguments, console && console.debug, console, true );
+            DEBUG >= this.level.number &&
+                log.call( this, arguments, console && console.debug, console, true );
         },
 
         /// Log a message with an extra one-time label if the log threshold is "info" or below.
@@ -205,7 +231,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         infox: function( /* label, ... */ ) {
-            INFO >= this.level && log.call( this, arguments, console && console.info, console, true );
+            INFO >= this.level.number &&
+                log.call( this, arguments, console && console.info, console, true );
         },
 
         /// Log a message with an extra one-time label if the log threshold is "warn" or below.
@@ -214,7 +241,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         warnx: function( /* label, ... */ ) {
-            WARN >= this.level && log.call( this, arguments, console && console.warn, console, true );
+            WARN >= this.level.number &&
+                log.call( this, arguments, console && console.warn, console, true );
         },
 
         /// Log a message with an extra one-time label if the log threshold is "error" or below.
@@ -223,7 +251,8 @@ define( [ "vwf/configuration" ], function( configuration ) {
         /// @function
 
         errorx: function( /* label, ... */ ) {
-            ERROR >= this.level && log.call( this, arguments, console && console.warn, console, true );
+            ERROR >= this.level.number &&
+                log.call( this, arguments, console && console.warn, console, true );
         },
 
         /// Log a message with an extra one-time label.
@@ -247,7 +276,7 @@ define( [ "vwf/configuration" ], function( configuration ) {
     ///   An Array-like list of arguments passed to a log function. normalize describes the formats
     ///   supported.
     /// @param {Function} appender
-    ///   A Firebug-like log function that logs its parameters, such as window.console.log.
+    ///   A Firebug-like log function that logs its arguments, such as window.console.log.
     /// @param {Object} context
     ///   The *this* object for the appender, such as window.console.
     /// @param {Boolean} [extra]
@@ -270,17 +299,26 @@ define( [ "vwf/configuration" ], function( configuration ) {
     /// A series of values, or a function that generates the values:
     /// 
     ///   [ value, value, ... ]
-    ///   [ function() { return [ value, value, ... ] }, context ]
+    ///   [ function( name, number ) { return [ value, value, ... ] }, context ]
     /// 
-    /// For a generator function, an optional context argument provides the generator function's
-    /// *this* context. The logger's default context object will be used if the context argument is
-    /// not provided.
+    /// For a generator function, an optional context argument provides the function's *this*
+    /// context. The logger's default context will be used if the context argument is no provided.
+    /// The log threshold name and number ("info" and 3, for example) are passed as arguments to the
+    /// function.
+    /// 
+    /// No message will be logged if a generator function returns undefined. Since the function will
+    /// only be called if the message type exceeds the log threshold, logger calls may be used to
+    /// control program behavior based on the log level:
+    ///
+    ///   this.logger.debug( function( name, number ) {
+    ///       debugControls.visible = true; // returns undefined, so no message
+    ///   } );
     /// 
     /// When *extra* is truthy, the first argument is interpreted as a one-time label that extends
     /// the logger's output prefix:
     /// 
     ///   [ "label", value, value, ... ]
-    ///   [ "label", function() { return [ value, value, ... ] }, context ]
+    ///   [ "label", function( name, number ) { return [ value, value, ... ] }, context ]
     /// 
     /// The arguments are normalized into a list of values ready to pass to the appender:
     /// 
@@ -316,7 +354,7 @@ define( [ "vwf/configuration" ], function( configuration ) {
             // Call the function using the provided context or this logger's context. We expect the
             // function to return an array of values, a single value, or undefined.
 
-            args = args[ start ].call( args[ start+1 ] || this.context );
+            args = args[ start ].call( args[ start+1 ] || this.context, this.level.name, this.level.number );
 
             // Convert a single value to an Array. An Array remains an Array. Leave undefined
             // unchanged.
@@ -352,7 +390,7 @@ define( [ "vwf/configuration" ], function( configuration ) {
             } else if ( typeof args[0] == "string" || args[0] instanceof String ) {
                 return [ combined_label( label, extra ) + ": " + args[0] ].concat( Array.prototype.slice.call( args, 1 ) ); // concatenate when the first field is a string so that it may remain a format string
             } else {
-                return [ combined_label( label, extra ) + ": " ].concat( args ); // otherwise insert a new first field
+                return [ combined_label( label, extra ) + ":" ].concat( args ); // otherwise insert a new first field
             }
 
         } else {
