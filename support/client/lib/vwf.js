@@ -619,7 +619,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Return the result.
 
             respond && this.respond( nodeID, actionName, memberName, parameters,
-                require( "vwf/utility" ).transform( result, transitTransformation ) );
+                require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
             this.logger.groupEnd();
         };
@@ -674,7 +674,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         this.log = function() {
 
             this.respond( undefined, "log", undefined, undefined,
-                require( "vwf/utility" ).transform( arguments, transitTransformation ) );
+                require( "vwf/utility" ).transform( arguments, require( "vwf/utility" ).transforms.transit ) );
 
         }
 
@@ -773,9 +773,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = queue.queue.shift();
 
-                            vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                                return depth == 2 ? Array.prototype.slice.call( object ) : object
-                            } ), "from queue" );
+                            vwf.logger.info( "setState:", "removing",
+                                JSON.stringify( loggableFields( fields ) ), "from queue" );
 
                             fields.respond && private_queue.push( fields );
 
@@ -785,9 +784,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = private_queue.shift();
 
-                            vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                                return depth == 2 ? Array.prototype.slice.call( object ) : object
-                            } ), "to queue" );
+                            vwf.logger.info( "setState:", "returning",
+                                JSON.stringify( loggableFields( fields ) ), "to queue" );
 
                             queue.queue.push( fields );
 
@@ -838,7 +836,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), transitTransformation ),
+                    require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // Message queue.
@@ -854,7 +852,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             if ( normalize ) {
                 applicationState =
-                    require( "vwf/utility" ).transform( applicationState, hashTransformation );
+                    require( "vwf/utility" ).transform( applicationState, require( "vwf/utility" ).transforms.hash );
             }
     
             this.logger.groupEnd();
@@ -922,10 +920,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
 
-            this.logger.group( "vwf.createNode " + (
-                typeof nodeComponent == "string" || nodeComponent instanceof String ?
-                    nodeComponent : JSON.stringify( loggableComponent( nodeComponent ) )
-            ) );
+            this.logger.group( "vwf.createNode " + JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             var nodePatch;
 
@@ -1106,7 +1101,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.setNode = function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
-            this.logger.group( "vwf.setNode " + JSON.stringify( loggableComponent( nodeComponent ) ) );
+            this.logger.group( "vwf.setNode " + nodeID + " " + JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             async.series( [
 
@@ -1425,10 +1420,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
 
-            this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
-                typeof childComponent == "string" || childComponent instanceof String ?
-                    childComponent : JSON.stringify( loggableComponent( childComponent ) )
-            ) + " " + childURI );
+            this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " +
+                JSON.stringify( loggableComponent( childComponent ) ) + " " + childURI );
 
             childComponent = normalizedComponent( childComponent );
 
@@ -1938,7 +1931,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
-            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );  // TODO: add truncated propertyGet, propertySet to log
+            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " +
+                JSON.stringify( loggableValue( propertyValue ) ) );  // TODO: add truncated propertyGet, propertySet to log
 
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
@@ -1965,7 +1959,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " +
+                JSON.stringify( loggableValue( propertyValue ) ) );
 
             var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
 
@@ -2205,7 +2200,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName + " " + methodParameters );
+            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName + " " +
+                JSON.stringify( loggableValues( methodParameters ) ) );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2255,7 +2251,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.fireEvent = function( nodeID, eventName, eventParameters ) {
 
-            this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " + eventParameters );
+            this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " +
+                JSON.stringify( loggableValues( eventParameters ) ) );
 
             // Call firingEvent() on each model.
 
@@ -2714,38 +2711,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return isComponent; 
         };
 
-        // -- objectIsTypedArray  ------------------------------------------------------------------
-
-        // Determine if a JavaScript object is a component specification by searching for component
-        // specification attributes in the candidate object.
-
-        var objectIsTypedArray = function( candidate ) {
-
-            var typedArrayTypes = [
-                Int8Array,
-                Uint8Array,
-                // Uint8ClampedArray,
-                Int16Array,
-                Uint16Array,
-                Int32Array,
-                Uint32Array,
-                Float32Array,
-                Float64Array,
-            ];
-
-            var isTypedArray = false;
-
-            if ( typeof candidate == "object" && candidate != null ) {
-
-                typedArrayTypes.forEach( function( typedArrayType ) {
-                    isTypedArray = isTypedArray || candidate instanceof typedArrayType;
-                } );
-
-            }
-            
-            return isTypedArray; 
-        };
-
         // -- valueHasAccessors --------------------------------------------------------------------
 
         // Determine if a property initializer is a detailed initializer containing explicit
@@ -2834,8 +2799,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // prototype.
 
             if ( componentIsURI( component ) ) {
-                component = component.match( /\.vwf$/ ) ?
-                    { extends: component } : { source: component };  // TODO: detect component from mime-type instead of extension?
+                if ( component.match( /\.vwf$/ ) ) {  // TODO: detect component from mime-type instead of extension?
+                    component = { extends: component };
+                } else {
+                    component = { source: component };
+                }
             } else if ( componentIsID( component ) ) {
                 component = { extends: component };
             }
@@ -2879,107 +2847,33 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return component;
         };
 
+        // -- loggableFields -----------------------------------------------------------------------
+
+        var loggableFields = function( fields ) {
+            return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
+        };
+
         // -- loggableComponent --------------------------------------------------------------------
 
-        // Return a copy of a component with the verbose bits truncated so that it may be written to
-        // a log.
-
         var loggableComponent = function( component ) {
+            return require( "vwf/utility" ).transform( component, loggableComponentTransformation );
+        };
 
-            var loggable = {};
+        // -- loggableValue ------------------------------------------------------------------------
 
-            for ( var elementName in component ) {
-
-                switch ( elementName ) {
-
-                    case "properties":
-
-                        loggable.properties = {};
-
-                        for ( var propertyName in component.properties ) {
-
-                            var componentPropertyValue = component.properties[propertyName];
-                            var loggablePropertyValue = loggable.properties[propertyName] = {};
-
-                            if ( valueHasAccessors( componentPropertyValue ) ) {
-                                for ( var propertyElementName in componentPropertyValue ) {
-                                    if ( propertyElementName == "set" || propertyElementName == "get" ) {
-                                        loggablePropertyValue[propertyElementName] = "...";
-                                    } else {
-                                        loggablePropertyValue[propertyElementName] = componentPropertyValue[propertyElementName];
-                                    }
-                                }
-                            } else {
-                                loggable.properties[propertyName] = componentPropertyValue;
-                            }
-
-                        }
-
-                        break;
-
-                    case "methods":
-
-                        loggable.methods = {};
-
-                        for ( var methodName in component.methods ) {
-
-                            var componentMethodValue = component.methods[methodName];
-                            var loggablemethodValue = loggable.methods[methodName] = {};
-
-                            if ( valueHasBody( componentMethodValue ) ) {
-                                for ( var methodElementName in componentMethodValue ) {
-                                    if ( methodElementName == "body" ) {
-                                        loggablemethodValue[methodElementName] = "...";
-                                    } else {
-                                        loggablemethodValue[methodElementName] = componentMethodValue[methodElementName];
-                                    }
-                                }
-                            } else {
-                                loggable.methods[methodName] = componentMethodValue;
-                            }
-
-                        }
-
-                        break;
-
-                    case "children":
-
-                        loggable.children = {};
-
-                        for ( var childName in component.children ) {
-                            loggable.children[childName] = {};
-                        }
-
-                        break;
-
-                    case "scripts":
-
-                        loggable.scripts = [];
-
-                        component.scripts.forEach( function( script ) {
-
-                            var loggableScript = "..."; // {};
-
-                            // for ( var scriptElementName in script ) {
-                            //     loggableScript[scriptElementName] = scriptElementName == "text" ? "..." : script[scriptElementName];
-                            // }
-
-                            loggable.scripts.push( loggableScript );
-
-                        } );
-
-                        break;
-
-                    default:
-
-                        loggable[elementName] = component[elementName];
-
-                        break;
+        var loggableValue = function( value ) {
+            return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
+                object = require( "vwf/utility" ).transforms.transit( object, names, depth );
+                if ( typeof object == "number" ) {
+                    return Number( object.toPrecision(5) ); // reduce precision to remove visual noise
                 }
+            } );
+        };
 
-            }
+        // -- loggableValues -----------------------------------------------------------------------
 
-            return loggable;
+        var loggableValues = function( values ) {
+            return loggableValue( values );
         };
 
         // -- remappedURI --------------------------------------------------------------------------
@@ -3001,20 +2895,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         };
 
-        // -- transitTransformation ----------------------------------------------------------------
-
-        // vwf/utility/transform() transformation function to convert an object for proper JSON
-        // serialization.
-
-        var transitTransformation = function( object ) {
-
-            // Convert typed arrays to regular arrays.
-
-            return objectIsTypedArray( object ) ?
-                Array.prototype.slice.call( object ) : object;
-
-        };
-
         // -- queueTransitTransformation -----------------------------------------------------------
 
         // vwf/utility/transform() transformation function to convert the message queue for proper
@@ -3022,7 +2902,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // queue: [ { ..., parameters: [ [ arguments ] ], ... }, { ... }, ... ]
 
-        var queueTransitTransformation = function( object, index, depth ) {
+        var queueTransitTransformation = function( object, names, depth ) {
 
             if ( depth == 0 ) {
 
@@ -3046,51 +2926,164 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 return filtered;
 
-            } else if ( depth == 3 ) {
-
-                // Convert array-like arguments objects to regular arrays.  // TODO: only safe so long as parameters is the only container in queue messages
-
-                return Array.prototype.slice.call( object );
-
             } else {
 
-                return object;
+                return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
 
             }
 
         };
 
-        // -- hashTransformation -------------------------------------------------------------------
+        // -- loggableComponentTransformation ------------------------------------------------------
 
-        // vwf/utility/transform() transformation function to normalize an object so that it can be
-        // serialized and hashed with consistent results.
+        // vwf/utility/transform() transformation function to truncate the verbose bits of a
+        // component so that it may be written to a log.
 
-        var hashTransformation = function( object ) {
+        var loggableComponentTransformation = function( object, names, depth ) {
 
-            if ( typeof object == "number" ) {
+            // Find the index of the lowest nested component in the names list.
 
-                // Reduce precision slightly to match what passes through the reflector.
+            var componentIndex = names.length;
 
-                return Number( object.toPrecision(15) );
+            while ( componentIndex > 2 && names[componentIndex-1] == "children" ) {
+                componentIndex -= 2;
+            }
 
-            } else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
-                
-                // Order objects alphabetically.
+            // depth                                                  names  notes
+            // -----                                                  -----  -----
+            // 0:                                                        []  the component
+            // 1:                                          [ "properties" ]  its properties object
+            // 2:                          [ "propertyName", "properties" ]  one property
+            // 1:                                            [ "children" ]  the children object
+            // 2:                               [ "childName", "children" ]  one child
+            // 3:                 [ "properties", "childName", "children" ]  the child's properties
+            // 4: [ "propertyName", "properties", "childName", "children" ]  one child property
 
-                var ordered = {};
+            if ( componentIndex > 0 ) {
 
-                Object.keys( object ).sort().forEach( function( key ) {
-                    ordered[key] = object[key];
-                } );
+                // Locate the container ("properties", "methods", "events", etc.) below the
+                // component in the names list.
 
-                return ordered;
+                var containerIndex = componentIndex - 1;
+                var containerName = names[containerIndex];
 
-            } else {
+                // Locate the member as appropriate for the container.
 
-                return object;
+                if ( containerName == "extends" ) {
+
+                    var memberIndex = containerIndex;
+                    var memberName = names[memberIndex];
+
+                } else if ( containerName == "implements" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+
+                } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
+                        containerName == "children" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+    
+                } else if ( containerName == "scripts" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+
+                } else {
+
+                    containerIndex = undefined;
+                    containerName = undefined;
+
+                }
 
             }
 
+            // Transform the object at the current recusion level.
+
+            switch ( containerName ) {
+
+                case "extends":
+
+                    // Omit a component descriptor for the prototype.
+
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "implements":
+
+                    // Omit component descriptors for the behaviors.
+
+                    if ( memberIndex == 1 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "properties":
+
+                    // Convert property values to a loggable version, and omit getter and setter
+                    // text.
+
+                    if ( memberIndex == 0 && ! valueHasAccessors( object ) ||
+                            memberIndex == 1 && names[0] == "value" ) {
+                        return loggableValue( object );
+                    } else if ( memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "methods":
+
+                    // Omit method body text.
+
+                    if ( memberIndex == 0 && ! valueHasBody( object ) || 
+                            memberIndex == 1 && names[0] == "body" ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "events":
+
+                    // Nothing for events.
+
+                    break;
+
+                case "children":
+
+                    // Omit child component descriptors.
+
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "scripts":
+
+                    // Shorten script text.
+
+                    if ( memberIndex == 0 && ! valueHasType( object ) || 
+                            memberIndex == 1 && names[0] == "text" ) {
+                        return "...";
+                    }
+
+                    break;
+
+            }
+
+            return object;
         };
 
         // -- xpathResolver ------------------------------------------------------------------------
