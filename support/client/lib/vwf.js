@@ -779,8 +779,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = queue.queue.shift();
 
-                            vwf.logger.debugx( "setState", "removing",
-                                JSON.stringify( loggableFields( fields ) ), "from queue" );
+                            vwf.logger.debugx( "setState", function() {
+                                return [ "removing", JSON.stringify( loggableFields( fields ) ), "from queue" ];
+                            } );
 
                             fields.respond && private_queue.push( fields );
 
@@ -790,8 +791,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = private_queue.shift();
 
-                            vwf.logger.debugx( "setState", "returning",
-                                JSON.stringify( loggableFields( fields ) ), "to queue" );
+                            vwf.logger.debugx( "setState", function() {
+                                return [ "returning", JSON.stringify( loggableFields( fields ) ), "to queue" ];
+                            } );
 
                             queue.queue.push( fields );
 
@@ -926,7 +928,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
 
-            this.logger.debuggx( "createNode", JSON.stringify( loggableComponent( nodeComponent ) ) );
+            this.logger.debuggx( "createNode", function() {
+                return [ JSON.stringify( loggableComponent( nodeComponent ) ) ];
+            } );
 
             var nodePatch;
 
@@ -1107,7 +1111,9 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.setNode = function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
-            this.logger.debuggx( "setNode", nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) );
+            this.logger.debuggx( "setNode", function() {
+                return [ nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) ];
+            } );
 
             async.series( [
 
@@ -1426,8 +1432,9 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
 
-            this.logger.debuggx( "createChild", nodeID, childName,
-                JSON.stringify( loggableComponent( childComponent ) ), childURI );
+            this.logger.debuggx( "createChild", function() {
+                return [ nodeID, childName, JSON.stringify( loggableComponent( childComponent ) ), childURI ];
+            } );
 
             childComponent = normalizedComponent( childComponent );
 
@@ -1937,8 +1944,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
-            this.logger.debuggx( "createProperty", nodeID, propertyName,
-                JSON.stringify( loggableValue( propertyValue ) ) );  // TODO: add truncated propertyGet, propertySet to log
+            this.logger.debuggx( "createProperty", function() {
+                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
+            } );
 
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
@@ -1965,8 +1973,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.debuggx( "setProperty", nodeID, propertyName,
-                JSON.stringify( loggableValue( propertyValue ) ) );
+            this.logger.debuggx( "setProperty", function() {
+                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
+            } );
 
             var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
 
@@ -2206,8 +2215,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            this.logger.debuggx( "callMethod", nodeID, methodName,
-                JSON.stringify( loggableValues( methodParameters ) ) );
+            this.logger.debuggx( "callMethod", function() {
+                return [ nodeID, methodName, JSON.stringify( loggableValues( methodParameters ) ) ];
+            } );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2257,8 +2267,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.fireEvent = function( nodeID, eventName, eventParameters ) {
 
-            this.logger.debuggx( "fireEvent", nodeID, eventName,
-                JSON.stringify( loggableValues( eventParameters ) ) );
+            this.logger.debuggx( "fireEvent", function() {
+                return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ) ];
+            } );
 
             // Call firingEvent() on each model.
 
@@ -2285,8 +2296,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
 
-            this.logger.debuggx( "dispatchEvent", nodeID, eventName,
-                JSON.stringify( loggableValues( eventParameters ) ), JSON.stringify( loggableValues( eventNodeParameters ) ) );
+            this.logger.debuggx( "dispatchEvent", function() {
+                return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ),
+                    JSON.stringify( loggableValues( eventNodeParameters ) ) ];
+            } );
 
             // Defaults for the parameter parameters.
 
@@ -2366,8 +2379,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.execute = function( nodeID, scriptText, scriptType ) {
 
-            this.logger.debuggx( "execute", nodeID,
-                ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType );  // TODO: loggableScript()
+            this.logger.debuggx( "execute", function() {
+                return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
+            } );
 
             // Assume JavaScript if the type is not specified and the text is a string.
 
