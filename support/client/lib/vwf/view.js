@@ -29,7 +29,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
     var label = module.id.replace( /\//g, "." );
 
-    logger.for( label ).info( "loading" );
+    logger.for( label ).debug( "loading" );
 
     return {
 
@@ -44,7 +44,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
             instance.module = module;
             instance.logger = logger.for( instance.module.id.replace( /\//g, "." ), instance );
             
-            instance.logger.info( "loading" );
+            instance.logger.debug( "loading" );
 
             if ( typeof initializer == "function" || initializer instanceof Function ) {
                 initializer = initializer();
@@ -67,7 +67,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
         create: function( kernel, view, stages, state, parameters ) {
 
-            this.logger.info( "creating" );
+            this.logger.debug( "creating" );
 
             // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 

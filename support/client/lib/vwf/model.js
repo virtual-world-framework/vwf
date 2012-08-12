@@ -36,7 +36,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/model" ], function( mod
 
     var label = module.id.replace( /\//g, "." );
 
-    logger.for( label ).info( "loading" );
+    logger.for( label ).debug( "loading" );
 
     return {
 
@@ -51,7 +51,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/model" ], function( mod
             instance.module = module;
             instance.logger = logger.for( instance.module.id.replace( /\//g, "." ), instance );
             
-            instance.logger.info( "loading" );
+            instance.logger.debug( "loading" );
 
             if ( typeof initializer == "function" || initializer instanceof Function ) {
                 initializer = initializer();
@@ -74,7 +74,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/model" ], function( mod
 
         create: function( kernel, model, stages, state, parameters ) {
 
-            this.logger.info( "creating" );
+            this.logger.debug( "creating" );
 
             // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 

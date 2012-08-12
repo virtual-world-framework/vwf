@@ -15,7 +15,7 @@
 
 ( function( window ) {
 
-    window.console && console.info && console.info( "loading vwf" );
+    window.console && console.debug && console.debug( "loading vwf" );
 
     // vwf.js is the main Virtual World Framework manager. It is constructed as a JavaScript module
     // (http://www.yuiblog.com/blog/2007/06/12/module-pattern) to isolate it from the rest of the
@@ -25,7 +25,7 @@
 
     window.vwf = new function() {
 
-        window.console && console.info && console.info( "creating vwf" );
+        window.console && console.debug && console.debug( "creating vwf" );
 
         // == Public variables =====================================================================
 
@@ -380,7 +380,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 setInterval( function() {
 
                     var fields = {
-                        time: vwf.now + 0.010 // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                        time: vwf.now + 0.010, // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                        origin: "reflector",
                     };
 
                     queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
@@ -409,7 +410,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "message", function( message ) {
 
-                    // vwf.logger.infox( "-socket", "message", message );
+                    // vwf.logger.debugx( "-socket", "message", message );
 
                     try {
 
@@ -419,6 +420,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
+
+                        fields.origin = "reflector";
 
                         // Update the queue. Insert the message (unless it is only a time tick), and
                         // advance the queue's record of the current time. Messages in the queue are
@@ -484,7 +487,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.plan = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
-            this.logger.groupx( "plan", nodeID, actionName, memberName,
+            this.logger.debuggx( "plan", nodeID, actionName, memberName,
                 parameters && parameters.length, when, callback_async && "callback" );
 
             var time = when > 0 ? // absolute (+) or relative (-)
@@ -497,16 +500,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 action: actionName,
                 member: memberName,
                 parameters: parameters,
+                client: this.client_, // propagate originating client
+                origin: "future",
                 // callback: callback_async,  // TODO
             };
 
-            if ( this.client_ ) {
-                fields.client = this.client_; // propagate the current originating client
-            }
-
             queue.insert( fields );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- send ---------------------------------------------------------------------------------
@@ -516,7 +517,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.send = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
-            this.logger.groupx( "send", nodeID, actionName, memberName,
+            this.logger.debuggx( "send", nodeID, actionName, memberName,
                 parameters && parameters.length, when, callback_async && "callback" );  // TODO: loggableParameters()
 
             var time = when > 0 ? // absolute (+) or relative (-)
@@ -534,23 +535,25 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // callback: callback_async,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
-            if ( ! socket ) { // single-user mode
+            if ( socket ) {
     
-                // Loop the message back to the incoming queue.
-
-                fields.client = this.moniker_; // stamp with the originating client like the reflector does
-                queue.insert( fields );
-    
-            } else {
-                
                 // Send the message.
 
                 var message = JSON.stringify( fields );
                 socket.send( message );
 
+            } else {
+                
+                // In single-user mode, loop the message back to the incoming queue.
+
+                fields.client = this.moniker_; // stamp with the originating client like the reflector does
+                fields.origin = "reflector";
+
+                queue.insert( fields );
+    
             }
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- respond ------------------------------------------------------------------------------
@@ -559,7 +562,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
-            this.logger.groupx( "respond", nodeID, actionName, memberName,
+            this.logger.debuggx( "respond", nodeID, actionName, memberName,
                 parameters && parameters.length, "..." );  // TODO: loggableParameters(), loggableResult()
 
             // Attach the current simulation time and pack the message as an array of the arguments.
@@ -574,30 +577,33 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 result: result,
             };
 
-            if ( ! socket ) {
-
-                // Nothing to do in single-user mode.
-
-            } else {
+            if ( socket ) {
 
                 // Send the message.
 
                 var message = JSON.stringify( fields );
                 socket.send( message );
 
+            } else {
+
+                // Nothing to do in single-user mode.
+
             }
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- receive ------------------------------------------------------------------------------
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( nodeID, actionName, memberName, parameters, respond ) {
+        this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
-            this.logger.groupx( "receive", nodeID, actionName, memberName,
-                parameters && parameters.length, respond );  // TODO: loggableParameters()
+            origin == "reflector" ?
+                this.logger.infogx( "receive", nodeID, actionName, memberName,
+                    parameters && parameters.length, respond, origin ) :
+                this.logger.debuggx( "receive", nodeID, actionName, memberName,
+                    parameters && parameters.length, respond, origin );
 
 // TODO: delegate parsing and validation to each action.
 
@@ -621,7 +627,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             respond && this.respond( nodeID, actionName, memberName, parameters,
                 require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
-            this.logger.groupxEnd();
+            origin == "reflector" ? this.logger.infou() : this.logger.debugu();
         };
 
         // -- dispatch -----------------------------------------------------------------------------
@@ -651,7 +657,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                     this.client_ = fields.client; // note the originating client for the duration of the action
-                    this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond );
+                    this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
                 }
 
             }
@@ -716,7 +722,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.setState = function( applicationState, callback_async /* () */ ) {
 
-            this.logger.groupx( "setState" );  // TODO: loggableState
+            this.logger.debuggx( "setState" );  // TODO: loggableState
 
             async.series( [
 
@@ -773,7 +779,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = queue.queue.shift();
 
-                            vwf.logger.infox( "setState", "removing",
+                            vwf.logger.debugx( "setState", "removing",
                                 JSON.stringify( loggableFields( fields ) ), "from queue" );
 
                             fields.respond && private_queue.push( fields );
@@ -784,7 +790,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = private_queue.shift();
 
-                            vwf.logger.infox( "setState", "returning",
+                            vwf.logger.debugx( "setState", "returning",
                                 JSON.stringify( loggableFields( fields ) ), "to queue" );
 
                             queue.queue.push( fields );
@@ -809,14 +815,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- getState -----------------------------------------------------------------------------
 
         this.getState = function( full, normalize ) {
 
-            this.logger.groupx( "getState", full, normalize );
+            this.logger.debuggx( "getState", full, normalize );
 
             // Get the application nodes and queue.
 
@@ -855,7 +861,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     require( "vwf/utility" ).transform( applicationState, require( "vwf/utility" ).transforms.hash );
             }
     
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return applicationState;
         };
@@ -864,7 +870,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.hashState = function() {
 
-            this.logger.groupx( "hashState" );
+            this.logger.debuggx( "hashState" );
 
             var applicationState = this.getState( true, true );
 
@@ -880,7 +886,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             var hashk = "k" + Crypto.MD5( JSON.stringify( applicationState.kernel ) ).toString().substring( 0, 16 );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             // Generate the combined hash.
 
@@ -920,7 +926,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
 
-            this.logger.groupx( "createNode", JSON.stringify( loggableComponent( nodeComponent ) ) );
+            this.logger.debuggx( "createNode", JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             var nodePatch;
 
@@ -1056,14 +1062,14 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- deleteNode ---------------------------------------------------------------------------
 
         this.deleteNode = function( nodeID ) {
 
-            this.logger.groupx( "deleteNode", nodeID );
+            this.logger.debuggx( "deleteNode", nodeID );
 
             // Remove the entry in the components list if this was the root of a component loaded
             // from a URI.
@@ -1089,7 +1095,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 view.deletedNode && view.deletedNode( nodeID );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- setNode ------------------------------------------------------------------------------
@@ -1101,7 +1107,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.setNode = function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
-            this.logger.groupx( "setNode", nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) );
+            this.logger.debuggx( "setNode", nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             async.series( [
 
@@ -1206,7 +1212,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return nodeComponent;
         };
@@ -1215,7 +1221,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.getNode = function( nodeID, full ) {  // TODO: include/exclude children, prototypes
 
-            this.logger.groupx( "getNode", nodeID, full );
+            this.logger.debuggx( "getNode", nodeID, full );
 
             // Start the descriptor.
 
@@ -1346,7 +1352,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // TODO: scripts
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             // Return the descriptor created, unless it was arranged as a patch and there were no
             // changes. Otherwise, return the URI if this is the root of a URI component.
@@ -1365,7 +1371,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.hashNode = function( nodeID ) {  // TODO: works with patches?  // TODO: only for nodes from getNode( , , true )
 
-            this.logger.groupx( "hashNode", typeof nodeID == "object" ? nodeID.id : nodeID );
+            this.logger.debuggx( "hashNode", typeof nodeID == "object" ? nodeID.id : nodeID );
 
             var nodeComponent = typeof nodeID == "object" ? nodeID : this.getNode( nodeID );
 
@@ -1392,7 +1398,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             var hashc = Object.keys( children ).length ?
                 "c" + Crypto.MD5( JSON.stringify( children ) ).toString().substring( 0, 16 ) : undefined;
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             // Generate the combined hash.
 
@@ -1420,7 +1426,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
 
-            this.logger.groupx( "createChild", nodeID, childName,
+            this.logger.debuggx( "createChild", nodeID, childName,
                 JSON.stringify( loggableComponent( childComponent ) ), childURI );
 
             childComponent = normalizedComponent( childComponent );
@@ -1762,14 +1768,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 callback_async && callback_async( childID );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- addChild -----------------------------------------------------------------------------
 
         this.addChild = function( nodeID, childID, childName ) {
 
-            this.logger.groupx( "addChild", nodeID, childID, childName );
+            this.logger.debuggx( "addChild", nodeID, childID, childName );
 
             // Call addingChild() on each model. The child is considered added after each model has
             // run.
@@ -1785,14 +1791,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- removeChild --------------------------------------------------------------------------
 
         this.removeChild = function( nodeID, childID ) {
 
-            this.logger.groupx( "removeChild", nodeID, childID );
+            this.logger.debuggx( "removeChild", nodeID, childID );
 
             // Call removingChild() on each model. The child is considered removed after each model
             // has run.
@@ -1808,7 +1814,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- setProperties ------------------------------------------------------------------------
@@ -1817,7 +1823,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.setProperties = function( nodeID, properties ) {  // TODO: rework as a cover for setProperty(), or remove; passing all properties to each driver is impractical since initializing and setting are different, and reentry can't be controlled when multiple sets are in progress.
 
-            this.logger.groupx( "setProperties", nodeID, properties );
+            this.logger.debuggx( "setProperties", nodeID, properties );
 
             // Call settingProperties() on each model.
 
@@ -1863,7 +1869,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return properties;
         };
@@ -1874,7 +1880,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.getProperties = function( nodeID ) {  // TODO: rework as a cover for getProperty(), or remove; passing all properties to each driver is impractical since reentry can't be controlled when multiple gets are in progress.
 
-            this.logger.groupx( "getProperties", nodeID );
+            this.logger.debuggx( "getProperties", nodeID );
 
             // Call gettingProperties() on each model.
 
@@ -1920,7 +1926,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return properties;
         };
@@ -1931,7 +1937,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
-            this.logger.groupx( "createProperty", nodeID, propertyName,
+            this.logger.debuggx( "createProperty", nodeID, propertyName,
                 JSON.stringify( loggableValue( propertyValue ) ) );  // TODO: add truncated propertyGet, propertySet to log
 
             // Call creatingProperty() on each model. The property is considered created after each
@@ -1948,7 +1954,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return propertyValue;
         };
@@ -1959,7 +1965,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.groupx( "setProperty", nodeID, propertyName,
+            this.logger.debuggx( "setProperty", nodeID, propertyName,
                 JSON.stringify( loggableValue( propertyValue ) ) );
 
             var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
@@ -2058,7 +2064,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             }
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return propertyValue;
         };
@@ -2071,7 +2077,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.getProperty = function( nodeID, propertyName ) {
 
-            this.logger.groupx( "getProperty", nodeID, propertyName );
+            this.logger.debuggx( "getProperty", nodeID, propertyName );
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2166,7 +2172,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             }
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return propertyValue;
         };
@@ -2177,7 +2183,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 
-            this.logger.groupx( "createMethod", nodeID, methodName, methodParameters );
+            this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
 
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
@@ -2193,14 +2199,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- callMethod ---------------------------------------------------------------------------
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            this.logger.groupx( "callMethod", nodeID, methodName,
+            this.logger.debuggx( "callMethod", nodeID, methodName,
                 JSON.stringify( loggableValues( methodParameters ) ) );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
@@ -2219,7 +2225,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return methodValue;
         };
@@ -2228,7 +2234,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
 
-            this.logger.groupx( "createEvent", nodeID, eventName, eventParameters );
+            this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
             // Call creatingEvent() on each model. The event is considered created after each model
             // has run.
@@ -2244,14 +2250,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- fireEvent ----------------------------------------------------------------------------
 
         this.fireEvent = function( nodeID, eventName, eventParameters ) {
 
-            this.logger.groupx( "fireEvent", nodeID, eventName,
+            this.logger.debuggx( "fireEvent", nodeID, eventName,
                 JSON.stringify( loggableValues( eventParameters ) ) );
 
             // Call firingEvent() on each model.
@@ -2266,7 +2272,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return handled;
         };
@@ -2279,7 +2285,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
 
-            this.logger.groupx( "dispatchEvent", nodeID, eventName,
+            this.logger.debuggx( "dispatchEvent", nodeID, eventName,
                 JSON.stringify( loggableValues( eventParameters ) ), JSON.stringify( loggableValues( eventNodeParameters ) ) );
 
             // Defaults for the parameter parameters.
@@ -2353,14 +2359,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             }, this );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
         };
 
         // -- execute ------------------------------------------------------------------------------
 
         this.execute = function( nodeID, scriptText, scriptType ) {
 
-            this.logger.groupx( "execute", nodeID,
+            this.logger.debuggx( "execute", nodeID,
                 ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType );  // TODO: loggableScript()
 
             // Assume JavaScript if the type is not specified and the text is a string.
@@ -2386,7 +2392,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
-            this.logger.groupxEnd();
+            this.logger.debugu();
 
             return scriptValue;
         };
@@ -2866,9 +2872,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         var loggableValue = function( value ) {
             return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
                 object = require( "vwf/utility" ).transforms.transit( object, names, depth );
-                if ( typeof object == "number" ) {
-                    return Number( object.toPrecision(5) ); // reduce precision to remove visual noise
-                }
+                return typeof object == "number" ? Number( object.toPrecision(5) ) : object; // reduce numeric precision to remove visual noise
             } );
         };
 
