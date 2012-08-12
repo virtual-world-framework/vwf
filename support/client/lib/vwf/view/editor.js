@@ -183,7 +183,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             try {
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
-                this.logger.warnc( "createdProperty", nodeID, propertyName, propertyValue,
+                this.logger.warnx( "createdProperty", nodeID, propertyName, propertyValue,
                     "stringify error:", e.message );
                 node.properties[ propertyName ].value = propertyValue;
             }
@@ -211,7 +211,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             try {
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
-                this.logger.warnc( "satProperty", nodeID, propertyName, propertyValue,
+                this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue,
                     "stringify error:", e.message );
                 node.properties[ propertyName ].value = propertyValue;
             }

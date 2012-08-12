@@ -15,7 +15,7 @@
 
 ( function( window ) {
 
-    window.console && console.info && console.info( "loading vwf" );
+    window.console && console.debug && console.debug( "loading vwf" );
 
     // vwf.js is the main Virtual World Framework manager. It is constructed as a JavaScript module
     // (http://www.yuiblog.com/blog/2007/06/12/module-pattern) to isolate it from the rest of the
@@ -25,14 +25,18 @@
 
     window.vwf = new function() {
 
-        window.console && console.info && console.info( "creating vwf" );
+        window.console && console.debug && console.debug( "creating vwf" );
 
         // == Public variables =====================================================================
 
         // The runtime environment (production, development, testing) and other configuration
         // settings appear here.
 
-        this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+        this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/configuration" as a dependency
+
+        // The kernel logger.
+
+        this.logger = undefined; // require( "logger" ).for( undefined, this );  // TODO: for( "vwf", ... ), and update existing calls  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/logger" as a dependency
 
         // Each model and view module loaded by the main page registers itself here.
 
@@ -188,10 +192,14 @@
 
             var args = Array.prototype.slice.call( arguments );
 
-            // Load the runtime configuration. Start with the factory defaults. The reflector may
+            // Load the runtime configuration. We start with the factory defaults. The reflector may
             // provide additional settings when we connect.
 
             this.configuration = require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+
+            // Create the logger.
+
+            this.logger = require( "logger" ).for( "vwf", this );  // TODO: for( "vwf", ... ), and update existing calls
 
             // Get the application specification if one is provided in the query string. Parse it
             // into an application specification object if it's valid JSON, otherwise keep the query
@@ -372,7 +380,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 setInterval( function() {
 
                     var fields = {
-                        time: vwf.now + 0.010 // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                        time: vwf.now + 0.010, // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                        origin: "reflector",
                     };
 
                     queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
@@ -385,7 +394,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "connect", function() {
 
-                    vwf.logger.info( "vwf.socket connected" );
+                    vwf.logger.infox( "-socket", "connected" );
 
                     vwf.moniker_ = this.transport.sessionid;
 
@@ -401,7 +410,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "message", function( message ) {
 
-                    // this.logger.info( "vwf.socket message " + message );
+                    // vwf.logger.debugx( "-socket", "message", message );
 
                     try {
 
@@ -411,6 +420,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
+
+                        fields.origin = "reflector";
 
                         // Update the queue. Insert the message (unless it is only a time tick), and
                         // advance the queue's record of the current time. Messages in the queue are
@@ -437,7 +448,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "disconnect", function() {
 
-                    vwf.logger.info( "vwf.socket disconnected" );
+                    vwf.logger.infox( "-socket", "disconnected" );
 
                 } );
 
@@ -476,8 +487,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.plan = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
-            this.logger.group( "vwf.plan " + nodeID + " " + actionName + " " + memberName + " " +
-                ( parameters && parameters.length ) + " " + when + " " + ( callback_async && "callback" ) );
+            this.logger.debuggx( "plan", nodeID, actionName, memberName,
+                parameters && parameters.length, when, callback_async && "callback" );
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
@@ -489,16 +500,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 action: actionName,
                 member: memberName,
                 parameters: parameters,
+                client: this.client_, // propagate originating client
+                origin: "future",
                 // callback: callback_async,  // TODO
             };
 
-            if ( this.client_ ) {
-                fields.client = this.client_; // propagate the current originating client
-            }
-
             queue.insert( fields );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- send ---------------------------------------------------------------------------------
@@ -508,8 +517,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.send = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
-            this.logger.group( "vwf.send " + nodeID + " " + actionName + " " + memberName + " " +
-                ( parameters && parameters.length ) + " " + when + " " + ( callback_async && "callback" ) );  // TODO: loggableParameters()
+            this.logger.debuggx( "send", nodeID, actionName, memberName,
+                parameters && parameters.length, when, callback_async && "callback" );  // TODO: loggableParameters()
 
             var time = when > 0 ? // absolute (+) or relative (-)
                 Math.max( this.now, when ) :
@@ -526,23 +535,25 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // callback: callback_async,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
             };
 
-            if ( ! socket ) { // single-user mode
+            if ( socket ) {
     
-                // Loop the message back to the incoming queue.
-
-                fields.client = this.moniker_; // stamp with the originating client like the reflector does
-                queue.insert( fields );
-    
-            } else {
-                
                 // Send the message.
 
                 var message = JSON.stringify( fields );
                 socket.send( message );
 
+            } else {
+                
+                // In single-user mode, loop the message back to the incoming queue.
+
+                fields.client = this.moniker_; // stamp with the originating client like the reflector does
+                fields.origin = "reflector";
+
+                queue.insert( fields );
+    
             }
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- respond ------------------------------------------------------------------------------
@@ -551,8 +562,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
-            this.logger.group( "vwf.respond " + nodeID + " " + actionName + " " + memberName + " " +
-                ( parameters && parameters.length ) + " " + "..." );  // TODO: loggableParameters(), loggableResult()
+            this.logger.debuggx( "respond", nodeID, actionName, memberName,
+                parameters && parameters.length, "..." );  // TODO: loggableParameters(), loggableResult()
 
             // Attach the current simulation time and pack the message as an array of the arguments.
 
@@ -566,30 +577,33 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 result: result,
             };
 
-            if ( ! socket ) {
-
-                // Nothing to do in single-user mode.
-
-            } else {
+            if ( socket ) {
 
                 // Send the message.
 
                 var message = JSON.stringify( fields );
                 socket.send( message );
 
+            } else {
+
+                // Nothing to do in single-user mode.
+
             }
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- receive ------------------------------------------------------------------------------
 
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
-        this.receive = function( nodeID, actionName, memberName, parameters, respond ) {
+        this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
-            this.logger.group( "vwf.receive " + nodeID + " " + actionName + " " + memberName + " " +
-                ( parameters && parameters.length ) + " " + respond );  // TODO: loggableParameters()
+            origin == "reflector" ?
+                this.logger.infogx( "receive", nodeID, actionName, memberName,
+                    parameters && parameters.length, respond, origin ) :
+                this.logger.debuggx( "receive", nodeID, actionName, memberName,
+                    parameters && parameters.length, respond, origin );
 
 // TODO: delegate parsing and validation to each action.
 
@@ -611,9 +625,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Return the result.
 
             respond && this.respond( nodeID, actionName, memberName, parameters,
-                require( "vwf/utility" ).transform( result, transitTransformation ) );
+                require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
-            this.logger.groupEnd();
+            origin == "reflector" ? this.logger.infou() : this.logger.debugu();
         };
 
         // -- dispatch -----------------------------------------------------------------------------
@@ -643,7 +657,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                     this.client_ = fields.client; // note the originating client for the duration of the action
-                    this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond );
+                    this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
                 }
 
             }
@@ -666,7 +680,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         this.log = function() {
 
             this.respond( undefined, "log", undefined, undefined,
-                require( "vwf/utility" ).transform( arguments, transitTransformation ) );
+                require( "vwf/utility" ).transform( arguments, require( "vwf/utility" ).transforms.transit ) );
 
         }
 
@@ -708,7 +722,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.setState = function( applicationState, callback_async /* () */ ) {
 
-            this.logger.group( "vwf.setState" );  // TODO: loggableState
+            this.logger.debuggx( "setState" );  // TODO: loggableState
 
             async.series( [
 
@@ -717,7 +731,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 function( series_callback /* ( err, results ) */ ) {
 
                     if ( applicationState.configuration ) {
-                        require( "vwf/configuration" ).instance = applicationState.configuration;                        
+                        require( "vwf/configuration" ).instance = applicationState.configuration;
                     }
 
                     series_callback( undefined, undefined );
@@ -765,9 +779,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = queue.queue.shift();
 
-                            vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                                return depth == 2 ? Array.prototype.slice.call( object ) : object
-                            } ), "from queue" );
+                            vwf.logger.debugx( "setState", "removing",
+                                JSON.stringify( loggableFields( fields ) ), "from queue" );
 
                             fields.respond && private_queue.push( fields );
 
@@ -777,9 +790,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = private_queue.shift();
 
-                            vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                                return depth == 2 ? Array.prototype.slice.call( object ) : object
-                            } ), "to queue" );
+                            vwf.logger.debugx( "setState", "returning",
+                                JSON.stringify( loggableFields( fields ) ), "to queue" );
 
                             queue.queue.push( fields );
 
@@ -803,14 +815,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- getState -----------------------------------------------------------------------------
 
         this.getState = function( full, normalize ) {
 
-            this.logger.group( "vwf.getState", full, normalize );
+            this.logger.debuggx( "getState", full, normalize );
 
             // Get the application nodes and queue.
 
@@ -830,7 +842,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), transitTransformation ),
+                    require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // Message queue.
@@ -846,10 +858,10 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             if ( normalize ) {
                 applicationState =
-                    require( "vwf/utility" ).transform( applicationState, hashTransformation );
+                    require( "vwf/utility" ).transform( applicationState, require( "vwf/utility" ).transforms.hash );
             }
     
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return applicationState;
         };
@@ -858,7 +870,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.hashState = function() {
 
-            this.logger.group( "vwf.hashState" );
+            this.logger.debuggx( "hashState" );
 
             var applicationState = this.getState( true, true );
 
@@ -874,7 +886,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             var hashk = "k" + Crypto.MD5( JSON.stringify( applicationState.kernel ) ).toString().substring( 0, 16 );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             // Generate the combined hash.
 
@@ -914,10 +926,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
 
-            this.logger.group( "vwf.createNode " + (
-                typeof nodeComponent == "string" || nodeComponent instanceof String ?
-                    nodeComponent : JSON.stringify( loggableComponent( nodeComponent ) )
-            ) );
+            this.logger.debuggx( "createNode", JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             var nodePatch;
 
@@ -958,13 +967,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // the list. The original load's completion will call our callback too.
 
                         } else if ( components[nodeURI] instanceof Array ) { // loading
-                            callback_async && components[nodeURI].push( callback_async );
+                            callback_async && components[nodeURI].push( callback_async );  // TODO: is this leaving a series callback hanging if we don't call series_callback_async?
 
                         // If this URI has already loaded, skip to the end and call the callback
                         // with the ID.
 
                         } else { // loaded
-                            callback_async && callback_async( components[nodeURI] );
+                            callback_async && callback_async( components[nodeURI] );  // TODO: is this leaving a series callback hanging if we don't call series_callback_async?
                         }
 
                     } else { // descriptor, ID or error
@@ -1053,14 +1062,14 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- deleteNode ---------------------------------------------------------------------------
 
         this.deleteNode = function( nodeID ) {
 
-            this.logger.group( "vwf.deleteNode " + nodeID );
+            this.logger.debuggx( "deleteNode", nodeID );
 
             // Remove the entry in the components list if this was the root of a component loaded
             // from a URI.
@@ -1086,7 +1095,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 view.deletedNode && view.deletedNode( nodeID );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- setNode ------------------------------------------------------------------------------
@@ -1098,7 +1107,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.setNode = function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
-            this.logger.group( "vwf.setNode " + JSON.stringify( loggableComponent( nodeComponent ) ) );
+            this.logger.debuggx( "setNode", nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) );
 
             async.series( [
 
@@ -1203,7 +1212,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return nodeComponent;
         };
@@ -1212,7 +1221,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.getNode = function( nodeID, full ) {  // TODO: include/exclude children, prototypes
 
-            this.logger.group( "vwf.getNode " + nodeID + " " + full );
+            this.logger.debuggx( "getNode", nodeID, full );
 
             // Start the descriptor.
 
@@ -1343,7 +1352,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // TODO: scripts
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             // Return the descriptor created, unless it was arranged as a patch and there were no
             // changes. Otherwise, return the URI if this is the root of a URI component.
@@ -1362,7 +1371,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.hashNode = function( nodeID ) {  // TODO: works with patches?  // TODO: only for nodes from getNode( , , true )
 
-            this.logger.group( "vwf.hashNode", typeof nodeID == "object" ? nodeID.id : nodeID );
+            this.logger.debuggx( "hashNode", typeof nodeID == "object" ? nodeID.id : nodeID );
 
             var nodeComponent = typeof nodeID == "object" ? nodeID : this.getNode( nodeID );
 
@@ -1389,7 +1398,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             var hashc = Object.keys( children ).length ?
                 "c" + Crypto.MD5( JSON.stringify( children ) ).toString().substring( 0, 16 ) : undefined;
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             // Generate the combined hash.
 
@@ -1417,10 +1426,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
 
-            this.logger.group( "vwf.createChild " + nodeID + " " + childName + " " + (
-                typeof childComponent == "string" || childComponent instanceof String ?
-                    childComponent : JSON.stringify( loggableComponent( childComponent ) )
-            ) + " " + childURI );
+            this.logger.debuggx( "createChild", nodeID, childName,
+                JSON.stringify( loggableComponent( childComponent ) ), childURI );
 
             childComponent = normalizedComponent( childComponent );
 
@@ -1761,14 +1768,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 callback_async && callback_async( childID );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- addChild -----------------------------------------------------------------------------
 
         this.addChild = function( nodeID, childID, childName ) {
 
-            this.logger.group( "vwf.addChild " + nodeID + " " + childID + " " + childName );
+            this.logger.debuggx( "addChild", nodeID, childID, childName );
 
             // Call addingChild() on each model. The child is considered added after each model has
             // run.
@@ -1784,14 +1791,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.addedChild && view.addedChild( nodeID, childID, childName );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- removeChild --------------------------------------------------------------------------
 
         this.removeChild = function( nodeID, childID ) {
 
-            this.logger.group( "vwf.removeChild " + nodeID + " " + childID );
+            this.logger.debuggx( "removeChild", nodeID, childID );
 
             // Call removingChild() on each model. The child is considered removed after each model
             // has run.
@@ -1807,7 +1814,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.removedChild && view.removedChild( nodeID, childID );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- setProperties ------------------------------------------------------------------------
@@ -1816,7 +1823,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.setProperties = function( nodeID, properties ) {  // TODO: rework as a cover for setProperty(), or remove; passing all properties to each driver is impractical since initializing and setting are different, and reentry can't be controlled when multiple sets are in progress.
 
-            this.logger.group( "vwf.setProperties " + nodeID + " " + properties );
+            this.logger.debuggx( "setProperties", nodeID, properties );
 
             // Call settingProperties() on each model.
 
@@ -1862,7 +1869,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return properties;
         };
@@ -1873,7 +1880,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.getProperties = function( nodeID ) {  // TODO: rework as a cover for getProperty(), or remove; passing all properties to each driver is impractical since reentry can't be controlled when multiple gets are in progress.
 
-            this.logger.group( "vwf.getProperties " + nodeID );
+            this.logger.debuggx( "getProperties", nodeID );
 
             // Call gettingProperties() on each model.
 
@@ -1919,7 +1926,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return properties;
         };
@@ -1930,7 +1937,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
-            this.logger.group( "vwf.createProperty " + nodeID + " " + propertyName + " " + propertyValue );  // TODO: add truncated propertyGet, propertySet to log
+            this.logger.debuggx( "createProperty", nodeID, propertyName,
+                JSON.stringify( loggableValue( propertyValue ) ) );  // TODO: add truncated propertyGet, propertySet to log
 
             // Call creatingProperty() on each model. The property is considered created after each
             // model has run.
@@ -1946,7 +1954,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return propertyValue;
         };
@@ -1957,7 +1965,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
-            this.logger.group( "vwf.setProperty " + nodeID + " " + propertyName + " " + propertyValue );
+            this.logger.debuggx( "setProperty", nodeID, propertyName,
+                JSON.stringify( loggableValue( propertyValue ) ) );
 
             var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
 
@@ -2055,7 +2064,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             }
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return propertyValue;
         };
@@ -2068,7 +2077,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.getProperty = function( nodeID, propertyName ) {
 
-            this.logger.group( "vwf.getProperty " + nodeID + " " + propertyName );
+            this.logger.debuggx( "getProperty", nodeID, propertyName );
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2163,7 +2172,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             }
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return propertyValue;
         };
@@ -2174,7 +2183,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 
-            this.logger.group( "vwf.createMethod " + nodeID + " " + methodName + " " + methodParameters );
+            this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
 
             // Call creatingMethod() on each model. The method is considered created after each
             // model has run.
@@ -2190,14 +2199,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- callMethod ---------------------------------------------------------------------------
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
 
-            this.logger.group( "vwf.callMethod " + nodeID + " " + methodName + " " + methodParameters );
+            this.logger.debuggx( "callMethod", nodeID, methodName,
+                JSON.stringify( loggableValues( methodParameters ) ) );
 
             // Call callingMethod() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2215,7 +2225,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return methodValue;
         };
@@ -2224,7 +2234,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
 
-            this.logger.group( "vwf.createEvent " + nodeID + " " + eventName + " " + eventParameters );
+            this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
             // Call creatingEvent() on each model. The event is considered created after each model
             // has run.
@@ -2240,14 +2250,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- fireEvent ----------------------------------------------------------------------------
 
         this.fireEvent = function( nodeID, eventName, eventParameters ) {
 
-            this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " + eventParameters );
+            this.logger.debuggx( "fireEvent", nodeID, eventName,
+                JSON.stringify( loggableValues( eventParameters ) ) );
 
             // Call firingEvent() on each model.
 
@@ -2261,7 +2272,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return handled;
         };
@@ -2274,7 +2285,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
 
-            this.logger.group( "vwf.dispatchEvent " + nodeID + " " + eventName + " " + eventParameters + " " + eventNodeParameters );
+            this.logger.debuggx( "dispatchEvent", nodeID, eventName,
+                JSON.stringify( loggableValues( eventParameters ) ), JSON.stringify( loggableValues( eventNodeParameters ) ) );
 
             // Defaults for the parameter parameters.
 
@@ -2347,14 +2359,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             }, this );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
         };
 
         // -- execute ------------------------------------------------------------------------------
 
         this.execute = function( nodeID, scriptText, scriptType ) {
 
-            this.logger.group( "vwf.execute " + nodeID + " " + ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ) + " " + scriptType );
+            this.logger.debuggx( "execute", nodeID,
+                ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType );  // TODO: loggableScript()
 
             // Assume JavaScript if the type is not specified and the text is a string.
 
@@ -2379,7 +2392,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 view.executed && view.executed( nodeID, scriptText, scriptType );
             } );
 
-            this.logger.groupEnd();
+            this.logger.debugu();
 
             return scriptValue;
         };
@@ -2557,21 +2570,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         };
 
-        // -- logger -------------------------------------------------------------------------------
-
-        this.logger = {
-
-            enabled: false,
-            log: function() { this.enabled && window.console && console.log && console.log.apply( console, arguments ) },
-            debug: function() { this.enabled && window.console && console.debug && console.debug.apply( console, arguments ) },
-            info: function() { this.enabled && window.console && console.info && console.info.apply( console, arguments ) },
-            warn: function() { window.console && console.warn && console.warn.apply( console, arguments ) },
-            error: function() { window.console && console.error && console.error.apply( console, arguments ) },
-            group: function() { this.enabled && window.console && console.group && console.group.apply( console, arguments ) },
-            groupCollapsed: function() { this.enabled && window.console && console.groupCollapsed && console.groupCollapsed.apply( console, arguments ) },
-            groupEnd: function() { this.enabled && window.console && console.groupEnd && console.groupEnd.apply( console, arguments ) },
-        };
-
         // == Private functions ====================================================================
 
         // -- loadComponent ------------------------------------------------------------------------
@@ -2721,38 +2719,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return isComponent; 
         };
 
-        // -- objectIsTypedArray  ------------------------------------------------------------------
-
-        // Determine if a JavaScript object is a component specification by searching for component
-        // specification attributes in the candidate object.
-
-        var objectIsTypedArray = function( candidate ) {
-
-            var typedArrayTypes = [
-                Int8Array,
-                Uint8Array,
-                // Uint8ClampedArray,
-                Int16Array,
-                Uint16Array,
-                Int32Array,
-                Uint32Array,
-                Float32Array,
-                Float64Array,
-            ];
-
-            var isTypedArray = false;
-
-            if ( typeof candidate == "object" && candidate != null ) {
-
-                typedArrayTypes.forEach( function( typedArrayType ) {
-                    isTypedArray = isTypedArray || candidate instanceof typedArrayType;
-                } );
-
-            }
-            
-            return isTypedArray; 
-        };
-
         // -- valueHasAccessors --------------------------------------------------------------------
 
         // Determine if a property initializer is a detailed initializer containing explicit
@@ -2841,8 +2807,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // prototype.
 
             if ( componentIsURI( component ) ) {
-                component = component.match( /\.vwf$/ ) ?
-                    { extends: component } : { source: component };  // TODO: detect component from mime-type instead of extension?
+                if ( component.match( /\.vwf$/ ) ) {  // TODO: detect component from mime-type instead of extension?
+                    component = { extends: component };
+                } else {
+                    component = { source: component };
+                }
             } else if ( componentIsID( component ) ) {
                 component = { extends: component };
             }
@@ -2886,107 +2855,31 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return component;
         };
 
+        // -- loggableFields -----------------------------------------------------------------------
+
+        var loggableFields = function( fields ) {
+            return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
+        };
+
         // -- loggableComponent --------------------------------------------------------------------
 
-        // Return a copy of a component with the verbose bits truncated so that it may be written to
-        // a log.
-
         var loggableComponent = function( component ) {
+            return require( "vwf/utility" ).transform( component, loggableComponentTransformation );
+        };
 
-            var loggable = {};
+        // -- loggableValue ------------------------------------------------------------------------
 
-            for ( var elementName in component ) {
+        var loggableValue = function( value ) {
+            return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
+                object = require( "vwf/utility" ).transforms.transit( object, names, depth );
+                return typeof object == "number" ? Number( object.toPrecision(5) ) : object; // reduce numeric precision to remove visual noise
+            } );
+        };
 
-                switch ( elementName ) {
+        // -- loggableValues -----------------------------------------------------------------------
 
-                    case "properties":
-
-                        loggable.properties = {};
-
-                        for ( var propertyName in component.properties ) {
-
-                            var componentPropertyValue = component.properties[propertyName];
-                            var loggablePropertyValue = loggable.properties[propertyName] = {};
-
-                            if ( valueHasAccessors( componentPropertyValue ) ) {
-                                for ( var propertyElementName in componentPropertyValue ) {
-                                    if ( propertyElementName == "set" || propertyElementName == "get" ) {
-                                        loggablePropertyValue[propertyElementName] = "...";
-                                    } else {
-                                        loggablePropertyValue[propertyElementName] = componentPropertyValue[propertyElementName];
-                                    }
-                                }
-                            } else {
-                                loggable.properties[propertyName] = componentPropertyValue;
-                            }
-
-                        }
-
-                        break;
-
-                    case "methods":
-
-                        loggable.methods = {};
-
-                        for ( var methodName in component.methods ) {
-
-                            var componentMethodValue = component.methods[methodName];
-                            var loggablemethodValue = loggable.methods[methodName] = {};
-
-                            if ( valueHasBody( componentMethodValue ) ) {
-                                for ( var methodElementName in componentMethodValue ) {
-                                    if ( methodElementName == "body" ) {
-                                        loggablemethodValue[methodElementName] = "...";
-                                    } else {
-                                        loggablemethodValue[methodElementName] = componentMethodValue[methodElementName];
-                                    }
-                                }
-                            } else {
-                                loggable.methods[methodName] = componentMethodValue;
-                            }
-
-                        }
-
-                        break;
-
-                    case "children":
-
-                        loggable.children = {};
-
-                        for ( var childName in component.children ) {
-                            loggable.children[childName] = {};
-                        }
-
-                        break;
-
-                    case "scripts":
-
-                        loggable.scripts = [];
-
-                        component.scripts.forEach( function( script ) {
-
-                            var loggableScript = "..."; // {};
-
-                            // for ( var scriptElementName in script ) {
-                            //     loggableScript[scriptElementName] = scriptElementName == "text" ? "..." : script[scriptElementName];
-                            // }
-
-                            loggable.scripts.push( loggableScript );
-
-                        } );
-
-                        break;
-
-                    default:
-
-                        loggable[elementName] = component[elementName];
-
-                        break;
-                }
-
-            }
-
-            return loggable;
+        var loggableValues = function( values ) {
+            return loggableValue( values );
         };
 
         // -- remappedURI --------------------------------------------------------------------------
@@ -3008,20 +2901,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         };
 
-        // -- transitTransformation ----------------------------------------------------------------
-
-        // vwf/utility/transform() transformation function to convert an object for proper JSON
-        // serialization.
-
-        var transitTransformation = function( object ) {
-
-            // Convert typed arrays to regular arrays.
-
-            return objectIsTypedArray( object ) ?
-                Array.prototype.slice.call( object ) : object;
-
-        };
-
         // -- queueTransitTransformation -----------------------------------------------------------
 
         // vwf/utility/transform() transformation function to convert the message queue for proper
@@ -3029,7 +2908,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // queue: [ { ..., parameters: [ [ arguments ] ], ... }, { ... }, ... ]
 
-        var queueTransitTransformation = function( object, index, depth ) {
+        var queueTransitTransformation = function( object, names, depth ) {
 
             if ( depth == 0 ) {
 
@@ -3053,51 +2932,164 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 return filtered;
 
-            } else if ( depth == 3 ) {
-
-                // Convert array-like arguments objects to regular arrays.  // TODO: only safe so long as parameters is the only container in queue messages
-
-                return Array.prototype.slice.call( object );
-
             } else {
 
-                return object;
+                return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
 
             }
 
         };
 
-        // -- hashTransformation -------------------------------------------------------------------
+        // -- loggableComponentTransformation ------------------------------------------------------
 
-        // vwf/utility/transform() transformation function to normalize an object so that it can be
-        // serialized and hashed with consistent results.
+        // vwf/utility/transform() transformation function to truncate the verbose bits of a
+        // component so that it may be written to a log.
 
-        var hashTransformation = function( object ) {
+        var loggableComponentTransformation = function( object, names, depth ) {
 
-            if ( typeof object == "number" ) {
+            // Find the index of the lowest nested component in the names list.
 
-                // Reduce precision slightly to match what passes through the reflector.
+            var componentIndex = names.length;
 
-                return Number( object.toPrecision(15) );
+            while ( componentIndex > 2 && names[componentIndex-1] == "children" ) {
+                componentIndex -= 2;
+            }
 
-            } else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
-                
-                // Order objects alphabetically.
+            // depth                                                  names  notes
+            // -----                                                  -----  -----
+            // 0:                                                        []  the component
+            // 1:                                          [ "properties" ]  its properties object
+            // 2:                          [ "propertyName", "properties" ]  one property
+            // 1:                                            [ "children" ]  the children object
+            // 2:                               [ "childName", "children" ]  one child
+            // 3:                 [ "properties", "childName", "children" ]  the child's properties
+            // 4: [ "propertyName", "properties", "childName", "children" ]  one child property
 
-                var ordered = {};
+            if ( componentIndex > 0 ) {
 
-                Object.keys( object ).sort().forEach( function( key ) {
-                    ordered[key] = object[key];
-                } );
+                // Locate the container ("properties", "methods", "events", etc.) below the
+                // component in the names list.
 
-                return ordered;
+                var containerIndex = componentIndex - 1;
+                var containerName = names[containerIndex];
 
-            } else {
+                // Locate the member as appropriate for the container.
 
-                return object;
+                if ( containerName == "extends" ) {
+
+                    var memberIndex = containerIndex;
+                    var memberName = names[memberIndex];
+
+                } else if ( containerName == "implements" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+
+                } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
+                        containerName == "children" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+    
+                } else if ( containerName == "scripts" ) {
+
+                    if ( containerIndex > 0 ) {
+                        var memberIndex = containerIndex - 1;
+                        var memberName = names[memberIndex];
+                    }
+
+                } else {
+
+                    containerIndex = undefined;
+                    containerName = undefined;
+
+                }
 
             }
 
+            // Transform the object at the current recusion level.
+
+            switch ( containerName ) {
+
+                case "extends":
+
+                    // Omit a component descriptor for the prototype.
+
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "implements":
+
+                    // Omit component descriptors for the behaviors.
+
+                    if ( memberIndex == 1 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "properties":
+
+                    // Convert property values to a loggable version, and omit getter and setter
+                    // text.
+
+                    if ( memberIndex == 0 && ! valueHasAccessors( object ) ||
+                            memberIndex == 1 && names[0] == "value" ) {
+                        return loggableValue( object );
+                    } else if ( memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "methods":
+
+                    // Omit method body text.
+
+                    if ( memberIndex == 0 && ! valueHasBody( object ) || 
+                            memberIndex == 1 && names[0] == "body" ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "events":
+
+                    // Nothing for events.
+
+                    break;
+
+                case "children":
+
+                    // Omit child component descriptors.
+
+                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "scripts":
+
+                    // Shorten script text.
+
+                    if ( memberIndex == 0 && ! valueHasType( object ) || 
+                            memberIndex == 1 && names[0] == "text" ) {
+                        return "...";
+                    }
+
+                    break;
+
+            }
+
+            return object;
         };
 
         // -- xpathResolver ------------------------------------------------------------------------
@@ -3403,10 +3395,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             suspend: function( why ) {
 
                 if ( this.suspension++ == 0 ) {
-                    vwf.logger.info( "vwf-queue#suspend: suspending queue at time", vwf.now, why ? why : "" );
+                    vwf.logger.infox( "-queue#suspend", "suspending queue at time", vwf.now, why ? why : "" );
                     return true;
                 } else {
-                    vwf.logger.debug( "vwf-queue#suspend: further suspending queue at time", vwf.now, why ? why : "" );
+                    vwf.logger.debugx( "-queue#suspend", "further suspending queue at time", vwf.now, why ? why : "" );
                     return false;
                 }
 
@@ -3427,11 +3419,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             resume: function( why ) {
 
                 if ( --this.suspension == 0 ) {
-                    vwf.logger.info( "vwf-queue#resume: resuming queue at time", vwf.now, why ? why : "" );
+                    vwf.logger.infox( "-queue#resume", "resuming queue at time", vwf.now, why ? why : "" );
                     vwf.dispatch();
                     return true;
                 } else {
-                    vwf.logger.debug( "vwf-queue#resume: partially resuming queue at time", vwf.now, why ? why : "" );
+                    vwf.logger.debugx( "-queue#resume", "partially resuming queue at time", vwf.now, why ? why : "" );
                     return false;
                 }
 

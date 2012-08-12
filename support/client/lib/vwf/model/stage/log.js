@@ -57,7 +57,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             }
 
             if ( logees ) {
-                this.logger.debugc.apply( this.logger, [ kernelFunctionName ].concat( logees ) );
+                this.logger.tracex.apply( this.logger, [ kernelFunctionName ].concat( logees ) );
             } 
 
             return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
@@ -95,7 +95,7 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 }
 
                 if ( logees ) {
-                    this.logger.debugc.apply( this.logger, [ modelFunctionName ].concat( logees ) );
+                    this.logger.tracex.apply( this.logger, [ modelFunctionName ].concat( logees ) );
                 }
 
                 return this.model[modelFunctionName].apply( this.model, arguments );

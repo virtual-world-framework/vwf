@@ -27,24 +27,24 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
-    var context = module.id.replace( /\//g, "." );
+    var label = module.id.replace( /\//g, "." );
 
-    logger.for( context ).infoc( "load" );
+    logger.for( label ).debug( "loading" );
 
     return {
 
         module: module,
 
-        logger: logger.for( context ),
+        logger: logger.for( label ),
 
         load: function( module, initializer, kernelGenerator, viewGenerator ) {
 
             var instance = Object.create( this );
 
             instance.module = module;
-            instance.logger = logger.for( instance.module.id.replace( /\//g, "." ) );
+            instance.logger = logger.for( instance.module.id.replace( /\//g, "." ), instance );
             
-            instance.logger.infoc( "load" );
+            instance.logger.debug( "loading" );
 
             if ( typeof initializer == "function" || initializer instanceof Function ) {
                 initializer = initializer();
@@ -67,7 +67,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
         create: function( kernel, view, stages, state, parameters ) {
 
-            this.logger.infoc( "create" );
+            this.logger.debug( "creating" );
 
             // Interpret create( kernel, stages, ... ) as create( kernel, undefined, stages, ... )
 
