@@ -1449,14 +1449,29 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-            if ( childComponent.id ) {  // pre-calculated id from an incoming replication
+var useLegacyID = [  // TODO: fix static ID references and remove
+    // use the legacy ID scheme except for nodes with these names, ...
+    // "...",
+].indexOf( childName ) < 0 && [
+    // ... or with these URIs
+    "http://vwf.example.com/node.vwf",
+].indexOf( childURI ) < 0;
+
+            if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
             } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
                 var childID = childURI ||  // TODO: hash uri => id to shorten for faster lookups?
                     Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
+if ( useLegacyID ) {  // TODO: fix static ID references and remove
+    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
+}
             } else {  // descendant: parent id + next from parent's sequence
                 var childID = nodeID + ":" + this.models.object.sequence( nodeID ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+if ( useLegacyID ) {  // TODO: fix static ID references and remove
+    var childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
+}
             }
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};

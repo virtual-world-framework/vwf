@@ -297,7 +297,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 switch ( childExtendsID ) {
                     case "appscene-vwf":
                     case "index-vwf":
-                    case "http-vwf-example-com-node-vwf":
+                    case "http://vwf.example.com/node.vwf":
                     case "http-vwf-example-com-node2-vwf":
                     case "http-vwf-example-com-scene-vwf":
                     case "http-vwf-example-com-navscene-vwf":
