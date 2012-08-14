@@ -66,7 +66,7 @@ The source and type allow the component to load a seperate data blob, usually in
 
 **properties**
 
-properties are the public variables of the component. The component inherits properties from its prototype and any behaviors. Initializing a property will override any default values from the prototype or behavior.
+Properties are the public variables of the component. The component inherits properties from its prototype and any behaviors. Initializing a property will override any default values from the prototype or behavior.
 
 The declaration for a property provides only a name, and an optional value.
 
@@ -117,7 +117,7 @@ Methods can also be declared empty, and intialized in a script later.
 
 **events**
 
-events define the outgoing messages a node can trigger. The component inherits events from its prototype and behaviors. 
+Events define the outgoing messages a node can trigger. The component inherits events from its prototype and behaviors. 
 
 The event specifier only provides the name of the event.
 
