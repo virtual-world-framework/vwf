@@ -61,13 +61,16 @@ scripts:
     "models/images/purple_tank.png", "models/images/rabbit_tank.png", "models/images/red_tank.png", 
     "models/images/rogue_tank.png" ];
   var tankColors = [ "#1647C4", "#537737", "#F2521E", "#61378A", "#FFFFFF", "#FF0000", "#000000" ];
+  var tankStartingPositions = [[0,10,200],[-13000,31000,200],[-37000,7000,200],
+    [-15000,-40000,200],[10000,-25000,200],[30000,12000,200],[-60000,-17000,200]];
   var playerTank = {
     extends: "tank.vwf",
     properties: {
       active: true,
       laserCount: 0,
       color: '',
-      translation: [0, 10, 200],
+      startingTranslation: [],
+      translation: [],
       scale: 0.5
     },
     children: {
@@ -140,7 +143,7 @@ scripts:
   this.createPlayer = function(playerName) {
     if(this.players[playerName]) {
       if(!this.players[playerName].active) {
-        this.players[playerName].translation = [0, 10, 200];
+        this.players[playerName].translation = this.players[playerName].startingTranslation;
         this.players[playerName].cachedBoundingBox = this.players[playerName].worldBoundingBox;
         this.players[playerName].active = true;
         this.players[playerName].visible = true;
@@ -152,6 +155,8 @@ scripts:
       newPlayer.children[playerName + "Camera"] = playerCamera;
       newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
       newPlayer.properties.color = tankColors[this.colorIndex];
+      newPlayer.properties.translation = tankStartingPositions[this.colorIndex];
+      newPlayer.properties.startingTranslation = tankStartingPositions[this.colorIndex];
       this.players.children.create(playerName, newPlayer);
       this.playerJoined( playerName );
       this.colorIndex += 1;
