@@ -17,17 +17,19 @@ The Virtual World Framework is a model - view based architecture. Views exist fo
 
 <div style='width:100%;text-align:center'><img src='images/arch1.png' alt='arch' width='512' /></div>
 
-A client's browser may have multiple views. For example, a user may see and renderer view and an editor view in their browser window. The renderer view shows a 3D visualization of the model state, and the editor view shows the hierachy of the scene and the pieces that make it up such as it's properties and children.
-
 The single model, or shared state, of the application has multiple copies that represent the shared simulation. 
 
 <div style='width:100%;text-align:center'><img src='images/arch2.png' alt='arch' width='512' /></div>
 
-Each client then has their own replicated model that they take with them. The model, however, remains the same as the one that every other user is viewing. The application then is a state machine. The same state machine is in different locations (different clients). If the state machines all have the same properties and children, they will all move to the same successive state.
+Each client then has their own replicated model that they take with them. The model, however, remains the same as the one that every other user is viewing. All clients show the same state with each having an indentical copy of the application. The applications are separately but simultaneously updated to retain identical states. 
+
+The application then is a state machine. The same state machine is in different locations (different clients). If the state machines all have the same properties and children, they will all move to the same successive state.
+
+A client's browser may have multiple views. For example, a user may see and renderer view and an editor view in their browser window. The renderer view shows a 3D visualization of the model state, and the editor view shows the hierachy of the scene and the pieces that make it up such as it's properties and children.
 
 <div style='width:100%;text-align:center'><img src='images/arch3.png' alt='arch' width='512' /></div>
 
-External inputs from one user get thrown "across the moat" into the "shared simulation." The model deflects incoming input from a view, and sends it directly to the reflector. The reflector can then send out the information to all of the replicated models. Thus all inputs to a model happen identically on the timeline to all clients within the application. 
+External inputs from one user get thrown "across the moat" into the shared simulation (model) [1]. The model deflects incoming input from a view, and sends it directly to the reflector [2]. The reflector can then send out the information to all of the replicated models [3]. Thus all inputs to a model happen identically on the timeline to all clients within the application. 
 
 <div style='width:100%;text-align:center'><img src='images/arch4.png' alt='arch' width='512' /></div>
 
@@ -37,13 +39,17 @@ The architecture separates external input from internal input. All external inpu
 
 **Component Structure**
 
-A VWF application is made up of components. Each component in the system is built up from smaller components or prototypes within the user's programming space. The [components](components.html) section provides further detail about creating application components, and the [prototypes](prototypes.html) page describes the VWF base types. 
+A VWF application is made up of components. Each component in the system is built up from smaller components (i.e. children) or through inheritance (i.e. prototypes) within the user's programming space. 
+
+The application is essentially a component itself, and can have one or more child components. Each child component can then have one or more children, creating a tree structure.
 
 <div style='width:100%;text-align:center'><img src='images/arch5.png' alt='arch' width='600' /></div>
 
-Components can interact with one another via scripts in the application. The use of parent and children keywords such as *this.parent*, *this.children*, *this.parent.children*, and so on can be used to trace through the hierarchy. 
+Additionally, components may extend prototype components, and will inherit their properties, methods, and events. A prototype may have multiple components that extend it in an application.
 
 <div style='width:100%;text-align:center'><img src='images/arch6.png' alt='arch' width='600' /></div>
+
+The [components](components.html) section provides further detail about creating application components, and the [prototypes](prototypes.html) page describes the VWF base types. 
 
 -------------------
 
