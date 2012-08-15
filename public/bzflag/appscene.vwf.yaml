@@ -14,12 +14,50 @@
 ---
 extends: http://vwf.example.com/scene.vwf
 properties:
-  translationSpeed: 1
-  rotationSpeed: 1
+
+  ## The size of the VWF world
+  ## 
+  ## @name appscene.vwf#worldSize
+  ## @property
+
+  worldSize: 137472
+
+  ## The size of the collision map image in pixels
+  ## 
+  ## @name appscene.vwf#collisionMapSize
+  ## @property
+
+  collisionMapSize: 525
+
+  ## World size / collision map size
+  ## 
+  ## @name appscene.vwf#collisionMapScaleFactor
+  ## @property
+
+  collisionMapScaleFactor: 262
+
+  ## The relative path to the image used for the collision map
+  ## 
+  ## @name appscene.vwf#collisionMapPath
+  ## @property
+
+  collisionMapPath: images/bzworldcollisionmap.png
 methods:
   update: 
 scripts:
 - |
+  var collisionMapCanvas, collisionMapContext;
+  this.initialize = function() {
+    collisionMapCanvas = document.createElement('canvas');
+    collisionMapCanvas.width = this.collisionMapSize;
+    collisionMapCanvas.height = this.collisionMapSize;
+    collisionMapContext = collisionMapCanvas.getContext("2d");
+    var collisionMapImage = new Image();
+    collisionMapImage.onload = function() {
+        collisionMapContext.drawImage(collisionMapImage, 0, 0);
+    }
+    collisionMapImage.src = this.collisionMapPath;
+  }
   this.collisionDetection = function(deltaTranslation, player) {
     var collision = false;
     var playerBoundingBox = player.cachedBoundingBox;
@@ -29,18 +67,42 @@ scripts:
     playerBoundingBox.min[1] += deltaTranslation[1];
     playerBoundingBox.max[2] += deltaTranslation[2];
     playerBoundingBox.min[2] += deltaTranslation[2];
-    // If the player is not within the bounding box of the world, it's colliding with the outer walls
-    var inBounds = this.checkForCollision(player, playerBoundingBox, [this.bz_world]);
-    if(inBounds) {
-      collision = this.checkForCollision(player, playerBoundingBox, this.bz_world.bone2.ID1.SketchUp.instance_0.skp7582.instance_1.Component.children) || 
-          this.checkForCollision(player, playerBoundingBox, this.players.children);
-    }
-    else {
-      collision = this.bz_world;
-    }
+    
+    collision = this.checkForStaticCollision(playerBoundingBox) ||
+        this.checkForDynamicCollision(player, playerBoundingBox, this.players.children);
     return collision;
   }
-  this.checkForCollision = function(player, playerBoundingBox, sceneObjects) {
+  this.checkForStaticCollision = function(playerBoundingBox) {
+    var minX, minY, maxX, maxY;
+    minX = Math.round((playerBoundingBox.min[0] + this.worldSize / 2) / this.collisionMapScaleFactor);
+    minY = Math.round((this.worldSize / 2 - playerBoundingBox.min[1]) / this.collisionMapScaleFactor);
+    maxX = Math.round((playerBoundingBox.max[0] + this.worldSize / 2) / this.collisionMapScaleFactor);
+    maxY = Math.round((this.worldSize / 2 - playerBoundingBox.max[1]) / this.collisionMapScaleFactor);
+
+    if(minX < 0 || minY < 0 || maxX > this.collisionMapSize || maxY > this.collisionMapSize) {
+      return this.bz_world;
+    }
+    else {
+      var imageData = collisionMapContext.getImageData(minX, minY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+      imageData = collisionMapContext.getImageData(minX, maxY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+      imageData = collisionMapContext.getImageData(maxX, minY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+      imageData = collisionMapContext.getImageData(maxX, maxY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+    }
+    return false;
+  }
+  this.checkForDynamicCollision = function(player, playerBoundingBox, sceneObjects) {
     for(var i=0;i<sceneObjects.length;i++) {
       if(player.id != sceneObjects[i].id && (!player.parentTank || player.parentTank != sceneObjects[i].id) && sceneObjects[i].active != false) {
         var sceneBoundingBox = sceneObjects[i].cachedBoundingBox ? sceneObjects[i].cachedBoundingBox : sceneObjects[i].worldBoundingBox;
@@ -56,5 +118,5 @@ scripts:
         return sceneObjects[i];
       }
     }
-    return undefined;
+    return false;
   }
