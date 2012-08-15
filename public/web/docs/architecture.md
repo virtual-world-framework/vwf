@@ -63,7 +63,7 @@ For example, the GLGE driver is responsible for any manipulation on the node tha
 
 Model and view drivers have the same structure; however, the model driver doesn't reach out, and a view driver does not have direct control. 
 
-For more detailed information regarding the drivers, please references the [drivers](drivers.html) page.
+For more detailed information regarding the drivers, please reference the [drivers](drivers.html) page.
 
 --------------------
 
