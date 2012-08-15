@@ -10,11 +10,18 @@
 				
 	<script type="text/javascript">
 		$(function(){
-			$( "#tabs" ).tabs();
+			$("#tabs").tabs();
+			$("#tabs").css("opacity", "0.6");
+
+			$( "#tabs" ).keydown(function(e) {
+			    e.stopPropagation();
+			}).keyup(function(e) {
+			    e.stopPropagation();
+			});
 
 			$('#createUser').dialog( {
 				height: 'auto',
-				width: 300,
+				width: 820,
 				modal: true,
 				resizable: false,
 				draggable: false,
@@ -28,6 +35,20 @@
 					}
 				}
 			});
+
+			$(".ui-dialog-titlebar").css("margin", "0px");
+			$(".ui-dialog-titlebar").css("padding", "0px");
+			$(".ui-dialog-titlebar").css("background-image", "url('images/header.png')");
+			$(".ui-dialog-titlebar").css("height", "165px");
+			$(".ui-dialog-titlebar-close").css("visibility", "hidden");
+
+			$(".ui-dialog").css("background-color", "#222222");
+			$(".ui-dialog").css("color", "white");
+			$(".ui-dialog").css("text-align", "center");
+
+			$(".ui-widget-content").css("background", "none");
+			$(".ui-widget-content").css("background-color", "#222222");
+			$(".ui-widget-content").css("color", "white");
 
 			$('#gameOver').dialog( {
 				autoOpen: false,
@@ -70,6 +91,7 @@
 				  	
 		.style1 {
 			text-align: left;
+			overflow:hidden;
 		}
 					
 		.style2 {
@@ -136,7 +158,7 @@
 			</td>
 		</tr>
 	</table>
-	<div id="createUser" title="Create new user">
+	<div id="createUser">
 		<label for="playerName">Name</label>
 		<input type="text" name="playerName" id="playerName" class="text ui-widget-content ui-corner-all" />
 	</div>
