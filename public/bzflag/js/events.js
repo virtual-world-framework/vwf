@@ -211,20 +211,27 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
           case "playerJoined":
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
+            $('#pop')[0].play();
             break;
           case "playerRespawned":
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " respawned.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " respawned.</b><br/></span>" );
+            $('#pop')[0].play();
             break;
           case "playerDestroyed":
             if(eventParameters[0] == playerNode) $( "#gameOver" ).dialog( "open" );
             var name = eventParameters[0].substring(9);
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
+            $('#boom')[0].play();
             break;
           case "chatSent":
             $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ": " + eventParameters[1] + "</b><br/></span>" );
             $('#allContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ": " + eventParameters[1] + "</b><br/></span>" );
+            $('#message')[0].play();
+            break;
+          case "laserFired":
+            $('#laser')[0].play();
             break;
         }
         $("#serverContent").scrollTop($("#allContent")[0].scrollHeight);

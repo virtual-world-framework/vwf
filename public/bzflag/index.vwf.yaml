@@ -27,6 +27,7 @@ events:
   playerDestroyed: 
   playerRespawned:
   chatSent:
+  laserFired:
 children:
   bz_world:
     extends: bzworld.vwf
@@ -172,6 +173,7 @@ scripts:
       this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
       player.laserCount += 1;
     }
+    this.laserFired();
   }
   this.sendChat = function(playerName, chatToSend) {
     this.chatSent( playerName, chatToSend, this.players[playerName].color );
