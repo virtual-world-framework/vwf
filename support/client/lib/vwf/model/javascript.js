@@ -221,6 +221,26 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 enumerable: true,
             } );
 
+            Object.defineProperty( node, "find", {
+                value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
+                    if ( callback ) {
+                        self.kernel.find( this.id, matchPattern, function( matchID ) {
+                            callback.call( node, self.nodes[matchID] );
+                        } );
+                    } else {  // TODO: future iterator proxy
+                        return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
+                            return self.nodes[matchID];
+                        } );
+                    }
+                }
+            } );
+
+            Object.defineProperty( node, "test", {
+                value: function( matchPattern, testNode ) { // "this" is node
+                    return self.kernel.test( this.id, matchPattern, testNode.id );
+                }
+            } );
+
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.
@@ -249,26 +269,6 @@ node.uri = childURI; // TODO: move to vwf/model/object
             node.private.future = Object.create( prototype.private ?
                 prototype.private.future : Object.prototype
             );
-
-            Object.defineProperty( node, "find", {
-                value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
-                    if ( callback ) {
-                        self.kernel.find( this.id, matchPattern, function( matchID ) {
-                            callback.call( node, self.nodes[matchID] );
-                        } );
-                    } else {  // TODO: future iterator proxy
-                        return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
-                            return self.nodes[matchID];
-                        } );
-                    }
-                }
-            } );
-
-            Object.defineProperty( node, "test", {
-                value: function( matchPattern, testNode ) { // "this" is node
-                    return self.kernel.test( this.id, matchPattern, testNode.id );
-                }
-            } );
 
             Object.defineProperty( node.private.future, "private", {
                 value: {
