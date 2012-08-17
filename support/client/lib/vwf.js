@@ -2498,7 +2498,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             var prototypeID = undefined;
             
             while ( nodeID !== undefined ) {
-                if ( ( prototypeID = this.prototype( nodeID ) ) !== undefined ) { // assignment is intentional
+                if ( ( prototypeID = /* assignment! */ this.prototype( nodeID ) ) !== undefined ) {
                     prototypeIDs.push( prototypeID );
                 }
                 nodeID = prototypeID;

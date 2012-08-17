@@ -630,7 +630,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     fileName = decodeURIComponent(fileData.fileName);
                     fileUrl = decodeURIComponent(fileData.fileUrl);
 
-                    if ( match = fileUrl.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {  // assignment is intentional
+                    if ( match = /* assignment! */ fileUrl.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {
 
                         object = {
                           extends: match[1],
@@ -642,7 +642,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                         fileName = fileName.replace( /\.(json|yaml)$/i, "" );
 
-                    } else if ( match = fileUrl.match( /\.dae$/i ) ) { // assignment is intentional
+                    } else if ( match = /* assignment! */ fileUrl.match( /\.dae$/i ) ) {
 
                         object = {
                           extends: "http://vwf.example.com/node3.vwf",

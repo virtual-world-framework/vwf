@@ -481,7 +481,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         jQuery.getJSON( "/" + root + "/admin/instances", function( data ) {
             jQuery.each( data, function( key, value ) {
-                if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) { // assignment is intentional
+                if ( match = /* assignment! */ key.match( RegExp( "/([^/]*)$" ) ) ) {
 
                     var instanceHTML = String( match[1] ).
                       replace( /&/g, "&amp;" ).

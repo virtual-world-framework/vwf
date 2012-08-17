@@ -42,7 +42,7 @@
 						( 
 						data, function( key, value ) 
 							{
-							  if ( match = key.match( RegExp( "/([^/]*)$" ) ) ) // assignment is intentional
+							  if ( match = /* assignment! */ key.match( RegExp( "/([^/]*)$" ) ) )
 							  { 
 									var instanceHTML = htmlEscape( match[1] );
 									var size = Object.size(value.clients); 
