@@ -1992,7 +1992,20 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
             } );
 
-            var initializing = ! nodeHasOwnProperty.call( this, nodeID, propertyName );
+            // Select the actual driver calls. Create the property if it doesn't exist on this node
+            // or its prototypes. Initialize it if it exists on a prototype but not on this node.
+            // Set it if it already exists on this node.
+
+            if ( ! nodeHasProperty.call( this, nodeID, propertyName ) ) {
+                var settingPropertyEtc = "creatingProperty";
+                var satPropertyEtc = "createdProperty";
+            } else if ( ! nodeHasOwnProperty.call( this, nodeID, propertyName ) ) {
+                var settingPropertyEtc = "initializingProperty";
+                var satPropertyEtc = "initializedProperty";
+            } else {
+                var settingPropertyEtc = "settingProperty";
+                var satPropertyEtc = "satProperty";
+            }
 
             // Record calls into this function by nodeID and propertyName so that models may call
             // back here (directly or indirectly) to delegate responses further down the chain
@@ -2019,13 +2032,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                     // Make the call.
 
-                    if ( initializing ) {
-                        var value = model.initializingProperty &&
-                            model.initializingProperty( nodeID, propertyName, propertyValue );
-                    } else {
-                        var value = model.settingProperty &&
-                            model.settingProperty( nodeID, propertyName, propertyValue );
-                    }
+                    var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
 
                     // Look for a return value potentially stored here by a reentrant call if the
                     // model didn't return one explicitly (such as with a JavaScript accessor
@@ -2052,10 +2059,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     }
 
                     // If we are setting, exit from the this.models.some() iterator once the value
-                    // has been set. Don't exit early if we are initializing since every model needs
-                    // the opportunity to register the property.
+                    // has been set. Don't exit early if we are creating or initializing since every
+                    // model needs the opportunity to register the property.
 
-                    return ! initializing && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+                    return settingPropertyEtc == "settingProperty" && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
                 }
 
             }, this );
@@ -2079,11 +2086,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // been set.  TODO: only want to call when actually set and with final value
 
                 this.views.forEach( function( view ) {
-                    if ( initializing ) {
-                        view.initializedProperty && view.initializedProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
-                    } else {
-                        view.satProperty && view.satProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
-                    }
+                    view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually set, not the incoming value
                 } );
 
             }

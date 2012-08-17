@@ -161,13 +161,13 @@
 
               vwf.setProperty( derivedDerivedBehaviorID, "derivedDerivedBehavior", "UpDaTeD" );
               vwf.setProperty( derivedDerivedBehaviorID, "derivedBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedDerivedBehaviorID, "baseBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedDerivedBehaviorID, "baseBehavior", "CrEaTeD" );
               vwf.setProperty( derivedDerivedBehaviorID, "base", "UpDaTeD" );
 
               equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "UpDaTeD", "derived property after initialization on derived with derived behavior" );
               equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "UpDaTeD", "derived behavior property after initialization on derived with derived behavior" );
-              // equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), false, "base behavior property not initialized on derived with derived behavior (JavaScript binding)" );  // TODO: kernel doesn't prevent this yet
-              // equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), undefined, "base behavior property not initialized on derived with derived behavior (kernel delegation)" );  // TODO: kernel doesn't prevent this yet
+              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), true, "base behavior property created on derived with derived behavior (JavaScript binding)" );  // TODO: kernel doesn't prevent this yet
+              equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), "CrEaTeD", "base behavior property created on derived with derived behavior (kernel delegation)" );  // TODO: kernel doesn't prevent this yet
               equal( vwf.execute( derivedDerivedBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with derived behavior" );
 
               equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with derived behavior through accessor" );
