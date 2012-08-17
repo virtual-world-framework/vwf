@@ -2099,7 +2099,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // Get a property value for a node.
 
-        this.getProperty = function( nodeID, propertyName ) {
+        this.getProperty = function( nodeID, propertyName, ignorePrototype ) {
 
             this.logger.debuggx( "getProperty", nodeID, propertyName );
 
@@ -2179,13 +2179,28 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                 delete entrants[nodeID+'-'+propertyName];
 
-                // Delegate to the prototype if we didn't get a result from the current node.
+                // Delegate to the behaviors and prototype if we didn't get a result from the
+                // current node.
 
-                if ( propertyValue === undefined ) {
-                    var prototypeID = nodePrototypeID.call( this, nodeID );
+                if ( propertyValue === undefined && ! ignorePrototype ) {
+
+                    var behaviorIDs = this.behaviors( nodeID );
+
+                    while ( propertyValue === undefined && behaviorIDs.length ) {
+                        var behaviorID = behaviorIDs.pop();
+                        propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
+                    }
+
+                }
+
+                if ( propertyValue === undefined && ! ignorePrototype ) {
+
+                    var prototypeID = this.prototype( nodeID );
+
                     if ( prototypeID != nodeTypeURI ) {
                         propertyValue = this.getProperty( prototypeID, propertyName );
                     }
+
                 }
 
                 // Call gotProperty() on each view.
@@ -2669,11 +2684,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         var nodeHasOwnChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
             return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
-        };
-
-        var nodePrototypeID = function( nodeID ) { // invoke with the kernel as "this"
-            var node = this.models.javascript.nodes[nodeID];
-            return Object.getPrototypeOf( node ).id;  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
         };
 
         // Is a component specifier a URI?

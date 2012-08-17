@@ -657,14 +657,14 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
     // -- proxiedBehavior --------------------------------------------------------------------------
 
-    function proxiedBehavior( prototype, behavior ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.
+    function proxiedBehavior( prototype, behavior ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.  // TODO: nodes need to keep a list of proxies on them and callback here to refresh after changes
 
         var self = this;
 
         var proxy = Object.create( prototype );
 
         Object.defineProperty( proxy, "private", {
-            value: Object.create( behavior.private || Object.prototype )
+            value: {}
         } );
 
         proxy.private.origin = behavior; // the node we're the proxy for
@@ -681,6 +681,14 @@ proxy.id = behavior.id; // TODO: move to vwf/model/object
         proxy.properties = Object.create( prototype.properties || Object.prototype, {
             node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
         } );
+
+        proxy.private.getters = Object.create( prototype.private ?
+            prototype.private.getters : Object.prototype
+        );
+
+        proxy.private.setters = Object.create( prototype.private ?
+            prototype.private.setters : Object.prototype
+        );
 
         for ( var propertyName in behavior.properties ) {
 
@@ -703,6 +711,14 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
 
                 } )( propertyName );
             
+                if ( behavior.private.getters.hasOwnProperty( propertyName ) ) {
+                    proxy.private.getters[propertyName] = behavior.private.getters[propertyName];
+                }
+
+                if ( behavior.private.setters.hasOwnProperty( propertyName ) ) {
+                    proxy.private.setters[propertyName] = behavior.private.setters[propertyName];
+                }
+
             }
 
         }
@@ -710,6 +726,10 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
         proxy.methods = Object.create( prototype.methods || Object.prototype, {
             node: { value: proxy } // for proxy.methods accessors (non-enumerable)  // TODO: hide this better
         } );
+
+        proxy.private.bodies = Object.create( prototype.private ?
+            prototype.private.bodies : Object.prototype
+        );
 
         for ( var methodName in behavior.methods ) {
 
@@ -748,6 +768,10 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
 
                 } )( methodName );
             
+                if ( behavior.private.bodies.hasOwnProperty( methodName ) ) {
+                    proxy.private.bodies[methodName] = behavior.private.bodies[methodName];
+                }
+
             }
 
         }
@@ -755,6 +779,8 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
         proxy.events = Object.create( prototype.events || Object.prototype, {
             node: { value: proxy } // for proxy.events accessors (non-enumerable)  // TODO: hide this better
         } );
+
+        proxy.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
         for ( var eventName in behavior.events ) {
 
@@ -825,9 +851,27 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
                 } )( eventName );
 
+                if ( behavior.private.listeners.hasOwnProperty( eventName ) ) {
+                    proxy.private.listeners[eventName] = behavior.private.listeners[eventName];
+                }
+
             }
 
         }
+
+        proxy.private.future = Object.create( prototype.private ?
+            prototype.private.future : Object.prototype
+        );
+
+        Object.defineProperty( proxy.private.future, "private", {
+            value: {
+                when: 0,
+                callback: undefined,
+                change: 0,
+            }
+        } );
+
+        proxy.private.change = behavior.private.change;
 
         return proxy;
     }
