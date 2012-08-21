@@ -1453,9 +1453,11 @@ var useLegacyID = [  // TODO: fix static ID references and remove
     // use the legacy ID scheme except for nodes with these names, ...
     // "...",
 ].indexOf( childName ) < 0 && [
-    // ... or with these URIs
+    // ... or with these URIs, ...
     "http://vwf.example.com/node.vwf",
-].indexOf( childURI ) < 0;
+].indexOf( childURI ) < 0 &&
+    // ... but not for tests
+    require.s.contexts._.config.baseUrl != "../lib/";
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
