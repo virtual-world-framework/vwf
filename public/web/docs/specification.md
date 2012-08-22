@@ -1,1 +1,1 @@
-<iframe src="application/example.vwf.html" style="height:600px" ALLOWTRANSPARENCY="false">Specification</iframe>
+<iframe src="application/example.vwf.html" style="height:600px;width:100%;" ALLOWTRANSPARENCY="false">Specification</iframe>

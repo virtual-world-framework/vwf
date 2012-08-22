@@ -24,7 +24,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.canvasQuery = undefined;
  
             this.lastPick = undefined;
-            this.keyStates = { keysDown: {}, mods: {} };
+            this.lastEventData = undefined;
+            this.mouseOverCanvas = false;
+            this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 
             this.height = 600;
             this.width = 800;
@@ -60,6 +62,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 window.onkeydown = function (event) {
                     var key = undefined;
                     var validKey = false;
+                    var keyAlreadyDown = false;
                     switch (event.keyCode) {
                         case 17:
                         case 16:
@@ -69,6 +72,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                             break;
                         default:
                             key = getKeyValue.call( glgeView, event.keyCode);
+                            keyAlreadyDown = !!glgeView.keyStates.keysDown[key.key];
                             glgeView.keyStates.keysDown[key.key] = key;
                             validKey = true;
                             break;
@@ -81,7 +85,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     glgeView.keyStates.mods.meta = event.metaKey;
 
                     var sceneNode = glgeView.state.scenes[glgeView.state.sceneRootID];
-                    if (validKey && sceneNode /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
+                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( glgeView.keyStates.keysDown ).length > 0*/) {
                         //var params = JSON.stringify( glgeView.keyStates );
                         glgeView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [glgeView.keyStates]);
                     }
@@ -100,6 +104,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         default:
                             key = getKeyValue.call( glgeView, event.keyCode);
                             delete glgeView.keyStates.keysDown[key.key];
+                            glgeView.keyStates.keysUp[key.key] = key;
                             validKey = true;
                             break;
                     }
@@ -113,6 +118,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     if (validKey && sceneNode) {
                         //var params = JSON.stringify( glgeView.keyStates );
                         glgeView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [glgeView.keyStates]);
+                        delete glgeView.keyStates.keysUp[key.key];
                     }
 
                 };
@@ -140,6 +146,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         $('#client_list').height(canvas.height);
                         $('#time_control').height(canvas.height);
                         $('#about_tab').height(canvas.height);
+                        $('#model_a').height(canvas.height);
+                        $('#model_b').height(canvas.height);
                     }
                 }
 
@@ -227,15 +235,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         function renderScene(time) {
 			requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
+            if((time - lastPickTime) > 10) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
-                if(newPick) {
-    				self.lastPick = newPick;
+                self.lastPick = newPick;
+    			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
+    				oldMouseX = mouse.getMousePosition().x;
+    				oldMouseY = mouse.getMousePosition().y;
+                    hovering = false;
+    			}
+                else if(self.lastEventData && self.mouseOverCanvas && !hovering) {
+                    var pickId = newPick ? getPickObjectID.call( view, self.lastPick, false ) : view.state.sceneRootID;
+                    view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                    hovering = true;
                 }
-				oldMouseX = mouse.getMousePosition().x;
-				oldMouseY = mouse.getMousePosition().y;
-				lastPickTime = time;
-			}
+                lastPickTime = time;
+            }
             renderer.render();
         };
 
@@ -245,6 +259,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			var mouse = new GLGE.MouseInput( canvas );
 			var oldMouseX = mouse.getMousePosition().x;
 			var oldMouseY = mouse.getMousePosition().y;
+            var hovering = false;
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
@@ -301,7 +316,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var container = document.getElementById("container");
         var sceneCanvas = canvas;
         var mouse = new GLGE.MouseInput( sceneCanvas );
-        var mouseOverCanvas = false;
 
         var self = this;
 
@@ -341,6 +355,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         meta: e.metaKey,
                     },
                 position: [ mouseXPos.call( this,e)/sceneView.width, mouseYPos.call( this,e)/sceneView.height ],
+                screenPosition: [mouseXPos.call(this,e), mouseYPos.call(this,e)]
             } ];
 
 
@@ -348,7 +363,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var camera = sceneView.state.cameraInUse;
             var worldCamPos, worldCamTrans, camInverse;
             if ( camera ) { 
-                worldCamPos = [ camera.getLocX(), camera.getLocY(), camera.getLocZ() ]; 
+                worldCamTrans = camera.getModelMatrix();
+                worldCamPos = [ worldCamTrans[3], worldCamTrans[7], worldCamTrans[11] ];
+                //worldCamPos = [ camera.getLocX(), camera.getLocY(), camera.getLocZ() ]; 
 //                worldCamTrans = goog.vec.Mat4.createFromArray( camera.getLocalMatrix() );
 //                goog.vec.Mat4.transpose( worldCamTrans, worldCamTrans );
 //                camInverse = goog.vec.Mat4.create();
@@ -431,6 +448,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 }
             }
+            self.lastEventData = returnData;
             return returnData;
         }          
 
@@ -503,7 +521,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         canvas.onmouseover = function( e ) {
-            mouseOverCanvas = true;
+            self.mouseOverCanvas = true;
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
@@ -523,8 +541,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
                                 pointerOverID = pointerPickID;
                                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
-                            } else {
-                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerHover", eData.eventData, eData.eventNodeData );
                             }
                         } else {
                             pointerOverID = pointerPickID;
@@ -545,7 +561,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave" );
                 pointerOverID = undefined;
             }
-            mouseOverCanvas = false;
+            self.mouseOverCanvas = false;
         }
 
         canvas.setAttribute("onmousewheel", '');
@@ -555,9 +571,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
                     eData.eventNodeData[""][0].wheel = {
-                        delta: e.wheelDelta,
-                        deltaX: e.wheelDeltaX,
-                        deltaY: e.wheelDeltaY,
+                        delta: e.wheelDelta / -40,
+                        deltaX: e.wheelDeltaX / -40,
+                        deltaY: e.wheelDeltaY / -40,
                     };
                     var id = sceneID;
                     if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
@@ -575,9 +591,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var eData = getEventData( e, false );
                 if ( eData ) {
                     eData.eventNodeData[""][0].wheel = {
-                        delta: e.detail * -40,
-                        deltaX: e.detail * -40,
-                        deltaY: e.detail * -40,
+                        delta: e.detail,
+                        deltaX: e.detail,
+                        deltaY: e.detail,
                     };
                     var id = sceneID;
                     if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
@@ -622,21 +638,36 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             if ( eData ) {
 
-                var fileData, fileName, fileUrl, match, object;
+                var fileData, fileName, fileUrl, rotation, scale, translation, match, object;
 
                 try {
 
                     fileData = JSON.parse( e.dataTransfer.getData('text/plain') );
                     fileName = decodeURIComponent(fileData.fileName);
                     fileUrl = decodeURIComponent(fileData.fileUrl);
+                    rotation = decodeURIComponent(fileData.rotation);
+                    rotation = rotation ? JSON.parse(rotation) : undefined;
+                    scale = decodeURIComponent(fileData.scale);
+                    scale = scale ? JSON.parse(scale) : [1, 1, 1];
+                    translation = decodeURIComponent(fileData.translation);
+                    translation = translation ? JSON.parse(translation) : [0, 0, 0];
+                    if($.isArray(translation) && translation.length == 3) {
+                        translation[0] += eData.eventNodeData[""][0].globalPosition[0];
+                        translation[1] += eData.eventNodeData[""][0].globalPosition[1];
+                        translation[2] += eData.eventNodeData[""][0].globalPosition[2];
+                    }
+                    else {
+                        translation = eData.eventNodeData[""][0].globalPosition;
+                    }
 
                     if ( match = /* assignment! */ fileUrl.match( /(.*\.vwf)\.(json|yaml)$/i ) ) {
 
                         object = {
                           extends: match[1],
                           properties: { 
-                            translation: eData.eventNodeData[""][0].globalPosition,
-                            scale: [ 1, 1, 1 ],
+                            translation: translation,
+                            rotation : rotation,
+                            scale: scale,
                           },
                         };
 
@@ -649,8 +680,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                           source: fileUrl,
                           type: "model/vnd.collada+xml",
                           properties: { 
-                            translation: eData.eventNodeData[""][0].globalPosition,
-                            scale: [ 1, 1, 1 ],
+                            translation: translation,
+                            rotation : rotation,
+                            scale: scale,
                           },   
                         };
 

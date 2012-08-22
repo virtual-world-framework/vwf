@@ -10,9 +10,11 @@ The Virtual World Framework (VWF) is a fast, light-weight, web-based architectur
 * JavaScript – the programming language of the web  
 
 The VWF serves as a replicated computing platform for multi-user interactive 2D and 3D components with a high degree of customizability of the environment and high bandwidth communication between users. These are environments that are focused on work and working together – whether for training, collaboration and/or entertainment. It is a zero-install platform, where additional software components can be added dynamically. VWF spaces can be embedded in virtually any application including web pages and emails. Furthermore, VWF spaces can embed existing applications and browsers. The next big 3D platform is simply the current world wide web with additional capabilities, and the Virtual World Framework embraces this ever growing technology.
+---------------------
 
-Installation Instructions
+Installation/Upgrade Instructions
 =====================
+
 
 Ubuntu/Debian
 -
@@ -20,12 +22,15 @@ Perform the following shell command at a user shell prompt:
 <pre><code>sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_debian.sh  | bash
 </code></pre>
 
+This command may be re-executed to upgrade the installation to the latest version of VWF at any time.
 
 Red Hat Enterprise Linux
 -
 Perform the following shell command at a user shell prompt:
 <pre><code>sudo curl https://raw.github.com/virtual-world-framework/vwf/master/support/build/Scripts/build_redhat.sh  | bash
 </code></pre>
+
+This command may be re-executed to upgrade the installation to the latest version of VWF at any time.
 
 Windows
 -
@@ -35,7 +40,7 @@ Download the Virtual World Framework Zip from:
 
 and then execute the _run.bat_ file provided at the root level of the extracted folder.
 
-Manual Installations
+Development Environment Setup and Manual Installation 
 -
 For additional information please visit: http://www.virtual.wf/web/docs/install.html
 

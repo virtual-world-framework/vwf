@@ -17,7 +17,6 @@ properties:
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   backgroundColor: [ 83, 157, 194 ]
   navmode: "orbit"
-  speed: 80.0
   mouseMode:
     set: |
       if( value == "orbit" ) {

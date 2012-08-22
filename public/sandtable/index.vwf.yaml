@@ -24,7 +24,7 @@ scripts:
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.camera.translation = [ 0, 20000, 10000 ];
       this.camera.far = 500000;
-      this.camera.near = 2;                        
+      this.camera.near = 2;
       this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
     }
     this.toolbar.selectedColorChanged = this.events.add( function( color ) {

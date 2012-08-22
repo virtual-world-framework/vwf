@@ -16,8 +16,21 @@
 <html>
 	<head>
 		<title>Virtual World Framework</title>
-		<meta http-equiv="REFRESH" content="0;url=web/about.html">
+		
+		<script type="text/javascript">
+				function UrlExists(){
+				var http = new XMLHttpRequest();
+				http.open('HEAD', 'web/about.html', false);
+				http.send();
+				if(http.status!=404){window.location.href = "web/about.html"; };
+				if(http.status==404){var body=document.getElementsByTagName('body')[0];body.style.display="block";};
+				}
+		</script>	
   	</head>
-	<body>
+	
+	<body onload="UrlExists();" style="display:none;background-color:#757C82;color:#ffffff;">
+	<h2>Virtual World Framework</h2><br/><br/>
+	Virtual World Framework is minimally installed and running at this point. Please return to your command line and run "bundle exec rake build" to compile the VWF Framework and then execute run.bat (Windows), or restart your Thin Server (Linux).
+
 	</body>
 </html>

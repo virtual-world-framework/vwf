@@ -37,7 +37,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
         logger: logger.for( label ),
 
-        load: function( module, initializer, kernelGenerator, viewGenerator ) {
+        load: function( module, initializer, viewGenerator, kernelGenerator ) {
 
             var instance = Object.create( this );
 
@@ -54,14 +54,20 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
                 instance[key] = initializer[key]; 
             }
 
-            kernelGenerator && Object.keys( kernel_api ).forEach( function( kernelFunctionName ) {
-                instance[kernelFunctionName] = kernelGenerator.call( instance, kernelFunctionName ); // TODO: ignore if undefined
+            viewGenerator && Object.keys( view_api ).forEach( function( viewFunctionName ) {
+                if ( ! instance.hasOwnProperty( viewFunctionName ) ) {
+                    instance[viewFunctionName] = viewGenerator.call( instance, viewFunctionName );
+                    instance[viewFunctionName] || delete instance[viewFunctionName];
+                }
             } );
 
-            viewGenerator && Object.keys( view_api ).forEach( function( viewFunctionName ) {
-                instance[viewFunctionName] = viewGenerator.call( instance, viewFunctionName ); // TODO: ignore if undefined
+            kernelGenerator && Object.keys( kernel_api ).forEach( function( kernelFunctionName ) {
+                if ( ! instance.hasOwnProperty( kernelFunctionName ) ) {
+                    instance[kernelFunctionName] = kernelGenerator.call( instance, kernelFunctionName );
+                    instance[kernelFunctionName] || delete instance[kernelFunctionName];
+                }
             } );
-                
+
             return instance;
         },
 

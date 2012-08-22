@@ -87,7 +87,6 @@ textarea:focus, input:focus{
 	padding-right:10px;
 	padding-top:5px;
 	padding-bottom:10px;
-	margin-bottom:5px;
 	background:#153255;
 	overflow:hidden;
 }
@@ -96,11 +95,26 @@ textarea:focus, input:focus{
 {
 	padding-left:10px;
 	padding-right:10px;
+	padding-top:0.5em;
+	padding-bottom:0.5em;
+	border-bottom-style:solid;
+	border-bottom-width:1px;
+	border-bottom-color: #153255;
 }
 
 .childContainer {
 	background-image:url('images/toggle-expand-light.png');
 	background-repeat:no-repeat;
+	background-position: right center;
+	padding-top:0.5em;
+	padding-bottom:0.5em;
+	border-bottom-style:solid;
+	border-bottom-width:1px;
+	border-bottom-color: #153255;
+}
+
+.childContainerHighlight {
+	background-color: #4C6D97;
 }
 
 .childEntry {
@@ -112,6 +126,11 @@ textarea:focus, input:focus{
 {
 	padding-left:10px;
 	padding-right:10px;
+	padding-top:0.5em;
+	padding-bottom:0.5em;
+	border-bottom-style:solid;
+	border-bottom-width:1px;
+	border-bottom-color: #153255;
 }
 
 .methodEntry td
@@ -128,13 +147,18 @@ textarea:focus, input:focus{
 	font-weight:bold;
 	padding-left:10px;
 	padding-right:10px;
+	padding-top:0.5em;
+	padding-bottom:0.5em;
+	border-bottom-style:solid;
+	border-bottom-width:1px;
+	border-bottom-color: #153255;
 }
 
 .scriptEntry 
 {
 	padding-left:10px;
 	padding-right:10px;
-	height:90%;
+	height:85%;
 }
 
 .scriptCode
@@ -201,4 +225,18 @@ textarea:focus, input:focus{
 	font-weight:bold;
 	padding-left:10px;
 	padding-right:10px;
+}
+
+.drag {
+	padding-top:5px;
+	padding-bottom:5px;
+	border-style:solid;
+	border-width:medium;
+	border-color: #153255;
+	text-align: center;
+}
+
+.drag:hover {
+	cursor: move;
+	background-color: #4C6D97;
 }

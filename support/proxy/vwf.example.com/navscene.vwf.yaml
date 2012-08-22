@@ -29,7 +29,9 @@ properties:
     value: "walk"
   orbitRadius: -1  
   orbitObjectID: "http-vwf-example-com-node3-vwf-sceneCenter"
-  speed: 2.0
+  # rotationSpeed: At a speed of 1, will take 4 seconds to go around 360 degrees.
+  rotationSpeed: 1.0
+  translationSpeed: 1.0
   maxSpeed: 500
   dragModeMove: false
 events:
@@ -52,7 +54,6 @@ scripts:
     var _85 = 85.0 * _piDiv180;
     var _10 = 10.0 * _piDiv180;
     var phi, theta;
-    var positionChanged = false;
     this.initialize = function() {
       this.input = { 
         futureActive: function() {
@@ -62,8 +63,8 @@ scripts:
         timeSinceDownEvent: function() { return this.time - this.pointerDownTime; },
         pointerDelta: function() { 
           if ( this.pointerInfo && this.lastPointerInfo ) {
-            return [ this.lastPointerInfo.position[0] - this.pointerInfo.position[0],
-                     this.lastPointerInfo.position[1] - this.pointerInfo.position[1] 
+            return [ (this.lastPointerInfo.position[0] - this.pointerInfo.position[0]) * 50,
+                     (this.lastPointerInfo.position[1] - this.pointerInfo.position[1]) * 50 
                    ];
           }
           return undefined;
@@ -85,9 +86,16 @@ scripts:
         turnLeftDown: false,
         turnRightDown: false,
         lastUpdateTime: undefined,
+        lastInputTime: undefined,
       };
-      this.originalSpeed = this.speed;
       this.setNavMode( this.navmode );
+    }
+    this.timeElapsed = function() {
+      var timeElapsed = this.time - this.input.lastInputTime;
+      if ( !this.input.lastInputTime || timeElapsed > 1 ) {
+        timeElapsed = 1;  
+      }
+      return timeElapsed;
     }
     this.setNavMode = function( mode ) {
       if (!this.activeCameraComp) {
@@ -150,51 +158,42 @@ scripts:
       this.input.lastPickInfo = undefined;
       this.input.pickInfo = pickInfo;      
       this.input.pointerDownTime = this.time;
+      this.input.lastInputTime = this.time;
     }
     this.pointerUp = function( parms, pickInfo ){
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = undefined;
       this.input.lastPickInfo = this.input.pickInfo;
-      this.input.pickInfo = undefined;            
+      this.input.pickInfo = undefined;
+      this.input.lastInputTime = this.time;            
     }
     this.pointerMove = function( parms, pickInfo ){
       this.input.pointerEventTime = this.time;
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = parms;
       this.input.lastPickInfo = this.input.pickInfo;
-      this.input.pickInfo = pickInfo;      
+      this.input.pickInfo = pickInfo;  
+ 
       if ( this.pointerIsDown() /* && this.input.pointerEventTime - this.input.pointerDownTime > 6 */ ) {
         var active = this.input.futureActive();
         var delta = this.input.pointerDelta();
-        var valid = false;
-        if ( delta ) {
-          switch( this.navmode ) {
-            case "orbit":
-              this.orbit( delta[0], delta[1] );
-              valid = true;
-              break;          
-            case "walk":
-              if ( this.dragModeMove )
-                this.move( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
-              else
-                this.look( (parms.position[0]*2.0)-1, (parms.position[1]*2.0)-1 );
-              valid = true;
-              break;
-          }
-          if ( valid && !active ) {
-            this.future( 0.1 ).update();
-          }
+        var valid = this.navmode == "none" ? false : true;
+        if ( valid && !active ) {
+          this.future( 0.1 ).update();
         }
-      }    
+      } 
+      this.input.lastInputTime = this.time;   
     }
     this.pointerLeave = function( parms ){
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = undefined;
       this.input.lastPickInfo = this.input.pickInfo;
-      this.input.pickInfo = undefined;              
+      this.input.pickInfo = undefined; 
+      this.input.lastInputTime = this.time;             
     }
     this.pointerWheel = function( parms, pickInfo ) {
       this.input.pointerEventTime = this.time;
+      this.input.lastInputTime = this.time;
 
       this.input.lastPointerInfo = this.input.pointerInfo;
       this.input.pointerInfo = parms;      
@@ -218,8 +217,8 @@ scripts:
 
         var mult = 0;
         if ( this.input.pickInfo.wheel.deltaY ) {
-          mult = Math.abs( this.input.pickInfo.wheel.deltaY / 20 );
-          if ( this.input.pickInfo.wheel.deltaY < 0 ) {
+          mult = Math.abs( this.input.pickInfo.wheel.deltaY);
+          if ( this.input.pickInfo.wheel.deltaY > 0 ) {
             // backwards
             cameraAt[0] *= -1;
             cameraAt[1] *= -1;
@@ -228,10 +227,10 @@ scripts:
             distanceLimit = pickInfo.distance;
           }
         }
-        if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 500 ) {
+        if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 0.5 ) {
           this.updateRadius();
         }
-        moveDistance = this.speed * mult;
+        moveDistance = this.distance() * mult;
         if ( distanceLimit && moveDistance > ( distanceLimit*0.4 )  ) {
           moveDistance = distanceLimit*0.4;
         }
@@ -248,21 +247,32 @@ scripts:
         //  if ( this.input.pickInfo.wheel.deltaY > 0 ) zinc *= -1;
         //  z = cameraPos[2] + zinc;
         //}
-
         this.activeCameraComp.translateBy( [ xInc, yInc, zInc ], 0 );
-        positionChanged = true;
       }
     }
     this.keyDown = function( parms ) {
       var active = this.input.futureActive();
+
+      // capture the event input locally
       this.input.keyInfo = parms;
-      this.handleKeyDown();
+
+      // store the current Time
+      this.input.lastInputTime = this.time;
+
+      // call future.update if update was not currently occurring
       if ( !active ) {
         this.future( 0.1 ).update();
       }
+      
     }
     this.keyUp = function( parms ) {
       this.input.keyInfo = parms;
+      if ( Object.keys( parms.keysDown ).length == 0 ){
+        this.handleKeyDown();
+        this.input.lastInputTime = undefined;
+      } else {
+        this.input.lastInputTime = this.time;
+      }
     }
     this.handleKeyDown = function() {
       if (!this.activeCameraComp) {
@@ -271,13 +281,13 @@ scripts:
       if ( this.activeCameraComp ) {
 
         var deltaZ = 0;
-        var kd = this.input.keyInfo.keysDown;
+        var kd = $.extend(true, {}, this.input.keyInfo.keysDown, this.input.keyInfo.keysUp);
 
         this.input.look = [ 0, 0 ];
         this.input.move = [ 0, 0 ];
         
         var temp;
-        for ( var keyPress in this.input.keyInfo.keysDown ) {
+        for ( var keyPress in kd ) {
           switch ( Number( kd[ keyPress ].code ) ) {
             case 87:  //w
             case 38:  //up
@@ -322,6 +332,8 @@ scripts:
               break;
           }
         }
+
+        this.input.keyInfo.keysUp = {};
         
         if ( this.input.look[0] != 0 || this.input.look[1] != 0 ) {
           this.look( this.input.look[0], this.input.look[1] );
@@ -360,7 +372,7 @@ scripts:
       if ( this.navmode == "walk" ) {
         this.translate( x, y );
       } else if ( this.navmode == "orbit" ) {
-        this.orbit( x * 0.1, y * 0.1 );
+        this.orbit( x, y );
       }
     }
     this.onLook = function( x, y ) {
@@ -386,8 +398,11 @@ scripts:
         this.getActiveCamera();
       
       if ( this.activeCameraComp ) {
-        if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * 1.5 ], 0 ) }
-        //if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y ], 0 ) }
+        if ( this.input.pointerInfo && this.input.pointerInfo.modifiers.ctrl ) {
+          if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y * this.angularDistance() ], 0 ) }
+        } else {
+          if ( x != 0 ) { this.activeCameraComp.rotateBy( [ 0, 0, 1, -x * this.angularDistance() ], 0 ) }
+        } 
       }
     }    
     this.zoom = function( dirIn ) {
@@ -402,19 +417,17 @@ scripts:
         var xinc = 0;
         var zinc = 0;
 
-        var speed = 1.0;
-        if ( this.activeCameraComp.speed )
-          speed = Number( this.activeCameraComp.speed );
-        
+        var speed = this.distance();
+
         if ( !dirIn ) speed = -speed;
         yinc = yinc + parseFloat( camerarot[1] ) * speed; 
         xinc = xinc + parseFloat( camerarot[0] ) * speed;
 
-        if ( this.orbitRadius == -1 || this.time - this.input.lastUpdateTime > 500 ) {
+        if ( this.orbitRadius == -1 || this.time - this.input.lastUpdateTime > 0.5 ) {
           this.updateRadius();
         }
         
-        if (xinc != 0 || yinc != 0 ) {
+        if ( xinc != 0 || yinc != 0 ) {
           var origX, origY, origZ;
           var x, y, z, atBounds = false;
           
@@ -422,8 +435,8 @@ scripts:
           origY = camerapos[1];
           origZ = camerapos[2];
         
-          x = origX + xinc * this.speed * mult;
-          y = origY + yinc * this.speed * mult;
+          x = origX + xinc * this.distance() * mult;
+          y = origY + yinc * this.distance() * mult;
           z = origZ;
 
           var ratioHR = camerapos[2] / this.orbitRadius;
@@ -432,52 +445,54 @@ scripts:
           z = origZ + zinc;
           
           this.activeCameraComp.translation = [ x, y, z ];
-          positionChanged = true;
         }
       }
+    }
+    this.distance = function(){
+      var dist = this.translationSpeed * 10;
+      if(this.timeElapsed() > 0) {
+        dist = dist * this.timeElapsed();
+      }
+      return dist;
+    }
+    this.angularDistance = function() {
+      // Should take 4 seconds to go around 360 degrees
+      var dist = this.rotationSpeed * 90;
+      if(this.timeElapsed() > 0) {
+        dist = dist * this.timeElapsed();
+      }
+      return dist;
     }
     this.cameraZ = function( dir ) {
       if (!this.activeCameraComp) this.getActiveCamera();
       
       if ( this.activeCameraComp ) {
         var pos = this.activeCameraComp.translation;
-        var speed = 1.0;
-        if ( this.activeCameraComp.speed )
-          speed = Number( this.activeCameraComp.speed );
         
-        this.activeCameraComp.translation = [ pos[0], pos[1], pos[2] + ( speed * dir ) ];
+        this.activeCameraComp.translation = [ pos[0], pos[1], pos[2] + ( this.distance() * dir ) ];
       }
     }
     this.updateRadius = function() {
       var pos = this.activeCameraComp.translation || [ 1, 1, 1 ];
       var oldRadius = this.orbitRadius;
-      
       this.orbitRadius = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) + (pos[2] * pos[2]) );
       var dist2D = Math.sqrt( (pos[0] * pos[0]) + (pos[1] * pos[1]) );
       
       phi = Math.acos( pos[2] / this.orbitRadius );
       if ( 0 <= pos[0] ) theta = Math.asin( pos[1]/dist2D );
       else theta = Math.PI - Math.asin( pos[1]/dist2D );
-      
-      if ( oldRadius != -1 ) {
-        if ( this.orbitRadius > oldRadius )
-          this.speed += ( this.orbitRadius - oldRadius ) * 0.006;
-        else if ( this.orbitRadius < oldRadius )
-          this.speed -= ( oldRadius - this.orbitRadius ) * 0.006;
-        if ( this.speed > this.maxSpeed ) this.speed = this.maxSpeed;
-        if ( this.speed < this.originalSpeed ) this.speed = this.originalSpeed;
-      }
+
       this.input.lastUpdateTime = this.time;
     }    
     this.orbit = function( xDelta, yDelta ){
       if (!this.activeCameraComp) this.getActiveCamera();
       if ( this.activeCameraComp ) {
         this.updateRadius();
-        
-        var pixelToRadian = this.orbitRadius / ( this.speed * 1000.0 );
-        var phiDelta = -yDelta * pixelToRadian * 0.5;
-        var thetaDelta = -xDelta * pixelToRadian * 2.0;
 
+        var pixelToRadian = _2PI * this.angularDistance() / 360;
+        var phiDelta = -yDelta * pixelToRadian;
+        var thetaDelta = -xDelta * pixelToRadian;
+        
         phi = phi - phiDelta;
         theta = theta - thetaDelta;
         
@@ -491,7 +506,7 @@ scripts:
         var x = this.orbitRadius * Math.sin( phi ) * Math.cos( theta );
         var y = this.orbitRadius * Math.sin( phi ) * Math.sin( theta );
         var z = this.orbitRadius * Math.cos( phi );
-
+        
         this.activeCameraComp.translation = [ x, y, z ];
       }
     }
@@ -529,7 +544,7 @@ scripts:
             this.activeCameraComp.translation,
             goog.vec.Vec3.scale(
               goog.vec.Vec3.normalize( trans, trans ),
-              this.speed,
+              this.distance(),
               trans
             ),
             trans
@@ -585,6 +600,6 @@ scripts:
         if ( this.input.futureActive() ) {
           this.future( 0.1 ).update();
         }
-      }	
+      } 
+      this.input.lastInputTime = this.time;
     } //@ sourceURL=navScene.vwf
-

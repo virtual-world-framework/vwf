@@ -234,39 +234,45 @@
 
             modelInitializers.forEach( function( modelInitializer ) {
 
-                // Accept either { "vwf/model/name": [ arguments] } or "vwf/model/name".
+                // Skip falsy values to allow initializers to be conditionally included by the
+                // loader.
 
-                if ( typeof modelInitializer == "object" && modelInitializer != null ) {
-                    var modelName = Object.keys( modelInitializer )[0];
-                    var modelArguments = modelInitializer[modelName];
-                } else {
-                    var modelName = modelInitializer;
-                    var modelArguments = undefined;
+                if ( modelInitializer ) {
+
+                    // Accept either { "vwf/model/name": [ arguments] } or "vwf/model/name".
+
+                    if ( typeof modelInitializer == "object" && modelInitializer != null ) {
+                        var modelName = Object.keys( modelInitializer )[0];
+                        var modelArguments = modelInitializer[modelName];
+                    } else {
+                        var modelName = modelInitializer;
+                        var modelArguments = undefined;
+                    }
+
+                    var model = require( modelName ).create(
+                        this.models.kernel,                         // model's kernel access
+                        [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
+                        {},                                         // state shared with a paired view
+                        [].concat( modelArguments || [] )           // arguments for initialize()
+                    );
+
+                    if ( model ) {
+                        this.models.push( model );
+                        this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
+
+    if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+        this.models.javascript = model;
+        while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
+    }
+
+    if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
+        this.models.object = model;
+        while ( this.models.object.model ) this.models.object = this.models.object.model;
+    }
+                    }
                 }
 
-                var model = require( modelName ).create(
-                    this.models.kernel,                         // model's kernel access
-                    [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
-                    {},                                         // state shared with a paired view
-                    [].concat( modelArguments || [] )           // arguments for initialize()
-                );
-
-                if ( model ) {
-                    this.models.push( model );
-                    this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
-
-if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-    this.models.javascript = model;
-    while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
-}
-
-if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
-    this.models.object = model;
-    while ( this.models.object.model ) this.models.object = this.models.object.model;
-}
-                }
-
-            }, this );
+                }, this );
 
             // Create the view interface to the kernel. Views can only make replicated calls which
             // bounce off the reflection server, are placed on the queue when received, and executed
@@ -278,42 +284,48 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             viewInitializers.forEach( function( viewInitializer ) {
 
-                // Accept either { "vwf/view/name": [ arguments] } or "vwf/view/name".
 
-                if ( typeof viewInitializer == "object" && viewInitializer != null ) {
-                    var viewName = Object.keys( viewInitializer )[0];
-                    var viewArguments = viewInitializer[viewName];
-                } else {
-                    var viewName = viewInitializer;
-                    var viewArguments = undefined;
-                }
+                // Skip falsy values to allow initializers to be conditionally included by the
+                // loader.
 
-                if ( ! viewName.match( "^vwf/view/" ) ) { // old way
+                if ( viewInitializer ) { 
 
-                    var view = this.modules[viewName];
-
-                    if ( view ) {
-                        var instance = new view();
-                        instance.state = this.models.actual["vwf/model/"+viewName] && this.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
-                        view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
-                        this.views.push( instance );
-                        this.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                    // Accept either { "vwf/view/name": [ arguments] } or "vwf/view/name".
+                    if ( typeof viewInitializer == "object" && viewInitializer != null ) {
+                        var viewName = Object.keys( viewInitializer )[0];
+                        var viewArguments = viewInitializer[viewName];
+                    } else {
+                        var viewName = viewInitializer;
+                        var viewArguments = undefined;
                     }
 
-                } else { // new way
+                    if ( ! viewName.match( "^vwf/view/" ) ) { // old way
 
-                    var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
+                        var view = this.modules[viewName];
 
-                    var view = require( viewName ).create(
-                        this.views.kernel,                          // view's kernel access
-                        [],                                         // stages between the kernel and view
-                        modelPeer && modelPeer.state || {},         // state shared with a paired model
-                        [].concat( viewArguments || [] )            // arguments for initialize()
-                    );
+                        if ( view ) {
+                            var instance = new view();
+                            instance.state = this.models.actual["vwf/model/"+viewName] && this.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
+                            view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
+                            this.views.push( instance );
+                            this.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                        }
 
-                    if ( view ) {
-                        this.views.push( view );
-                        this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                    } else { // new way
+
+                        var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
+
+                        var view = require( viewName ).create(
+                            this.views.kernel,                          // view's kernel access
+                            [],                                         // stages between the kernel and view
+                            modelPeer && modelPeer.state || {},         // state shared with a paired model
+                            [].concat( viewArguments || [] )            // arguments for initialize()
+                        );
+
+                        if ( view ) {
+                            this.views.push( view );
+                            this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
+                        }
                     }
 
                 }

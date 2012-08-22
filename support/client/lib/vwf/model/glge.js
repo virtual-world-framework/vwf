@@ -614,6 +614,24 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 switch ( propertyName ) {
 
+                    case "worldTransform":
+                        value = goog.vec.Mat4.transpose( glgeObject.getModelMatrix(),
+                            goog.vec.Mat4.create()
+                        );
+
+                        // Rotate -90 degress around X to convert from GLGE Y-up to VWF Z-up.
+
+                        if ( glgeObject instanceof GLGE.Camera ) {
+                            var columny = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 1, columny );
+                            var columnz = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 2, columnz );
+                            goog.vec.Mat4.setColumn( value, 2, columny );
+                            goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                        }
+
+                        break;
+
                     case "transform":
 
                         // We would use glgeObject.getLocalMatrix(), but glgeObject.localMatrix
@@ -643,10 +661,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
 
                         break;
-
-                    //case "worldTransform":
-                    //   value = goog.vec.Mat4.transpose( glgeObject.getModelMatrix(), goog.vec.Mat4.create() );
-                    //   break;
                 
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
@@ -1675,6 +1689,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         sceneNode.camera.glgeCameras[childID] = cam;
                     } else {
                         cam = sceneNode.camera.glgeCameras[childID];
+                    }
+
+                    var glgeParent = parent.glgeObject;
+                    if ( glgeParent && ( glgeParent instanceof GLGE.Scene || glgeParent instanceof GLGE.Group )) {
+                        glgeParent.addObject( cam );
                     }
 
                     child.name = childName;
