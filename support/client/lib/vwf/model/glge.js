@@ -196,7 +196,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             parentID: nodeID,
                             sourceType: childType,
                             type: childExtendsID,
-                            loadingCollada: callback 
+                            loadingCollada: callback,
+                            sceneID: this.state.sceneRootID
                         };
                         loadCollada.call( this, parentNode, node ); 
                         break;
@@ -209,7 +210,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             ID: childID,                                
                             parentID: nodeID,
                             type: childExtendsID,
-                            sourceType: childType 
+                            sourceType: childType,
+                            sceneID: this.state.sceneRootID 
                         };
                             
                         if ( sceneNode && sceneNode.glgeDocument ){
@@ -237,7 +239,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 ID: childID,                                
                                 parentID: nodeID,
                                 type: childExtendsID,
-                                sourceType: childType 
+                                sourceType: childType,
+                                sceneID: this.state.sceneRootID 
                             };
                             createMesh.call( this, node );
                         }
@@ -250,7 +253,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             ID: childID,
                             parentID: nodeID,
                             type: childExtendsID,
-                            sourceType: childType, 
+                            sourceType: childType,
+                            sceneID: this.state.sceneRootID 
                         };
                         if ( node.glgeObject ) {
                             if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
@@ -613,24 +617,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
 
                 switch ( propertyName ) {
-
-                    case "worldTransform":
-                        value = goog.vec.Mat4.transpose( glgeObject.getModelMatrix(),
-                            goog.vec.Mat4.create()
-                        );
-
-                        // Rotate -90 degress around X to convert from GLGE Y-up to VWF Z-up.
-
-                        if ( glgeObject instanceof GLGE.Camera ) {
-                            var columny = goog.vec.Vec4.create();
-                            goog.vec.Mat4.getColumn( value, 1, columny );
-                            var columnz = goog.vec.Vec4.create();
-                            goog.vec.Mat4.getColumn( value, 2, columnz );
-                            goog.vec.Mat4.setColumn( value, 2, columny );
-                            goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                        }
-
-                        break;
 
                     case "transform":
 
@@ -1109,14 +1095,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         if ( txtr ) {
                             txtr.setSrc( propertyValue );
                         } else if ( mat ) {
-					        var ml = new GLGE.MaterialLayer;
-					        ml.setMapto( GLGE.M_COLOR );
-					        ml.setMapinput( GLGE.UV1 );
+                            var ml = new GLGE.MaterialLayer;
+                            ml.setMapto( GLGE.M_COLOR );
+                            ml.setMapinput( GLGE.UV1 );
                             var txt = new GLGE.Texture();
                             txt.setSrc( propertyValue );
                             mat.addTexture( txt );
-					        ml.setTexture( txt );
-					        mat.addMaterialLayer( ml );
+                            ml.setTexture( txt );
+                            mat.addMaterialLayer( ml );
                         }
                     }
                     }
@@ -1677,11 +1663,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     function createCamera( nodeID, childID, childName ) {
 
         var sceneNode = this.state.scenes[nodeID];
-        if ( sceneNode ) {
+        var parent = sceneNode ? sceneNode : this.state.nodes[nodeID];
+        if ( !sceneNode ) sceneNode = this.state.scenes[parent.sceneID];
+        if ( sceneNode && parent ) {
             var child = this.state.nodes[childID];
             if ( child ) {
                 var cam;
-                
                 if ( sceneNode.camera && sceneNode.camera.glgeCameras ) {
                     if ( !sceneNode.camera.glgeCameras[childID] ) {
                         cam = new GLGE.Camera();

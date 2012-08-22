@@ -1,0 +1,95 @@
+--- 
+extends: http://vwf.example.com/navscene.vwf
+properties: 
+  navmode: none
+  rotationSpeed: 100
+children: 
+  boundary:
+    extends: http://vwf.example.com/node3.vwf
+    source: UnitCube.dae
+    type: model/vnd.collada+xml
+    properties:
+      translation: [ 0, 0, -200 ]
+      scale: 1000
+  centerCube:
+    extends: http://vwf.example.com/node3.vwf
+    source: BlueCube.dae
+    type: model/vnd.collada+xml
+    properties:
+      scale: 3
+  participantGroup:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ 0, 0, 0 ]
+    children:
+      participant: 
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          navcamera:
+            extends: http://vwf.example.com/camera.vwf
+            properties:
+              translation: [ 0, 20, 10 ]
+              lookAt: "http-vwf-example-com-node3-vwf-centerCube"
+          pointerSphere: 
+            extends: http://vwf.example.com/node3.vwf
+            source: UnitSphereGreen.dae
+            type: model/vnd.collada+xml
+            properties: 
+              scale: [ 0.003, 0.003, 0.003 ]
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 1, 0, 0, -45 ]
+  dir2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ -1, 0, 0, 225 ]
+events: 
+  pointerHover: 
+scripts:
+- |
+  this.initialize = function() {
+    this.activeCamera = this.participantGroup.participant.navcamera.id;
+  }
+  this.keyDown = function(params, pickInfo) { 
+    var kd = this.input.keyInfo.keysDown;
+    for ( var keyPress in this.input.keyInfo.keysDown ) {
+      switch ( Number( kd[ keyPress ].code ) ) {
+        case 74: // J
+          this.rotateParticipantZ(-this.rotationSpeed * 0.15);
+          break;
+        case 76: // L
+          this.rotateParticipantZ(this.rotationSpeed * 0.15);
+          break;
+        case 73: // I
+          this.rotateParticipantX(this.rotationSpeed * 0.15);
+          break;
+        case 75: // K
+          this.rotateParticipantX(-this.rotationSpeed * 0.15);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  this.rotateParticipantZ = function(amount) {
+    this.participantGroup.rotateBy( [ 0, 0, 1, amount ], 0 );
+  }
+  this.rotateParticipantX = function(amount) {
+    this.participantGroup.rotateBy( [ 1, 0, 0, amount ], 0 );
+  }
+  this.pointerHover = function(params, pickInfo) {
+    if(pickInfo.origin)
+    {
+      var center = pickInfo.origin;
+      var worldTransform = this.participantGroup.participant.pointerSphere.worldTransform;
+      worldTransform[12] = center[0];
+      worldTransform[13] = center[1];
+      worldTransform[14] = center[2];
+      this.participantGroup.participant.pointerSphere.worldTransform = worldTransform;
+    }
+  }

@@ -11,19 +11,67 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a spin behavior (on move)
+## 
+## @name spin-on-click.vwf
+## @namespace
+
 --- 
 extends:
   http://vwf.example.com/node3.vwf
 properties:
+  
+  ## Spin rate
+  ## 
+  ## @name spin-on-move.vwf#spin-rate
+  ## @property
+
   spin-rate: 0.1
+
+  ## Spin axis
+  ## 
+  ## @name spin-on-move.vwf#spin-axis
+  ## @property
+
   spin-axis: [ 0, 0, 1 ]
+
+  ## Spin input dimension
+  ## 
+  ## @name spin-on-move.vwf#spin-inputDim
+  ## @property
+
   spin-inputDim: "x"
+
+  ## Spin value
+  ## 
+  ## @name spin-on-move.vwf#spin-value
+  ## @property
+
   spin-value: 0
+
 events:
   valueChanged:
+
 methods:
+
+  ## Spin function. Updates component rotations and calls future spin
+  ## 
+  ## @name spin-on-move.vwf#spin
+  ## @function
+  ##
+  ## @returns undefined
+
   spin:
+
+  ## Initialization function
+  ## 
+  ## @name spin-on-move.vwf#init
+  ## @function
+  ##
+  ## @returns undefined
+
   init:
+
 scripts:
 - |
     this.init = function() {

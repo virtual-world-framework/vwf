@@ -11,9 +11,20 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a camera in 3D space
+## 
+## @name camera.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node3.vwf
-properties: 
+properties:
+
+  ## Walk mode navigation (ie. orbit, walk)
+  ## 
+  ## @name camera.vwf#walkMode
+  ## @property
+
   walkMode:
     set: |
       switch ( value ) {
@@ -23,26 +34,62 @@ properties:
           break;
       }
     value: "walk"
+
+  ## The point to orbit around in orbit mode
+  ## 
+  ## @name camera.vwf#orbitPoint
+  ## @property
+
   orbitPoint: [ 0, 0, 0 ]
+
+  ## The far clipping plane value
+  ## 
+  ## @name camera.vwf#far
+  ## @property
+
   far:
     set: |
       if ( value > 0 && value > this.near ) {
         this.far = value;
       }
     value: 1000.0
+
+  ## The near clipping plane value
+  ## 
+  ## @name camera.vwf#near
+  ## @property
+
   near:
     set: |
       if ( value > 0 && value < this.far ) {
         this.near = value;
       }
     value: 0.1
+
+  ## Field of view
+  ## 
+  ## @name camera.vwf#fovy
+  ## @property
+
   fovy:
     value: 35
     set: |
       if ( value > 0 ) {
         this.fovy = value;
       }
+
+  ## Aspect ratio
+  ## 
+  ## @name camera.vwf#aspect
+  ## @property
+
   aspect: 1.0
+
+  ## Type of camera (perspective vs. orthographic)
+  ## 
+  ## @name camera.vwf#cameraType
+  ## @property
+
   cameraType:
     set: |
       switch ( value ) {
@@ -52,4 +99,10 @@ properties:
           break;
       }
     value: "perspective"
+
+  ## Speed of the camera
+  ## 
+  ## @name camera.vwf#speed
+  ## @property
+
   speed: 2.0

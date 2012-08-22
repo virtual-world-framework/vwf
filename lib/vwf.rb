@@ -151,7 +151,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
       delegated_env = env.merge(
         "SCRIPT_NAME" => application_instance,
-        "PATH_INFO" => "/" + ( private_path || "index.html" ),  # TODO: do index.* default elsewhere  # TODO: escaped properly for PATH_INFO?
+        "PATH_INFO" => "/" + ( private_path || "" ),  # TODO: escaped properly for PATH_INFO?
         "vwf.root" => public_path,
         "vwf.application" => application,
         "vwf.instance" => instance

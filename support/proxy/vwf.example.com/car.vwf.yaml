@@ -11,9 +11,20 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a 3D car
+## 
+## @name car.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node3.vwf
 properties:
+
+  ## Attached to camera boolean value
+  ## 
+  ## @name car.vwf#attachedToCamera
+  ## @property
+
   attachedToCamera: 
     set: |
         this.attachedToCamera = function( value ) {

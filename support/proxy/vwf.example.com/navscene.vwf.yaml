@@ -11,9 +11,20 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a navigation scene
+## 
+## @name navscene.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties: 
+  
+  ## Navigation mode
+  ## 
+  ## @name navscene.vwf#navmode
+  ## @property
+
   navmode:
     set: |
       switch ( value ) {
@@ -27,13 +38,49 @@ properties:
           break;
       }
     value: "walk"
-  orbitRadius: -1  
+
+  ## Orbit radius
+  ## 
+  ## @name navscene.vwf#orbitRadius
+  ## @property
+
+  orbitRadius: -1
+
+  ## ID of object around which to orbit
+  ## 
+  ## @name navscene.vwf#orbitObjectID
+  ## @property
+
   orbitObjectID: "http-vwf-example-com-node3-vwf-sceneCenter"
-  # rotationSpeed: At a speed of 1, will take 4 seconds to go around 360 degrees.
+
+  ## Rotation speed. At a speed of 1, will take 4 seconds to go around 360 degrees.
+  ## 
+  ## @name navscene.vwf#rotationSpeed
+  ## @property
+
   rotationSpeed: 1.0
+
+  ## Translation speed
+  ## 
+  ## @name navscene.vwf#translationSpeed
+  ## @property
+
   translationSpeed: 1.0
+
+  ## Maximum speed
+  ## 
+  ## @name navscene.vwf#maxSpeed
+  ## @property
+
   maxSpeed: 500
+
+  ## Drag mode move boolean. Default value is false.
+  ## 
+  ## @name navscene.vwf#dragModeMove
+  ## @property
+
   dragModeMove: false
+
 events:
   keyUp:
   keyDown:
@@ -42,9 +89,27 @@ events:
   pointerMove:
   pointerLeave:
   pointerWheel:
+
 methods:
+  
+  ## Updates scene
+  ## 
+  ## @name navscene.vwf#update
+  ## @function
+  ## 
+  ## @returns undefined
+
   update:
-  getCameraAt:  
+
+  ## Gets camera at vector
+  ## 
+  ## @name navscene.vwf#getCameraAt
+  ## @function
+  ## 
+  ## @returns camera at vector
+
+  getCameraAt:
+
 scripts:
 - |
     var counter = 1;
@@ -206,48 +271,28 @@ scripts:
       if ( this.activeCameraComp ) {
         var cameraPos = this.activeCameraComp.translation;
         var cameraAt = this.getCameraAt();
-        
-        var xInc = 0;
-        var yInc = 0;
-        var zInc = 0;
-        var distanceLimit;
-        var moveDistance; 
 
-        goog.vec.Vec3.normalize( cameraAt, cameraAt );
-
-        var mult = 0;
-        if ( this.input.pickInfo.wheel.deltaY ) {
-          mult = Math.abs( this.input.pickInfo.wheel.deltaY);
-          if ( this.input.pickInfo.wheel.deltaY > 0 ) {
-            // backwards
-            cameraAt[0] *= -1;
-            cameraAt[1] *= -1;
-            cameraAt[2] *= -1;
-          } else if ( pickInfo && pickInfo.distance ) {
-            distanceLimit = pickInfo.distance;
-          }
-        }
         if ( this.orbitRadius == -1 || this.input.pointerEventTime - this.input.lastUpdateTime > 0.5 ) {
           this.updateRadius();
         }
-        moveDistance = this.distance() * mult;
-        if ( distanceLimit && moveDistance > ( distanceLimit*0.4 )  ) {
-          moveDistance = distanceLimit*0.4;
+
+        cameraAt = goog.vec.Vec3.scale(
+          cameraAt,
+          this.input.pickInfo.wheel.deltaY * -1,
+          cameraAt
+        );
+        
+        if ( goog.vec.Vec3.magnitudeSquared( cameraAt ) > goog.vec.EPSILON ) {
+          this.activeCameraComp.translation = goog.vec.Vec3.add(
+            this.activeCameraComp.translation,
+            goog.vec.Vec3.scale(
+              goog.vec.Vec3.normalize( cameraAt, cameraAt ),
+              this.distance(),
+              cameraAt
+            ),
+            cameraAt
+          );
         }
-
-        xInc = cameraAt[0] * moveDistance;
-        yInc = cameraAt[1] * moveDistance;
-        zInc = cameraAt[2] * moveDistance;
-
-        // old code to handle when lookAt is valid
-        //else {  
-        //  z = cameraPos[2];
-        //  var ratioHR = camerapos[2] / this.orbitRadius;
-        //  zinc = Math.sqrt( Math.pow( x-cameraPos[0], 2 ) + Math.pow( y-cameraPos[1], 2 ) ) * ratioHR;
-        //  if ( this.input.pickInfo.wheel.deltaY > 0 ) zinc *= -1;
-        //  z = cameraPos[2] + zinc;
-        //}
-        this.activeCameraComp.translateBy( [ xInc, yInc, zInc ], 0 );
       }
     }
     this.keyDown = function( parms ) {

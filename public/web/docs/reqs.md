@@ -7,7 +7,7 @@ In order to successfully run the Virtual World Framework, the following browser 
 *   HTML5
 *   ECMAScript5
 *   Browser with WebGL enabled (for 3D content)
-*	Browser with WebSocket enabled for multi-user functionality (not on a corporate network)
+*	Browser with WebSocket enabled for multi-user functionality
 
 The following browsers are recommended for use:
 

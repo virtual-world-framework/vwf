@@ -55,7 +55,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             this.highlightedChild = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Hierarchy.png' alt='hierarchy' /><img id='userlist' src='images/tab_UserList.png' alt='userlist' /><img id='timeline' src='images/tab_Timeline.png' alt='timeline' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Application.png' alt='application' /><img id='userlist' src='images/tab_Users.png' alt='users' /><img id='timeline' src='images/tab_Time.png' alt='time' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
@@ -626,76 +626,30 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             });
         }
 
-        // Create new script
-        $(topdownTemp).append("<div id='createScript'></div>");
-        $('#createScript').append("<div class='childContainer'><div class='childEntry'><b>New Script</div></div>");
-        $('#createScript').click( function (evt) {
-            createScript.call(self, nodeID);
-        });
-        $('#createScript > div:last').css('border-bottom-width', '3px');
+        // Add node children
+        $(topdownTemp).append("<div id='children'></div>");
+        for ( var i = 0; i < node.children.length; i++ ) {
+            $('#children').append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div></div>");
+            $('#' + node.children[i].ID).click( function(evt) {
+                drillDown.call(self, $(this).attr("id"), nodeID);
+            });
+        }
 
-        // Add node scripts
-        $(topdownTemp).append("<div id='scripts'></div>");
-        for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
+        $('#children > div:last').css('border-bottom-width', '3px');
+
+        // Add prototype children
+        $(topdownTemp).append("<div id='prototypeChildren'></div>");
+        var prototypeChildren = getChildren.call( this, this.kernel.kernel, node.extendsID ); 
+        for ( var key in prototypeChildren)       
         {
-            var scriptFull = this.allScripts[nodeID][i].text;
-            if(scriptFull != undefined)
-            {
-                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $('#scripts').append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
-                $('#script-' + nodeID + "-" + i).click( function(evt) {
-                    var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
-                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
-                    viewScript.call(self, id, scriptID, undefined);
-                });
-            }
+            var child = prototypeChildren[key];
+            $('#prototypeChildren').append("<div id='" + child.ID + "' class='childContainer'><div class='childEntry'><b>" + child.name + "</b></div></div>");
+            $('#' + child.ID).click( function(evt) {
+                drillDown.call(self, $(this).attr("id"), nodeID);
+            });
         }
 
-        $('#scripts > div:last').css('border-bottom-width', '3px');
-
-        // Add prototype scripts
-        $(topdownTemp).append("<div id='prototypeScripts'></div>");
-        for( var i=0; i < this.allScripts[ node.extendsID ].length; i++ )
-        {
-            var scriptFull = this.allScripts[node.extendsID][i].text;
-            if(scriptFull != undefined)
-            {
-                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $('#prototypeScripts').append("<div id='script-" + node.extendsID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
-                $('#script-' + node.extendsID + "-" + i).click( function(evt) {
-                    var extendsId = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
-                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
-                    viewScript.call(self, nodeID, scriptID, extendsId);
-                });
-            }
-        }
-
-        $('#prototypeScripts > div:last').css('border-bottom-width', '3px');
-
-        // Add node behaviors
-        $(topdownTemp).append("<div id='behaviors'></div>");
-        for ( var i = 0; i < node.implementsIDs.length; i++ ) {
-            $('#behaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
-
-            /* 
-            //Placeholder to Enable/Disable behaviors
-            $('#' + node.implementsID[i] + '-enable').change( function(evt) {
-            
-            }); 
-            */
-        }
-
-        $('#behaviors > div:last').css('border-bottom-width', '3px');
-
-        // Add prototype behaviors
-        $(topdownTemp).append("<div id='prototypeBehaviors'></div>");
-        var prototypeNode = this.nodes[ node.extendsID ];
-        for ( var i=0; i < prototypeNode.implementsIDs.length; i++)
-        {
-            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeNode.implementsIDs[i] + "</b></td><td><input id='" + prototypeNode.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
-        }
-
-        $('#prototypeBehaviors > div:last').css('border-bottom-width', '3px');
+        $('#prototypeChildren > div:last').css('border-bottom-width', '3px');
 
         // Add node properties
         $(topdownTemp).append("<div id='properties'></div>");
@@ -781,31 +735,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         $('#prototypeProperties > div:last').css('border-bottom-width', '3px');
-        
-        // Add node children
-        $(topdownTemp).append("<div id='children'></div>");
-        for ( var i = 0; i < node.children.length; i++ ) {
-            $('#children').append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div></div>");
-            $('#' + node.children[i].ID).click( function(evt) {
-                drillDown.call(self, $(this).attr("id"), nodeID);
-            });
-        }
-
-        $('#children > div:last').css('border-bottom-width', '3px');
-
-        // Add prototype children
-        $(topdownTemp).append("<div id='prototypeChildren'></div>");
-        var prototypeChildren = getChildren.call( this, this.kernel.kernel, node.extendsID ); 
-        for ( var key in prototypeChildren)       
-        {
-            var child = prototypeChildren[key];
-            $('#prototypeChildren').append("<div id='" + child.ID + "' class='childContainer'><div class='childEntry'><b>" + child.name + "</b></div></div>");
-            $('#' + child.ID).click( function(evt) {
-                drillDown.call(self, $(this).attr("id"), nodeID);
-            });
-        }
-
-        $('#prototypeChildren > div:last').css('border-bottom-width', '3px');
 
         // Add node methods
         $(topdownTemp).append("<div id='methods'></div>");
@@ -892,6 +821,77 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         }
 
         $('#prototypeEvents > div:last').css('border-bottom-width', '3px');
+
+        // Add node behaviors
+        $(topdownTemp).append("<div id='behaviors'></div>");
+        for ( var i = 0; i < node.implementsIDs.length; i++ ) {
+            $('#behaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
+
+            /* 
+            //Placeholder to Enable/Disable behaviors
+            $('#' + node.implementsID[i] + '-enable').change( function(evt) {
+            
+            }); 
+            */
+        }
+
+        $('#behaviors > div:last').css('border-bottom-width', '3px');
+
+        // Add prototype behaviors
+        $(topdownTemp).append("<div id='prototypeBehaviors'></div>");
+        var prototypeNode = this.nodes[ node.extendsID ];
+        for ( var i=0; i < prototypeNode.implementsIDs.length; i++)
+        {
+            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeNode.implementsIDs[i] + "</b></td><td><input id='" + prototypeNode.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
+        }
+
+        $('#prototypeBehaviors > div:last').css('border-bottom-width', '3px');
+
+        // Create new script
+        $(topdownTemp).append("<div id='createScript'></div>");
+        $('#createScript').append("<div class='childContainer'><div class='childEntry'><b>New Script</div></div>");
+        $('#createScript').click( function (evt) {
+            createScript.call(self, nodeID);
+        });
+        $('#createScript > div:last').css('border-bottom-width', '3px');
+
+        // Add node scripts
+        $(topdownTemp).append("<div id='scripts'></div>");
+        for( var i=0; i < this.allScripts[ nodeID ].length; i++ )
+        {
+            var scriptFull = this.allScripts[nodeID][i].text;
+            if(scriptFull != undefined)
+            {
+                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                $('#scripts').append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
+                $('#script-' + nodeID + "-" + i).click( function(evt) {
+                    var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                    viewScript.call(self, id, scriptID, undefined);
+                });
+            }
+        }
+
+        $('#scripts > div:last').css('border-bottom-width', '3px');
+
+        // Add prototype scripts
+        $(topdownTemp).append("<div id='prototypeScripts'></div>");
+        for( var i=0; i < this.allScripts[ node.extendsID ].length; i++ )
+        {
+            var scriptFull = this.allScripts[node.extendsID][i].text;
+            if(scriptFull != undefined)
+            {
+                var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
+                $('#prototypeScripts').append("<div id='script-" + node.extendsID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
+                $('#script-' + node.extendsID + "-" + i).click( function(evt) {
+                    var extendsId = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                    var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
+                    viewScript.call(self, nodeID, scriptID, extendsId);
+                });
+            }
+        }
+
+        $('#prototypeScripts > div:last').css('border-bottom-width', '3px');
     }
 
     // -- createScript ----------------------------------------------------------------------

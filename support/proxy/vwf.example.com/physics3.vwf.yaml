@@ -11,14 +11,67 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a physics enabled 3D node
+## 
+## @name physics3.vwf
+## @namespace
+
 ---
 extends: http://vwf.example.com/node3.vwf
 properties:
+
+  ## Physics
+  ## 
+  ## @name physics3.vwf#physics
+  ## @property
+
   physics: none
+
+  ## Physics Def
+  ## 
+  ## @name physics3.vwf#physicsDef
+  ## @property
+
   physicsDef: 0
+
+  ## Mass
+  ## 
+  ## @name physics3.vwf#mass
+  ## @property
+
   mass: 
+
+  ## Restitution
+  ## 
+  ## @name physics3.vwf#restitution
+  ## @property
+
   restitution: 
+
+  ## Friction
+  ## 
+  ## @name physics3.vwf#friction
+  ## @property
+
   friction: 
+
+  ## Rotational velocity damping
+  ## 
+  ## @name physics3.vwf#rotVelocityDamping
+  ## @property
+
   rotVelocityDamping: 
+
+  ## Linear velocity damping
+  ## 
+  ## @name physics3.vwf#linVelocityDamping
+  ## @property
+
   linVelocityDamping: 
+
+  ## Velocity
+  ## 
+  ## @name physics3.vwf#velocity
+  ## @property
+
   velocity: 

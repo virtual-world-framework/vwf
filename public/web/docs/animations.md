@@ -1,19 +1,7 @@
 Animations
 ===================
 -------------------
-There are two common ways to accomplish animation within the framework: the tick function and the future call. The most efficient and optimal way to control the animation is to use the future call. Animations are often created using the future call within behavior files, and then implemented on specific components in the applications. These behavior files can be used to define paths or sequences of motion to create animations. Please see [behaviors](behaviors.html) for more information. 
-
--------------------
-
-**Tick Function**
-
-The tick function should only be used for actions that *must* be run at every tick of the application clock. If too many actions are contained within the tick function, the application will show signs of lagging. 
-
-	this.tick = function(time) {
-	  doSomething(time);
-	}
-
-For most animations, actions only need to occur at a certain interval to create a smooth animation, and thus, the VWF future call should be used.
+The primary way to accomplish animations in VWF is the future call. Animations are often created using the future call within behavior files, and then implemented on specific components in the applications. These behavior files can be used to define paths or sequences of motion to create animations. Please see [behaviors](behaviors.html) for more information. Animations defined in the collada document will also be loaded and available to the framework.
 
 -------------------
 
@@ -31,7 +19,29 @@ The VWF future call can be used to run a method at a specified time in the futur
 
 The future call schedules the next step. The parameter passed to the function call can be raised or lowered to smooth or optimize the animation, respectively.
 
+Future calls may also be used for property assignment or to fire an event at a given time in the future. 
+
+	this.future.eventName();
+	this.future.propertyName = value;
+
+<!-- Coming soon! Relative vs. Absolute future calls: this.in() and this.at() -->
+
 -------------------
+
+**Animation Flags**
+
+If an object already has an animation defined, the animation flags on the node3 prototype can be set to specify animation properties. 
+
+*Playing* - A value of true will set the animation to play, where a value of false will stop the animation. 
+
+*Looping* - Determines whether the animation will play a single time or loop.
+
+*Speed* - Determines how fast the animation is played. Negative speeds will reverse the animation. 
+
+<!-- Coming soon! Avatar animations, blended animations, animated transformations -->
+
+-------------------
+
 
 
 

@@ -11,17 +11,73 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a lesson
+## 
+## @name lesson.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/instruction.vwf
 properties: 
+
+  ## The active instruction
+  ## 
+  ## @name lesson.vwf#activeInstruction
+  ## @property
+
   activeInstruction:
     set: |
       this.activeInstruction = value;
     value: false
+
+  ## Index value for the instruction
+  ## 
+  ## @name lesson.vwf#instructionIndex
+  ## @property
+
   instructionIndex:
     set: |
       this.instructionIndex = value;
     value: 0
+
+methods:
+
+  ## On entry function
+  ## 
+  ## @name lesson.vwf#onEntry
+  ## @function
+  ##
+  ## @returns undefined
+
+  onEntry:
+
+  ## Next instruction
+  ## 
+  ## @name lesson.vwf#nextInstruction
+  ## @function
+  ##
+  ## @returns undefined
+
+  nextInstruction:
+
+  ## Activate next
+  ## 
+  ## @name lesson.vwf#activateNext
+  ## @function
+  ##
+  ## @returns undefined
+
+  activateNext:
+
+  ## Instruction success
+  ## 
+  ## @name lesson.vwf#instructionSuccess
+  ## @function
+  ##
+  ## @returns undefined
+
+  instructionSuccess:
+
 scripts:
 - |
     this.onEntry = function() {

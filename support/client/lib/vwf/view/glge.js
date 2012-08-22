@@ -374,6 +374,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             returnData.eventNodeData = { "": [ {
                 distance: pickInfo ? pickInfo.distance : undefined,
+                origin: pickInfo ? pickInfo.pickOrigin : undefined,
                 globalPosition: pickInfo ? pickInfo.coord : undefined,
                 globalNormal: pickInfo ? pickInfo.normal : undefined,
                 globalSource: worldCamPos,            
@@ -782,7 +783,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
                 mousepos.y = mousepos.y + window.scrollY;
 
-                return sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
+                var returnValue = sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
+                if (!returnValue) {
+                    returnValue = { };
+                }
+
+                var originRay = sceneNode.glgeScene.makeRay(mousepos.x, mousepos.y)
+                returnValue.pickOrigin = originRay ? originRay.origin : undefined;
+
+                return returnValue;
             }
         }
         return undefined;
