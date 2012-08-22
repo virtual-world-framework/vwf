@@ -11,6 +11,9 @@
     <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
+
     <script type="text/javascript" src="../lib/vwf.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
@@ -25,6 +28,7 @@
 
         "domReady",
 
+        "vwf/configuration",
         "vwf/kernel/model",
         "vwf/model/javascript",
         "vwf/model/object",
@@ -52,16 +56,16 @@
             createFixture( function( fixtureID ) {
 
               vwf.execute( fixtureID, "this.a" );
-              equal( vwf.execute( fixtureID, "this.test" ), "a-property", "properties override methods" );
+              equal( vwf.execute( fixtureID, "this.result" ), "a-property", "properties override methods" );
 
               vwf.execute( fixtureID, "this.b()" );
-              equal( vwf.execute( fixtureID, "this.test" ), "b-method", "methods override events" );
+              equal( vwf.execute( fixtureID, "this.result" ), "b-method", "methods override events" );
 
               vwf.execute( fixtureID, "this.c()" );
-              equal( vwf.execute( fixtureID, "this.test" ), "c-event", "events override children" );
+              equal( vwf.execute( fixtureID, "this.result" ), "c-event", "events override children" );
 
               vwf.execute( fixtureID, "this.d.p" );
-              equal( vwf.execute( fixtureID, "this.test" ), "d-child", "children override nothing" );
+              equal( vwf.execute( fixtureID, "this.result" ), "d-child", "children override nothing" );
 
               start();
             } );
@@ -82,16 +86,16 @@
               runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
-                    equal( vwf.execute( fixtureID, "this.test" ), "a-property", "properties override methods" ) } },
+                    equal( vwf.execute( fixtureID, "this.result" ), "a-property", "properties override methods" ) } },
 
                 { relative: 0.002, assertion: function() {
-                    equal( vwf.execute( fixtureID, "this.test" ), "b-method", "methods override events" ) } },
+                    equal( vwf.execute( fixtureID, "this.result" ), "b-method", "methods override events" ) } },
 
                 { relative: 0.003, assertion: function() {
-                    equal( vwf.execute( fixtureID, "this.test" ), "c-event", "events override children" ) } },
+                    equal( vwf.execute( fixtureID, "this.result" ), "c-event", "events override children" ) } },
 
                 { relative: 0.004, assertion: function() {
-                    equal( vwf.execute( fixtureID, "this.test" ), "d-child", "children override nothing" ) } },
+                    equal( vwf.execute( fixtureID, "this.result" ), "d-child", "children override nothing" ) } },
 
               ] );
 
@@ -112,13 +116,13 @@
               
               properties: {
                 a: {
-                  get: "return this.test = 'a-property'",
+                  get: "return this.result = 'a-property'",
                 }
               },
 
               methods: {
-                a: "return this.test = 'a-method'",
-                b: "return this.test = 'b-method'",
+                a: "return this.result = 'a-method'",
+                b: "return this.result = 'b-method'",
               },
 
               events: {
@@ -128,20 +132,20 @@
               },
 
               children: {
-                a: { properties: { p: { get: "return this.parent.test = 'a-child'" } } },
-                b: { properties: { p: { get: "return this.parent.test = 'b-child'" } } },
-                c: { properties: { p: { get: "return this.parent.test = 'c-child'" } } },
-                d: { properties: { p: { get: "return this.parent.test = 'd-child'" } } },
+                a: { properties: { p: { get: "return this.parent.result = 'a-child'" } } },
+                b: { properties: { p: { get: "return this.parent.result = 'b-child'" } } },
+                c: { properties: { p: { get: "return this.parent.result = 'c-child'" } } },
+                d: { properties: { p: { get: "return this.parent.result = 'd-child'" } } },
               },
 
               scripts: [
-                "this.events.a = this.events.add( function() { this.test = 'a-event' }, this )",
-                "this.events.b = this.events.add( function() { this.test = 'b-event' }, this )",
-                "this.events.c = this.events.add( function() { this.test = 'c-event' }, this )",
-                "this.test = undefined",
+                "this.events.a = this.events.add( function() { this.result = 'a-event' }, this )",
+                "this.events.b = this.events.add( function() { this.result = 'b-event' }, this )",
+                "this.events.c = this.events.add( function() { this.result = 'c-event' }, this )",
+                "this.result = undefined",
               ],
 
-            }, function( fixtureID ) {
+            }, undefined, function( fixtureID ) {
 
               callback( fixtureID );
 

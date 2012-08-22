@@ -54,7 +54,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 return;
 
 //            this.logger.enabled = true;
-//            this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+//            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childURI, childName );
 //            this.logger.enable = false;
 
@@ -108,7 +108,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 initCamera.call( this, sceneNode.glgeScene.camera );
 
                 var camType = "http://vwf.example.com/camera.vwf";
-                vwf.createChild( childID, "camera", { "extends": camType }, undefined );    
+                vwf.createChild( childID, "camera", { "extends": camType } );    
 
                 var model = this;
                 var xmlDocLoadedCallback = callback;
@@ -242,6 +242,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 sourceType: childType,
                                 sceneID: this.state.sceneRootID 
                             };
+                            createMesh.call( this, node );
                         }
                         break;
 
@@ -300,7 +301,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 switch ( childExtendsID ) {
                     case "appscene-vwf":
                     case "index-vwf":
-                    case "http-vwf-example-com-node-vwf":
+                    case "http://vwf.example.com/node.vwf":
                     case "http-vwf-example-com-node2-vwf":
                     case "http-vwf-example-com-scene-vwf":
                     case "http-vwf-example-com-navscene-vwf":
@@ -358,21 +359,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 //        removingChild: function( nodeID, childID, childName ) {
 //        },
 
-        // -- parenting ----------------------------------------------------------------------------
-
-//        parenting: function( nodeID ) {  // TODO: move to a backstop model
-//        },
-
-        // -- childrening --------------------------------------------------------------------------
-
-//        childrening: function( nodeID ) {  // TODO: move to a backstop model
-//        },
-
-        // -- naming -------------------------------------------------------------------------------
-
-//        naming: function( nodeID ) {  // TODO: move to a backstop model
-//        },
-
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
@@ -393,7 +379,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     switch ( propertyName ) {
 
                         case "meshDefinition":
-                            createMesh.call( this, propertyValue, node );
+                            defineMesh.call( this, propertyValue, node );
                             break;
 
                         default:
@@ -2171,7 +2157,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function createMesh( def, node ) {
+    function createMesh( node ) {
         if ( !node.glgeParent ) {
             node.glgeParent = this.state.nodes[ node.parentID ];    
         }
@@ -2179,6 +2165,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         if ( node.glgeParent ) {
             node.glgeObject = new GLGE.Group();
             node.glgeParent.addObject( node.glgeObject );
+        }        
+    }
+
+    function defineMesh( def, node ) {
+        if ( node.glgeObject ) {
             var obj = new GLGE.Object();
             var mat = new GLGE.Material();
             var mesh = new GLGE.Mesh();

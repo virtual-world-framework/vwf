@@ -83,6 +83,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             } );
 
 node.id = childID; // TODO: move to vwf/model/object
+node.uri = childURI; // TODO: move to vwf/model/object
 
             node.name = childName;
 
@@ -92,7 +93,7 @@ node.id = childID; // TODO: move to vwf/model/object
             node.type = childType;
 
             Object.defineProperty( node, "logger", {
-                value: this.logger.for( childName ),
+                value: this.logger.for( "#" + ( childName || childURI || childID ), node ),
                 enumerable: true,
             } );
 
@@ -181,7 +182,13 @@ node.id = childID; // TODO: move to vwf/model/object
 
             Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
-                    return self.kernel.createChild( this.node.id, name, component /* , callback */ );  // TODO: support callback and map callback's childID parameter to the child node
+                    if ( callback ) {
+                        self.kernel.createChild( this.node.id, name, component, undefined, undefined, function( childID ) {
+                            callback.call( node, self.nodes[childID] );
+                        } );
+                    } else { 
+                        return self.kernel.createChild( this.node.id, name, component );
+                    }
                 }
             } );
 
@@ -212,6 +219,26 @@ node.id = childID; // TODO: move to vwf/model/object
                     return self.kernel.moniker();
                 },
                 enumerable: true,
+            } );
+
+            Object.defineProperty( node, "find", {
+                value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
+                    if ( callback ) {
+                        self.kernel.find( this.id, matchPattern, function( matchID ) {
+                            callback.call( node, self.nodes[matchID] );
+                        } );
+                    } else {  // TODO: future iterator proxy
+                        return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
+                            return self.nodes[matchID];
+                        } );
+                    }
+                }
+            } );
+
+            Object.defineProperty( node, "test", {
+                value: function( matchPattern, testNode ) { // "this" is node
+                    return self.kernel.test( this.id, matchPattern, testNode.id );
+                }
             } );
 
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
@@ -267,7 +294,7 @@ node.id = childID; // TODO: move to vwf/model/object
             try {
                 return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
             } catch ( e ) {
-                this.logger.warnc( "initializingNode", childID,
+                this.logger.warnx( "initializingNode", childID,
                     "exception in initialize:", utility.exceptionMessage( e ) );
             }
 
@@ -326,45 +353,6 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
         // TODO: removingChild
 
-        // -- parenting ----------------------------------------------------------------------------
-
-        parenting: function( nodeID ) {  // TODO: move to vwf/model/object
-
-            var node = this.nodes[nodeID];
-
-            return node.parent && node.parent.id || 0;
-        },
-
-        // -- childrening --------------------------------------------------------------------------
-
-        childrening: function( nodeID ) {  // TODO: move to vwf/model/object
-
-            var node = this.nodes[nodeID];
-
-            return jQuery.map( node.children, function( child ) {
-                return child.id;
-            } );
-        },
-
-        // -- naming -------------------------------------------------------------------------------
-
-        naming: function( nodeID ) {  // TODO: move to vwf/model/object
-
-            var node = this.nodes[nodeID];
-
-            return node.name || "";
-        },
-
-        // -- settingProperties --------------------------------------------------------------------
-
-        settingProperties: function( nodeID, properties ) {  // TODO: these are here as a hack to keep scripts from coloring the setNode()/getNode() property values; vwf/kernel/model's disable and set/getProperties need to handle this properly (problem: getters can still return a value even when reentry is blocked)
-        },
-
-        // -- gettingProperties --------------------------------------------------------------------
-
-        gettingProperties: function( nodeID, properties ) {  // TODO: these are here as a hack to keep scripts from coloring the setNode()/getNode() property values; vwf/kernel/model's disable and set/getProperties need to handle this properly (problem: getters can still return a value even when reentry is blocked)
-        },
-
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
@@ -375,7 +363,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                 try {
                     node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
                 } catch ( e ) {
-                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", utility.exceptionMessage( e ) );
                 }
             } else {
@@ -386,7 +374,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
                 try {
                     node.private.setters[propertyName] = eval( setterScript( propertySet ) );
                 } catch ( e ) {
-                    this.logger.warnc( "creatingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", utility.exceptionMessage( e ) );
                 }
             } else {
@@ -438,7 +426,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 try {
                     return setter.call( node, propertyValue );
                 } catch ( e ) {
-                    this.logger.warnc( "settingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue,
                         "exception in setter:", utility.exceptionMessage( e ) );
                 }
             }
@@ -457,7 +445,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 try {
                     return getter.call( node );
                 } catch ( e ) {
-                    this.logger.warnc( "gettingProperty", nodeID, propertyName, propertyValue,
+                    this.logger.warnx( "gettingProperty", nodeID, propertyName, propertyValue,
                         "exception in getter:", utility.exceptionMessage( e ) );
                 }
             }
@@ -504,7 +492,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
             } catch ( e ) {
-                this.logger.warnc( "creatingMethod", nodeID, methodName, methodParameters,
+                this.logger.warnx( "creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", utility.exceptionMessage( e ) );
             }
         
@@ -525,7 +513,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 try {
                     return body.apply( node, methodParameters );
                 } catch ( e ) {
-                    this.logger.warnc( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                    this.logger.warnx( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage( e ) );
                 }
             }
@@ -634,7 +622,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
                 } catch ( e ) {
-                    self.logger.warnc( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
+                    self.logger.warnx( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
                         "exception:", utility.exceptionMessage( e ) );
                 }
 
@@ -655,7 +643,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 try {
                     return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
                 } catch ( e ) {
-                    this.logger.warnc( "executing", nodeID,
+                    this.logger.warnx( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );
                 }
             }
@@ -669,14 +657,14 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
     // -- proxiedBehavior --------------------------------------------------------------------------
 
-    function proxiedBehavior( prototype, behavior ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.
+    function proxiedBehavior( prototype, behavior ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.  // TODO: nodes need to keep a list of proxies on them and callback here to refresh after changes
 
         var self = this;
 
         var proxy = Object.create( prototype );
 
         Object.defineProperty( proxy, "private", {
-            value: Object.create( behavior.private || Object.prototype )
+            value: {}
         } );
 
         proxy.private.origin = behavior; // the node we're the proxy for
@@ -693,6 +681,14 @@ proxy.id = behavior.id; // TODO: move to vwf/model/object
         proxy.properties = Object.create( prototype.properties || Object.prototype, {
             node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
         } );
+
+        proxy.private.getters = Object.create( prototype.private ?
+            prototype.private.getters : Object.prototype
+        );
+
+        proxy.private.setters = Object.create( prototype.private ?
+            prototype.private.setters : Object.prototype
+        );
 
         for ( var propertyName in behavior.properties ) {
 
@@ -715,6 +711,14 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
 
                 } )( propertyName );
             
+                if ( behavior.private.getters.hasOwnProperty( propertyName ) ) {
+                    proxy.private.getters[propertyName] = behavior.private.getters[propertyName];
+                }
+
+                if ( behavior.private.setters.hasOwnProperty( propertyName ) ) {
+                    proxy.private.setters[propertyName] = behavior.private.setters[propertyName];
+                }
+
             }
 
         }
@@ -722,6 +726,10 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
         proxy.methods = Object.create( prototype.methods || Object.prototype, {
             node: { value: proxy } // for proxy.methods accessors (non-enumerable)  // TODO: hide this better
         } );
+
+        proxy.private.bodies = Object.create( prototype.private ?
+            prototype.private.bodies : Object.prototype
+        );
 
         for ( var methodName in behavior.methods ) {
 
@@ -760,6 +768,10 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
 
                 } )( methodName );
             
+                if ( behavior.private.bodies.hasOwnProperty( methodName ) ) {
+                    proxy.private.bodies[methodName] = behavior.private.bodies[methodName];
+                }
+
             }
 
         }
@@ -767,6 +779,8 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
         proxy.events = Object.create( prototype.events || Object.prototype, {
             node: { value: proxy } // for proxy.events accessors (non-enumerable)  // TODO: hide this better
         } );
+
+        proxy.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
         for ( var eventName in behavior.events ) {
 
@@ -837,9 +851,27 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
                 } )( eventName );
 
+                if ( behavior.private.listeners.hasOwnProperty( eventName ) ) {
+                    proxy.private.listeners[eventName] = behavior.private.listeners[eventName];
+                }
+
             }
 
         }
+
+        proxy.private.future = Object.create( prototype.private ?
+            prototype.private.future : Object.prototype
+        );
+
+        Object.defineProperty( proxy.private.future, "private", {
+            value: {
+                when: 0,
+                callback: undefined,
+                change: 0,
+            }
+        } );
+
+        proxy.private.change = behavior.private.change;
 
         return proxy;
     }

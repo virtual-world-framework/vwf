@@ -11,6 +11,9 @@
     <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
+
     <script type="text/javascript" src="../lib/vwf.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
@@ -28,6 +31,7 @@
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
 
+        "vwf/configuration",
         "vwf/kernel/model",
         "vwf/model/javascript",
         "vwf/model/object",
@@ -53,8 +57,8 @@
   
             create_node_prototype_with_initializers( true, true, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "test" ), "node", "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "test" ), "prototype", "prototype's initialization" );
+                equal( vwf.getProperty( nodeID, "property" ), "node", "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
 
                 start();
             } );
@@ -67,8 +71,8 @@
   
             create_node_prototype_with_initializers( true, false, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "test" ), "node", "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "test" ), null, "prototype's initialization" );
+                equal( vwf.getProperty( nodeID, "property" ), "node", "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
 
                 start();
             } );
@@ -81,8 +85,8 @@
   
             create_node_prototype_with_initializers( false, true, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "test" ), "prototype", "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "test" ), "prototype", "prototype's initialization" );
+                equal( vwf.getProperty( nodeID, "property" ), "prototype", "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
 
                 start();
             } );
@@ -95,8 +99,8 @@
   
             create_node_prototype_with_initializers( false, false, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "test" ), null, "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "test" ), null, "prototype's initialization" );
+                equal( vwf.getProperty( nodeID, "property" ), null, "node's initialization" );
+                equal( vwf.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
 
                 start();
             } );
@@ -106,21 +110,21 @@
           // == Helper functions =====================================================================
 
           // Create a VWF object with two levels of inheritance using the given initializers. Add a
-          // "test" property to each.
+          // "property" property to each.
 
           function create_node_prototype( node, prototype, callback /* ( nodeID, prototypeID ) */ ) {
 
             prototype.properties = prototype.properties || {};
-            prototype.properties.test = prototype.properties.test || null;
+            prototype.properties.property = prototype.properties.property || null;
 
             vwf.createNode( prototype, function( prototypeID ) {
 
                 node.extends = prototypeID;
 
                 node.properties = node.properties || {};
-                node.properties.test = node.properties.test || null;
+                node.properties.property = node.properties.property || null;
 
-                vwf.createChild( 0, unique_name( "node" ), node, function( nodeID ) {
+                vwf.createChild( 0, unique_name( "node" ), node, undefined, function( nodeID ) {
                     callback( nodeID, prototypeID );
                 } );
 
@@ -128,8 +132,8 @@
 
           }
 
-          // Create a node with a prototype. Add initialize() methods as specified to set the "test"
-          // property.
+          // Create a node with a prototype. Add initialize() methods as specified to set the
+          // "property" property.
 
           function create_node_prototype_with_initializers( node_init, prototype_init, callback /* ( nodeID, prototypeID ) */ ) {
 
@@ -137,7 +141,7 @@
 
             if ( node_init ) {
                 node.scripts = [ {
-                    text: "this.initialize = function() { this.test = \"node\" }",
+                    text: "this.initialize = function() { this.property = \"node\" }",
                     type: "application/javascript"
                 } ];
             }
@@ -146,7 +150,7 @@
 
             if ( prototype_init ) {
                 prototype .scripts = [ {
-                    text: "this.initialize = function() { this.test = \"prototype\" }",
+                    text: "this.initialize = function() { this.property = \"prototype\" }",
                     type: "application/javascript"
                 } ];
             }

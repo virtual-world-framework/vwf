@@ -11,6 +11,9 @@
     <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
 
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
+
     <script type="text/javascript" src="../lib/vwf.js"></script>
 
     <script type="text/javascript" src="../lib/require.js"></script>
@@ -25,6 +28,7 @@
 
         "domReady",
 
+        "vwf/configuration",
         "vwf/kernel/model",
         "vwf/model/javascript",
         "vwf/model/object",
@@ -419,7 +423,7 @@
                 extends: baseID,
                 properties: { result: result.top },
 
-              }, function( topID ) {
+              }, undefined, function( topID ) {
 
                 // Child node.
 
@@ -428,7 +432,7 @@
                   extends: baseID,
                   properties: { result: result.middle },
 
-                }, function( middleID ) {
+                }, undefined, function( middleID ) {
 
                   // Grandchild node.
 
@@ -437,7 +441,7 @@
                     extends: baseID,
                     properties: { result: result.bottom },
 
-                  }, function( bottomID ) {
+                  }, undefined, function( bottomID ) {
 
                     callback( topID, middleID, bottomID, baseID );
 

@@ -40,6 +40,10 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // == Kernel API ===========================================================================
 
+        // TODO: setState
+        // TODO: getState
+        // TODO: hashState
+
         // -- createNode ---------------------------------------------------------------------------
 
         createNode: function( nodeComponent, callback /* ( nodeID ) */ ) {
@@ -52,11 +56,15 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return this.kernel.deleteNode( this.model_to_kernel[this.object_id(node)] || node );
         },
 
+        // TODO: setNode
+        // TODO: getNode
+        // TODO: hashNode
+
         // -- createChild --------------------------------------------------------------------------
 
-        createChild: function( node, childName, childComponent, callback /* ( childID ) */ ) {
+        createChild: function( node, childName, childComponent, childURI, callback /* ( childID ) */ ) {
             return this.kernel.createChild( this.model_to_kernel[this.object_id(node)] || node,
-                childName, childComponent, callback );  // TODO: remap callback parameter
+                childName, childComponent, childURI, callback );  // TODO: remap callback parameter
         },
 
         // -- addChild -----------------------------------------------------------------------------
@@ -73,29 +81,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 this.model_to_kernel[this.object_id(child)] || child );
         },
 
-        // -- ancestors -------------------------------------------------------------------------------
-
-        ancestors: function( node ) {
-            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- parent -------------------------------------------------------------------------------
-
-        parent: function( node ) {
-            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- children -----------------------------------------------------------------------------
-
-        children: function( node ) {
-            return this.kernel.children( this.model_to_kernel[this.object_id(node)] || node );
-        },
-
-        // -- name ---------------------------------------------------------------------------------
-
-        name: function( node ) {
-            return this.kernel.name( this.model_to_kernel[this.object_id(node)] || node );
-        },
+        // TODO: setProperties
+        // TODO: getProperties
 
         // -- createProperty -----------------------------------------------------------------------
 
@@ -172,6 +159,92 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return this.kernel.time();
         },
 
+        // -- client -------------------------------------------------------------------------------
+
+        client: function() {
+            return this.kernel.client();
+        },
+
+        // -- moniker ------------------------------------------------------------------------------
+
+        moniker: function() {
+            return this.kernel.moniker();
+        },
+
+        // -- intrinsics ---------------------------------------------------------------------------
+
+        intrinsics: function( node, result ) {
+            return this.kernel.intrinsics( this.model_to_kernel[this.object_id(node)] || node, result );
+        },
+
+        // -- uri ----------------------------------------------------------------------------------
+
+        uri: function( node ) {
+            return this.kernel.uri( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- name ---------------------------------------------------------------------------------
+
+        name: function( node ) {
+            return this.kernel.name( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- prototype ----------------------------------------------------------------------------
+
+        prototype: function( node ) {
+            return this.kernel.prototype( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- prototypes ---------------------------------------------------------------------------
+
+        prototypes: function( node ) {
+            return this.kernel.prototypes( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- behaviors ----------------------------------------------------------------------------
+
+        behaviors: function( node ) {
+            return this.kernel.behaviors( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- ancestors ----------------------------------------------------------------------------
+
+        ancestors: function( node ) {
+            return this.kernel.ancestors( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- parent -------------------------------------------------------------------------------
+
+        parent: function( node ) {
+            return this.kernel.parent( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- children -----------------------------------------------------------------------------
+
+        children: function( node ) {
+            return this.kernel.children( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- descendants --------------------------------------------------------------------------
+
+        descendants: function( node ) {
+            return this.kernel.descendants( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
+        },
+
+        // -- find ---------------------------------------------------------------------------------
+
+        find: function( node, matchPattern, callback /* ( matchID ) */ ) { // TODO remap return value and callback parameter
+            return this.kernel.find( this.model_to_kernel[this.object_id(node)] || node,
+                matchPattern, callback );
+        },
+
+        // -- test ---------------------------------------------------------------------------------
+
+        test: function( node, matchPattern, test ) {
+            return this.kernel.test( this.model_to_kernel[this.object_id(node)] || node,
+                matchPattern, this.model_to_kernel[this.object_id(test)] || test );
+        },
+
         // == Model API ============================================================================
 
         // -- creatingNode -------------------------------------------------------------------------
@@ -219,24 +292,6 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
         removingChild: function( nodeID, childID ) {
             return this.model.removingChild && this.model.removingChild(
                 this.kernel_to_model[nodeID] || nodeID, this.kernel_to_model[childID] || childID );
-        },
-
-        // -- parenting ----------------------------------------------------------------------------
-
-        parenting: function( nodeID ) {
-            return this.model.parenting && this.model.parenting( this.kernel_to_model[nodeID] || nodeID );
-        },
-
-        // -- childrening --------------------------------------------------------------------------
-
-        childrening: function( nodeID ) {
-            return this.model.childrening && this.model.childrening( this.kernel_to_model[nodeID] || nodeID );
-        },
-
-        // -- naming -------------------------------------------------------------------------------
-
-        naming: function( nodeID ) {
-            return this.model.naming && this.model.naming( this.kernel_to_model[nodeID] || nodeID );
         },
 
         // -- creatingProperty ---------------------------------------------------------------------

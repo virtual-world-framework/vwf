@@ -25,17 +25,17 @@ define( {
     /// 
     /// @param {ID} nodeID
     /// @param {ID} childID
-    /// @param {String} childExtendsID 
+    /// @param {String} childExtendsID
     /// @param {String[]} childImplementsIDs
     /// @param {String} childSource
-    /// @param {String} childType 
+    /// @param {String} childType
     /// @param {String} childURI
     /// @param {String} childName
     /// @param {Function} [callback]
     /// 
-    /// @returns {} 
+    /// @returns {}
 
-    creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /- ( ready ) -/ */ ],
+    creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback( ready ) */ ],
 
     /// Description.
     /// 
@@ -45,7 +45,7 @@ define( {
     /// @param {ID} nodeID
     /// @param {ID} childID
     /// 
-    /// @returns {} 
+    /// @returns {}
 
     initializingNode: [ /* nodeID, childID */ ],
 
@@ -62,32 +62,10 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.model#prototyping
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    prototyping: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.model#behavioring
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    behavioring: [],
-
-    /// Description.
-    /// 
     /// @name vwf.api.model#addingChild
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
@@ -98,7 +76,7 @@ define( {
     /// @name vwf.api.model#removingChild
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
@@ -106,42 +84,10 @@ define( {
 
     /// Description.
     /// 
-    /// @name vwf.api.model#parenting
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    parenting: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.model#childrening
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-
-    childrening: [],
-
-    /// Description.
-    /// 
-    /// @name vwf.api.model#naming
-    /// @function
-    /// 
-    /// @param {} 
-    /// 
-    /// @returns {}
-    naming: [],
-
-    /// Description.
-    /// 
     /// @name vwf.api.model#settingProperties
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
@@ -152,7 +98,7 @@ define( {
     /// @name vwf.api.model#gettingProperties
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
@@ -163,7 +109,7 @@ define( {
     /// @name vwf.api.model#creatingProperty
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
@@ -174,20 +120,20 @@ define( {
     /// @name vwf.api.model#initializingProperty
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
     initializingProperty: [],
 
-    /* TODO: deletingProperty, */
-    
+    // TODO: deletingProperty
+  
     /// Description.
     /// 
     /// @name vwf.api.model#settingProperty
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
@@ -198,7 +144,7 @@ define( {
     /// @name vwf.api.model#gettingProperty
     /// @function
     /// 
-    /// @param {} 
+    /// @param {}
     /// 
     /// @returns {}
 
@@ -218,7 +164,7 @@ define( {
 
     creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
-    /* TODO: deletingMethod, */
+    // TODO: deletingMethod
 
     /// Description.
     /// 
@@ -246,7 +192,7 @@ define( {
 
     creatingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-    /* TODO: deletingEvent, */
+    // TODO: deletingEvent
 
     /// Description.
     /// 
@@ -280,7 +226,5 @@ define( {
     /// @returns {}
 
     ticking: [],
-
-
 
 } );

@@ -33,67 +33,95 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- creatingNode -------------------------------------------------------------------------
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+                childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
-            this.objects[childID] = {
+            var parent = nodeID != 0 && this.objects[nodeID];
 
-                name: childName,
+            var child = this.objects[childID] = {
 
                 id: childID,
-                extends: childExtendsID,
-                implements: childImplementsIDs,
+
+                prototype: childExtendsID &&
+                    this.objects[childExtendsID],
+
+                behaviors: ( childImplementsIDs || [] ).map( function( childImplementsID ) {
+                    return this.objects[childImplementsID];
+                }, this ),
 
                 source: childSource,
                 type: childType,
 
                 uri: childURI,
 
+                name: childName,
+
                 properties: {},
 
+                parent: undefined,
+                children: [],
+
+                sequence: 0,
+
+                // Change list for patchable objects; created when needed
+
+                // patches: {
+                //     root: true,                 // node is the root of the component
+                //     descendant: true,           // node is a descendant still within the component
+                //     properties: true,           // placeholder for a property change list
+                // },
+
                 initialized: false,
-                changed: false, // any changes since initialization?
-                added: false, // added since parent's initialization?
 
             };
+
+            if ( child.uri ) {
+                child.patches = { root: true };
+            } else  if ( parent && ! parent.initialized && parent.patches ) {
+                child.patches = { descendant: true };
+            }
 
         },
 
         // -- initializingNode ---------------------------------------------------------------------
 
         initializingNode: function( nodeID, childID ) {
-
-            this.objects[childID].changed = false;
             this.objects[childID].initialized = true;
-
-            if ( nodeID != 0 && this.objects[nodeID].initialized ) {
-                this.objects[childID].changed = true;
-                this.objects[childID].added = true;
-            }
-
         },
 
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
+
+            var child = this.objects[nodeID];
+            var object = child.parent;
+
+            if ( object ) {
+
+                var index = object.children.indexOf( child );
+
+                if ( index >= 0 ) {
+                    object.children.splice( index, 1 );
+                }
+
+                child.parent = undefined;
+
+            }
+
             delete this.objects[nodeID];
-        },
 
-        // -- prototyping --------------------------------------------------------------------------
-
-        prototyping: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].extends;
-        },
-
-        // -- behavioring --------------------------------------------------------------------------
-
-        behavioring: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].implements;
         },
 
         // -- addingChild --------------------------------------------------------------------------
 
-        // addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
-        // },
+        addingChild: function( nodeID, childID, childName ) {  // TODO: not for global anchor node 0
+
+            var object = this.objects[nodeID];
+            var child = this.objects[childID];
+
+            child.parent = object;
+            object.children.push( child );
+
+        },
 
         // -- removingChild ------------------------------------------------------------------------
 
@@ -106,21 +134,23 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         settingProperties: function( nodeID, properties ) {
 
-if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
+            var object = this.objects[nodeID];
 
-            var node_properties = this.objects[nodeID].properties;
+if ( ! object ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
+
+            var node_properties = object.properties;
 
             for ( var propertyName in properties ) {  // TODO: since undefined values don't serialize to json, interate over node_properties (has-own only) instead and set to undefined if missing from properties?
 
                 if ( ! node_properties.hasOwnProperty( propertyName ) ) {
                     this.kernel.setProperty( nodeID, propertyName, properties[propertyName] );
-                }  // TODO: this needs to be handled in vwf.js for setProperties() the way it's now handling setProperty() create vs. initiailize vs. set
+                }  // TODO: this needs to be handled in vwf.js for setProperties() the way it's now handling setProperty() create vs. initialize vs. set
 
                 node_properties[propertyName] = properties[propertyName];
 
             }
 
-            this.objects[nodeID].changed = true;
+            object.initialized && object.patches && ( object.patches.properties = true ); // placeholder for a property change list
 
             return node_properties;
         },
@@ -148,8 +178,9 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-            this.objects[nodeID].changed = true;
-            return this.objects[nodeID].properties[propertyName] = propertyValue;
+            var object = this.objects[nodeID];
+            object.initialized && object.patches && ( object.patches.properties = true ); // placeholder for a property change list
+            return object.properties[propertyName] = propertyValue;
         },
 
         // -- gettingProperty ----------------------------------------------------------------------
@@ -158,19 +189,23 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
             return this.objects[nodeID].properties[propertyName];
         },
 
-        // -- name_source_type ---------------------------------------------------------------------
+        // == Special Model API ====================================================================
 
-        name_source_type: function( nodeID, result ) {
+        // The kernel delegates the corresponding API calls exclusively to vwf/model/object without
+        // calling any other models.
 
-            result = result || {};
+        // -- intrinsics ---------------------------------------------------------------------------
+
+        intrinsics: function( nodeID, result ) {
 
             var object = this.objects[nodeID];
 
-            if ( object ) {
-                result.name = object.name;
-                result.source = object.source;
-                result.type = object.type;
-            }
+            result = result || {};
+
+            // TODO: extends and implements IDs
+
+            result.source = object.source;
+            result.type = object.type;
 
             return result;
         },
@@ -178,40 +213,89 @@ if ( ! this.objects[nodeID] ) return;  // TODO: patch until full-graph sync is w
         // -- uri ----------------------------------------------------------------------------------
 
         uri: function( nodeID ) {
-
-            var object = this.objects[nodeID];
-
-            if ( object ) {
-                return object.uri;
-            }
-
-            return undefined;
+            return this.objects[nodeID].uri;
         },
 
-        // -- changed ------------------------------------------------------------------------------
+        // -- name ---------------------------------------------------------------------------------
 
-        changed: function( nodeID ) {
-
-            var object = this.objects[nodeID];
-
-            if ( object ) {
-                return object.changed;
-            }
-
-            return undefined;
+        name: function( nodeID ) {
+            return this.objects[nodeID].name || "";
         },
 
-        // -- added --------------------------------------------------------------------------------
+        // -- prototype ----------------------------------------------------------------------------
 
-        added: function( nodeID ) {
+        prototype: function( nodeID ) {  // TODO: not for global anchor node 0
+            var object = this.objects[nodeID];
+            return object.prototype && object.prototype.id;
+        },
+
+        // -- behaviors ----------------------------------------------------------------------------
+
+        behaviors: function( nodeID ) {  // TODO: not for global anchor node 0
+            return this.objects[nodeID].behaviors.map( function( behavior ) {
+                return behavior.id;
+            } );
+        },
+
+        // -- parent -------------------------------------------------------------------------------
+
+        parent: function( nodeID ) {
+            var object = this.objects[nodeID];
+            return object.parent && object.parent.id || 0;
+        },
+
+        // -- children -----------------------------------------------------------------------------
+
+        children: function( nodeID ) {
+            return this.objects[nodeID].children.map( function( child ) {
+                return child.id;
+            } );
+        },
+
+        // == Special utilities ====================================================================
+
+        // The kernel depends on these utility functions but does not expose them directly in the
+        // public API.
+
+        // -- properties ---------------------------------------------------------------------------
+
+        properties: function( nodeID ) {
+            return this.objects[nodeID].properties;
+        },
+
+        // -- internals ----------------------------------------------------------------------------
+
+        internals: function( nodeID, internals ) {
 
             var object = this.objects[nodeID];
 
-            if ( object ) {
-                return object.added;
+            if ( internals ) { // set
+                object.sequence = internals.sequence || 0;
+            } else { // get
+                internals = {};
+                internals.sequence = object.sequence;
             }
 
-            return undefined;
+            return internals;
+        },
+
+        // -- sequence -----------------------------------------------------------------------------
+
+        sequence: function( nodeID ) {
+            var object = this.objects[nodeID];
+            return object && ++object.sequence;
+        },
+
+        // -- patches ------------------------------------------------------------------------------
+
+        patches: function( nodeID ) {
+            return this.objects[nodeID].patches;
+        },
+
+        // -- exists -------------------------------------------------------------------------------
+
+        exists: function( nodeID ) {
+            return !! this.objects[nodeID];
         },
 
     } );

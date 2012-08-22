@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        "vwf/configuration",
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "vwf/view/document",
+        "vwf/utility",
+        "logger",
+
+      ], function( ready ) {
+
+        // Test node replication.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ "vwf/view/document" ]
+          );
+
+          // URI component to be used as a prototype. The state of a URI component can be expressed
+          // as a patch to the URI's descriptor.
+
+          var prototype = {
+
+            // The descriptor, and a data URI referencing it.
+
+            uri: dataURIFromDescriptor( {
+              properties: {
+                p: { // numbers externally, strings internally
+                  set: "this.p = value.toString()", // number to string
+                  get: "return parseInt( this.p )", // string to number
+                },
+              }
+            } ),
+
+            // ID of the constructed component.
+
+            id: undefined, // fill in once created
+
+            // Function to apply a change.
+
+            change: function( state ) {
+              vwf.execute( this.id, "this.p = " + state );
+            },
+
+            // Function to calculate the expected getNode() state after a given change.
+
+            state: function( state ) {
+              if ( state ) { // modified state
+                return {
+                  patches: this.uri, // patches the component
+                  properties: {
+                    p: state.toString(), // property "p" changed
+                  },
+                };
+              } else { // default state
+                return this.uri; // component (no changes)
+              }
+            },
+
+          };
+
+          asyncTest( "URI component", function() {
+
+            vwf.createNode( prototype.uri, function( id ) {
+              prototype.id = id;
+
+              deepEqual( vwf.getNode( id ), prototype.state(), "unmodified prototype is prototype URI" );
+
+              prototype.change( 1 );
+              deepEqual( vwf.getNode( id ), prototype.state( 1 ), "modified prototype is patched with changes" );
+
+              prototype.change( 2 );
+              deepEqual( vwf.getNode( id ), prototype.state( 2 ), "prototype modified again" );
+
+              vwf.setNode( id, prototype.state( 1 ), function( id ) {
+
+                deepEqual( vwf.getNode( id ), prototype.state( 1 ), "modified prototype restored" );
+
+                // vwf.setNode( id, prototype.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), prototype.state(), "unmodified prototype restored" );
+
+                var state1 = prototype.state( 1 );
+
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  prototype.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
+            } );
+
+          } );
+
+          // Descriptor component deriving from the prototype. The state of a descriptor component
+          // must be fully specified since there is no underlying URI to patch.
+
+          var node = {
+
+            // The descriptor.
+
+            descriptor: {
+              extends: prototype.uri,
+            },
+
+            // ID of the constructed component.
+
+            id: undefined, // fill in once created
+
+            // Function to apply a change.
+
+            change: function( state ) {
+              vwf.execute( this.id, "this.p = " + state );
+            },
+
+            // Function to calculate the expected getNode() state after a given change.
+
+            state: function( state ) {
+              if ( state ) { // modified state
+                return {
+                  id: this.id,
+                  extends: prototype.uri,
+                  properties: {
+                    p: state.toString(), // property "p" from prototype set in node
+                  },
+                };
+              } else { // default state
+                return {
+                  id: this.id,
+                  extends: prototype.uri,
+                };
+              }
+            },
+
+          };
+
+          asyncTest( "Descriptor component deriving from URI component", function() {
+
+            vwf.createNode( node.descriptor, function( id ) {
+              node.id = id;
+
+              deepEqual( vwf.getNode( id ), node.state(), "unmodified node" );
+
+              node.change( 1 );
+              deepEqual( vwf.getNode( id ), node.state( 1 ), "modified node shows changes" );
+
+              node.change( 2 );
+              deepEqual( vwf.getNode( id ), node.state( 2 ), "node modified again" );
+
+              vwf.setNode( id, node.state( 1 ), function( id ) {
+
+                deepEqual( vwf.getNode( id ), node.state( 1 ), "modified node restored" );
+
+                // vwf.setNode( id, node.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), node.state(), "unmodified node restored" );
+
+                var state1 = node.state( 1 );
+
+                vwf.deleteNode( vwf.prototype( id ) );
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  node.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified node regenerated" );
+
+                  vwf.deleteNode( vwf.prototype( id ) );
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
+            } );
+
+          } );
+
+          // URI component with a child.
+
+          var prototypeWithChild = {
+
+            // The descriptor, and a data URI referencing it.
+
+            uri: dataURIFromDescriptor( {
+              properties: {
+                p: {
+                  set: "this.p = value.toString()",
+                  get: "return parseInt( this.p )",
+                },
+              },
+              children: {
+                c: {
+                  properties: {
+                    p: null,
+                  },
+                },
+              },
+            } ),
+
+            // ID of the constructed component.
+
+            id: undefined, // fill in once created
+
+            // Function to apply a change.
+
+            change: function( state ) {
+              vwf.execute( this.id, "this.c.p = " + state );
+            },
+
+            // Function to calculate the expected getNode() state after a given change.
+
+            state: function( state ) {
+              if ( state ) {
+                return { // modified state
+                  patches: this.uri,
+                  sequence: 1,
+                  children: {
+                    c: {
+                      patches: vwf.execute( this.id, "this.c.id" ),
+                      properties: {
+                        p: state,
+                      },
+                    },
+                  },
+                };
+              } else { // default state
+                return this.uri;
+              }
+            },
+
+          };
+
+          asyncTest( "URI component with child", function() {
+
+            vwf.createNode( prototypeWithChild.uri, function( id ) {
+              prototypeWithChild.id = id;
+
+              deepEqual( vwf.getNode( id ), prototypeWithChild.state(), "unmodified prototype is prototype URI" );
+
+              prototypeWithChild.change( 1 );
+              deepEqual( vwf.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype is patched with changes" );
+
+              prototypeWithChild.change( 2 );
+              deepEqual( vwf.getNode( id ), prototypeWithChild.state( 2 ), "prototype modified again" );
+
+              vwf.setNode( id, prototypeWithChild.state( 1 ), function( id ) {
+
+                deepEqual( vwf.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype restored" );
+
+                // vwf.setNode( id, prototypeWithChild.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), prototypeWithChild.state(), "unmodified prototype restored" );
+
+                var state1 = prototypeWithChild.state( 1 );
+
+                vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  prototypeWithChild.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+
+                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
+            } );
+
+          } );
+
+          // URI component that creates a child in its initializer.
+
+          var prototypeWithInitializerChild = {
+
+            // The descriptor, and a data URI referencing it.
+
+            uri: dataURIFromDescriptor( {
+              scripts: [
+                "this.initialize = function() { " +
+                  "this.children.create( 'c', { " +
+                    "properties: { " +
+                      "p: null, " +
+                    "}, " +
+                  "} ); " +
+                "}"
+              ]
+            } ),
+
+            // ID of the constructed component.
+
+            id: undefined, // fill in once created
+
+            // Function to apply a change.
+
+            change: function( state ) {
+              vwf.execute( this.id, "this.c.p = " + state );
+            },
+
+            // Function to calculate the expected getNode() state after a given change.
+
+            state: function( state ) {
+              if ( state ) {
+                return { // modified state
+                  patches: this.uri,
+                  sequence: 1,
+                  children: {
+                    c: {
+                      patches: vwf.execute( this.id, "this.c.id" ),
+                      properties: {
+                        p: state,
+                      },
+                    },
+                  },
+                };
+              } else { // default state
+                return this.uri;
+              }
+
+            },
+
+          };
+
+          asyncTest( "URI component with initializer child", function() {
+
+            vwf.createNode( prototypeWithInitializerChild.uri, function( id ) {
+              prototypeWithInitializerChild.id = id;
+
+              deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype is prototype URI" );
+
+              prototypeWithInitializerChild.change( 1 );
+              deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype is patched with changes" );
+
+              prototypeWithInitializerChild.change( 2 );
+              deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 2 ), "prototype modified again" );
+
+              vwf.setNode( id, prototypeWithInitializerChild.state( 1 ), function( id ) {
+
+                deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype restored" );
+
+                // vwf.setNode( id, prototypeWithInitializerChild.state() );  TODO: support property deletes
+                // deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype restored" );
+
+                var state1 = prototypeWithInitializerChild.state( 1 );
+
+                vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                vwf.deleteNode( id );
+
+                vwf.createNode( state1, function( id ) {
+                  prototypeWithInitializerChild.id = id;
+
+                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+
+                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                  vwf.deleteNode( id );
+
+                  start();
+
+                } );
+
+              } );
+
+            } );
+
+          } );
+
+          // Descriptor component deriving from a URI component that creates a child in its
+          // initializer.
+
+          var nodeWithPrototypeInitializerChild = {
+
+            // The descriptor, and a data URI referencing it.
+
+            descriptor: {
+              extends: prototypeWithInitializerChild.uri,
+            },
+
+            // ID of the constructed component.
+
+            id: undefined, // fill in once created
+
+            // Function to apply a change.
+
+            change: function( state ) {
+              vwf.execute( this.id, "this.c.p = " + state );
+            },
+
+            // Function to calculate the expected getNode() state after a given change.
+
+            state: function( state ) {
+              return {
+                id: this.id,
+                extends: prototypeWithInitializerChild.uri,
+                sequence: 1, // one child
+                children: {
+                  c: { // child always fully specified since createNode() outside of initialize()
+                    id: vwf.execute( this.id, "this.c.id" ),
+                    properties: {
+                      p: state ? state : null,
+                    },
+                  },
+                },
+              };
+            },
+
+          };
+
+          asyncTest( "Descriptor component deriving from URI component with initializer child", function() {
+
+            vwf.createNode( nodeWithPrototypeInitializerChild.descriptor, function( id ) {
+              nodeWithPrototypeInitializerChild.id = id;
+
+              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified node" );
+
+              nodeWithPrototypeInitializerChild.change( 1 );
+              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node" );
+
+              nodeWithPrototypeInitializerChild.change( 2 );
+              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 2 ), "node modified again" );
+
+              vwf.setNode( id, nodeWithPrototypeInitializerChild.state( 1 ), function( id ) {
+
+                deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node restored" );
+
+                vwf.setNode( id, nodeWithPrototypeInitializerChild.state(), function( id ) {
+
+                  deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified node restored" );
+
+                  var state1 = nodeWithPrototypeInitializerChild.state( 1 );
+
+                  vwf.deleteNode( vwf.execute( vwf.prototype( id ), "this.c.id" ) );
+                  vwf.deleteNode( vwf.prototype( id ) );
+
+                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                  vwf.deleteNode( id );
+
+                  vwf.createNode( state1, function( id ) {
+                    nodeWithPrototypeInitializerChild.id = id;
+
+                    deepEqual( vwf.getNode( id ), state1, "modified node regenerated" );
+
+                    vwf.deleteNode( vwf.execute( vwf.prototype( id ), "this.c.id" ) );
+                    vwf.deleteNode( vwf.prototype( id ) );
+
+                    vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
+                    vwf.deleteNode( id );
+
+                    start();
+
+                  } );
+
+                } );
+
+              } );
+
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Convert a component descriptor to a data URI component.
+
+          function dataURIFromDescriptor( descriptor ) {
+
+            return "data:application/json;base64," + btoa( JSON.stringify( descriptor ) );
+
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>
