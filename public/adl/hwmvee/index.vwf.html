@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
+<!-- Secretary of Defense (Personnel & Readiness).                                               -->
+<!--                                                                                             -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
+<!-- except in compliance with the License. You may obtain a copy of the License at              -->
+<!--                                                                                             -->
+<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
+<!--                                                                                             -->
+<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
+<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
+<!-- either express or implied. See the License for the specific language governing permissions  -->
+<!-- and limitations under the License.                                                          -->
+
+<html>
+  <head>
+    <script type="text/javascript" src="terrainheight.js"></script>
+	<script type="text/javascript" src="terrainfunctions.js"></script> 
+	<script type="text/javascript" src="TCDriver.js"></script>
+	<script type="text/javascript" src="base64.js"></script>
+	<script type="text/javascript">
+	
+	var tc_lrs;
+	var gUserData = {Email:"",Name:""};
+	var gProfile = null;
+	var gProfiles = null;
+	function InitLRSConnection()
+	{
+	 tc_lrs = TCDriver_GetLRSObject();
+	}
+	function GetTCProps()
+	{
+	
+		var props = {
+		 endpoint:"https://cloud.scorm.com/ScormEngineInterface/TCAPI/NDXS9EO128/sandbox/",
+		 auth:"Basic " + Base64.encode('NDXS9EO128:ZocWK14icHi1roV4gO9Q91qkD40cS2RDIvhsJ0Zx'),
+		 actor:{ "mbox":[gUserData.Email], "name":[gUserData.Name] },
+		 //registration:"",
+		 //activity_id:"NDXS9EO128",
+		 //grouping:"",
+		 //activity_platform:""
+		 
+		};
+		console.log(props);
+		return props
+	}
+	function LogAttempt()
+	{
+	
+	            var tcCourseObj = {
+                    "id":window.location.href,
+                    "definition":{
+                    	"type":"Course",
+                        "name":{"en-US":"VWFGame"},
+                        "description":{"en-US":"A simple based on the Virtual World Framework"}
+                    }
+                };
+                var contextObj = {
+                    "contextActivities":{
+                        "grouping":{"id":"http://asdf"}
+                    }
+                };
+                var stmt = {
+                    "verb":"attempted",
+                    "object":tcCourseObj,
+                    "actor":{ "mbox":["mailto:" + gUserData.Email], "name":[gUserData.Name] },
+					"context": contextObj
+                };
+
+				console.log("TCDriver_SendStatement");
+                TCDriver_SendStatement(tc_lrs, stmt);
+	}
+	function CreateProfile(email,name, password)
+	{
+	
+	            var tcCourseObj = {
+                    "id":window.location.href,
+                    "definition":{
+                    	"type":"Course",
+                        "name":{"en-US":"VWFGame"},
+                        "description":{"en-US":"A simple based on the Virtual World Framework"}
+                    }
+                };
+                var contextObj = {
+                    "contextActivities":{
+                        "grouping":{"id":Base64.encode(password)}
+                    }
+                };
+                var stmt = {
+                    "verb":"imported",
+                    "object":tcCourseObj,
+                    "actor":{ "mbox":["mailto:" + email], "name":[name] },
+					"context": contextObj
+                };
+
+				console.log("TCDriver_SendStatement");
+                TCDriver_SendStatement(tc_lrs, stmt);
+	}
+	function GetProfiles()
+	{
+		if(!gProfiles)
+			gProfiles = JSON.parse(TCDriver_GetStatements(tc_lrs,null,'imported',null,null)).statements;
+		return gProfiles;
+	}
+	function CheckForProfile(name)
+	{
+		var profiles = GetProfiles();
+		for(var i = 0; i < profiles.length; i++)
+		{
+			if( profiles[i].actor.name[0] == name)
+			    return profiles[i];
+		}
+		return null;
+	}
+	function BeginLogon()
+	{
+		$('#Logon').dialog('close');
+		var name = $('#name').val();
+		gProfile = CheckForProfile(name);
+		if(gProfile)
+		{
+			$('#passworddialog').dialog({title:'Enter Password',modal:true,buttons:{"Back":function(){$('#passworddialog').dialog('close');;$('#Logon').dialog('open');;},"Begin Game":function(){PasswordEntered();}}});
+		}
+		else
+		{
+		    $('#ProfileName').val(name);
+		    $('#createprofile').dialog({title:'Create Profile',modal:true,buttons:{"Back":function(){$('#createprofile').dialog('close');;$('#Logon').dialog('open');;},"Begin Game":function(){ProfileCreated();}}});
+		}
+	}
+	function ProfileCreated()
+	{
+		
+		if($('#ProfilePassword').val() != $('#ProfilePassword2').val())
+		{
+		   $('#ProfilePassword').css({ background: "#FF0000" });
+           $('#ProfilePassword').stop().animate({ backgroundColor: "#FFFFFF" });	
+		   $('#ProfilePassword2').css({ background: "#FF0000" });
+           $('#ProfilePassword2').stop().animate({ backgroundColor: "#FFFFFF" });	
+		   return;
+		}
+		if(CheckForProfile($('#ProfileName').val()) != null)
+		{
+		   $('#ProfileName').css({ background: "#FF0000" });
+           $('#ProfileName').stop().animate({ backgroundColor: "#FFFFFF" });	
+		   return;
+		}
+		if($('#ProfileEmail').val().indexOf('@') == -1)
+		{
+		   $('#ProfileEmail').css({ background: "#FF0000" });
+           $('#ProfileEmail').stop().animate({ backgroundColor: "#FFFFFF" });	
+		   return;
+		}
+		CreateProfile($('#ProfileEmail').val(),$('#ProfileName').val(),$('#ProfilePassword').val());
+		Begin();
+		$('#createprofile').dialog('close');
+	}
+	function PasswordEntered()
+	{
+	    
+		var password = Base64.encode($('#password').val());
+		if(gProfile.context.contextActivities.grouping.id == password)
+		{
+		   Begin();
+		   $('#passworddialog').dialog('close');
+		}
+		else
+		{
+		   $('#password').css({ background: "#FF0000" });
+           $('#password').stop().animate({ backgroundColor: "#FFFFFF" });	
+		}
+	}
+	function LogFailure()
+	{
+	
+	            var tcCourseObj = {
+                    "id":window.location.href,
+                    "definition":{
+                    	"type":"Course",
+                        "name":{"en-US":"VWFGame"},
+                        "description":{"en-US":"A simple based on the Virtual World Framework"}
+                    }
+                };
+                var contextObj = {
+                    "contextActivities":{
+                        "grouping":{"id":"http://asdf"}
+                    }
+                };
+                var stmt = {
+                    "verb":"failed",
+                    "object":tcCourseObj,
+                    "actor":{ "mbox":["mailto:" + gUserData.Email], "name":[gUserData.Name] },
+					"context": contextObj
+                };
+
+				console.log("TCDriver_SendStatement");
+                TCDriver_SendStatement(tc_lrs, stmt);
+	}
+	var PlayerProto  = { 
+                    
+                    extends: 'hmvee.vwf',
+                    source: 'matv01_veh.dae',
+                    type: 'model/vnd.collada+xml',
+                    properties: {
+                        PlayerNumber: 1,
+						rotation: [ 1, 0, 0, 90 ],
+						translation: [0,0,1],
+						initialPos: [10,10,1],
+						initialRot: [0,0,0,1],
+						initialHealth: 100,
+						initialRotAmt: 0,
+						initialSteerAmt:0,
+						initialWheelRotate:0
+                        },
+                    };
+	
+	function Begin()
+	{
+	    
+		
+		var name = $('#name').val();
+		gUserData.Name = name;
+		gUserData.Email = name + "@test.com";
+		
+		LogAttempt();
+		PlayerProto.properties.PlayerNumber = name;
+		PlayerProto.properties.initialPos[0] = (Math.random() * 80)-40;
+		PlayerProto.properties.initialPos[1] = (Math.random() * 80)-40;
+		PlayerProto.properties.initialPos[2] = (Math.random() * 80)-40;
+		PlayerProto.properties.initialRot[0] = 90;
+		PlayerProto.properties.initialRot[1] = 0;
+		PlayerProto.properties.initialRot[2] = 1;
+		PlayerProto.properties.initialRot[3] = 0;
+		PlayerProto.properties.initialHealth = 100;
+		PlayerProto.properties.initialRotAmt = 0;
+		PlayerProto.properties.initialSteerAmt = 0;
+		PlayerProto.properties.initialWheelRotate = 0;
+		
+		
+		document[name + 'link'] = null;
+		PlayerProto.properties.PlayerNumber = name;
+		//PlayerProto.id = "player-"+name;
+		document["PlayerNumber"] = name;
+		var parms = new Array();
+		parms.push(JSON.stringify(PlayerProto));
+		
+		console.log(vwf_view);
+		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
+		
+		
+		
+	}
+	function SendSelf()
+	{
+		//Because this will be called on the local client when creating his own player, filter if he is not yet created;
+		if(!document[document.PlayerNumber +'link'])
+		    return;
+		//alert('sendself');
+	    var name = $('#name').val();
+		PlayerProto.properties.PlayerNumber = name;
+		PlayerProto.properties.initialPos[0] = document[document.PlayerNumber +'link'].translation[0];
+		PlayerProto.properties.initialPos[1] = document[document.PlayerNumber +'link'].translation[1];
+		PlayerProto.properties.initialPos[2] = document[document.PlayerNumber +'link'].translation[2];
+		PlayerProto.properties.initialRot[0] = document[document.PlayerNumber +'link'].rotation[0];
+		PlayerProto.properties.initialRot[1] = document[document.PlayerNumber +'link'].rotation[1];
+		PlayerProto.properties.initialRot[2] = document[document.PlayerNumber +'link'].rotation[2];
+		PlayerProto.properties.initialRot[3] = document[document.PlayerNumber +'link'].rotation[3];
+		PlayerProto.properties.initialHealth = document[document.PlayerNumber +'link'].Health;
+		PlayerProto.properties.initialRotAmt = document[document.PlayerNumber +'link'].RotationAmt;
+		PlayerProto.properties.initialSteerAmt = document[document.PlayerNumber +'link'].steerAmt;
+		PlayerProto.properties.initialWheelRotate = document[document.PlayerNumber +'link'].wheelRotate;
+		//PlayerProto.id = "player-"+name;
+		var parms = new Array();
+		parms.push(JSON.stringify(PlayerProto));
+		//alert(JSON.stringify(parms));
+		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
+	//	var x = document[document.PlayerNumber +'link'].translation[0];
+	//	var y = document[document.PlayerNumber +'link'].translation[1];
+	//	var z = document[document.PlayerNumber +'link'].translation[2];
+	//	vwf_view.kernel.setProperty('hmvee-vwf-player-'+document.PlayerNumber, 'translation', [x,y,z]);
+	}
+	function testhit()
+	{
+		vwf_view.kernel.callMethod(document[document.PlayerNumber +'link'].id,'hit',[]);
+	}
+	function SceneInitialize()
+	{
+		InitLRSConnection();
+		$(window).unload(function(){SceneDestroy();});
+		$('#Logon').dialog({title:'Enter Name',modal:true,buttons:{"Log in":function(){BeginLogon();}}});
+	}
+	function SceneDestroy()
+	{
+		
+	    var parms = new Array();
+		parms.push(document[document.PlayerNumber +'link'].id);
+		//alert(JSON.stringify(parms));
+		vwf_view.kernel.callMethod('index-vwf','deleteplayer',parms);
+	}
+	$(document).ready(function(){SceneInitialize();});
+	
+	</script>	
+	<script language="JavaScript">
+	function disableEnterKey(e)
+	{
+		 var key;
+		 if(window.event)
+			  key = window.event.keyCode;     //IE
+		 else
+			  key = e.which;     //firefox
+		 if(key == 13)
+			  return false;
+		 else
+			  return true;
+	}
+	</script>
+
+
+  </head>
+  <body>
+    
+    <div id='Logon'>
+		<form>
+				<input type="text" name="name" id="name" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />
+		</form>
+	</div>
+	<div id='passworddialog'>
+		<form>
+				<input type="password" name="password" id="password" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />
+		</form>
+	</div>
+	<div id='createprofile'>
+		<form>
+		        <label style='font-size:small' for="password">Password:</label> 
+				<input type="password" name="password" id="ProfilePassword" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />
+				<label style='font-size:small' for="password2">Confirm:</label> 
+				<input type="password" name="password2" id="ProfilePassword2" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />
+				<label style='font-size:small' for="ProfileName">Name:</label> 
+				<input type="text" name="Name" id="ProfileName" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />
+				<label style='font-size:small' for="ProfileEmail">EMail:</label> 
+				<input type="text" name="Email" id="ProfileEmail" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />
+		</form>
+	</div>
+	<div id='gameover'></div>
+  </body>
+</html>

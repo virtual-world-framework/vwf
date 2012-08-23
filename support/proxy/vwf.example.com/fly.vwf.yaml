@@ -11,10 +11,21 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a fly behavior
+## 
+## @name fly.vwf
+## @namespace
+
 --- 
 extends:
   http://vwf.example.com/node3.vwf
 properties:
+
+  ## Whether the component is flying
+  ## 
+  ## @name fly.vwf#fly-flying
+  ## @property
+
   fly-flying:
     set: |
       if ( value && ! this["fly-flying"] ) {  // starting
@@ -24,19 +35,113 @@ properties:
         this["fly-flying"] = false;  // set the internal value
       }
     value: false
+
+  ## Distance on ground
+  ## 
+  ## @name fly.vwf#fly-distanceOnGround
+  ## @property
+
   fly-distanceOnGround: 1000
+
+  ## Maximum speed on the ground
+  ## 
+  ## @name fly.vwf#fly-speedOnGroundMax
+  ## @property
+
   fly-speedOnGroundMax: 200
+
+  ## Elevation
+  ## 
+  ## @name fly.vwf#fly-elevation
+  ## @property
+
   fly-elevation: 2500
+
+  ## Speed in the air
+  ## 
+  ## @name fly.vwf#fly-speedInAir
+  ## @property
+
   fly-speedInAir: 250
+
+  ## Flying radius
+  ## 
+  ## @name fly.vwf#fly-radius
+  ## @property
+
   fly-radius: 8000
+
+  ## Flying speed
+  ## 
+  ## @name fly.vwf#fly-speed
+  ## @property
+
   fly-speed: 62.5
+
+  ## Point index
+  ## 
+  ## @name fly.vwf#fly-pointIndex
+  ## @property
+
   fly-pointIndex: 0
 methods:
+
+  ## Animation function. Updates component positions and calls vwf future fly call
+  ## 
+  ## @name fly.vwf#fly
+  ## @function
+  ##
+  ## @returns undefined
+
   fly:
+
+  ## Updates speed based on whether the component is on the ground or in the air.
+  ## 
+  ## @name fly.vwf#updateSpeed
+  ## @function
+  ##
+  ## @returns undefined
+
   updateSpeed:
+
+  ## Returns whether component is on the ground
+  ## 
+  ## @name fly.vwf#isOnGround
+  ## @function
+  ##
+  ## @returns undefined
+
   isOnGround:
+
+  ## Returns whether component is rising
+  ## 
+  ## @name fly.vwf#isRising
+  ## @function
+  ##
+  ## @returns undefined
+
   isRising:
+
+  ## Initialization function
+  ## 
+  ## @name fly.vwf#initialize
+  ## @function
+  ##
+  ## @returns undefined
+
   initialize:
+
+  ## Calculates new interpolated positions
+  ## 
+  ## @name fly.vwf#isOnGround
+  ## @function
+  ##
+  ## @param {Array} beforeCoord
+  ## @param {Array} afterCoord
+  ## @param {Number} percent
+  ##
+  ## @returns new position
+
   interpolate:
 scripts:
 - |

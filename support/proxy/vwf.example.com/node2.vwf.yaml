@@ -11,19 +11,43 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a 2D node
+## 
+## @name node2.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node.vwf
 properties: 
+  
+  ## Enabled
+  ## 
+  ## @name node2.vwf#enabled
+  ## @property
+
   enabled: true
+
+  ## Location
+  ## 
+  ## @name node2.vwf#location
+  ## @property
+
   location: 
     set: |
       this.location = value;
       if ( this.locationChanged ) this.locationChanged( value );
     value: [ 0, 0 ]
+
+  ## Size
+  ## 
+  ## @name node2.vwf#size
+  ## @property
+
   size: 
     set: |
       this.size = value;
       if ( this.sizeChanged ) this.sizeChanged( value );
+      
 events:
   resizing:
   moving:

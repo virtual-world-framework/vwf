@@ -11,14 +11,40 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a 3D node
+## 
+## @name node3.vwf
+## @namespace
+
 ---
 extends: http://vwf.example.com/node.vwf
+
 properties:
+
+  ## World transform of 3D node
+  ## 
+  ## @name node3.vwf#worldTransform
+  ## @property
+
   worldTransform:
     set: |
-      var parentInverse = goog.vec.Mat4.invert( this.transformFromValue( parent.transform ), goog.vec.Vec3.create() );
-      var transform = goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Vec3.create() );
-      this.transform = transform;
+      var parentInverse = goog.vec.Mat4.create();
+      if ( this.parent && goog.vec.Mat4.invert( this.transformFromValue( this.parent.worldTransform ), parentInverse ) ) {
+        var transform = goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Mat4.create() );
+        this.transform = transform;
+      }
+    get: |
+      if( this.parent && this.parent.worldTransform )
+      {
+        return goog.vec.Mat4.multMat( this.parent.worldTransform, this.transform, goog.vec.Mat4.create() );
+      }
+      else return this.transform;
+
+  ## Transform of 3D node
+  ## 
+  ## @name node3.vwf#transform
+  ## @property
+
   transform:
     set: |
       var transform = this.transformFromValue( value ); // parse incoming value
@@ -26,6 +52,13 @@ properties:
         this.transform = transform;
         this.transformChanged( transform );
       }
+
+  ## Translation of 3D node
+  ## node.translation <= [ x, y, z ]
+  ## 
+  ## @name node3.vwf#translation
+  ## @property
+
   translation:
     # node.translation <= [ x, y, z ]
     set: |
@@ -38,6 +71,13 @@ properties:
       var translation = goog.vec.Vec3.create();
       goog.vec.Mat4.getColumn( this.transform || goog.vec.Mat4.createIdentity(), 3, translation );
       return translation;
+
+  ## Rotation of 3D node
+  ## node.rotation <= [ x, y, z, angle ]
+  ## 
+  ## @name node3.vwf#rotation
+  ## @property
+
   rotation:
     # node.rotation <= [ x, y, z, angle ]
     set: |
@@ -56,6 +96,12 @@ properties:
         rotation
       ) * 180 / Math.PI;
       return rotation;
+
+  ## Rotation matrix of 3D node
+  ## 
+  ## @name node3.vwf#rotatioMatrix
+  ## @property
+
   rotationMatrix:
     get: |
       return this.unscaledTransform(
@@ -63,6 +109,13 @@ properties:
         goog.vec.Vec3.create(),
         goog.vec.Mat4.create()
       );
+
+  ## Quaternion of 3D node
+  ## node.quaternion <= [ x, y, z, w ]
+  ## 
+  ## @name node3.vwf#quaternion
+  ## @property
+
   quaternion:
     # node.quaternion <= [ x, y, z, w ]
     set: |
@@ -87,6 +140,13 @@ properties:
         ),
         goog.vec.Quaternion.create()
       );
+
+  ## Scale of 3D node
+  ## node.scale <= [ x, y, z ], node.scale <= s
+  ## 
+  ## @name node3.vwf#scale
+  ## @property
+
   scale:
     # node.scale <= [ x, y, z ], node.scale <= s
     set: |
@@ -108,15 +168,35 @@ properties:
         this.transform || goog.vec.Mat4.createIdentity(),
         goog.vec.Vec3.create()
       );
+
+  ## Enabled
+  ## 
+  ## @name node3.vwf#enabled
+  ## @property
+
   enabled: true
+
+  ## Bounding box of 3D node
+  ## 
+  ## @name node3.vwf#boundingbox
+  ## @property
+
   boundingbox: 
     set: |
       this.logger.info("WARNING: node3 boundingbox cannot be set" )
+
+
+  ## World bounding box of 3D node
+  ##
+  ## @name node3.vwf#worldBoundingBox
+  ## @property
+
   worldBoundingBox:
     set: |
       this.logger.info("WARNING: node3 worldBoundingBox cannot be set" )
     get: |
-      if(this.worldTransform) {
+      var worldTransform = this.worldTransform;
+      if(worldTransform) {
         var worldBoundingBox;
         for(var i=0;i<this.children.length;i++) {
           var childBoundingBox = this.children[i].worldBoundingBox;
@@ -136,14 +216,14 @@ properties:
         }
         if(!worldBoundingBox) {
           worldBoundingBox = this.boundingbox;
-          var coord0=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord1=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord2=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord3=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
-          var coord4=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
-          var coord5=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
-          var coord6=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
-          var coord7=goog.vec.Mat4.multVec4(this.worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+          var coord0=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+          var coord1=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+          var coord2=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+          var coord3=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.min[2],1], goog.vec.Vec4.create() );
+          var coord4=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+          var coord5=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.min[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+          var coord6=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.min[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
+          var coord7=goog.vec.Mat4.multVec4(worldTransform,[worldBoundingBox.max[0],worldBoundingBox.max[1],worldBoundingBox.max[2],1], goog.vec.Vec4.create() );
           worldBoundingBox.min[0]=Math.min(coord0[0],coord1[0],coord2[0],coord3[0],coord4[0],coord5[0],coord6[0],coord7[0]);
           worldBoundingBox.max[0]=Math.max(coord0[0],coord1[0],coord2[0],coord3[0],coord4[0],coord5[0],coord6[0],coord7[0]);
           worldBoundingBox.min[1]=Math.min(coord0[1],coord1[1],coord2[1],coord3[1],coord4[1],coord5[1],coord6[1],coord7[1]);
@@ -156,24 +236,83 @@ properties:
       else {
         return this.boundingbox;
       } 
+
+  ## Offset from center of 3D node
+  ## 
+  ## @name node3.vwf#centerOffset
+  ## @property
+
   centerOffset: 
     set: |
       this.logger.info( "WARNING: node3 centerOffset cannot be set" )
+
+  ## Vertices of 3D node
+  ## 
+  ## @name node3.vwf#vertices
+  ## @property
+
   vertices: 
     set: |
       this.logger.info( "WARNING: node3 vertices cannot be set" )
     value: 
+
+  ## Vertex indices of 3D node
+  ## 
+  ## @name node3.vwf#vertexIndices
+  ## @property
+
   vertexIndices: 
     set: |
       this.logger.info( "WARNING: node3 vertexIndices cannot be set" )
     value: 
+
+  ## Speed value
+  ## 
+  ## @name node3.vwf#speed
+  ## @property
+
   speed: 1
+
+  ## Playing value
+  ## 
+  ## @name node3.vwf#playing
+  ## @property
+
   playing: false
+
+  ## Looping value
+  ## 
+  ## @name node3.vwf#looping
+  ## @property
+
   looping: false
+
+  ## Look at value
+  ## 
+  ## @name lookAt
+  ## @property
+
   lookAt: ""
+
+  ## Visible value
+  ## 
+  ## @name node3.vwf#visible
+  ## @property
+
   visible: true
+
 methods:
-  # Translate by translation over duration.
+
+  ## Translate by given translation over duration.
+  ## 
+  ## @name node3.vwf#translateBy
+  ## @function
+  ##
+  ## @param {Array} translation
+  ## @param {Number} duraion
+  ##
+  ## @returns undefined
+
   translateBy:
     parameters:
       - translation
@@ -192,7 +331,17 @@ methods:
         this.time,
         this.time + ( duration || 0 )
       ); //@ sourceURL=node3.translateBy.vwf
-  # Translate to translation over duration.
+
+  ## Translate to given translation over duration.
+  ## 
+  ## @name node3.vwf#translateTo
+  ## @function
+  ##
+  ## @param {Array} translation
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+
   translateTo:
     parameters:
       - translation
@@ -206,7 +355,19 @@ methods:
         this.time,
         this.time + ( duration || 0 )
       ); //@ sourceURL=node3.translateTo.vwf
-  # Perform a translation animation.
+
+  ## Perform a translation animation.
+  ## 
+  ## @name node3.vwf#translationWorker
+  ## @function
+  ##
+  ## @param {Array} startTranslation
+  ## @param {Array} stopTranslation
+  ## @param {Number} startTime
+  ## @param {Number} stopTime
+  ##
+  ## @returns undefined
+
   translationWorker:
     parameters:
       - startTranslation
@@ -227,11 +388,23 @@ methods:
           stopTime
         ); // TODO: way to do this.in( next-tick )...
       }  //@ sourceURL=node3.translationWorker.vwf
-  # Rotate by rotation over duration.
+
+  ## Rotate by given rotation over duration.
+  ## 
+  ## @name node3.vwf#rotateBy
+  ## @function
+  ## 
+  ## @param {Array} rotation
+  ## @param {Number} [duration]
+  ## @param {String} [frame]
+  ## 
+  ## @returns undefined
+
   rotateBy:
     parameters:
       - rotation
       - duration
+      - frame
     body: |
       var rotation = this.rotationFromValue( rotation );
       var deltaQuaternion = goog.vec.Quaternion.fromAngleAxis(
@@ -239,8 +412,18 @@ methods:
         goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
         goog.vec.Quaternion.create()
       );
-      this.quaterniateBy( deltaQuaternion, duration ); //@ sourceURL=node3.rotateBy.vwf
-  # Rotate to rotation over duration.
+      this.quaterniateBy( deltaQuaternion, duration, frame ); //@ sourceURL=node3.rotateBy.vwf
+
+  ## Rotate to given rotation over duration.
+  ## 
+  ## @name node3.vwf#rotateTo
+  ## @function
+  ## 
+  ## @param {Array} rotation
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+
   rotateTo:
     parameters:
       - rotation
@@ -253,26 +436,56 @@ methods:
         goog.vec.Quaternion.create()
       );
       this.quaterniateTo( stopQuaternion, duration ); //@ sourceURL=node3.rotateTo.vwf
-  # Rotate by quaternion over duration.
+
+  ## Rotate by given quaternion over duration.
+  ## 
+  ## @name node3.vwf#quaterniateBy
+  ## @function
+  ## 
+  ## @param {Array} quaternion
+  ## @param {Number} [duration]
+  ## @param {String} [frame]
+  ## 
+  ## @returns undefined
+
   quaterniateBy:
     parameters:
       - quaternion
       - duration
+      - frame
     body: |
       var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
       var deltaQuaternion = this.quaternionFromValue( quaternion );
-      var stopQuaternion = goog.vec.Quaternion.concat(
-        deltaQuaternion,
-        startQuaternion,
-        goog.vec.Quaternion.create()
-      );
+      if ( ! frame || frame == "rotated" ) {
+        var stopQuaternion = goog.vec.Quaternion.concat(
+          deltaQuaternion,
+          startQuaternion,
+          goog.vec.Quaternion.create()
+        );
+      } else if ( frame == "scaled" ) {
+        var stopQuaternion = goog.vec.Quaternion.concat(
+          startQuaternion,
+          deltaQuaternion,
+          goog.vec.Quaternion.create()
+        );
+      }
       this.quaternionWorker(
         startQuaternion,
         stopQuaternion,
         this.time,
         this.time + ( duration || 0 )
       ); //@ sourceURL=node3.quaterniateBy.vwf
-  # Rotate to quaternion over duration.
+
+  ## Rotate to given quaternion over duration.
+  ## 
+  ## @name node3.vwf#quaterniateTo
+  ## @function
+  ## 
+  ## @param {Array} quaternion
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+
   quaterniateTo:
     parameters:
       - quaternion
@@ -286,7 +499,19 @@ methods:
         this.time,
         this.time + ( duration || 0 )
       ); //@ sourceURL=node3.quaterniateTo.vwf
-  # Perform a quaternion animation.
+
+  ## Perform a quaternion animation.
+  ## 
+  ## @name node3.vwf#quaternionWorker
+  ## @function
+  ## 
+  ## @param {Array} startQuarternion
+  ## @param {Array} stopQuarternion
+  ## @param {Number} startTime
+  ## @param {Number} stopTime
+  ## 
+  ## @returns undefined
+
   quaternionWorker:
     parameters:
       - startQuaternion
@@ -307,7 +532,17 @@ methods:
           stopTime
         ); // TODO: way to do this.in( next-tick )...
       } //@ sourceURL=node3.quaternionWorker.vwf
-  # Scale by scale over duration.
+
+  ## Scale by given scale over duration.
+  ## 
+  ## @name node3.vwf#scaleBy
+  ## @function
+  ## 
+  ## @param {Array} scale
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+
   scaleBy:
     parameters:
       - scale
@@ -326,7 +561,17 @@ methods:
         this.time,
         this.time + ( duration || 0 )
       );
-  # Scale to scale over duration.
+
+  ## Scale to given scale over duration.
+  ## 
+  ## @name node3.vwf#scaleTo
+  ## @function
+  ## 
+  ## @param {Array} scale
+  ## @param {Number} duration
+  ## 
+  ## @returns undefined
+
   scaleTo:
     parameters:
       - scale
@@ -340,7 +585,19 @@ methods:
         this.time,
         this.time + ( duration || 0 )
       );
-  # Perform a scale animation.
+
+  ## Perform a scale animation.
+  ## 
+  ## @name node3.vwf#scaleWorker
+  ## @function
+  ## 
+  ## @param {Array} startScale
+  ## @param {Array} stopScale
+  ## @param {Number} startTime
+  ## @param {Number} stopTime
+  ## 
+  ## @returns undefined
+
   scaleWorker:
     parameters:
       - startScale
@@ -361,7 +618,9 @@ methods:
           stopTime
         );  // TODO: way to do this.in( next-tick )...
       }
+
 events:
+
   keyDown:
   keyPress:
   keyUp:
@@ -374,7 +633,9 @@ events:
   pointerLeave:
   pointerWheel:
   transformChanged:
+
 scripts:
+
 - |
   // Parse a parameter as a transform specification.
   this.transformFromValue = function( value ) {

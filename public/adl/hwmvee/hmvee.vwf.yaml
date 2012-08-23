@@ -1,0 +1,536 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: http://vwf.example.com/node3.vwf
+properties:
+  scale: [ 1, 1, 1]
+  position: 
+    set: |
+           this.translation = value;
+           this.position = value;
+           this.updateCamera();
+  orientation:
+    set: |
+           this.orientation = value;
+           this.rotation = value;
+           this.updateCamera();    
+  RotationAmt:
+  Controlled:
+  Health: 100
+  steerAmt:
+    set: |
+           this.steerAmt = value;
+           this.steerAmt = Math.min(.7,Math.max(-.7,value));
+           this.tireRF.setRotMatrix(this.BuildSteerMatrix());
+  wheelRotate:
+    set: |
+            this.wheelRotate = value;
+            this.wheelRotMatrix	= this.BuildSteerMatrix();		
+            this.tireRF.setRotMatrix(this.wheelRotMatrix);
+            this.tireLF.setRotMatrix(this.wheelRotMatrix);	
+            this.tireRB.setRotX(this.wheelRotate);	
+            this.tireLB.setRotX(this.wheelRotate);	
+methods:
+  update:
+  fire: 
+  hit:
+  localKeyDown:
+  localKeyUp:
+scripts: 
+- |
+         
+         function findChildColladaNode(node, name)
+         {
+            
+            if(node.colladaId == name)
+                return node;
+            else if(node.children){
+                for(var i = 0; i < node.children.length; i++) {
+                    var child = findChildColladaNode(node.children[i],name);
+                    if(child) return child;
+                }
+            }
+            return null;
+         }
+         function findChildViewNode(node, name)
+         {
+            
+            if(node.vwfID == name)
+                return node;
+            else if(node.children){
+                for(var i = 0; i < node.children.length; i++) {
+                    var child = findChildViewNode(node.children[i],name);
+                    if(child) return child;
+                }
+            }
+            return null;
+         }
+         function recurseshow(obj, depth)
+         {
+             if(!obj) return null;		 
+             if(depth > 1) return null;
+             depth++;
+             var keys = {};
+             if(obj.__proto__) keys['proto'] = recurseshow(obj.__proto__,depth);
+             for (var key in obj) if(key != 'parent' && key != 'vertices'){
+                if(obj[key] && obj[key].constructor === String) keys[key] = obj[key];
+                else keys[key] = recurseshow(obj[key],depth) ;
+             }
+             return keys;
+         }
+         function debugshow(obj)
+         {
+            var keys = recurseshow(obj,0);
+            var data = "data:application/json;UTF8," + (JSON.stringify(keys));
+            window.open(data);	 
+         }
+         function findscene()
+         {
+             for(var i =0; i<vwf.views.length;i++)
+             {
+                 if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].glgeScene;
+             }
+             return null;
+         }
+         this.BuildSteerMatrix = function()
+         {
+             var steermat = GLGE.angleAxis(this.steerAmt,[0,0,1]);		  
+             var sidevec =  GLGE.mulMat4Vec3(steermat,[1,0,0]);
+             var spinmat =  GLGE.angleAxis(this.wheelRotate,sidevec);
+             return GLGE.mulMat4(spinmat,steermat);
+         }
+         
+         this.initialize = function() {
+                
+                if(!this.PlayerNumber)
+                    return;
+                
+                var root = findChildViewNode(findscene(),this.id);
+                
+                this.position = [0,0,0];
+                this.updatecounter = 0;
+                       
+                this.tireRF = findChildColladaNode(root,'passenger_side_front_wheel');
+                this.tireRB = findChildColladaNode(root,'passenger_side_back_wheel');
+                this.tireLF = findChildColladaNode(root,'driver_side_front_wheel');
+                this.tireLB = findChildColladaNode(root,'driver_side_back_wheel');
+                this.numfired = 0;
+                this.steerAmt = 1.0;
+                this.wheelRotate = 0.0;
+                this.RotationAmt = 0.0;
+                this.GetSteer = function(){return this.steerAmt;}
+                this.wheelRotMatrix = [];
+                this.WDown = false;
+                this.SDown = false;
+                this.DDown = false;
+                this.ADown = false;
+                this.Momentum = 0.0;
+                
+                this.Controlled = false;
+                
+                //this.AmFirstClient();
+                document[this.PlayerNumber +'link'] = this;
+                if(document.PlayerNumber == this.PlayerNumber)
+                  {
+                                   
+                    $(document).keydown(function(e){  document[this.PlayerNumber +'link'].keydown(e);});
+                    $(document).keyup(function(e){document[this.PlayerNumber +'link'].keyup(e);});
+                  }
+                  var newdiv = document.createElement('div');
+                  newdiv.style.position = 'absolute';
+                  newdiv.id = "Player " + this.PlayerNumber + 'label';
+                  newdiv.innerHTML = "Player " + this.PlayerNumber;
+                  newdiv.style.left = '0px';
+                  newdiv.style.top = '0px';
+                  newdiv.style.background = 'white';
+                  document.body.appendChild(newdiv);
+                  
+                  var hitscreen = document.createElement('img');  
+                  hitscreen.src = 'hitscreen.png';
+                  hitscreen.style.position = 'absolute';
+                  hitscreen.style.width = '100%';
+                  hitscreen.style.height = '100%';
+                  hitscreen.style.left = '0';
+                  hitscreen.style.top = '0';
+                  hitscreen.style.opacity = '0';
+                  hitscreen.id = "hitscreen";
+                  document.body.appendChild(hitscreen);
+                  
+                
+                if(this.initialPos)
+                {
+                      this.translation = this.initialPos;
+                }
+                if(this.initialRot)
+                    this.rotation = this.intiailRot;
+                if(this.initialHealth)
+                    this.Health = this.initialHealth;  
+                    
+                if(this.initialRotAmt) this.RotationAmt = this.initialRotAmt;
+                if(this.initialSteerAmt) this.steerAmt = this.initialSteerAmt;
+                if(this.initialWheelRotate) this.wheelRotate = this.initialWheelRotate;
+                
+                this.update();
+         }
+         this.hit = function()
+         {
+             this.Health -= 25;
+             if(document[document.PlayerNumber + 'link'] == this)
+             {
+                var div = document.getElementById('hitscreen');
+                div.style.opacity = '1';
+                $('#hitscreen').stop().animate({
+                    opacity: 0.0,
+                  }, 2000, function() {
+                    // Animation complete.
+                  });
+                if(this.Health < 1)
+                {
+                 SceneDestroy();
+                 LogFailure();
+                 $('#Logon').dialog({title:'Game Over!',modal:true,buttons:{"Respawn":function(){$('#Logon').dialog('close');Begin();}}});
+                 
+                 $(document).unbind('keydown');
+                 $(document).unbind('keyup');
+                }
+             }
+                 
+         }
+         this.fire = function()
+         {
+                
+                this.numfired++;
+                var proto = { 
+                    id: 'Missile',
+                    extends: 'http://vwf.example.com/node3.vwf',
+                    source: 'missile.dae',
+                    type: 'model/vnd.collada+xml',
+                    properties: {
+                        translation: [10,10,10],
+                        rotation: [1,0,0,90],
+                        position: {set:"this.translation = value; this.position = value; this.updateCamera();"},
+                        orientation: {set:"this.rotation = value; this.orientation = value; this.updateCamera();"},
+                        shooter: "",
+                        target: "",
+                        age: 0
+                        },
+                    methods: { 
+                        update: null
+                        },
+                    scripts: [  "this.initialize = function() {"+
+                                "   this.future(1.0/60.0).update();"+
+                                "   this.active = true;"+
+                                "this.target = this.GetNearist();"+
+                                "this.targetpoint = null;"+
+                                "if(this.target) {this.targetpoint = this.target.translation;}"+
+                                "}",
+                                "this.update = function(){    "+
+                                
+                                "this.age++;"+
+                                "if(this.age > 200) this.delete();"+
+                                "if(this.translation[2] < document.TerrainFunctions.SampleTerrainByPos(this.translation[0],this.translation[1])) this.delete();"+
+                                "var front = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,0,-1]);"+
+                                "this.translation=       [this.translation[0] + front[0],  "+
+                                "                            this.translation[1] + front[1],  "+
+                                "                            this.translation[2]+ front[2]]; "+
+                                "var testpoint;"+
+                                "if (this.target) testpoint = [this.target.translation[0],this.target.translation[1],this.target.translation[2]];"+
+                               
+                                "if(testpoint){"+
+                                "testpoint[2] += 2;"+
+                                "var dist = GLGE.distanceVec3(this.translation, testpoint);"+
+                               
+                                "if(dist < 40 && this.active==true)"+
+                                "{"+
+                                "    var pointfront = [0,0,-1];"+
+                                "    var to = GLGE.subVec3(testpoint,this.translation);"+
+                                "    to = document.TerrainFunctions.normalize(to);"+
+                                "    var a = GLGE.crossVec3(pointfront,to);"+
+                                "    var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(pointfront,to) );    "+
+                                "    var angle = 0; var axis = [0,0,1];"+
+                                "    var  tofront_norm = [];"+
+                                "    goog.vec.Quaternion.normalize(tofront,tofront_norm);    "+
+                                "    var currentrot = [];"+
+                                "    goog.vec.Quaternion.fromAngleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]],currentrot);"+
+                                "    var slerped_rot = [];"+
+                                "    goog.vec.Quaternion.slerp(currentrot,tofront_norm,.02,slerped_rot);"+
+                                "    angle = goog.vec.Quaternion.toAngleAxis(slerped_rot,axis);"+
+                                "    this.rotation = [axis[0],axis[1],axis[2],angle/0.0174532925];   "+
+                                "}"+
+                                "if(dist < 3 && this.active==true) {this.hit();}"+
+                                "}"+ 
+                                "this.future(1.0/60.0).update();"+
+                                //"this.updateCamera();"+
+                                "}",
+                                "this.delete = function(){this.active=false; vwf_view.kernel.kernel.deleteNode(this.id);}",
+                                "this.hit = function() {vwf_view.kernel.kernel.callMethod(this.targetid,'hit',[]);this.delete();}"
+                                ,
+                                 "this.updateCamera = function()"+
+                                 "{"+
+                                 "       if(document[document.PlayerNumber + 'link'].PlayerNumber != this.shooter)"+
+                                 "       return;"+
+                                 "         var cameraTarget = this;"+             
+                                 "         var camera = vwf.views[0].state.cameraInUse;"+
+                                 "         var camoffset = [];"+
+                                 "         camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,5,5]);"+ 
+                                 "         var cameragoal = [cameraTarget.translation[0]+camoffset[0],cameraTarget.translation[1]+camoffset[1],cameraTarget.translation[2]+camoffset[2]];"+
+                                 "         var togoal = [cameragoal[0] - camera.getLocX(),"+
+                                 "                       cameragoal[1] - camera.getLocY(),"+
+                                 "                       cameragoal[2] - camera.getLocZ()];"+
+                                 "         var blendfactor = 30;"+             
+                                 "         camera.setLoc(camera.getLocX() + togoal[0]/blendfactor,"+
+                                 "                       camera.getLocY() + togoal[1]/blendfactor,"+
+                                 "                       camera.getLocZ() + togoal[2]/blendfactor);"+
+                                 "         camera.Lookat([cameraTarget.translation[0],cameraTarget.translation[1],cameraTarget.translation[2]+2]);"+
+                                 "}"
+                                ,
+                                "this.GetNearist = function() { "+
+                                "var dot = -1;"+
+                                "var pos = null;"+
+                                "for(var node in vwf_view.kernel.kernel.models[0].model.nodes) { var lnode = vwf_view.kernel.kernel.models[0].model.nodes[node];"+
+                                    "if(lnode.PlayerNumber && lnode.PlayerNumber != this.shooter){"+
+                                    "   var thisdir = GLGE.subVec3(lnode.translation,this.translation);"+
+                                    "    thisdir = document.TerrainFunctions.normalize(thisdir);"+
+                                    "    var front = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,0,-1]);"+
+                                    "   var thisdot = GLGE.dotVec3(thisdir,front);"+
+                                    "   if(thisdot > dot){dot = thisdot; pos = lnode; this.targetid = node}"+
+                                    "}"+
+                                "}"+
+                                "return pos;"+
+                                "}"
+                                ]    
+                };
+                proto.properties.translation[0] = this.translation[0];
+                proto.properties.translation[1] = this.translation[1];
+                proto.properties.translation[2] = this.translation[2] + 4;
+                
+                var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,1,0]);
+                var missilerotation = [];
+                var pointfront = [0,0,-1];
+                var to = forward;
+                to = document.TerrainFunctions.normalize(to);
+                var a = GLGE.crossVec3(pointfront,to);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(pointfront,to) );    
+                var angle = 0; var axis = [0,0,1];
+                var  tofront_norm = [];
+                goog.vec.Quaternion.normalize(tofront,tofront_norm);    
+                var currentrot = [];
+               
+                angle = goog.vec.Quaternion.toAngleAxis(tofront_norm,axis);
+                missilerotation = [axis[0],axis[1],axis[2],angle/0.0174532925];   
+                
+                proto.properties.rotation[0] = missilerotation[0];
+                proto.properties.rotation[1] = missilerotation[1];
+                proto.properties.rotation[2] = missilerotation[2];
+                proto.properties.rotation[3] = missilerotation[3];
+                proto.properties.shooter = this.PlayerNumber;
+               
+                
+                var newid = "missile" + this.numfired + "" + this.PlayerNumber;
+                console.log(newid);
+                this.camtarget = newid;
+                proto.uri = newid;
+                //this.parent.children.create(proto, newid);
+                vwf_view.kernel.kernel.createNode(proto, null);
+                
+         }
+         this.turn = function(dir)
+         {
+            var t = this.RotationAmt + dir * this.steerAmt/16.0 * .03 * this.Momentum;
+            //vwf_view.kernel.setProperty(this.id, "RotationAmt", t);
+            this.RotationAmt = t;
+         }
+         this.keydown = function(e){
+           
+           if(document["PlayerNumber"] != this.PlayerNumber)
+                      return;
+                      
+             if(e.keyCode == 65) vwf_view.kernel.callMethod(this.id,'localKeyDown',['A'],0,null);
+             if(e.keyCode == 68) vwf_view.kernel.callMethod(this.id,'localKeyDown',['D'],0,null);
+             if(e.keyCode == 87) vwf_view.kernel.callMethod(this.id,'localKeyDown',['S'],0,null);
+             if(e.keyCode == 83) vwf_view.kernel.callMethod(this.id,'localKeyDown',['W'],0,null);
+         }
+         this.keyup = function(e){
+             
+             if(document["PlayerNumber"] != this.PlayerNumber)
+                      return;
+                      
+              if(e.keyCode == 65) vwf_view.kernel.callMethod(this.id,'localKeyUp',['A'],0,null);
+              if(e.keyCode == 68) vwf_view.kernel.callMethod(this.id,'localKeyUp',['D'],0,null);
+              if(e.keyCode == 87) vwf_view.kernel.callMethod(this.id,'localKeyUp',['S'],0,null);
+              if(e.keyCode == 83) vwf_view.kernel.callMethod(this.id,'localKeyUp',['W'],0,null);
+              if(e.keyCode == 32)
+             {
+                vwf.send(this.id,'callMethod','fire',0,null);
+             }
+         }
+         this.localKeyUp = function(e)
+         {
+            if(e == 'A')
+                 this.ADown = false;
+            if(e == 'S')
+                 this.SDown = false;
+            if(e == 'D')
+                 this.DDown = false;
+            if(e == 'W')
+                 this.WDown = false;                 
+         }
+         this.localKeyDown = function(e)
+         {
+            if(e == 'A')
+                 this.ADown = true;
+            if(e == 'S')
+                 this.SDown = true;
+            if(e == 'D')
+                 this.DDown = true;
+            if(e == 'W')
+                 this.WDown = true;                 
+         }
+         this.update = function(){
+         
+            //if(document["MY_HMVEE"] == this)
+            {
+                  
+                  //vwf_view.kernel.setProperty(this.id, "steerAmt", this.steerAmt *.993);
+                  this.steerAmt = this.steerAmt * .993;
+                  this.Momentum *= .993;
+                  if(this.ADown == true) this.steerAmt +=.03
+                  if(this.DDown == true) this.steerAmt -=.03
+                 
+                  if(this.WDown == true) this.Momentum += .2;
+                  if(this.SDown == true) this.Momentum -= .2;
+                 
+                  //build quaternion to rotate from local up to terrain normal
+                  var norm = [0,0,1];
+                  if(document.TerrainFunctions)
+                    norm = document.TerrainFunctions.SampleNormalByPos(this.translation[0],this.translation[1]);
+                  var up = [0,0,1];
+                  if(document.TerrainFunctions)
+                    norm = document.TerrainFunctions.normalize(norm);
+                  if(document.TerrainFunctions)
+                     up = document.TerrainFunctions.normalize(up);
+                  var a = GLGE.crossVec3(up,norm);
+                  var tonorm = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(up,norm) );
+                  var  current = [];
+                  goog.vec.Quaternion.normalize(tonorm,current);
+                 
+                 
+                  var turn = goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+                  goog.vec.Quaternion.fromAngleAxis(this.RotationAmt,norm, turn);
+                 
+                 
+                  var totalquat = goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+                  goog.vec.Quaternion.concat(turn,current, totalquat);
+                  var axis = [0,0,0];
+                  var angle = 0;
+                  angle = goog.vec.Quaternion.toAngleAxis(totalquat,axis);
+                  //vwf_view.kernel.setProperty(this.id, 'orientation' , [axis[0],axis[1],axis[2],angle/0.0174532925]);
+                  this.rotation = [axis[0],axis[1],axis[2],angle/0.0174532925];
+                  var z = 0.0;
+                  if(document.TerrainFunctions)
+                    z = document.TerrainFunctions.SampleTerrainByPos(this.translation[0],this.translation[1]);
+                    
+                 
+                  //vwf_view.kernel.setProperty(this.id, 'wheelRotate',this.wheelRotate -.01 * this.Momentum);
+                  this.wheelRotate=this.wheelRotate +.01 * this.Momentum;
+                      
+                    
+                  var front = GLGE.mulMat4Vec3(GLGE.angleAxis(angle,axis),[0,1,0]);
+                  var flat = document.TerrainFunctions.normalize([0,0,1]);
+                  var slope = GLGE.dotVec3(front,flat);
+                  document.title = slope;
+                  this.Momentum += (slope*.25);
+                  var speedforward  =-this.Momentum*.007;  
+                  
+                  front = GLGE.scaleVec3(front,speedforward);
+                  //vwf_view.kernel.setProperty(this.id, 'position' , [this.position[0] + front[0],this.position[1] + front[1],z + front[2]]);
+                  this.translation = [this.translation[0] + front[0],this.translation[1] + front[1],z + front[2]]   
+                  this.turn(-1);
+                  this.updateCamera();    
+                 
+                  
+                  this.updatecounter++;
+                  if(this.updatecounter > 300)
+                  {
+                     vwf_view.kernel.setProperties(this.id,{'translation':this.translation,'rotation':this.rotation,'RotationAmt':this.RotationAmt},0,null);
+                   //  vwf_view.kernel.setProperty(this.id,'rotation',this.rotation,0,null);
+                   //  vwf_view.kernel.setProperty(this.id,'RotationAmt',this.RotationAmt,0,null);
+                        this.updatecounter = 0;
+                  }
+              }
+              
+              var div = document.getElementById("Player " + this.PlayerNumber + 'label');
+              var pos = this.translation;
+              pos = [pos[0],pos[1],pos[2]+3,1];
+                 
+              var viewprojection = vwf.views[0].state.cameraInUse.getViewProjection();
+              var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+              screen[0] /= screen[3];
+              screen[1] /= screen[3];
+              screen[2] /= screen[3];
+              screen[0] /= 2;
+              screen[1] /= 2;
+              screen[2] /= 2;
+              screen[0] += .5;
+              screen[1] += .5;
+              screen[2] += .5;
+          
+              screen[0] *= window.innerWidth;
+              screen[1] *= window.innerHeight;
+              screen[2] *= window.innerHeight;
+             
+              screen[1] = window.innerHeight - screen[1];
+             
+              
+              div.style.left = screen[0]  +'px';
+              div.style.top = screen[1]  +  'px';
+              div.innerHTML = this.PlayerNumber + " " + this.Health;
+              
+              div.style.left = (screen[0] - div.offsetWidth/2)  +'px';
+              this.future(1.0/60.0).update();
+                 
+         }
+         this.updateCamera = function()
+         {
+                  
+                  if(document["PlayerNumber"] != this.PlayerNumber)
+                      return;
+                  var cameraTarget = vwf_view.kernel.kernel.models[0].model.nodes['http-vwf-example-com-node3-vwf-' + this.camtarget];
+                  if(!cameraTarget)
+                        cameraTarget = this;
+                  else
+                        return;
+                        
+                  var camera = vwf.views[0].state.cameraInUse;
+                  var camoffset = [];
+                  camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.RotationAmt,[0,0,1]),[0,-20,8]);
+            
+                  var cameragoal = [cameraTarget.translation[0]+camoffset[0],cameraTarget.translation[1]+camoffset[1],cameraTarget.translation[2]+camoffset[2]];
+                  var togoal = [cameragoal[0] - camera.getLocX(),
+                                cameragoal[1] - camera.getLocY(),
+                                cameragoal[2] - camera.getLocZ()];
+                  var blendfactor = 30;
+                  
+                        
+                  camera.setLoc(camera.getLocX() + togoal[0]/blendfactor,
+                                camera.getLocY() + togoal[1]/blendfactor,
+                                camera.getLocZ() + togoal[2]/blendfactor);
+                  camera.Lookat([cameraTarget.translation[0],cameraTarget.translation[1],cameraTarget.translation[2]+2]);
+         
+         
+         }
+     
+         var that = this;
+       
+        

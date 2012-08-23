@@ -18,12 +18,14 @@ class VWF::Application
     @app = Rack::Builder.new do
 
       map "/" do
+
         run Rack::Cascade.new [
-          Reflector.new,                                                        # The WebSocket reflector  # TODO: not for instance==nil?  # Reflector.new( :debug => true, :backend => { :debug => true } ),
-          Rack::File.new( File.join VWF.settings.support, "client/lib" ),       # Client files from ^/support/client/lib
-          Rack::File.new( File.join VWF.settings.public_folder, root ),         # Public content from ^/public  # TODO: will match public_path/index.html which we don't really want
-          Component.new( File.join VWF.settings.public_folder, root )           # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
+          Reflector.new,                                                        # The WebSocket reflector  # TODO: not for instance==nil?  # debugging: Reflector.new( :debug => true, :backend => { :debug => true } ),
+          Client.new( File.join VWF.settings.support, "client/lib" ),           # Client files from ^/support/client/lib
+          Rack::File.new( File.join VWF.settings.public_folder, root ),         # Public content from ^/public/path/to/application
+          Component.new( File.join VWF.settings.public_folder, root )           # A component descriptor, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
         ]
+
       end
 
       map "/admin" do
@@ -40,6 +42,23 @@ class VWF::Application
 
   def self.call env
     new.call env
+  end
+
+  # Wrap Rack::File to serve "/" as "/index.html".
+
+  class Client
+
+    def initialize root
+      @file = Rack::File.new root
+    end
+
+    def call env
+      if %w[ GET HEAD ].include?( env["REQUEST_METHOD"] ) && env["PATH_INFO"] == "/"
+        env["PATH_INFO"] = "/index.html"
+      end
+      @file.call env
+    end
+
   end
 
 end

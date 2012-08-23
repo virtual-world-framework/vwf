@@ -11,14 +11,41 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a translate behavior (on down)
+## 
+## @name translate-on-down.vwf
+## @namespace
+
 --- 
 extends:
   http://vwf.example.com/node3.vwf
 properties:
+  
+  ## Translate vector
+  ## 
+  ## @name translate-on-down.vwf#translate_vector
+  ## @property
+
   translate-vector: [ 0, 1, 0 ]
+
+  ## Translate value
+  ## 
+  ## @name translate-on-down.vwf#translate_value
+  ## @property
+
   translate_value: 0
+
 methods:
+
+  ## Move function. Updates component translation
+  ## 
+  ## @name translate-on-down.vwf#move
+  ## @function
+  ##
+  ## @returns undefined
+
   move:
+
 scripts:
 - |
   var initialPosition;

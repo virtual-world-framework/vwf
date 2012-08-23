@@ -49,7 +49,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( childExtendsID === undefined )
                 return;
 
-            this.logger.infoc( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName );
+            this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName );
             var node = {
                 parentID: nodeID,
                 ID: childID,
@@ -141,6 +141,18 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                                 }, function(errorCode) {
                                     this.logger.info( "google earth load error: " + errorCode );
+                                }, {
+
+                                    // https://developers.google.com/earth/documentation/#sidedatabase
+                                    // https://developers.google.com/earth/documentation/reference/google_earth_namespace#a70288485024d8129dd1c290fb2e5553b
+
+                                    // Alternate database server:
+                                    // database: "http://khmdb.google.com/?db=moon",
+
+                                    // If required by the server:
+                                    // username: "",
+                                    // password: "",
+
                                 } );
                                 win.clearInterval( interval );
                             }
@@ -168,7 +180,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var obj, earth, ge;
             var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             if ( propertyValue ) {
-                //this.logger.infoc( "satProperty", nodeID, propertyName, propertyValue );
+                //this.logger.infox( "satProperty", nodeID, propertyName, propertyValue );
                 if ( propertyName == "controlClient" ) {
                     this.controlClient = propertyValue;
                     value = propertyValue;

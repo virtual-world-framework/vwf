@@ -11,5 +11,10 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a 2D canvas
+## 
+## @name canvas.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node2.vwf

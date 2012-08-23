@@ -11,9 +11,20 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a scene
+## 
+## @name scene.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/node2.vwf
 properties:
+
+  ## Active camera
+  ## 
+  ## @name scene.vwf#activeCamera
+  ## @property
+
   activeCamera: 
     set: |
       if ( this.activeCameraComp ) {
@@ -34,10 +45,17 @@ properties:
         }
       }
     value: "http-vwf-example-com-camera-vwf-camera"
+
+  ## Ambient color
+  ## 
+  ## @name scene.vwf#ambientColor
+  ## @property
+
   ambientColor: 
     set: |
       this.ambientColor = value;
     value: [ 183, 183, 183 ]
+    
 scripts:
 - |
     this.activeCameraComp = undefined;

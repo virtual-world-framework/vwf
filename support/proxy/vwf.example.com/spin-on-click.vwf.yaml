@@ -11,10 +11,21 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a spin behavior (on click)
+## 
+## @name spin-on-click.vwf
+## @namespace
+
 --- 
 extends:
   http://vwf.example.com/node3.vwf
 properties:
+
+  ## Whether the component is spinning
+  ## 
+  ## @name spin-on-click.vwf#spin-spinning
+  ## @property
+
   spin-spinning:
     set: |
       if ( value && ! this["spin-spinning"] ) {  // starting
@@ -24,15 +35,37 @@ properties:
         this["spin-spinning"] = false;  // set the internal value
       }
     value: false
+
+  ## Spin rate
+  ## 
+  ## @name spin-on-click.vwf#spin-rate
+  ## @property
+
   spin-rate: 1
+
+  ## Spin axis
+  ## 
+  ## @name spin-on-click.vwf#spin-axis
+  ## @property
+
   spin-axis: [ 0, 0, 1 ]
+
 methods:
+  
+  ## Spin function. Updates component rotations and calls future spin
+  ## 
+  ## @name spin-on-click.vwf#spin
+  ## @function
+  ##
+  ## @returns undefined
+
   spin: |
     if ( this["spin-spinning"] ) {  // if enabled
       var axis = this["spin-axis"];
       this.rotateBy( [ axis[0], axis[1], axis[2], this["spin-rate"], 0 ] );
       this.future( 0.05 ).spin();  // schedule the next step
     }
+
 scripts:
 - |
   this.pointerClick = function()  {  // when clicked ...

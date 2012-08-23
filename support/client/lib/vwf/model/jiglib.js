@@ -42,7 +42,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
           var kernel = this.kernel.kernel.kernel;
           //this.logger.enable = true;
-          //this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
+          //this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
           //                  childSource, childType, childURI, childName );
           //this.logger.enabled = false;
 
@@ -163,21 +163,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         //removingChild: function( nodeID, childID, childName ) {
         //},
 
-        // -- parenting ----------------------------------------------------------------------------
-
-        //parenting: function( nodeID ) {
-        //},
-
-        // -- childrening --------------------------------------------------------------------------
-
-        //childrening: function( nodeID ) {
-        //},
-
-        // -- naming -------------------------------------------------------------------------------
-
-        //naming: function( nodeID ) {
-        //},
-
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
@@ -190,7 +175,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var value = undefined;
             //this.logger.enabled = true;
-            //this.logger.infoc( "creatingProperty", nodeID, propertyName, propertyValue );
+            //this.logger.infox( "creatingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enabled = false;
 
             if ( !( propertyValue === undefined ) ) {
@@ -251,7 +236,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var value = undefined;
 //            this.logger.enabled = !this.updating;
 //            if ( nodeID != "http-vwf-example-com-camera-vwf-camera" )
-//                this.logger.infoc( "settingProperty", nodeID, propertyName, propertyValue );
+//                this.logger.infox( "settingProperty", nodeID, propertyName, propertyValue );
 //            this.logger.enabled = false;
 
             if ( propertyValue === undefined )
@@ -396,7 +381,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
             //this.logger.enabled = true;
             //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
-            //    this.logger.infoc( "gettingProperty", nodeID, propertyName, propertyValue );
+            //    this.logger.infox( "gettingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enabled = false;
           
             propertyValue = undefined;

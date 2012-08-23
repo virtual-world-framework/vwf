@@ -11,10 +11,21 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a sway behavior (on click)
+## 
+## @name sway-on-click.vwf
+## @namespace
+
 --- 
 extends:
   http://vwf.example.com/node3.vwf
 properties:
+  
+  ## Whether the component is swaying
+  ## 
+  ## @name sway-on-click.vwf#sway-swaying
+  ## @property
+
   sway-swaying:
     set: |
       if ( value && ! this["sway-start"] ) {
@@ -25,11 +36,39 @@ properties:
       }
     get: |
       return !! this["sway-start"];
+
+  ## Sway rate
+  ## 
+  ## @name sway-on-click.vwf#sway-rate
+  ## @property
+
   sway-rate: 1
+
+  ## Sway axis
+  ## 
+  ## @name sway-on-click.vwf#sway-axis
+  ## @property
+
   sway-axis: [ 0, 1, 0 ]
+
+  ## Sway start
+  ## 
+  ## @name sway-on-click.vwf#sway-start
+  ## @property
+
   sway-start: null
+
 methods:
+  
+  ## Sway function. Updates component rotations and calls future sway
+  ## 
+  ## @name sway-on-click.vwf#sway
+  ## @function
+  ##
+  ## @returns undefined
+
   sway:
+  
 scripts:
 - |
     this.pointerClick = function() {

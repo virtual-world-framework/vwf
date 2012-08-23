@@ -11,9 +11,20 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a navigation scene
+## 
+## @name navscene.vwf
+## @namespace
+
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties: 
+  
+  ## Navigation mode
+  ## 
+  ## @name navscene.vwf#navmode
+  ## @property
+
   navmode:
     set: |
       switch ( value ) {
@@ -27,13 +38,49 @@ properties:
           break;
       }
     value: "walk"
-  orbitRadius: -1  
+
+  ## Orbit radius
+  ## 
+  ## @name navscene.vwf#orbitRadius
+  ## @property
+
+  orbitRadius: -1
+
+  ## ID of object around which to orbit
+  ## 
+  ## @name navscene.vwf#orbitObjectID
+  ## @property
+
   orbitObjectID: "http-vwf-example-com-node3-vwf-sceneCenter"
-  # rotationSpeed: At a speed of 1, will take 4 seconds to go around 360 degrees.
+
+  ## Rotation speed. At a speed of 1, will take 4 seconds to go around 360 degrees.
+  ## 
+  ## @name navscene.vwf#rotationSpeed
+  ## @property
+
   rotationSpeed: 1.0
+
+  ## Translation speed
+  ## 
+  ## @name navscene.vwf#translationSpeed
+  ## @property
+
   translationSpeed: 1.0
+
+  ## Maximum speed
+  ## 
+  ## @name navscene.vwf#maxSpeed
+  ## @property
+
   maxSpeed: 500
+
+  ## Drag mode move boolean. Default value is false.
+  ## 
+  ## @name navscene.vwf#dragModeMove
+  ## @property
+
   dragModeMove: false
+
 events:
   keyUp:
   keyDown:
@@ -42,9 +89,27 @@ events:
   pointerMove:
   pointerLeave:
   pointerWheel:
+
 methods:
+  
+  ## Updates scene
+  ## 
+  ## @name navscene.vwf#update
+  ## @function
+  ## 
+  ## @returns undefined
+
   update:
-  getCameraAt:  
+
+  ## Gets camera at vector
+  ## 
+  ## @name navscene.vwf#getCameraAt
+  ## @function
+  ## 
+  ## @returns camera at vector
+
+  getCameraAt:
+
 scripts:
 - |
     var counter = 1;

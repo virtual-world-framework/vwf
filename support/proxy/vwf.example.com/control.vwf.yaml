@@ -11,12 +11,22 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## The component representation of a control behavior
+## 
+## @name control.vwf
+## @namespace
+
 ---
 extends:
   http://vwf.example.com/node3.vwf
 properties:
-  # controlValue: The current value of the control. Must be between minValue and maxValue. 
-  # This multipled by transformIncrement describes how much the translation/rotation/scale has changed.
+
+  ## The current value of the control. Must be between minValue and maxValue. This property 
+  ## multipled by transformIncrement describes how much the translation/rotation/scale has changed.
+  ##
+  ## @name control.vwf#controlValue
+  ## @property
+
   controlValue:
     set: |
       if(this.controlValue == undefined) {
@@ -46,7 +56,12 @@ properties:
         }
       }
     value: 0
-  # controlType: What property the control modifies. Possible values are "translate", "rotate", and "scale".
+
+  ## What property the control modifies. Possible values are "translate", "rotate", and "scale".
+  ##
+  ## @name control.vwf#controlType
+  ## @property
+
   controlType: 
     set: |
         switch ( value ) {
@@ -56,9 +71,14 @@ properties:
             this.editMode = value;
             break;  
         }
-  # controlMode: How the control modifies the property. Possible values are "momentary", "positions", and "continuous". 
-  # If set to momentary, the control value is set to maxValue on mouse down and minValue on mouseUp.
-  # If set to positions, the control value will increment by the direction. 
+
+  ## How the control modifies the property. Possible values are "momentary", "positions", and 
+  ## "continuous". If set to momentary, the control value is set to maxValue on mouse down and 
+  ## minValue on mouseUp.   # If set to positions, the control value will increment by the direction. 
+  ##
+  ## @name control.vwf#controlMode
+  ## @property
+
   controlMode:
     set: |
       switch (value) {
@@ -68,17 +88,44 @@ properties:
           this.controlMode = value;
           break;
       }
-  # transformAxis: Determines which axes the changes will be made to.
+
+  ## Determines which axes the changes will be made to.
+  ##
+  ## @name control.vwf#transformAxis
+  ## @property
+
   transformAxis: [1, 0, 0]
-  # transformIncrement: How much the translation/rotation/scale will change for each increment of controlValue. 
-  # For example, if the controlType is rotate, a transformIncrement of 30 will rotate the object 30 degrees at controlValue of 1, 60 at controlValue of 2, etc.
-  # This multipled by controlValue describes how much the translation/rotation/scale has changed.
+
+  ## How much the translation/rotation/scale will change for each increment of controlValue. 
+  ## For example, if the controlType is rotate, a transformIncrement of 30 will rotate the object 
+  ## 30 degrees at controlValue of 1, 60 at controlValue of 2, etc. This multipled by controlValue
+  ## describes how much the translation/rotation/scale has changed.
+  ##
+  ## @name control.vwf#transformIncrement
+  ## @property
+
   transformIncrement: 1
-  # minValue: The minimum controlValue can be set to.
+
+  ## The minimum controlValue can be set to.
+  ##
+  ## @name control.vwf#minValue
+  ## @property
+
   minValue: 0
-  # maxValue: The maximum controlValue can be set to.
+
+  ## The maximum controlValue can be set to.
+  ##
+  ## @name control.vwf#maxValue
+  ## @property
+
   maxValue: 1
-  # direction: Determines whether the controlValue will increase or decrease on a mouse click and the sign of the value passed into the delta methods. Is either 1 or -1.
+
+  ## Determines whether the controlValue will increase or decrease on a mouse click and the sign 
+  ## of the value passed into the delta methods. Is either 1 or -1.
+  ##
+  ## @name control.vwf#direction
+  ## @property
+
   direction: 
     set: |
       switch(value) {
@@ -88,14 +135,69 @@ properties:
           break;
       }
     value: 1
-  # dragSpeed: How quickly the object will move when the mouse is dragged. Larger values result in faster dragging. 
-  # A value of 1 would mean that the mouse would have to be dragged from one side of the screen to increment the controlValue.
+
+  ## How quickly the object will move when the mouse is dragged. Larger values result in faster 
+  ## dragging. A value of 1 would mean that the mouse would have to be dragged from one side of 
+  ## the screen to increment the controlValue.
+  ##
+  ## @name control.vwf#dragSpeed
+  ## @property
+
   dragSpeed: 50
+
 methods:
+
+  ## Sets up the mouse pointer information used for dragging.
+  ## 
+  ## @name control.vwf#init
+  ## @function
+  ##
+  ## @returns pointer position deltas
+
   init:
+
+  ## Translates by the given delta
+  ## 
+  ## @name control.vwf#deltaTranslation
+  ## @function
+  ##
+  ## @param {Number} incrementBy
+  ##
+  ## @returns undefined
+
   deltaTranslation: 
+
+  ## Rotates by the given delta
+  ## 
+  ## @name control.vwf#deltaRotation
+  ## @function
+  ##
+  ## @param {Number} incrementBy
+  ##
+  ## @returns undefined
+
   deltaRotation:
+
+  ## Scales by the given delta
+  ## 
+  ## @name control.vwf#deltaScale
+  ## @function
+  ##
+  ## @param {Number} incrementBy
+  ##
+  ## @returns undefined
+
   deltaScale:
+
+  ## Transforms by the given delta
+  ## 
+  ## @name control.vwf#deltaTransform
+  ## @function
+  ##
+  ## @param {Number} incrementBy
+  ##
+  ## @returns undefined
+
   deltaTransform:
 scripts:
 - |

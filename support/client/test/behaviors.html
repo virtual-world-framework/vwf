@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <script type="text/javascript" src="qunit.js"></script>
+
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/async.js"></script>
+
+    <script type="text/javascript" src="../lib/crypto.js"></script>
+    <script type="text/javascript" src="../lib/md5.js"></script>
+
+    <script type="text/javascript" src="../lib/vwf.js"></script>
+
+    <script type="text/javascript" src="../lib/require.js"></script>
+
+    <script type="text/javascript">
+
+      require( {
+
+        baseUrl: "../lib"
+
+      }, [
+
+        "domReady",
+
+        "vwf/configuration",
+        "vwf/kernel/model",
+        "vwf/model/javascript",
+        "vwf/model/object",
+        "vwf/model/stage/log",
+        "vwf/kernel/view",
+        "vwf/utility",
+        "logger",
+
+      ], function( ready ) {
+
+        // Test behavior inheritance.
+
+        ready( function() {
+
+          vwf.initialize(
+            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
+            /*  views */ [ ]
+          );
+
+          asyncTest( "No behaviors", function() {  // Base
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              equal( vwf.execute( baseID, "this.base" ), "base", "base property visible on base" );
+              equal( vwf.execute( baseID, "this.baseAccessor" ), "BASE", "base property visible on base through accessor" );
+
+              start();
+            } );
+
+          } );
+
+          asyncTest( "Inheritance with no behaviors", function() {  // Derived extends Base
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              equal( vwf.execute( derivedID, "this.derived" ), "derived", "derived property visible on derived" );
+              equal( vwf.execute( derivedID, "this.base" ), "base", "base property visible on derived" );
+
+              equal( vwf.execute( derivedID, "this.derivedAccessor" ), "DERIVED", "derived property visible on derived through accessor" );
+              equal( vwf.execute( derivedID, "this.baseAccessor" ), "BASE", "base property visible on derived through accessor" );
+
+              start();
+            } );
+
+          } );
+
+          asyncTest( "Inheritance through behavior", function() {  // DerivedBaseBehavior implements BaseBehavior extends Base
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "derivedBaseBehavior", "derived property visible on derived with base behavior" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base behavior" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.base" ), "base", "base property visible on derived with base behavior" );
+
+              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehaviorAccessor" ), "DERIVEDBASEBEHAVIOR", "derived property visible on derived with base behavior through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehaviorAccessor" ), "BASEBEHAVIOR", "base behavior property visible on derived with base behavior through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with base behavior through accessor" );
+
+              vwf.setProperty( derivedBaseBehaviorID, "derivedBaseBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedBaseBehaviorID, "baseBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedBaseBehaviorID, "base", "UpDaTeD" );
+
+              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "UpDaTeD", "derived property after initialization on derived with base behavior" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "UpDaTeD", "base behavior property after initialization on derived with base behavior" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with base behavior" );
+
+              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with base behavior through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehaviorAccessor" ), "UPDATED", "base behavior property after initialization on derived with base behavior through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with base behavior through accessor" );
+
+              start();
+            } );
+
+          } );
+
+          asyncTest( "Inheritance through two behaviors", function() {  // DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehavior" ), "derivedBaseBehaviorOtherBehavior", "derived property visible on derived with base and other behaviors" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base and other behaviors" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehavior" ), "otherBehavior", "other behavior property visible on derived with base and other behaviors" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.base" ), "base", "base property visible on derived with base and other behaviors" );
+
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehaviorAccessor" ), "DERIVEDBASEBEHAVIOROTHERBEHAVIOR", "derived property visible on derived with base and other behaviors through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehaviorAccessor" ), "BASEBEHAVIOR", "base behavior property visible on derived with base and other behaviors through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehaviorAccessor" ), "OTHERBEHAVIOR", "other behavior property visible on derived with base and other behaviors through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with base and other behaviors through accessor" );
+
+              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "derivedBaseBehaviorOtherBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "baseBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "otherBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "base", "UpDaTeD" );
+
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehavior" ), "UpDaTeD", "derived property after initialization on derived with base and other behaviors" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehavior" ), "UpDaTeD", "base behavior property after initialization on derived with base and other behaviors" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehavior" ), "UpDaTeD", "other behavior property after initialization on derived with base and other behaviors" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with base and other behaviors" );
+
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with base and other behaviors through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehaviorAccessor" ), "UPDATED", "base behavior property after initialization on derived with base and other behaviors through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehaviorAccessor" ), "UPDATED", "other behavior property after initialization on derived with base and other behaviors through accessor" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with base and other behaviors through accessor" );
+
+              start();
+            } );
+
+          } );
+
+          asyncTest( "Inheritance through behavior with own inheritance", function() {  // DerivedDerivedBehavior implements DerivedBehavior extends Base; DerivedBehavior extends BaseBehavior
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "derivedDerivedBehavior", "derived property visible on derived with derived behavior" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "derivedBehavior", "derived behavior property visible on derived with derived behavior" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), false, "base behavior property not visible on derived with derived behavior (JavaScript binding)" );
+              equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), undefined, "base behavior property not visible on derived with derived behavior (kernel delegation)" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.base" ), "base", "base property visible on derived with derived behavior" );
+
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehaviorAccessor" ), "DERIVEDDERIVEDBEHAVIOR", "derived property visible on derived with derived behavior through accessor" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehaviorAccessor" ), "DERIVEDBEHAVIOR", "derived behavior property visible on derived with derived behavior through accessor" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehaviorAccessor' in this" ), false, "base behavior property not visible on derived with derived behavior through accessor (JavaScript binding)" );
+              // equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehaviorAccessor" ), undefined, "base behavior property not visible on derived with derived behavior through accessor (kernel delegation)" );  // TODO: would need to handle ignorePrototype in vwf.model.javascript.gettingProperty() to prevent accessor inheritance in behaviors
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with derived behavior through accessor" );
+
+              vwf.setProperty( derivedDerivedBehaviorID, "derivedDerivedBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedDerivedBehaviorID, "derivedBehavior", "UpDaTeD" );
+              vwf.setProperty( derivedDerivedBehaviorID, "baseBehavior", "CrEaTeD" );
+              vwf.setProperty( derivedDerivedBehaviorID, "base", "UpDaTeD" );
+
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "UpDaTeD", "derived property after initialization on derived with derived behavior" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "UpDaTeD", "derived behavior property after initialization on derived with derived behavior" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), true, "base behavior property created on derived with derived behavior (JavaScript binding)" );  // TODO: kernel doesn't prevent this yet
+              equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), "CrEaTeD", "base behavior property created on derived with derived behavior (kernel delegation)" );  // TODO: kernel doesn't prevent this yet
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with derived behavior" );
+
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with derived behavior through accessor" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehaviorAccessor" ), "UPDATED", "derived behavior property after initialization on derived with derived behavior through accessor" );
+              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehaviorAccessor' in this" ), false, "base behavior property not initialized on derived with derived behavior through accessor (JavaScript binding)" );
+              // equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehaviorAccessor" ), undefined, "base behavior property not initialized on derived with derived behavior through accessor (kernel delegation)" );  // TODO: would need to handle ignorePrototype in vwf.model.javascript.gettingProperty() to prevent accessor inheritance in behaviors
+              equal( vwf.execute( derivedDerivedBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with derived behavior through accessor" );
+
+              start();
+            } );
+
+          } );
+
+          asyncTest( "Multiple behavior inheritance order", function() {  // DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              vwf.createProperty( derivedBaseBehaviorOtherBehaviorID, "a", "derivedBaseBehaviorOtherBehavior" );
+
+              vwf.createProperty( baseBehaviorID, "a", "baseBehavior" );
+              vwf.createProperty( baseBehaviorID, "b", "baseBehavior" );
+
+              vwf.createProperty( otherBehaviorID, "a", "otherBehavior" );
+              vwf.createProperty( otherBehaviorID, "b", "otherBehavior" );
+              vwf.createProperty( otherBehaviorID, "c", "otherBehavior" );
+
+              vwf.createProperty( baseID, "a", "base" );
+              vwf.createProperty( baseID, "b", "base" );
+              vwf.createProperty( baseID, "c", "base" );
+              vwf.createProperty( baseID, "d", "base" );
+
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.a" ), "derivedBaseBehaviorOtherBehavior", "derived property visible above behaviors and prototype" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.b" ), "baseBehavior", "second behavior property visible above first behavior and prototype" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.c" ), "otherBehavior", "first behavior property visible above prototype" );
+              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.d" ), "base", "prototype property visible" );
+
+              start();
+            } );
+
+          } );
+
+          // == Helper functions =====================================================================
+
+          // Create nodes in this arrangement:
+          // 
+          //   DerivedBaseBehavior implements BaseBehavior extends Base
+          //   DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
+          //   DerivedDerivedBehavior implements DerivedBehavior extends Base
+          //   
+          //   Derived extends Base
+          //   Base
+          //   
+          //   DerivedBehavior extends BaseBehavior
+          //   BaseBehavior
+          //   
+          //   OtherBehavior
+
+          function createFixture( callback ) {
+
+            createNode( "otherBehavior", undefined, undefined, function( otherBehaviorID ) {
+              createNode( "baseBehavior", undefined, undefined, function( baseBehaviorID ) {
+                createNode( "derivedBehavior", undefined, baseBehaviorID, function( derivedBehaviorID ) {
+                  createNode( "base", undefined, undefined, function( baseID ) {
+                    createNode( "derived", undefined, baseID, function( derivedID ) {
+                      createNode( "derivedBaseBehavior", [ baseBehaviorID ], baseID, function( derivedBaseBehaviorID ) {
+                        createNode( "derivedBaseBehaviorOtherBehavior", [ otherBehaviorID, baseBehaviorID ], baseID, function( derivedBaseBehaviorOtherBehaviorID ) {
+                          createNode( "derivedDerivedBehavior", [ derivedBehaviorID ], baseID, function( derivedDerivedBehaviorID ) {
+                            callback( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                              derivedBehaviorID, baseBehaviorID, otherBehaviorID );
+                          } );
+                        } );
+                      } );
+                    } );
+                  } );
+                } );
+              } );
+            } );
+  
+          }
+
+          // Create a node with the given prototype and behaviors and a property of the given name
+          // having that same name as its value. A second property wraps the first property using
+          // accessor methods that convert to upper case on get and to lower case on set.
+
+          function createNode( which, behaviors, prototype, callback /* nodeID */ ) {
+
+            var descriptor = {
+              properties: {}
+            };
+
+            descriptor.extends = prototype;
+            descriptor.implements = behaviors;
+
+            descriptor.properties[which] = which;
+
+            descriptor.properties[which+"Accessor"] = {
+              get: "return this." + which + ".toUpperCase()",
+              set: "this." + which + " = value.toLowerCase()",
+            };
+
+            vwf.createNode( descriptor, callback );
+          }
+
+        } );
+
+      } );
+
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="qunit.css" />
+
+  </head>
+
+  <body>
+
+    <h1 id="qunit-header">Virtual World Framework</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture">test markup, will be hidden</div>
+
+  </body>
+
+</html>
