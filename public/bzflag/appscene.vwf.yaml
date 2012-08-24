@@ -47,6 +47,7 @@ methods:
 scripts:
 - |
   var collisionMapCanvas, collisionMapContext;
+
   this.initialize = function() {
     collisionMapCanvas = document.createElement('canvas');
     collisionMapCanvas.width = this.collisionMapSize;
@@ -67,7 +68,7 @@ scripts:
     playerBoundingBox.min[1] += deltaTranslation[1];
     playerBoundingBox.max[2] += deltaTranslation[2];
     playerBoundingBox.min[2] += deltaTranslation[2];
-    
+
     collision = this.checkForStaticCollision(playerBoundingBox) ||
         this.checkForDynamicCollision(player, playerBoundingBox, this.players.children);
     return collision;

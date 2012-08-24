@@ -27,9 +27,10 @@
 				draggable: false,
 				buttons: {
 					"Create": function() {
-						if($('#playerName').val().length > 0) {
-							playerName = $('#playerName').val();
-							vwf_view.kernel.callMethod("index-vwf", "createPlayer", [$('#playerName').val()]);
+						if($('#userNameInput').val().length > 0) {
+							playerName = $('#userNameInput').val();
+							vwf_view.kernel.callMethod("index-vwf", "createPlayer", [$('#userNameInput').val()]);
+							$('#userName').html(playerName + ":&nbsp;");
 							$(this).dialog("close");
 						}
 					}
@@ -116,8 +117,8 @@
 	<table style="width: 100%; height: 100%;">
 		<tr>
 			<td class="style1" style="width: 33%" valign="top">
-				<div id="userName" style="float: left;color:#4A7347;font-size:1.2em;">Username:&nbsp;</div>
-				<div id="userScore" style="color:#4A7347;font-size:1.2em;">0</div>
+				<div id="userName" style="float: left;color:white;font-size:1.2em;">Username:&nbsp;</div>
+				<div id="userScore" style="color:white;font-size:1.2em;">0</div>
 			</td>
 			<td style="width: 33%; height: 33%" valign="top">
 				<div id="messageTop" style="color:red;font-size:1.2em;">Message Top</div>
@@ -159,8 +160,8 @@
 		</tr>
 	</table>
 	<div id="createUser">
-		<label for="playerName">Name</label>
-		<input type="text" name="playerName" id="playerName" class="text ui-widget-content ui-corner-all" />
+		<label for="userNameInput">Name</label>
+		<input type="text" name="userNameInput" id="userNameInput" class="text ui-widget-content ui-corner-all" />
 	</div>
 	<div id="gameOver" title="Game Over">
 		<p>Your tank was destroyed. Do you want to play again?</p>

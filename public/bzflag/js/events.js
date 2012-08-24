@@ -219,11 +219,17 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
             $('#pop')[0].play();
             break;
           case "playerDestroyed":
-            if(eventParameters[0] == playerNode) $( "#gameOver" ).dialog( "open" );
+            if(eventParameters[0] == playerNode) {
+                $("#userScore").text(eventParameters[1]); 
+                $( "#gameOver" ).dialog( "open" );
+            }
             var name = eventParameters[0].substring(9);
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
             $('#boom')[0].play();
+            break;
+          case "playerScored": 
+            if(eventParameters[0] == playerNode) $("#userScore").text(eventParameters[1]);
             break;
           case "chatSent":
             $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ": " + eventParameters[1] + "</b><br/></span>" );

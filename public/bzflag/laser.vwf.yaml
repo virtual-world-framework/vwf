@@ -17,6 +17,7 @@ properties:
   translationSpeed: 1200
   laserDirection: 
   cachedBoundingBox: 
+  parentTank: 
 methods:
   fire:
 scripts:
@@ -55,33 +56,61 @@ scripts:
       if(this.laserDirection[2] != 0) {
         this.laserDirection[2] = 0;
       }
-      if ( goog.vec.Vec3.magnitudeSquared( this.laserDirection ) > goog.vec.EPSILON ) {
-        var trans = goog.vec.Vec3.scale(
-            this.laserDirection,
-            this.distance(),
-            goog.vec.Vec3.create()
-          );
-        this.cachedBoundingBox = this.worldBoundingBox;
-        collision = this.parent.parent.collisionDetection(trans, this);
-        if(!collision) {
-          this.translation = goog.vec.Vec3.add(
-            this.translation,
-            trans,
-            trans
-          );
+      this.cachedBoundingBox = this.worldBoundingBox;
+      collision = this.parent.parent.collisionDetection([0,0,0], this);
+      if(!collision) {
+        if ( goog.vec.Vec3.magnitudeSquared( this.laserDirection ) > goog.vec.EPSILON ) {
+          var trans = goog.vec.Vec3.scale(
+              this.laserDirection,
+              this.distance(),
+              goog.vec.Vec3.create()
+            );
+          this.cachedBoundingBox = this.worldBoundingBox;
+          collision = this.parent.parent.collisionDetection(trans, this);
+          if(!collision) {
+            this.translation = goog.vec.Vec3.add(
+              this.translation,
+              trans,
+              trans
+            );
+          }
+          else {
+            if(this.parent.parent.bz_world.id != collision.id) {
+              var players = this.parent.parent.players;
+              for(var i=0;i<players.children.length;i++) {
+                if(players.children[i].id == collision.id) {
+                  players.children[i].active = false;
+                  players.children[i].visible = false;
+                  players.children[i].playerDeaths += 1;
+                  this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].score);
+                }
+                else if(players.children[i].id == this.parentTank) {
+                  players.children[i].playerKills += 1;
+                  this.parent.parent.events.playerScored(players.children[i].id, players.children[i].score);
+                }
+              }
+            }
+            this.parent.children.delete(this);
+          }
         }
-        else {
+      }
+      else {
+        if(this.parent.parent.bz_world.id != collision.id) {
           var players = this.parent.parent.players;
           for(var i=0;i<players.children.length;i++) {
             if(players.children[i].id == collision.id) {
               players.children[i].active = false;
               players.children[i].visible = false;
-              this.parent.parent.events.playerDestroyed(players.children[i].id);
+              players.children[i].playerDeaths += 1;
+              this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].score);
+            }
+            else if(players.children[i].id == this.parentTank) {
+              players.children[i].playerKills += 1;
+              this.parent.parent.events.playerScored(players.children[i].id, players.children[i].score);
             }
           }
-
-          this.parent.children.delete(this);
         }
+        this.parent.children.delete(this);
       }
       if(!collision) {
         this.future(0.1).fire();

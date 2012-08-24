@@ -26,6 +26,7 @@ events:
   playerJoined:
   playerDestroyed: 
   playerRespawned:
+  playerScored: 
   chatSent:
   laserFired:
 children:
@@ -62,8 +63,8 @@ scripts:
     "models/images/purple_tank.png", "models/images/rabbit_tank.png", "models/images/red_tank.png", 
     "models/images/rogue_tank.png" ];
   var tankColors = [ "#1647C4", "#537737", "#F2521E", "#61378A", "#FFFFFF", "#FF0000", "#000000" ];
-  var tankStartingPositions = [[0,10,200],[-13000,31000,200],[-37000,7000,200],
-    [-15000,-40000,200],[10000,-25000,200],[30000,12000,200],[-60000,-17000,200]];
+  var tankStartingPositions = [[0,10,100],[-13000,31000,100],[-37000,7000,100],
+    [-15000,-40000,100],[10000,-25000,100],[30000,12000,100],[-60000,-17000,100]];
   var playerTank = {
     extends: "tank.vwf",
     properties: {

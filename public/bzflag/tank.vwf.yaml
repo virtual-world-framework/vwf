@@ -19,6 +19,11 @@ properties:
   translationSpeed: 400
   rotationSpeed: 0.5
   cachedBoundingBox: 
+  score: 
+    get: |
+      return this.playerKills - this.playerDeaths;
+  playerKills: 0
+  playerDeaths: 0
 methods:
   update:
 scripts:
