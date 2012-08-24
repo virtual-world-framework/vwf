@@ -68,6 +68,15 @@
 					}
 				}
 			});
+
+			/*var canvas = document.getElementById('map');//$('#map');
+			var context = canvas.getContext('2d');
+			var map_image = new Image();
+			map_image.id = 'map_image';
+			map_image.src = 'images/bzworldmap.png';
+			map_image.onload = function() {
+				context.drawImage(map_image, 0, 0);
+			};*/
 		});
 	</script>
 				
@@ -135,7 +144,10 @@
 			<td style="width: 33%" class="style2" valign="top">Team Score</td>
 		</tr>
 		<tr>
-			<td class="style1" style="width: 33%" valign="bottom">Map</td>
+			<td id='mapCont' class="style1" style="width: 33%;opacity:0.8">
+				<img id='map_image' src='images/bzworldmap.png' height='220px' alt='map' style='position:absolute;bottom:2px'/>
+				<canvas id='map' style='width:220px;height:220px;position:absolute;bottom:2px'></canvas>
+			</td>
 			<td colspan="2" style="height: 33%;" valign="bottom" class="style1">
 				<div>
 					<div id="tabs" class="style1">
