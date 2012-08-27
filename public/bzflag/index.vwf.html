@@ -37,24 +37,13 @@
 				}
 			});
 
-			$(".ui-dialog-titlebar").css("margin", "0px");
-			$(".ui-dialog-titlebar").css("padding", "0px");
 			$(".ui-dialog-titlebar").css("background-image", "url('images/header.png')");
 			$(".ui-dialog-titlebar").css("height", "165px");
-			$(".ui-dialog-titlebar-close").css("visibility", "hidden");
-
-			$(".ui-dialog").css("background-color", "#222222");
-			$(".ui-dialog").css("color", "white");
-			$(".ui-dialog").css("text-align", "center");
-
-			$(".ui-widget-content").css("background", "none");
-			$(".ui-widget-content").css("background-color", "#222222");
-			$(".ui-widget-content").css("color", "white");
 
 			$('#gameOver').dialog( {
 				autoOpen: false,
 				height: 'auto',
-				width: 300,
+				width: 332,
 				modal: true,
 				resizable: false,
 				draggable: false,
@@ -71,11 +60,28 @@
 		            $(".ui-widget-overlay").css("background-image", "url('images/cracked.png')");
 					$(".ui-widget-overlay").css("background-repeat", "repeat");
 					$(".ui-widget-overlay").css("background-color", "#755");
+
+					$(".ui-dialog-titlebar").css("background-image", "url('images/gameover.png')");
+					$(".ui-dialog-titlebar").css("height", "79px");
+
+					$('.ui-dialog :button').blur();
 		        },
 		        close: function() {
 		            $(".ui-widget-overlay").css("background", "#AAA url(images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x;");
 		        }
 			});
+
+			$(".ui-dialog-titlebar").css("margin", "0px");
+			$(".ui-dialog-titlebar").css("padding", "0px");
+			$(".ui-dialog-titlebar-close").css("visibility", "hidden");
+
+			$(".ui-dialog").css("background-color", "#222222");
+			$(".ui-dialog").css("color", "white");
+			$(".ui-dialog").css("text-align", "center");
+
+			$(".ui-widget-content").css("background", "none");
+			$(".ui-widget-content").css("background-color", "#222222");
+			$(".ui-widget-content").css("color", "white");
 
 			/*var canvas = document.getElementById('map');//$('#map');
 			var context = canvas.getContext('2d');
@@ -183,7 +189,7 @@
 		<label for="userNameInput">Name</label>
 		<input type="text" name="userNameInput" id="userNameInput" class="text ui-widget-content ui-corner-all" />
 	</div>
-	<div id="gameOver" title="Game Over">
+	<div id="gameOver">
 		<p>Your tank was destroyed. Do you want to play again?</p>
 	</div>
 	<audio id='laser'>
