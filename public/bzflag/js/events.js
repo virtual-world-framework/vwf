@@ -211,6 +211,7 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
           case "playerJoined":
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
+            vwf_view.kernel.getProperty('index-vwf', 'scoreBoard');
             $('#pop')[0].play();
             break;
           case "playerRespawned":
@@ -226,10 +227,12 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
             var name = eventParameters[0].substring(9);
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
+            vwf_view.kernel.getProperty('index-vwf', 'scoreBoard');
             $('#boom')[0].play();
             break;
           case "playerScored": 
             if(eventParameters[0] == playerNode) $("#userScore").text(eventParameters[1]);
+            vwf_view.kernel.getProperty('index-vwf', 'scoreBoard');
             break;
           case "chatSent":
             $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ": " + eventParameters[1] + "</b><br/></span>" );
@@ -243,6 +246,16 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
         $("#serverContent").scrollTop($("#allContent")[0].scrollHeight);
         $("#chatContent").scrollTop($("#chatContent")[0].scrollHeight);
         $("#allContent").scrollTop($("#allContent")[0].scrollHeight);
+    }
+}
+
+vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
+    if (nodeId == sceneNode) {
+        switch (propertyName) {
+            case "scoreBoard": 
+                updateScoreboard(propertyValue);
+                break;
+        }
     }
 }
 
@@ -293,4 +306,13 @@ function mouseXPos(e) {
 
 function mouseYPos(e) {
     return e.clientY - e.currentTarget.offsetTop + window.scrollY;
+}
+
+function updateScoreboard(scores) {
+    var scoreHtml = '';
+    for(var i=0; i<scores.length; i++) {
+        scoreHtml += "<tr><td>" + scores[i].score + "</td><td>" + scores[i].playerKills + "-" + 
+            scores[i].playerDeaths + "</td><td>" + scores[i].name + "</td></tr>";
+    }
+    $('#scoreBoard tbody').html(scoreHtml);
 }
