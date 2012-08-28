@@ -851,12 +851,14 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
                 } )( eventName );
 
-                if ( behavior.private.listeners.hasOwnProperty( eventName ) ) {
-                    proxy.private.listeners[eventName] = behavior.private.listeners[eventName];
-                }
-
             }
 
+        }
+
+        for ( var eventName in behavior.private.listeners ) { // outside of the behavior.events loop as with getters, setters, and bodies; listeners may appear above the event definition
+            if ( behavior.private.listeners.hasOwnProperty( eventName ) ) {
+                proxy.private.listeners[eventName] = behavior.private.listeners[eventName];
+            }
         }
 
         proxy.private.future = Object.create( prototype.private ?
