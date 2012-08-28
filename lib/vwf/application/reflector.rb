@@ -28,27 +28,26 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    # Start the timer on the first connection to this instance.
+    connect
 
-    schedule_tick
+  end
 
-    # Use a consistent timestamp for the synchronization messages.
+  def connect
 
-    time = session[:transport].time
+    # first
 
-    # Register as a not-yet-synchronized client.
+    if clients.length == 1 # coming from 0
 
-    session[:pending_clients] ||= {}
-    session[:pending_clients][self] = [ time ] # save the client's starting time
+      # Start the timer on the first connection to this instance.
 
-    # Initialize the first client to the instance, or synchronize an additional client to the first.
-
-    unless clients.length > session[:pending_clients].size
+      schedule_tick
 
       # Initialize the client configuration from the runtime environment.
 
-      fields_setState = {
-        "time" => time,
+      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
+          "launching #{id} from #{ env["vwf.application"] }"
+
+      send "time" => session[:transport].time,
         "action" => "setState",
         "parameters" => [ {
           "configuration" =>
@@ -56,33 +55,50 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
           "nodes" =>
             [ env["vwf.application"] ]
         } ]
+
+    # second
+
+    elsif session[:pending].nil?
+
+      # xxx
+
+      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
+          "connecting #{id} and suspending (1 suspended)"
+
+      session[:pending] = {
+        :time => session[:transport].time,
+        :source => clients.reject { |client| client == self } .first,
+        :clients => [ self ],
+        :messages => []
       }
 
-      send fields_setState
+      # Request the current state from a synchronized client.
 
-      session[:pending_clients].delete self
+      source = session[:pending][:source]
+      time = session[:pending][:time]
+
+      # source.send "time" => time, "action" => "hashState", "respond" => true
+
+      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
+          "requesting state from #{source.id}"
+
+      source.send "time" => time,
+        "action" => "getState",
+        "respond" => true
+
+    # pending
 
     else
 
-      # Request the current state from a synchronized client.  # TODO: find first non-pending client in list
+      logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
+          "connecting #{id} and suspending (#{ session[:pending][:clients].length + 1 } suspended)"
 
-      # clients.first.send "time" => time, "action" => "hashState", "respond" => true
-
-      fields_getState = {
-        "time" => time,
-        "action" => "getState",
-        "respond" => true
-      }
-
-      clients.first.send fields_getState
-
-      # clients.first.send "time" => time, "action" => "hashState", "respond" => true
-      # clients.first.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
+      session[:pending][:clients].push self
 
     end
 
   end
-  
+
   def onmessage message
 
     super
@@ -100,60 +116,127 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     else
 
-      log fields, :receive
-
-      # When the request for the current state is received, update all unsynchronized clients to the
-      # current state. Refresh the synchronized clients as well since the get/set operation may be
-      # lossy, and this ensures that every client resumes from the same state.
-
-      if fields["action"] == "getState"
-
-        fields_setState = {
-          "time" => nil, # updated per client
-          "action" => "setState",
-          "parameters" => [ fields["result"] ]
-        }
-
-        session[:pending_clients].each do |client, messages| # clients.each do |client|
-
-          time = messages.shift # the first slot stores the client's starting time
-
-          # Set the state in the new client.
-
-          client.send fields_setState.merge "time" => time
-
-          # client.send "time" => time, "action" => "hashState", "respond" => true
-          # client.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
-
-          # Deliver any messages that arrived after the client joined but before we received the
-          # state from the reference client.
-
-          messages.each do |fields_pending|
-            client.send fields_pending.merge "time" => time
-          end
-
-        end
-
-        session[:pending_clients].clear
-
-      end
+      receive fields
 
     end
 
   end
-  
+
+  # xxx
+
+  def receive fields
+
+    log fields, :receive
+
+    # When the request for the current state is received, update all unsynchronized clients to the
+    # current state. Refresh the synchronized clients as well since the get/set operation may be
+    # lossy, and this ensures that every client resumes from the same state.
+
+    if fields["action"] == "getState" && session[:pending] && session[:pending][:source] == self
+
+      logger.debug "VWF::Application::Reflector#receive #{ object_id } received state from #{id}"
+
+      time = session[:pending][:time]
+
+      fields_setState = {
+        "time" => time,
+        "action" => "setState",
+        "parameters" => [ fields["result"] ]
+      }
+
+      while client = session[:pending][:clients].shift
+        logger.debug "VWF::Application::Reflector#receive #{ object_id } " +
+          "resuming #{client.id} (#{ session[:pending][:clients].length } suspended)"
+      end
+
+      clients.each do |client|
+
+        # Set the state in the new client.
+
+        logger.debug "VWF::Application::Reflector#receive #{ object_id } " +
+          "setting state in #{client.id}"
+
+        client.send fields_setState
+
+        # Deliver any messages that arrived after the client joined but before we received the
+        # state from the reference client.
+
+        session[:pending][:messages].each do |fields_pending|
+          client.send fields_pending.merge "time" => time
+        end
+
+        # client.send "time" => time, "action" => "hashState", "respond" => true
+        # client.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
+
+      end
+
+      session.delete :pending
+
+    end
+
+  end
+
   def ondisconnect
 
-    # Unregister from the not-yet-synchronized list if we're still there.
-
-    session[:pending_clients].delete self
-    # TODO: resend getNode if this was the reference client and a getNode was pending
-
-    # Stop the timer and clear the state on the last disconnection from this instance.
-
-    cancel_tick
+    disconnect
 
     super
+
+    # If the disconnecting client was providing state data for pending clients, replay connections
+    # from the pending clients and choose a new source.
+
+    if session[:stasis]
+
+      while client = session[:stasis].shift
+        client.connect
+      end
+
+      session.delete :stasis
+
+    end
+
+  end
+
+  def disconnect
+
+    if session[:pending]
+
+      if session[:pending][:clients].include? self
+
+        logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
+          "disconnecting #{id}+ (#{ session[:pending][:clients].length } suspended)"
+
+        session[:pending][:clients].delete self
+        session.delete :pending if session[:pending][:clients].empty?
+
+      elsif session[:pending][:source] == self
+
+        logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
+          "disconnecting #{id}* (#{ session[:pending][:clients].length } suspended)"
+
+        # The disconnecting client was to provide state data for pending clients. Put the pending
+        # clients aside so that we can replay their connections and choose a new source.
+
+        session[:stasis] = session[:pending][:clients]
+        session.delete :pending
+
+      else
+
+        logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
+          "disconnecting #{id} (#{ session[:pending][:clients].length } suspended)"
+
+      end
+
+    else
+
+      logger.debug "VWF::Application::Reflector#disconnect #{ object_id } " +
+          "disconnecting #{id}"
+
+    end
+
+    if clients.length == 1 # going to 0
+      cancel_tick
+    end
 
   end
 
@@ -187,20 +270,23 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       fields = message
       message = JSON.generate fields, :max_nesting => 100
 
-      logger.debug "VWF::Application::Reflector#broadcast #{ object_id } #{ message_for_log message }" if log
+      logger.debug "VWF::Application::Reflector#broadcast #{ object_id } " +
+          "#{ message_for_log message }" if log
 
-      clients.each do |client|
-        unless session[:pending_clients][client] # established clients: same as in super
-          next if client.closing
-          client.log fields, :send if log
-          client.send message, false
-        else # pending clients: save until "setState" sent
-          session[:pending_clients][client].push fields
-        end
+      clients.each do |client| # established clients: same as in super
+        next if client.closing
+        client.log fields, :send if log
+        client.send message, false
       end
 
-    else # otherwise the socket.io default
+      if session[:pending] # pending clients: save until "setState" sent
+        session[:pending][:messages].push fields
+      end
+
+    else # otherwise do the socket.io default
+
       super
+
     end
 
   end
@@ -264,6 +350,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         # Write the entire message as a YAML document.
 
         file.puts YAML::dump fields
+        file.puts ""
 
       end
 
@@ -296,25 +383,44 @@ private
 
   def schedule_tick
 
-    if clients.length == 1
-      transport = session[:transport] = Transport.new
-      session[:timer] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
-        transport.playing and broadcast( { "time" => transport.time }, false )
-      end
-      transport.play  # TODO: wait until first client has completed loading  # TODO: wait until all clients are ready for an instructor session
+    logger.debug "VWF::Application::Reflector#schedule_tick #{ object_id } #{id}"
+
+    transport = session[:transport] = Transport.new
+
+    session[:timer] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
+      transport.playing and broadcast( { "time" => transport.time }, false )
     end
+
+    transport.play  # TODO: wait until all clients are ready for an instructor session
 
   end
   
   def cancel_tick
 
-    if clients.length == 1
-      session[:timer].cancel
-      session.delete :timer
-      session[:transport].stop
-      session.delete :transport
-    end
+    logger.debug "VWF::Application::Reflector#cancel_tick #{ object_id } #{id}"
+
+    session[:timer].cancel
+    session.delete :timer
+
+    session[:transport].stop
+    session.delete :transport
     
+  end
+
+  def self.clients env
+
+    session = self.session env
+
+    super - ( session[:pending] ? session[:pending][:clients] : [] ) -
+      ( session[:stasis] || [] )
+
+  end
+
+  def clients
+
+    super - ( session[:pending] ? session[:pending][:clients] : [] ) -
+      ( session[:stasis] || [] )
+
   end
 
 public
