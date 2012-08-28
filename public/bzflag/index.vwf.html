@@ -1,0 +1,218 @@
+﻿<div id="wrapper" style="height:100%;width:100%;z-index:2;position:absolute;top:0px;left:0px;pointer-events:none;">
+	<!-- JAVASCRIPT -->
+
+	<script src="js/jquery-1.7.2.min.js" type="text/javascript"></script>
+	<script src="js/jquery-ui-1.8.21.custom.min.js" type="text/javascript"></script>
+	<script src="js/jquery.ui.core.js" type="text/javascript"></script>
+	<script src="js/jquery.ui.widget.js" type="text/javascript"></script>
+	<script src="js/jquery.ui.tabs.js" type="text/javascript"></script>
+	<script src="js/events.js" type="text/javascript"></script>
+				
+	<script type="text/javascript">
+		$(function(){
+			$("#tabs").tabs();
+			$("#tabs").css("opacity", "0.6");
+
+			$( "#tabs" ).keydown(function(e) {
+			    e.stopPropagation();
+			}).keyup(function(e) {
+			    e.stopPropagation();
+			});
+
+			$('#createUser').dialog( {
+				height: 'auto',
+				width: 820,
+				modal: true,
+				resizable: false,
+				draggable: false,
+				buttons: {
+					"Create": function() {
+						if($('#userNameInput').val().length > 0) {
+							playerName = $('#userNameInput').val();
+							vwf_view.kernel.callMethod("index-vwf", "createPlayer", [$('#userNameInput').val()]);
+							$('#userName').html(playerName + ":&nbsp;");
+							$(this).dialog("close");
+						}
+					}
+				}
+			});
+
+			$(".ui-dialog-titlebar").css("background-image", "url('images/header.png')");
+			$(".ui-dialog-titlebar").css("height", "165px");
+
+			$('#gameOver').dialog( {
+				autoOpen: false,
+				height: 'auto',
+				width: 332,
+				modal: true,
+				resizable: false,
+				draggable: false,
+				buttons: {
+					"Yes": function () {
+						vwf_view.kernel.callMethod("index-vwf", "createPlayer", [playerName]);
+						$(this).dialog("close");
+					},
+					"No": function () {
+						$(this).dialog("close");
+					}
+				},
+				open: function() {
+		            $(".ui-widget-overlay").css("background-image", "url('images/cracked.png')");
+					$(".ui-widget-overlay").css("background-repeat", "repeat");
+					$(".ui-widget-overlay").css("background-color", "#755");
+
+					$(".ui-dialog-titlebar").css("background-image", "url('images/gameover.png')");
+					$(".ui-dialog-titlebar").css("height", "79px");
+
+					$('.ui-dialog :button').blur();
+		        },
+		        close: function() {
+		            $(".ui-widget-overlay").css("background", "#AAA url(images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x;");
+		        }
+			});
+
+			$(".ui-dialog-titlebar").css("margin", "0px");
+			$(".ui-dialog-titlebar").css("padding", "0px");
+			$(".ui-dialog-titlebar-close").css("visibility", "hidden");
+
+			$(".ui-dialog").css("background-color", "#222222");
+			$(".ui-dialog").css("color", "white");
+			$(".ui-dialog").css("text-align", "center");
+
+			$(".ui-widget-content").css("background", "none");
+			$(".ui-widget-content").css("background-color", "#222222");
+			$(".ui-widget-content").css("color", "white");
+
+			/*var canvas = document.getElementById('map');//$('#map');
+			var context = canvas.getContext('2d');
+			var map_image = new Image();
+			map_image.id = 'map_image';
+			map_image.src = 'images/bzworldmap.png';
+			map_image.onload = function() {
+				context.drawImage(map_image, 0, 0);
+			};*/
+		});
+	</script>
+				
+	<script type="text/javascript">
+		$(document).ready(function () {document.getElementById('wrapper').style.height = document.getElementById('vwf-root').style.height;});
+		$('#wrapper').appendTo('#vwf-root');
+	</script>
+				
+	<!-- CSS -->
+	<link rel="stylesheet" href="css/smoothness/jquery-ui-1.8.21.custom.css"></link>
+	<link rel="stylesheet" href="css/demos.css"></link>
+	<style type="text/css">
+		#wrapper {
+			height:100%;
+			border: none;
+			text-align: center;
+		}
+				   	
+		#wrapper {
+			vertical-align: middle;
+		}
+				  	
+		.style1 {
+			text-align: left;
+			overflow:hidden;
+		}
+					
+		.style2 {
+			text-align: right;
+		}
+
+		.notifcationStyle {
+			text-align: left;
+			pointer-events:auto;
+			font-size:12px;
+		}
+		.content {
+			overflow-y:auto;
+			height:150px;
+		}
+		.chatContent {
+			overflow-y:auto;
+			height:128px;
+		}
+	</style>
+
+	<table style="width: 100%; height: 100%;">
+		<tr>
+			<td class="style1" style="width: 33%" valign="top">
+				<div id="userName" style="float: left;color:white;font-size:1.2em;">Username:&nbsp;</div>
+				<div id="userScore" style="color:white;font-size:1.2em;">0</div>
+			</td>
+			<td style="width: 33%; height: 33%" valign="top">
+				<div id="messageTop" style="color:red;font-size:1.2em;">Message Top</div>
+			</td>
+			<td style="width: 33%" class="style2" valign="top">
+				<div id="currentFlag" style="float: right;color:white;font-size:1.2em;">Current Flag</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="style1" style="width: 33%" valign="top">
+				<table id="scoreBoard">
+					<thead>
+						<tr>
+							<th>Score</th>
+							<th>Kills</th>
+							<th>Player</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</td>
+			<td style="width: 33%; height: 33%">
+				<img alt="" src="images/overlay/AimBox.png" style="height:100%;width:100%;max-height:250px;max-width:250px;"/>
+			</td>
+			<td style="width: 33%" class="style2" valign="top">Team Score</td>
+		</tr>
+		<tr>
+			<td id='mapCont' class="style1" style="width: 33%;opacity:0.8">
+				<img id='map_image' src='images/bzworldmap.png' height='220px' alt='map' style='position:absolute;bottom:2px'/>
+				<canvas id='map' style='width:220px;height:220px;position:absolute;bottom:2px'></canvas>
+			</td>
+			<td colspan="2" style="height: 33%;" valign="bottom" class="style1">
+				<div>
+					<div id="tabs" class="style1">
+						<ul style="pointer-events:auto;">
+							<li><a href="#tabs-1">All</a></li>
+							<li><a href="#tabs-2">Chat</a></li>
+							<li><a href="#tabs-3">Server</a></li>
+						</ul>
+						<div id="tabs-1" class="notifcationStyle">
+							<div id="allContent" class="content"></div>
+						</div>
+						<div id="tabs-2" class="notifcationStyle">
+							<div id="chatContent" class="chatContent"></div>
+							<textarea id="chatInput" rows="1" style='width:100%'/>
+						</div>
+						<div id="tabs-3" class="notifcationStyle">
+							<div id="serverContent" class="content"></div>
+						</div>
+					</div>
+				</div>
+			</td>
+		</tr>
+	</table>
+	<div id="createUser">
+		<label for="userNameInput">Name</label>
+		<input type="text" name="userNameInput" id="userNameInput" class="text ui-widget-content ui-corner-all" />
+	</div>
+	<div id="gameOver">
+		<p>Your tank was destroyed. Do you want to play again?</p>
+	</div>
+	<audio id='laser'>
+		<source src="sounds/laser.wav"></source>
+	</audio>
+	<audio id='boom'>
+		<source src="sounds/boom.wav"></source>
+	</audio>
+	<audio id='pop'>
+		<source src="sounds/pop.wav"></source>
+	</audio>
+	<audio id='message'>
+		<source src="sounds/message_team.wav"></source>
+	</audio>
+</div>

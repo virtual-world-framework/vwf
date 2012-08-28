@@ -1,0 +1,144 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/scene.vwf
+properties:
+
+  ## The size of the VWF world
+  ## 
+  ## @name appscene.vwf#worldSize
+  ## @property
+
+  worldSize: 137472
+
+  ## The size of the collision map image in pixels
+  ## 
+  ## @name appscene.vwf#collisionMapSize
+  ## @property
+
+  collisionMapSize: 525
+
+  ## World size / collision map size
+  ## 
+  ## @name appscene.vwf#collisionMapScaleFactor
+  ## @property
+
+  collisionMapScaleFactor: 262
+
+  ## The relative path to the image used for the collision map
+  ## 
+  ## @name appscene.vwf#collisionMapPath
+  ## @property
+
+  collisionMapPath: images/bzworldcollisionmap.png
+
+  ## The sorted list of scores for all players
+  ##
+  ## @name appscene.vwf#scoreBoard
+  ## @property
+  scoreBoard: 
+    get: |
+      var scoreBoard = [];
+      for(var i=0; i<this.players.children.length; i++) {
+        scoreBoard.push({
+          id: this.players.children[i].id, 
+          name: this.players.children[i].name, 
+          score: this.players.children[i].score,
+          playerKills: this.players.children[i].playerKills,
+          playerDeaths: this.players.children[i].playerDeaths
+        });
+      }
+      scoreBoard.sort(function(a,b) {
+        return b.score - a.score;
+      });
+      return scoreBoard;
+methods:
+  update: 
+scripts:
+- |
+  var collisionMapCanvas, collisionMapContext;
+
+  this.initialize = function() {
+    collisionMapCanvas = document.createElement('canvas');
+    collisionMapCanvas.width = this.collisionMapSize;
+    collisionMapCanvas.height = this.collisionMapSize;
+    collisionMapContext = collisionMapCanvas.getContext("2d");
+    var collisionMapImage = new Image();
+    collisionMapImage.onload = function() {
+        collisionMapContext.drawImage(collisionMapImage, 0, 0);
+    }
+    collisionMapImage.src = this.collisionMapPath;
+  }
+  this.collisionDetection = function(deltaTranslation, player) {
+    var collision = false;
+    var playerBoundingBox = player.cachedBoundingBox;
+    playerBoundingBox.max[0] += deltaTranslation[0];
+    playerBoundingBox.min[0] += deltaTranslation[0];
+    playerBoundingBox.max[1] += deltaTranslation[1];
+    playerBoundingBox.min[1] += deltaTranslation[1];
+    playerBoundingBox.max[2] += deltaTranslation[2];
+    playerBoundingBox.min[2] += deltaTranslation[2];
+
+    collision = this.checkForStaticCollision(playerBoundingBox) ||
+        this.checkForDynamicCollision(player, playerBoundingBox, this.players.children);
+    return collision;
+  }
+  this.checkForStaticCollision = function(playerBoundingBox) {
+    var minX, minY, maxX, maxY;
+    minX = Math.round((playerBoundingBox.min[0] + this.worldSize / 2) / this.collisionMapScaleFactor);
+    minY = Math.round((this.worldSize / 2 - playerBoundingBox.min[1]) / this.collisionMapScaleFactor);
+    maxX = Math.round((playerBoundingBox.max[0] + this.worldSize / 2) / this.collisionMapScaleFactor);
+    maxY = Math.round((this.worldSize / 2 - playerBoundingBox.max[1]) / this.collisionMapScaleFactor);
+
+    if(minX < 0 || minY < 0 || maxX > this.collisionMapSize || maxY > this.collisionMapSize) {
+      return this.bz_world;
+    }
+    else {
+      var imageData = collisionMapContext.getImageData(minX, minY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+      imageData = collisionMapContext.getImageData(minX, maxY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+      imageData = collisionMapContext.getImageData(maxX, minY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+      imageData = collisionMapContext.getImageData(maxX, maxY, 1, 1);
+      if(imageData.data[3] != 0) {
+        return this.bz_world;
+      }
+    }
+    return false;
+  }
+  this.checkForDynamicCollision = function(player, playerBoundingBox, sceneObjects) {
+    for(var i=0;i<sceneObjects.length;i++) {
+      if(player.id != sceneObjects[i].id && (!player.parentTank || player.parentTank != sceneObjects[i].id) && sceneObjects[i].active != false) {
+        var sceneBoundingBox = sceneObjects[i].cachedBoundingBox ? sceneObjects[i].cachedBoundingBox : sceneObjects[i].worldBoundingBox;
+        if(sceneBoundingBox.max[0] == Infinity || sceneBoundingBox.max[1] == Infinity || sceneBoundingBox.max[2] == Infinity || 
+            sceneBoundingBox.min[0] == -Infinity || sceneBoundingBox.min[1] == -Infinity || sceneBoundingBox.min[2] == -Infinity) {
+          continue;
+        }
+        if(playerBoundingBox.max[0] < sceneBoundingBox.min[0] || playerBoundingBox.min[0] > sceneBoundingBox.max[0] ||
+              playerBoundingBox.max[1] < sceneBoundingBox.min[1] || playerBoundingBox.min[1] > sceneBoundingBox.max[1] || 
+              playerBoundingBox.max[2] < sceneBoundingBox.min[2] || playerBoundingBox.min[2] > sceneBoundingBox.max[2]) {
+          continue;
+        }
+        return sceneObjects[i];
+      }
+    }
+    return false;
+  }

@@ -64,12 +64,20 @@ scripts:
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.ambientColor = this.ambientColor;
     }
-    this.getChild = function( childName ) {
-      for ( var i = 0; i < this.children.length; i++ ) {
-        if ( this.children[i].id == childName ) {
-          return this.children[i];
-        } else if ( this.children[i].name && this.children[i].name == childName ) {
-          return this.children[i];        
+    this.getChild = function( childName, startingNode ) {
+      if(!startingNode) {
+        startingNode = this;
+      }
+      for ( var i = 0; i < startingNode.children.length; i++ ) {
+        if ( startingNode.children[i].id == childName ) {
+          return startingNode.children[i];
+        } else if ( startingNode.children[i].name && startingNode.children[i].name == childName ) {
+          return startingNode.children[i];        
+        } else {
+          var childNode = this.getChild(childName, startingNode.children[i]);
+          if(childNode) {
+            return childNode;
+          }
         }
       }
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );

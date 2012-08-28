@@ -1,0 +1,181 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: appscene.vwf
+properties:
+  activeCamera: "http-vwf-example-com-camera-vwf-camera"
+  backgroundColor: [ 83, 157, 194 ]
+  ambientColor: [ 250, 250, 250 ]
+  colorIndex: 0
+methods:
+  createPlayer:
+  fireLaser:
+  sendChat:
+events:
+  playerJoined:
+  playerDestroyed: 
+  playerRespawned:
+  playerScored: 
+  chatSent:
+  laserFired:
+children:
+  bz_world:
+    extends: bzworld.vwf
+  # mountains:
+  #   extends: http://vwf.example.com/node3.vwf
+  #   source: models/mountains.dae
+  #   type: model/vnd.collada+xml
+  #   properties: 
+  #     rotation: [ 1, 0, 0, 0 ]
+  #     translation: [ 0, 0, -5000 ]
+  #     scale: 1500
+  background:
+    extends: http://vwf.example.com/node3.vwf
+    # source: models/desert_skydome.dae
+    source: models/skydome.dae
+    type: model/vnd.collada+xml
+    properties:
+      rotation: [ 1, 0, 0, 0 ]
+      translation: [ 0, 0, -5000 ]
+      scale: 110
+  players:
+    extends: http://vwf.example.com/node3.vwf
+  lasers:
+    extends: http://vwf.example.com/node3.vwf
+  # sceneCenter:
+  #   extends: http://vwf.example.com/node3.vwf
+  #   properties:
+  #     translation: [ 0, 0, 0 ]
+scripts:
+- |
+  var tankMaterials = [ "models/images/blue_tank.png", "models/images/green_tank.png", "models/images/hunter_tank.png", 
+    "models/images/purple_tank.png", "models/images/rabbit_tank.png", "models/images/red_tank.png", 
+    "models/images/rogue_tank.png" ];
+  var tankColors = [ "#1647C4", "#537737", "#F2521E", "#61378A", "#FFFFFF", "#FF0000", "#000000" ];
+  var tankStartingPositions = [[0,10,100],[-13000,31000,100],[-37000,7000,100],
+    [-15000,-40000,100],[10000,-25000,100],[30000,12000,100],[-60000,-17000,100]];
+  var playerTank = {
+    extends: "tank.vwf",
+    properties: {
+      active: true,
+      laserCount: 0,
+      color: '',
+      startingTranslation: [],
+      translation: [],
+      scale: 0.5
+    },
+    children: {
+      playerModel: {
+        extends: "http://vwf.example.com/node3.vwf",
+        source: "models/tank.dae",
+        type: "model/vnd.collada+xml",
+        properties: {
+          rotation: [0, 0, 1, 180],
+        },
+        children: {
+          bone1: {
+            extends: "http://vwf.example.com/node3.vwf",
+            children: {
+              bone3: {
+                extends: "http://vwf.example.com/node3.vwf",
+                children: {
+                  Scene: {
+                    extends: "http://vwf.example.com/node3.vwf",
+                    children: {
+                      Tank: {
+                        extends: "http://vwf.example.com/node3.vwf",
+                        children: {
+                          glgeObj1: {
+                            extends: "http://vwf.example.com/node3.vwf",
+                            children: { }
+                          },
+                        }
+                      },
+                    }
+                  },
+                }
+              },
+            }
+          },
+          TankMaterial1: {
+            extends: "http://vwf.example.com/material.vwf",
+            properties: {
+              texture: ""
+            }
+          }
+        }
+      }
+    }
+  };
+  var playerCamera = {
+    extends: "http://vwf.example.com/camera.vwf",
+    properties: {
+      translation: [0, 300, 450],
+      far: 1000000,
+      near: 1,
+    }
+  };
+  var bolt = {
+    extends: "laser.vwf",
+    source: "models/bolt.dae",
+    type: "model/vnd.collada+xml",
+    properties: {
+      laserDirection: [],
+      parentTank: "",
+      translation: [],
+      scale: 100
+    }
+  };
+  this.initialize = function() {
+    this.camera.translation = [ 0, 0, 800 ];
+    this.camera.far = 1000000;
+    this.camera.near = 1;
+  }
+  this.createPlayer = function(playerName) {
+    if(this.players[playerName]) {
+      if(!this.players[playerName].active) {
+        this.players[playerName].translation = this.players[playerName].startingTranslation;
+        this.players[playerName].cachedBoundingBox = this.players[playerName].worldBoundingBox;
+        this.players[playerName].active = true;
+        this.players[playerName].visible = true;
+        this.playerRespawned( playerName );
+      }
+    }
+    else if(this.colorIndex < tankMaterials.length) {
+      var newPlayer = $.extend(true, {}, playerTank);
+      newPlayer.children[playerName + "Camera"] = playerCamera;
+      newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
+      newPlayer.properties.color = tankColors[this.colorIndex];
+      newPlayer.properties.translation = tankStartingPositions[this.colorIndex];
+      newPlayer.properties.startingTranslation = tankStartingPositions[this.colorIndex];
+      this.players.children.create(playerName, newPlayer);
+      this.playerJoined( playerName );
+      this.colorIndex += 1;
+    }
+  }
+  this.fireLaser = function(playerName) {
+    var player = this.players.children[playerName];
+    if(player && player.active) {
+      var newBolt = $.extend(true, {}, bolt);
+      newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2]];
+      newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
+      newBolt.properties.parentTank = player.id;
+      this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);
+      player.laserCount += 1;
+    }
+    this.laserFired();
+  }
+  this.sendChat = function(playerName, chatToSend) {
+    this.chatSent( playerName, chatToSend, this.players[playerName].color );
+  }

@@ -1,0 +1,119 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  translationSpeed: 1200
+  laserDirection: 
+  cachedBoundingBox: 
+  parentTank: 
+methods:
+  fire:
+scripts:
+- |
+  this.initialize = function() {
+    this.lastUpdateTime = this.time;
+    this.future(0.1).fire();
+  }
+  this.getCameraVec = function( x, y, z ) {
+      var camRotMat = this.rotationMatrix;
+      var camAt = goog.vec.Mat4.multVec4(
+        camRotMat,
+        goog.vec.Vec4.createFromValues( x, y, z, 1 ),
+        goog.vec.Vec3.create()
+      );
+      return camAt;      
+  }
+  this.timeElapsed = function() {
+    var timeElapsed = this.time - this.lastUpdateTime;
+    if ( !this.lastUpdateTime || timeElapsed > 1 ) {
+      timeElapsed = 1;  
+    }
+    return timeElapsed;
+  }
+  this.distance = function() {
+    var dist = this.translationSpeed * 10;
+    if(this.timeElapsed() > 0) {
+      dist = dist * this.timeElapsed();
+    }
+    this.lastUpdateTime = this.time;
+    return dist;
+  }
+  this.fire = function() {
+    if(this.laserDirection) {
+      var collision, inBounds;
+      if(this.laserDirection[2] != 0) {
+        this.laserDirection[2] = 0;
+      }
+      this.cachedBoundingBox = this.worldBoundingBox;
+      collision = this.parent.parent.collisionDetection([0,0,0], this);
+      if(!collision) {
+        if ( goog.vec.Vec3.magnitudeSquared( this.laserDirection ) > goog.vec.EPSILON ) {
+          var trans = goog.vec.Vec3.scale(
+              this.laserDirection,
+              this.distance(),
+              goog.vec.Vec3.create()
+            );
+          this.cachedBoundingBox = this.worldBoundingBox;
+          collision = this.parent.parent.collisionDetection(trans, this);
+          if(!collision) {
+            this.translation = goog.vec.Vec3.add(
+              this.translation,
+              trans,
+              trans
+            );
+          }
+          else {
+            if(this.parent.parent.bz_world.id != collision.id) {
+              var players = this.parent.parent.players;
+              for(var i=0;i<players.children.length;i++) {
+                if(players.children[i].id == collision.id) {
+                  players.children[i].active = false;
+                  players.children[i].visible = false;
+                  players.children[i].playerDeaths += 1;
+                  this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].score);
+                }
+                else if(players.children[i].id == this.parentTank) {
+                  players.children[i].playerKills += 1;
+                  this.parent.parent.events.playerScored(players.children[i].id, players.children[i].score);
+                }
+              }
+            }
+            this.parent.children.delete(this);
+          }
+        }
+      }
+      else {
+        if(this.parent.parent.bz_world.id != collision.id) {
+          var players = this.parent.parent.players;
+          for(var i=0;i<players.children.length;i++) {
+            if(players.children[i].id == collision.id) {
+              players.children[i].active = false;
+              players.children[i].visible = false;
+              players.children[i].playerDeaths += 1;
+              this.parent.parent.events.playerDestroyed(players.children[i].id, players.children[i].score);
+            }
+            else if(players.children[i].id == this.parentTank) {
+              players.children[i].playerKills += 1;
+              this.parent.parent.events.playerScored(players.children[i].id, players.children[i].score);
+            }
+          }
+        }
+        this.parent.children.delete(this);
+      }
+      if(!collision) {
+        this.future(0.1).fire();
+      }
+    }
+  }

@@ -195,54 +195,54 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     // GLGE private functions
     // -- initScene ------------------------------------------------------------------------
     function initScene( sceneNode ) {
-	
+    
         var self = this;
-		var requestAnimFrame, cancelAnimFrame;
-		(function() {
-			var lastTime = 0;
-			var vendors = ['ms', 'moz', 'webkit', 'o'];
-			for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-				window.cancelRequestAnimationFrame = window[vendors[x]+
-				  'CancelRequestAnimationFrame'];
-			}
+        var requestAnimFrame, cancelAnimFrame;
+        (function() {
+            var lastTime = 0;
+            var vendors = ['ms', 'moz', 'webkit', 'o'];
+            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+                window.cancelRequestAnimationFrame = window[vendors[x]+
+                  'CancelRequestAnimationFrame'];
+            }
 
-			if (!window.requestAnimationFrame) {
-				requestAnimFrame = function(callback, element) {
-					var currTime = +new Date;
-					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-					var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-					  timeToCall);
-					lastTime = currTime + timeToCall;
-					return id;
-				};
-			}
-			else {
-				requestAnimFrame = window.requestAnimationFrame;
-			}
+            if (!window.requestAnimationFrame) {
+                requestAnimFrame = window.requestAnimationFrame = function(callback, element) {
+                    var currTime = +new Date;
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+                      timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+            }
+            else {
+                requestAnimFrame = window.requestAnimationFrame;
+            }
 
-			if (!window.cancelAnimationFrame) {
-				cancelAnimFrame = function(id) {
-					clearTimeout(id);
-				};
-			}
-			else {
-				cancelAnimFrame = window.cancelAnimationFrame;
-			}
-		}());
+            if (!window.cancelAnimationFrame) {
+                cancelAnimFrame = window.cancelAnimationFrame = function(id) {
+                    clearTimeout(id);
+                };
+            }
+            else {
+                cancelAnimFrame = window.cancelAnimationFrame;
+            }
+        }());
         
-		var lastPickTime = 0;
+        var lastPickTime = 0;
         function renderScene(time) {
-			requestAnimFrame( renderScene );
+            requestAnimFrame( renderScene );
             sceneNode.frameCount++;
             if((time - lastPickTime) > 10) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
                 self.lastPick = newPick;
-    			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
-    				oldMouseX = mouse.getMousePosition().x;
-    				oldMouseY = mouse.getMousePosition().y;
+                if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
+                    oldMouseX = mouse.getMousePosition().x;
+                    oldMouseY = mouse.getMousePosition().y;
                     hovering = false;
-    			}
+                }
                 else if(self.lastEventData && self.mouseOverCanvas && !hovering) {
                     var pickId = newPick ? getPickObjectID.call( view, self.lastPick, false ) : view.state.sceneRootID;
                     view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
@@ -256,9 +256,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         var canvas = this.canvasQuery.get( 0 );
 
         if ( canvas ) {
-			var mouse = new GLGE.MouseInput( canvas );
-			var oldMouseX = mouse.getMousePosition().x;
-			var oldMouseY = mouse.getMousePosition().y;
+            var mouse = new GLGE.MouseInput( canvas );
+            var oldMouseX = mouse.getMousePosition().x;
+            var oldMouseY = mouse.getMousePosition().y;
             var hovering = false;
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
@@ -864,8 +864,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.logger.info(indent.call( this,iIndent) + lastGroupName + ":");
             this.logger.info(indent.call( this,iIndent + 1) + "extends: http://vwf.example.com/node3.vwf");
 
-            if (getChildCount.call( this, group) > 0)
+            if (getChildCount.call( this, group) > 0) {
                 this.logger.info(sOut + "children:");
+            }
         }
     }
 

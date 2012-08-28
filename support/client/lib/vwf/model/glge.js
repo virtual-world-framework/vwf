@@ -650,8 +650,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
-                        var scale = this.kernel.getProperty( nodeID, "scale", undefined );
-                        value = { min: [ bbox.xMin * scale[0], bbox.yMin* scale[1], bbox.zMin*scale[2] ], max: [ bbox.xMax * scale[0], bbox.yMax* scale[1], bbox.zMax*scale[2] ] };
+                        value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
                         break;
 
                     case "centerOffset":
@@ -1729,9 +1728,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function getLocalBoundingBox( glgeObject ) {
 
-        var bBox = { xMin: Number.MAX_VALUE, xMax: Number.MIN_VALUE,
-                     yMin: Number.MAX_VALUE, yMax: Number.MIN_VALUE,
-                     zMin: Number.MAX_VALUE, zMax: Number.MIN_VALUE };
+        var bBox = { xMin: Number.MAX_VALUE, xMax: -Number.MAX_VALUE,
+                     yMin: Number.MAX_VALUE, yMax: -Number.MAX_VALUE,
+                     zMin: Number.MAX_VALUE, zMax: -Number.MAX_VALUE };
 
         var glgeObjectList = [];
         findAllGlgeObjects.call( this, glgeObject, glgeObjectList );
@@ -1977,7 +1976,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" );    
+                foundGlge = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" || prototypes[i] == "http-vwf-example-com-scene-vwf" );    
             }
         }
 
