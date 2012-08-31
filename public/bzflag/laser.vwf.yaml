@@ -73,6 +73,7 @@ scripts:
               trans,
               trans
             );
+            this.laserParticle.translation = this.translation;
           }
           else {
             if(this.parent.parent.bz_world.id != collision.id) {

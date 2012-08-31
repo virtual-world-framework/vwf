@@ -125,3 +125,12 @@ properties:
 
   image:
 
+  ## World bounding box of the camera. Overrides inherited property to return null, since a camera has no dimensions
+  ##
+  ## @name camera.vwf#worldBoundingBox
+  ## @property
+
+  worldBoundingBox:
+    get: |
+      return null;
+    value: null

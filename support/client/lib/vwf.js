@@ -1481,7 +1481,9 @@ var useLegacyID = [  // TODO: fix static ID references and remove
     "Scene",
     "Tank",
     "playerModel",
-    "TankMaterial1"
+    "TankMaterial1",
+    "laserModel",
+    "laserParticle"
 ].indexOf( childName ) < 0 && [
     // ... or with these URIs, ...
     "http://vwf.example.com/node.vwf",

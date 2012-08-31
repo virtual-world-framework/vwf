@@ -65,12 +65,15 @@ scripts:
   var tankColors = [ "#1647C4", "#537737", "#F2521E", "#61378A", "#FFFFFF", "#FF0000", "#000000" ];
   var tankStartingPositions = [[0,10,100],[-13000,31000,100],[-37000,7000,100],
     [-15000,-40000,100],[10000,-25000,100],[30000,12000,100],[-60000,-17000,100]];
+  var laserMaterials = ["images/blue_bolt.png", "images/green_bolt.png", "images/hunter_bolt.png", "images/purple_bolt.png", 
+    "images/rabbit_bolt.png", "images/red_bolt.png", "images/rogue_bolt.png"];
   var playerTank = {
     extends: "tank.vwf",
     properties: {
       active: true,
       laserCount: 0,
       color: '',
+      laserMaterial: '',
       startingTranslation: [],
       translation: [],
       scale: 0.5
@@ -128,15 +131,39 @@ scripts:
   };
   var bolt = {
     extends: "laser.vwf",
-    source: "models/bolt.dae",
-    type: "model/vnd.collada+xml",
     properties: {
       laserDirection: [],
       parentTank: "",
       translation: [],
-      scale: 100
+    },
+    children: {
+      laserModel: {
+        extends: "http://vwf.example.com/node3.vwf",
+        source: "models/bolt.dae",
+        type: "model/vnd.collada+xml",
+        properties: {
+          scale: 100,
+          visible: false
+        }
+      },
+      laserParticle: { 
+        extends: "http://vwf.example.com/particlesystem.vwf",
+        properties: {
+          numberParticles: 1,
+          maxLifeTime: 210000,
+          minLifeTime: 170000,
+          startSize: 400,
+          endSize: 400,
+          startColor: "#ffffff",
+          endColor: "#ffffff",
+          loop: true,
+          image: "",
+          translation: []
+        }
+      }
     }
   };
+
   this.initialize = function() {
     this.camera.translation = [ 0, 0, 800 ];
     this.camera.far = 1000000;
@@ -159,6 +186,7 @@ scripts:
       newPlayer.properties.color = tankColors[this.colorIndex];
       newPlayer.properties.translation = tankStartingPositions[this.colorIndex];
       newPlayer.properties.startingTranslation = tankStartingPositions[this.colorIndex];
+      newPlayer.properties.laserMaterial = laserMaterials[this.colorIndex];
       this.players.children.create(playerName, newPlayer);
       this.playerJoined( playerName );
       this.colorIndex += 1;
@@ -168,7 +196,9 @@ scripts:
     var player = this.players.children[playerName];
     if(player && player.active) {
       var newBolt = $.extend(true, {}, bolt);
-      newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2]];
+      newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 50];
+      newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 50];
+      newBolt.children.laserParticle.properties.image = player.laserMaterial;
       newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
       newBolt.properties.parentTank = player.id;
       this.lasers.children.create(playerName+"Laser"+player.laserCount, newBolt);

@@ -46,6 +46,9 @@ var input = {
     lastInputTime: undefined,
 };
 
+var laserImages = ["images/blue_bolt.png", "images/green_bolt.png", "images/hunter_bolt.png", "images/purple_bolt.png", 
+    "images/rabbit_bolt.png", "images/red_bolt.png", "images/rogue_bolt.png"];
+
 vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs,
 	childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 	if(childName == playerName) {
@@ -315,4 +318,10 @@ function updateScoreboard(scores) {
             scores[i].playerDeaths + "</td><td>" + scores[i].name + "</td></tr>";
     }
     $('#scoreBoard tbody').html(scoreHtml);
+}
+
+function preloadImages() {
+    for(i = 0; i < laserImages.length; i++) {
+        new Image().src = this.laserImages[i];
+    }
 }
