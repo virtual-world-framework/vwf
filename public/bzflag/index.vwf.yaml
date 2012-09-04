@@ -196,8 +196,8 @@ scripts:
     var player = this.players.children[playerName];
     if(player && player.active) {
       var newBolt = $.extend(true, {}, bolt);
-      newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 50];
-      newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 50];
+      newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
+      newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
       newBolt.children.laserParticle.properties.image = player.laserMaterial;
       newBolt.properties.laserDirection = goog.vec.Mat4.multVec3(player.rotationMatrix, [0,1,0], goog.vec.Vec3.create());
       newBolt.properties.parentTank = player.id;
