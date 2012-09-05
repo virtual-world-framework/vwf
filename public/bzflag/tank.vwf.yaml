@@ -17,7 +17,7 @@ properties:
   active: 
   laserCount: 
   translationSpeed: 400
-  rotationSpeed: 0.5
+  rotationSpeed: 0.3
   cachedBoundingBox: 
   score: 
     get: |
