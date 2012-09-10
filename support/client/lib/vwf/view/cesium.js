@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -90,7 +90,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     var view = this;
                    
                     var canvas = document.getElementById("glCanvas");
-                    var ellipsoid = Cesium.Ellipsoid.getWgs84();
+                    var ellipsoid = Cesium.Ellipsoid.WGS84;
                     var scene = new Cesium.Scene(canvas);
                     var primitives = scene.getPrimitives();
                 
@@ -100,7 +100,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         mapStyle : Cesium.BingMapsStyle.AERIAL
                     });
                 
-                    var cb = new Cesium.CentralBody(scene.getCamera(), ellipsoid);
+                    var cb = new Cesium.CentralBody(ellipsoid);
                     cb.dayTileProvider = bing;
                     cb.nightImageSource = "images/land_ocean_ice_lights_2048.jpg";
                     cb.specularMapSource = "images/earthspec1k.jpg";
@@ -114,8 +114,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 
                     scene.getCamera().frustum.near = 1.0;
                 
-                    scene.getCamera().getControllers().addSpindle();
-                    scene.getCamera().getControllers().addFreeLook();
+                    scene.getCamera().getControllers().addCentralBody();
                     
                     scene.setAnimation(function() {
                         scene.setSunPosition(Cesium.SunPosition.compute().position);
@@ -124,17 +123,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     view = this;
                     node.scene = scene;
                     
-                    var spindle = scene.getCamera().getControllers().get(0);
+                    var spindle = scene.getCamera().getControllers().get(0).spindleController;
                     var spinHandler = spindle._spinHandler;
                     var rightZoom = spindle._zoomHandler;
                     var wheelZoom = spindle._zoomWheel;
-                    var freeLook = scene.getCamera().getControllers().get(1);
+                    var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
+                    var centralBody = scene.getCamera().getControllers().get(0);
+                    var rotateHandler = scene.getCamera().getControllers().get(0)._rotateHandler;
                     
                     (function tick() {
-                        var rotating = spinHandler && spinHandler.isMoving() && spinHandler.getMovement();
+                        var spinning = spinHandler && spinHandler.isMoving() && spinHandler.getMovement();
+                        var rotating = rotateHandler && rotateHandler.isMoving();
                         var rightZooming = rightZoom && rightZoom.isMoving();
                         var wheelZooming = wheelZoom && wheelZoom.isMoving();
                         var spinMovement = spinHandler.getMovement();
+                        var rotateMovement = rotateHandler.getMovement();
                         var rightZoomMovement = rightZoom.getMovement();
                         var wheelZoomMovement = wheelZoom.getMovement();
                         
@@ -142,28 +145,34 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         var freeLookMovement = freeLook._handler.getMovement();
                         
                         broadcastCameraControllerData.call(view, {
+                        	"spinning": spinning,
                         	"rotating": rotating,
                         	"rightZooming": rightZooming,
                         	"wheelZooming": wheelZooming,
                         	"spinMovement": spinMovement,
-                        	"spinTs": spinHandler.getButtonPressTime(),
-                        	"spinTr":  spinHandler.getButtonReleaseTime(),
+                        	"spinTouchStart": spinHandler.getButtonPressTime() ? spinHandler.getButtonPressTime().getTime() : undefined,
+                        	"spinTouchRelease": spinHandler.getButtonReleaseTime() ? spinHandler.getButtonReleaseTime().getTime() : undefined,
                         	"spinLastMovement": spinHandler.getLastMovement(),
+                        	"rotateMovement": rotateMovement,
                         	"rightZoomMovement": rightZoomMovement,
-                        	"rightZoomTs": rightZoom.getButtonPressTime(),
-                        	"rightZoomTr":  rightZoom.getButtonReleaseTime(),
+                        	"rightZoomTouchStart": rightZoom.getButtonPressTime() ? rightZoom.getButtonPressTime().getTime() : undefined,
+                        	"rightZoomTouchRelease": rightZoom.getButtonReleaseTime() ? rightZoom.getButtonReleaseTime().getTime() : undefined,
                         	"rightZoomLastMovement": rightZoom.getLastMovement(),
                         	"wheelZoomMovement": wheelZoomMovement,
-                        	"wheelZoomTs": wheelZoom.getButtonPressTime(),
-                        	"wheelZoomTr":  wheelZoom.getButtonReleaseTime(),
+                        	"wheelZoomTouchStart": wheelZoom.getButtonPressTime() ? wheelZoom.getButtonPressTime().getTime() : undefined,
+                        	"wheelZoomTouchRelease": wheelZoom.getButtonReleaseTime() ? wheelZoom.getButtonReleaseTime().getTime() : undefined,
                         	"wheelZoomLastMovement": wheelZoom.getLastMovement(),
                         	"freeLookIsMoving": freeLookIsMoving,
                         	"freeLookMovement": freeLookMovement
                         });
                         
-                        if (rotating) {
+                        if (spinning) {
                         	spindle._spin(spinMovement);
                         } 
+                        
+                        if (rotating) {
+                        	centralBody._rotate(rotateMovement);
+                        }
 
                         if (rightZooming) {
                         	spindle._zoom(rightZoomMovement);
@@ -179,23 +188,24 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         scene.render();
                         Cesium.requestAnimationFrame(tick);
                     }());
-                    
-                    var resetHandler = new Cesium.EventHandler();
-                    resetHandler.setKeyAction(
-                		function () {
-	                    	console.log("Synchronize views");
-	                    	var direction = scene.getCamera().direction;
-	                        var position = scene.getCamera().position;
-	                        var up = scene.getCamera().up;
-	                        var right = scene.getCamera().right;
-	                    	broadcastCameraViewData.call(view, {
-	                    		"direction": direction,
-	                        	"position": position,
-	                        	"up": up,
-	                        	"right": scene.getCamera().right
-	                    	});
-                		}, 
-                		"r");
+					
+					var keydownHandler = function(e) {
+						var keyCode = e.keyCode;
+						if (keyCode === 82) {	// "R"
+							console.log("Synchronize views");
+							var direction = scene.getCamera().direction;
+							var position = scene.getCamera().position;
+							var up = scene.getCamera().up;
+							var right = scene.getCamera().right;
+							broadcastCameraViewData.call(view, {
+								"direction": direction,
+								"position": position,
+								"up": up,
+								"right": scene.getCamera().right
+							});
+						}
+					}
+					document.addEventListener('keydown', keydownHandler, false);
                     
                     document.oncontextmenu = function() { return false; };                    
             } 
@@ -236,37 +246,44 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     	camera.right = right;
                                     	break;
                                     case "cameraControllerData":
-                                    	var spindle = scene.getCamera().getControllers().get(0);
-                                    	var freeLook = scene.getCamera().getControllers().get(1);
+                                    	var spindle = scene.getCamera().getControllers().get(0).spindleController;
+                                    	var freeLook = scene.getCamera().getControllers().get(0).freeLookController;
+                                    	var centralBody = scene.getCamera().getControllers().get(0);
                                     	
                                     	var rightZoom = spindle._zoomHandler;
                                         var wheelZoom = spindle._zoomWheel;
                                         
+                                        var spinning = propertyValue.spinning;
                                         var rotating = propertyValue.rotating;
                                     	var rightZooming = propertyValue.rightZooming;
                                     	var wheelZooming = propertyValue.wheelZooming;
                                     	var spinMovement = propertyValue.spinMovement;
+                                    	var rotateMovement = propertyValue.rotateMovement;
                                     	var rightZoomMovement = propertyValue.rightZoomMovement;
                                     	var wheelZoomMovement = propertyValue.wheelZoomMovement;
-
-                                    	var spinTs = propertyValue.spinTs;
-                                    	var spinTr = propertyValue.spinTr;
+                                    	
+                                    	var spinTouchStart = propertyValue.spinTouchStart;
+                                    	var spinTouchRelease = propertyValue.spinTouchRelease;
                                     	var spinLastMovement = propertyValue.spinLastMovement;
                                     	
-                                    	var rightZoomTs = propertyValue.righZoomTs;
-                                    	var rightZoomTr = propertyValue.rightZoomTr;
+                                    	var rightZoomTouchStart = propertyValue.righZoomTouchStart;
+                                    	var rightZoomTouchRelease = propertyValue.rightZoomTouchRelease;
                                     	var rightZoomLastMovement = propertyValue.rightZoomLastMovement;
                                     	
-                                    	var wheelZoomTs = propertyValue.wheelZoomTs;
-                                    	var wheelZoomTr = propertyValue.wheelZoomTr;
+                                    	var wheelZoomTouchStart = propertyValue.wheelZoomTouchStart;
+                                    	var wheelZoomTouchRelease = propertyValue.wheelZoomTouchRelease;
                                     	var wheelZoomLastMovement = propertyValue.wheelZoomLastMovement;
                                     	
                                     	var freeLookIsMoving = propertyValue.freeLookIsMoving;
                                     	var freeLookMovement = propertyValue.freeLookMovement;
                                     	
-                                        if (rotating) {
+                                        if (spinning) {
                                         	spindle._spin(spinMovement);                                        	
-                                        } 
+                                        }
+                                        
+                                        if (rotating) {
+                                        	centralBody._rotate(rotateMovement);
+                                        }
 
                                         if (rightZooming) {
                                         	spindle._zoom(rightZoomMovement);
@@ -276,13 +293,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                         }
                                         
                                         if (!rotating && spindle.inertiaSpin < 1.0) {
-                                            Cesium.CameraHelpers.createInertia(spinTs, spinTr, spinLastMovement, spindle.inertiaSpin, spindle._spin, spindle, '_lastInertiaSpinMovement');
+                                            Cesium.CameraHelpers.createInertia(spinTouchStart, spinTouchRelease, spinLastMovement, spindle.inertiaSpin, spindle._spin, spindle, '_lastInertiaSpinMovement');
                                         }
                                         if (!rightZooming && spindle.inertiaZoom < 1.0) {
-                                        	Cesium.CameraHelpers.createInertia(rightZoomTs, rightZoomTr, rightZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaZoomMovement');
+                                        	Cesium.CameraHelpers.createInertia(rightZoomTouchStart, rightZoomTouchRelease, rightZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaZoomMovement');
                                         }
                                         if (!wheelZooming && spindle.inertiaZoom < 1.0) {
-                                        	Cesium.CameraHelpers.createInertia(wheelZoomTs, wheelZoomTr, wheelZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaWheelZoomMovement');
+                                        	Cesium.CameraHelpers.createInertia(wheelZoomTouchStart, wheelZoomTouchRelease, wheelZoomLastMovement, spindle.inertiaZoom, spindle._zoom, spindle, '_lastInertiaWheelZoomMovement');
                                         }
                                         
                                         if(freeLookIsMoving) {
@@ -327,7 +344,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             return value;
         },
     } );
-
+	
     function broadcastCameraViewData(cameraData) {
         var node, scene;   
         if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-cesiumInstance" ] ) {
