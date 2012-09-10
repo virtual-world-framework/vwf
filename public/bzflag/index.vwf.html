@@ -10,10 +10,10 @@
 				
 	<script type="text/javascript">
 		$(function(){
-			$("#tabs").tabs();
-			$("#tabs").css("opacity", "0.6");
+			$("#bztabs").tabs();
+			$("#bztabs").css("opacity", "0.6");
 
-			$( "#tabs" ).keydown(function(e) {
+			$( "#bztabs" ).keydown(function(e) {
 			    e.stopPropagation();
 			}).keyup(function(e) {
 			    e.stopPropagation();
@@ -170,13 +170,14 @@
 			<td style="width: 33%" class="style2" valign="top">Team Score</td>
 		</tr>
 		<tr>
-			<td id='mapCont' class="style1" style="width: 33%;opacity:0.8">
-				<img id='map_image' src='images/bzworldmap.png' height='220px' alt='map' style='position:absolute;bottom:2px'/>
-				<canvas id='map' style='width:220px;height:220px;position:absolute;bottom:2px'></canvas>
+			<td id='mapCont' class="style1" style="width:33%">
+				<img id='map_image' src='images/bzworldmap.png' height='220px' alt='map' style='position:absolute;bottom:2px;left:2px'/>
+				<!-- To draw locations of tanks on map
+				<canvas id='map' style='width:220px;height:220px;position:absolute;bottom:2px'></canvas> -->
 			</td>
 			<td colspan="2" style="height: 33%;" valign="bottom" class="style1">
 				<div>
-					<div id="tabs" class="style1">
+					<div id="bztabs" class="style1">
 						<ul style="pointer-events:auto;">
 							<li><a href="#tabs-1">All</a></li>
 							<li><a href="#tabs-2">Chat</a></li>
