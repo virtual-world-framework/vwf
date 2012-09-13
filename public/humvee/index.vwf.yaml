@@ -16,42 +16,552 @@ extends: http://vwf.example.com/navscene.vwf
 properties:
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   navmode: "orbit"
+  speed: 4.0
 children:
   humvee:
     extends: http://vwf.example.com/node3.vwf
     source: humvee.DAE
     type: model/vnd.collada+xml
     children:
-      MaxScene:
-        extends: http://vwf.example.com/node3.vwf
-        children:
-          Humvee:
-            extends: http://vwf.example.com/node3.vwf
-            children:
-              Tire01:
-                extends: http://vwf.example.com/node3.vwf
+      bone2: 
+        extends: http://vwf.example.com/node3.vwf 
+        children: 
+          Scene: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              ParkingBrake: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_034: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj1: 
+                        extends: http://vwf.example.com/node3.vwf 
+              WaitToStart: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_033: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj2: 
+                        extends: http://vwf.example.com/node3.vwf 
+              AirFan: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_032: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj3: 
+                        extends: http://vwf.example.com/node3.vwf 
+              GearShift: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_031: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj4: 
+                        extends: http://vwf.example.com/node3.vwf 
+              HighLowSelector: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_030: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj5: 
+                        extends: http://vwf.example.com/node3.vwf 
+              EmergencyBrake: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_029: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj6: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Accelerator: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_028: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj7: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Brake: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_027: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj8: 
+                        extends: http://vwf.example.com/node3.vwf 
+              SteeringWheel: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Horn: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      Untitled_026: 
+                        extends: http://vwf.example.com/node3.vwf 
+                        children: 
+                          glgeObj9: 
+                            extends: http://vwf.example.com/node3.vwf 
+                  Untitled_025: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj10: 
+                        extends: http://vwf.example.com/node3.vwf 
+              TurnSignal: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_024: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj11: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Ignition: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_023: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj12: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Switch03: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_022: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj13: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Switch02: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_021: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj14: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Switch01: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_020: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj15: 
+                        extends: http://vwf.example.com/node3.vwf 
+              AirTemp: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_019: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj16: 
+                        extends: http://vwf.example.com/node3.vwf 
+              SpeedNeedle: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_018: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj17: 
+                        extends: http://vwf.example.com/node3.vwf 
+              VoltMeter: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_017: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj18: 
+                        extends: http://vwf.example.com/node3.vwf 
+              TempNeedle: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_016: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj19: 
+                        extends: http://vwf.example.com/node3.vwf 
+              OilNeedle: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_015: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj20: 
+                        extends: http://vwf.example.com/node3.vwf 
+              FuelNeedle: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_014: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj21: 
+                        extends: http://vwf.example.com/node3.vwf 
+              DoorPassFront: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
                 properties:
-                  rotation: [ 0, 0, 1, 25 ]
-              Tire02:
-                extends: http://vwf.example.com/node3.vwf
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 45
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  Untitled_013: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj22: 
+                        extends: http://vwf.example.com/node3.vwf 
+              DoorPassRear: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
                 properties:
-                  rotation: [ 0, 0, 1, 25 ]
-              Tire03:
-                extends: http://vwf.example.com/node3.vwf
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 45
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  Untitled_012: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj23: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Omni002: 
+                extends: http://vwf.example.com/node3.vwf 
+              WiperPass: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_011: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj24: 
+                        extends: http://vwf.example.com/node3.vwf 
+              WiperDriver: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  Untitled_010: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj25: 
+                        extends: http://vwf.example.com/node3.vwf 
+              GunMount: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
                 properties:
-                  rotation: [ 0, 0, 1, 0 ]
-              Tire04:
-                extends: http://vwf.example.com/node3.vwf
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 45
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 0.2
+                  maxValue: 8
+                  dragSpeed: 10
+                children: 
+                  GunMountHatch01: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    implements: 
+                    - http://vwf.example.com/control.vwf
+                    properties:
+                      controlType: rotate
+                      controlMode: continuous
+                      transformIncrement: 60
+                      transformAxis: [1, 0, 0]
+                      transformDuration: 0.5
+                      maxValue: 3
+                      dragSpeed: 5
+                    children: 
+                      GunMountHatch02: 
+                        extends: http://vwf.example.com/node3.vwf 
+                        implements: 
+                        - http://vwf.example.com/control.vwf
+                        properties:
+                          controlType: rotate
+                          controlMode: continuous
+                          transformIncrement: 58
+                          transformAxis: [0, 1, 0]
+                          transformDuration: 0.5
+                          maxValue: 3
+                          dragSpeed: 5
+                        children: 
+                          Untitled_009: 
+                            extends: http://vwf.example.com/node3.vwf 
+                            children: 
+                              glgeObj26: 
+                                extends: http://vwf.example.com/node3.vwf 
+                      Untitled_008: 
+                        extends: http://vwf.example.com/node3.vwf 
+                        children: 
+                          glgeObj27: 
+                            extends: http://vwf.example.com/node3.vwf 
+                  Untitled_007: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj28: 
+                        extends: http://vwf.example.com/node3.vwf 
+              DoorDriverFront: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
                 properties:
-                  rotation: [ 0, 0, 1, 0 ]
-          EnvironmentAmbientLight:
-            extends: http://vwf.example.com/node3.vwf
-          Omni001:
-            extends: http://vwf.example.com/node3.vwf
-          Omni002:
-            extends: http://vwf.example.com/node3.vwf
-          Ground:
-            extends: http://vwf.example.com/node3.vwf
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -45
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  Untitled_006: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj29: 
+                        extends: http://vwf.example.com/node3.vwf 
+              RearHatch: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -45
+                  transformAxis: [0, 1, 0]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  Untitled_005: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj30: 
+                        extends: http://vwf.example.com/node3.vwf 
+              SpareMount: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 45
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  SpareTire: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj31: 
+                        extends: http://vwf.example.com/node3.vwf 
+                  Untitled_004: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj32: 
+                        extends: http://vwf.example.com/node3.vwf 
+              DoorDriverRear: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -45
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  Untitled_003: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj33: 
+                        extends: http://vwf.example.com/node3.vwf 
+              TireDriverRear: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 10
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 0.2
+                  maxValue: 3
+                  minValue: -3
+                  dragSpeed: 10
+                children: 
+                  glgeObj34: 
+                    extends: http://vwf.example.com/node3.vwf 
+                scripts:
+                - |
+                    this.pointerUp = function( pointerInfo, pickInfo ) {
+                      this.parent.TirePassRear.transformDuration = 0.2;
+                      this.parent.TirePassRear.direction = this.direction;
+                      this.parent.TirePassRear.controlValue = this.controlValue;
+                    }
+                    this.pointerMove = function( pointerInfo, pickInfo ) {
+                      this.parent.TirePassRear.transformDuration = 0;
+                      this.parent.TirePassRear.direction = this.direction;
+                      this.parent.TirePassRear.controlValue = this.controlValue;
+                    }
+              TirePassRear: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 10
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 0.2
+                  maxValue: 3
+                  minValue: -3
+                  dragSpeed: 10
+                children: 
+                  glgeObj35: 
+                    extends: http://vwf.example.com/node3.vwf 
+                scripts:
+                - |
+                    this.pointerUp = function( pointerInfo, pickInfo ) {
+                      this.parent.TireDriverRear.transformDuration = 0.2;
+                      this.parent.TireDriverRear.direction = this.direction;
+                      this.parent.TireDriverRear.controlValue = this.controlValue;
+                    }
+                    this.pointerMove = function( pointerInfo, pickInfo ) {
+                      this.parent.TireDriverRear.transformDuration = 0;
+                      this.parent.TireDriverRear.direction = this.direction;
+                      this.parent.TireDriverRear.controlValue = this.controlValue;
+                    } 
+              TirePassFront: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 10
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 0.2
+                  maxValue: 3
+                  minValue: -3
+                  dragSpeed: 10
+                children: 
+                  glgeObj36: 
+                    extends: http://vwf.example.com/node3.vwf
+                scripts:
+                - |
+                    this.pointerUp = function( pointerInfo, pickInfo ) {
+                      this.parent.TireDriverFront.transformDuration = 0.2;
+                      this.parent.TireDriverFront.direction = this.direction;
+                      this.parent.TireDriverFront.controlValue = this.controlValue;
+                    }
+                    this.pointerMove = function( pointerInfo, pickInfo ) {
+                      this.parent.TireDriverFront.transformDuration = 0;
+                      this.parent.TireDriverFront.direction = this.direction;
+                      this.parent.TireDriverFront.controlValue = this.controlValue;
+                    }
+              TireDriverFront: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 10
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 0.2
+                  maxValue: 3
+                  minValue: -3
+                  dragSpeed: 10
+                children: 
+                  glgeObj37: 
+                    extends: http://vwf.example.com/node3.vwf 
+                scripts:
+                - |
+                    this.pointerUp = function( pointerInfo, pickInfo ) {
+                      this.parent.TirePassFront.transformDuration = 0.2;
+                      this.parent.TirePassFront.direction = this.direction;
+                      this.parent.TirePassFront.controlValue = this.controlValue;
+                    }
+                    this.pointerMove = function( pointerInfo, pickInfo ) {
+                      this.parent.TirePassFront.transformDuration = 0;
+                      this.parent.TirePassFront.direction = this.direction;
+                      this.parent.TirePassFront.controlValue = this.controlValue;
+                    }
+              HumveeBody: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj38: 
+                    extends: http://vwf.example.com/node3.vwf 
+              HoodLatchPass: 
+                extends: http://vwf.example.com/node3.vwf
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -45
+                  transformAxis: [1, 0, 0]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5 
+                children: 
+                  Untitled_002: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj39: 
+                        extends: http://vwf.example.com/node3.vwf 
+              HoodLatchDriver: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 45
+                  transformAxis: [1, 0, 0]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  Untitled_001: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj40: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Hood: 
+                extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -45
+                  transformAxis: [0, 1, 0]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
+                children: 
+                  Untitled: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      glgeObj41: 
+                        extends: http://vwf.example.com/node3.vwf 
+              Ground: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj42: 
+                    extends: http://vwf.example.com/node3.vwf 
+              Omni001: 
+                extends: http://vwf.example.com/node3.vwf 
+              EnvironmentAmbientLight: 
+                extends: http://vwf.example.com/node3.vwf 
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -73,3 +583,5 @@ scripts:
     this.camera.lookAt = "http-vwf-example-com-node3-vwf-humvee";
     this.camera.far = 3000;
   }
+
+# Paste into the console to jump to an inside view: vwf.execute( "index-vwf", "this.navmode = 'walk' ; this.camera.transform = [-0.4292135238647461, 0.9031997919082642, -0.000008751301720621996, 0, -0.8462061285972595, -0.40213271975517273, -0.34959691762924194, 0, -0.31576135754585266, -0.150045245885849, 0.9368997812271118, 0, -15.161749839782715, -28.28612518310547, 72.89060974121094, 1]" )

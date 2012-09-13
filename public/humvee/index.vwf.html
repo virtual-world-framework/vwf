@@ -27,15 +27,15 @@
           active = false;
       } ); 
 
-      jQuery( ".humvee.wheels.slider" ).slider( {
-        value: -25,
-        min: -40,
-        max: 40,
-        slide: function (event, ui) {
-          vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire01", "rotation", [ 0, 0, 1, -ui.value ]);
-          vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire02", "rotation", [ 0, 0, 1, -ui.value ]);
-        }
-      } );
+      // jQuery( ".humvee.wheels.slider" ).slider( {
+      //   value: -25,
+      //   min: -40,
+      //   max: 40,
+      //   slide: function (event, ui) {
+      //     vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire01", "rotation", [ 0, 0, 1, -ui.value ]);
+      //     vwf_view.kernel.setProperty("http-vwf-example-com-node3-vwf-Tire02", "rotation", [ 0, 0, 1, -ui.value ]);
+      //   }
+      // } );
 
       vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
       	if (nodeId == "http-vwf-example-com-node3-vwf-Tire01" ) {
@@ -47,19 +47,19 @@
         }
       }
 
-      vwf_view.kernel.execute( "http-vwf-example-com-node3-vwf-Tire01", "this.rotation = this.rotation" );
+      // vwf_view.kernel.execute( "http-vwf-example-com-node3-vwf-Tire01", "this.rotation = this.rotation" );
 
     </script>
   </head>
   <body>
     <div id='wrapper' style='width:99%;position:absolute;bottom:30px;pointer-events:none'>
-      <div style='font:bold 10pt Arial;text-align:center;text-transform:uppercase;margin:auto;pointer-events:all'>
+      <!-- <div style='font:bold 10pt Arial;text-align:center;text-transform:uppercase;margin:auto;pointer-events:all'>
         <p>
           <span>Left</span>
           <span class="humvee wheels slider" style="display:inline-block;width:10em"></span>
           <span>Right</span><br />
         </p>
-      </div>
+      </div> -->
     </div>
     <script type="text/javascript">
       $('#wrapper').appendTo('#vwf-root');

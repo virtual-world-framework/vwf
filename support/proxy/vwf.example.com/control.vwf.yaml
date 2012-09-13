@@ -106,6 +106,13 @@ properties:
 
   transformIncrement: 1
 
+  ## How long the transformation will take. A value of 0 means the transformation is instant.
+  ##
+  ## @name control.vwf#transformDuration
+  ## @property
+
+  transformDuration: 0
+
   ## The minimum controlValue can be set to.
   ##
   ## @name control.vwf#minValue
@@ -235,7 +242,8 @@ scripts:
           ret[1] = this.pointerInfo.position[1] - this.previous.pointerInfo.position[1];
         }
         return ret;
-      }
+      },
+      "originalTransformDuration": this.transformDuration
     };
   }
   // Sets the starting values for the mouse pointer if in positions or continuous mode. Sets controlValue to the maxValue if in momentary mode.
@@ -266,10 +274,12 @@ scripts:
         this.controlValue = Math.round(this.controlValue);
       }
       this.input.clear();
+      this.transformDuration = this.input.originalTransformDuration;
     }
   }
   this.pointerMove = function( pointerInfo, pickInfo ) {
     if(this.controlMode != "momentary") {
+      this.transformDuration = 0;
       this.input.update( pointerInfo, pickInfo );
       var diff = this.input.change();
       var speed = 1 / this.dragSpeed;
@@ -345,10 +355,11 @@ scripts:
   this.deltaTranslation = function(incrementBy) {
     this.translateBy([(this.transformAxis[0] * this.transformIncrement * incrementBy), 
       (this.transformAxis[1] * this.transformIncrement * incrementBy), 
-      (this.transformAxis[2] * this.transformIncrement * incrementBy)]);
+      (this.transformAxis[2] * this.transformIncrement * incrementBy)],
+      this.transformDuration);
   }
   this.deltaRotation = function(incrementBy) {
-    this.rotateBy([this.transformAxis[0], this.transformAxis[1], this.transformAxis[2], (incrementBy * this.transformIncrement)]);
+    this.rotateBy([this.transformAxis[0], this.transformAxis[1], this.transformAxis[2], (incrementBy * this.transformIncrement)], this.transformDuration, "rotated");
   }
   this.deltaScale = function(incrementBy) {
     var newScale = [1, 1, 1];
@@ -377,5 +388,5 @@ scripts:
         newScale[2] = newScale[2] / scaleFactor;
       }
     }
-    this.scaleBy(newScale);
+    this.scaleBy(newScale, this.transformDuration);
   }
