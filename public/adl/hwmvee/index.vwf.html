@@ -21,181 +21,7 @@
 	<script type="text/javascript" src="base64.js"></script>
 	<script type="text/javascript">
 	
-	var tc_lrs;
-	var gUserData = {Email:"",Name:""};
-	var gProfile = null;
-	var gProfiles = null;
-	function InitLRSConnection()
-	{
-	 tc_lrs = TCDriver_GetLRSObject();
-	}
-	function GetTCProps()
-	{
-	
-		var props = {
-		 endpoint:"https://cloud.scorm.com/ScormEngineInterface/TCAPI/NDXS9EO128/sandbox/",
-		 auth:"Basic " + Base64.encode('NDXS9EO128:ZocWK14icHi1roV4gO9Q91qkD40cS2RDIvhsJ0Zx'),
-		 actor:{ "mbox":[gUserData.Email], "name":[gUserData.Name] },
-		 //registration:"",
-		 //activity_id:"NDXS9EO128",
-		 //grouping:"",
-		 //activity_platform:""
-		 
-		};
-		console.log(props);
-		return props
-	}
-	function LogAttempt()
-	{
-	
-	            var tcCourseObj = {
-                    "id":window.location.href,
-                    "definition":{
-                    	"type":"Course",
-                        "name":{"en-US":"VWFGame"},
-                        "description":{"en-US":"A simple based on the Virtual World Framework"}
-                    }
-                };
-                var contextObj = {
-                    "contextActivities":{
-                        "grouping":{"id":"http://asdf"}
-                    }
-                };
-                var stmt = {
-                    "verb":"attempted",
-                    "object":tcCourseObj,
-                    "actor":{ "mbox":["mailto:" + gUserData.Email], "name":[gUserData.Name] },
-					"context": contextObj
-                };
 
-				console.log("TCDriver_SendStatement");
-                TCDriver_SendStatement(tc_lrs, stmt);
-	}
-	function CreateProfile(email,name, password)
-	{
-	
-	            var tcCourseObj = {
-                    "id":window.location.href,
-                    "definition":{
-                    	"type":"Course",
-                        "name":{"en-US":"VWFGame"},
-                        "description":{"en-US":"A simple based on the Virtual World Framework"}
-                    }
-                };
-                var contextObj = {
-                    "contextActivities":{
-                        "grouping":{"id":Base64.encode(password)}
-                    }
-                };
-                var stmt = {
-                    "verb":"imported",
-                    "object":tcCourseObj,
-                    "actor":{ "mbox":["mailto:" + email], "name":[name] },
-					"context": contextObj
-                };
-
-				console.log("TCDriver_SendStatement");
-                TCDriver_SendStatement(tc_lrs, stmt);
-	}
-	function GetProfiles()
-	{
-		if(!gProfiles)
-			gProfiles = JSON.parse(TCDriver_GetStatements(tc_lrs,null,'imported',null,null)).statements;
-		return gProfiles;
-	}
-	function CheckForProfile(name)
-	{
-		var profiles = GetProfiles();
-		for(var i = 0; i < profiles.length; i++)
-		{
-			if( profiles[i].actor.name[0] == name)
-			    return profiles[i];
-		}
-		return null;
-	}
-	function BeginLogon()
-	{
-		$('#Logon').dialog('close');
-		var name = $('#name').val();
-		gProfile = CheckForProfile(name);
-		if(gProfile)
-		{
-			$('#passworddialog').dialog({title:'Enter Password',modal:true,buttons:{"Back":function(){$('#passworddialog').dialog('close');;$('#Logon').dialog('open');;},"Begin Game":function(){PasswordEntered();}}});
-		}
-		else
-		{
-		    $('#ProfileName').val(name);
-		    $('#createprofile').dialog({title:'Create Profile',modal:true,buttons:{"Back":function(){$('#createprofile').dialog('close');;$('#Logon').dialog('open');;},"Begin Game":function(){ProfileCreated();}}});
-		}
-	}
-	function ProfileCreated()
-	{
-		
-		if($('#ProfilePassword').val() != $('#ProfilePassword2').val())
-		{
-		   $('#ProfilePassword').css({ background: "#FF0000" });
-           $('#ProfilePassword').stop().animate({ backgroundColor: "#FFFFFF" });	
-		   $('#ProfilePassword2').css({ background: "#FF0000" });
-           $('#ProfilePassword2').stop().animate({ backgroundColor: "#FFFFFF" });	
-		   return;
-		}
-		if(CheckForProfile($('#ProfileName').val()) != null)
-		{
-		   $('#ProfileName').css({ background: "#FF0000" });
-           $('#ProfileName').stop().animate({ backgroundColor: "#FFFFFF" });	
-		   return;
-		}
-		if($('#ProfileEmail').val().indexOf('@') == -1)
-		{
-		   $('#ProfileEmail').css({ background: "#FF0000" });
-           $('#ProfileEmail').stop().animate({ backgroundColor: "#FFFFFF" });	
-		   return;
-		}
-		CreateProfile($('#ProfileEmail').val(),$('#ProfileName').val(),$('#ProfilePassword').val());
-		Begin();
-		$('#createprofile').dialog('close');
-	}
-	function PasswordEntered()
-	{
-	    
-		var password = Base64.encode($('#password').val());
-		if(gProfile.context.contextActivities.grouping.id == password)
-		{
-		   Begin();
-		   $('#passworddialog').dialog('close');
-		}
-		else
-		{
-		   $('#password').css({ background: "#FF0000" });
-           $('#password').stop().animate({ backgroundColor: "#FFFFFF" });	
-		}
-	}
-	function LogFailure()
-	{
-	
-	            var tcCourseObj = {
-                    "id":window.location.href,
-                    "definition":{
-                    	"type":"Course",
-                        "name":{"en-US":"VWFGame"},
-                        "description":{"en-US":"A simple based on the Virtual World Framework"}
-                    }
-                };
-                var contextObj = {
-                    "contextActivities":{
-                        "grouping":{"id":"http://asdf"}
-                    }
-                };
-                var stmt = {
-                    "verb":"failed",
-                    "object":tcCourseObj,
-                    "actor":{ "mbox":["mailto:" + gUserData.Email], "name":[gUserData.Name] },
-					"context": contextObj
-                };
-
-				console.log("TCDriver_SendStatement");
-                TCDriver_SendStatement(tc_lrs, stmt);
-	}
 	var PlayerProto  = { 
                     
                     extends: 'hmvee.vwf',
@@ -219,10 +45,7 @@
 	    
 		
 		var name = $('#name').val();
-		gUserData.Name = name;
-		gUserData.Email = name + "@test.com";
-		
-		LogAttempt();
+		$('#Logon').dialog('close');
 		PlayerProto.properties.PlayerNumber = name;
 		PlayerProto.properties.initialPos[0] = (Math.random() * 80)-40;
 		PlayerProto.properties.initialPos[1] = (Math.random() * 80)-40;
@@ -239,7 +62,7 @@
 		
 		document[name + 'link'] = null;
 		PlayerProto.properties.PlayerNumber = name;
-		//PlayerProto.id = "player-"+name;
+		PlayerProto.id = "player"+name;
 		document["PlayerNumber"] = name;
 		var parms = new Array();
 		parms.push(JSON.stringify(PlayerProto));
@@ -252,10 +75,10 @@
 	}
 	function SendSelf()
 	{
+		//This will be called by the scene when a player is created. This sends a prototype for the local player to all remote machines.
 		//Because this will be called on the local client when creating his own player, filter if he is not yet created;
 		if(!document[document.PlayerNumber +'link'])
 		    return;
-		//alert('sendself');
 	    var name = $('#name').val();
 		PlayerProto.properties.PlayerNumber = name;
 		PlayerProto.properties.initialPos[0] = document[document.PlayerNumber +'link'].translation[0];
@@ -269,15 +92,9 @@
 		PlayerProto.properties.initialRotAmt = document[document.PlayerNumber +'link'].RotationAmt;
 		PlayerProto.properties.initialSteerAmt = document[document.PlayerNumber +'link'].steerAmt;
 		PlayerProto.properties.initialWheelRotate = document[document.PlayerNumber +'link'].wheelRotate;
-		//PlayerProto.id = "player-"+name;
 		var parms = new Array();
 		parms.push(JSON.stringify(PlayerProto));
-		//alert(JSON.stringify(parms));
 		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
-	//	var x = document[document.PlayerNumber +'link'].translation[0];
-	//	var y = document[document.PlayerNumber +'link'].translation[1];
-	//	var z = document[document.PlayerNumber +'link'].translation[2];
-	//	vwf_view.kernel.setProperty('hmvee-vwf-player-'+document.PlayerNumber, 'translation', [x,y,z]);
 	}
 	function testhit()
 	{
@@ -285,9 +102,8 @@
 	}
 	function SceneInitialize()
 	{
-		InitLRSConnection();
 		$(window).unload(function(){SceneDestroy();});
-		$('#Logon').dialog({title:'Enter Name',modal:true,buttons:{"Log in":function(){BeginLogon();}}});
+		$('#Logon').dialog({title:'Enter Name',modal:true,buttons:{"Play!":function(){Begin();}}});
 	}
 	function SceneDestroy()
 	{

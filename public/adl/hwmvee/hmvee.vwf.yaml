@@ -15,6 +15,11 @@
 extends: http://vwf.example.com/node3.vwf
 properties:
   scale: [ 1, 1, 1]
+  lookAngle: 0.0
+  rel_x: 0
+  rel_y: 0
+  last_x: 0
+  last_y: 0
   position: 
     set: |
            this.translation = value;
@@ -40,13 +45,16 @@ properties:
             this.tireRF.setRotMatrix(this.wheelRotMatrix);
             this.tireLF.setRotMatrix(this.wheelRotMatrix);	
             this.tireRB.setRotX(this.wheelRotate);	
-            this.tireLB.setRotX(this.wheelRotate);	
+            this.tireLB.setRotX(this.wheelRotate);
+events:
+  pointerMove:            
 methods:
   update:
   fire: 
   hit:
   localKeyDown:
   localKeyUp:
+  localpointerMove:
 scripts: 
 - |
          
@@ -113,9 +121,10 @@ scripts:
          
          this.initialize = function() {
                 
+                
                 if(!this.PlayerNumber)
                     return;
-                
+             
                 var root = findChildViewNode(findscene(),this.id);
                 
                 this.position = [0,0,0];
@@ -125,6 +134,8 @@ scripts:
                 this.tireRB = findChildColladaNode(root,'passenger_side_back_wheel');
                 this.tireLF = findChildColladaNode(root,'driver_side_front_wheel');
                 this.tireLB = findChildColladaNode(root,'driver_side_back_wheel');
+                this.turret = findChildColladaNode(root,'turret');
+                debugger;
                 this.numfired = 0;
                 this.steerAmt = 1.0;
                 this.wheelRotate = 0.0;
@@ -136,14 +147,17 @@ scripts:
                 this.DDown = false;
                 this.ADown = false;
                 this.Momentum = 0.0;
+                this.lookAngle = 0.0;
                 
                 this.Controlled = false;
                 
                 //this.AmFirstClient();
                 document[this.PlayerNumber +'link'] = this;
+                //If the player that is initializing is the local player, then link up the keypress handlers
                 if(document.PlayerNumber == this.PlayerNumber)
                   {
-                                   
+                    
+                    $(document).mousemove(function(e){  document[this.PlayerNumber +'link'].pointerMove(e);});                    
                     $(document).keydown(function(e){  document[this.PlayerNumber +'link'].keydown(e);});
                     $(document).keyup(function(e){document[this.PlayerNumber +'link'].keyup(e);});
                   }
@@ -183,6 +197,24 @@ scripts:
                 
                 this.update();
          }
+         this.pointerMove = function( parms, pickInfo ){
+
+              if(document["PlayerNumber"] != this.PlayerNumber)
+                      return;
+              vwf_view.kernel.callMethod(this.id,'localpointerMove',[{clientX:parms.clientX,clientY:parms.clientY}],0,null)
+             
+         }
+         this.localpointerMove = function( parms ){
+
+              
+              if(this.rel_x == undefined) return;
+              this.rel_x = this.last_x - parms.clientX;
+              this.rel_y = this.last_y - parms.clientY;
+              this.lookAngle += this.rel_x/300;
+               this.last_x = parms.clientX;
+                this.last_y = parms.clientY;
+         }
+      
          this.hit = function()
          {
              this.Health -= 25;
@@ -198,7 +230,7 @@ scripts:
                 if(this.Health < 1)
                 {
                  SceneDestroy();
-                 LogFailure();
+                 //LogFailure();
                  $('#Logon').dialog({title:'Game Over!',modal:true,buttons:{"Respawn":function(){$('#Logon').dialog('close');Begin();}}});
                  
                  $(document).unbind('keydown');
@@ -226,18 +258,22 @@ scripts:
                         age: 0
                         },
                     methods: { 
-                        update: null
+                        updatestep: null
                         },
                     scripts: [  "this.initialize = function() {"+
-                                "   this.future(1.0/60.0).update();"+
-                                "   this.active = true;"+
+                                "   "+
+                                "this.active = true;"+
+                                //This seems odd as well. I don't think the properties are being initialized.
+                                "this.translation = vwf.getNode(this.id).properties.translation;"+
+                                "this.rotation = vwf.getNode(this.id).properties.rotation;"+
                                 "this.target = this.GetNearist();"+
                                 "this.targetpoint = null;"+
                                 "if(this.target) {this.targetpoint = this.target.translation;}"+
+                                "this.updatestep(); "+
                                 "}",
-                                "this.update = function(){    "+
-                                
-                                "this.age++;"+
+                                "this.updatestep = function(){    "+
+                                ""+
+                                "this.age++;document.title = this.age;"+
                                 "if(this.age > 200) this.delete();"+
                                 "if(this.translation[2] < document.TerrainFunctions.SampleTerrainByPos(this.translation[0],this.translation[1])) this.delete();"+
                                 "var front = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,0,-1]);"+
@@ -270,7 +306,7 @@ scripts:
                                 "}"+
                                 "if(dist < 3 && this.active==true) {this.hit();}"+
                                 "}"+ 
-                                "this.future(1.0/60.0).update();"+
+                                "this.future(1.0/60.0).updatestep();"+
                                 //"this.updateCamera();"+
                                 "}",
                                 "this.delete = function(){this.active=false; vwf_view.kernel.kernel.deleteNode(this.id);}",
@@ -311,11 +347,21 @@ scripts:
                                 "}"
                                 ]    
                 };
+               
+               //Set the missile initial position
                 proto.properties.translation[0] = this.translation[0];
                 proto.properties.translation[1] = this.translation[1];
                 proto.properties.translation[2] = this.translation[2] + 4;
                 
-                var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,1,0]);
+                //rotate the missile to face the front of the humvee
+                var modelmatrix = this.turret.getModelMatrix();
+                 var tempmodelmatrix = [];
+                 for(var i=0; i< 16; i++)
+                  tempmodelmatrix[i] = modelmatrix[i];
+                tempmodelmatrix[3] = 0;
+                tempmodelmatrix[7] = 0;
+                tempmodelmatrix[11] = 0;
+                var forward = GLGE.mulMat4Vec3(tempmodelmatrix,[0,1,0]);
                 var missilerotation = [];
                 var pointfront = [0,0,-1];
                 var to = forward;
@@ -341,6 +387,7 @@ scripts:
                 console.log(newid);
                 this.camtarget = newid;
                 proto.uri = newid;
+                proto.id = newid;
                 //this.parent.children.create(proto, newid);
                 vwf_view.kernel.kernel.createNode(proto, null);
                 
@@ -353,16 +400,23 @@ scripts:
          }
          this.keydown = function(e){
            
+           //Only the local player is controlled by the keypresses
            if(document["PlayerNumber"] != this.PlayerNumber)
                       return;
-                      
-             if(e.keyCode == 65) vwf_view.kernel.callMethod(this.id,'localKeyDown',['A'],0,null);
-             if(e.keyCode == 68) vwf_view.kernel.callMethod(this.id,'localKeyDown',['D'],0,null);
-             if(e.keyCode == 87) vwf_view.kernel.callMethod(this.id,'localKeyDown',['S'],0,null);
-             if(e.keyCode == 83) vwf_view.kernel.callMethod(this.id,'localKeyDown',['W'],0,null);
+             
+            if(e.keyCode == 65 && this.ADown == true) return;
+            if(e.keyCode == 68 && this.DDown == true) return;
+            if(e.keyCode == 87 && this.SDown == true) return;
+            if(e.keyCode == 83 && this.WDown == true) return;
+             
+            if(e.keyCode == 65) vwf_view.kernel.callMethod(this.id,'localKeyDown',['A'],0,null);
+            if(e.keyCode == 68) vwf_view.kernel.callMethod(this.id,'localKeyDown',['D'],0,null);
+            if(e.keyCode == 87) vwf_view.kernel.callMethod(this.id,'localKeyDown',['S'],0,null);
+            if(e.keyCode == 83) vwf_view.kernel.callMethod(this.id,'localKeyDown',['W'],0,null);
          }
          this.keyup = function(e){
              
+             //Only the local player is controlled by the keypresses
              if(document["PlayerNumber"] != this.PlayerNumber)
                       return;
                       
@@ -377,6 +431,7 @@ scripts:
          }
          this.localKeyUp = function(e)
          {
+                    
             if(e == 'A')
                  this.ADown = false;
             if(e == 'S')
@@ -405,9 +460,11 @@ scripts:
                   //vwf_view.kernel.setProperty(this.id, "steerAmt", this.steerAmt *.993);
                   this.steerAmt = this.steerAmt * .993;
                   this.Momentum *= .993;
+                  this.turret.setRotZ(this.lookAngle);
+                  if(this.SDown == true || this.WDown == true)this.lookAngle *= Math.min(1.0,Math.max(0.0,1.0/(1.0+Math.abs(this.Momentum)/600)));
                   if(this.ADown == true) this.steerAmt +=.03
                   if(this.DDown == true) this.steerAmt -=.03
-                 
+                  
                   if(this.WDown == true) this.Momentum += .2;
                   if(this.SDown == true) this.Momentum -= .2;
                  
@@ -449,7 +506,7 @@ scripts:
                   var front = GLGE.mulMat4Vec3(GLGE.angleAxis(angle,axis),[0,1,0]);
                   var flat = document.TerrainFunctions.normalize([0,0,1]);
                   var slope = GLGE.dotVec3(front,flat);
-                  document.title = slope;
+                
                   this.Momentum += (slope*.25);
                   var speedforward  =-this.Momentum*.007;  
                   
@@ -514,7 +571,7 @@ scripts:
                         
                   var camera = vwf.views[0].state.cameraInUse;
                   var camoffset = [];
-                  camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.RotationAmt,[0,0,1]),[0,-20,8]);
+                  camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.RotationAmt+this.lookAngle,[0,0,1]),[0,-20,8]);
             
                   var cameragoal = [cameraTarget.translation[0]+camoffset[0],cameraTarget.translation[1]+camoffset[1],cameraTarget.translation[2]+camoffset[2]];
                   var togoal = [cameragoal[0] - camera.getLocX(),

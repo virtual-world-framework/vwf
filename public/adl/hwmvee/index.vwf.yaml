@@ -20,6 +20,7 @@ events:
 methods:  
   newplayer:
   deleteplayer:
+  initialize:
 children:
   Terrain:
     extends: http://vwf.example.com/node3.vwf
@@ -68,9 +69,11 @@ scripts:
             //When a new player is created, you'll have to let the new guy know that you exist. SendSelf does this.
             SendSelf();
             
-            //vwf_view.kernel.kernel.createNode('index-vwf',proto , "player-"+proto.properties.PlayerNumber, null);
+            //This is odd. It seems like supplying an ID for the new object causes the initialize not to fire
+            proto.id = "player-"+proto.properties.PlayerNumber;
             proto.uri = "player-"+proto.properties.PlayerNumber;
-            vwf_view.kernel.kernel.createNode(proto, null);
+            vwf_view.kernel.kernel.createNode(proto,  function(){vwf_view.kernel.kernel.models[0].model.nodes[proto.id].initialize();
+            });
         }
     }
    
