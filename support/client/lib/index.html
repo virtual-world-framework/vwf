@@ -56,8 +56,6 @@
     <!-- directives from a connection to an outside engine that is not visible to all users- but -->
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
-    <!-- script type="text/javascript" src="vwf/model/unity/UnityObject.js"></script -->
-
     <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
     <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
     <script type="text/javascript">connected && google.load( "earth", "1" )</script>
@@ -76,7 +74,6 @@
             "vwf/model/jiglib",
             "vwf/model/glge",
             "vwf/model/scenejs",
-            // "vwf/model/unity",
             "vwf/model/object",
             "vwf/model/stage/log",
             "vwf/kernel/view",
@@ -121,7 +118,6 @@
                         "vwf/model/javascript",
                         "vwf/model/jiglib",
                         "vwf/model/glge",
-                        // { "vwf/model/unity": "#vwf-root" },  // TODO: resolve #vwf-root after ready()
                         "vwf/model/object",
                     ],
 
