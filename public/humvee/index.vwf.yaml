@@ -23,6 +23,10 @@ children:
     source: humvee.DAE
     type: model/vnd.collada+xml
     children:
+      interiorCamera:
+        extends: http://vwf.example.com/camera.vwf
+        properties:
+          transform: [-0.4292135238647461, 0.9031997919082642, -0.000008751301720621996, 0, -0.8462061285972595, -0.40213271975517273, -0.34959691762924194, 0, -0.31576135754585266, -0.150045245885849, 0.9368997812271118, 0, -15.161749839782715, -28.28612518310547, 72.89060974121094, 1]
       bone2: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
@@ -47,6 +51,16 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               AirFan: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: translate
+                  controlMode: continuous
+                  transformIncrement: -0.5
+                  transformAxis: [0, 0, 1]
+                  transformDuration: 0.5
+                  maxValue: 2
+                  dragSpeed: 5
                 children: 
                   Untitled_032: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -55,6 +69,17 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               GearShift: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: translate
+                  controlMode: continuous
+                  transformIncrement: 2
+                  transformAxis: [1, 0, 0]
+                  transformDuration: 0.5
+                  minValue: -2
+                  maxValue: 2
+                  dragSpeed: 5
                 children: 
                   Untitled_031: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -63,6 +88,17 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               HighLowSelector: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: translate
+                  controlMode: continuous
+                  transformIncrement: 3
+                  transformAxis: [1, 0, 0]
+                  transformDuration: 0.5
+                  minValue: -1
+                  maxValue: 1
+                  dragSpeed: 5
                 children: 
                   Untitled_030: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -71,6 +107,16 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               EmergencyBrake: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 45
+                  transformAxis: [0, 1, 0]
+                  transformDuration: 1
+                  maxValue: 1
+                  dragSpeed: 5
                 children: 
                   Untitled_029: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -79,6 +125,16 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               Accelerator: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 5
+                  transformAxis: [0, 1, 0]
+                  transformDuration: 0.2
+                  maxValue: 2
+                  dragSpeed: 5
                 children: 
                   Untitled_028: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -87,6 +143,16 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               Brake: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 5
+                  transformAxis: [0, 1, 0]
+                  transformDuration: 0.2
+                  maxValue: 2
+                  dragSpeed: 5
                 children: 
                   Untitled_027: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -95,6 +161,17 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               SteeringWheel: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -30
+                  transformAxis: [0.942, 0, 0.335]
+                  transformDuration: 0.2
+                  minValue: -12
+                  maxValue: 12
+                  dragSpeed: 5
                 children: 
                   Horn: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -110,7 +187,18 @@ children:
                       glgeObj10: 
                         extends: http://vwf.example.com/node3.vwf 
               TurnSignal: 
-                extends: http://vwf.example.com/node3.vwf 
+                extends: http://vwf.example.com/node3.vwf
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: 30
+                  transformAxis: [0.942, 0, 0.335]
+                  transformDuration: 0.2
+                  minValue: -1
+                  maxValue: 1
+                  dragSpeed: 5 
                 children: 
                   Untitled_024: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -119,6 +207,16 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               Ignition: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -35
+                  transformAxis: [1, 0, 0]
+                  transformDuration: 0.5
+                  maxValue: 2
+                  dragSpeed: 5
                 children: 
                   Untitled_023: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -159,6 +257,16 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               SpeedNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -20
+                  transformAxis: [0.986, 0, 0.164]
+                  transformDuration: 0.2
+                  maxValue: 12
+                  dragSpeed: 10
                 children: 
                   Untitled_018: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -166,7 +274,18 @@ children:
                       glgeObj17: 
                         extends: http://vwf.example.com/node3.vwf 
               VoltMeter: 
-                extends: http://vwf.example.com/node3.vwf 
+                extends: http://vwf.example.com/node3.vwf
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -18
+                  transformAxis: [0.986, 0, 0.164]
+                  transformDuration: 0.2
+                  minValue: -2
+                  maxValue: 2
+                  dragSpeed: 10 
                 children: 
                   Untitled_017: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -175,6 +294,17 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               TempNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -12
+                  transformAxis: [0.986, 0, 0.164]
+                  transformDuration: 0.2
+                  minValue: -3
+                  maxValue: 3
+                  dragSpeed: 10 
                 children: 
                   Untitled_016: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -183,6 +313,17 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               OilNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -25
+                  transformAxis: [0.986, 0, 0.164]
+                  transformDuration: 0.2
+                  minValue: -2
+                  maxValue: 2
+                  dragSpeed: 10 
                 children: 
                   Untitled_015: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -191,6 +332,17 @@ children:
                         extends: http://vwf.example.com/node3.vwf 
               FuelNeedle: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -20
+                  transformAxis: [0.986, 0, 0.164]
+                  transformDuration: 0.2
+                  minValue: -2
+                  maxValue: 2
+                  dragSpeed: 10 
                 children: 
                   Untitled_014: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -237,20 +389,66 @@ children:
                 extends: http://vwf.example.com/node3.vwf 
               WiperPass: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -45
+                  transformAxis: [1, 0, 0]
+                  transformDuration: 0.5
+                  minValue: -1
+                  maxValue: 3
+                  dragSpeed: 5
                 children: 
                   Untitled_011: 
                     extends: http://vwf.example.com/node3.vwf 
                     children: 
                       glgeObj24: 
                         extends: http://vwf.example.com/node3.vwf 
+                scripts:
+                - |
+                    this.pointerUp = function( pointerInfo, pickInfo ) {
+                      this.parent.WiperDriver.transformDuration = 0.5;
+                      this.parent.WiperDriver.direction = this.direction;
+                      this.parent.WiperDriver.controlValue = this.controlValue;
+                    }
+                    this.pointerMove = function( pointerInfo, pickInfo ) {
+                      this.parent.WiperDriver.transformDuration = 0;
+                      this.parent.WiperDriver.direction = this.direction;
+                      this.parent.WiperDriver.controlValue = this.controlValue;
+                    }
               WiperDriver: 
                 extends: http://vwf.example.com/node3.vwf 
+                implements: 
+                - http://vwf.example.com/control.vwf
+                properties:
+                  controlType: rotate
+                  controlMode: continuous
+                  transformIncrement: -45
+                  transformAxis: [1, 0, 0]
+                  transformDuration: 0.5
+                  minValue: -1
+                  maxValue: 3
+                  dragSpeed: 5
                 children: 
                   Untitled_010: 
                     extends: http://vwf.example.com/node3.vwf 
                     children: 
                       glgeObj25: 
                         extends: http://vwf.example.com/node3.vwf 
+                scripts:
+                - |
+                    this.pointerUp = function( pointerInfo, pickInfo ) {
+                      this.parent.WiperPass.transformDuration = 0.5;
+                      this.parent.WiperPass.direction = this.direction;
+                      this.parent.WiperPass.controlValue = this.controlValue;
+                    }
+                    this.pointerMove = function( pointerInfo, pickInfo ) {
+                      this.parent.WiperPass.transformDuration = 0;
+                      this.parent.WiperPass.direction = this.direction;
+                      this.parent.WiperPass.controlValue = this.controlValue;
+                    }
               GunMount: 
                 extends: http://vwf.example.com/node3.vwf 
                 implements: 
