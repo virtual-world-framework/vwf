@@ -55,6 +55,7 @@ properties:
             break;
         }
       }
+      this.controlValueUpdated(this.controlValue);
     value: 0
 
   ## What property the control modifies. Possible values are "translate", "rotate", and "scale".
@@ -151,6 +152,19 @@ properties:
   ## @property
 
   dragSpeed: 50
+
+events:
+
+  ## Notifies listeners that the control value has been updated.
+  ##
+  ## @name contro.vwf#controlValueUpdated
+  ## @event
+  ##
+  ## @param {Number} updatedValue
+
+  controlValueUpdated:
+    parameters:
+    - updatedValue
 
 methods:
 
