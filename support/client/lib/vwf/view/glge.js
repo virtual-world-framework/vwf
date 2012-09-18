@@ -244,7 +244,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     hovering = false;
                 }
                 else if(self.lastEventData && self.mouseOverCanvas && !hovering) {
-                    var pickId = newPick ? getPickObjectID.call( view, self.lastPick, false ) : view.state.sceneRootID;
+                    var pickId = getPickObjectID.call( view, self.lastPick, false );
+                    if(!pickId) {
+                        pickId = view.state.sceneRootID;
+                    }
                     view.kernel.dispatchEvent( pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     hovering = true;
                 }
@@ -876,7 +879,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         if ( objName != "" ) {
             this.logger.info( indent.call( this,iIndent) + "children:" );
             this.logger.info( indent.call( this,iIndent+1) + objName + ":");
-            this.logger.info( indent.call( this,iIndent+2) + "extends: http://vwf.example.com/object3.vwf");
+            this.logger.info( indent.call( this,iIndent+2) + "extends: http://vwf.example.com/node3.vwf");
             indentAdd = 2;
         }
     }
