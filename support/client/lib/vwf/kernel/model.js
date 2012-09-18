@@ -79,7 +79,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             } );
                         } else {
                             this.kernel.plan( undefined, kernelFunctionName, undefined,
-                                [ childComponent ], when, callback /* ( result ) */ );
+                                [ nodeComponent ], when, callback /* ( result ) */ );
                         }
 
                     } else {
@@ -398,7 +398,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 return function( nodeID, result ) {
                     return this.kernel[kernelFunctionName]( nodeID, result );
-                }            
+                };
 
             case "uri":
             case "name":

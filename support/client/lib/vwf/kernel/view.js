@@ -43,7 +43,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 return function( nodeComponent, when, callback /* ( nodeID ) */ ) {
                     this.kernel.send( undefined, kernelFunctionName, undefined,
-                        [ childComponent ], when || 0, callback /* ( result ) */ );
+                        [ nodeComponent ], when || 0, callback /* ( result ) */ );
                 };
 
             case "deleteNode":
