@@ -129,12 +129,11 @@ children:
                 - http://vwf.example.com/control.vwf
                 properties:
                   controlType: rotate
-                  controlMode: continuous
-                  transformIncrement: 5
+                  controlMode: momentary
+                  transformIncrement: 10
                   transformAxis: [0, 1, 0]
                   transformDuration: 0.2
-                  maxValue: 2
-                  dragSpeed: 5
+                  maxValue: 1
                 children: 
                   Untitled_028: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -147,12 +146,11 @@ children:
                 - http://vwf.example.com/control.vwf
                 properties:
                   controlType: rotate
-                  controlMode: continuous
-                  transformIncrement: 5
+                  controlMode: momentary
+                  transformIncrement: 10
                   transformAxis: [0, 1, 0]
                   transformDuration: 0.2
-                  maxValue: 2
-                  dragSpeed: 5
+                  maxValue: 1
                 children: 
                   Untitled_027: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -189,12 +187,12 @@ children:
                 scripts:
                 - |
                     this.pointerUp = function( pointerInfo, pickInfo ) {
-                      this.parent.TireDriverFront.transformDuration = 0.2;
                       this.parent.TireDriverFront.direction = this.direction;
                       this.parent.TireDriverFront.controlValue = this.controlValue / 4;
-                      this.parent.TirePassFront.transformDuration = 0.2;
+                      this.parent.TireDriverFront.transformDuration = 0.2;
                       this.parent.TirePassFront.direction = this.direction;
                       this.parent.TirePassFront.controlValue = this.controlValue / 4;
+                      this.parent.TirePassFront.transformDuration = 0.2;
                     }
                     this.pointerMove = function( pointerInfo, pickInfo ) {
                       this.parent.TireDriverFront.transformDuration = 0;
@@ -438,9 +436,9 @@ children:
                 scripts:
                 - |
                     this.pointerUp = function( pointerInfo, pickInfo ) {
-                      this.parent.WiperDriver.transformDuration = 0.5;
                       this.parent.WiperDriver.direction = this.direction;
                       this.parent.WiperDriver.controlValue = this.controlValue;
+                      this.parent.WiperDriver.transformDuration = 0.5;
                     }
                     this.pointerMove = function( pointerInfo, pickInfo ) {
                       this.parent.WiperDriver.transformDuration = 0;
@@ -469,9 +467,9 @@ children:
                 scripts:
                 - |
                     this.pointerUp = function( pointerInfo, pickInfo ) {
-                      this.parent.WiperPass.transformDuration = 0.5;
                       this.parent.WiperPass.direction = this.direction;
                       this.parent.WiperPass.controlValue = this.controlValue;
+                      this.parent.WiperPass.transformDuration = 0.5;
                     }
                     this.pointerMove = function( pointerInfo, pickInfo ) {
                       this.parent.WiperPass.transformDuration = 0;
@@ -638,12 +636,12 @@ children:
                 scripts:
                 - |
                     this.pointerUp = function( pointerInfo, pickInfo ) {
-                      this.parent.TireDriverFront.transformDuration = 0.2;
                       this.parent.TireDriverFront.direction = this.direction;
                       this.parent.TireDriverFront.controlValue = this.controlValue;
-                      this.parent.SteeringWheel.transformDuration = 0.2;
+                      this.parent.TireDriverFront.transformDuration = 0.2;
                       this.parent.SteeringWheel.direction = this.direction;
                       this.parent.SteeringWheel.controlValue = this.controlValue * 4;
+                      this.parent.SteeringWheel.transformDuration = 0.2;
                     }
                     this.pointerMove = function( pointerInfo, pickInfo ) {
                       this.parent.TireDriverFront.transformDuration = 0;
@@ -672,12 +670,12 @@ children:
                 scripts:
                 - |
                     this.pointerUp = function( pointerInfo, pickInfo ) {
-                      this.parent.TirePassFront.transformDuration = 0.2;
                       this.parent.TirePassFront.direction = this.direction;
                       this.parent.TirePassFront.controlValue = this.controlValue;
-                      this.parent.SteeringWheel.transformDuration = 0.2;
+                      this.parent.TirePassFront.transformDuration = 0.2;
                       this.parent.SteeringWheel.direction = this.direction;
                       this.parent.SteeringWheel.controlValue = this.controlValue * 4;
+                      this.parent.SteeringWheel.transformDuration = 0.2;
                     }
                     this.pointerMove = function( pointerInfo, pickInfo ) {
                       this.parent.TirePassFront.transformDuration = 0;
@@ -751,6 +749,16 @@ children:
                     this.pointerUp = function( pointerInfo, pickInfo ) {
                       this.parent.HoodLatchDriver.direction = this.direction;
                       this.parent.HoodLatchDriver.controlValue = this.controlValue;
+                      this.parent.HoodLatchDriver.transformDuration = 1;
+                      this.parent.HoodLatchPass.direction = this.direction;
+                      this.parent.HoodLatchPass.controlValue = this.controlValue;
+                      this.parent.HoodLatchPass.transformDuration = 1;
+                    }
+                    this.pointerMove = function( pointerInfo, pickInfo ) {
+                      this.parent.HoodLatchDriver.transformDuration = 0;
+                      this.parent.HoodLatchDriver.direction = this.direction;
+                      this.parent.HoodLatchDriver.controlValue = this.controlValue;
+                      this.parent.HoodLatchPass.transformDuration = 0;
                       this.parent.HoodLatchPass.direction = this.direction;
                       this.parent.HoodLatchPass.controlValue = this.controlValue;
                     }

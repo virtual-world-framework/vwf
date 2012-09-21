@@ -32,7 +32,7 @@ properties:
       if(this.controlValue == undefined) {
         this.controlValue = value;
       }
-      else {
+      else if(!this.playing && this.controlValue != value) {
         if(value > this.maxValue) {
           value = this.maxValue - 1;
           this.direction = -1;
@@ -41,7 +41,7 @@ properties:
           value = this.minValue + 1;
           this.direction = 1;
         }
-        var incrementBy = Math.abs(value - this.controlValue) * this.direction;
+        var incrementBy = (Math.abs(value - this.controlValue) * this.direction);
         this.controlValue = value;
         switch(this.controlType) {
           case "translate": 
@@ -54,6 +54,9 @@ properties:
             this.deltaScale(incrementBy);
             break;
         }
+      }
+      else {
+        this.controlValue = this.controlValue;
       }
       this.controlValueUpdated(this.controlValue);
     value: 0
@@ -112,7 +115,12 @@ properties:
   ## @name control.vwf#transformDuration
   ## @property
 
-  transformDuration: 0
+  transformDuration: 
+    set: |
+      if(!this.playing) {
+        this.transformDuration = value;
+      }
+    value: 0
 
   ## The minimum controlValue can be set to.
   ##
@@ -136,11 +144,13 @@ properties:
 
   direction: 
     set: |
-      switch(value) {
-        case 1:
-        case -1:
-          this.direction = value;
-          break;
+      if(!this.playing) {
+        switch(value) {
+          case 1:
+          case -1:
+            this.direction = value;
+            break;
+        }
       }
     value: 1
 
@@ -231,10 +241,6 @@ scripts:
         "pointerInfo": undefined,
         "pickInfo": undefined,        
       },
-      pointerDown: {
-        "pointerInfo": undefined,
-        "pickInfo": undefined,        
-      },
       update: function( pointerInfo, pickInfo ){
         if(!this.previous.pointerInfo) {
           this.previous.pointerInfo = this.pointerInfo;
@@ -269,8 +275,8 @@ scripts:
       this.controlValue = this.maxValue;
     }
     else {
-      this.input.pointerDown.pointerInfo = pointerInfo;
-      this.input.pointerDown.pointerInfo = pickInfo;
+      this.input.pointerInfo = pointerInfo;
+      this.input.pickInfo = pickInfo;
     }
   }
   // If the mouse has not moved, add the direction to the controlValue if in positions or continuous mode. Sets controlValue to the minValue if in momentary mode.
@@ -279,7 +285,7 @@ scripts:
       this.direction = -1;
       this.controlValue = this.minValue;
     }
-    else {
+    else if(!this.playing) {
       if(this.input.previous.pointerInfo == undefined) {
         this.controlValue = this.controlValue + this.direction;
       }
@@ -292,7 +298,7 @@ scripts:
     }
   }
   this.pointerMove = function( pointerInfo, pickInfo ) {
-    if(this.controlMode != "momentary") {
+    if(this.controlMode != "momentary" && !this.playing) {
       this.transformDuration = 0;
       this.input.update( pointerInfo, pickInfo );
       var diff = this.input.change();

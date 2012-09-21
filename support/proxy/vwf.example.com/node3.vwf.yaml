@@ -375,6 +375,7 @@ methods:
       - startTime
       - stopTime
     body: |
+      this.playing = true;
       this.translation = goog.vec.Vec3.lerp(
         startTranslation, stopTranslation,
         startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
@@ -387,7 +388,10 @@ methods:
           startTime,
           stopTime
         ); // TODO: way to do this.in( next-tick )...
-      }  //@ sourceURL=node3.translationWorker.vwf
+      }  
+      else { 
+        this.playing = false;
+      } //@ sourceURL=node3.translationWorker.vwf
 
   ## Rotate by given rotation over duration.
   ## 
@@ -519,6 +523,7 @@ methods:
       - startTime
       - stopTime
     body: |
+      this.playing = true;
       this.quaternion = goog.vec.Quaternion.slerp(
         startQuaternion, stopQuaternion,
         startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
@@ -531,6 +536,9 @@ methods:
           startTime,
           stopTime
         ); // TODO: way to do this.in( next-tick )...
+      } 
+      else {
+        this.playing = false;
       } //@ sourceURL=node3.quaternionWorker.vwf
 
   ## Scale by given scale over duration.
@@ -605,6 +613,7 @@ methods:
       - startTime
       - stopTime
     body: |
+      this.playing = true;
       this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
         startScale, stopScale,
         startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
@@ -617,6 +626,9 @@ methods:
           startTime,
           stopTime
         );  // TODO: way to do this.in( next-tick )...
+      }
+      else {
+        this.playing = false;
       }
 
 events:
