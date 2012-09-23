@@ -13,7 +13,7 @@
 
 require "helper"
 
-class VWFTest < Test::Unit::TestCase
+class VWFTest < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
   def app
@@ -26,8 +26,8 @@ class VWFTest < Test::Unit::TestCase
     assert last_response.ok?
 
     component = JSON.parse last_response.body
-    assert_not_nil component["extends"]
-    assert_not_nil component["properties"]
+    refute_nil component["extends"]
+    refute_nil component["properties"]
     assert_equal "component", component["properties"]["file"]
     
   end
@@ -42,8 +42,8 @@ class VWFTest < Test::Unit::TestCase
     assert_match /^#{callback}\(.*\)$/, last_response.body
 
     component = JSON.parse last_response.body[ /#{callback}\s*\(\s*(.*)\s*\)/, 1 ]
-    assert_not_nil component["extends"]
-    assert_not_nil component["properties"]
+    refute_nil component["extends"]
+    refute_nil component["properties"]
     assert_equal "component", component["properties"]["file"]
 
   end

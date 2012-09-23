@@ -13,7 +13,7 @@
 
 require "helper"
   
-class VWF::PatternTest < Test::Unit::TestCase
+class VWF::PatternTest < MiniTest::Unit::TestCase
   include Rack::Test::Methods
 
   # Assume these directories containing these files.
