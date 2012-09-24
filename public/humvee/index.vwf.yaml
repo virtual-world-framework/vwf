@@ -17,6 +17,8 @@ properties:
   activeCamera: "http-vwf-example-com-camera-vwf-camera"
   navmode: "orbit"
   speed: 4.0
+methods:
+  switchCameraView: 
 children:
   humvee:
     extends: http://vwf.example.com/node3.vwf
@@ -25,8 +27,6 @@ children:
     children:
       interiorCamera:
         extends: http://vwf.example.com/camera.vwf
-        properties:
-          transform: [-0.31940966844558716,0.9476123452186584,-5.816936266000994e-8,0,-0.9332156777381897,-0.3145570456981659,-0.17364755272865295,0,-0.1645519733428955,-0.05546514317393303,0.9848077297210693,0,-1.3992034196853638,-11.587126731872559,75.94760131835938,1]
       bone2: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
@@ -791,6 +791,21 @@ scripts:
     this.camera.translation = [ -320, -360, 164 ];
     this.camera.lookAt = "http-vwf-example-com-node3-vwf-humvee";
     this.camera.far = 3000;
+    this.humvee.interiorCamera.transform = [-0.31940966844558716, 0.9476123452186584, -5.816936266000994e-8, 0,
+      -0.9332156777381897, -0.3145570456981659, -0.17364755272865295, 0,
+      -0.1645519733428955, -0.05546514317393303, 0.9848077297210693, 0,
+      -1.3992034196853638, -11.587126731872559, 75.94760131835938, 1];
+  }
+  this.switchCameraView = function(view) {
+    if(view == "exterior") {
+      this.navmode='orbit'; 
+      this.camera.lookAt = this.find('/humvee')[0].id; 
+      this.activeCamera = this.find('/camera')[0].id;
+    }
+    else {
+      this.navmode='walk'; 
+      this.activeCamera = this.find('/humvee/interiorCamera')[0].id;
+    }
   }
 
 # Paste into the console to jump to an inside view: vwf.execute( "index-vwf", "this.navmode = 'walk' ; this.camera.transform = [-0.4292135238647461, 0.9031997919082642, -0.000008751301720621996, 0, -0.8462061285972595, -0.40213271975517273, -0.34959691762924194, 0, -0.31576135754585266, -0.150045245885849, 0.9368997812271118, 0, -15.161749839782715, -28.28612518310547, 72.89060974121094, 1]" )
