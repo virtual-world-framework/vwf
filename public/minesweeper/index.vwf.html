@@ -19,7 +19,9 @@
 		<link href="minesweeper.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
 			$(function() {
+				var gameInProgress = vwf.getProperty('index-vwf', 'gameInProgress');
 				$("a", ".toolstyle").button();
+				$("a", ".toolstyle").button("option", "disabled", gameInProgress);
 			});
 			
 			function startGame() {
