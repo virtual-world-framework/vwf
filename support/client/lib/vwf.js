@@ -2504,17 +2504,16 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.prototypes = function( nodeID ) {
 
-            var prototypeIDs = [];
-            var prototypeID = undefined;
-            
-            while ( nodeID !== undefined ) {
-                if ( ( prototypeID = /* assignment! */ this.prototype( nodeID ) ) !== undefined ) {
-                    prototypeIDs.push( prototypeID );
-                }
-                nodeID = prototypeID;
+            var prototypes = [];
+
+            nodeID = this.prototype( nodeID );
+
+            while ( nodeID ) {
+                prototypes.push( nodeID );
+                nodeID = this.prototype( nodeID );
             }
-            
-            return prototypeIDs;
+
+            return prototypes;
         };
 
         // -- behaviors ----------------------------------------------------------------------------
