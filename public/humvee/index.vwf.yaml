@@ -14,7 +14,6 @@
 ---
 extends: http://vwf.example.com/navscene.vwf
 properties:
-  activeCamera: "http-vwf-example-com-camera-vwf-camera"
   navmode: "orbit"
   speed: 4.0
 methods:

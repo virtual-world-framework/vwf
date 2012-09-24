@@ -19,6 +19,13 @@
     <script type="text/javascript">
 
       $(function() {
+        var camera = vwf.getProperty(vwf.find("", "/")[0], "activeCamera");
+        if(camera == vwf.find("", "/camera")[0]) {
+          $("#exterior").attr("checked", true);
+        }
+        else {
+          $("#interior").attr("checked", true);
+        }
         $("#toolbar").buttonset();
       });
 
