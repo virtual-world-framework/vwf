@@ -182,8 +182,9 @@ define( function() {
         // Default configuration for all environments.
 
         default: {
-            environment: require.toUrl( "dummy" ).indexOf( "../lib/" ) == 0 ? "testing" : "development",
+            "environment": require.toUrl( "dummy" ).indexOf( "../lib/" ) == 0 ? "testing" : "development",
             "log-level": "warn",        // logger threshold
+            "random-seed": +new Date,   // pseudorandom number generator seed
             "randomize-ids": false,     // randomize IDs to discourage assumptions about ID allocation
             "humanize-ids": false,      // append recognizable strings to node IDs
         },
@@ -204,6 +205,7 @@ define( function() {
         // Changes for testing environments.
 
         testing: {
+            "random-seed": window.location, // make the random sequence repeatable
         },
 
     };

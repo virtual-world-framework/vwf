@@ -160,6 +160,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         [ scriptText, scriptType ], when || 0, callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
                 };
 
+            case "random":
+
+                return function( nodeID, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, undefined,
+                        undefined, when || 0, callback /* ( result ) */ );
+                };
+
+            case "seed":
+
+                return function( nodeID, seed, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, undefined,
+                        [ seed ], when || 0, callback /* ( result ) */ );
+                };
+
             // -- Read-only functions --------------------------------------------------------------
 
             case "time":

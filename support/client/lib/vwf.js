@@ -806,10 +806,8 @@
 
                         // Set the queue time and add the incoming items to the queue.
 
-                        if ( applicationState.queue ) {
-                            queue.time = applicationState.queue.time;
-                            queue.insert( applicationState.queue.queue || [] );
-                        }
+                        queue.time = applicationState.queue.time;
+                        queue.insert( applicationState.queue.queue || [] );
 
                     }
 
@@ -838,7 +836,7 @@
                 // Runtime configuration.
 
                 configuration:
-                    require( "vwf/configuration" ).instance,
+                    require( "vwf/configuration" ).active,
 
                 // Internal kernel state.
 
@@ -963,7 +961,7 @@
                         // Load the document if we haven't seen this URI yet. Mark the components
                         // list to indicate that this component is loading.
 
-                        if ( ! components[nodeURI] ) { // uri is not loading (Array) or loaded (id)
+                        if ( ! components[nodeURI] ) { // uri is not loading (Array) or is loaded (id)
 
                             components[nodeURI] = []; // [] => array of callbacks while loading => true
 
@@ -975,14 +973,23 @@
                         // If we've seen this URI, but it is still loading, just add our callback to
                         // the list. The original load's completion will call our callback too.
 
-                        } else if ( components[nodeURI] instanceof Array ) { // loading
+                        } else if ( components[nodeURI] instanceof Array ) { // uri is loading
+ 
                             callback_async && components[nodeURI].push( callback_async );  // TODO: is this leaving a series callback hanging if we don't call series_callback_async?
 
                         // If this URI has already loaded, skip to the end and call the callback
                         // with the ID.
 
-                        } else { // loaded
-                            callback_async && callback_async( components[nodeURI] );  // TODO: is this leaving a series callback hanging if we don't call series_callback_async?
+                        } else { // uri is loaded
+
+                            if ( nodePatch ) {
+                                vwf.setNode( components[nodeURI], nodePatch, function( nodeID ) /* async */ {
+                                    callback_async && callback_async( components[nodeURI] );  // TODO: is this leaving a series callback hanging if we don't call series_callback_async?
+                                } );
+                            } else {
+                                callback_async && callback_async( components[nodeURI] );  // TODO: is this leaving a series callback hanging if we don't call series_callback_async?
+                            }
+
                         }
 
                     } else { // descriptor, ID or error
@@ -1280,10 +1287,13 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Internal state.
 
-            var internals = this.models.object.internals( nodeID ); // sequence
+            if ( full || ! patching || patches.internals ) {
 
-            if ( internals.sequence ) { // omit if 0 (default)
+                var internals = this.models.object.internals( nodeID ); // sequence and random
+
                 nodeComponent.sequence = internals.sequence;
+                nodeComponent.random = internals.random;
+
             }
 
             // Suppress kernel reentry so that we can read the state without coloring from any
@@ -1462,7 +1472,11 @@ var useLegacyID = [  // TODO: fix static ID references and remove
     "http://vwf.example.com/node.vwf",
 ].indexOf( childURI ) < 0 &&
     // ... but not for tests
-    require.s.contexts._.config.baseUrl != "../lib/";
+    require.toUrl( "dummy" ).indexOf( "../lib/" ) != 0;
+
+useLegacyID = useLegacyID ||
+    // work around model/glge creating a camera on a not-initialized application node
+    nodeID == "index-vwf" && ! this.models.object.objects[nodeID] && childName == "camera";
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
@@ -1473,11 +1487,13 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
 }
             } else {  // descendant: parent id + next from parent's sequence
-                var childID = nodeID + ":" + this.models.object.sequence( nodeID ) +
-                    ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
     var childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
+} else {    
+                var childID = nodeID + ":" + this.sequence( nodeID ) +
+                    ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
+                    ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 }
             }
 
@@ -1555,6 +1571,8 @@ if ( ! childComponent.source ) {
 
                         var driver_ready = true;
 
+                        // TODO: suppress kernel reentry here (just for childID?) with kernel/model showing a warning when breached; no actions are allowed until all drivers have seen creatingNode()
+
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                                 childComponent.source, childComponent.type, childURI, childName, function( ready ) /* async */ {
 
@@ -1568,6 +1586,8 @@ if ( ! childComponent.source ) {
                             }
 
                         } );
+
+                        // TODO: restore kernel reentry here
 
                         driver_ready && each_callback_async( undefined );
 
@@ -2207,7 +2227,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
                     var prototypeID = this.prototype( nodeID );
 
-                    if ( prototypeID != nodeTypeURI ) {
+                    if ( prototypeID !== nodeTypeURI ) {
                         propertyValue = this.getProperty( prototypeID, propertyName );
                     }
 
@@ -2451,6 +2471,18 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return scriptValue;
         };
 
+        // -- random -------------------------------------------------------------------------------
+
+        this.random = function( nodeID ) {
+            return this.models.object.random( nodeID );
+        };
+
+        // -- seed ---------------------------------------------------------------------------------
+
+        this.seed = function( nodeID, seed ) {
+            return this.models.object.seed( nodeID, seed );
+        };
+
         // -- time ---------------------------------------------------------------------------------
 
         // The current simulation time.
@@ -2562,6 +2594,12 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }, this );             
 
             return descendants;
+        };
+
+        // -- sequence -----------------------------------------------------------------------------
+
+        this.sequence = function( nodeID ) {
+            return this.models.object.sequence( nodeID );
         };
 
         /// Locate nodes matching a search pattern. See vwf.api.kernel#find for details.

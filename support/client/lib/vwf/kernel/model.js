@@ -384,6 +384,44 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
 
+            case "random":
+
+                return function( nodeID, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                                undefined, when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "seed":
+
+                return function( nodeID, seed, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, seed );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                                [ seed ], when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
             // -- Read-only functions --------------------------------------------------------------
 
             case "time":
