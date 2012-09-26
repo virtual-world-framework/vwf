@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model, configuration ) {
 
     // vwf/model/object.js is a backstop property store.
 
@@ -60,14 +60,19 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 parent: undefined,
                 children: [],
 
-                sequence: 0,
+                sequence: 0,                      // counter for child ID assignments
 
-                // Change list for patchable objects; created when needed
+                prng: parent ?                    // pseudorandom number generator, seeded by ...
+                    new Alea( JSON.stringify( parent.prng.state ), childID ) :  // ... the parent's prng and the child ID, or
+                    new Alea( configuration.active["random-seed"], childID ),   // ... the global seed and the child ID
+
+                // Change list for patchable objects. This field is omitted until needed.
 
                 // patches: {
-                //     root: true,                 // node is the root of the component
-                //     descendant: true,           // node is a descendant still within the component
-                //     properties: true,           // placeholder for a property change list
+                //     root: true,                // node is the root of the component
+                //     descendant: true,          // node is a descendant still within the component
+                //     internals: true,           // random, seed, or sequence has changed
+                //     properties: true,          // placeholder for a property change list
                 // },
 
                 initialized: false,
@@ -194,6 +199,22 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         // The kernel delegates the corresponding API calls exclusively to vwf/model/object without
         // calling any other models.
 
+        // -- random -------------------------------------------------------------------------------
+
+        random: function( nodeID ) {
+            var object = this.objects[nodeID];
+            object.initialized && object.patches && ( object.patches.internals = true );
+            return object.prng();
+        },
+
+        // -- seed ---------------------------------------------------------------------------------
+
+        seed: function( nodeID, seed ) {
+            var object = this.objects[nodeID];
+            object.initialized && object.patches && ( object.patches.internals = true );
+            object.prng = new Alea( seed );
+        },
+
         // -- intrinsics ---------------------------------------------------------------------------
 
         intrinsics: function( nodeID, result ) {
@@ -271,9 +292,11 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
             if ( internals ) { // set
                 object.sequence = internals.sequence || 0;
+                jQuery.extend( object.prng.state, internals.random || {} );
             } else { // get
                 internals = {};
                 internals.sequence = object.sequence;
+                internals.random = object.prng.state;  // TODO: tag as Alea data
             }
 
             return internals;
@@ -283,6 +306,7 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         sequence: function( nodeID ) {
             var object = this.objects[nodeID];
+            object.initialized && object.patches && ( object.patches.internals = true );
             return object && ++object.sequence;
         },
 

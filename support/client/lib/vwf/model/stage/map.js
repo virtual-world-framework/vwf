@@ -153,6 +153,18 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                 scriptText, scriptType );
         },
 
+        // -- random -------------------------------------------------------------------------------
+
+        random: function( node ) {
+            return this.kernel.random( this.model_to_kernel[this.object_id(node)] || node );
+        },
+
+        // -- seed ---------------------------------------------------------------------------------
+
+        seed: function( node, seed ) {
+            return this.kernel.seed( this.model_to_kernel[this.object_id(node)] || node, seed );
+        },
+
         // -- time ---------------------------------------------------------------------------------
 
         time: function() {

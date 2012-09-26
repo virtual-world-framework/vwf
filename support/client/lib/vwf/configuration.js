@@ -182,18 +182,19 @@ define( function() {
         // Default configuration for all environments.
 
         default: {
-            environment: "development",
+            "environment": require.toUrl( "dummy" ).indexOf( "../lib/" ) == 0 ? "testing" : "development",
+            "log-level": "warn",        // logger threshold
+            "random-seed": +new Date,   // pseudorandom number generator seed
+            "randomize-ids": false,     // randomize IDs to discourage assumptions about ID allocation
+            "humanize-ids": false,      // append recognizable strings to node IDs
         },
 
-        // Production configuration.
+        // Changes for production environments.
 
         production: {
-            "log-level": "warn",
-            "randomize-ids": false,
-            "humanize-ids": false,
         },
 
-        // Development configuration.
+        // Changes for development environments.
 
         development: {
             "log-level": "info",
@@ -201,12 +202,10 @@ define( function() {
             "humanize-ids": true,
         },
 
-        // Testing configuration.
+        // Changes for testing environments.
 
         testing: {
-            "log-level": "warn",
-            "randomize-ids": false,
-            "humanize-ids": false,
+            "random-seed": window.location, // make the random sequence repeatable
         },
 
     };

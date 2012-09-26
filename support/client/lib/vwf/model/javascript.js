@@ -198,6 +198,20 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 }
             } );
 
+            // Define the "random" and "seed" functions.
+
+            Object.defineProperty( node, "random", { // "this" is node
+                value: function() {
+                    return self.kernel.random( this.id );
+                }
+            } );
+
+            Object.defineProperty( node, "seed", { // "this" is node
+                value: function( seed ) {
+                    return self.kernel.seed( this.id, seed );
+                }
+            } );
+
             // Define the "time", "client", and "moniker" properties.
 
             Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?

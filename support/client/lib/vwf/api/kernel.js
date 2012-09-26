@@ -299,6 +299,23 @@ define( {
 
     execute: [ /* nodeID, scriptText, scriptType */ ],
 
+    /// @name vwf.api.kernel#random
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {Number}
+
+    random: [ /* nodeID */ ],
+
+    /// @name vwf.api.kernel#seed
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} seed
+
+    seed: [ /* nodeID, seed */ ],
+
     /// It will return the current simulation time.
     /// 
     /// @name vwf.api.kernel#time
