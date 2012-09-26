@@ -195,8 +195,10 @@ scripts:
           newLine.properties.meshDefinition.faces = faces;
           newLine.properties.meshDefinition.color = this.lineColor;
           
-          this.children.create("line"+lineIndex, newLine);
-          this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
+          this.children.create( "line"+lineIndex, newLine, function( newObj ) {
+            this.nodesCreated.push( newObj.id );
+          } );
+
           lineIndex++;
           
           this.lastDrawPoint.pickInfo = pickInfo;
@@ -221,8 +223,10 @@ scripts:
           pushpin.source = "models/pushPinYellow.dae";
         
         var name = "pushpin"+pushpinIndex;
-        this.children.create(name, pushpin);
-        this.nodesCreated.push( "http-vwf-example-com-node3-vwf-"+name );
+        this.children.create( name, pushpin, function( newObj ) {
+          this.nodesCreated.push( newObj.id );
+        } );
+
         pushpinIndex++;        
         
         //var pt = parms.pickInfo.coord;
@@ -285,8 +289,10 @@ scripts:
       cube.properties.meshDefinition.faces = faces;
       cube.properties.meshDefinition.color = color;
       
-      this.children.create("cube"+cubeIndex, cube);
-      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cube"+cubeIndex );
+      this.children.create( "cube"+cubeIndex, cube, function( newObj ) {
+        if ( temp ) this.nodesCreated.push( newObj.id );
+      } );
+
       cubeIndex++;
     }
     this.createLine = function( x1, y1, z1, x2, y2, z2, thickness, color, temp ) {
@@ -352,8 +358,10 @@ scripts:
       line.properties.meshDefinition.faces = faces;
       line.properties.meshDefinition.color = color;
       
-      this.children.create("line"+lineIndex, line);
-      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-line"+lineIndex );
+      this.children.create( "line"+lineIndex, line, function( newObj ) {
+        if ( temp ) this.nodesCreated.push( newObj.id );
+      } );
+
       lineIndex++;    
     }
     this.createCone = function( x, y, z, radius, height, color, accuracy, temp ) {
@@ -382,7 +390,9 @@ scripts:
       cone.properties.meshDefinition.faces = faces;
       cone.properties.meshDefinition.color = color;
       
-      this.children.create("cone"+coneIndex, cone);
-      if ( temp ) this.nodesCreated.push( "http-vwf-example-com-node3-vwf-cone"+coneIndex );
+      this.children.create( "cone"+coneIndex, cone, function( newObj ) {
+        if ( temp ) this.nodesCreated.push( newObj.id );
+      } );
+
       coneIndex++; 
     } //@ sourceURL=appScene.vwf
