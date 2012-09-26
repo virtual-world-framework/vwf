@@ -437,6 +437,10 @@ children:
           texture: "images/dkBlue.png"      
 scripts:
 - |
+    var tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
+                       this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
+                       this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
+                       this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
     this.initialize = function() {
 
       this.tile1.translation = this.tilePosition1;
@@ -461,13 +465,16 @@ scripts:
     }
     
     this.shuffle = function() {
-      var tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
-                       this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
-                       this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
-                       this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
-      tilePositions.sort( function(){ return (Math.round( Math.random() )-0.5); } ); 
-      // this.setPositions(tilePositions);
-      vwf.send(this.id, "callMethod", "setPositions", [[tilePositions]], 0);
+      var tmp, current, top = tilePositions.length;
+
+      if(top) while(--top) {
+        current = Math.floor(this.random() * (top + 1));
+        console.info(current);
+        tmp = tilePositions[current];
+        tilePositions[current] = tilePositions[top];
+        tilePositions[top] = tmp;
+      }
+      this.setPositions();
     }
     
     this.solve = function() {
@@ -489,7 +496,7 @@ scripts:
       this.openTilePosition = this.tilePosition16;
     }
     
-    this.setPositions = function(tilePositions) {
+    this.setPositions = function() {
       if (this.time >= (this.lastSetPositionTime || 0) + 0.1) {
         this.lastSetPositionTime = this.time
         this.tile1.translation = tilePositions[0];

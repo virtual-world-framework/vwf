@@ -709,10 +709,18 @@ scripts:
     }
 
     this.startGame = function() {
-      if(!vwf.client() || vwf.client() == vwf.moniker()) {
-        // Randomize mines
-        tileMap.sort( function(){ return (Math.random() -0.5); } ); 
-        vwf.send(this.id, "callMethod", "setupGame", [[tileMap]], 0);
+      this.shuffle();
+      this.setupGame(tileMap);
+    }
+
+    this.shuffle = function() {
+      var tmp, current, top = tileMap.length;
+
+      if(top) while(--top) {
+        current = Math.floor(this.random() * (top + 1));
+        tmp = tileMap[current];
+        tileMap[current] = tileMap[top];
+        tileMap[top] = tmp;
       }
     }
     
