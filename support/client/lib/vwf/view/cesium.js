@@ -64,7 +64,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( childExtendsID === undefined )
                 return;
             
-            this.logger.infoc( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            this.logger.infox( "createdNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             var node = {
                 parentID: nodeID,
                 ID: childID,
