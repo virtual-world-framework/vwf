@@ -3327,10 +3327,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 return false;
             }
 
-            var matches_type = ! type || this.prototypes( nodeID ).some( function( prototypeID ) {
-                if ( this.uri( prototypeID ) == type ) {
-                    return true;
-                }
+            var matches_type = ! type || this.uri( nodeID ) == type ||
+                this.prototypes( nodeID ).some( function( prototypeID ) {
+                    return this.uri( prototypeID ) == type;
             }, this );
 
             return matches_type;
