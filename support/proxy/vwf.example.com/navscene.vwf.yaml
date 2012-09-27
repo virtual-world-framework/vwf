@@ -46,12 +46,12 @@ properties:
 
   orbitRadius: -1
 
-  ## ID of object around which to orbit
+  ## A node.vwf#find search pattern identifying the object to orbit.
   ## 
-  ## @name navscene.vwf#orbitObjectID
+  ## @name navscene.vwf#orbitObjectPattern
   ## @property
 
-  orbitObjectID: "http-vwf-example-com-node3-vwf-sceneCenter"
+  orbitObjectPattern: "sceneCenter"
 
   ## Rotation speed. At a speed of 1, will take 4 seconds to go around 360 degrees.
   ## 
@@ -169,8 +169,12 @@ scripts:
       if ( this.activeCameraComp ) {
         switch( mode ) {
           case "orbit":
-            this.activeCameraComp.lookAt = this.orbitObjectID;
-            this.updateRadius();
+            if ( this.orbitObjectPattern ) {
+              this.find( this.orbitObjectPattern, function( orbitObject ) {
+                this.activeCameraComp.lookAt = orbitObject.id;
+                this.updateRadius();
+              } );
+            }
             break;
           default:
             this.activeCameraComp.lookAt = "";
