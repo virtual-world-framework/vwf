@@ -734,35 +734,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         }
     }
 
-    // == getPrototypes =====================================================================
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
-
-    // == isGlgeSceneDefinition ==============================================================
-
-    function isSceneDefinition( prototypes ) {
-        var foundGlge = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-//                foundGlge = ( prototypes[i] == "http-vwf-example-com-physics2-vwf" ); 
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );
-            }
-        }
-
-        return foundGlge;
-    }
-
-
     // == isPhysicsProp =====================================================================
 
     function isPhysicsProp( pn ) {
