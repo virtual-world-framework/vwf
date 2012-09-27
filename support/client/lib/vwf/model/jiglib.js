@@ -46,8 +46,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
           //                  childSource, childType, childURI, childName );
           //this.logger.enabled = false;
 
-          var prototypes = getPrototypes.call( this, kernel, childExtendsID );
-          if ( prototypes && isSceneDefinition.call( this, prototypes ) ) {
+          if ( childExtendsID && this.kernel.test( childExtendsID,
+                "self::element(*,'http://vwf.example.com/scene.vwf')", childExtendsID ) ) {
+
             this.scenes[ childID ] = {};
             this.scenes[ childID ].ID = childID;
             this.scenes[ childID ].extendsID = childExtendsID;
@@ -57,12 +58,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.scenes[ childID ].system = jigLib.PhysicsSystem.getInstance();
             this.scenes[ childID ].initialized = false;
             this.scenes[ childID ].propertyMap = {};
+
           } else {
 
-              switch ( childExtendsID ) {
-                 case "http-vwf-example-com-physics3-vwf":
-                 case "http-vwf-example-com-node3-vwf":
-                 case "http-vwf-example-com-mesh-vwf":
+              switch ( childExtendsID && this.kernel.uri( childExtendsID ) ) {
+                 case "http://vwf.example.com/physics3.vwf":
+                 case "http://vwf.example.com/node3.vwf":
+                 case "http://vwf.example.com/mesh.vwf":
                     this.nodes[ childID ] = {};
     /* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
                     this.nodes[ childID ].name = childName;
@@ -731,35 +733,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
         }
     }
-
-    // == getPrototypes =====================================================================
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
-
-    // == isGlgeSceneDefinition ==============================================================
-
-    function isSceneDefinition( prototypes ) {
-        var foundGlge = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-//                foundGlge = ( prototypes[i] == "http-vwf-example-com-physics2-vwf" ); 
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );
-            }
-        }
-
-        return foundGlge;
-    }
-
 
     // == isPhysicsProp =====================================================================
 

@@ -126,7 +126,11 @@ scripts:
             cube.scripts = [];
             cube.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
 
-            this.children.create( newObjName, cube );
+            this.children.create( newObjName, cube, function( newObj ) {
+              this.nodesCreated.push( newObj.id );
+              this.nodesCreated = this.nodesCreated;
+            } );
+
             this.createCube = false;
           } else {
             this.spheresCreated += 1;
@@ -140,12 +144,12 @@ scripts:
             sphere.scripts = [];
             sphere.scripts.push( "this.initialize = function() { this.velocity = [ "+vel[0]+", "+vel[1]+", "+vel[2]+" ]; }" );
             
-            this.children.create( newObjName, sphere );
+            this.children.create( newObjName, sphere, function( newObj ) {
+              this.nodesCreated.push( newObj.id );
+              this.nodesCreated = this.nodesCreated;
+            } );
+
             this.createCube = true;      
-          }
-          if ( newObjName && newObjName != "" ) {
-            this.nodesCreated.push( "http-vwf-example-com-physics3-vwf-"+newObjName );
-            this.nodesCreated = this.nodesCreated;
           }
         }
       }

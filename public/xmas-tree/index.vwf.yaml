@@ -17,14 +17,12 @@ source: physics.xml
 type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
-  activeCamera: "http-vwf-example-com-camera-vwf-camera"
   gravity: [ 0, 0, -50.8, 0 ]
   collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
 scripts:
 - |
     this.initialize = function() {
-      this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
       this.camera.translation = [ 30, 138, 40 ];
       this.camera.rotation = [ 0, 0, 1, 180 ];
       this.camera.far = 50000; 

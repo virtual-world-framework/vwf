@@ -157,8 +157,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 parent.children.push( node );
             }
 
-            var prototypes = getPrototypes.call( this, kernel, childExtendsID );
-            if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == "index-vwf" ) {
+            if ( childID == "index-vwf" && childExtendsID && this.kernel.test( childExtendsID,
+                    "self::element(*,'http://vwf.example.com/scene.vwf')", childExtendsID ) ) {
                 this.scenes[ childID ] = node;
             }
             
@@ -1153,17 +1153,6 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             }
         }
         return methods;
-    }
-
-    function isGlgeSceneDefinition( prototypes ) {
-        var foundGlge = false;
-        if ( prototypes ) {
-            for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-scene-vwf" );    
-            }
-        }
-
-        return foundGlge;
     }
 
     function highlightChildInHierarchy(nodeID) {

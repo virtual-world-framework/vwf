@@ -788,7 +788,7 @@ scripts:
 - |
   this.initialize = function() {
     this.camera.translation = [ -320, -360, 164 ];
-    this.camera.lookAt = "http-vwf-example-com-node3-vwf-humvee";
+    this.camera.lookAt = this.humvee.id;
     this.camera.far = 3000;
     this.humvee.interiorCamera.transform = [-0.31940966844558716, 0.9476123452186584, -5.816936266000994e-8, 0,
       -0.9332156777381897, -0.3145570456981659, -0.17364755272865295, 0,

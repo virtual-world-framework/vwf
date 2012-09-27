@@ -14,7 +14,6 @@
 ---
 extends: http://vwf.example.com/navscene.vwf
 properties:
-  activeCamera: "http-vwf-example-com-camera-vwf-camera"
   navmode: "orbit"
   speed: 4.0
 children:
@@ -380,7 +379,7 @@ scripts:
 - |
   this.initialize = function() {
     this.camera.translation = [ -500, -500, 235 ];
-    this.camera.lookAt = "http-vwf-example-com-node3-vwf-humvee";
+    this.camera.lookAt = this.children.humvee.id;
     this.camera.far = 3000;
   }
 
