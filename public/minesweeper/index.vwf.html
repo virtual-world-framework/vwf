@@ -19,13 +19,13 @@
 		<link href="minesweeper.css" rel="stylesheet" type="text/css" />
 		<script type="text/javascript">
 			$(function() {
-				var gameInProgress = vwf.getProperty('index-vwf', 'gameInProgress');
+				var gameInProgress = vwf.getProperty(vwf.find("", "/")[0], 'gameInProgress');
 				$("a", ".toolstyle").button();
 				$("a", ".toolstyle").button("option", "disabled", gameInProgress);
 			});
 			
 			function startGame() {
-				vwf_view.kernel.callMethod("index-vwf", "startGame");
+				vwf_view.kernel.callMethod(vwf.find("", "/")[0], "startGame");
 			}
 		</script>
 	</head>

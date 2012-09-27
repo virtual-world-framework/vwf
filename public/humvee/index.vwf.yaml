@@ -798,12 +798,12 @@ scripts:
   this.switchCameraView = function(view) {
     if(view == "exterior") {
       this.navmode='orbit'; 
-      this.camera.lookAt = this.find('/humvee')[0].id; 
-      this.activeCamera = this.find('/camera')[0].id;
+      this.camera.lookAt = this.humvee.id; 
+      this.activeCamera = this.camera.id;
     }
     else {
       this.navmode='walk'; 
-      this.activeCamera = this.find('/humvee/interiorCamera')[0].id;
+      this.activeCamera = this.humvee.interiorCamera.id;
     }
   }
 
