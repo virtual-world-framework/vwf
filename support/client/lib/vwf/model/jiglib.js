@@ -59,10 +59,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.scenes[ childID ].propertyMap = {};
           } else {
 
-              switch ( childExtendsID ) {
-                 case "http-vwf-example-com-physics3-vwf":
-                 case "http-vwf-example-com-node3-vwf":
-                 case "http-vwf-example-com-mesh-vwf":
+              switch ( childExtendsID && this.kernel.uri( childExtendsID ) ) {
+                 case "http://vwf.example.com/physics3.vwf":
+                 case "http://vwf.example.com/node3.vwf":
+                 case "http://vwf.example.com/mesh.vwf":
                     this.nodes[ childID ] = {};
     /* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
                     this.nodes[ childID ].name = childName;
