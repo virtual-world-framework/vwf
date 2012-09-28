@@ -21,7 +21,7 @@
 
       function setMode(mode) {
     		highlightMode(mode);
-        vwf_view.kernel.setProperty("index-vwf", "mouseMode", mode);
+        vwf_view.kernel.setProperty(vwf.find("", "/")[0], "mouseMode", mode);
   	  }
 
       function highlightMode(mode) {
@@ -32,7 +32,7 @@
       }
 
       vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-      	if (nodeId == "index-vwf" ) {
+      	if (nodeId == vwf.find("", "/")[0] ) {
       	  switch (propertyName) {
       		case "mouseMode":
       		  highlightMode( propertyValue );
