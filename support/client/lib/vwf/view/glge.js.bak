@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -13,11 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-/// @module vwf/view/glge
-/// @requires vwf/view
-/// @requires vwf/utility
-
-define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
+define( [ "module", "vwf/view" ], function( module, view ) {
 
     return view.load( module, {
 
@@ -136,12 +132,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ((origWidth != glgeView.width) || (origHeight != glgeView.height)) {
                         canvas.height = glgeView.height;
                         canvas.width = glgeView.width;
-                        
-                        var cam = glgeView.state.cameraInUse;
-                        if ( cam ) {
-                            cam.setAspect( ( canvas.width / canvas.height )  );
+                        var camID = glgeView.state.cameraInUseID
+                        if (!camID && camID != "") {
+                            var cam = glgeView.state.cameraInUse;
+                            camID = getObjectID.call( glgeView, cam, false, false);
                         }
-
+                        if (camID && camID != "") {
+                            vwf.setProperty(camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
+                        }
+                        vwf.setProperty(glgeView.state.sceneRootID, "size", [glgeView.width, glgeView.height]);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
                         $('#topdown_a').height(canvas.height);
                         $('#topdown_b').height(canvas.height);
                         $('#client_list').height(canvas.height);
@@ -198,25 +197,46 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     function initScene( sceneNode ) {
     
         var self = this;
+        var requestAnimFrame, cancelAnimFrame;
+        (function() {
+            var lastTime = 0;
+            var vendors = ['ms', 'moz', 'webkit', 'o'];
+            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+                window.cancelRequestAnimationFrame = window[vendors[x]+
+                  'CancelRequestAnimationFrame'];
+            }
+
+            if (!window.requestAnimationFrame) {
+                requestAnimFrame = window.requestAnimationFrame = function(callback, element) {
+                    var currTime = +new Date;
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+                      timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+            }
+            else {
+                requestAnimFrame = window.requestAnimationFrame;
+            }
+
+            if (!window.cancelAnimationFrame) {
+                cancelAnimFrame = window.cancelAnimationFrame = function(id) {
+                    clearTimeout(id);
+                };
+            }
+            else {
+                cancelAnimFrame = window.cancelAnimationFrame;
+            }
+        }());
+        
         var lastPickTime = 0;
         function renderScene(time) {
-            time = time || 0;
-            window.requestAnimationFrame( renderScene );
+            requestAnimFrame( renderScene );
             sceneNode.frameCount++;
             if((time - lastPickTime) > 10) {
-				
-				
                 var newPick = mousePick.call( this, mouse, sceneNode );
-				
-				var newPickId = newPick ? getPickObjectID.call( view, newPick, false ) : view.state.sceneRootID;
-                if(self.lastPickId != newPickId && self.lastEventData)
-				{
-					
-                    view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                    view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-				}
-				
-				self.lastPickId = newPickId
                 self.lastPick = newPick;
                 if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
                     oldMouseX = mouse.getMousePosition().x;
@@ -246,12 +266,10 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
-            // ambientColor is a property of the scene now
-            // that property should be set instead of hardcoding here
-            //sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );
+            sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );
 
             this.state.cameraInUse = sceneNode.glgeScene.camera;
-            this.state.cameraInUse.setAspect( ( canvas.width / canvas.height)  );
+            this.state.cameraInUse.setAspect( ( canvas.width / canvas.height) /*/ 1.333 */ );
 
             // set up all of the mouse event handlers
             initMouseEvents.call( this, canvas );
@@ -264,7 +282,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
 
-            renderScene();
+            renderScene((+new Date));
         }
     } 
 
@@ -324,8 +342,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     break;
             };
 
-            var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.clientX, y: e.clientY } ); // canvas coordinates from window coordinates
-
             returnData.eventData = [ {
                 /*client: "123456789ABCDEFG", */
                 button: mouseButton,
@@ -341,8 +357,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                         shift: e.shiftKey,
                         meta: e.metaKey,
                     },
-                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
-                screenPosition: [ mousePos.x, mousePos.y ]
+                position: [ mouseXPos.call( this,e)/sceneView.width, mouseYPos.call( this,e)/sceneView.height ],
+                screenPosition: [mouseXPos.call(this,e), mouseYPos.call(this,e)]
             } ];
 
 
@@ -677,7 +693,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     }
 
                     if ( object ) {
-                        sceneView.kernel.createChild( sceneView.kernel.find("", "/")[0], fileName, object );                
+                        sceneView.kernel.createChild( "index-vwf", fileName, object );                
                     }
 
                 } catch ( e ) {
@@ -709,6 +725,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             obj = obj.parent;
         }
         return sOut;
+    }
+
+    function mouseXPos(e) {
+        return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
+    }
+
+    function mouseYPos(e) {
+        return e.clientY - e.currentTarget.offsetTop + window.scrollY;
     }
 
     function getPickObjectID( pickInfo, debug ) {
@@ -758,11 +782,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( sceneNode.frameCount > 10 && sceneNode.pendingLoads == 0 ) {
 
                 var objectIDFound = -1;
+                var mousepos=mouse.getMousePosition();
+                mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
+                mousepos.y = mousepos.y + window.scrollY;
 
-                var mousepos=mouse.getMousePosition(); // window coordinates
-                mousepos = utility.coordinates.contentFromWindow( mouse.element, mousepos ); // canvas coordinates
-
-                var returnValue = sceneNode.glgeScene.pick(mousepos.x - $('#index-vwf').offset().left, mousepos.y - $('#index-vwf').offset().top);
+                var returnValue = sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
                 if (!returnValue) {
                     returnValue = { };
                 }
