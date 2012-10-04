@@ -37,6 +37,7 @@ properties:
         this.tossSphereStrength = value;
       }   
     value: 250
+  nodesCreated: 
 methods:
   clear:
 scripts:
@@ -145,6 +146,7 @@ scripts:
 
             this.children.create( newObjName, cube, function( newObj ) {
               this.nodesCreated.push( newObj.id );
+              this.nodesCreated = this.nodesCreated;
             } );
 
             this.createCube = false;
@@ -162,6 +164,7 @@ scripts:
             
             this.children.create( newObjName, sphere, function( newObj ) {
               this.nodesCreated.push( newObj.id );
+              this.nodesCreated = this.nodesCreated;
             } );
 
             this.createCube = true;      

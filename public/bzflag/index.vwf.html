@@ -29,7 +29,7 @@
 					"Create": function() {
 						if($('#userNameInput').val().length > 0) {
 							playerName = $('#userNameInput').val();
-							vwf_view.kernel.callMethod("index-vwf", "createPlayer", [$('#userNameInput').val()]);
+							vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val()]);
 							$('#userName').html(playerName + ":&nbsp;");
 							preloadImages();
 							$(this).dialog("close");
@@ -50,7 +50,7 @@
 				draggable: false,
 				buttons: {
 					"Yes": function () {
-						vwf_view.kernel.callMethod("index-vwf", "createPlayer", [playerName]);
+						vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName]);
 						$(this).dialog("close");
 					},
 					"No": function () {

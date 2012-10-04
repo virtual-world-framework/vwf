@@ -12,7 +12,7 @@
 // the License.
 var playerNode = undefined;
 var playerName = undefined;
-var sceneNode = 'index-vwf';
+var sceneNode = vwf.find("","/")[0];
 
 var canvas = $('#' + sceneNode).get(0);
 var keyStates = { keysDown: {}, mods: {}, keysUp: {} };
@@ -235,7 +235,7 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
             break;
           case "playerScored": 
             if(eventParameters[0] == playerNode) $("#userScore").text(eventParameters[1]);
-            vwf_view.kernel.getProperty('index-vwf', 'scoreBoard');
+            vwf_view.kernel.getProperty(vwf.find("","/")[0], 'scoreBoard');
             break;
           case "chatSent":
             $('#chatContent').append( "<span style='color:" + eventParameters[2] + "'><b>" + eventParameters[0] + ": " + eventParameters[1] + "</b><br/></span>" );

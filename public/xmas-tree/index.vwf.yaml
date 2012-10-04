@@ -18,7 +18,6 @@ type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   gravity: [ 0, 0, -50.8, 0 ]
-  collisionSystem: [ false ]
   backgroundColor: [ 83, 157, 194 ]
 scripts:
 - |
@@ -61,7 +60,6 @@ children:
     properties: 
       lightType: "directional"
       translation: [ 60, 85, 70 ]
-      rotationOLD: [ 0.5, 0.1, 0 ]
       constantAttenuation: 1.5
       linearAttenuation: 0.00000001
       quadraticAttenuation: 0.00001
