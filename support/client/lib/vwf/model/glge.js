@@ -1092,7 +1092,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 case "texture": {
                     if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
                         if ( txtr ) {
-                            txtr.setSrc( propertyValue );
+                            if(txtr.getSrc() != propertyValue) {
+                                txtr.setSrc( propertyValue );
+                            }
                         } else if ( mat ) {
                             var ml = new GLGE.MaterialLayer;
                             ml.setMapto( GLGE.M_COLOR );
