@@ -60,6 +60,7 @@
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
     <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
+    <script type="text/javascript">var cesium = window.location.search.indexOf( "?cesium" ) == 0</script>
     <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
     <script type="text/javascript">connected && google.load( "earth", "1" )</script>
 
@@ -86,7 +87,7 @@
             "vwf/view/glge",
             "vwf/utility",
             connected && "vwf/view/googleEarth",
-            connected && "vwf/view/cesium"
+            cesium && "vwf/view/cesium"
 			
         ], function( ready ) {
 
@@ -134,7 +135,7 @@
                         "vwf/view/document",
                         "vwf/view/editor",
 						connected && "vwf/view/googleEarth",
-						connected && "vwf/view/cesium"
+						cesium && "vwf/view/cesium"
                     ]
 
                 );

@@ -113,13 +113,13 @@
 			<table class="table table-striped">
 				<tr>
 					<td style="width:25%">
-							<a href="../<%= application + ( application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == 'agi' ? "?connected=1" : "" )  %>" target="_blank">
+							<a href="../<%= application + ( application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == 'agi' ? "?cesium=1" : "" )  %>" target="_blank">
 							<img src="../<%= image %>" alt="<%= name %>" / style="vertical-align:middle;">            
 					  </a>
 					</td>
 					<td style="width:75%">
 						  <h3 style="float:left;vertical-align:middle;"><%= name %></h3> 
-						  <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../<%= application + ( application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == 'agi' ? "?connected=1" : "" )  %>">
+						  <a style="float:right;vertical-align:middle;" class="btn btn-info btn-small" target="_blank" href="../<%= application + ( application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == 'agi' ? "?cesium=1" : "" )  %>">
 						  Launch New Session</a>
 						  <br/>
 						  <hr>
@@ -131,7 +131,7 @@
 									<p><b>Current Sessions</b></p>
 								</div>
 								<script type="text/javascript">
-								$(document.getElementById('<%= application.gsub("/","") %>instances')).ready(showInfo('<%= application %>', '<%= (application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == "agi" ? "?connected=1" : "" )  %>'));							
+								$(document.getElementById('<%= application.gsub("/","") %>instances')).ready(showInfo('<%= application %>', '<%= (application == "earth" ? "?connected=1" : "" ) + ( application[0..2] == "agi" ? "?cesium=1" : "" )  %>'));							
 								</script>
 							</div>
 						</div>
