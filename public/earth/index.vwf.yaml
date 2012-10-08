@@ -29,7 +29,7 @@ children:
       tilt: 
       range: 
       cameraData:
-  camera:
+  observer:
     extends: http://vwf.example.com/node3.vwf
     properties:
       longitude:

@@ -187,7 +187,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 } else if ( this.kernel.client() != this.kernel.moniker() ) { 
 
                     switch ( nodeID ) {
-                        case "http-vwf-example-com-node3-vwf-camera":
+                        case "http-vwf-example-com-node3-vwf-observer":
                         case "http-vwf-example-com-node3-vwf-lookAt":
                             if ( earth && earth.earthInst ) {
                                 ge = earth.earthInst;
@@ -259,7 +259,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var obj, earth, ge;
             var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
             switch ( nodeID ) {
-                case "http-vwf-example-com-node3-vwf-camera":
+                case "http-vwf-example-com-node3-vwf-observer":
                 case "http-vwf-example-com-node3-vwf-lookAt":
                     if ( earth && earth.earthInst ) {
                         ge = earth.earthInst;
