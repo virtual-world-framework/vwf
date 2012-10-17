@@ -97,7 +97,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				group.add(cubeX);
 				group.add(cubeY);
 				group.add(cubeZ);
-				
+				group.vwfID = "TEST DUMMY AXIS GIZMO";
 				sceneNode.threeScene.add(group);
 				//cam.position.set(0, 0, 0);
 				//cam.lookAt( sceneNode.threeScene.position );
@@ -186,6 +186,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				}
 			
 			}
+			if(node && node.threeObject)
+				node.threeObject.vwfID = childID;
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -264,7 +266,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 													  propertyValue[1],propertyValue[5],propertyValue[9],propertyValue[13],
 													  propertyValue[2],propertyValue[6],propertyValue[10],propertyValue[14],
 													  propertyValue[3],propertyValue[7],propertyValue[11],propertyValue[15]);
-						if(threeObject instanceof THREE.Camera)
+						if(threeObject instanceof THREE.Camera || threeObject instanceof THREE.Light )
 						{
 							threeObject.matrixAutoUpdate = false;
 							threeObject.up = new THREE.Vector3(0,0,1);
@@ -380,8 +382,109 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					
 					}
 				}	
-			  }
- 
+				if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight)
+				{
+					if(propertyName == 'lightType')
+					{
+						if(propertyValue == 'point' && !(threeObject instanceof THREE.PointLight))
+						{
+
+							var newlight = new THREE.PointLight('FFFFFF',1,0);
+							newlight.color.setRGB(1,1,1);
+							newlight.matrixAutoUpdate = false;
+							CopyProperties(threeObject,newlight);
+							var parent = threeObject.parent;
+							parent.remove(threeObject);
+							parent.add(newlight);
+							node.threeObject = newlight;
+							rebuildAllMaterials.call(this);
+						}
+						if(propertyValue == 'directional' && !(threeObject instanceof THREE.DirectionalLight))
+						{
+							
+							var newlight = new THREE.DirectionalLight('FFFFFF',1,0);
+							newlight.color.setRGB(1,1,1);
+							newlight.matrixAutoUpdate = false;
+							CopyProperties(threeObject,newlight);
+							var parent = threeObject.parent;
+							parent.remove(threeObject);
+							parent.add(newlight);
+							node.threeObject = newlight;
+							rebuildAllMaterials.call(this);
+						}
+						if(propertyValue == 'spot' && !(threeObject instanceof THREE.SpotLight))
+						{
+							
+							var newlight = new THREE.SpotLight('FFFFFF',1,0);
+							CopyProperties(threeObject,newlight);
+							newlight.color.setRGB(1,1,1);
+							newlight.matrixAutoUpdate = false;
+							var parent = threeObject.parent;
+							parent.remove(threeObject);
+							parent.add(newlight);
+							node.threeObject = newlight;
+							rebuildAllMaterials.call(this);
+						}
+						
+					}
+					if(propertyName == 'constantAttenuation')
+					{
+					
+					}
+					if(propertyName == 'linearAttenuation')
+					{
+					
+					}
+					if(propertyName == 'quadraticAttenuation')
+					{
+					
+					}
+					if(propertyName == 'spotCosCutOff')
+					{
+					
+					}
+					if(propertyName == 'spotExponent')
+					{
+					
+					}
+					if(propertyName == 'diffuse')
+					{
+					
+					}
+					if(propertyName == 'specular')
+					{
+					
+					}
+					if(propertyName == 'samples')
+					{
+					
+					}
+					if(propertyName == 'softness')
+					{
+					
+					}
+					if(propertyName == 'bufferHeight')
+					{
+					
+					}
+					if(propertyName == 'bufferWidth')
+					{
+					
+					}
+					if(propertyName == 'shadowBias')
+					{
+					
+					}
+					if(propertyName == 'distance')
+					{
+					
+					}
+					if(propertyName == 'castShadows')
+					{
+					
+					}
+				}
+			}
         },
 
         // -- gettingProperty ----------------------------------------------------------------------
@@ -551,12 +654,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         function colladaLoaded( collada ) { 
             sceneNode.pendingLoads--;
-            
+            debugger;
 			//possibly deal with setting intial scale and rotation here, if threejs does something strange by default
 			//collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
 			
             var removed = false;
-			
+			nodeCopy.threeObject.add(collada.scene);
 			//no idea what this is doing here
             if ( nodeCopy && nodeCopy.colladaLoaded ) {
                 nodeCopy.colladaLoaded( true );
@@ -587,17 +690,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
             }
         }
-
         node.name = childName;
 		
 		///////////////////////////////////////////////
 		//temp mesh for all geometry to test
-		var cubeX = new THREE.Mesh(
-			new THREE.CubeGeometry( .3, .30, .30 ),
-			new THREE.MeshLambertMaterial( { color: 0xFFFFFF, emissive:0xFFFFFF } )
-		);
+		//var cubeX = new THREE.Mesh(
+		//	new THREE.CubeGeometry( .3, .30, .30 ),
+		//	new THREE.MeshLambertMaterial( { color: 0xFFFFFF, emissive:0xFFFFFF } )
+		//);
 		
-        node.threeObject = cubeX;
+		
+        node.threeObject = new THREE.Object3D();
         sceneNode.srcColladaObjects.push( node.threeObject );
         node.threeObject.vwfID = nodeID;
 
@@ -618,7 +721,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 		////////////////////////////////////
 		//manually call callback, since there is no async load currently
-		colladaLoaded(node.threeObject);
+		//colladaLoaded(node.threeObject);
+		
+		node.loader = new THREE.ColladaLoader();
+		node.loader.load(node.source,colladaLoaded.bind(this));
     }
 	function loadComplete() {
         var itemsToDelete = [];
@@ -676,8 +782,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var child = this.state.nodes[childID];
         if ( child ) {
-            child.threeObject = new THREE.PointLight('FFFFFF',1,0);
+            child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
 			child.threeObject.color.setRGB(1,1,1);
+			child.threeObject.matrixAutoUpdate = false;
+		
             child.threeObject.name = childName;
             child.name = childName;
             addThreeChild.call( this, nodeID, childID );
@@ -703,4 +811,36 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
         }
     }
+	function rebuildAllMaterials(start)
+	{
+		
+		if(!start)
+		{
+			for(var i in this.state.scenes)
+			{
+				rebuildAllMaterials(this.state.scenes[i].threeScene);
+			}
+		}else
+		{
+			if(start && start.material)
+			{
+				start.material.needsUpdate = true;
+			}
+			if(start && start.children)
+			{
+			   for(var i in start.children)
+				rebuildAllMaterials(start.children[i]);
+			}
+		}
+	}
+	function CopyProperties(from,to)
+	{
+		for(var i in from)
+		{
+			if(i != 'parent' && typeof from[i] != 'function')
+			{
+				to[i] = from[i];
+			}
+		}
+	}
 });

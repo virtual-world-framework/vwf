@@ -12,7 +12,7 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
 children:
@@ -20,3 +20,21 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: duck.dae
     type: model/vnd.collada+xml
+  camera:
+    extends: http://vwf.example.com/camera.vwf
+    properties:
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 1, 0, 0, -45 ]
+      translation: [0,1000,0]
+scripts:
+- | 
+    this.initialize = function()
+    {
+       
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,600,50];
+    }
