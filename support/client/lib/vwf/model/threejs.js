@@ -42,8 +42,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
 			
-			console.log([nodeID,childID,childExtendsID,childType]);
-			
+			//console.log([nodeID,childID,childExtendsID,childType]);
+			//console.log("Create " + childID);
 			var parentNode;
 			var threeChild;
 			
@@ -240,7 +240,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 		
-		  console.log([nodeID,propertyName,propertyValue]);
+		  //console.log([nodeID,propertyName,propertyValue]);
 		  var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
 		  var value = undefined;
 		  
@@ -263,13 +263,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						
 						//set is columns, not rows
 						var matrix = new THREE.Matrix4(propertyValue[0],propertyValue[4],propertyValue[8],propertyValue[12],
-													  propertyValue[1],propertyValue[5],propertyValue[9],propertyValue[13],
+													  propertyValue[1],propertyValue[5],propertyValue[9],-propertyValue[13],
 													  propertyValue[2],propertyValue[6],propertyValue[10],propertyValue[14],
 													  propertyValue[3],propertyValue[7],propertyValue[11],propertyValue[15]);
-						if(threeObject instanceof THREE.Camera || threeObject instanceof THREE.Light )
-						{
+					
 							threeObject.matrixAutoUpdate = false;
 							threeObject.up = new THREE.Vector3(0,0,1);
+							
 							var flipmat = new THREE.Matrix4(1, 0,0,0,
 															0, 0,1,0,
 															0,1,0,0,
@@ -277,24 +277,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							
 											
 							matrix = matrix.multiply(flipmat,matrix);
-
+							
+							
 							var elements = matrix.elements;
 							
 							threeObject.matrix.set(elements[0],elements[8],elements[4],elements[12],
 													elements[2],elements[10],elements[6],elements[14],
 													elements[1],elements[9],elements[5],elements[13],
-													elements[3],elements[11],elements[7],elements[15]);						
+													elements[3],elements[11],elements[7],elements[15]);
+																			
 							threeObject.updateMatrixWorld(true);						
 													
-						}else{
-							
-							var i = threeObject.matrix.clone();
-							i = i.getInverse(i);
-							threeObject.applyMatrix(i);
-							threeObject.applyMatrix(matrix);					  
-							threeObject.updateMatrixWorld(true);	
-						
-						}
+					
 					}
 					if(propertyName == 'material')
 					{
@@ -601,10 +595,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }	
 	function CreateThreeCamera()
 	{
-		var cam = new THREE.PerspectiveCamera(35,800/600,.01,10000);
+		
+		var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
 		cam.matrixAutoUpdate = false;
 		cam.up = new THREE.Vector3(0,0,1);
-		cam.matrix.elements = [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1];
+		cam.matrix.elements = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 		cam.updateMatrixWorld(true);	
 		return cam;
 	}
@@ -654,12 +649,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         function colladaLoaded( collada ) { 
             sceneNode.pendingLoads--;
-            debugger;
+            
 			//possibly deal with setting intial scale and rotation here, if threejs does something strange by default
 			//collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
 			
             var removed = false;
 			nodeCopy.threeObject.add(collada.scene);
+			nodeCopy.matrixAutoUpdate = false;
+			nodeCopy.matrix.elements = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 			//no idea what this is doing here
             if ( nodeCopy && nodeCopy.colladaLoaded ) {
                 nodeCopy.colladaLoaded( true );

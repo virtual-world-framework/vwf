@@ -15,10 +15,11 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
+  counter:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
-    source: duck.dae
+    source: sphere.dae
     type: model/vnd.collada+xml
   camera:
     extends: http://vwf.example.com/camera.vwf
@@ -30,13 +31,21 @@ children:
       constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
+methods:
+  tick:      
 scripts:
 - | 
     this.initialize = function()
     {
        
         this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
+        this.camera.translation = [0,0,0];
         vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,-100,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[0,0,0]);
+        this.counter = 0;
+    }
+    this.tick = function()
+    {
+       
+        this.counter++;
+        vwf.setProperty('http-vwf-example-com-camera-vwf-camera','rotation',[0,1,0,this.counter]);
     }

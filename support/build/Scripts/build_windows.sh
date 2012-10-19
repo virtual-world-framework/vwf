@@ -27,7 +27,7 @@ set -e
 curl -s http://production.cf.rubygems.org/rubygems/rubygems-1.8.24.tgz --proxy $1 | tar xz
 cd rubygems-1.8.24
 ruby setup.rb install 
-gem install bundler --no-ri --no-rdoc
+gem install bundler 
 
 # Download the latest VWF Master Branch Baseline to the local system
 if [ -d "vwf" ];then

@@ -97,7 +97,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     modelInited: false,
                     pendingLoads: 0,
                 };
-
+				debugger;
+				sceneNode.glgeScene.addChild(BuildAxis());
+				
                 if ( sceneNode.glgeScene.camera ) {
                         sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = sceneNode.glgeScene.camera;
                 } else {
@@ -2357,7 +2359,70 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             node.glgeObject.addObject( obj );
         }        
     }
-
+			
+	function BuildBox(size,offset,color)
+	{
+		
+		var hx = size[0]/2;
+		var hy = size[1]/2;
+		var hz = size[2]/2;
+		
+		var ox = offset[0];
+		var oy = offset[1];
+		var oz = offset[2];
+		
+		var planemesh = new GLGE.Mesh();
+		var planeobj = new GLGE.Object();
+		planeobj.setMesh(planemesh);
+		
+		var positions = [
+		hx + ox,hy + oy,hz + oz, 
+		hx + ox,hy + oy,-hz + oz, 
+		hx + ox,-hy + oy,hz + oz, 
+		hx + ox,-hy + oy,-hz + oz,
+		-hx + ox,hy + oy,hz + oz,
+		-hx + ox,hy + oy,-hz + oz, 
+		-hx + ox,-hy + oy,hz + oz, 
+		-hx + ox,-hy + oy,-hz + oz
+		];
+		
+		var colors = [];
+		for(var i = 0; i < (positions.length/3); i++)
+		{	colors.push(color[0]);
+			colors.push(color[1]);
+			colors.push(color[2]);
+			colors.push(color[3]);
+		}
+		
+		var indexes = [0,2,6,6,4,0,1,3,7,7,5,1,0,1,3,3,2,0,4,5,7,7,6,4,0,1,5,5,4,0,2,3,7,7,6,2];
+		
+		planemesh.setPositions(positions);
+		planemesh.setVertexColors(colors);
+		planemesh.setFaces(indexes);
+		
+		var mat = new GLGE.Material();
+		
+		planeobj.setPickable(true);
+		planeobj.setMaterial(mat);
+		mat.setVertexColorMode(GLGE.VC_MUL);
+		//mat.setColor(color);
+		//mat.setEmit(color);
+		//mat.setShadeless(true);
+		//mat.setAmbient([.5,.5,.5,1]);
+		return planeobj;
+	}
+	function BuildAxis()
+	{	
+		var red = [1,.55,.55,1];
+		var green = [.55,1,.55,1];
+		var blue = [.55,.55,1,1];
+		
+		var MoveGizmo = new GLGE.Group();
+		MoveGizmo.addChild(BuildBox([1,.030,.030],[.5,0,0],red));               //move x
+		MoveGizmo.addChild(BuildBox([.030,1,.030],[0,.5,0],green));//move y
+		MoveGizmo.addChild(BuildBox([.030,.030,1],[0,0,.5],blue));//move z
+		return MoveGizmo;
+	}
     function addGlgeChild( parentID, childID ) {
         
         var glgeParent;

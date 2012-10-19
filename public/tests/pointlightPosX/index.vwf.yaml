@@ -15,6 +15,7 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
+  counter:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -27,9 +28,11 @@ children:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 1
+      constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
+methods:
+  tick:      
 scripts:
 - | 
     this.initialize = function()
@@ -39,4 +42,11 @@ scripts:
         this.camera.translation = [0,-600,50];
         vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,-100,0]);
         vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[0,0,0]);
+        this.counter = 0;
+    }
+    this.tick = function()
+    {
+       
+        this.counter++;
+        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[Math.sin(this.counter/10)*200,-70,50]);
     }
