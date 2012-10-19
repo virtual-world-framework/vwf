@@ -30,7 +30,7 @@ if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
 		export http_proxy=http://proxy-server.mycorp.com:3128/
 		
 		"
-	sh "bash support/build/Scripts/update_ruby.sh"
+	# sh "bash support/build/Scripts/update_ruby.sh"
 end
 	
 FileList[ "*/Rakefile", "*/*/Rakefile" ].map do |rakefile| # could use "*/**/Rakefile" to reach an arbitrary depth
@@ -96,10 +96,10 @@ task :windows => :common do
         RUBY = "../cache/ruby-1.8.7-p357-i386-mingw32"
 		CURPATH = `cygpath -w -p $PWD`
 
-        File.open( "#{DEVKIT}/config.yml", "w" ) do |io|
-            io.puts "---"
-            io.puts "- ../#{RUBY}"
-        end
+       # File.open( "#{DEVKIT}/config.yml", "w" ) do |io|
+       #     io.puts "---"
+       #     io.puts "- ../#{RUBY}"
+       # end
 
         sh "echo '" + <<-BAT.strip.gsub( %r{^ *}, "" ) + "' | CMD.EXE"
             @ECHO OFF
