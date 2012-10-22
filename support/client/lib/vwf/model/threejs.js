@@ -73,6 +73,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				var cam = CreateThreeCamera();
 				sceneNode.camera.threeJScameras[sceneNode.camera.defaultCamID] = cam;
 				sceneNode.camera.ID= sceneNode.camera.defaultCamID;
+				
 				sceneNode.threeScene.add(cam);
 				
 				///////////////////////////////////////////////
@@ -134,7 +135,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         if ( !sceneNode.camera.threeJScameras[ childID ] ) {
                             var cam = CreateThreeCamera();
                             sceneNode.camera.threeJScameras[ childID ] = cam;
-							 
+							
 							 //cam.position.set(0, 0, 0);
 							 //cam.lookAt( sceneNode.threeScene.position );
                             
@@ -144,33 +145,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                   
                     } else if ( node.threeObject ) {
                         sceneNode.camera.threeJScameras[ childID ] = node.threeObject;
+						sceneNode.threeScene.add(cam); 
                     }
                 }               
             }
-			
-			if ( protos && isNodeDefinition.call( this, protos ) ) {
-				
-                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                if ( childType == "model/vnd.collada+xml") {
-                        
-						//Do we need this when we have an async load? currently seems to break things
-						//callback( false );
-                        node = this.state.nodes[childID] = {
-                            name: childName,  
-                            threeObject: undefined,
-                            source: utility.resolveURI( childSource, childURI ),
-                            ID: childID,
-                            parentID: nodeID,
-                            sourceType: childType,
-                            type: childExtendsID,
-                            //no load callback, maybe don't need this?
-							//loadingCollada: callback,
-                            sceneID: this.state.sceneRootID
-                        };
-                        loadCollada.call( this, parentNode, node );     
-				}
-			}
-			if(protos && isLightDefinition.call(this,protos))
+			else if(protos && isLightDefinition.call(this,protos))
 			{
 				node = this.state.nodes[childID] = {
                     name: childName,
@@ -185,6 +164,47 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					createLight.call(this,nodeID,childID,childName);
 				}
 			
+			}else if ( protos && isNodeDefinition.call( this, protos ) ) {
+				
+                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                if ( childType == "model/vnd.collada+xml") {
+                        
+						
+						//Do we need this when we have an async load? currently seems to break things
+						callback( false );
+                        node = this.state.nodes[childID] = {
+                            name: childName,  
+                            threeObject: undefined,
+                            source: utility.resolveURI( childSource, childURI ),
+                            ID: childID,
+                            parentID: nodeID,
+                            sourceType: childType,
+                            type: childExtendsID,
+                            //no load callback, maybe don't need this?
+							loadingCollada: callback,
+                            sceneID: this.state.sceneRootID
+                        };
+                        loadCollada.call( this, parentNode, node );     
+				}else
+				{	
+						
+						node = this.state.nodes[childID] = {
+                            name: childName,  
+                            threeObject: undefined,
+                            source: utility.resolveURI( childSource, childURI ),
+                            ID: childID,
+                            parentID: nodeID,
+                            sourceType: childType,
+                            type: childExtendsID,
+                            //no load callback, maybe don't need this?
+							//loadingCollada: callback,
+                            sceneID: this.state.sceneRootID
+                        };
+						node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
+						//The parent three object did not have any childrent with the name matching the nodeID, so make a new group
+						if(!node.threeObject)
+							node.threeObject = new THREE.Object3D(); 
+				}
 			}
 			if(node && node.threeObject)
 				node.threeObject.vwfID = childID;
@@ -199,6 +219,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- addingChild ------------------------------------------------------------------------
         
         addingChild: function( nodeID, childID, childName ) {
+			
         },
 
         // -- movingChild ------------------------------------------------------------------------
@@ -242,6 +263,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 		
 		  //console.log([nodeID,propertyName,propertyValue]);
 		  var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+		  if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
 		  var value = undefined;
 		  
 		  //this driver has no representation of this node, so there is nothing to do.
@@ -263,13 +285,39 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						
 						//set is columns, not rows
 						var matrix = new THREE.Matrix4(propertyValue[0],propertyValue[4],propertyValue[8],propertyValue[12],
-													  propertyValue[1],propertyValue[5],propertyValue[9],-propertyValue[13],
+													  propertyValue[1],propertyValue[5],propertyValue[9],propertyValue[13],
 													  propertyValue[2],propertyValue[6],propertyValue[10],propertyValue[14],
 													  propertyValue[3],propertyValue[7],propertyValue[11],propertyValue[15]);
-					
+						
+						
+							matrix.elements[13] *= -1;
+							var translation = new THREE.Vector3();
+							var quat = new THREE.Quaternion();
+							var scale = new THREE.Vector3();
+							
+							
+						
+							matrix.decompose(translation,quat,scale);
+							var googquat = goog.vec.Quaternion.createFromValues(quat.x,quat.y,quat.z,quat.w);
+							var angle = 0;
+							var axis = [0,0,0];
+							angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
+							if(isNaN(angle))
+								angle = 0;
+							axis[0] *= -1;
+							axis[2] *= -1;
+							
+							var vx = new THREE.Vector3();
+							vx.set(axis[0],axis[1],axis[2]);
+							quat.setFromAxisAngle(vx,angle);
+							if(!isNaN(quat.w))
+							matrix.setRotationFromQuaternion(quat);
+							
 							threeObject.matrixAutoUpdate = false;
 							threeObject.up = new THREE.Vector3(0,0,1);
-							
+							matrix = matrix.scale(scale);
+							if(threeObject.parent instanceof THREE.Scene)
+							{							
 							var flipmat = new THREE.Matrix4(1, 0,0,0,
 															0, 0,1,0,
 															0,1,0,0,
@@ -277,7 +325,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							
 											
 							matrix = matrix.multiply(flipmat,matrix);
-							
+							}
 							
 							var elements = matrix.elements;
 							
@@ -285,7 +333,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 													elements[2],elements[10],elements[6],elements[14],
 													elements[1],elements[9],elements[5],elements[13],
 													elements[3],elements[11],elements[7],elements[15]);
-																			
+																
+						
 							threeObject.updateMatrixWorld(true);						
 													
 					
@@ -300,6 +349,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						//instead, we'll take the position of the node and look at that.
 						if(typeof propertyValue == 'string')
 						{
+							
 							var lookatNode = this.state.nodes[propertyValue];
 							
 							var lookatObject = null;
@@ -308,19 +358,49 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							
 							if(lookatObject)
 							{
-								var lookatPosition = lookatObject.position;
-								threeObject.lookAt(lookatPosition);
+								var lookatPosition = new THREE.Vector3();
+								var thisPosition = new THREE.Vector3();
+								var up = new THREE.Vector3();
+								up.set(0,0,1);
+								lookatPosition.copy(lookatObject.matrix.getPosition());
+								thisPosition.copy(threeObject.matrix.getPosition());
+								threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
+								
+								var flipmat = new THREE.Matrix4(-1, 0,0,0,
+															0, 1,0,0,
+															0,0,1,0,
+															0, 0,0,1);
+								var matrix = new THREE.Matrix4();
+								matrix.copy(threeObject.matrix);						
+								matrix = matrix.multiply(flipmat,matrix);
+								threeObject.matrix.copy(matrix);
+								threeObject.updateMatrixWorld(true);	
 							}
 						
 						}else if (propertyValue instanceof Array)
 						{
-							threeObject.lookAt(propertyValue);
+							    var lookatPosition = new THREE.Vector3();
+								var thisPosition = new THREE.Vector3();
+								var up = new THREE.Vector();
+								up.set(0,0,1);
+								lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
+								thisPosition.copy(threeObject.matrix.getPosition());
+								threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
+								var flipmat = new THREE.Matrix4(-1, 0,0,0,
+															0, 1,0,0,
+															0,0,1,0,
+															0, 0,0,1);
+								var matrix = new THREE.Matrix4();
+								matrix.copy(threeObject.matrix);						
+								matrix = matrix.multiply(flipmat,matrix);
+								threeObject.matrix.copy(matrix);
+								threeObject.updateMatrixWorld(true);	
 						}
 					
 					}
 					if(propertyName == 'visible')
 					{
-						threeObject.visible = propertyValue;
+						SetVisible(threeObject,propertyValue);
 					}
 				}
 				if(threeObject instanceof THREE.Camera)
@@ -361,15 +441,19 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				{
 					if(propertyName == 'activeCamera')
 					{
-					
+						if(this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue])
+						{
+							this.state.cameraInUse = this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue];
+							this.state.scenes[this.state.sceneRootID].camera.ID = propertyValue;
+						}
 					}
 					if(propertyName == 'ambientColor')
 					{
-					
+					          //handled in view
 					}
 					if(propertyName == 'backgroundColor')
 					{
-					
+							  //handled in view	
 					}
 					if(propertyName == 'aspect')
 					{
@@ -384,6 +468,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						{
 
 							var newlight = new THREE.PointLight('FFFFFF',1,0);
+							newlight.distance = 100;
 							newlight.color.setRGB(1,1,1);
 							newlight.matrixAutoUpdate = false;
 							CopyProperties(threeObject,newlight);
@@ -397,6 +482,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						{
 							
 							var newlight = new THREE.DirectionalLight('FFFFFF',1,0);
+							newlight.distance = 100;
 							newlight.color.setRGB(1,1,1);
 							newlight.matrixAutoUpdate = false;
 							CopyProperties(threeObject,newlight);
@@ -443,7 +529,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					}
 					if(propertyName == 'diffuse')
 					{
-					
+						
+						threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
 					}
 					if(propertyName == 'specular')
 					{
@@ -466,10 +553,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					
 					}
 					if(propertyName == 'shadowBias')
-					{
-					
-					}
-					if(propertyName == 'distance')
 					{
 					
 					}
@@ -624,14 +707,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         cam = sceneNode.camera.threeJScameras[childID];
                     }
 
-                    var threeParent = parent.threeParent;
+                    var threeParent = parent.threeObject;
+					if(!threeParent) threeParent = parent.threeScene;
                     if ( threeParent && ( threeParent instanceof THREE.Scene || threeParent instanceof THREE.Object3D )) {
                         threeParent.add( cam );
                     }
 
                     child.name = childName;
-                    child.threeParent = cam;
-                    child.uid = child.threeParent.uid;
+                    child.threeObject = cam;
+                    child.uid = child.threeObject.uid;
                     cam.name = childName;
                 }
             }
@@ -654,15 +738,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 			//collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
 			
             var removed = false;
+		   
+			SetMaterialAmbients.call(threeModel,collada.scene);
 			nodeCopy.threeObject.add(collada.scene);
-			nodeCopy.matrixAutoUpdate = false;
-			nodeCopy.matrix.elements = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+			nodeCopy.threeObject.matrixAutoUpdate = false;
+			nodeCopy.threeObject.matrix.elements = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 			//no idea what this is doing here
             if ( nodeCopy && nodeCopy.colladaLoaded ) {
                 nodeCopy.colladaLoaded( true );
             }
             for ( var j = 0; j < sceneNode.srcColladaObjects.length; j++ ) {
-                if ( sceneNode.srcColladaObjects[j] == collada ){
+                if ( sceneNode.srcColladaObjects[j] == nodeCopy.threeObject ){
                     sceneNode.srcColladaObjects.splice( j, 1 );
                     removed = true;
                 }
@@ -674,13 +760,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
 
                 var id = collada.vwfID;
-                if ( !id ) id = getObjectID.call( threeModel, collada, true, false );
+                if ( !id ) id = getObjectID.call( threeModel, collada.scene, true, false );
                 if ( id && id != "" ){
                     //glgeModel.kernel.callMethod( id, "loadComplete" );
                     if ( threeModel.state.nodes[id] ) {
                         var colladaNode = threeModel.state.nodes[id];
                         //finally, here is the async callback
 						if ( colladaNode.loadingCollada ) {
+							
                             colladaNode.loadingCollada( true );                    
                         }
                     }
@@ -688,15 +775,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
         }
         node.name = childName;
-		
-		///////////////////////////////////////////////
-		//temp mesh for all geometry to test
-		//var cubeX = new THREE.Mesh(
-		//	new THREE.CubeGeometry( .3, .30, .30 ),
-		//	new THREE.MeshLambertMaterial( { color: 0xFFFFFF, emissive:0xFFFFFF } )
-		//);
-		
-		
         node.threeObject = new THREE.Object3D();
         sceneNode.srcColladaObjects.push( node.threeObject );
         node.threeObject.vwfID = nodeID;
@@ -780,6 +858,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var child = this.state.nodes[childID];
         if ( child ) {
             child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
+			child.threeObject.distance = 100;
 			child.threeObject.color.setRGB(1,1,1);
 			child.threeObject.matrixAutoUpdate = false;
 		
@@ -839,5 +918,70 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				to[i] = from[i];
 			}
 		}
+	}
+	//search the threeObject of the parent sim node for the threeChild with the name of the sim child node
+	function findThreeObjectInParent(childID,parentID)
+	{
+		var parentThreeObject;
+		if(this.state.nodes[parentID])
+			parentThreeObject = this.state.nodes[parentID].threeObject;
+		if(!parentThreeObject && this.state.scenes[parentID])
+			parentThreeObject = this.state.scenes[parentID].threeScene;
+		
+		//If there is no parent object render node, then there does not need to be a child node
+		if(!parentThreeObject) return null;	
+		
+		var threeChild = findChildThreeObject(parentThreeObject,childID);
+		return threeChild;
+	}
+	function findChildThreeObject(threeParent,childID)
+	{
+		var ret = null;
+		if(threeParent.name == childID)
+			ret = threeParent;
+		else if(threeParent.children)
+		{
+			for(var i = 0; i< threeParent.children.length; i++)
+				var child = findChildThreeObject(threeParent.children[i],childID);
+			if(child)
+				ret = child;
+		}		
+		return ret;
+	}
+	//necessary when settign the amibent color to match GLGE behavior
+	//Three js mults scene ambient by material ambient
+	function SetMaterialAmbients(start)
+	{
+		
+		if(!start)
+		{
+			for(var i in this.state.scenes)
+			{
+				SetMaterialAmbients(this.state.scenes[i].threeScene);
+			}
+		}else
+		{
+			if(start && start.material)
+			{
+				
+				//this will override any ambient colors set in materials.
+				start.material.ambient.setRGB(1,1,1);
+			}
+			if(start && start.children)
+			{
+			   for(var i in start.children)
+				SetMaterialAmbients(start.children[i]);
+			}
+		}
+	}
+	function SetVisible(node,state)	
+	{
+			if(node)
+				node.visible = state;
+			if(node && node.children)
+			{
+			   for(var i in node.children)
+				SetVisible(node.children[i],state);
+			}
 	}
 });
