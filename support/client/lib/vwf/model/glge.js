@@ -1295,7 +1295,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 break;
 
             case "diffuse":
-                node.glgeObject.diffuse = propertyValue; // no setDiffuse() in GLGE 0.7
+                node.glgeObject.setColor(propertyValue); // no setDiffuse() in GLGE 0.7
                 break;
 
             case "specular":

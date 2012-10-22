@@ -85,7 +85,7 @@ properties:
       this.quaternion =
         goog.vec.Quaternion.fromAngleAxis(
           rotation[3] * Math.PI / 180,
-          goog.vec.Vec3.createFromValues( -rotation[0], rotation[1], -rotation[2] ),
+          goog.vec.Vec3.createFromValues( rotation[0], rotation[1], rotation[2] ),
           goog.vec.Quaternion.create()
         );
     # node.rotation => [ x, y, z, angle ]
@@ -123,11 +123,6 @@ properties:
       var translation = goog.vec.Vec4.create(); goog.vec.Mat4.getColumn( transform, 3, translation );
       var scale = this.transformScale( transform, goog.vec.Vec3.create() );
       var quaternion = this.quaternionFromValue( value ); // parse incoming value
-      var axis = [0,0,0];
-      var angle = goog.vec.Quaternion.toAngleAxis(quaternion,axis);
-      axis[0] *=-1;
-      axis[2] *=-1;
-      quaternion = goog.vec.Quaternion.fromAngleAxis(angle,axis,goog.vec.Quaternion.create());
       goog.vec.Quaternion.toRotationMatrix4(
         quaternion,
         transform
