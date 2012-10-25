@@ -965,7 +965,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 			{
 				
 				//this will override any ambient colors set in materials.
-				start.material.ambient.setRGB(1,1,1);
+				if(start.material.ambient)
+					start.material.ambient.setRGB(1,1,1);
 			}
 			if(start && start.children)
 			{

@@ -270,8 +270,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			{
 				//.005 chosen to make the 255 range for the ambient light mult to values that look like GLGE values.
 				//this will override any ambient colors set in materials.
-				
-				start.material.ambient.setRGB(1,1,1);
+				if(start.material.ambient)
+					start.material.ambient.setRGB(1,1,1);
 			}
 			if(start && start.children)
 			{

@@ -54,6 +54,7 @@ scripts:
     this.camera.far = 500000;
     this.camera.near = 2;
     this.camera.lookAt = this.sceneCenter.id;
+    vwf.setProperty('http-vwf-example-com-node3-vwf-flat_terrain','rotation',[1,0,0,-90]);
   }
   var pushpinIndex = 1;
   var pushpin = {
