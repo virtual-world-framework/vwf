@@ -18,40 +18,30 @@ properties:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
-    source: duck.dae
-    type: model/vnd.collada+xml
+#   oddly, adding this fixes the issue as well.
+#   source: duck.dae
+#   type: model/vnd.collada+xml    
     properties:
-      translation: [ 100, 0, 0]
-      scale: [ .5, .5, .5]
-  duck2:
-    extends: http://vwf.example.com/node3.vwf
-    source: duck.dae
-    type: model/vnd.collada+xml
-    properties:
-      translation:      
-        - -200
-        - 0
-        - 0
-      scale:
-        - .5
-        - .5
-        - .5        
-  camera:
-    extends: http://vwf.example.com/camera.vwf
-    properties:
-  dir1:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "point"
-      constantAttenuation: 1
-      rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [100,0,0]
+      scale: [.5,.5,.5]   
+#  uncomment the below object to fix the camera issue
+#  my hypothesis is that adding any other http request fixes this
+#  must change the order that something is run in parallel perhaps?
+#  dir1:
+#    extends: http://vwf.example.com/light.vwf
+#    properties:
+#      lightType: "point"
+#      constantAttenuation: 1
+#      rotation: [ 1, 0, 0, -45 ]
+#      translation: [0,-100,0]
 scripts:
 - | 
     this.initialize = function()
     {
        
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
+        if(!this.camera)
+            alert('this.camera is null! (or maybe undefined)');
+        else
+            alert('This is the correct behavior');
        
     }

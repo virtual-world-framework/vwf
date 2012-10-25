@@ -512,6 +512,7 @@ scripts:
     }
 
     this.moveTile = function(obj) {
+      alert('here');
       var dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
       var dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
       
