@@ -36269,7 +36269,7 @@ THREE.ColladaLoader = function () {
 		// Axis conversion is done for geometries, animations, and controllers.
 		// If we ever pull cameras or lights out of the COLLADA file, they'll
 		// need extra work.
-		convertUpAxis: false,
+		convertUpAxis: true,
 
 		subdivideFaces: true,
 
