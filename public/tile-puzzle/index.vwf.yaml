@@ -42,6 +42,8 @@ children:
     extends: http://vwf.example.com/node3.vwf
     source: shuffleBtn.dae
     type: model/vnd.collada+xml
+    events:
+      pointerClick:
     properties: 
       translation: [ 7.2, 10, 0 ]
       rotation: [ 1, 0, 0, -90 ]
@@ -512,7 +514,7 @@ scripts:
     }
 
     this.moveTile = function(obj) {
-      alert('here');
+
       var dx = Math.abs(obj.translation[0] - this.openTilePosition[0]);
       var dy = Math.abs(obj.translation[1] - this.openTilePosition[1]);
       

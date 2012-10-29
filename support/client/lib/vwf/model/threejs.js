@@ -174,7 +174,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						callback( false );
                         node = this.state.nodes[childID] = {
                             name: childName,  
-                            threeObject: undefined,
+                            threeObject: threeChild,
                             source: utility.resolveURI( childSource, childURI ),
                             ID: childID,
                             parentID: nodeID,
@@ -190,7 +190,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						
 						node = this.state.nodes[childID] = {
                             name: childName,  
-                            threeObject: undefined,
+                            threeObject: threeChild,
                             source: utility.resolveURI( childSource, childURI ),
                             ID: childID,
                             parentID: nodeID,
@@ -200,14 +200,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							//loadingCollada: callback,
                             sceneID: this.state.sceneRootID
                         };
-						node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
+						if(!node.threeObject)
+							node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
 						//The parent three object did not have any childrent with the name matching the nodeID, so make a new group
 						if(!node.threeObject)
 							node.threeObject = new THREE.Object3D(); 
 				}
 			}
 			if(node && node.threeObject)
+			{
 				node.threeObject.vwfID = childID;
+				node.threeObject.name = childName;
+			}
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -656,17 +660,26 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 		
 		return node;
 	}
+	//changing this function significantly from the GLGE code. Will search heirarchy down until encountering a matching chile
+	//will look into nodes that don't match.... this might not be desirable
 	 function FindChildByName( obj, childName, childType ) {
         
-        var childToReturn = jQuery.grep( obj.children || [], function ( child ) {
-            return (child.colladaName || child.colladaId || child.name || child.id || "") == childName;
-        }).shift();
-
-        if ( !childToReturn ) {
-            childToReturn = findObject.call( this, childName, childType );
-        }
-        //this.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
-        return childToReturn;
+		
+        if(obj.name == childName || obj.id == childName || obj.vwfID == childName || obj.name == 'node-'+childName)
+		{
+			return obj;
+		}
+		else if(obj.children && obj.children.length > 0)
+		{
+			var ret = null;
+			for(var i =0; i < obj.children.length;i++)
+			{
+				ret = FindChildByName(obj.children[i],childName,childType);
+				if(ret)
+					return ret;
+			}
+		}
+		return null;
 
     }
 	function findObject( objName, type ) {
@@ -775,7 +788,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
         }
         node.name = childName;
-        node.threeObject = new THREE.Object3D();
+        if(!node.threeObject)
+			node.threeObject = new THREE.Object3D();
         sceneNode.srcColladaObjects.push( node.threeObject );
         node.threeObject.vwfID = nodeID;
 
