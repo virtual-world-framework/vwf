@@ -735,7 +735,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         // -- callingMethod --------------------------------------------------------------------------
 
-//        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+//        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ], methodValue */ ) { // TODO: parameters
 //            return undefined;
 //        },
 

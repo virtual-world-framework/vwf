@@ -2305,14 +2305,14 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             var methodValue = undefined;
 
             this.models.forEach( function( model ) {
-                var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
+                var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters, methodValue );
                 methodValue = value !== undefined ? value : methodValue;
             } );
 
             // Call calledMethod() on each view.
 
             this.views.forEach( function( view ) {
-                view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters );  // TODO: should also have result
+                view.calledMethod && view.calledMethod( nodeID, methodName, methodParameters, methodValue );
             } );
 
             this.logger.debugu();

@@ -163,10 +163,11 @@ define( {
     /// @param {ID} nodeID
     /// @param {String} methodName
     /// @param {String[]} methodParameters
+    /// @param {Value} methodValue
     /// 
     /// @returns {}
 
-    calledMethod: [ /* nodeID, methodName, methodParameters */ ],
+    calledMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
 
     /// Description.
     /// 

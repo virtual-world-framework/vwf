@@ -347,9 +347,9 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName, methodParameters ) {
+        callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             return this.model.callingMethod && this.model.callingMethod( this.kernel_to_model[nodeID] || nodeID,
-                methodName, methodParameters );
+                methodName, methodParameters, methodValue );
         },
 
         // -- creatingEvent ------------------------------------------------------------------------
