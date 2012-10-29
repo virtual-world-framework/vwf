@@ -417,12 +417,6 @@ children:
           if ( radio.keysLocked ) return;
         }
     children:
-      bone1:
-        extends: http://vwf.example.com/node3.vwf
-        children:
-          MaxScene:
-            extends: http://vwf.example.com/node3.vwf
-            children:
               EnvironmentAmbientLight:
                 extends: http://vwf.example.com/node3.vwf
               Radio:

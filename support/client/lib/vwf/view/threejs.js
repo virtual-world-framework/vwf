@@ -311,7 +311,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             pointerPickID = undefined;
 
             threeActualObj = pickInfo ? pickInfo.object : undefined;
-            pointerPickID = pickInfo ? getPickObjectID.call( sceneView, pickInfo, debug ) : undefined;
+            pointerPickID = pickInfo ? getPickObjectID.call( sceneView, pickInfo.object, debug ) : undefined;
             var mouseButton = "left";
             switch( e.button ) {
                 case 2: 
@@ -360,9 +360,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             returnData.eventNodeData = { "": [ {
                 distance: pickInfo ? pickInfo.distance : undefined,
-                origin: pickInfo ? pickInfo.pickOrigin : undefined,
-                globalPosition: pickInfo ? pickInfo.coord : undefined,
-                globalNormal: pickInfo ? pickInfo.normal : undefined,
+                origin: pickInfo ? pickInfo.worldCamPos : undefined,
+                globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
+                globalNormal: pickInfo ? [0,0,1] : undefined,    //** not implemented by threejs
                 globalSource: worldCamPos,            
             } ] };
 
@@ -382,11 +382,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 var trans, parentTrans, localTrans, localNormal, parentInverse, relativeCamPos;
                 while ( child ) {
 
-                    trans = goog.vec.Mat4.createFromArray( child.threeObject.getLocalMatrix() );
+                    trans = goog.vec.Mat4.createFromArray( child.threeObject.matrix.elements );
                     goog.vec.Mat4.transpose( trans, trans );                   
                     
                     if ( parent ) {                   
-                        parentTrans = goog.vec.Mat4.createFromArray( parent.threeObject.getLocalMatrix() );
+                        parentTrans = goog.vec.Mat4.createFromArray( parent.threeObject.matrix.elements );
                         goog.vec.Mat4.transpose( parentTrans, parentTrans ); 
                     } else {
                         parentTrans = undefined;
@@ -474,7 +474,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     mouseLeftDown = false;
                     break;
             };
-
+           
             var eData = getEventData( e, ctrlAndAltDown );
             if ( eData ) {
                 var mouseUpObjectID = pointerPickID;

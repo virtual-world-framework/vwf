@@ -21,7 +21,7 @@ scripts:
 - |
     this.initialize = function() {
       this.camera.translation = [ 0, 20000, 10000 ];
-      this.camera.far = 500000;
+      this.camera.far = 5000000;
       this.camera.near = 2;
       this.camera.lookAt = this.children.sceneCenter.id;
     }
@@ -59,7 +59,7 @@ children:
     source: models/vwf_terrain.dae
     type: model/vnd.collada+xml
     properties:
-      translation: [ 0, 0, -150 ]
+      translation: [ 0, 0, 1000 ]
       scale: [ 0.008, 0.008, 0.020 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
