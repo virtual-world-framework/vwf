@@ -231,11 +231,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             sceneNode.frameCount++;
 			if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY) && ((time - lastPickTime) > 100)) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
-                if(newPick) {
-    				self.lastPick = newPick;
+				
+				var newPickId = newPick ? getPickObjectID.call( view, newPick, false ) : view.state.sceneRootID;
+                if(self.lastPickId != newPickId)
+				{
+                    
+					if(self.lastPickId)
+                        view.kernel.dispatchEvent( self.lastPickId, "pointerOut",null, null );
+                    if(newPickId)
+                        view.kernel.dispatchEvent( newPickId, "pointerOver", null, null );
                 }
-				oldMouseX = mouse.getMousePosition().x;
-				oldMouseY = mouse.getMousePosition().y;
+				
+				self.lastPickId = newPickId
+				self.lastPick = newPick;
+                
 				lastPickTime = time;
 			}
             renderer.render();
@@ -770,7 +779,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
                 mousepos.y = mousepos.y + window.scrollY;
 
-                return sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
+                var returnValue = sceneNode.glgeScene.pick(mousepos.x - $('#index-vwf').offset().left, mousepos.y - $('#index-vwf').offset().top);
+                if (!returnValue) {
+                    returnValue = { };
+                }
+
+                var originRay = sceneNode.glgeScene.makeRay(mousepos.x, mousepos.y)
+                returnValue.pickOrigin = originRay ? originRay.origin : undefined;
+
+                return returnValue;
             }
         }
         return undefined;

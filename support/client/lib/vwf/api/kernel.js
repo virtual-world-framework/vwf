@@ -285,7 +285,19 @@ define( {
 
     createMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
-    /* TODO: deleteMethod, */
+	/// It will call deletingMethod() on each model. The method is considered deleted after each
+    /// model has run.  It will also call deletedMethod() on each view. The view is being 
+    /// notified that a method has been deleted.
+    /// 
+    /// @name vwf.api.kernel#deleteMethod
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} methodName
+    /// 
+    /// @returns {}
+
+    deleteMethod: [ /* nodeID, methodName */ ],
 
     /// It will call callingMethod() on each model. The first model to return a non-undefined value
     /// dictates the return value.  It will also call calledMethod() on each view.
@@ -311,12 +323,25 @@ define( {
     /// @param {ID} nodeID
     /// @param {String} eventName
     /// @param {String[]} eventParameters
+	/// @param {String} eventBody
     /// 
     /// @returns {}
 
-    createEvent: [ /* nodeID, eventName, eventParameters */ ],
+    createEvent: [ /* nodeID, eventName, eventParameters, eventBody */ ],
 
-    /* TODO: deleteEvent, */
+    /// It will call deletingEvent() on each model. The event is considered deleted after each model
+    /// has run.  It will also call deleteEvent() on each view. The view is being notified that a
+    /// event has been deleted.
+    /// 
+    /// @name vwf.api.kernel#createEvent
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} eventName
+    /// 
+    /// @returns {}
+
+    deleteEvent: [ /* nodeID, eventName, eventParameters */ ],
 
     /// It will call firingEvent() on each model and firedEvent() on each view.
     /// 

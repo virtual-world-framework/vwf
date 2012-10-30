@@ -464,6 +464,68 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             return undefined;
         },
+		gettingMethod: function( nodeID, methodName ) {
+
+			
+			var node = this.nodes[nodeID];
+			var method;
+			
+			var func = node.private.bodies && node.private.bodies[methodName];
+			if(func)
+			{
+				var str = func.toString();
+				str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}')-1);
+				method = str;
+			}
+            return method;
+        },
+		gettingMethods: function( nodeID ) {
+
+			
+			var node = this.nodes[nodeID];
+			var methods = {};
+			for(var i in node.methods)
+			{
+				if(node.methods.hasOwnProperty(i))
+				{
+					var methodName = i;
+					var func = node.private.bodies && node.private.bodies[methodName];
+					if(func)
+					{
+						var str = func.toString();
+						str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}')-1);
+						methods[methodName] = str;
+					}
+				}	
+			}
+            return methods;
+        },
+		gettingEvents: function( nodeID ) {
+			
+			var node = this.nodes[nodeID];
+			var events = {};
+			for(var i in node.events)
+			{
+				var eventName = i;
+				if(node.events.hasOwnProperty(i))
+				{	
+					//TODO: deal with multiple handlers. Requires refactor of childcomponent create code.
+					for(var j=0; j<node.private.listeners[eventName].length; j++)
+					{
+						var func = node.private.listeners && node.private.listeners[eventName] && node.private.listeners[eventName][j].handler;
+						if(func)
+						{
+							var str = func.toString();
+							var params = str.substring(str.indexOf('(')+1,str.indexOf(')'));
+							params = params.split(',');
+							str = str.substring(str.indexOf('{')+1,str.lastIndexOf('}')-1);
+							events[eventName] = {parameters:params,body:str};
+						}
+					}
+				}	
+			}
+            return events;
+        },
 
         // -- creatingMethod -----------------------------------------------------------------------
 
@@ -484,6 +546,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     this.node.private.bodies[methodName] = value;
                 },
                 enumerable: true,
+				configurable: true
             } );
 
 node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
@@ -499,6 +562,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     this.private.bodies[methodName] = value;
                 },
                 enumerable: true,
+				configurable: true
             } );
 
             try {
@@ -512,13 +576,37 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
         },
 
-        // TODO: deletingMethod
+		deletingMethod: function( nodeID, methodName ) {
 
+			
+            var node = this.nodes[nodeID];
+			if(!node) return undefined;
+            var body = node.private.bodies && node.private.bodies[methodName];
+
+            if ( body ) {
+                try {
+						
+						delete node.private.bodies[methodName];
+						if(node.hasOwnProperty( methodName ))
+							delete node[methodName];
+						delete node.methods[methodName];
+						
+
+						
+					} catch ( e ) {
+                    this.logger.warnx( "deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                        "exception:", utility.exceptionMessage( e ) );
+                }
+            }
+
+            return undefined;
+        },
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters ) {
 
             var node = this.nodes[nodeID];
+			if(!node) return undefined;
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if ( body ) {
@@ -535,8 +623,9 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
         // -- creatingEvent ------------------------------------------------------------------------
 
-        creatingEvent: function( nodeID, eventName, eventParameters ) {
+        creatingEvent: function( nodeID, eventName, eventParameters,eventBody ) {
 
+           
             var node = this.nodes[nodeID];
             var self = this;
 
@@ -568,6 +657,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     }
                 },
                 enumerable: true,
+				configurable: true
             } );
 
 node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
@@ -599,16 +689,52 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     }
                 },
                 enumerable: true,
+				configurable: true
             } );
 
             node.private.listeners[eventName] = [];
+			if(eventBody)
+			{
+				
+				try{
+					var handler = { handler: null, context: node }
+					handler.handler = eval( bodyScript( eventParameters || [], eventBody || "" ) );
+					node.private.listeners[eventName].push(handler);
+				} catch ( e ) {
+                    this.logger.warnx( "creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+                        "exception:", utility.exceptionMessage( e ) );
+                }
+			}
 
             node.private.change++; // invalidate the "future" cache
 
         },
 
-        // -- firingEvent --------------------------------------------------------------------------
+		deletingEvent: function( nodeID, eventName)
+		{
 
+			var node = this.nodes[nodeID];
+			if(!node) return undefined;
+			if(node)
+			{
+				try{
+					if(node.private.listeners && node.private.listeners[eventName])
+						delete node.private.listeners[eventName];
+					if(node.hasOwnProperty( eventName ))
+						delete node[eventName];
+					if(node.events.hasOwnProperty( eventName ))
+						delete node.events[eventName];
+				}
+				catch ( e ) {
+						this.logger.warnx( "deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+							"exception:", utility.exceptionMessage( e ) );
+				}
+			}	
+		
+		},
+
+		
+        // -- firingEvent --------------------------------------------------------------------------
         firingEvent: function( nodeID, eventName, eventParameters ) {
 
             var phase = eventParameters && eventParameters.phase; // the phase is smuggled across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible

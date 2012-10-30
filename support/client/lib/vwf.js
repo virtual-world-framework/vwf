@@ -1286,6 +1286,29 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             }
 
             // Methods.
+			nodeComponent.methods = this.getMethods( nodeID );
+
+                for ( var methodName in nodeComponent.methods ) {  // TODO: distinguish add, change, remove
+                    if ( nodeComponent.methods[methodName] === undefined ) {
+                        delete nodeComponent.methods[methodName];
+                    }
+                }
+
+                if ( Object.keys( nodeComponent.methods ).length == 0 ) { 
+                    delete nodeComponent.methods;
+                } 
+			//events
+				nodeComponent.events = this.getEvents( nodeID );
+
+                for ( var eventName in nodeComponent.events ) {  // TODO: distinguish add, change, remove
+                    if ( nodeComponent.events[eventName] === undefined ) {
+                        delete nodeComponent.events[eventName];
+                    }
+                }
+
+                if ( Object.keys( nodeComponent.events ).length == 0 ) { 
+                    delete nodeComponent.events;
+                }
 
             // nodeComponent.methods = {};  // TODO
 
@@ -1654,7 +1677,7 @@ if ( ! childComponent.source ) {
                     childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
 
                         if ( valueHasBody( eventValue ) ) {
-                            vwf.createEvent( childID, eventName, eventValue.parameters );
+                            vwf.createEvent( childID, eventName, eventValue.parameters ,eventValue.body );
                         } else {
                             vwf.createEvent( childID, eventName, undefined );
                         }
@@ -1972,7 +1995,112 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             return properties;
         };
+		
+		this.getMethods = function( nodeID ) {  // TODO: rework as a cover for getProperty(), or remove; passing all properties to each driver is impractical since reentry can't be controlled when multiple gets are in progress.
 
+            this.logger.group( "getMethods", nodeID );
+
+            // Call gettingProperties() on each model.
+
+            var methods = this.models.reduceRight( function( intermediate_methods, model ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+
+                var model_methods = {};
+				
+                if ( model.gettingMethods ) {
+                    model_methods = model.gettingMethods( nodeID, methods );
+                } else if ( model.gettingMethod ) {
+                    for ( var methodName in intermediate_methods ) {
+                        model_methods[methodName] =
+                            model.gettingMethod( nodeID, methodName, intermediate_methods[methodName] );
+                        if ( vwf.models.kernel.blocked() ) {
+                            model_methods[methodName] = undefined; // ignore result from a blocked getter
+                        }
+                    }
+                }
+
+                for ( var methodName in model_methods ) {
+                    if ( model_methods[methodName] !== undefined ) { // copy values from this model
+                        intermediate_methods[methodName] = model_methods[methodName];
+                    } else if ( intermediate_methods[methodName] === undefined ) { // as well as recording any new keys
+                        intermediate_methods[methodName] = undefined;
+                    }
+                }
+
+                return intermediate_methods;
+
+            }, {} );
+
+            // Call gotProperties() on each view.
+
+            this.views.forEach( function( view ) {
+
+                if ( view.gotMethods ) {
+                    view.gotMethods( nodeID, methods );
+                } else if ( view.gotMethod ) {
+                    for ( var methodName in methods ) {
+                        view.gotMethod( nodeID, methodName, methods[methodName] );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
+                    }
+                }
+
+            } );
+
+            this.logger.groupEnd();
+
+            return methods;
+        };
+
+		this.getEvents = function( nodeID ) {  // TODO: rework as a cover for getProperty(), or remove; passing all properties to each driver is impractical since reentry can't be controlled when multiple gets are in progress.
+
+            this.logger.group( "getevents", nodeID );
+
+            // Call gettingProperties() on each model.
+
+            var events = this.models.reduceRight( function( intermediate_events, model ) {  // TODO: note that we can't go left to right and take the first result since we are getting all of the properties as a batch; verify that this creates the same result as calling getProperty individually on each property and that there are no side effects from getting through a driver after the one that handles the get.
+
+                var model_events = {};
+				
+                if ( model.gettingEvents ) {
+                    model_events = model.gettingEvents( nodeID, events );
+                } else if ( model.gettingEvent ) {
+                    for ( var eventName in intermediate_events ) {
+                        model_events[eventName] =
+                            model.gettingEvent( nodeID, eventName, intermediate_events[eventName] );
+                        if ( vwf.models.kernel.blocked() ) {
+                            model_events[eventName] = undefined; // ignore result from a blocked getter
+                        }
+                    }
+                }
+
+                for ( var eventName in model_events ) {
+                    if ( model_events[eventName] !== undefined ) { // copy values from this model
+                        intermediate_events[eventName] = model_events[eventName];
+                    } else if ( intermediate_events[eventName] === undefined ) { // as well as recording any new keys
+                        intermediate_events[eventName] = undefined;
+                    }
+                }
+
+                return intermediate_events;
+
+            }, {} );
+
+            // Call gotProperties() on each view.
+
+            this.views.forEach( function( view ) {
+
+                if ( view.gotEvents ) {
+                    view.gotEvents( nodeID, events );
+                } else if ( view.gotEvent ) {
+                    for ( var eventName in events ) {
+                        view.gotEvent( nodeID, eventName, events[eventName] );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
+                    }
+                }
+
+            } );
+
+            this.logger.groupEnd();
+
+            return events;
+        };
         // -- createProperty -----------------------------------------------------------------------
 
         // Create a property on a node and assign an initial value.
@@ -2224,8 +2352,35 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
 
             this.logger.groupEnd();
+		
+			if(methodName == 'tick')
+				vwf.tickable.nodeIDs.push(nodeID)
         };
+		
+		this.deleteMethod = function( nodeID, methodName) {
 
+			
+            this.logger.group( "deleteMethod", nodeID, methodName );
+
+            // Call creatingMethod() on each model. The method is considered created after each
+            // model has run.
+
+            this.models.forEach( function( model ) {
+                model.deletingMethod && model.deletingMethod( nodeID, methodName);
+            } );
+
+            // Call createdMethod() on each view. The view is being notified that a method has been
+            // created.
+
+            this.views.forEach( function( view ) {
+                view.deletedMethod && view.deletedMethod( nodeID, methodName );
+            } );
+		
+			//remove from the tickable queue.
+			if(methodName == 'tick' && vwf.tickable.nodeIDs.indexOf(nodeID) != -1)
+				vwf.tickable.nodeIDs.splice(vwf.tickable.nodeIDs.indexOf(nodeID),1);
+            this.logger.groupEnd();
+        };
         // -- callMethod ---------------------------------------------------------------------------
 
         this.callMethod = function( nodeID, methodName, methodParameters ) {
@@ -2255,7 +2410,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         // -- createEvent --------------------------------------------------------------------------
 
-        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
+        this.createEvent = function( nodeID, eventName, eventParameters,eventBody ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
 
             this.logger.group( "vwf.createEvent " + nodeID + " " + eventName + " " + eventParameters );
 
@@ -2263,19 +2418,39 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // has run.
 
             this.models.forEach( function( model ) {
-                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
+                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters,eventBody );
             } );
 
             // Call createdEvent() on each view. The view is being notified that a event has been
             // created.
 
             this.views.forEach( function( view ) {
-                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters,eventBody );
             } );
 
             this.logger.groupEnd();
         };
+		this.deleteEvent = function( nodeID, eventName) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
 
+			
+            this.logger.group( "deleteEvent", nodeID,eventName);
+
+            // Call creatingEvent() on each model. The event is considered created after each model
+            // has run.
+
+            this.models.forEach( function( model ) {
+                model.deletingEvent && model.deletingEvent( nodeID, eventName );
+            } );
+
+            // Call createdEvent() on each view. The view is being notified that a event has been
+            // created.
+
+            this.views.forEach( function( view ) {
+                view.deletedEvent && view.deletedEvent( nodeID, eventName );
+            } );
+
+            this.logger.groupEnd();
+        };
         // -- fireEvent ----------------------------------------------------------------------------
 
         this.fireEvent = function( nodeID, eventName, eventParameters ) {

@@ -1,0 +1,193 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: prim.vwf
+properties:
+  _initialized: false
+  _width:
+    set: |
+            
+            this._width = value;
+            this._width = Math.max(this._width,.001);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _length:
+    set: |
+            this._length = value;
+            this._length = Math.max(this._length,.001);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _lengthSegs:
+    set: |
+            this._lengthSegs = value;
+            this._lengthSegs = Math.max(this._lengthSegs,1);
+            this._lengthSegs = Math.min(this._lengthSegs,50);
+            this._lengthSegs = Math.floor(this._lengthSegs);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _widthSegs:
+    set: |
+            this._widthSegs = value;
+            this._widthSegs = Math.max(this._widthSegs,1);
+            this._widthSegs = Math.min(this._widthSegs,50);
+            this._widthSegs = Math.floor(this._widthSegs);
+            if(this._initialized == true)
+            this.dirtyStack();             
+  EditorData:
+    _length:
+      displayname: length
+      property: _length
+      type: slider
+      min: 0
+      max: 20
+      step: .01
+    _lengthsegs:
+      displayname: length segments
+      property: _lengthSegs
+      type: slider
+      min: 1
+      max: 50
+      step: 1
+    _widthsegs:
+      displayname: width segments
+      property: _widthSegs
+      type: slider
+      min: 1
+      max: 50
+      step: 1      
+    _width:
+      displayname: width
+      property: _width
+      type: slider
+      min: 0
+      max: 20
+      step: .01      
+
+events:
+  pointerOver:
+  pointerOut:
+  pointerUp:
+  pointerDown:
+  pointerMove:
+  pointerClick:
+scripts:
+- |
+    this.initialize = function(){
+        
+        
+        if(this.uri == "plane.vwf" )
+            return;
+
+       var primobj = new GLGE.Object();
+       primobj.testname = "TEST PLANE1";
+       this.mesh = primobj;
+       if(vwf.getProperty(this.id,'_length') == undefined) vwf.setProperty(this.id,'_length',1);
+       if(vwf.getProperty(this.id,'_width') == undefined) vwf.setProperty(this.id,'_width',1);
+       if(vwf.getProperty(this.id,'_widthSegs') == undefined) vwf.setProperty(this.id,'_widthSegs',1);
+       if(vwf.getProperty(this.id,'_lengthSegs') == undefined) vwf.setProperty(this.id,'_lengthSegs',1);
+      
+       
+       vwf.views[0].state.nodes[this.id].glgeObject.addChild(this.mesh);
+       
+       
+       this._initialized = true;
+       window.setTimeout(this.dirtyStack.bind(this),500);  
+        window.setTimeout(this.setupMaterial.bind(this),500);        
+    }
+    this.Build = function()
+    {
+        var length = vwf.getProperty(this.id,'_length');
+        var width = vwf.getProperty(this.id,'_width');
+        var _lengthSegs = vwf.getProperty(this.id,'_lengthSegs');
+        var _widthSegs = vwf.getProperty(this.id,'_widthSegs');
+        return this.BuildPlane(length,width,_widthSegs+1,_lengthSegs+1);
+    }
+
+    this.BuildPlane = function(width,height,widthsegs,heightsegs)
+    {
+    
+        var positions = [];
+        var faces = [];
+        var uvs = []
+        var normals = [];
+        for(var i = 0; i < widthsegs; i++)
+        {
+            for(var j = 0; j<heightsegs;j++)
+            {
+                positions.push(((i/(widthsegs-1)) * width)-width/2);
+                positions.push(((j/(heightsegs-1)) * height)-height/2);
+                positions.push(0);
+                uvs.push(i/(widthsegs-1));
+                uvs.push(j/(heightsegs-1));
+                normals.push(0);
+                normals.push(0);
+                normals.push(1);
+            }
+        }
+      
+        var faces = [];
+        for(var i = 0; i < widthsegs-1; i++)
+        {
+            for(var j = 0; j<heightsegs-1;j++)
+            {
+                var thisi = heightsegs * i + j;
+                var thisj = heightsegs * i + (j+1);
+                var thisi1 = heightsegs * (i+1) + j;
+                var thisi1j1 = heightsegs * (i+1) + (j+1);
+                faces.push(thisi);
+                faces.push(thisj);
+                faces.push(thisi1);
+
+                faces.push(thisi1j1);
+                faces.push(thisi1);
+                faces.push(thisj);
+                
+                
+            }
+        }
+       
+        var planemesh = new GLGE.Mesh();
+          
+        planemesh.setPositions(positions);
+        planemesh.setFaces(faces);
+        planemesh.setNormals(normals);
+        planemesh.setUV(uvs);
+        
+        return planemesh;
+    }
+    
+    function findChildViewNode(node, name)
+    {
+        if(node.vwfID == name)
+            return node;
+        else if(node.children){
+            for(var i = 0; i < node.children.length; i++) {
+                var child = findChildViewNode(node.children[i],name);
+                if(child) return child;
+            }
+        }
+        return null;
+    }
+    function findVWFscene()
+    {
+         return  vwf.models[0].model.nodes["index-vwf"];
+    }
+    function findscene()
+    {
+         for(var i =0; i<vwf.views.length;i++)
+         {
+             if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].glgeScene;
+         }
+         return null;
+    }

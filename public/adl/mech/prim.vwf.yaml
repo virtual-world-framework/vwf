@@ -1,0 +1,181 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+extends: http://vwf.example.com/node3.vwf
+methods:
+  GetMesh:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetBounds:
+  initTexture:
+  getTexture:
+  setupMaterial:
+properties:
+  materialDef:
+    get: |
+            return this.getTexture();
+    set: |
+             
+             this.materialDef = value;
+             this.initTexture(value);
+scripts:
+- |  
+    this.getTexture = function()
+    {
+            if(this.materialDef) return this.materialDef;    
+            if(!this.mesh)
+                return null;
+            var newMaterial = {};
+            var currentMaterial = this.mesh.material;
+            newMaterial.shininess = currentMaterial.getShininess();
+            newMaterial.alpha = currentMaterial.getAlpha();
+            newMaterial.ambient = currentMaterial.getAmbient();
+            newMaterial.color = currentMaterial.getColor();
+            newMaterial.emit = currentMaterial.getEmit();
+            newMaterial.reflect = currentMaterial.getReflectivity();
+            newMaterial.shadeless = currentMaterial.getShadeless();
+            newMaterial.shadow = currentMaterial.getShadow();
+            
+            newMaterial.specularColor = currentMaterial.getSpecularColor();
+            newMaterial.specularLevel = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
+            newMaterial.specularColor.r = newMaterial.specularColor.r/newMaterial.specularLevel || 0;
+            newMaterial.specularColor.g = newMaterial.specularColor.g/newMaterial.specularLevel || 0;
+            newMaterial.specularColor.b = newMaterial.specularColor.b/newMaterial.specularLevel || 0;
+            newMaterial.layers = [];
+            for(var i = 0; i<currentMaterial.layers.length;i++)
+            {
+                var newLayer = {};
+                newMaterial.layers.push(newLayer);
+                newLayer.src = currentMaterial.layers[i].getTexture().getSrc();
+                newLayer.mapTo = currentMaterial.layers[i].getMapto();
+                newLayer.blendMode = currentMaterial.layers[i].getBlendMode();
+                newLayer.alpha = currentMaterial.layers[i].getAlpha();
+                
+                newLayer.scalex = currentMaterial.layers[i].getScaleX();
+                newLayer.scaley = currentMaterial.layers[i].getScaleY();
+                newLayer.offsetx = currentMaterial.layers[i].getOffsetX();
+                newLayer.offsety = currentMaterial.layers[i].getOffsetY();
+                newLayer.rot = currentMaterial.layers[i].getRotZ();
+                newLayer.mapInput = currentMaterial.layers[i].getMapinput();
+            }            
+            return newMaterial;
+    
+    }
+    this.setupMaterial = function()
+    {
+        
+        this.mesh.setMaterial(new GLGE.Material());
+        this.initTexture();
+    }
+    this.initTexture = function(value)
+    {
+             
+             var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
+             if(!newMaterial) return;
+             var currentMaterial = this.mesh.getMaterial();
+             if(!currentMaterial) return;
+             currentMaterial.setShininess(newMaterial.shininess);
+             currentMaterial.setAlpha(newMaterial.alpha);
+             currentMaterial.setAmbient(newMaterial.ambient);
+             currentMaterial.setColor(newMaterial.color);
+             currentMaterial.setEmit(newMaterial.emit);
+             currentMaterial.setReflectivity(newMaterial.reflect);
+             currentMaterial.setShadeless(newMaterial.shadeless);
+             currentMaterial.setShadow(newMaterial.shadow);
+            
+             
+             
+             
+             newMaterial.specularColor.r = newMaterial.specularColor.r || 0;
+             newMaterial.specularColor.g = newMaterial.specularColor.g || 0;
+             newMaterial.specularColor.b = newMaterial.specularColor.b || 0;
+             
+             var norm = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
+             newMaterial.specularColor.r /= norm;
+             newMaterial.specularColor.g /= norm;
+             newMaterial.specularColor.b /= norm;
+             
+             newMaterial.specularColor.r *= newMaterial.specularLevel;
+             newMaterial.specularColor.g *= newMaterial.specularLevel;
+             newMaterial.specularColor.b *= newMaterial.specularLevel;
+             currentMaterial.setSpecularColor(newMaterial.specularColor);
+             for(var i=0 ; i < newMaterial.layers.length; i++)
+             {
+                var layer = currentMaterial.layers[i];
+                var newLayer = newMaterial.layers[i];
+                if(!layer)
+                {
+                    layer = new GLGE.MaterialLayer();
+                    layer.setMapinput(GLGE.UV1);
+                    currentMaterial.addMaterialLayer(layer);
+                }
+                
+                layer.setMapto(newLayer.mapTo);
+                layer.setBlendMode(newLayer.blendMode);
+                layer.setAlpha(newLayer.alpha);
+                
+                layer.setScaleX(newLayer.scalex);
+                layer.setScaleY(newLayer.scaley);
+                layer.setOffsetX(newLayer.offsetx);
+                layer.setOffsetY(newLayer.offsety);
+                layer.setRotZ(newLayer.rot);
+                layer.setMapinput(newLayer.mapInput );
+                
+                var texture = layer.getTexture();
+                if(texture && texture.getSrc() != newMaterial.layers[i].src)
+                {
+                    //currentMaterial.removeTexture(texture);
+                    layer.setTexture(null);
+                    texture = null;
+                }
+                if(!texture)
+                {
+                    texture = new GLGE.Texture();
+                    layer.setTexture(texture);
+                    currentMaterial.addTexture(texture);
+                    texture.setSrc(newMaterial.layers[i].src);
+                }
+                
+             }
+             while(currentMaterial.layers.length > newMaterial.layers.length)
+                currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
+    
+    }
+    this.GetMesh = function()
+    {
+        return this.mesh;
+    }
+    this.updateSelf = function()
+    {
+        
+        this.mesh.setMesh(this.Build()); 
+    }
+    this.dirtyStack = function()
+    {
+        
+        this.updateStack();
+    }
+    this.updateStack = function()
+    {
+        
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.GetBounds = function()
+    {
+        return this.boundingbox;
+    }                

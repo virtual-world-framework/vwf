@@ -104,7 +104,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         [ methodParameters, methodBody ], when || 0, callback /* ( result ) */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- vwf.receive() needs to parse
                 };
 
-            // TODO: deleteMethod
+            case "deleteMethod":
+
+                return function( nodeID, methodName, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, methodName,
+                        undefined, when || 0, callback /* ( result ) */ );
+                };
 
             case "callMethod":
 
@@ -115,12 +120,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     
             case "createEvent":
 
-                return function( nodeID, eventName, eventParameters, when, callback ) {
+                return function( nodeID, eventName, eventParameters,eventBody, when, callback ) {
                     this.kernel.send( nodeID, kernelFunctionName, eventName,
-                        [ eventParameters ], when || 0, callback /* ( result ) */ );
+                        [ eventParameters ,eventBody], when || 0, callback /* ( result ) */ );
                 };
 
-            // TODO: deleteEvent
+            case "deleteEvent":
+
+                return function( nodeID, eventName, eventParameters,eventBody, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                        undefined, when || 0, callback /* ( result ) */ );
+                };
 
             case "fireEvent":
 

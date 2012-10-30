@@ -218,7 +218,28 @@ define( {
 
     creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
-    /* TODO: deletingMethod, */
+    deletingMethod: [ /* nodeID, methodName */ ],
+
+	/// Description.
+    /// 
+    /// @name vwf.api.model#gettingMethods
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {}
+	gettingMethods: [/* nodeID*/],
+
+	/// Description.
+    /// 
+    /// @name vwf.api.model#gettingMethods
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// 
+    /// @returns {}
+	gettingEvents: [/* nodeID*/],
+	
 
     /// Description.
     /// 
@@ -246,7 +267,17 @@ define( {
 
     creatingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-    /* TODO: deletingEvent, */
+    /// Description.
+    /// 
+    /// @name vwf.api.model#deletingEvent
+    /// @function
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} eventName
+    /// 
+    /// @returns {}
+
+    deletingEvent: [ /* nodeID, eventName */ ],
 
     /// Description.
     /// 

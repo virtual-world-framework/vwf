@@ -5471,49 +5471,58 @@ GLGE.Mesh.prototype.calcTangents=function(){
 			tangentArray[i]=0;
 		}
 		for(var i=0;i<this.faces.data.length;i=i+3){
-			var p1=[position[(parseInt(this.faces.data[i]))*3],position[(parseInt(this.faces.data[i]))*3+1],position[(parseInt(this.faces.data[i]))*3+2]];
-			var p2=[position[(parseInt(this.faces.data[i+1]))*3],position[(parseInt(this.faces.data[i+1]))*3+1],position[(parseInt(this.faces.data[i+1]))*3+2]];
-			var p3=[position[(parseInt(this.faces.data[i+2]))*3],position[(parseInt(this.faces.data[i+2]))*3+1],position[(parseInt(this.faces.data[i+2]))*3+2]];
-			
-			var n1=[normal[(parseInt(this.faces.data[i]))*3],normal[(parseInt(this.faces.data[i]))*3+1],normal[(parseInt(this.faces.data[i]))*3+2]];
-			var n2=[normal[(parseInt(this.faces.data[i+1]))*3],normal[(parseInt(this.faces.data[i+1]))*3+1],normal[(parseInt(this.faces.data[i+1]))*3+2]];
-			var n3=[normal[(parseInt(this.faces.data[i+2]))*3],normal[(parseInt(this.faces.data[i+2]))*3+1],normal[(parseInt(this.faces.data[i+2]))*3+2]];
-			
-			var uv1=[uv[(parseInt(this.faces.data[i]))*4],uv[(parseInt(this.faces.data[i]))*4+1]];
-			var uv2=[uv[(parseInt(this.faces.data[i+1]))*4],uv[(parseInt(this.faces.data[i+1]))*4+1]];
-			var uv3=[uv[(parseInt(this.faces.data[i+2]))*4],uv[(parseInt(this.faces.data[i+2]))*4+1]];
+			var f1=parseInt(this.faces.data[i]);
+			var f2=parseInt(this.faces.data[i+1]);
+			var f3=parseInt(this.faces.data[i+2]);
+
+			var p1=[position[f1*3],position[f1*3+1],position[f1*3+2]];
+			var p2=[position[f2*3],position[f2*3+1],position[f2*3+2]];
+			var p3=[position[f3*3],position[f3*3+1],position[f3*3+2]];
+
+			var n1=[normal[f1*3],normal[f1*3+1],normal[f1*3+2]];
+			var n2=[normal[f2*3],normal[f2*3+1],normal[f2*3+2]];
+			var n3=[normal[f3*3],normal[f3*3+1],normal[f3*3+2]];
+
+			var uv1=[uv[f1*4],uv[f1*4+1]];
+			var uv2=[uv[f2*4],uv[f2*4+1]];
+			var uv3=[uv[f3*4],uv[f3*4+1]];
 			
 			var tb=this.tangentFromUV(p2,p1,p3,uv2,uv1,uv3,n2);
 			
-			if(!data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")]){
-				data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")]=tb;
+			var d=[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",");
+			if(!data[d]){
+				data[d]=tb;
 			}else{
-				data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")][0][0]+=tb[0][0];
-				data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")][0][1]+=tb[0][1];
-				data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")][0][2]+=tb[0][2];
-				data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")][1][0]+=tb[1][0];
-				data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")][1][1]+=tb[1][1];
-				data[[p1[0],p1[1],p1[2],uv1[0],uv1[1],n1[0],n1[1],n1[2]].join(",")][1][2]+=tb[1][2];
+				data[d][0][0]+=tb[0][0];
+				data[d][0][1]+=tb[0][1];
+				data[d][0][2]+=tb[0][2];
+				data[d][1][0]+=tb[1][0];
+				data[d][1][1]+=tb[1][1];
+				data[d][1][2]+=tb[1][2];
 			}
-			if(!data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")]){
-				data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")]=tb;
+
+			d=[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",");
+			if(!data[d]){
+				data[d]=tb;
 			}else{
-				data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")][0][0]+=tb[0][0];
-				data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")][0][1]+=tb[0][1];
-				data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")][0][2]+=tb[0][2];
-				data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")][1][0]+=tb[1][0];
-				data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")][1][1]+=tb[1][1];
-				data[[p2[0],p2[1],p2[2],uv2[0],uv2[1],n2[0],n2[1],n2[2]].join(",")][1][2]+=tb[1][2];
+				data[d][0][0]+=tb[0][0];
+				data[d][0][1]+=tb[0][1];
+				data[d][0][2]+=tb[0][2];
+				data[d][1][0]+=tb[1][0];
+				data[d][1][1]+=tb[1][1];
+				data[d][1][2]+=tb[1][2];
 			}
-			if(!data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")]){
-				data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")]=tb;
+
+			d=[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",");
+			if(!data[d]){
+				data[d]=tb;
 			}else{
-				data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")][0][0]+=tb[0][0];
-				data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")][0][1]+=tb[0][1];
-				data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")][0][2]+=tb[0][2];
-				data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")][1][0]+=tb[1][0];
-				data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")][1][1]+=tb[1][1];
-				data[[p3[0],p3[1],p3[2],uv3[0],uv3[1],n3[0],n3[1],n3[2]].join(",")][1][2]+=tb[1][2];
+				data[d][0][0]+=tb[0][0];
+				data[d][0][1]+=tb[0][1];
+				data[d][0][2]+=tb[0][2];
+				data[d][1][0]+=tb[1][0];
+				data[d][1][1]+=tb[1][1];
+				data[d][1][2]+=tb[1][2];
 			}
 
 		}		
@@ -8053,6 +8062,10 @@ GLGE.Texture.prototype.setSrc=function(url){
 	this.url=url;
 	this.state=0;
 	this.image=new Image();
+	if(url.indexOf('@')!=-1)
+		this.image.crossOrigin = "use-credentials";
+	else
+		this.image.crossOrigin = 'anonymous';
 	var texture=this;
 	this.image.onload = function(){
 		texture.state=1;
@@ -9206,7 +9219,7 @@ pkfragStr.push("void main(void)\n");
 pkfragStr.push("{\n");
 pkfragStr.push("float Xcoord = gl_FragCoord.x+0.5;\n");
 pkfragStr.push("if(Xcoord>0.0) gl_FragColor = vec4(pickcolor,1.0);\n");
-pkfragStr.push("if(Xcoord>1.0) gl_FragColor = vec4(n,1.0);\n");
+pkfragStr.push("if(Xcoord>1.0) gl_FragColor = vec4(((normalize(n)+1.0)/2.0),1.0);\n");
 pkfragStr.push("if(Xcoord>2.0){");	
 pkfragStr.push("vec3 rgb=fract((gl_FragCoord.z/gl_FragCoord.w) * vec3(65536.0, 256.0, 1.0));\n");
 pkfragStr.push("gl_FragColor=vec4(rgb-rgb.rrg*vec3(0.0,0.00390625,0.00390625),1.0);\n");
@@ -9787,7 +9800,7 @@ GLGE.Object.prototype.GLGenerateShader=function(gl){
 			vertexStr.push("norm = worldInverseTranspose * vec4(mix(normal,normal2,framesBlend), 1.0);\n");  
 			if(tangent) vertexStr.push("tang = (worldInverseTranspose*vec4(mix(tangent,tangent2,framesBlend),1.0)).xyz;\n");
 		}else{
-			vertexStr.push("norm = worldInverseTranspose * vec4(normal, 1.0);\n");  
+			vertexStr.push("norm = %GLGEPICKSHADERWORLDNORMAL *% vec4(normal, 1.0);\n");  
 			if(tangent) vertexStr.push("tang = (worldInverseTranspose*vec4(tangent,1.0)).xyz;\n");
 		}
 	}
@@ -9818,7 +9831,10 @@ GLGE.Object.prototype.GLGenerateShader=function(gl){
 	vertexStr.push("}\n");
 	
 	vertexStr=vertexStr.join("");
+	var vertexStrPick = vertexStr;
 
+	vertexStr = vertexStr.replace('%GLGEPICKSHADERWORLDNORMAL *%','worldInverseTranspose *');
+	vertexStrPick = vertexStrPick.replace('%GLGEPICKSHADERWORLDNORMAL *%','');
 	//Fragment Shader
 	fragStr=this.material.getFragmentShader(lights,colors,this.shaderVertexInjection);
 
@@ -9828,7 +9844,7 @@ GLGE.Object.prototype.GLGenerateShader=function(gl){
 	this.GLFragmentShader=GLGE.getGLShader(gl,gl.FRAGMENT_SHADER,fragStr);
 	this.GLVertexShader=GLGE.getGLShader(gl,gl.VERTEX_SHADER,vertexStr+"//default");
 	this.GLVertexShaderShadow=GLGE.getGLShader(gl,gl.VERTEX_SHADER,vertexStr+"//shadow");
-	this.GLVertexShaderPick=GLGE.getGLShader(gl,gl.VERTEX_SHADER,vertexStr+"//pick");
+	this.GLVertexShaderPick=GLGE.getGLShader(gl,gl.VERTEX_SHADER,vertexStrPick+"//pick");
 	this.GLVertexShaderNormal=GLGE.getGLShader(gl,gl.VERTEX_SHADER,vertexStr+"//normal");
 
 	this.GLShaderProgramPick=GLGE.getGLProgram(gl,this.GLVertexShaderPick,this.GLFragmentShaderPick);
@@ -10817,7 +10833,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 GLGE.Renderer=function(canvas,error,props){
 	this.viewport=[];
 	this.canvas=canvas;
-	if(!props) props={alpha:true,depth:true,stencil:true,antialias:true,premultipliedAlpha:true};
+	
+	if(!props) props={alpha:false,depth:true,stencil:false,antialias:true,premultipliedAlpha:true,preserveDrawingBuffer: true};
 	try {
 		this.gl = canvas.getContext("experimental-webgl",props);
 	} catch(e) {}
@@ -12819,7 +12836,7 @@ GLGE.Scene.prototype.renderPass=function(gl,renderObjects,offsetx,offsety,width,
 	gl.clearDepth(1.0);
 	gl.depthFunc(gl.LEQUAL);
 	gl.viewport(offsetx,offsety,width,height);
-	
+	gl.enable(this.gl.DEPTH_TEST);
 	gl.clearColor(this.backgroundColor.r, this.backgroundColor.g, this.backgroundColor.b, this.backgroundColor.a);
 	if(!type) {
 		gl.scissor(offsetx,offsety,width,height);
@@ -12968,17 +12985,39 @@ GLGE.Scene.prototype.ray=function(origin,direction){
 			var cvp=this.camera.getViewProjection();
 			objects=this.objectsInViewFrustum(objects,cvp);
 		}*/
+		var pickableDepthTestObjects = [];
+		var pickableNoDepthObjects = [];
+		var ordermap = {}
 		for(var i=0; i<objects.length;i++){
-			if(objects[i].pickable) objects[i].GLRender(gl,GLGE.RENDER_PICK,i+1);
+			if(objects[i].pickable && objects[i].depthTest) pickableDepthTestObjects.push(objects[i]);//objects[i].GLRender(gl,GLGE.RENDER_PICK,i+1);
+			if(objects[i].pickable && !objects[i].depthTest) pickableNoDepthObjects.push(objects[i]);
+			ordermap[objects[i].uid] = i+1;
 		}
+		gl.enable(this.gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
+		for(var i=0; i<pickableDepthTestObjects.length;i++){
+			pickableDepthTestObjects[i].GLRender(gl,GLGE.RENDER_PICK,ordermap[pickableDepthTestObjects[i].uid]);
+		}
+		
+		gl.disable(this.gl.DEPTH_TEST);
+		for(var i=0; i<pickableNoDepthObjects.length;i++){
+			pickableNoDepthObjects[i].GLRender(gl,GLGE.RENDER_PICK,ordermap[pickableNoDepthObjects[i].uid]);
+		}
+		gl.enable(this.gl.DEPTH_TEST);
 		//gl.flush();
 
 		var data = new Uint8Array(8 * 1 * 4);
+		
 		gl.readPixels(0, 0, 8, 1, gl.RGBA,gl.UNSIGNED_BYTE, data);
 		
 		var norm=[data[4]/255,data[5]/255,data[6]/255];
-		var normalsize=Math.sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2])*0.5;
-		norm=[norm[0]/normalsize-1,norm[1]/normalsize-1,norm[2]/normalsize-1];
+		norm[0] = (norm[0]-.5) * 2;
+		norm[1] = (norm[1]-.5) * 2;
+		norm[2] = (norm[2]-.5) * 2;
+		//norm = GLGE.mulMat4Vec3(GLGE.inverseMat4(this.camera.matrix),norm);
+		//norm = GLGE.subVec3(norm,origin);
+		//var normalsize=Math.sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2])*0.5;
+		//norm=[norm[0]/normalsize,norm[1]/normalsize,norm[2]/normalsize];
 		var obj=objects[data[0]+data[1]*256+data[2]*65536-1];
 
 		var dist=(data[10]/255+0.00390625*data[9]/255+0.0000152587890625*data[8]/255)*this.camera.far;
@@ -19274,6 +19313,9 @@ GLGE.Document.prototype.getWavefront=function(ele){
 }
 })(GLGE);
 
+var ss = document.createElement('script');
+ss.src = 'meshcompression.js';
+document.head.appendChild(ss);
 /*
 GLGE WebGL Graphics Engine
 Copyright (c) 2011, Paul Brunt

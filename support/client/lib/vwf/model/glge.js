@@ -200,7 +200,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         };
                         loadCollada.call( this, parentNode, node ); 
                         break;
-
+					case "model/vnd.osgjs+json+compressed":
+                        callback( false );
+                        node = this.state.nodes[childID] = {
+                            name: childName,  
+                            glgeObject: undefined,
+                            source: childSource,
+                            ID: childID,
+                            parentID: nodeID,
+                            sourceType: childType,
+                            type: childExtendsID,
+                            loadingJson: callback 
+                        };
+                        loadJson.call( this, parentNode, node ); 
+                        break;
                     case "text/xml":
                         node = this.state.nodes[childID] = {
                             name: childName,  
@@ -796,6 +809,68 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             //findAllColladaObjs.call( this, sceneNode.glgeScene, sceneNode.ID );
         }
     } 
+    // -- loadCollada ------------------------------------------------------------------------  
+    
+    function loadJson( parentNode, node ) {
+
+        var nodeCopy = node; 
+        var nodeID = node.ID;
+        var childName = node.name;
+        var glgeModel = this;
+        var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+
+        function jsonLoaded( collada ) { 
+            sceneNode.pendingLoads--;
+            collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
+            var removed = false;
+            if ( nodeCopy && nodeCopy.colladaLoaded ) {
+                nodeCopy.colladaLoaded( true );
+            }
+            for ( var j = 0; j < sceneNode.srcColladaObjects.length; j++ ) {
+                if ( sceneNode.srcColladaObjects[j] == collada ){
+                    sceneNode.srcColladaObjects.splice( j, 1 );
+                    removed = true;
+                }
+            } 
+            if ( removed ) {
+                if ( sceneNode.srcColladaObjects.length == 0 ) {
+                    //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
+                    loadComplete.call( glgeModel );
+                }
+
+                var id = collada.vwfID;
+                if ( !id ) id = getObjectID.call( glgeModel, collada, true, false );
+                if ( id && id != "" ){
+                    //glgeModel.kernel.callMethod( id, "loadComplete" );
+                    if ( glgeModel.state.nodes[id] ) {
+                        var colladaNode = glgeModel.state.nodes[id];
+                        if ( colladaNode.loadingJson ) {
+                            colladaNode.loadingJson( true );                    
+                        }
+                    }
+                }
+            }
+        }
+
+        node.name = childName;
+        node.glgeObject = BuildJSON_GLGE_Node(node, jsonLoaded);
+        sceneNode.srcColladaObjects.push( node.glgeObject );
+        node.glgeObject.vwfID = nodeID;
+
+        sceneNode.pendingLoads++;
+        
+        if ( parentNode && parentNode.glgeObject ) {
+            parentNode.glgeObject.addChild( node.glgeObject );
+         } else if ( sceneNode ) {
+//          if ( !sceneNode.glgeScene ) {
+//              this.initScene.call( this, sceneNode );
+//          }
+            if ( sceneNode.glgeScene ) {
+                sceneNode.glgeScene.addChild( node.glgeObject );
+            }
+             
+        }
+    }
 
     // -- loadCollada ------------------------------------------------------------------------  
     
