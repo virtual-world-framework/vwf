@@ -99,7 +99,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				group.add(cubeY);
 				group.add(cubeZ);
 				group.vwfID = "TEST DUMMY AXIS GIZMO";
-				sceneNode.threeScene.add(group);
+				//sceneNode.threeScene.add(group);
 				//cam.position.set(0, 0, 0);
 				//cam.lookAt( sceneNode.threeScene.position );
 				cam.name = 'camera';
@@ -286,6 +286,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				{
 					if(propertyName == 'transform')
 					{
+						
+					
 						
 						//set is columns, not rows
 						var matrix = new THREE.Matrix4(propertyValue[0],propertyValue[4],propertyValue[8],propertyValue[12],
@@ -570,9 +572,89 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         // -- gettingProperty ----------------------------------------------------------------------
 
-        gettingProperty: function( nodeID, propertyName, propertyValue ) {
+        gettingProperty: function( nodeID, propertyName ) {
 
-        
+          //console.log([nodeID,propertyName,propertyValue]);
+		  var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+		  if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
+		  var value = undefined;
+		  
+		  //this driver has no representation of this node, so there is nothing to do.
+		  if(!node) return;
+		  
+          var threeObject = node.threeObject;
+		  if(!threeObject)
+			threeObject = node.threeScene;
+		  
+		  //There is not three object for this node, so there is nothing this driver can do. return
+		  if(!threeObject) return value;	
+		  
+			  if ( node && threeObject ) 
+			  {
+				if(threeObject instanceof THREE.Object3D)
+				{
+					if(propertyName == 'transform')
+					{
+						
+						var propertyValue = new THREE.Matrix4();
+						var elements = threeObject.matrix.elements;	
+						propertyValue.set(elements[0],elements[8],elements[4],elements[12],
+													elements[2],elements[10],elements[6],elements[14],
+													elements[1],elements[9],elements[5],elements[13],
+													elements[3],elements[11],elements[7],elements[15]);
+						//propertyValue.set(elements[0],elements[8],elements[4],elements[12],
+						//							elements[2],elements[10],elements[6],elements[14],
+						//							elements[1],elements[9],elements[5],elements[13],
+						//							elements[3],elements[11],elements[7],elements[15]);
+						    if(threeObject.parent instanceof THREE.Scene)
+							{							
+							var flipmat = new THREE.Matrix4(1, 0,0,0,
+															0, 0,1,0,
+															0,1,0,0,
+															0, 0,0,1);
+							
+											
+							propertyValue = propertyValue.multiply(flipmat,propertyValue);
+							}
+							
+							
+							var translation = new THREE.Vector3();
+							var quat = new THREE.Quaternion();
+							var scale = new THREE.Vector3();
+							
+							
+						
+							propertyValue.decompose(translation,quat,scale);
+							var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
+							var angle = 0;
+							var axis = [0,0,0];
+							angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
+							if(isNaN(angle))
+								angle = 0;
+							axis[0] *= -1;
+							axis[2] *= -1;
+							
+							var vx = new THREE.Vector3();
+							vx.set(axis[0],axis[1],axis[2]);
+							quat.setFromAxisAngle(vx,angle);
+							if(!isNaN(quat.w))
+							propertyValue.setRotationFromQuaternion(quat);
+							
+							
+							propertyValue = propertyValue.scale(scale);
+							propertyValue.elements[13] *= -1;
+							
+							
+							
+																
+						
+						
+							return propertyValue.elements;					
+													
+					
+					}
+				}
+			}		
         },
 
 
