@@ -25,6 +25,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.canvasQuery = null;
             if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
             if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
+			this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -227,7 +228,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			window._dRenderer = renderer;
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
 			
-			initMouseEvents.call(this,mycanvas);
+			initInputEvents.call(this,mycanvas);
             renderScene((+new Date));
         }
     }
@@ -280,9 +281,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			}
 		}
 	}
-	    // -- initMouseEvents ------------------------------------------------------------------------
+	    // -- initInputEvents ------------------------------------------------------------------------
 
-    function initMouseEvents( canvas ) {
+    function initInputEvents( canvas ) {
         var sceneNode = this.state.scenes[this.state.sceneRootID], child;
         var sceneID = this.state.sceneRootID;
         var sceneView = this;
@@ -553,6 +554,72 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         canvas.setAttribute("onmousewheel", '');
+		
+		window.onkeydown = function (event) {
+					
+                    var key = undefined;
+                    var validKey = false;
+                    var keyAlreadyDown = false;
+                    switch (event.keyCode) {
+                        case 17:
+                        case 16:
+                        case 18:
+                        case 19:
+                        case 20:
+                            break;
+                        default:
+                            key = getKeyValue.call( sceneView, event.keyCode);
+                            keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
+                            sceneView.keyStates.keysDown[key.key] = key;
+                            validKey = true;
+                            break;
+                    }
+
+                    if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
+                    sceneView.keyStates.mods.alt = event.altKey;
+                    sceneView.keyStates.mods.shift = event.shiftKey;
+                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
+                    sceneView.keyStates.mods.meta = event.metaKey;
+
+                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
+                        //var params = JSON.stringify( sceneView.keyStates );
+                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
+                    }
+                };
+
+         window.onkeyup = function (event) {
+                    var key = undefined;
+                    var validKey = false;
+                    switch (event.keyCode) {
+                        case 16:
+                        case 17:
+                        case 18:
+                        case 19:
+                        case 20:
+                            break;
+                        default:
+                            key = getKeyValue.call( sceneView, event.keyCode);
+                            delete sceneView.keyStates.keysDown[key.key];
+                            sceneView.keyStates.keysUp[key.key] = key;
+                            validKey = true;
+                            break;
+                    }
+
+                    sceneView.keyStates.mods.alt = event.altKey;
+                    sceneView.keyStates.mods.shift = event.shiftKey;
+                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
+                    sceneView.keyStates.mods.meta = event.metaKey;
+
+                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+                    if (validKey && sceneNode) {
+                        //var params = JSON.stringify( sceneView.keyStates );
+                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
+                        delete sceneView.keyStates.keysUp[key.key];
+                    }
+
+                };
+		
         if(typeof canvas.onmousewheel == "function") {
             canvas.removeAttribute("onmousewheel");
             canvas.onmousewheel = function( e ) {
@@ -743,4 +810,370 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 		 return getPickObjectID(threeObject.parent);
 		return null;	
 	}
+	    function getKeyValue( keyCode ) {
+        var key = { key: undefined, code: keyCode, char: undefined };
+        switch ( keyCode ) {
+            case 8:
+                key.key = "backspace";
+                break;
+            case 9:
+                key.key = "tab";
+                break;
+            case 13:
+                key.key = "enter";
+                break;
+            case 16:
+                key.key = "shift";
+                break;
+            case 17:
+                key.key = "ctrl";
+                break;
+            case 18:
+                key = "alt";
+                break;
+            case 19:
+                key.key = "pausebreak";
+                break;
+            case 20:
+                key.key = "capslock";
+                break;
+            case 27:
+                key.key = "escape";
+                break;
+            case 33:
+                key.key = "pageup";
+                break;
+            case 34:
+                key.key = "pagedown";
+                break;
+            case 35:
+                key.key = "end";
+                break;
+            case 36:
+                key.key = "home";
+                break;
+            case 37:
+                key.key = "leftarrow";
+                break;
+            case 38:
+                key.key = "uparrow";
+                break;
+            case 39:
+                key.key = "rightarrow";
+                break;
+            case 40:
+                key.key = "downarrow";
+                break;
+            case 45:
+                key.key = "insert";
+                break;
+            case 46:
+                key.key = "delete";
+                break;
+            case 48:
+                key.key = "0";
+                key.char = "0";
+                break;
+            case 49:
+                key.key = "1";
+                key.char = "1";
+                break;
+            case 50:
+                key.key = "2";
+                key.char = "2";
+                break;
+            case 51:
+                key.key = "3";
+                key.char = "3";
+                break;
+            case 52:
+                key.key = "4";
+                key.char = "4";
+                break;
+            case 53:
+                key.key = "5";
+                key.char = "5";
+                break;
+            case 54:
+                key.key = "6";
+                key.char = "6";
+                break;
+            case 55:
+                key.key = "7";
+                key.char = "7";
+                break;                
+            case 56:
+                key.key = "8";
+                key.char = "8";
+                break;
+            case 57:
+                key.key = "9";
+                key.char = "9";
+                break;  
+            case 65:
+                key.key = "A";
+                key.char = "A";
+                break;
+            case 66:
+                key.key = "B";
+                key.char = "B";
+                break;
+            case 67:
+                key.key = "C";
+                key.char = "C";
+                break;
+            case 68:
+                key.key = "D";
+                key.char = "D";
+                break;
+            case 69:
+                key.key = "E";
+                key.char = "E";
+                break;
+            case 70:
+                key.key = "F";
+                key.char = "F";
+                break;
+            case 71:
+                key.key = "G";
+                key.char = "G";
+                break;
+            case 72:
+                key.key = "H";
+                key.char = "H";
+                break;
+            case 73:
+                key.key = "I";
+                key.char = "I";
+                break;                
+            case 74:
+                key.key = "J";
+                key.char = "J";
+                break;
+            case 75:
+                key.key = "K";
+                key.char = "K";
+                break;                 
+            case 76:
+                key.key = "L";
+                key.char = "L";
+                break;
+            case 77:
+                key.key = "M";
+                key.char = "M";
+                break;
+            case 78:
+                key.key = "N";
+                key.char = "N";
+                break;
+            case 79:
+                key.key = "O";
+                key.char = "O";
+                break;
+            case 80:
+                key.key = "P";
+                key.char = "P";
+                break;
+            case 81:
+                key.key = "Q";
+                key.char = "Q";
+                break;
+            case 82:
+                key.key = "R";
+                key.char = "R";
+                break;
+            case 83:
+                key.key = "S";
+                key.char = "S";
+                break;                
+            case 84:
+                key.key = "T";
+                key.char = "T";
+                break;
+            case 85:
+                key.key = "U";
+                key.char = "U";
+                break;                  
+            case 86:
+                key.key = "V";
+                key.char = "V";
+                break;
+            case 87:
+                key.key = "W";
+                key.char = "W";
+                break;
+            case 88:
+                key.key = "X";
+                key.char = "X";
+                break;                
+            case 89:
+                key.key = "Y";
+                key.char = "Y";
+                break;
+            case 90:
+                key.key = "Z";
+                key.char = "Z";
+                break; 
+            case 91:
+                key.key = "leftwindow";
+                break;
+            case 92:
+                key.key = "rightwindow";
+                break;
+            case 93:
+                key.key = "select";
+                break;
+            case 96:
+                key.key = "numpad0";
+                key.char = "0";
+                break;
+            case 97:
+                key.key = "numpad1";
+                key.char = "1";
+                break;
+            case 98:
+                key.key = "numpad2";
+                key.char = "2";
+                break;
+            case 99:
+                key.key = "numpad3";
+                key.char = "3";
+                break;
+            case 100:
+                key.key = "numpad4";
+                key.char = "4";
+                break;
+            case 101:
+                key.key = "numpad5";
+                key.char = "5";
+                break;
+            case 102:
+                key.key = "numpad6";
+                key.char = "6";
+                break;
+            case 103:
+                key.key = "numpad7";
+                key.char = "7";
+                break;
+            case 104:
+                key.key = "numpad8";
+                key.char = "8";
+                break;
+            case 105:
+                key.key = "numpad9";
+                key.char = "9";
+                break;
+            case 106:
+                key.key = "multiply";
+                key.char = "*";
+                break;
+            case 107:
+                key.key = "add";
+                key.char = "+";
+                break;
+            case 109:
+                key.key = "subtract";
+                key.char = "-";
+                break;
+            case 110:
+                key.key = "decimalpoint";
+                key.char = ".";
+                break;
+            case 111:
+                key.key = "divide";
+                key.char = "/";
+                break;
+            case 112:
+                key.key = "f1";
+                break;
+            case 113:
+                key.key = "f2";
+                break;
+            case 114:
+                key.key = "f3";
+                break;
+            case 115:
+                key.key = "f4";
+                break;
+            case 116:
+                key.key = "f5";
+                break;
+            case 117:
+                key.key = "f6";
+                break;
+            case 118:
+                key.key = "f7";
+                break;
+            case 119:
+                key.key = "f8";
+                break;
+            case 120:
+                key.key = "f9";
+                break;
+            case 121:
+                key.key = "f10";
+                break;
+            case 122:
+                key.key = "f11";
+                break;
+            case 123:
+                key.key = "f12";
+                break;
+            case 144:
+                key.key = "numlock";
+                break;
+            case 145:
+                key.key = "scrolllock";
+                break;
+            case 186:
+                key.key = "semicolon";
+                key.char = ";";
+                break;
+            case 187:
+                key.key = "equal";
+                key.char = "=";
+                break;
+            case 188:
+                key.key = "comma";
+                key.char = ",";
+                break;
+            case 189:
+                key.key = "dash";
+                key.char = "-";
+                break;
+            case 190:
+                key.key = "period";
+                key.char = ".";
+                break;
+            case 191:
+                key.key = "forwardslash";
+                key.char = "/";
+                break;
+            case 192:
+                key.key = "graveaccent";
+                break;
+            case 219:
+                key.key = "openbraket";
+                key.char = "{";
+                break;
+            case 220:
+                key.key = "backslash";
+                key.char = "\\";
+                break;
+            case 221:
+                key.key = "closebraket";
+                key.char = "}";
+                break;
+            case 222:
+                key.key = "singlequote";
+                key.char = "'";
+                break;
+            case 32:
+                key.key = "space";
+                key.char = " ";
+                break;
+        }
+        return key;
+    }
+
 });

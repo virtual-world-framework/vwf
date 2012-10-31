@@ -1,0 +1,56 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  navmode: none
+children:
+  duck:
+    extends: http://vwf.example.com/node3.vwf
+    source: duck.dae
+    type: model/vnd.collada+xml    
+    properties:
+      translation: [ 0, 0, 0]
+      rotation: [ 0, 0, 1, 0]
+      scale: [ .5, .5, .5]   
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      constantAttenuation: 1
+      rotation: [ 1, 0, 0, -45 ]
+      translation: [0,-100,0]
+methods:
+  update:      
+scripts:
+- | 
+    this.initialize = function()
+    {
+      this.counter = 0;
+        this.future(.333).update();
+       
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        
+        this.threeobject = vwf.views[0].state.nodes[this.duck.id].threeObject;
+    }
+    this.update = function()
+    {
+        this.counter++;
+        if(this.counter == 179)
+         this.counter = 0;
+         
+        this.duck.rotation = [0,0,1,this.counter]; 
+        this.future(.0333).update();
+    }

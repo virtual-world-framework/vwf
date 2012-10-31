@@ -431,6 +431,36 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					{
 						SetVisible(threeObject,propertyValue);
 					}
+					//This can be a bit confusing, as the node has a material property, and a material child node. 
+					//setting the property does this, but the code in the component is ambigious
+					if(propertyName == 'material')
+					{
+						var material = GetMaterial(node.threeObject);
+						if(!material)
+						{	
+							material = new THREE.MeshPhongMaterial();
+							SetMaterial(node.threeObject,material);
+						}
+						if(propertyValue == 'red')
+							material.color.setRGB(1,0,0);
+						if(propertyValue == 'green')
+							material.color.setRGB(0,1,0);
+						if(propertyValue == 'blue')
+							material.color.setRGB(0,0,1);
+						if(propertyValue == 'purple')
+							material.color.setRGB(1,0,1);
+						if(propertyValue == 'orange')
+							material.color.setRGB(1,.5,0);
+						if(propertyValue == 'yellow')
+							material.color.setRGB(1,1,0);	
+						if(propertyValue == 'gray')
+							material.color.setRGB(.5,.5,.5);
+						if(propertyValue == 'white')
+							material.color.setRGB(1,1,1);
+						if(propertyValue == 'black')
+							material.color.setRGB(0,0,0);							
+						material.ambient.setRGB( material.color.r,material.color.g,material.color.b);
+					}
 				}
 				if(threeObject instanceof THREE.Camera)
 				{
@@ -490,6 +520,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						
 						threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
 						threeObject.needsUpdate = true;
+						threeObject.ambient.setRGB( threeObject.color.r,threeObject.color.g,threeObject.color.b);
 					}
 				}
 				if(threeObject instanceof THREE.Scene)
@@ -708,6 +739,47 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 													
 					
 					}
+					if(propertyName ==  "boundingbox")
+					{
+                        var bbox = getLocalBoundingBox.call( this, glgeObject );
+                        value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
+                    }
+/*
+                    if(propertyName ==  "centerOffset")
+					{
+                        var centerOff = getCenterOffset.call( this, glgeObject );
+                        var scale = this.kernel.getProperty( nodeID, "scale", undefined );
+                        value = new Array;
+                        value.push( centerOff[0] * scale[0], centerOff[1] * scale[1], centerOff[2] * scale[2] ); 
+                    }
+
+                    if(propertyName ==  "vertices")
+					{
+                        value = getMeshVertices.call( this, glgeObject );
+                    }
+
+                    if(propertyName ==  "vertexIndices")
+					{
+                        value = getMeshVertexIndices.call( this, glgeObject );
+                    }
+*/
+                    if(propertyName ==  "meshData")
+					{
+						
+						var threeObject = node.threeObject;
+                        value = [];
+                        var scale = this.gettingProperty( nodeID, "scale", [] ); 
+						scale = [1,1,1];
+                        var meshList = findAllMeshes.call( this, threeObject );
+                        for ( var i = 0; i < meshList.length; i++ ) {
+                            value.push( {  "vertices": getMeshVertices.call( this, meshList[i],threeObject ),
+                                           "vertexIndices": getMeshVertexIndices.call( this, meshList[i] ),
+                                           "scale": scale 
+                                        } );
+                        }
+						return value;
+                    }
+					
 				}
 				if(threeObject instanceof THREE.Material)
 				{
@@ -896,6 +968,63 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
     }
+	function findAllMeshes(threeObject,list)
+	{
+		
+		if(!threeObject) return;
+		if(!list) list = [];
+		if(threeObject instanceof THREE.Mesh)
+			list.push(threeObject);
+		if(threeObject.children)
+		{
+			for(var i = 0; i < threeObject.children.length; i++)
+			{
+				findAllMeshes(threeObject.children[i],list);
+			}
+		}
+		return list;	
+	}
+	
+	function getMeshVertexIndices(mesh)
+	{
+		
+	    var ret = [];
+		for(var i = 0; i < mesh.geometry.faces.length; i++)
+		{
+			var face = mesh.geometry.faces[i];
+			ret.push([face.a,face.b,face.c]);
+
+		}
+		return ret;
+	}
+	//Get all mesh verts. Transform via matrix stack up to threeObject. Thus, get all sub mesh verts relative to this object's transform
+	function getMeshVertices(mesh,threeObject )
+	{
+		
+		var matrix = new THREE.Matrix4();
+		matrix.copy(mesh.matrix);
+		var parent = mesh.parent;
+		while(parent && parent != threeObject)
+		{
+			var mat = new THREE.Matrix4();
+			mat.copy(parent.matrix);
+			matrix = matrix.multiply(mat,matrix);
+			parent = parent.parent;
+		}
+		var mat = new THREE.Matrix4();
+			mat.copy(threeObject.matrix);
+		matrix = matrix.multiply(mat,matrix);
+		var ret = [];
+		for(var i = 0; i < mesh.geometry.vertices.length; i++)
+		{
+			var vert = new THREE.Vector3();
+			vert.copy(mesh.geometry.vertices[i]);
+			vert = matrix.multiplyVector3(vert);
+			ret.push([vert.x,-vert.y,vert.z]);
+
+		}
+		return ret;
+	}
 	//do a depth first search of the children, return the first material
 	function GetMaterial(threeObject)
 	{
