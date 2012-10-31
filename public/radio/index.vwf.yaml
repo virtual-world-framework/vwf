@@ -93,7 +93,7 @@ children:
               this.menuMode = "channel";
             } else {
               this.volume = 0;
-              this.Radio.LCD.glgeObj14.material.texture = "images/lcd.png";
+              this.Radio.LCD.material.texture = "images/lcd.png";
             } 
           }
         value: false
@@ -114,67 +114,67 @@ children:
           if ( !this.powerOn ) return;
           switch( value ) {
             case 0:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[0];
+              this.Radio.LCD.material.texture = this.parent.channelImages[0];
               this.channel = value;
               break;
             case 1:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[1];
+              this.Radio.LCD.material.texture = this.parent.channelImages[1];
               this.channel = value;
               break;
             case 2:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[2];
+              this.Radio.LCD.material.texture = this.parent.channelImages[2];
               this.channel = value;
               break;
             case 3:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[3];
+              this.Radio.LCD.material.texture = this.parent.channelImages[3];
               this.channel = value;
               break;
             case 4:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[4];
+              this.Radio.LCD.material.texture = this.parent.channelImages[4];
               this.channel = value;
               break;
             case 5:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[5];
+              this.Radio.LCD.material.texture = this.parent.channelImages[5];
               this.channel = value;
               break;
             case 6:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[6];
+              this.Radio.LCD.material.texture = this.parent.channelImages[6];
               this.channel = value;
               break;
             case 7:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[7];
+              this.Radio.LCD.material.texture = this.parent.channelImages[7];
               this.channel = value;
               break;
             case 8:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[8];
+              this.Radio.LCD.material.texture = this.parent.channelImages[8];
               this.channel = value;
               break;
             case 9:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[9];
+              this.Radio.LCD.material.texture = this.parent.channelImages[9];
               this.channel = value;
               break;
             case 10:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[10];
+              this.Radio.LCD.material.texture = this.parent.channelImages[10];
               this.channel = value;
               break;
             case 11:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[11];
+              this.Radio.LCD.material.texture = this.parent.channelImages[11];
               this.channel = value;
               break;
             case 12:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[12];
+              this.Radio.LCD.material.texture = this.parent.channelImages[12];
               this.channel = value;
               break;
             case 13:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[13];
+              this.Radio.LCD.material.texture = this.parent.channelImages[13];
               this.channel = value;
               break;
             case 14:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[14];
+              this.Radio.LCD.material.texture = this.parent.channelImages[14];
               this.channel = value;
               break;
             case 15:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[15];
+              this.Radio.LCD.material.texture = this.parent.channelImages[15];
               this.channel = value;
               break;
           }
@@ -219,15 +219,15 @@ children:
           if ( !this.powerOn ) return;
           switch(value) {
             case "auto":
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[0];
+              this.Radio.LCD.material.texture = this.parent.backlightImages[0];
               this.backLightMode = value;
               break;
             case "off":
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[1];
+              this.Radio.LCD.material.texture = this.parent.backlightImages[1];
               this.backLightMode = value;
               break;
             case "on":
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[2];
+              this.Radio.LCD.material.texture = this.parent.backlightImages[2];
               this.backLightMode = value;
               break;
           }
@@ -236,10 +236,10 @@ children:
         set: |
           if ( !this.powerOn ) return;
           if ( value ) {
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.beepImages[0];
+              this.Radio.LCD.material.texture = this.parent.beepImages[0];
               this.beepOn = value;
           } else {
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.beepImages[1];
+              this.Radio.LCD.material.texture = this.parent.beepImages[1];
               this.beepOn = value;
           }
         value: true
@@ -248,43 +248,43 @@ children:
           if ( !this.powerOn ) return;
           switch(value) {
             case 20:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[0];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[0];
               this.squelch = value;
               break;
             case 30:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[1];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[1];
               this.squelch = value;
               break;
             case 40:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[2];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[2];
               this.squelch = value;
               break;
             case 50:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[3];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[3];
               this.squelch = value;
               break;
             case 60:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[4];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[4];
               this.squelch = value;
               break;
             case 70:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[5];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[5];
               this.squelch = value;
               break;
             case 80:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[6];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[6];
               this.squelch = value;
               break;
             case 90:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[7];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[7];
               this.squelch = value;
               break;
             case 100:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[8];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[8];
               this.squelch = value;
               break;
             case 110:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[9];
+              this.Radio.LCD.material.texture = this.parent.squelchImages[9];
               this.squelch = value;
               break;
           }
@@ -293,10 +293,10 @@ children:
         set: |
           if ( !this.powerOn ) return;
           if ( value ) {
-            this.Radio.LCD.glgeObj14.material.texture = this.parent.encryptImages[0];
+            this.Radio.LCD.material.texture = this.parent.encryptImages[0];
               this.encryptionOn = value;
           } else { 
-            this.Radio.LCD.glgeObj14.material.texture = this.parent.encryptImages[1];
+            this.Radio.LCD.material.texture = this.parent.encryptImages[1];
               this.encryptionOn = value;
           } 
           this.encryptionOn = value;
@@ -306,15 +306,15 @@ children:
           if ( !this.powerOn ) return;
           switch ( value ){
             case 4:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[0];
+              this.Radio.LCD.material.texture = this.parent.powerImages[0];
               this.transmitPower = value;
               break;
             case 2:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[1];
+              this.Radio.LCD.material.texture = this.parent.powerImages[1];
               this.transmitPower = value;
               break;
             case 1:
-              this.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[2];
+              this.Radio.LCD.material.texture = this.parent.powerImages[2];
               this.transmitPower = value;
               break;
           }
@@ -456,10 +456,10 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function( pointerInfo, pickInfo ) {
-                          this.parent.parent.parent.parent.channel = this.controlValue;
+                          this.parent.parent.channel = this.controlValue;
                         }
                         this.pointerMove = function( pointerInfo, pickInfo ) {
-                          this.parent.parent.parent.parent.channel = this.controlValue;
+                          this.parent.parent.channel = this.controlValue;
                         }
                   ic40Down:
                     extends: http://vwf.example.com/node3.vwf
@@ -472,7 +472,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.down();
+                          this.parent.parent.down();
                         }
                   ic40Monitor:
                     extends: http://vwf.example.com/node3.vwf
@@ -490,7 +490,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.p0();
+                          this.parent.parent.p0();
                         }                
                   ic40P1:
                     extends: http://vwf.example.com/node3.vwf
@@ -503,7 +503,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.p1();
+                          this.parent.parent.p1();
                         }                  
                   ic40P2:
                     extends: http://vwf.example.com/node3.vwf
@@ -516,7 +516,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.p2();
+                          this.parent.parent.p2();
                         }                  
                   ic40P3:
                     extends: http://vwf.example.com/node3.vwf
@@ -529,7 +529,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.p3();
+                          this.parent.parent.p3();
                         }                  
                   ic40PTT:
                     extends: http://vwf.example.com/node3.vwf
@@ -542,7 +542,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.ptt();
+                          this.parent.parent.ptt();
                         }                  
                   ic40Red:
                     extends: http://vwf.example.com/node3.vwf
@@ -555,7 +555,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.red();
+                          this.parent.parent.red();
                         }                 
                   ic40Up:
                     extends: http://vwf.example.com/node3.vwf
@@ -568,7 +568,7 @@ children:
                     scripts:
                     - |
                         this.pointerUp = function() {
-                          this.parent.parent.parent.parent.up();
+                          this.parent.parent.up();
                         }
                   ic40Volume:
                     extends: http://vwf.example.com/node3.vwf
@@ -583,22 +583,19 @@ children:
                     scripts:  
                     - | 
                         this.pointerUp = function()  {
-                          if ( this.parent.parent.parent.parent.volume == 0 ) {
-                            this.parent.parent.parent.parent.volume = 1;
+                          if ( this.parent.parent.volume == 0 ) {
+                            this.parent.parent.volume = 1;
                           } else {
-                            this.parent.parent.parent.parent.volume = 0;
+                            this.parent.parent.volume = 0;
                           }                            
                         }
                   LCD:
                     extends: http://vwf.example.com/node3.vwf
                     children:
-                      glgeObj14:
-                        extends: http://vwf.example.com/mesh.vwf
-                        children:
-                          material:
-                            extends: http://vwf.example.com/material.vwf
-                            properties:
-                              texture: 
+                      material:
+                        extends: http://vwf.example.com/material.vwf
+                        properties:
+                          texture: 
                   LCD_Back:
                     extends: http://vwf.example.com/node3.vwf
                     children:
@@ -702,6 +699,6 @@ children:
                 scripts:
                 - |
                     this.ic40Antennae = function() {
-                      this.parent.parent.parent.parent.antenna = !this.parent.parent.parent.parent.antenna; 
+                      this.parent.parent.antenna = !this.parent.parent.antenna; 
                     } 
 
