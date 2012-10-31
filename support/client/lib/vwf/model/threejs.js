@@ -164,7 +164,25 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					createLight.call(this,nodeID,childID,childName);
 				}
 			
-			}else if ( protos && isNodeDefinition.call( this, protos ) ) {
+			}else if ( protos && isMaterialDefinition.call( this, protos ) ) {
+			
+				
+				node = this.state.nodes[childID] = {
+                    name: childName,
+                    threeObject: parentNode.threeObject,
+                    ID: childID,
+                    parentID: nodeID,
+                    type: childExtendsID,
+                    sourceType: childType,
+                };
+				node.threeMaterial = GetMaterial(node.threeObject);
+				if(!node.threeMaterial)
+				{	
+					node.threeMaterial = new THREE.MeshPhongMaterial();
+					SetMaterial(node.threeObject,node.threeMaterial)
+				}
+			}
+			else if ( protos && isNodeDefinition.call( this, protos ) ) {
 				
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 if ( childType == "model/vnd.collada+xml") {
@@ -206,12 +224,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						if(!node.threeObject)
 							node.threeObject = new THREE.Object3D(); 
 				}
-			}
+			
 			if(node && node.threeObject)
 			{
-				node.threeObject.vwfID = childID;
-				node.threeObject.name = childName;
+				if(!node.threeObject.vwfID) node.threeObject.vwfID = childID;
+				if(!node.threeObject.name) node.threeObject.name = childName;
 			}
+			
+			}
+			
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -277,6 +298,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 		  if(!threeObject)
 			threeObject = node.threeScene;
 		  
+		  //if it's a material node, we'll work with the threeMaterial
+		  //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
+		  //in case we later need access to the object the material is on.
+		  if(node.threeMaterial)
+			threeObject = node.threeMaterial;
+			
 		  //There is not three object for this node, so there is nothing this driver can do. return
 		  if(!threeObject) return value;	
 		  
@@ -344,10 +371,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							threeObject.updateMatrixWorld(true);						
 													
 					
-					}
-					if(propertyName == 'material')
-					{
-						
 					}
 					if(propertyName == 'lookAt')
 					{
@@ -441,6 +464,32 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						{
 						
 						}
+					}
+				}
+				if(threeObject instanceof THREE.Material)
+				{
+					if(propertyName == "texture")
+					{
+						
+						if(propertyValue !== "")
+						{
+							var img = new Image();
+							img.src = propertyValue;
+							var newmap = THREE.ImageUtils.loadTexture(propertyValue);
+							threeObject.map = newmap;
+							threeObject.needsUpdate = true;
+						}else
+						{
+							threeObject.map = null;
+							threeObject.needsUpdate = true;
+						}
+						
+					}
+					if(propertyName == "color")
+					{
+						
+						threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+						threeObject.needsUpdate = true;
 					}
 				}
 				if(threeObject instanceof THREE.Scene)
@@ -586,6 +635,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 		  if(!threeObject)
 			threeObject = node.threeScene;
 		  
+		  //if it's a material node, we'll work with the threeMaterial
+		  //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
+		  //in case we later need access to the object the material is on.
+		  if(node.threeMaterial)
+			threeObject = node.threeMaterial;
+			
 		  //There is not three object for this node, so there is nothing this driver can do. return
 		  if(!threeObject) return value;	
 		  
@@ -654,6 +709,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					
 					}
 				}
+				if(threeObject instanceof THREE.Material)
+				{
+					if(propertyName == "texture")
+					{
+						if(threeObject.map && threeObject.map.image)
+							return threeObject.map.image.src;
+							
+					}
+					if(propertyName == "color")
+					{
+						
+							
+					}
+				}
 			}		
         },
 
@@ -702,6 +771,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
         return foundScene;
+    }
+	function isMaterialDefinition( prototypes ) {
+        var foundMaterial = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
+                foundMaterial = ( prototypes[i] == "http-vwf-example-com-material-vwf" );    
+            }
+        }
+
+        return foundMaterial;
     }
 	function isCameraDefinition( prototypes ) {
         var foundCamera = false;
@@ -817,7 +896,47 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
     }
-	
+	//do a depth first search of the children, return the first material
+	function GetMaterial(threeObject)
+	{
+		//something must be pretty seriously wrong if no threeobject
+		if(!threeObject)
+			return null;
+		
+		if(threeObject && threeObject.material)
+			return threeObject.material;
+		if(threeObject.children)
+		{
+			var ret = null;
+			for(var i=0; i < threeObject.children.length; i++)
+			{
+				ret = GetMaterial(threeObject.children[i])
+				if(ret) return ret;
+			}				
+		}		
+		return null;
+	}
+	//set the material on all the sub meshes of an object.
+	//This could cause some strangeness in cases where an asset has multiple sub materials
+	//best to only specify the material sub-node where an asset is a mesh leaf
+	function SetMaterial(threeObject,material)
+	{
+		//something must be pretty seriously wrong if no threeobject
+		if(!threeObject)
+			return null;
+		
+		if(threeObject && threeObject instanceof THREE.Mesh)
+			threeObject.material = material; 
+		if(threeObject.children)
+		{
+			var ret = null;
+			for(var i=0; i < threeObject.children.length; i++)
+			{
+				SetMaterial(threeObject.children[i],material)
+			}				
+		}		
+		return null;
+	}
 	function loadCollada( parentNode, node ) {
 
         var nodeCopy = node; 
