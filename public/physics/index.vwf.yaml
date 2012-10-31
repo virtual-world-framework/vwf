@@ -13,8 +13,6 @@
 
 --- 
 extends: appscene.vwf
-source: physics.xml
-type: model/x-glge
 properties:
   ambientColor: [ 183, 183, 183 ]
   backgroundColor: [ 83, 157, 194 ]
@@ -57,6 +55,7 @@ children:
     extends: "http://vwf.example.com/light.vwf"
     properties: 
       lightType: "directional"
-      constantAttenuation: 1.5
+      constantAttenuation: 100000
       linearAttenuation: 0.00000001
       quadraticAttenuation: 0.00001
+      translation: [ 0, 0, 1]
