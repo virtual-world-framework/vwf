@@ -1,0 +1,77 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+#
+# note that hte asset document is wrong axis. This should just demonstrate that the children nodes of the 
+# VWF nodes are linked up to the correct nodes from the asset document. if the boxes are spinning, this is
+# probably working correctly.
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  navmode: none
+  counter: 0
+methods:
+  tick:  
+children:
+  assetbox01:
+    extends: http://vwf.example.com/node3.vwf
+    source: model.dae
+    type: model/vnd.collada+xml
+    children:
+      Scene_Root:
+        extends: http://vwf.example.com/node3.vwf
+        children:
+          Box01:
+            extends: http://vwf.example.com/node3.vwf
+            children:
+              Box02:
+                extends: http://vwf.example.com/node3.vwf
+                children:
+                  Box03:
+                    extends: http://vwf.example.com/node3.vwf
+                    children:
+  camera:
+    extends: http://vwf.example.com/camera.vwf
+    properties:
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      constantAttenuation: 0
+      rotation: [ 1, 0, 0, -45 ]
+      translation: [0,-100,0]
+scripts:
+- | 
+    this.initialize = function()
+    {
+       
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,100,100]);
+        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','lightType','directional');
+        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box01','translation',[0,0,0]);
+        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box02','translation',[0,-20,0]);
+        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box03','translation',[0,-20,0]);
+        var pos = vwf.getProperty('http-vwf-example-com-node3-vwf-Box03','translation');
+        alert('the next prompt should not say "0, 0, 0"');
+        alert(pos[0] +', ' + pos[1] +', ' + pos[2]);
+    }
+    this.tick = function()
+    {
+        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box01','rotation',[0,1,0,this.counter]);
+        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box02','rotation',[0,1,0,this.counter*4]);
+        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box03','rotation',[0,1,0,this.counter*8]);
+        var p = vwf.getProperty('http-vwf-example-com-node3-vwf-Box03','translation');
+        p[0] += .1;
+        vwf.setProperty('http-vwf-example-com-node3-vwf-Box03','translation',p);
+        this.counter++;
+    }

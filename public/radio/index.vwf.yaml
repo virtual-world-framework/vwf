@@ -93,7 +93,7 @@ children:
               this.menuMode = "channel";
             } else {
               this.volume = 0;
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = "images/lcd.png";
+              this.Radio.LCD.glgeObj14.material.texture = "images/lcd.png";
             } 
           }
         value: false
@@ -114,67 +114,67 @@ children:
           if ( !this.powerOn ) return;
           switch( value ) {
             case 0:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[0];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[0];
               this.channel = value;
               break;
             case 1:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[1];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[1];
               this.channel = value;
               break;
             case 2:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[2];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[2];
               this.channel = value;
               break;
             case 3:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[3];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[3];
               this.channel = value;
               break;
             case 4:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[4];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[4];
               this.channel = value;
               break;
             case 5:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[5];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[5];
               this.channel = value;
               break;
             case 6:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[6];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[6];
               this.channel = value;
               break;
             case 7:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[7];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[7];
               this.channel = value;
               break;
             case 8:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[8];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[8];
               this.channel = value;
               break;
             case 9:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[9];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[9];
               this.channel = value;
               break;
             case 10:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[10];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[10];
               this.channel = value;
               break;
             case 11:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[11];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[11];
               this.channel = value;
               break;
             case 12:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[12];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[12];
               this.channel = value;
               break;
             case 13:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[13];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[13];
               this.channel = value;
               break;
             case 14:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[14];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[14];
               this.channel = value;
               break;
             case 15:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[15];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.channelImages[15];
               this.channel = value;
               break;
           }
@@ -183,7 +183,7 @@ children:
       antenna:
         set: |
           if ( value ) {
-            this.bone1.MaxScene.Radio.playing = !value;
+            this.Radio.playing = !value;
           } else {
             this.logger.debug( "replace the antenna" );
           }
@@ -219,15 +219,15 @@ children:
           if ( !this.powerOn ) return;
           switch(value) {
             case "auto":
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[0];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[0];
               this.backLightMode = value;
               break;
             case "off":
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[1];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[1];
               this.backLightMode = value;
               break;
             case "on":
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[2];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.backlightImages[2];
               this.backLightMode = value;
               break;
           }
@@ -236,10 +236,10 @@ children:
         set: |
           if ( !this.powerOn ) return;
           if ( value ) {
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.beepImages[0];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.beepImages[0];
               this.beepOn = value;
           } else {
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.beepImages[1];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.beepImages[1];
               this.beepOn = value;
           }
         value: true
@@ -248,43 +248,43 @@ children:
           if ( !this.powerOn ) return;
           switch(value) {
             case 20:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[0];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[0];
               this.squelch = value;
               break;
             case 30:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[1];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[1];
               this.squelch = value;
               break;
             case 40:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[2];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[2];
               this.squelch = value;
               break;
             case 50:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[3];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[3];
               this.squelch = value;
               break;
             case 60:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[4];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[4];
               this.squelch = value;
               break;
             case 70:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[5];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[5];
               this.squelch = value;
               break;
             case 80:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[6];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[6];
               this.squelch = value;
               break;
             case 90:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[7];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[7];
               this.squelch = value;
               break;
             case 100:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[8];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[8];
               this.squelch = value;
               break;
             case 110:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[9];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.squelchImages[9];
               this.squelch = value;
               break;
           }
@@ -293,10 +293,10 @@ children:
         set: |
           if ( !this.powerOn ) return;
           if ( value ) {
-            this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.encryptImages[0];
+            this.Radio.LCD.glgeObj14.material.texture = this.parent.encryptImages[0];
               this.encryptionOn = value;
           } else { 
-            this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.encryptImages[1];
+            this.Radio.LCD.glgeObj14.material.texture = this.parent.encryptImages[1];
               this.encryptionOn = value;
           } 
           this.encryptionOn = value;
@@ -306,15 +306,15 @@ children:
           if ( !this.powerOn ) return;
           switch ( value ){
             case 4:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[0];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[0];
               this.transmitPower = value;
               break;
             case 2:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[1];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[1];
               this.transmitPower = value;
               break;
             case 1:
-              this.bone1.MaxScene.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[2];
+              this.Radio.LCD.glgeObj14.material.texture = this.parent.powerImages[2];
               this.transmitPower = value;
               break;
           }
@@ -450,7 +450,7 @@ children:
                       controlType: rotate
                       controlMode: continuous
                       transformIncrement: -18
-                      transformAxis: [0, 0, 1]
+                      transformAxis: [0, 1, 0]
                       maxValue: 15
                       dragSpeed: 20
                     scripts:
@@ -486,7 +486,7 @@ children:
                     properties:
                       controlType: translate
                       controlMode: momentary
-                      transformAxis: [ 0, 0.03, 0 ]
+                      transformAxis: [ 0, 0, 0.03 ]
                     scripts:
                     - |
                         this.pointerUp = function() {
@@ -499,7 +499,7 @@ children:
                     properties:
                       controlType: translate
                       controlMode: momentary
-                      transformAxis: [ 0, 0.03, 0 ]
+                      transformAxis: [ 0, 0, 0.03 ]
                     scripts:
                     - |
                         this.pointerUp = function() {
@@ -512,7 +512,7 @@ children:
                     properties:
                       controlType: translate
                       controlMode: momentary
-                      transformAxis: [ 0, 0.03, 0 ]
+                      transformAxis: [ 0, 0, 0.03 ]
                     scripts:
                     - |
                         this.pointerUp = function() {
@@ -525,7 +525,7 @@ children:
                     properties:
                       controlType: translate
                       controlMode: momentary
-                      transformAxis: [ 0, 0.03, 0 ]
+                      transformAxis: [ 0, 0, 0.03 ]
                     scripts:
                     - |
                         this.pointerUp = function() {
@@ -551,7 +551,7 @@ children:
                     properties:
                       controlType: translate
                       controlMode: momentary
-                      transformAxis: [ 0, 0, -0.02 ]
+                      transformAxis: [ 0, 0.02, 0 ]
                     scripts:
                     - |
                         this.pointerUp = function() {
@@ -579,7 +579,7 @@ children:
                       controlType: rotate
                       controlMode: positions
                       transformIncrement: 12
-                      transformAxis: [0, 0, 1]
+                      transformAxis: [0, 1, 0]
                     scripts:  
                     - | 
                         this.pointerUp = function()  {
