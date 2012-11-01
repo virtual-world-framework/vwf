@@ -683,17 +683,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             var scene = this.scenes[ node.sceneID ];
             if ( scene ) {
                 var normal = [0, 0, 1, 0];
+				
 				var pos = this.kernel.getProperty( nodeID, "translation" )|| [ 0, 0, 0 ];
                 if ( physicsDef.constructor == Array ) {
                     switch ( physicsDef.length ) {
-                        case "2":
+                        case 2:
                             if ( physicsDef[1].constructor == Array ) {
                                 if ( physicsDef[1].length == 4 ) {
                                     normal = physicsDef[1];
                                 }
                             }
                             break;
-                        case "5":
+                        case 5:
                             for ( var i = 0; i < 4; i++ ) {
                                 normal[i] = physicsDef[i+1];
                             }
