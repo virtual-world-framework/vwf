@@ -2310,3 +2310,345 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
     }
 } );
+
+
+
+function DecodeARRAY_BUFFER(str,range,inmin,stride,bits)
+{
+ str = blobarray[str];
+  var attribs_out = [];//new Float32Array(str.length);
+  //min = min + 0.0;
+  var prev = [0,0,0];
+  var divisor = Math.pow(2,bits);
+  for (var i = 5; i < str.length-5; i+=stride) {
+
+	  for(var j = 0; j< stride; j++)
+		{	  
+			  var code = str.charCodeAt(i+j);
+			  var dezigzag = (Number(code) >> 1) ^ (-(Number(code) & 1));
+			  prev[j] += dezigzag;
+			  var prev_attrib = ((prev[j]/divisor)*(range))  + Number(inmin) ;//(code >> 1) ^ (-(code & 1));
+			  attribs_out.push(prev_attrib);
+		}	  
+  }
+ 
+  return attribs_out;
+}
+var debugarraytype = "";
+function DecodeELEMENT_ARRAY_BUFFER(str,range)
+{
+ 
+  str = blobarray[str];
+  var attribs_out = [];//new Uint16Array(str.length);
+  var prev = 0;
+  for (var i = 5; i < str.length-5; i++) {
+ 
+      var code = str.charCodeAt(i);
+	  var dezigzag = (code >> 1) ^ (-(code & 1));;
+	  prev += dezigzag;
+	 // alert("char code " +code + " dezigzag " + dezigzag + " new value " + prev);
+      attribs_out.push(prev);
+	  
+  }
+ 
+  return attribs_out;
+}
+
+function DecodeArray(array,key)
+{
+	var type = array.type;
+	var array2 =[];
+	var itemsize = array.itemSize;
+	
+	if(type == "ELEMENT_ARRAY_BUFFER")
+		array2 = DecodeELEMENT_ARRAY_BUFFER(array.elements.values,array.elements.range);
+	if(type == "ARRAY_BUFFER")
+		array2 = DecodeARRAY_BUFFER(array.elements.values,array.elements.range,array.elements.min,itemsize,array.elements.bits);	
+	
+	return array2;
+}
+
+var JSONNode = function(node,callback)
+{
+    var self = this;
+	this.url = node.source;
+	this.callback = callback;
+	this.children=[];
+	
+	this.jsonLoaded = function(e)
+	{
+	    var test = 1+1;
+		var jsonData = JSON.parse(decompress(e));
+		var texture_load_callback = function(texturename)
+		{
+			
+			var src = "";
+			if(this.url.toLowerCase().indexOf('3dr_federation') != -1)
+				src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/NoRedirect/" + encodeURIComponent(texturename) +"?ID=00-00-00";
+			else
+				src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/" + encodeURIComponent(texturename) +"?ID=00-00-00";
+			console.log(src);
+			src = src.replace("AnonymousUser:@","");
+			var tex = new GLGE.Texture();
+			tex.setSrc(src);
+			return tex;
+		}
+		this.addChild(ParseSceneGraph(jsonData,texture_load_callback.bind(this)),null);
+		if(this.callback)
+			this.callback(this);
+	}.bind(this);
+	
+	this.error = function(e)
+	{
+		alert(e.responseText);
+	}.bind(this);
+	
+	$.ajax({
+        url: this.url,
+        data: {},
+        success: this.jsonLoaded,
+        error: this.error,
+		dataType:'text'
+    });
+	;
+}
+
+GLGE.augment(GLGE.Group,JSONNode);
+
+function BuildJSON_GLGE_Node(node,callback)
+{
+	return new JSONNode(node,callback);
+}
+function toColor(arr)
+	{
+		var color = {};
+		color.r = arr[0];
+		color.g = arr[1];
+		color.b = arr[2];
+		color.a = arr[3];
+		return color;
+	}
+function ApplyMaterial(newnode,newmaterial)
+{
+	if(newnode.setMaterial)
+		newnode.setMaterial(newmaterial);
+	else if( newnode.children)
+	{
+		for(var i =0; i < newnode.children.length;i++)
+			ApplyMaterial(newnode.children[0],newmaterial);
+	}	
+}	
+function ParseSceneGraph(node, texture_load_callback) {
+
+    var newnode;
+	//its geometry
+    if (node.primitives) {
+		newnode = new GLGE.Object();
+		var mesh = new GLGE.Mesh();
+        
+		//vertex data
+		if (node.attributes) {
+			jQuery.each(node.attributes, function(key, element) {
+			debugarraytype = key;
+				var attributeArray = node.attributes[key];
+				node.attributes[key] = DecodeArray(attributeArray,key);
+				if(key == "Vertex")
+					mesh.setPositions(node.attributes[key]);
+				if(key == "Normal")
+					mesh.setNormals(node.attributes[key]);
+				if(key == "TexCoord0")
+					mesh.setUV(node.attributes[key]);
+                if(key == "TexCoord1")
+					mesh.setUV2(node.attributes[key]);
+				if(key == "VertexColor")
+					mesh.setVertexColors(node.attributes[key]);
+                if(key == "Tangent")
+					mesh.setTangents(node.attributes[key]);						
+			});
+		}
+		
+		var i;
+		for (i in node.primitives) {
+			
+			if (node.primitives[i].indices) {
+				var array = node.primitives[i].indices;
+				array = DecodeArray(array);
+				
+				mesh.setFaces(array);
+			} else {
+				mode = gl[mode];
+				var first = node.primitives[i].first;
+				var count = node.primitives[i].count;
+				if (count > 65535)
+					count = 32740;
+				//node.primitives[i] = new osg.DrawArrays(mode, first, count);
+			}
+		}
+		newnode.setMesh(mesh.uid);
+		}
+		var newmaterial = null;
+		if (node.stateset) {
+			newmaterial = new GLGE.Material();
+			if (node.stateset.textures) {
+				var textures = node.stateset.textures;
+				for ( var t = 0, tl = textures.length; t < tl; t++) {
+					if (textures[t] === undefined) {
+						continue;
+					}
+					if (!textures[t].file) {
+						if (console !== undefined) {
+						console.log("no 'file' field for texture "
+							+ textures[t]);
+						}
+					}
+
+					var tex;
+					if (texture_load_callback)
+						tex = texture_load_callback(textures[t].file);
+					else
+					{
+						tex = new GLGE.Texture();
+						
+						tex.setSrc(textures[t].file);
+						
+					}
+					if (tex) {
+						newmaterial.addTexture(tex.uid);
+						var layer = new GLGE.MaterialLayer();
+						layer.setBlendMode(0);
+						layer.setMapinput(0);
+						layer.setMapto(1);
+						layer.setTexture(tex.uid);
+						newmaterial.addMaterialLayer(layer);
+					}
+				}
+			}
+			if (node.stateset.material) {
+				newmaterial.setAmbient(toColor(node.stateset.material.ambient));
+				newmaterial.setColor(toColor(node.stateset.material.diffuse));
+				
+				newmaterial.setShininess(node.stateset.material.shininess);
+				newmaterial.setSpecularColor(toColor(node.stateset.material.specular));
+			}
+			
+		}
+		
+		
+		
+	if (node.matrix) {
+	
+		if(newnode == null)
+			newnode = new GLGE.Group();
+		var matrix = [];
+		for(var i =0; i < node.matrix.length; i++)
+			matrix.push(node.matrix[i]);
+		var glmat = GLGE.Mat4(matrix);
+		glmat = GLGE.transposeMat4(glmat);
+		console.log(glmat[3],glmat[7],glmat[11]);
+		
+	    var mat=GLGE.Mat4([glmat[0], glmat[1], glmat[2], 0,
+								glmat[4], glmat[5], glmat[6], 0,
+								glmat[8], glmat[9], glmat[10], 0,
+								0, 0, 0, 1]);
+			
+	    newnode.setRotMatrix(mat);
+		newnode.setLoc(glmat[3],glmat[7],glmat[11]);
+    }
+	
+	if (node.children) {
+		if(newnode == null)
+			newnode = new GLGE.Group();
+		for ( var child = 0; child < node.children.length; child++) {
+			var childnode = ParseSceneGraph(node.children[child],texture_load_callback);
+			if(childnode)
+				newnode.addChild(childnode);
+		}
+    }
+	
+	if(newnode && newmaterial)
+		ApplyMaterial(newnode,newmaterial);
+	
+    if(node.name && newnode)
+		newnode.name = node.name;
+		
+    return newnode;
+}
+var blobsfound = 0;
+var blobarray = [];
+
+function DecompressStrings(data, replace, find)
+{
+	var reg = new RegExp(find,'g');
+	return data.replace(reg, replace);
+}
+
+function decompressJsonStrings(data)
+{
+data = DecompressStrings(data,"\"min\":","min:");
+data = DecompressStrings(data,"\"max\":","max:");
+data = DecompressStrings(data,"\"stateset\":","ss:");
+data = DecompressStrings(data,"\"LINE_LOOP\"","\"LL\"");
+data = DecompressStrings(data,"\"LINEAR\"","\"L\"");
+data = DecompressStrings(data,"\"LINEAR_MIPMAP_LINEAR\"","\"LML\"");
+data = DecompressStrings(data,"\"LINEAR_MIPMAP_NEAREST\"","\"LMN\"");
+data = DecompressStrings(data,"\"NEAREST\"","\"NE\"");
+data = DecompressStrings(data,"\"NEAREST_MIPMAP_LINEAR\"","\"NML\"");
+data = DecompressStrings(data,"\"NEAREST_MIPMAP_NEAREST\"","\"NMN\"");
+data = DecompressStrings(data,"\"mag_filter\":","maf:");
+data = DecompressStrings(data,"\"min_filter\":","mif:");
+data = DecompressStrings(data,"\"file\":","f:");
+data = DecompressStrings(data,"\"name\":","n:");
+data = DecompressStrings(data,"\"ambient\":","a:");
+data = DecompressStrings(data,"\"diffuse\":","d:");
+data = DecompressStrings(data,"\"specular\":","s:");
+data = DecompressStrings(data,"\"emission\":","e:");
+data = DecompressStrings(data,"\"shininess\":","sh:");
+data = DecompressStrings(data,"\"textures\":","t:");
+data = DecompressStrings(data,"\"material\":","m:");
+data = DecompressStrings(data,"\"POINTS\"","\"P\"");
+data = DecompressStrings(data,"\"LINES\"","\"LI\"");
+
+data = DecompressStrings(data,"\"LINE_STRIP\"","\"LS\"");
+data = DecompressStrings(data,"\"TRIANGLES\"","\"T\"");
+data = DecompressStrings(data,"\"TRIANGLE_FAN\"","\"TF\"");
+data = DecompressStrings(data,"\"TRIANGLE_STRIP\"","\"TS\"");
+data = DecompressStrings(data,"\"first\":","fi:");
+data = DecompressStrings(data,"\"count\":","co:");
+data = DecompressStrings(data,"\"mode\":","mo:");
+data = DecompressStrings(data,"\"undefined\":","u:");
+data = DecompressStrings(data,"\"children\":","c:");
+data = DecompressStrings(data,"\"range\":","r:");
+data = DecompressStrings(data,"\"bits\":","b:");
+data = DecompressStrings(data,"\"values\":","v:");
+data = DecompressStrings(data,"\"elements\":","el:");
+data = DecompressStrings(data,"\"itemSize\":","iS:");
+data = DecompressStrings(data,"\"type\":","ty:");
+data = DecompressStrings(data,"\"ARRAY_BUFFER\"","\"AB\"");
+data = DecompressStrings(data,"\"ELEMENT_ARRAY_BUFFER\"","\"EAB\"");
+data = DecompressStrings(data,"\"indices\":","i:");
+data = DecompressStrings(data,"\"Vertex\":","V:");
+data = DecompressStrings(data,"\"Normal\":","N:");
+data = DecompressStrings(data,"\"TexCoord0\":","T0:");
+data = DecompressStrings(data,"\"TexCoord1\":","T1:");
+data = DecompressStrings(data,"\"TexCoord2\":","T2:");
+data = DecompressStrings(data,"\"TexCoord3\":","T3:");
+data = DecompressStrings(data,"\"TexCoord4\":","T4:");
+data = DecompressStrings(data,"\"attributes\":","A:");
+data = DecompressStrings(data,"\"primitives\":","p:");
+data = DecompressStrings(data,"\"projection\":","pr:");
+data = DecompressStrings(data,"\"matrix\":","M:");
+
+return data;
+}
+
+function decompress(dataencoded)
+{
+    blobsfound = 0;
+    blobarray = [];
+
+    var regex = new RegExp('\u7FFF\u7FFE\u7FFF\u7FFE\u7FFF[\\S\\s]*?\u7FFE\u7FFF\u7FFE\u7FFF\u7FFE','igm');
+	blobarray = dataencoded.match(regex);
+	var data = dataencoded.replace(regex,function(match) { return "\""+(blobsfound++)+"\"";});
+	data = decompressJsonStrings(data);
+	return data;
+}

@@ -44,6 +44,10 @@ function Editor()
 	$(document.body).append('<div id="statusbar" class="statusbar" />');
 	$('#statusbar').css('top',(document.height - 25) + 'px');
 	
+	$(window).resize(function(){
+	$('#statusbar').css('top',(document.height - 25) + 'px');
+	});
+	
 	$('#statusbar').append('<div id="SceneName" class="statusbarElement" />');
 	$('#SceneName').html('Not Saved');	
 	$('#statusbar').append('<div id="StatusSelectedID" class="statusbarElement" />');
@@ -187,7 +191,7 @@ function Editor()
 		SelectObject(null);
 	}.bind(this);
 	//	$('#vwf-root').keyup(function(e){
-	var keyup = function(e)
+	var keydown = function(e)
 	{
 		//console.log(e);
 
@@ -1275,7 +1279,7 @@ function Editor()
 	this.mousewheel =mousewheel;
 	this.mouseup =mouseup;
 	this.DeleteSelection =DeleteSelection;
-	this.keyup =keyup ;
+	this.keydown =keydown ;
 	this.intersectLinePlane =intersectLinePlane;
 	this.GetCameraCenterRay =GetCameraCenterRay;
 	this.GetWorldPickRay =GetWorldPickRay;

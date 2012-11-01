@@ -533,7 +533,7 @@ scripts:
                 this.walk();
             if(e.keysDown.S)
                 this.walkback();
-            if(e.keysDown.space)
+            if(e.keysDown.space && !e.mods.shift)
             {
                 if(!this.inMotion('run'))
                     this.jump();

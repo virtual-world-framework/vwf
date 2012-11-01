@@ -52,6 +52,16 @@ buildmenu:function($, setting){
 	var smoothmenu=ddsmoothmenu
 	var $mainmenu=$("#"+setting.mainmenuid+">ul") //reference main menu UL
 	$mainmenu.parent().get(0).className=setting.classname || "ddsmoothmenu"
+	var leaves = $mainmenu.find("li");
+	
+	for(var i = 0; i < leaves.length; i++)
+	{
+		var isleaf = $(leaves[i]).find('ul').length ==0 ?true:false;
+		if(isleaf)
+		$(leaves[i]).click(function(){
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		});
+	}
 	var $headers=$mainmenu.find("ul").parent()
 	$headers.hover(
 		function(e){
@@ -85,10 +95,41 @@ buildmenu:function($, setting){
 			}
 			this.$shadow=$('<div class="ddshadow'+(this.istopheader? ' toplevelshadow' : '')+'"></div>').prependTo($parentshadow).css({left:this._shadowoffset.x+'px', top:this._shadowoffset.y+'px'})  //insert shadow DIV and set it to parent node for the next shadow div
 		}
-		$curobj.hover(
+		$curobj.click(
 			function(e){
 				var $targetul=$subul //reference UL to reveal
 				var header=$curobj.get(0) //reference header LI as DOM object
+				var istopheader=$curobj.parents("ul").length==1? true : false;
+				var isbottomheader=$curobj.children("ul").length==0? true : false;
+				
+				if(istopheader)
+				{
+					clearTimeout($targetul.data('timers').hidetimer)
+					$targetul.data('timers').showtimer=setTimeout(function(){
+						header._offsets={left:$curobj.offset().left, top:$curobj.offset().top}
+						var menuleft=header.istopheader && setting.orientation!='v'? 0 : header._dimensions.w
+						menuleft=(header._offsets.left+menuleft+header._dimensions.subulw>$(window).width())? (header.istopheader && setting.orientation!='v'? 0 : 172) : menuleft //calculate this sub menu's offsets from its parent
+						if ($targetul.queue().length<=1){ //if 1 or less queued animations
+							$targetul.css({left:menuleft+"px"}).animate({height:'show',opacity:'show'}, ddsmoothmenu.transition.overtime)
+							if (smoothmenu.shadow.enable && !smoothmenu.css3support){
+								var shadowleft=header.istopheader? $targetul.offset().left+ddsmoothmenu.shadow.offsetx : menuleft
+								var shadowtop=header.istopheader?$targetul.offset().top+smoothmenu.shadow.offsety : header._shadowoffset.y
+								if (!header.istopheader && ddsmoothmenu.detectwebkit){ //in WebKit browsers, restore shadow's opacity to full
+									header.$shadow.css({opacity:1})
+								}
+								header.$shadow.css({overflow:'', left:'0'+'px', top:shadowtop+'px'}).animate({height:header._dimensions.subulh+'px'}, ddsmoothmenu.transition.overtime)
+							}
+						}
+					}, ddsmoothmenu.showhidedelay.showdelay)
+				}
+		});
+		$curobj.hover(
+			function(e){
+				
+				var $targetul=$subul //reference UL to reveal
+				var header=$curobj.get(0) //reference header LI as DOM object
+				var istopheader=$curobj.parents("ul").length==1? true : false;
+				if(istopheader) return;
 				clearTimeout($targetul.data('timers').hidetimer)
 				$targetul.data('timers').showtimer=setTimeout(function(){
 					header._offsets={left:$curobj.offset().left, top:$curobj.offset().top}

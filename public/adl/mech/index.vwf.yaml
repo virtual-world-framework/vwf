@@ -69,15 +69,25 @@ scripts:
        
        var grass = new GLGE.Material();
        var grassTex = new GLGE.MaterialLayer();
+       var grassTex2 = new GLGE.MaterialLayer();
        var grasstexsrc = new GLGE.Texture();
-       grasstexsrc.setSrc('grass_512.png');
+       grasstexsrc.setSrc('textures/dirt.jpg');
        grassTex.setTexture(grasstexsrc);
        grassTex.setMapinput(GLGE.UV1);
        grassTex.setMapto(GLGE.M_COLOR);
+       
+       grassTex2.setTexture(grasstexsrc);
+       grassTex2.setMapinput(GLGE.UV1);
+       grassTex2.setMapto(GLGE.M_COLOR + GLGE.M_SPECULAR);
+       grassTex2.setScaleX(10);
+       grassTex2.setScaleY(10);
+       grassTex2.setAlpha(.5);
        grass.addMaterialLayer(grassTex);
+       grass.addMaterialLayer(grassTex2);
        grass.addTexture(grasstexsrc);
        ground.setMaterial(grass);
-
+       grass.setSpecular(.6);
+       grass.setShininess(15);
        var l = new GLGE.Light();
        l.setType(2);
        l.setColor([200,200,200]);
@@ -86,6 +96,9 @@ scripts:
        findscene().setAmbientColor([156,156,156,1]);
        this.CreateSky();
        
+       findscene().setFogType(GLGE.FOG_SKYQUADRATIC);
+       findscene().setFogFar(30);
+       findscene().setFogNear(10);
     }
     this.keyDown = function(e)
     {
@@ -125,7 +138,7 @@ scripts:
         
         tex.setSrcNegX('skys/cloudy_noon_BK.jpg');
         tex.setSrcNegY('skys/cloudy_noon_LF.jpg');
-        tex.setSrcNegZ('grass_512.png');
+        tex.setSrcNegZ('skys/cloudy_noon_DN.jpg');
         tex.setSrcPosX('skys/cloudy_noon_FR.jpg');
         tex.setSrcPosY('skys/cloudy_noon_RT.jpg');
         tex.setSrcPosZ('skys/cloudy_noon_UP.jpg');
@@ -442,12 +455,17 @@ scripts:
             var offset = GLGE.mulMat4Vec3(xmatrix,[1,0,0]);
             offset = GLGE.scaleVec3(offset,1/GLGE.lengthVec3(offset));
             var side = GLGE.crossVec3([0,0,1],offset);
-            document.title = side;
+           
+            if(this.y_rot < .479) this.y_rot = .479;
+            if(this.y_rot > .628) this.y_rot = .628;
+            
             var crossmatrix = GLGE.angleAxis(this.y_rot*10,side);
             var stage2offset = GLGE.mulMat4Vec3(crossmatrix,offset);
             
             stage2offset = GLGE.scaleVec3(stage2offset,1/GLGE.lengthVec3(stage2offset));
             var finaloffset = GLGE.scaleVec3(stage2offset,this.zoom);
+            if(this.center[2] < .05)
+             this.center[2] = .05;
             var finalpos = GLGE.addVec3(finaloffset,this.center);
             
             //this.camera.translation = finalpos;

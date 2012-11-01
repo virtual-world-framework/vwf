@@ -137,6 +137,7 @@
 	<script type="text/javascript" src="UserManager.js"></script>
 	<script type="text/javascript" src="DataManager.js"></script>
 	<script type="text/javascript" src="ScriptEditor.js"></script>
+	<script type="text/javascript" src="_3DRIntegration.js"></script>
 	<script type="text/javascript">
 	
 	$(document).ready(
@@ -235,11 +236,11 @@
 		$('#vwf-root').mouseup(function(e){_Editor.mouseup(e)});
 		$('#vwf-root').mouseleave(function(e){_Editor.mouseup(e)});
 		$('#vwf-root').mousemove(function(e){_Editor.mousemove(e)});
-		$('#vwf-root').keyup(function(e){
+		$('#vwf-root').keydown(function(e){
 			
-			_Editor.keyup(e)
+			_Editor.keydown(e)
 			if(e.keyCode == 32 && e.shiftKey)
-				$('#MenuFocusSelected').click();
+				focusSelected();
 		});
 		$('#vwf-root').css('overflow','hidden');
 		$(document.body).css('font-size','10px');
@@ -267,7 +268,7 @@
 		});
 		
 		//make the menu items disappear when you click one
-		$(".ddsmoothmenu").find('li').click(function(){$(".ddsmoothmenu").find('li').trigger('mouseleave');});
+		//$(".ddsmoothmenu").find('li').click(function(){$(".ddsmoothmenu").find('li').trigger('mouseleave');});
 		
 		$('#MenuLogOut').attr('disabled','true');
 		$('#MenuLogIn').click(function(e){
@@ -322,6 +323,9 @@
 		});
 		$('#MenuUsers').click(function(e){
 			$('#Players').dialog('open');
+		});
+		$('#MenuModels').click(function(e){
+			_ModelLibrary.show();
 		});
 		$('#MenuSnapLarge').click(function(e){
 			_Editor.SetSnaps(.5,15 * 0.0174532925,5);
@@ -388,17 +392,20 @@
 			_DataManager.load();
 		});
 		
-		
-		$('#MenuFocusSelected').click(function(e){
-		 if(_Editor.GetSelectedVWFNode())
-		 {
+		function focusSelected()
+		{
 			if(_Editor.GetSelectedVWFNode())
 			 {
-				var gizpos = [_Editor.GetMoveGizmo().getLocX(),_Editor.GetMoveGizmo().getLocY(),_Editor.GetMoveGizmo().getLocZ()];
-				vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
-				vwf.models[0].model.nodes['index-vwf'].updateCamera();
+				if(_Editor.GetSelectedVWFNode())
+				 {
+					var gizpos = [_Editor.GetMoveGizmo().getLocX(),_Editor.GetMoveGizmo().getLocY(),_Editor.GetMoveGizmo().getLocZ()];
+					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
+					vwf.models[0].model.nodes['index-vwf'].updateCamera();
+				 }
 			 }
-		 }
+		}
+		$('#MenuFocusSelected').click(function(e){
+			focusSelected();
 		});
 		$('#MenuCameraOrbit').click(function(e){
 			
@@ -766,6 +773,7 @@
   <li><a href="#" id="MenuMaterialEditor">Material Editor</a></li>
   <li><a href="#" id="MenuScriptEditor">Script Editor</a></li>
   <li><a href="#" id="MenuObjectProperties">Object Properties</a></li>
+  <li><a href="#" id="MenuModels">Models</a></li>
   </ul>
 </li>
 </ul>

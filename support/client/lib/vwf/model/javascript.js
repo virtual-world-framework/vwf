@@ -594,7 +594,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
 						
 					} catch ( e ) {
-                    this.logger.warnx( "deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                    this.logger.warnc( "deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage( e ) );
                 }
             }
@@ -701,7 +701,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 					handler.handler = eval( bodyScript( eventParameters || [], eventBody || "" ) );
 					node.private.listeners[eventName].push(handler);
 				} catch ( e ) {
-                    this.logger.warnx( "creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+                    this.logger.warnc( "creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage( e ) );
                 }
 			}
@@ -726,7 +726,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 						delete node.events[eventName];
 				}
 				catch ( e ) {
-						this.logger.warnx( "deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+						this.logger.warnc( "deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
 							"exception:", utility.exceptionMessage( e ) );
 				}
 			}	
