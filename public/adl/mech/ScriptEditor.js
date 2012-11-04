@@ -33,13 +33,13 @@ function ScriptEditor()
 	'	</ul>'+
 	'	<div id="methods" style="height: 100%;padding:4px">'+
 	'		<div style="width: 180px;display: inline-block;vertical-align: top;"><div id="methodlist"/><div id="saveMethod"/></div>'+
-			'<div id="textinnerm" style="display: inline-block;position:absolute"><textarea style="width:100%;height:100%;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: sans-serif;font-size: 1.5em;" type="text" id="methodtext" />'+
+			'<div id="textinnerm" style="display: inline-block;position:absolute"><div style="width: 100%;height: 100%;position: absolute;border: 1px solid black;" type="text" id="methodtext" />'+
 			'<div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/>'+
 			'</div>'+
 	'	</div>'+
 	'	<div id="events" style="height: 100%;padding:4px">'+
 	'		<div style="width: 180px;display: inline-block;vertical-align: top;"><div id="eventlist"/><div id="saveEvent"/></div>'+
-	'		<div id="textinnere" style="display: inline-block;position:absolute"><textarea style="width:100%;height:100%;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: sans-serif;font-size: 1.5em;" type="text" id="eventtext" />'+
+	'		<div id="textinnere" style="display: inline-block;position:absolute"><div style="width: 100%;height: 100%;position: absolute;border: 1px solid black;" type="text" id="eventtext" />'+
 	'		<div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/>'+
 	'		</div>'+
 	'	</div>'+
@@ -318,7 +318,7 @@ function ScriptEditor()
 		}
 		
 		var methodname = _ScriptEditor.selectedMethod;
-		var rawtext = $('#methodtext').val();
+		var rawtext = this.methodeditor.getValue();
 		var params = rawtext.substring(rawtext.indexOf('(')+1,	rawtext.indexOf(')'));
 		params = params.split(',');
 		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.indexOf('}'));
@@ -351,7 +351,7 @@ function ScriptEditor()
 		}
 		
 		var eventname = _ScriptEditor.selectedEvent;
-		var rawtext = $('#eventtext').val();
+		var rawtext = this.eventeditor.getValue();
 		var params = rawtext.substring(rawtext.indexOf('(')+1,	rawtext.indexOf(')'));
 		params = params.split(',');
 		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.indexOf('}'));
@@ -384,7 +384,8 @@ function ScriptEditor()
 			$('#methodtext').css('border-color','red');		
 		}
 		_ScriptEditor.selectedMethod = name;
-		$('#methodtext').val(text);
+		//$('#methodtext').val(text);
+        this.methodeditor.setValue(text);
 		$('#methodtext').css('background','url(images/stripe.png) 100% 100% repeat');
 		$('#methodtext').removeAttr('disabled');
 	}
@@ -408,7 +409,7 @@ function ScriptEditor()
 			$('#eventtext').css('border-color','red');
 		}
 		_ScriptEditor.selectedEvent = name;
-		$('#eventtext').val(text);
+		this.eventeditor.setValue(text);
 		$('#eventtext').css('background','');
 		$('#eventtext').css('background','url(images/stripe.png) 100% 100% repeat');
 		$('#eventtext').removeAttr('disabled');
@@ -435,8 +436,8 @@ function ScriptEditor()
 			$('#eventtext').attr('disabled','disabled');
 			$('#eventtext').css('background','url(images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
 			$('#methodtext').css('background','url(images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
-			$('#eventtext').val('');
-			$('#methodtext').val('');
+			this.methodeditor.setValue('');
+			this.eventeditor.setValue('');
 		}
 		
 		if(!this.currentNode)
@@ -590,5 +591,12 @@ function ScriptEditor()
 		}
 	}
 	$(document).bind('selectionChanged',this.SelectionChanged.bind(this));
+    this.methodeditor = ace.edit("methodtext");
+    this.methodeditor.setTheme("ace/theme/monokai");
+    this.methodeditor.getSession().setMode("ace/mode/javascript");
+    
+    this.eventeditor = ace.edit("methodtext");
+    this.eventeditor.setTheme("ace/theme/monokai");
+    this.eventeditor.getSession().setMode("ace/mode/javascript");
 }
 _ScriptEditor = new ScriptEditor();
