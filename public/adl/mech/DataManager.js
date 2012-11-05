@@ -43,6 +43,67 @@ function DataManager()
 		this.rawdata.profiles[profile.Username] = profile;
 		this.saveData();
 	}
+	this.getInventory = function(name)
+	{
+		for(var i in this.rawdata.inventory)
+		{
+			if(i == name)
+				return this.rawdata.inventory[i];
+		}
+		return null;
+	}
+	this.addInventoryItem = function(owner,data,name,type)
+	{
+	    var inventory = this.getInventory(owner);
+		if(!inventory)
+		   this.rawdata.inventory[owner] = {objects:{},scripts:{}}
+		inventory = this.getInventory(owner);
+		if(type == 'script')
+			inventory.scripts[name] = data;
+		if(type == 'object')
+			inventory.objects[name] = data;
+		this.saveData();			
+	}
+	this.renameInventoryItem = function(owner,oldname,newname,type)
+	{	
+		if(oldname == newname) return;
+		var inventory = this.getInventory(owner);
+		if(!inventory) return;
+		if(type == 'script')
+		{	
+			inventory.scripts[newname] = inventory.scripts[oldname];
+			delete inventory.scripts[oldname];
+		}
+		if(type == 'object')
+		{	
+			inventory.objects[newname] = inventory.objects[oldname];
+			delete inventory.objects[oldname];
+		}
+		this.saveData();	
+	}
+	this.deleteInventoryItem = function(owner,item)
+	{
+		
+		var inventory = this.getInventory(owner);
+		if(!inventory) return;
+		for(var i in inventory.scripts)
+		{
+			if(inventory.scripts[i] == item)
+			{
+				delete inventory.scripts[i];
+				break;
+			}
+		}
+		for(var i in inventory.objects)
+		{
+			if(inventory.objects[i] == item)
+			{
+				delete inventory.objects[i];
+				break;
+			}
+		}
+		this.saveData();
+	}
 	this.captureScene = function(name)
 	{
 			var scene = vwf.getNode('index-vwf');

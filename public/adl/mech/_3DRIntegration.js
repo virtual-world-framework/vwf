@@ -208,6 +208,7 @@ function _3DRIntegration()
 	Close:function(){$('#ModelDetails').dialog('close');},
 	Create:function(){
 		$('#ModelDetails').dialog('close');
+		$('#ModelLibrary').dialog('close');
 		_ModelLibrary.insertObject(_ModelLibrary.DetailsPID);
 	}
 	
@@ -315,7 +316,10 @@ function _3DRIntegration()
 		ret += "<p> Polygons:" + obj.NumPolygons +"</p>";
 		ret += "<p> Conversion:" + obj.ConversionAvailable +"</p>";
 		ret += "<p> Anonymous Download:" + obj.AnonymousDownloadAvailable +"</p>";
-		return ret;
+		
+		jQuery('#ModelDetails').html(ret);
+		$('#ModelDetails').dialog('option', 'position', 'center');
+						
 	}
 	this.showDetails = function(pid)
 	{
@@ -325,6 +329,7 @@ function _3DRIntegration()
 		if(_ModelLibrary.MetadataCache[pid])
 		{
 			_ModelLibrary.DisplayMetadata(_ModelLibrary.MetadataCache[pid]);
+			
 		}else
 		{
 			$.ajax({
@@ -335,7 +340,7 @@ function _3DRIntegration()
 						
 						var metadata = object;
 						jQuery('#ModelDetails').css('text-align','left');
-						jQuery('#ModelDetails').html(_ModelLibrary.DisplayMetadata(object));
+						_ModelLibrary.DisplayMetadata(object);
 						_ModelLibrary.MetadataCache[object.PID] = object;
 					}.bind(this),
 					error: function (xhr, ajaxOptions, thrownError) {
@@ -417,16 +422,17 @@ function _3DRIntegration()
 						
 						jQuery('#ModelSearchResults').html("");
 						jQuery('#ResultsPages').html("");
-						
+						_Notifier.stopWait();
 						_ModelLibrary.SetResults(object);
-
+						$('#ModelLibrary').dialog('option', 'position', 'center');
 						
 					},
 					error: function (xhr, ajaxOptions, thrownError) {
 						alert(thrownError);
+						_Notifier.stopWait();
 					}
             });
-		
+		_Notifier.startWait('Searching...');
 	}
 	$('#ModelSearchButton').click(function(){_ModelLibrary.Search3DR()});
 }

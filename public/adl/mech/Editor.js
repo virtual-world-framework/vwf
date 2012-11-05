@@ -521,8 +521,8 @@ function Editor()
             //save some time and bail is nothing is changing
             if(GLGE.lengthVec3(relintersectxy) == 0 && GLGE.lengthVec3(relintersectxz) == 0 && GLGE.lengthVec3(relintersectyz) == 0)
             return;
-            
-			if(CoordSystem == LocalCoords)
+           
+			if( CoordSystem == LocalCoords)
 			{
 				var mat = findviewnode(SelectedVWFNode.id).getRotMatrix();
 				//mat = GLGE.inverseMat4(mat);
@@ -550,6 +550,7 @@ function Editor()
 				}
 				
 			}
+			
 			  var ScaleXY = [0,0,0];
                 ScaleXY[0] = relintersectxy[0] /1;
                 ScaleXY[1] = relintersectxy[1] /1;
@@ -1074,7 +1075,7 @@ function Editor()
 		if(type == Scale)
 		{
 			$('#StatusTransform').html('Scale');
-			SetCoordSystem(LocalCoords);			
+			//SetCoordSystem(LocalCoords);			
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if(i>=19 && i <=25)
 				{
@@ -1264,7 +1265,9 @@ function Editor()
 	}.bind(this);
 	var GetSelectedVWFNode = function()
 	{
+		if(SelectedVWFNode)
 		return vwf.getNode(SelectedVWFNode.id);
+		return null;
 	}.bind(this);
 	var findscene = function()
 	{

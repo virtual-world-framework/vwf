@@ -183,11 +183,12 @@ scripts:
     this.update = function(moniker)
     {
         this.updatecounter++;
-        var updateFreqDivisor = 2;
+        var updateFreqDivisor = 3;
         if(Math.ceil(this.updatecounter/updateFreqDivisor) - this.updatecounter/updateFreqDivisor != 0) 
         {
             if(this.activeCycle != null)
             {
+                this.mesh.setFrameRate(0);
                 this.mesh.setStartFrame(this.activeCycle.getFrame(),0,false);
             }
             return;
@@ -214,7 +215,10 @@ scripts:
         this.placeNameTag();
         var standing = 1.603559666;
         if(this.activeCycle)
-        this.mesh.setStartFrame(this.activeCycle.increment(updateFreqDivisor),0,false);
+        {
+            this.mesh.setFrameRate(0);
+            this.mesh.setStartFrame(this.activeCycle.increment(updateFreqDivisor),0,false);
+        }
         
         
         

@@ -9741,7 +9741,7 @@ pkfragStr.push("void main(void)\n");
 pkfragStr.push("{\n");
 pkfragStr.push("float Xcoord = gl_FragCoord.x+0.5;\n");
 pkfragStr.push("if(Xcoord>0.0) gl_FragColor = vec4(pickcolor,1.0);\n");
-pkfragStr.push("if(Xcoord>1.0) gl_FragColor = vec4(((normalize(n)+1.0)/2.0),1.0);\n");
+pkfragStr.push("if(Xcoord>1.0) gl_FragColor = vec4(n,1.0);\n");
 pkfragStr.push("if(Xcoord>2.0){");	
 pkfragStr.push("vec3 rgb=fract((gl_FragCoord.z/gl_FragCoord.w) * vec3(65536.0, 256.0, 1.0));\n");
 pkfragStr.push("gl_FragColor=vec4(rgb-rgb.rrg*vec3(0.0,0.00390625,0.00390625),1.0);\n");
@@ -12767,7 +12767,6 @@ GLGE.Light.prototype.getCastShadows=function(){
 */
 GLGE.Light.prototype.setShadowBias=function(value){
   this.shadowBias=value;
-  this.fireEvent("shaderupdate",{});
   return this;
 }
 /**

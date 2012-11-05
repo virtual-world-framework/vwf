@@ -9,7 +9,7 @@
     <created>2012-10-02T13:59:33</created>
     <modified>2012-10-02T13:59:33</modified>
     <unit name="meter" meter="1"/>
-    <up_axis>Z_UP</up_axis>
+    <up_axis>Y_UP</up_axis>
   </asset>
   <library_effects>
     <effect id="ColorEffectR0G0B0">

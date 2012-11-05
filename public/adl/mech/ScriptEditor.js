@@ -1,3 +1,30 @@
+jQuery.fn.extend({
+insertAtCaret: function(textToInsert){
+  return this.each(function(i) {
+    if (document.selection) {
+      this.focus();
+      sel = document.selection.createRange();
+      sel.text = textToInsert;
+      this.focus();
+    }
+    else if (this.selectionStart || this.selectionStart == '0') {
+      var startPos = this.selectionStart;
+      var endPos = this.selectionEnd;
+      var scrollTop = this.scrollTop;
+      this.value = this.value.substring(0, startPos)+textToInsert+this.value.substring(endPos,this.value.length);
+      this.focus();
+      this.selectionStart = startPos + textToInsert.length;
+      this.selectionEnd = startPos + textToInsert.length;
+      this.scrollTop = scrollTop;
+    } 
+    else {
+      this.value += textToInsert;
+      this.focus();
+    }
+  })
+}
+});
+
 function ScriptEditor()
 {
 
@@ -16,9 +43,23 @@ function ScriptEditor()
 		$('#textinnere').css('width',w+'px')
 		$('#textinnerm').css('height',h+'px')
 		$('#textinnere').css('height',h+'px')
-	
+		 h+=15;
+		$('#checkSyntaxMethod').css('top',h+'px');
+		$('#checkSyntaxEvent').css('top',h+'px');
+		
+		$('#callMethod').css('top',h+'px');
+		$('#deleteMethod').css('top',h+'px');
+		$('#newMethod').css('top',h+'px');
+		$('#saveMethodCopy').css('top',h+'px');
+		
+		$('#callEvent').css('top',h+'px');
+		$('#deleteEvent').css('top',h+'px');
+		$('#newEvent').css('top',h+'px');
+		$('#saveEventCopy').css('top',h+'px');
+		_ScriptEditor.methodEditor.resize();
+		_ScriptEditor.eventEditor.resize();
 	}
-	
+	$(document.body).append('<script src="ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
 	$(document.body).append("<div id='ScriptEditorAbandonChanges'>You have are about to load a different script,but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.</div>");
 	$(document.body).append("<div id='ScriptEditorCreateMethod'><input id='newMethodName' type='text' /></div>");
 	$(document.body).append("<div id='ScriptEditorCreateEvent'><input id='newEventName' type='text' /></div>");
@@ -33,14 +74,18 @@ function ScriptEditor()
 	'	</ul>'+
 	'	<div id="methods" style="height: 100%;padding:4px">'+
 	'		<div style="width: 180px;display: inline-block;vertical-align: top;"><div id="methodlist"/><div id="saveMethod"/></div>'+
-			'<div id="textinnerm" style="display: inline-block;position:absolute"><textarea style="width:100%;height:100%;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: sans-serif;font-size: 1.5em;" type="text" id="methodtext" />'+
-			'<div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/>'+
+			'<div id="textinnerm" style="display: inline-block;position:absolute">'+
+			//'<div style="white-space: pre;overflow: hidden;border: 1px transparent solid;width:100%;height:100%;tab-size: 3;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: monospace;font-size: 1.5em;" type="text" id="methodtextback" />'+
+			'<div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="methodtext" />'+
+			'<div id="callMethod"/><div id="deleteMethod"/><div id="newMethod"/><div id="checkSyntaxMethod"/><div id="saveMethodCopy"/>'+
 			'</div>'+
 	'	</div>'+
 	'	<div id="events" style="height: 100%;padding:4px">'+
 	'		<div style="width: 180px;display: inline-block;vertical-align: top;"><div id="eventlist"/><div id="saveEvent"/></div>'+
-	'		<div id="textinnere" style="display: inline-block;position:absolute"><textarea style="width:100%;height:100%;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: sans-serif;font-size: 1.5em;" type="text" id="eventtext" />'+
-	'		<div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/>'+
+	'		<div id="textinnere" style="display: inline-block;position:absolute">'+
+	//'       <div style="white-space: pre;overflow: hidden;border: 1px transparent solid;width:100%;height:100%;tab-size: 3;border-radius: 10px;box-shadow: 5px 5px 20px lightgray inset;padding:10px 0px 0px 10px;font-family: monospace;font-size: 1.5em;" type="text" id="eventtextback" />'+
+	'       <div style="position: absolute;top: 0px;width: 100%;height: 100%;border: 1px black solid;"  id="eventtext" />'+
+	'		<div id="callEvent"/><div id="deleteEvent"/><div id="newEvent"/><div id="checkSyntaxEvent"/><div id="saveEventCopy"/>'+
 	'		</div>'+
 	'	</div>'+
 	'</div>'+
@@ -104,11 +149,27 @@ function ScriptEditor()
 	$('#eventlist').css('width','180px');
 	
 	$('#saveEvent').css('position','absolute');
-	$('#saveEvent').css('bottom','10px');
+	$('#saveEvent').css('bottom','6px');
 	$('#saveEvent').css('width','175px');
+	
+	
+	//$('#saveEventCopy').css('position','absolute');
+	$('#saveEventCopy').css('bottom','10px');
+	$('#saveEventCopy').css('width','145px');
+	
+	//$('#saveMethodCopy').css('position','absolute');
+	$('#saveMethodCopy').css('bottom','10px');
+	$('#saveMethodCopy').css('width','145px');
+	
+	
 	$('#saveMethod').css('position','absolute');
-	$('#saveMethod').css('bottom','10px');
+	$('#saveMethod').css('bottom','6px');
 	$('#saveMethod').css('width','175px');
+	
+	
+	$('#saveEventCopy').button({label:'Save in Inventory'});
+	$('#saveMethodCopy').button({label:'Save in Inventory'});
+	
 	$('#saveEvent').button({label:'Save Event'});
 	$('#saveMethod').button({label:'Save Method'});
 	
@@ -121,9 +182,23 @@ function ScriptEditor()
 	$('#checkSyntaxMethod').css('float','right');
 	$('#checkSyntaxEvent').css('float','right');
 	
+	$('#checkSyntaxMethod').css('margin-top','3px');
+	$('#checkSyntaxEvent').css('margin-top','3px');
+	
+	$('#saveEventCopy').css('float','right');
+	$('#saveMethodCopy').css('float','right');
+	
+	$('#saveMethodCopy').css('margin-top','3px');
+	$('#saveEventCopy').css('margin-top','3px');
+	
+	
 	$('#callMethod').css('float','right');
 	$('#deleteMethod').css('float','right');
 	$('#newMethod').css('float','right');
+	
+	$('#callMethod').css('margin-top','3px');
+	$('#deleteMethod').css('margin-top','3px');
+	$('#newMethod').css('margin-top','3px');
 	
 	$('#callEvent').button({label:'Trigger Event'});
 	$('#deleteEvent').button({label:'Delete Event'});
@@ -133,15 +208,34 @@ function ScriptEditor()
 	$('#deleteEvent').css('float','right');
 	$('#newEvent').css('float','right');
 	
-	$('#eventtext').keydown(function(e){
+	$('#callEvent').css('margin-top','3px');
+	$('#deleteEvent').css('margin-top','3px');
+	$('#newEvent').css('margin-top','3px');
+	
+	$('#methodtext,#eventtext').keydown(function(e) {
+		var code = (e.keyCode ? e.keyCode : e.which);
 		e.stopPropagation();
-		//return false;
 	});
-	$('#methodtext').keydown(function(e){
-		e.stopPropagation();
-		//return false;
+	
+	$('#saveMethodCopy').click(function(e){
+		
+		
+		if(!_ScriptEditor.checkMethodSyntax())
+		{
+			return
+		}
+		_InventoryManager.addScript(_ScriptEditor.methodEditor.getValue(),_ScriptEditor.selectedMethod,'method');
+		
 	});
-
+	$('#saveEventCopy').click(function(e){
+		
+		if(!_ScriptEditor.checkMethodSyntax())
+		{
+			return
+		}
+		_InventoryManager.addScript(_ScriptEditor.eventEditor.getValue(),_ScriptEditor.selectedEvent,'event');
+		
+	});
 	
 	this.DeleteActiveMethod_imp = function()
 	{
@@ -174,17 +268,17 @@ function ScriptEditor()
 	
 	this.checkMethodSyntax = function()
 	{
-		var testobj = {};
-		var error;
-		try{
-			testobj[_ScriptEditor.selectedMethod] = eval($('#methodtext').val());
-		}catch(e)
+		var s = _ScriptEditor.methodEditor.getSession().getAnnotations();
+		
+		var errors = "";
+		for(var i =0;i< s.length;i++)
 		{
-			error = e;
+			if(s[i].type == 'error')
+			errors += "<br/> line: " + s[i].row +"-" + s[i].text;
 		}
-		if(error)
+		if(errors != "")
 		{
-			$('#ScriptEditorMessage').html('This script contains syntax errors, and cannot be saved. The error is: \n' + error.toString());
+			$('#ScriptEditorMessage').html('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
 			$('#ScriptEditorMessage').dialog('open');
 			return false;
 		}
@@ -219,17 +313,17 @@ function ScriptEditor()
 	}
 	this.checkEventSyntax = function()
 	{
-		var testobj = {};
-		var error;
-		try{
-			testobj[_ScriptEditor.selectedEvent] = eval($('#eventtext').val());
-		}catch(e)
+		var s = _ScriptEditor.eventEditor.getSession().getAnnotations();
+		
+		var errors = "";
+		for(var i =0;i< s.length;i++)
 		{
-			error = e;
+			if(s[i].type == 'error')
+			errors += "<br/> line: " + s[i].row +"-" + s[i].text;
 		}
-		if(error)
+		if(errors != "")
 		{
-			$('#ScriptEditorMessage').html('This script contains syntax errors, and cannot be saved. The error is: \n' + error.toString());
+			$('#ScriptEditorMessage').html('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
 			$('#ScriptEditorMessage').dialog('open');
 			return false;
 		}
@@ -285,10 +379,13 @@ function ScriptEditor()
 	
 	this.show = function()
 	{
+		if(!this.isOpen())
+		{
 		$('#ScriptEditor').dialog('open');
 		_ScriptEditor.resize();
 		_ScriptEditor.BuildGUI();
 		_ScriptEditor.open =true;
+		}
 	}
 	
 	this.hide = function()
@@ -318,11 +415,14 @@ function ScriptEditor()
 		}
 		
 		var methodname = _ScriptEditor.selectedMethod;
-		var rawtext = $('#methodtext').val();
+		var rawtext = _ScriptEditor.methodEditor.getValue();
 		var params = rawtext.substring(rawtext.indexOf('(')+1,	rawtext.indexOf(')'));
 		params = params.split(',');
-		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.indexOf('}'));
+		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.lastIndexOf('}'));
 		body = $.trim(body);
+		
+		//body = body.replace(/\s*\n\s+/gm,'\n');
+		
 		if(_ScriptEditor.currentNode.methods && _ScriptEditor.currentNode.methods[methodname])
 		{
 			vwf_view.kernel.deleteMethod(_ScriptEditor.currentNode.id,methodname);
@@ -342,19 +442,18 @@ function ScriptEditor()
 	}
 	this.SaveEventClicked = function()
 	{
-		
+		debugger;
 		if(!_ScriptEditor.EventChanged) return;
 		if(!_ScriptEditor.checkEventSyntax()) 
 		{
 			//show dialog;
 			return false;
 		}
-		
 		var eventname = _ScriptEditor.selectedEvent;
-		var rawtext = $('#eventtext').val();
+		var rawtext = _ScriptEditor.eventEditor.getValue();
 		var params = rawtext.substring(rawtext.indexOf('(')+1,	rawtext.indexOf(')'));
 		params = params.split(',');
-		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.indexOf('}'));
+		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.lastIndexOf('}'));
 		body = $.trim(body);
 		if(_ScriptEditor.currentNode.events && _ScriptEditor.currentNode.events[eventname])
 		{
@@ -373,6 +472,41 @@ function ScriptEditor()
 	}
 	this.setSelectedMethod_internal = function(name,text)
 	{
+	
+	/*	text = text.replace(/([^\n])\{/gm,'$1\n\{');
+		text = text.replace(/([^\n])\}/gm,'$1\n\}');
+		var opening = 0;
+		var indentedtext = "";
+		debugger;
+		for(var i = 0; i < text.length-1; i++)
+		{
+			
+			
+			if(text[i+1] == '}')
+				opening--;
+			
+			//if(text[i] != '{' && text[i] != '}' && text[i] != '\n')
+			if(text[i] != '\n')			
+				indentedtext += text[i];	
+			//if(text[i] == '{' || text[i] == '}')
+			//{
+			//	for(var j = 0; j<opening;j++)
+			//		indentedtext+='   ';
+			//	indentedtext += text[i];	
+			//}
+			if(text[i] == '\n')
+			{
+				indentedtext += text[i];
+				for(var j = 0; j<opening;j++)
+					indentedtext+='   ';
+				
+			}
+				if(text[i] == '{')
+				opening++;
+			
+		}
+		indentedtext += text[text.length-1];	
+		*/
 		if(this.currentNode.methods && this.currentNode.methods[name])
 		{
 			_ScriptEditor.MethodChanged = false;
@@ -384,8 +518,11 @@ function ScriptEditor()
 			$('#methodtext').css('border-color','red');		
 		}
 		_ScriptEditor.selectedMethod = name;
-		$('#methodtext').val(text);
-		$('#methodtext').css('background','url(images/stripe.png) 100% 100% repeat');
+		_ScriptEditor.methodEditor.setValue(text);
+		_ScriptEditor.methodEditor.selection.clearSelection();
+		//$('#methodtextback').html(_ScriptEditor.formatScript(indentedtext));
+		$('#methodtext').find(".ace_content").css('background','url(images/stripe.png) 100% 100% repeat');
+		
 		$('#methodtext').removeAttr('disabled');
 	}
 	this.setSelectedMethod = function(name,text)
@@ -408,9 +545,11 @@ function ScriptEditor()
 			$('#eventtext').css('border-color','red');
 		}
 		_ScriptEditor.selectedEvent = name;
-		$('#eventtext').val(text);
-		$('#eventtext').css('background','');
-		$('#eventtext').css('background','url(images/stripe.png) 100% 100% repeat');
+		_ScriptEditor.eventEditor.setValue(text);
+		_ScriptEditor.eventEditor.selection.clearSelection();
+		//$('#eventtextback').html(_ScriptEditor.formatScript(text));
+		
+		$('#eventtext').find(".ace_content").css('background','url(images/stripe.png) 100% 100% repeat');
 		$('#eventtext').removeAttr('disabled');
 	}
 	this.setSelectedEvent = function(name,text)
@@ -419,6 +558,23 @@ function ScriptEditor()
 			_ScriptEditor.PromptAbandon(function(){_ScriptEditor.setSelectedEvent_internal(name,text);})
 		else
 			_ScriptEditor.setSelectedEvent_internal(name,text);
+	}
+	this.NodeHasProperty = function(name)
+	{
+		if(!_ScriptEditor.currentNode) return false;
+		var node = vwf.models[0].model.nodes[_ScriptEditor.currentNode.id];
+		while(node)
+		{
+			var props = node.properties;
+			if(node);
+				for(var i in node)
+				{
+					if(name == i)
+						return true;
+				}
+			node = node.proto;
+		}
+		return false;
 	}
 	this.BuildGUI = function(refresh)
 	{
@@ -433,10 +589,10 @@ function ScriptEditor()
 			$('#methodtext').css('border-color','black');
 			$('#methodtext').attr('disabled','disabled');
 			$('#eventtext').attr('disabled','disabled');
-			$('#eventtext').css('background','url(images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
-			$('#methodtext').css('background','url(images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
-			$('#eventtext').val('');
-			$('#methodtext').val('');
+			$('#eventtext').find(".ace_content").css('background','url(images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
+			$('#methodtext').find(".ace_content").css('background','url(images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
+			_ScriptEditor.eventEditor.setValue('');
+			_ScriptEditor.methodEditor.setValue('');
 		}
 		
 		if(!this.currentNode)
@@ -590,5 +746,15 @@ function ScriptEditor()
 		}
 	}
 	$(document).bind('selectionChanged',this.SelectionChanged.bind(this));
+	this.methodEditor = ace.edit("methodtext");
+    this.methodEditor.setTheme("ace/theme/chrome");
+    this.methodEditor.getSession().setMode("ace/mode/javascript");
+	this.eventEditor = ace.edit("eventtext");
+    this.eventEditor.setTheme("ace/theme/chrome");
+    this.eventEditor.getSession().setMode("ace/mode/javascript");
+	this.methodEditor.setPrintMarginColumn(false);
+	this.methodEditor.setFontSize('15px');
+	this.eventEditor.setPrintMarginColumn(false);
+	this.eventEditor.setFontSize('15px');
 }
 _ScriptEditor = new ScriptEditor();

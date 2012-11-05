@@ -90,10 +90,10 @@ scripts:
        grass.setShininess(15);
        var l = new GLGE.Light();
        l.setType(2);
-       l.setColor([200,200,200]);
+       l.setColor('rgb(200,200,200)');
        l.setRotX(1);
        findscene().addChild(l);
-       findscene().setAmbientColor([156,156,156,1]);
+       findscene().setAmbientColor('rgb(200,200,200)');
        this.CreateSky();
        
        findscene().setFogType(GLGE.FOG_SKYQUADRATIC);

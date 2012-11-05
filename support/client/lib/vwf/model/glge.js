@@ -818,8 +818,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var childName = node.name;
         var glgeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-
-        function jsonLoaded( collada ) { 
+		$(document).trigger('BeginParse');
+        function jsonLoaded( collada ) {
+			$(document).trigger('EndParse');		
             sceneNode.pendingLoads--;
             collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             var removed = false;
@@ -881,8 +882,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var childName = node.name;
         var glgeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-
+		$(document).trigger('BeginParse');
         function colladaLoaded( collada ) { 
+			$(document).trigger('EndParse');
             sceneNode.pendingLoads--;
             collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             var removed = false;
@@ -2484,7 +2486,7 @@ function ParseSceneGraph(node, texture_load_callback) {
 				//node.primitives[i] = new osg.DrawArrays(mode, first, count);
 			}
 		}
-		newnode.setMesh(mesh.uid);
+		newnode.setMesh(mesh);
 		}
 		var newmaterial = null;
 		if (node.stateset) {
@@ -2513,12 +2515,12 @@ function ParseSceneGraph(node, texture_load_callback) {
 						
 					}
 					if (tex) {
-						newmaterial.addTexture(tex.uid);
+						newmaterial.addTexture(tex);
 						var layer = new GLGE.MaterialLayer();
 						layer.setBlendMode(0);
 						layer.setMapinput(0);
 						layer.setMapto(1);
-						layer.setTexture(tex.uid);
+						layer.setTexture(tex);
 						newmaterial.addMaterialLayer(layer);
 					}
 				}

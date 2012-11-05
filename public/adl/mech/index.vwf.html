@@ -138,6 +138,7 @@
 	<script type="text/javascript" src="DataManager.js"></script>
 	<script type="text/javascript" src="ScriptEditor.js"></script>
 	<script type="text/javascript" src="_3DRIntegration.js"></script>
+	<script type="text/javascript" src="InventoryManager.js"></script>
 	<script type="text/javascript">
 	
 	$(document).ready(
@@ -304,7 +305,11 @@
 		$('#MenuMulti').click(function(e){
 			_Editor.SetGizmoMode(_Editor.Multi);
 		});
-			;
+		$('#MenuSaveCopy').click(function(e){
+			_InventoryManager.Take();
+		});
+		
+		
 		$('#MenuLocal').click(function(e){
 			_Editor.SetCoordSystem(_Editor.LocalCoords);
 			if(_Editor.GetMoveGizmo())
@@ -344,6 +349,9 @@
 		});
 		$('#MenuScriptEditor').click(function(e){
 			_ScriptEditor.show();
+		});
+		$('#MenuInventory').click(function(e){
+			_InventoryManager.show();
 		});
 		$('#MenuObjectProperties').click(function(e){
 			_PrimitiveEditor.show();
@@ -700,6 +708,7 @@
 	  <li><a href="#" id="MenuPaste">Paste</a></li>
 	  <li><a href="#" id="MenuDuplicate">Duplicate</a></li>
 	  <li><a href="#" id="MenuDelete">Delete</a></li>
+	  <li><a href="#" id="MenuSaveCopy">Save Copy</a></li>
 	  <li><a href="#">Select</a>
 		<ul>
 			<li><a href="#" id="MenuSelectName">Select By Name</a></li>
@@ -774,6 +783,7 @@
   <li><a href="#" id="MenuScriptEditor">Script Editor</a></li>
   <li><a href="#" id="MenuObjectProperties">Object Properties</a></li>
   <li><a href="#" id="MenuModels">Models</a></li>
+  <li><a href="#" id="MenuInventory">Inventory</a></li>
   </ul>
 </li>
 </ul>
