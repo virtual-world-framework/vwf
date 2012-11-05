@@ -27,7 +27,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.kernel = this.kernel.kernel.kernel;
-
             this.state.sceneRootID = "index-vwf";
 
             this.delayedProperties = {};
@@ -180,6 +179,23 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				{	
 					node.threeMaterial = new THREE.MeshPhongMaterial();
 					SetMaterial(node.threeObject,node.threeMaterial)
+				}
+			}
+			else if ( protos && isParticleDefinition.call( this, protos ) ) {
+			
+				
+				node = this.state.nodes[childID] = {
+					name: childName,
+                    threeObject: threeChild,
+                    ID: childID,
+                    parentID: nodeID,
+                    type: childExtendsID,
+                    sourceType: childType,
+                };
+				
+				if(!node.threeObject)
+				{	
+					CreateParticleSystem.call(this,nodeID,childID,childName);
 				}
 			}
 			else if ( protos && isNodeDefinition.call( this, protos ) ) {
@@ -819,6 +835,45 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // == ticking =============================================================================
 
         ticking: function( vwfTime ) {
+		
+			for(var i in this.state.nodes)
+			{
+				var node = this.state.nodes[i];
+				var threeObject = node.threeObject;
+				if(threeObject instanceof THREE.ParticleSystem)
+				{	
+					
+					  var pCount = 1800;
+					  var particles = threeObject.geometry;
+					  while(pCount--) {
+
+						// get the particle
+						var particle =
+						  particles.vertices[pCount];
+
+						// check if we need to reset
+						if(particle.z < -200) {
+						  particle.z = 200;
+						  particle.velocity.z = 0;
+						}
+
+						// update the velocity with
+						// a splat of randomniz
+						particle.velocity.z -=
+						  Math.random() * .1;
+
+						// and the position
+						particle.addSelf(
+						  particle.velocity);
+						//particle.z -= 10;
+					  }
+
+					  // flag to the particle system
+					  // that we've changed its vertices.
+					  threeObject.geometry.verticesNeedUpdate  = true;
+				
+				}
+			}
         }
 
     } );
@@ -864,6 +919,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         return foundCamera;
     }
+	function isParticleDefinition( prototypes ) {
+        var foundSystem = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundSystem; i++ ) {
+                foundSystem = ( prototypes[i] == "http-vwf-example-com-particlesystem-vwf" );    
+            }
+        }
+
+        return foundSystem;
+    }
+	
+	
 	function isNodeDefinition( prototypes ) {
         var foundNode = false;
         if ( prototypes ) {
@@ -1212,6 +1279,53 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         } 
                
     }
+	function CreateParticleSystem(nodeID, childID, childName )
+	{
+		
+		debugger;
+		var child = this.state.nodes[childID];
+		if ( child ) 
+		{
+		
+			// create the particle variables
+			var particleCount = 1800;
+			var	particles = new THREE.Geometry();
+			var	pMaterial =
+				  new THREE.ParticleBasicMaterial({
+					color: 0xFFFFFF,
+					size: 20
+				  });
+
+			// now create the individual particles
+			for(var p = 0; p < particleCount; p++) {
+
+			  // create a particle with random
+			  // position values, -250 -> 250
+			  var pX = Math.random() * 500 - 250,
+				  pY = Math.random() * 500 - 250,
+				  pZ = Math.random() * 500 - 250,
+				  particle = new THREE.Vertex(
+					new THREE.Vector3(pX, pY, pZ)
+				  );
+				particle.velocity = new THREE.Vector3(
+				  0,              // x
+				  0, // y: random vel
+				  -Math.random()*10);
+			  // add it to the geometry
+			  particles.vertices.push(particle);
+			}
+
+			// create the particle system
+			var particleSystem = new THREE.ParticleSystem(particles,pMaterial);
+            child.threeObject = particleSystem;
+			
+		
+            child.threeObject.name = childName;
+            child.name = childName;
+            addThreeChild.call( this, nodeID, childID );
+        } 
+	
+	}
 	function addThreeChild( parentID, childID ) {
         
         var threeParent;

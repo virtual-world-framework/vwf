@@ -48,9 +48,9 @@ scripts:
     var idsToAddVelocity;
     var materials = [ "red", "blue", "yellow", "green", "orange", "purple", "silver" ];
     var cube = { 
-      "source": "Cube", 
+      "source": "cube.dae", 
       "extends": "http://vwf.example.com/physics3.vwf",
-      "type": "text/xml",
+      "type": "model/vnd.collada+xml",
       "properties": { 
         "material": "",
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
@@ -62,9 +62,9 @@ scripts:
         } 
       };
     var sphere = { 
-      "source": "Sphere", 
+      "source": "sphere.dae", 
       "extends": "http://vwf.example.com/physics3.vwf",
-      "type": "text/xml",
+      "type": "model/vnd.collada+xml",
       "properties": { 
         "material": "", 
         "rotVelocityDamping": [ 0.5, 0.5, 0.5 ], 
