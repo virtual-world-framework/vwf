@@ -126,7 +126,7 @@ function ScriptEditor()
 		$('#ScriptEditorCreateMethod').dialog('close');
 		}
 	}});
-	
+	 
 	$('#ScriptEditorCreateEvent').dialog({title:'Enter Event Signiture',autoOpen:false,height:'auto',width:'300px',position:'center',modal:true,buttons:{
 	'Ok':function(){
 		
