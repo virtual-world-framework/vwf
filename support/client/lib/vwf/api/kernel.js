@@ -69,11 +69,12 @@ define( {
     /// @function
     /// 
     /// @param {ID} nodeID
-    /// @param {String|Object} component
+    /// @param {String|Object} nodeComponent
+    /// @param {Function} [callback]
     /// 
     /// @returns {}
 
-    setNode: [ /* nodeID, component */ ],
+    setNode: [ /* nodeID, nodeComponent, callback( nodeID ) */ ],
 
     /// Get node will retrieve the component of the node specified by the given id.
     /// 
@@ -81,10 +82,12 @@ define( {
     /// @function
     /// 
     /// @param {ID} nodeID
+    /// @param {Boolean} full
+    /// @param {Boolean} normalize
     /// 
     /// @returns {Object}
 
-    getNode: [ /* nodeID */ ],
+    getNode: [ /* nodeID, full, normalize */ ],
 
     // TODO: hashNode
 

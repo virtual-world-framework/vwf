@@ -862,8 +862,8 @@
             // Normalize for consistency.
 
             if ( normalize ) {
-                applicationState =
-                    require( "vwf/utility" ).transform( applicationState, require( "vwf/utility" ).transforms.hash );
+                applicationState = require( "vwf/utility" ).transform(
+                    applicationState, require( "vwf/utility" ).transforms.hash );
             }
     
             this.logger.debugu();
@@ -1237,7 +1237,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         // -- getNode ------------------------------------------------------------------------------
 
-        this.getNode = function( nodeID, full ) {  // TODO: include/exclude children, prototypes
+        this.getNode = function( nodeID, full, normalize ) {  // TODO: options to include/exclude children, prototypes
 
             this.logger.debuggx( "getNode", nodeID, full );
 
@@ -1373,6 +1373,13 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // TODO: scripts
 
+            // Normalize for consistency.
+
+            if ( normalize ) {
+                nodeComponent = require( "vwf/utility" ).transform(
+                    nodeComponent, require( "vwf/utility" ).transforms.hash );
+            }
+
             this.logger.debugu();
 
             // Return the descriptor created, unless it was arranged as a patch and there were no
@@ -1394,7 +1401,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             this.logger.debuggx( "hashNode", typeof nodeID == "object" ? nodeID.id : nodeID );
 
-            var nodeComponent = typeof nodeID == "object" ? nodeID : this.getNode( nodeID );
+            var nodeComponent = typeof nodeID == "object" ? nodeID : this.getNode( nodeID, true, true );
 
             // Hash the intrinsic state.
 
