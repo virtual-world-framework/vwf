@@ -96,7 +96,10 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     
                                     // add some layers
                                     node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_BORDERS, true);
+                                    node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_BUILDINGS, true);
                                     node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_ROADS, true);
+                                    node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_TERRAIN, true);
+                                    node.earthInst.getLayerRoot().enableLayerById(node.earthInst.LAYER_TREES, true);
                                     node.earthInst.getOptions().setFlyToSpeed( node.earthInst.SPEED_TELEPORT );
 
 
