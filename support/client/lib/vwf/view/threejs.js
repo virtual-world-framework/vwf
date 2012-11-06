@@ -200,20 +200,73 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
+		
+		function detectWebGL()
+		{
+			var asa; var canvas; var dcanvas; var gl; var expmt;
 
+			$(document.body).append('<canvas width="100" height="100" id="testWebGLSupport" />');
+			canvas = $('#testWebGLSupport');
+			console.log(canvas);
+
+			// check to see if we can do webgl
+			// ALERT FOR JQUERY PEEPS: canvas is a jquery obj - access the dom obj at canvas[0]
+				dcanvas = canvas[0];
+				expmt = false;
+				if ("WebGLRenderingContext" in window) {
+					console.log("browser at least knows what webgl is.");
+				}
+				// some browsers don't have a .getContext for canvas...
+				try { gl = dcanvas.getContext("webgl"); }
+				catch (x) { gl = null; }
+				if (gl == null) {
+					try { gl = dcanvas.getContext("experimental-webgl"); }
+					catch (x) { gl = null; }
+					if (gl == null) { console.log('but can\'t speak it'); }
+					else { expmt = true; console.log('and speaks it experimentally.'); }
+				} else {
+					console.log('and speaks it natively.');
+				}
+
+				if (gl || expmt) {
+					console.log("loading webgl content."); canvas.remove(); return true;
+				} else {
+					console.log("image-only fallback. no webgl.");
+					canvas.remove();
+					return false;
+				}
+
+			
+		
+		
+		}
+		function getURLParameter(name) {
+			return decodeURI(
+				(RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+			);
+		}
+		
         if ( mycanvas ) {
             var oldMouseX = 0;
             var oldMouseY = 0;
             var hovering = false;
-		  
-			sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
+			
+		    if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
+			{
+				sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
+			}else
+			{
+				sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
+				sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
+			}
             sceneNode.renderer.setClearColor({r:.5,g:1,b:1},1.0);
 			var ambientlight = new THREE.AmbientLight('#000000');
 			ambientlight.color.setRGB(.7,.7,.7);
 			sceneNode.threeScene.add(ambientlight);
 			
 			rebuildAllMaterials.call(this);
-			sceneNode.renderer.setFaceCulling(false);
+			if(sceneNode.renderer.setFaceCulling)
+				sceneNode.renderer.setFaceCulling(false);
             this.state.cameraInUse = sceneNode.threeScene.children[0];
            // this.state.cameraInUse.setAspect( ( mycanvas.width / mycanvas.height) /*/ 1.333 */ );
 

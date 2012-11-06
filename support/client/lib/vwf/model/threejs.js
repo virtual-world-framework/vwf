@@ -201,7 +201,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 			else if ( protos && isNodeDefinition.call( this, protos ) ) {
 				
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                if ( childType == "model/vnd.collada+xml") {
+                if ( childType == "model/vnd.collada+xml" || childType == "model/vnd.osgjs+json+compressed") {
                         
 						
 						//Do we need this when we have an async load? currently seems to break things
@@ -215,11 +215,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             sourceType: childType,
                             type: childExtendsID,
                             //no load callback, maybe don't need this?
-							loadingCollada: callback,
+							loadingCallback: callback,
                             sceneID: this.state.sceneRootID
                         };
-                        loadCollada.call( this, parentNode, node );     
-				}else
+                        loadAsset.call( this, parentNode, node, childType );     
+				}
+				else
 				{	
 						
 						node = this.state.nodes[childID] = {
@@ -231,7 +232,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             sourceType: childType,
                             type: childExtendsID,
                             //no load callback, maybe don't need this?
-							//loadingCollada: callback,
+							//loadingCallback: callback,
                             sceneID: this.state.sceneRootID
                         };
 						if(!node.threeObject)
@@ -955,7 +956,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 		node.modelInited = false;
 		node.threeScene = new THREE.Scene();
 		node.pendingLoads = 0;
-		node.srcColladaObjects = [];
+		node.srcAssetObjects = [];
 		node.delayedProperties = {};
 		
 		return node;
@@ -1133,7 +1134,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 		}		
 		return null;
 	}
-	function loadCollada( parentNode, node ) {
+	function loadAsset( parentNode, node, childType ) {
 
         var nodeCopy = node; 
         var nodeID = node.ID;
@@ -1141,44 +1142,45 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
 
-        function colladaLoaded( collada ) { 
+        function assetLoaded( asset ) { 
             sceneNode.pendingLoads--;
             
 			//possibly deal with setting intial scale and rotation here, if threejs does something strange by default
 			//collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
-			
+			if(asset.scene)
+				asset = asset.scene;
             var removed = false;
 		   
-			SetMaterialAmbients.call(threeModel,collada.scene);
-			nodeCopy.threeObject.add(collada.scene);
+			SetMaterialAmbients.call(threeModel,asset);
+			nodeCopy.threeObject.add(asset);
 			nodeCopy.threeObject.matrixAutoUpdate = false;
 			nodeCopy.threeObject.matrix.elements = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 			//no idea what this is doing here
-            if ( nodeCopy && nodeCopy.colladaLoaded ) {
-                nodeCopy.colladaLoaded( true );
+            if ( nodeCopy && nodeCopy.assetLoaded ) {
+                nodeCopy.assetLoaded( true );
             }
-            for ( var j = 0; j < sceneNode.srcColladaObjects.length; j++ ) {
-                if ( sceneNode.srcColladaObjects[j] == nodeCopy.threeObject ){
-                    sceneNode.srcColladaObjects.splice( j, 1 );
+            for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
+                if ( sceneNode.srcAssetObjects[j] == nodeCopy.threeObject ){
+                    sceneNode.srcAssetObjects.splice( j, 1 );
                     removed = true;
                 }
             } 
             if ( removed ) {
-                if ( sceneNode.srcColladaObjects.length == 0 ) {
+                if ( sceneNode.srcAssetObjects.length == 0 ) {
                     //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
                     loadComplete.call( threeModel );
                 }
 
-                var id = collada.vwfID;
-                if ( !id ) id = getObjectID.call( threeModel, collada.scene, true, false );
+                var id = nodeCopy.vwfID;
+                if ( !id ) id = getObjectID.call( threeModel, asset, true, false );
                 if ( id && id != "" ){
                     //glgeModel.kernel.callMethod( id, "loadComplete" );
                     if ( threeModel.state.nodes[id] ) {
-                        var colladaNode = threeModel.state.nodes[id];
+                        var assetNode = threeModel.state.nodes[id];
                         //finally, here is the async callback
-						if ( colladaNode.loadingCollada ) {
+						if ( assetNode.loadingCallback ) {
 							
-                            colladaNode.loadingCollada( true );                    
+                            assetNode.loadingCallback( true );                    
                         }
                     }
                 }
@@ -1187,11 +1189,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         node.name = childName;
         if(!node.threeObject)
 			node.threeObject = new THREE.Object3D();
-        sceneNode.srcColladaObjects.push( node.threeObject );
+        sceneNode.srcAssetObjects.push( node.threeObject );
         node.threeObject.vwfID = nodeID;
 
         //todo, set when dealing with actual collada load. Three js should have some sort of loader with a callback. 
-        //node.glgeObject.loadedCallback = colladaLoaded;
+        //node.glgeObject.loadedCallback = assetLoaded;
         sceneNode.pendingLoads++;
         
         if ( parentNode && parentNode.threeObject ) {
@@ -1207,10 +1209,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 		////////////////////////////////////
 		//manually call callback, since there is no async load currently
-		//colladaLoaded(node.threeObject);
+		//assetLoaded(node.threeObject);
+		if(childType == "model/vnd.collada+xml")
+		{
+			node.loader = new THREE.ColladaLoader();
+			node.loader.load(node.source,assetLoaded.bind(this));
+		}
+		if(childType == "model/vnd.osgjs+json+compressed")
+		{
+			node.loader = new UTF8JsonLoader(node,assetLoaded.bind(this));
+		}
+			
 		
-		node.loader = new THREE.ColladaLoader();
-		node.loader.load(node.source,colladaLoaded.bind(this));
     }
 	function loadComplete() {
         var itemsToDelete = [];
@@ -1282,7 +1292,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 	function CreateParticleSystem(nodeID, childID, childName )
 	{
 		
-		debugger;
+		
 		var child = this.state.nodes[childID];
 		if ( child ) 
 		{
@@ -1423,8 +1433,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 			{
 				
 				//this will override any ambient colors set in materials.
-				if(start.material.ambient)
-					start.material.ambient.setRGB(1,1,1);
+				//if(start.material.ambient)
+				//	start.material.ambient.setRGB(1,1,1);
 			}
 			if(start && start.children)
 			{
@@ -1442,5 +1452,385 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 			   for(var i in node.children)
 				SetVisible(node.children[i],state);
 			}
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//UTF8 loader
+	
+
+	function DecodeARRAY_BUFFER(str,range,inmin,stride,bits)
+	{
+	 str = blobarray[str];
+	  var attribs_out = [];//new Float32Array(str.length);
+	  //min = min + 0.0;
+	  var prev = [0,0,0];
+	  var divisor = Math.pow(2,bits);
+	  for (var i = 5; i < str.length-5; i+=stride) {
+
+		  for(var j = 0; j< stride; j++)
+			{	  
+				  var code = str.charCodeAt(i+j);
+				  var dezigzag = (Number(code) >> 1) ^ (-(Number(code) & 1));
+				  prev[j] += dezigzag;
+				  var prev_attrib = ((prev[j]/divisor)*(range))  + Number(inmin) ;//(code >> 1) ^ (-(code & 1));
+				  attribs_out.push(prev_attrib);
+			}	  
+	  }
+	 
+	  return attribs_out;
+	}
+	var debugarraytype = "";
+	function DecodeELEMENT_ARRAY_BUFFER(str,range)
+	{
+	 
+	  str = blobarray[str];
+	  var attribs_out = [];//new Uint16Array(str.length);
+	  var prev = 0;
+	  for (var i = 5; i < str.length-5; i++) {
+	 
+		  var code = str.charCodeAt(i);
+		  var dezigzag = (code >> 1) ^ (-(code & 1));;
+		  prev += dezigzag;
+		 // alert("char code " +code + " dezigzag " + dezigzag + " new value " + prev);
+		  attribs_out.push(prev);
+		  
+	  }
+	 
+	  return attribs_out;
+	}
+
+	function DecodeArray(array,key)
+	{
+		var type = array.type;
+		var array2 =[];
+		var itemsize = array.itemSize;
+		
+		if(type == "ELEMENT_ARRAY_BUFFER")
+			array2 = DecodeELEMENT_ARRAY_BUFFER(array.elements.values,array.elements.range);
+		if(type == "ARRAY_BUFFER")
+			array2 = DecodeARRAY_BUFFER(array.elements.values,array.elements.range,array.elements.min,itemsize,array.elements.bits);	
+		
+		return array2;
+	}
+
+	function UTF8JsonLoader(node,callback)
+	{
+		
+		var self = this;
+		this.url = node.source;
+		this.callback = callback;
+		this.children=[];
+		
+		this.jsonLoaded = function(e)
+		{
+			var test = 1+1;
+			var jsonData = JSON.parse(decompress(e));
+			var texture_load_callback = function(texturename)
+			{
+				
+				var src = "";
+				if(this.url.toLowerCase().indexOf('3dr_federation') != -1)
+					src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/NoRedirect/" + encodeURIComponent(texturename) +"?ID=00-00-00";
+				else
+					src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/" + encodeURIComponent(texturename) +"?ID=00-00-00";
+				console.log(src);
+				src = src.replace("AnonymousUser:@","");
+				
+				var tex = THREE.ImageUtils.loadTexture(src);
+				
+				return tex;
+			}
+			this.scene = ParseSceneGraph(jsonData,texture_load_callback.bind(this));
+			if(this.callback)
+				this.callback(this);
+		}.bind(this);
+		
+		this.error = function(e)
+		{
+			alert(e.responseText);
+		}.bind(this);
+		
+		$.ajax({
+			url: this.url,
+			data: {},
+			success: this.jsonLoaded,
+			error: this.error,
+			dataType:'text'
+		});
+		;
+	}
+
+	
+
+	function BuildUTF8JsonNode(node,callback)
+	{
+		return new UTF8JsonLoader(node,callback);
+	}
+	function toColor(arr)
+		{
+			var color = new THREE.Color();
+			color.setRGB(arr[0],arr[1],arr[2],arr[3]);
+			return color;
+		}
+	function ApplyMaterial(newnode,newmaterial)
+	{
+		if(newnode instanceof THREE.Mesh)
+			newnode.material = newmaterial;
+		else if( newnode.children)
+		{
+			for(var i =0; i < newnode.children.length;i++)
+				ApplyMaterial(newnode.children[0],newmaterial);
+		}	
+	}	
+	function ParseSceneGraph(node, texture_load_callback) {
+		
+		var newnode;
+		//its geometry
+		if (node.primitives) {
+			
+			//newnode = new THREE.Object3D();
+			var geo = new THREE.Geometry();
+			var mesh = newnode = new THREE.Mesh(geo);
+			mesh.geometry.normals = [];
+			mesh.geometry.UVS = [];
+			
+			
+			
+			//vertex data
+			if (node.attributes) {
+				jQuery.each(node.attributes, function(key, element) {
+					debugarraytype = key;
+					var attributeArray = node.attributes[key];
+					node.attributes[key] = DecodeArray(attributeArray,key);
+					if(key == "Vertex")
+					{
+						for(var i = 0; i < node.attributes[key].length-2; i+= 3)
+						{
+							var vert = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+							mesh.geometry.vertices.push(vert);
+						}
+					}
+					if(key == "Normal")
+					{
+						for(var i = 0; i < node.attributes[key].length-2; i+= 3)
+						{
+							var norm = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+							mesh.geometry.normals.push(norm);
+						}
+					}
+					if(key == "TexCoord0")
+					{
+						for(var i = 0; i < node.attributes[key].length-1; i+= 2)
+						{
+							var uv = new THREE.UV(node.attributes[key][i],node.attributes[key][i+1]);
+							mesh.geometry.UVS.push(uv);
+						}
+					}
+					
+					if(key == "VertexColor")
+					{
+						for(var i = 0; i < node.attributes[key].length-3; i+= 4)
+						{
+							var vert = new THREE.Vector3(node.attributes[key][i],node.attributes[key][i+1],node.attributes[key][i+2]);
+							mesh.geometry.colors.push(vert);
+							
+						}
+					}				
+				});
+			}
+			
+			var i;
+			for (i in node.primitives) {
+				
+				if (node.primitives[i].indices) {
+					var array = node.primitives[i].indices;
+					array = DecodeArray(array);
+					
+					for(var j = 0; j < array.length-2; j+= 3)
+					{
+						var face = new THREE.Face3(array[j],array[j+1],array[j+2],new THREE.Vector3(0,1,0),new THREE.Color('#000000'),0);
+						face.vertexNormals.push(mesh.geometry.normals[face.a]);
+						face.vertexNormals.push(mesh.geometry.normals[face.b]);
+						face.vertexNormals.push(mesh.geometry.normals[face.c]);
+						mesh.geometry.faces.push(face);
+						mesh.geometry.faceVertexUvs[0].push([mesh.geometry.UVS[face.a],mesh.geometry.UVS[face.b],mesh.geometry.UVS[face.c]]);
+
+					}
+				} else {
+					mode = gl[mode];
+					var first = node.primitives[i].first;
+					var count = node.primitives[i].count;
+					if (count > 65535)
+						count = 32740;
+					//node.primitives[i] = new osg.DrawArrays(mode, first, count);
+				}
+			}
+			
+			
+			mesh.geometry.verticesNeedUpdate  = true;
+			mesh.geometry.facesNeedUpdate  = true;
+			}
+			var newmaterial = null;
+			if (node.stateset) {
+				newmaterial = new THREE.MeshPhongMaterial();
+				if (node.stateset.textures) {
+					var textures = node.stateset.textures;
+					for ( var t = 0, tl = textures.length; t < tl; t++) {
+						if (textures[t] === undefined) {
+							continue;
+						}
+						if (!textures[t].file) {
+							if (console !== undefined) {
+							console.log("no 'file' field for texture "
+								+ textures[t]);
+							}
+						}
+
+						var tex;
+						if (texture_load_callback)
+							tex = texture_load_callback(textures[t].file);
+						else
+						{
+							tex = THREE.ImageUtils.loadTexture(textures[t].file);
+						}
+						if (tex) {
+							tex.wrapS = THREE.RepeatWrapping;
+							tex.wrapT = THREE.RepeatWrapping;
+							newmaterial.map = tex;
+							newmaterial.needsUpdate = true;
+						}
+					}
+				}
+				if (node.stateset.material) {
+					newmaterial.ambient = (toColor(node.stateset.material.ambient));
+					newmaterial.color = (toColor(node.stateset.material.diffuse));
+					
+					newmaterial.shininess = (node.stateset.material.shininess);
+					newmaterial.specular = (toColor(node.stateset.material.specular));
+					newmaterial.needsUpdate = true;
+				}
+				
+			}
+			
+			
+			
+		if (node.matrix) {
+		
+			if(newnode == null)
+				newnode = new THREE.Object3D();
+			var matrix = [];
+			for(var i =0; i < node.matrix.length; i++)
+				matrix.push(node.matrix[i]);
+			var glmat = new THREE.Matrix4();
+			glmat.elements = matrix;
+			
+			var flipmat = new THREE.Matrix4(1, 0,0,0,
+											0, 0,1,0,
+											0,-1,0,0,
+											0, 0,0,1);
+							
+											
+			glmat = glmat.multiply(flipmat,glmat);
+			
+			//glmat = glmat.transpose();
+			newnode.matrix.copy(glmat)	
+			newnode.matrixAutoUpdate = false;
+		}
+		
+		if (node.children) {
+			if(newnode == null)
+				newnode = new THREE.Object3D();
+			for ( var child = 0; child < node.children.length; child++) {
+				var childnode = ParseSceneGraph(node.children[child],texture_load_callback);
+				if(childnode)
+					newnode.add(childnode);
+			}
+		}
+		
+		if(newnode && newmaterial)
+			ApplyMaterial(newnode,newmaterial);
+		
+		if(node.name && newnode)
+			newnode.name = node.name;
+			
+		return newnode;
+	}
+	var blobsfound = 0;
+	var blobarray = [];
+
+	function DecompressStrings(data, replace, find)
+	{
+		var reg = new RegExp(find,'g');
+		return data.replace(reg, replace);
+	}
+
+	function decompressJsonStrings(data)
+	{
+	data = DecompressStrings(data,"\"min\":","min:");
+	data = DecompressStrings(data,"\"max\":","max:");
+	data = DecompressStrings(data,"\"stateset\":","ss:");
+	data = DecompressStrings(data,"\"LINE_LOOP\"","\"LL\"");
+	data = DecompressStrings(data,"\"LINEAR\"","\"L\"");
+	data = DecompressStrings(data,"\"LINEAR_MIPMAP_LINEAR\"","\"LML\"");
+	data = DecompressStrings(data,"\"LINEAR_MIPMAP_NEAREST\"","\"LMN\"");
+	data = DecompressStrings(data,"\"NEAREST\"","\"NE\"");
+	data = DecompressStrings(data,"\"NEAREST_MIPMAP_LINEAR\"","\"NML\"");
+	data = DecompressStrings(data,"\"NEAREST_MIPMAP_NEAREST\"","\"NMN\"");
+	data = DecompressStrings(data,"\"mag_filter\":","maf:");
+	data = DecompressStrings(data,"\"min_filter\":","mif:");
+	data = DecompressStrings(data,"\"file\":","f:");
+	data = DecompressStrings(data,"\"name\":","n:");
+	data = DecompressStrings(data,"\"ambient\":","a:");
+	data = DecompressStrings(data,"\"diffuse\":","d:");
+	data = DecompressStrings(data,"\"specular\":","s:");
+	data = DecompressStrings(data,"\"emission\":","e:");
+	data = DecompressStrings(data,"\"shininess\":","sh:");
+	data = DecompressStrings(data,"\"textures\":","t:");
+	data = DecompressStrings(data,"\"material\":","m:");
+	data = DecompressStrings(data,"\"POINTS\"","\"P\"");
+	data = DecompressStrings(data,"\"LINES\"","\"LI\"");
+
+	data = DecompressStrings(data,"\"LINE_STRIP\"","\"LS\"");
+	data = DecompressStrings(data,"\"TRIANGLES\"","\"T\"");
+	data = DecompressStrings(data,"\"TRIANGLE_FAN\"","\"TF\"");
+	data = DecompressStrings(data,"\"TRIANGLE_STRIP\"","\"TS\"");
+	data = DecompressStrings(data,"\"first\":","fi:");
+	data = DecompressStrings(data,"\"count\":","co:");
+	data = DecompressStrings(data,"\"mode\":","mo:");
+	data = DecompressStrings(data,"\"undefined\":","u:");
+	data = DecompressStrings(data,"\"children\":","c:");
+	data = DecompressStrings(data,"\"range\":","r:");
+	data = DecompressStrings(data,"\"bits\":","b:");
+	data = DecompressStrings(data,"\"values\":","v:");
+	data = DecompressStrings(data,"\"elements\":","el:");
+	data = DecompressStrings(data,"\"itemSize\":","iS:");
+	data = DecompressStrings(data,"\"type\":","ty:");
+	data = DecompressStrings(data,"\"ARRAY_BUFFER\"","\"AB\"");
+	data = DecompressStrings(data,"\"ELEMENT_ARRAY_BUFFER\"","\"EAB\"");
+	data = DecompressStrings(data,"\"indices\":","i:");
+	data = DecompressStrings(data,"\"Vertex\":","V:");
+	data = DecompressStrings(data,"\"Normal\":","N:");
+	data = DecompressStrings(data,"\"TexCoord0\":","T0:");
+	data = DecompressStrings(data,"\"TexCoord1\":","T1:");
+	data = DecompressStrings(data,"\"TexCoord2\":","T2:");
+	data = DecompressStrings(data,"\"TexCoord3\":","T3:");
+	data = DecompressStrings(data,"\"TexCoord4\":","T4:");
+	data = DecompressStrings(data,"\"attributes\":","A:");
+	data = DecompressStrings(data,"\"primitives\":","p:");
+	data = DecompressStrings(data,"\"projection\":","pr:");
+	data = DecompressStrings(data,"\"matrix\":","M:");
+
+	return data;
+	}
+
+	function decompress(dataencoded)
+	{
+		blobsfound = 0;
+		blobarray = [];
+
+		var regex = new RegExp('\u7FFF\u7FFE\u7FFF\u7FFE\u7FFF[\\S\\s]*?\u7FFE\u7FFF\u7FFE\u7FFF\u7FFE','igm');
+		blobarray = dataencoded.match(regex);
+		var data = dataencoded.replace(regex,function(match) { return "\""+(blobsfound++)+"\"";});
+		data = decompressJsonStrings(data);
+		return data;
 	}
 });
