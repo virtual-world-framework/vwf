@@ -102,7 +102,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 							{
 								
 								threeObject.__lights[i].color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-								SetMaterialAmbients.call(this);
+								//SetMaterialAmbients.call(this);
 							}
 							
 						}

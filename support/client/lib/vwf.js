@@ -87,7 +87,10 @@
         // controlled by the reflector and updates here as we receive control messages.
 
         this.now = 0;
-
+		
+		//time slicing and keying off the sim clock, issue ticks at a set rate.
+		this.lastTick = 0;
+		
         // The moniker of the client responsible for an action. Will be falsy for actions
         // originating in the server, such as time ticks.
 
@@ -655,7 +658,15 @@
                 if ( this.now != fields.time ) {
                     this.client_ = undefined; // clear after the previous action
                     this.now = fields.time;
-                    this.tick();
+					var time = fields.time - this.lastTick;
+					while(time > 0)
+					{	
+						this.tick();
+						time -= .053;
+					}
+					//save the leftovers
+					this.lastTick = fields.time - time;
+                    
                 }
 
                 // Perform the action.
@@ -670,10 +681,17 @@
             // Advance time to the most recent time received from the server. Tick if the time
             // advanced.
 
-            if ( queue.ready() && this.now != queue.time ) {
+            if ( queue.ready() && queue.time - this.lastTick > .053 ) {
                 this.client_ = undefined; // clear after the previous action
                 this.now = queue.time;
-                this.tick();
+				var time = queue.time - this.lastTick;
+					while(time > 0)
+					{	
+						this.tick();
+						time -= .053;
+					}
+					//save the leftovers
+					this.lastTick = queue.time - time;
             }
             
         };
