@@ -431,16 +431,18 @@ function MaterialEditor()
 	this.SelectionChanged = function(e,node)
 	{
 		try{
-			
+			debugger; 
 			if(node)
 			{
 				this.currentMaterial = vwf.getProperty(node.id,'materialDef');
+				if(!this.currentMaterial)
+					return;
 				this.BuildGUI();
 			}
 		}
 		catch(e)
 		{
-			console.log(e);
+			debugger;  console.log(e);
 		}
 	}
 	$(document).bind('selectionChanged',this.SelectionChanged.bind(this));

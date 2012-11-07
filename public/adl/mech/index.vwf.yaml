@@ -552,11 +552,14 @@ scripts:
     this.deleteplayer = function(e)
     {
         
-        
-        var num = vwf_view.kernel.kernel.models[0].model.nodes[e].PlayerNumber;
+        debugger;
+        var player = vwf_view.kernel.kernel.models[0].model.nodes[e];
+        if(!player)
+            player = vwf_view.kernel.kernel.models[0].model.nodes['-object-Object-'+e];
+        var num = player.PlayerNumber;
         PlayerDeleted(num);
         
-        vwf_view.kernel.kernel.models[0].model.nodes[e].deinitialize();
+        player.deinitialize();
         
         
         
@@ -589,7 +592,7 @@ scripts:
     this.newplayer = function(e)
     {
         
-       
+        debugger;
         this.loaded = true;
         var proto = JSON.parse(e);
         //this.players.push(proto);

@@ -78,7 +78,7 @@
         // controlled by the reflector and updates here as we receive control messages.
 
         this.now = 0;
-
+		this.lastTick = 0;
         // The moniker of the client responsible for an action. Will be falsy for actions
         // originating in the server, such as time ticks.
 
@@ -681,7 +681,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
-                    this.tick();
+                    var time = fields.time - this.lastTick;
+					while(time > 0)
+					{	
+						this.tick();
+						time -= .053;
+					}
+					//save the leftovers
+					this.lastTick = fields.time - time;
                 }
 
                 // Record the originating client.

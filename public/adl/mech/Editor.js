@@ -923,7 +923,7 @@ function Editor()
 	}.bind(this);
 	var triggerSelectionChanged = function(VWFNode)
 	{
-		
+		debugger;
 		$(document).trigger('selectionChanged', [VWFNode]);
 		
 	}.bind(this);

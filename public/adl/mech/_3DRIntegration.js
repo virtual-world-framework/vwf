@@ -341,7 +341,7 @@ function _3DRIntegration()
 						var metadata = object;
 						jQuery('#ModelDetails').css('text-align','left');
 						_ModelLibrary.DisplayMetadata(object);
-						_ModelLibrary.MetadataCache[object.PID] = object;
+						_ModelLibrary.MetadataCache[_ModelLibrary.DetailsPID] = object;
 					}.bind(this),
 					error: function (xhr, ajaxOptions, thrownError) {
 						alert(thrownError);

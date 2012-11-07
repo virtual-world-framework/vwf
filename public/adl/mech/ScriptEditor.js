@@ -719,7 +719,7 @@ function ScriptEditor()
 	}
 	this.SelectionChanged = function(e,node)
 	{
-		
+		debugger; 
 		if(!this.isOpen())
 		{
 			_ScriptEditor.currentNode = node
@@ -742,7 +742,7 @@ function ScriptEditor()
 		}
 		catch(e)
 		{
-			console.log(e);
+			debugger; console.log(e);
 		}
 	}
 	$(document).bind('selectionChanged',this.SelectionChanged.bind(this));

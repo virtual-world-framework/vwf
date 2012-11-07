@@ -312,7 +312,7 @@ function PrimitiveEditor()
 	this.SelectionTransformed = function(e,node)
 	{
 		try{
-			
+			debugger; 
 			if(node)
 			{
 				
@@ -333,7 +333,7 @@ function PrimitiveEditor()
 		}
 		catch(e)
 		{
-			console.log(e);
+			debugger; console.log(e);
 		}
 	}
 	$(document).bind('selectionChanged',this.SelectionChanged.bind(this));

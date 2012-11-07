@@ -22,8 +22,7 @@
             <diffuse>
               <color>0 0 0 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -51,8 +50,7 @@
             <diffuse>
               <color>0.65098 0.792157 0.941176 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -80,8 +78,7 @@
             <diffuse>
               <color>0.878431 0.776471 0.341176 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -109,8 +106,7 @@
             <diffuse>
               <color>0.0313725 0.431373 0.52549 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -138,8 +134,7 @@
             <diffuse>
               <color>0.109804 0.109804 0.694118 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -167,8 +162,7 @@
             <diffuse>
               <color>0.423529 0.0313725 0.533333 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -196,8 +190,7 @@
             <diffuse>
               <color>0.898039 0.603922 0.843137 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -225,8 +218,7 @@
             <diffuse>
               <color>0.0235294 0.52549 0.0235294 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -254,8 +246,7 @@
             <diffuse>
               <color>0.443137 0.52549 0.0235294 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -283,8 +274,7 @@
             <diffuse>
               <color>0.52549 0.0235294 0.0235294 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -312,8 +302,7 @@
             <diffuse>
               <color>0.894118 0.721569 0.6 1</color>
             </diffuse>
-            <specular>
-              <color>1 1 1 1</color>
+            <specular>              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>
@@ -355,7 +344,7 @@
               <texture texture="us_male_adult_soldier_army_bduCompleteMap_tga-sampler" texcoord="CHANNEL1"/>
             </diffuse>
             <specular>
-              <color>0.9 0.9 0.9 1</color>
+              <color>0 0 0 1</color>
             </specular>
             <shininess>
               <float>10</float>

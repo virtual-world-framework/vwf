@@ -183,7 +183,7 @@ scripts:
     this.update = function(moniker)
     {
         this.updatecounter++;
-        var updateFreqDivisor = 3;
+        var updateFreqDivisor = 1;
         if(Math.ceil(this.updatecounter/updateFreqDivisor) - this.updatecounter/updateFreqDivisor != 0) 
         {
             if(this.activeCycle != null)
@@ -312,6 +312,7 @@ scripts:
                     var len = GLGE.lengthVec3(offset);
                     offset = GLGE.scaleVec3(offset,1/GLGE.lengthVec3(offset));
                     var norm = intersectfront.normal;
+                    console.log(norm);
                     if(Math.abs(norm[0]) < .05) norm[0] = 0;
                     if(Math.abs(norm[1]) < .05) norm[1] = 0;
                     if(Math.abs(norm[2]) < .05) norm[2] = 0;
@@ -321,7 +322,7 @@ scripts:
                     this.translation = GLGE.addVec3(this.translation,R);
                 }
             }
-            var intersect = findscene().ray(GLGE.addVec3(this.translation,[0,0,1.7]),[0,0,1]);
+          /*  var intersect = findscene().ray(GLGE.addVec3(this.translation,[0,0,1.7]),[0,0,1]);
             if( intersect)
             {
                 //console.log(intersect.distance);
@@ -342,7 +343,7 @@ scripts:
                 {
                     this.translation = GLGE.addVec3(this.translation, [0,0,zmove/3]);
                 }
-            }
+            }*/
             this.mesh.setPickable(true);
         }
         if(this.inMotion('jump') && this.jumpcounter > 10)

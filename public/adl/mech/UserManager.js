@@ -50,6 +50,11 @@ function UserManager()
 	$("#CreateUserProfiletable").append("<tr><td><div>Height</div></td><td style='width: auto;max-width: 100%;'><input style='border-radius: 10px;width: auto;' type='text' id='SetProfileHeight'></input></td></tr>");
 	$("#CreateUserProfiletable").append("<tr><td><div>Weight</div></td><td style='width: auto;max-width: 100%;'><input style='border-radius: 10px;width: auto;' type='text' id='SetProfileWeight'></input></td></tr>");
 	$("#CreateUserProfiletable").append("<tr><td><div>Nationality</div></td><td style='width: auto;max-width: 100%;'><input style='border-radius: 10px;width: auto;' type='text' id='SetProfileNationality'></input></td></tr>");
+	$("#CreateUserProfiletable").append("<tr><td><div>Avatar</div></td><td style='width: auto;max-width: 100%;'><select style='border-radius: 10px;width: auto;' type='text' id='SetProfileAvatar'>"+
+										"<option value='usmale.dae'>US Soldier 1</choice>"+
+										"<option value='usmale2.dae'>US Soldier 2</choice>"+
+										"<option value='afganman.dae'>Afghani Man</choice>"+
+										"</select></td></tr>");
 	
 	$(document.body).append('<div id="EditProfileDialog"/>');
 	
@@ -104,7 +109,7 @@ function UserManager()
 		$('#UserProfileWindow').dialog('option','position',[1282,40]);
 		_PrimitiveEditor.hide();
 		_MaterialEditor.hide();
-		_Editor.SelectObject(null);
+		//_Editor.SelectObject(null);
 		for(i in profile)
 		{
 			$('#Profile' + i).html(profile[i]);
@@ -140,7 +145,7 @@ function UserManager()
 	    
         $('#MenuLogIn').attr('disabled','disabled');
 		$('#MenuLogOut').removeAttr('disabled');
-		this.PlayerProto.source= 'usmale.dae';//$("#AvatarChoice :radio:checked").attr('value');
+		this.PlayerProto.source= profile['Avatar'];
 		var name = profile.Username;
 		$('#Logon').dialog('close');
 		this.PlayerProto.properties.PlayerNumber = name;
@@ -260,6 +265,7 @@ function UserManager()
 				alert('you must enter a user name');
 				return;
 			}
+			newprofile['Avatar'] = $('#SetProfileAvatar').val();
 			_DataManager.saveProfile(newprofile);
 			$('#CreateProfileDialog').dialog('close');
 			_UserManager.Login(_DataManager.GetProfileForUser(newprofile.Username));

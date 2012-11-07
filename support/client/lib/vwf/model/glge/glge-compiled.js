@@ -14027,6 +14027,7 @@ GLGE.Scene.prototype.ray=function(origin,direction){
 			var cvp=this.camera.getViewProjection();
 			objects=this.objectsInViewFrustum(objects,cvp);
 		}*/
+		
 		var pickableDepthTestObjects = [];
 		var pickableNoDepthObjects = [];
 		var ordermap = {}
@@ -14051,7 +14052,7 @@ GLGE.Scene.prototype.ray=function(origin,direction){
 		var data = new Uint8Array(8 * 1 * 4);
 		gl.readPixels(0, 0, 8, 1, gl.RGBA,gl.UNSIGNED_BYTE, data);
 		
-		var norm=[data[4]/255,data[5]/255,data[6]/255];
+		var norm=[data[4]/255+0.00390625,data[5]/255+0.00390625,data[6]/255+0.00390625];
 		norm[0] = (norm[0]-.5) * 2;
 		norm[1] = (norm[1]-.5) * 2;
 		norm[2] = (norm[2]-.5) * 2;
@@ -14060,7 +14061,15 @@ GLGE.Scene.prototype.ray=function(origin,direction){
 		//var normalsize=Math.sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2])*0.5;
 		//norm=[norm[0]/normalsize,norm[1]/normalsize,norm[2]/normalsize];
 		var obj=objects[data[0]+data[1]*256+data[2]*65536-1];
-
+		if(obj)
+		{
+			var M = new GLGE.Mat4(obj.getModelMatrix());
+			
+			M[3] = M[7] = M[11] = 0;
+			norm = GLGE.mulMat4Vec3(M,norm);
+			var len = GLGE.lengthVec3(norm);
+			norm = GLGE.scaleVec3(norm,1/len);
+		}
 		var dist=(data[10]/255+0.00390625*data[9]/255+0.0000152587890625*data[8]/255)*this.camera.far;
 		var tex=[];
 		tex[0]=(data[14]/255+0.00390625*data[13]/255+0.0000152587890625*data[12]/255);
