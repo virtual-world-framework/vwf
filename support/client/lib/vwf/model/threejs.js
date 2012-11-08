@@ -256,6 +256,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         deletingNode: function( nodeID ) {
 
+			
+			if(nodeID)
+			{
+				var childNode = this.state.nodes[nodeID];
+				if(childNode)
+				{
+					var threeObject = childNode.threeObject;
+					if(threeObject && threeObject.parent)
+					{
+						threeObject.parent.remove(threeObject);
+					}
+					delete this.state.nodes[childNode];
+				}				
+			}
         },
 
         // -- addingChild ------------------------------------------------------------------------
