@@ -21,6 +21,20 @@ extends: http://vwf.example.com/node.vwf
 
 properties:
 
+  ## Node casts shadows
+  ## 
+  ## @name node3.vwf#castShadows
+  ## @property
+
+  castShadows:
+  
+  ## Node receives shadows
+  ## 
+  ## @name node3.vwf#receiveShadows
+  ## @property
+
+  receiveShadows:
+  
   ## World transform of 3D node
   ## 
   ## @name node3.vwf#worldTransform

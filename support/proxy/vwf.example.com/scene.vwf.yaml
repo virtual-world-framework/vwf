@@ -20,6 +20,12 @@
 extends: http://vwf.example.com/node2.vwf
 properties:
 
+  ## Cast Shadows
+  ## 
+  ## @name scene.vwf#enableShadows
+  ## @property
+
+  enableShadows: 
   ## Active camera
   ## 
   ## @name scene.vwf#activeCamera
