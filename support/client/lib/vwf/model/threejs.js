@@ -460,7 +460,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					}
 					if(propertyName == 'visible')
 					{
+						//need to walk the tree and hide all sub nodes as well
 						SetVisible(threeObject,propertyValue);
+					}
+					if(propertyName == 'castShadows')
+					{
+						debugger;
+						threeObject.castShadow = true;
+					}
+					if(propertyName == 'receiveShadows')
+					{
+						debugger;
+						threeObject.receiveShadow = true;
 					}
 					//This can be a bit confusing, as the node has a material property, and a material child node. 
 					//setting the property does this, but the code in the component is ambigious
@@ -498,32 +509,90 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					if(propertyName == "fovy")
 					{
 						if(propertyValue)
+						{
 							threeObject.fov = parseFloat(propertyValue);
+							threeObject.updateProjectionMatrix();
+						}
 					}
 					if(propertyName == "near")
 					{
 						if(propertyValue)
+						{
 							threeObject.near = parseFloat(propertyValue);
+							threeObject.updateProjectionMatrix();
+						}
 					}
 					if(propertyName == "aspect")
 					{
 						if(propertyValue)
-							threeObject.aspect = parseFloat(propertyValue);					
+						{
+							threeObject.aspect = parseFloat(propertyValue);	
+							threeObject.updateProjectionMatrix();							
+						}
 					}
 					if(propertyName == "far")
 					{
 						if(propertyValue)
+						{
 							threeObject.far = parseFloat(propertyValue);					
+							threeObject.updateProjectionMatrix();
+						}
 					}
 					if(propertyName == "cameraType")
 					{	
 						if(propertyValue == 'perspective')
 						{
-					
+							
+							var parent = threeObject.parent;
+							if(parent && threeObject && !(threeObject instanceof THREE.PerspectiveCamera))
+							{
+								var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+								parent.remove(threeObject);
+								var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
+								//CopyProperties(threeObject,cam);
+								cam.far = threeObject.far;
+								cam.near = threeObject.near;
+								cam.matrix = threeObject.matrix;
+								cam.matrixAutoUpdate = false;
+								if(threeObject.fov)
+									cam.fov = threeObject.fov;
+								if(threeObject.aspect)
+									cam.aspect = threeObject.aspect;	
+								if(this.state.cameraInUse == threeObject)
+									this.state.cameraInUse = cam;
+								threeObject.updateProjectionMatrix();	
+								node.threeObject = cam;
+								sceneNode.camera.threeJScameras[ nodeID ] = cam;
+								parent.add(node.threeObject);
+							}
 						}
 						if(propertyValue == 'orthographic')
 						{
-						
+							
+							var parent = threeObject.parent;
+							if(parent && threeObject && !(threeObject instanceof THREE.OrthographicCamera))
+							{
+								
+								var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+								parent.remove(threeObject);
+								var offset  = threeObject.far * Math.cos(threeObject.fov/2 * 0.0174532925);
+								offset = offset/2;
+								var aspect = threeObject.aspect;
+								var cam = new THREE.OrthographicCamera(-offset,offset,offset/aspect,-offset/aspect,threeObject.near,threeObject.far);
+								cam.far = threeObject.far;
+								cam.near = threeObject.near;
+								cam.matrix = threeObject.matrix;
+								cam.matrixAutoUpdate = false;
+								if(threeObject.fov)
+									cam.fov = threeObject.fov;
+								if(threeObject.aspect)
+									cam.aspect = threeObject.aspect;	
+								if(this.state.cameraInUse == threeObject)
+									this.state.cameraInUse = cam;
+								node.threeObject = cam;
+								sceneNode.camera.threeJScameras[ nodeID ] = cam;
+								parent.add(node.threeObject);
+							}
 						}
 					}
 				}
@@ -571,10 +640,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					if(propertyName == 'backgroundColor')
 					{
 							  //handled in view	
-					}
-					if(propertyName == 'aspect')
-					{
-					
 					}
 				}	
 				if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight)
@@ -624,59 +689,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						}
 						
 					}
-					if(propertyName == 'constantAttenuation')
-					{
-					
-					}
-					if(propertyName == 'linearAttenuation')
-					{
-					
-					}
-					if(propertyName == 'quadraticAttenuation')
-					{
-					
-					}
-					if(propertyName == 'spotCosCutOff')
-					{
-					
-					}
-					if(propertyName == 'spotExponent')
-					{
-					
-					}
 					if(propertyName == 'diffuse')
 					{
-						
 						threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-					}
-					if(propertyName == 'specular')
-					{
-					
-					}
-					if(propertyName == 'samples')
-					{
-					
-					}
-					if(propertyName == 'softness')
-					{
-					
-					}
-					if(propertyName == 'bufferHeight')
-					{
-					
-					}
-					if(propertyName == 'bufferWidth')
-					{
-					
-					}
-					if(propertyName == 'shadowBias')
-					{
-					
 					}
 					if(propertyName == 'castShadows')
 					{
-					
+						debugger;
+						threeObject.castShadow = true;
 					}
+
 				}
 			}
         },
@@ -1290,9 +1312,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 	function createLight( nodeID, childID, childName ) {
 
+		debugger;
         var child = this.state.nodes[childID];
         if ( child ) {
             child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
+			child.threeObject.shadowCameraRight     =  500;
+			child.threeObject.shadowCameraLeft      = -500;
+			child.threeObject.shadowCameraTop       =  500;
+			child.threeObject.shadowCameraBottom    = -500;
 			child.threeObject.distance = 100;
 			child.threeObject.color.setRGB(1,1,1);
 			child.threeObject.matrixAutoUpdate = false;

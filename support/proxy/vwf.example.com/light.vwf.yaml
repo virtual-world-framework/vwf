@@ -20,6 +20,13 @@
 extends: http://vwf.example.com/node3.vwf
 properties: 
 
+  ## Does this light cast shadows
+  ## 
+  ## @name light.vwf#lightType
+  ## @property
+
+  castShadows:
+  
   ## The type of light (point, directional, spot)
   ## 
   ## @name light.vwf#lightType

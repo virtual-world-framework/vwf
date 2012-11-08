@@ -93,6 +93,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			{
 				if(threeObject instanceof THREE.Scene)
 				{
+					if(propertyName == 'enableShadows')
+					{
+						debugger;
+						var sceneNode = this.state.scenes[nodeID];
+						sceneNode.renderer.shadowMapEnabled = propertyValue;
+					}
 					if(propertyName == 'ambientColor')
 					{
 						
