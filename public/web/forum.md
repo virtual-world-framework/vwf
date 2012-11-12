@@ -1,1 +1,1 @@
-<iframe SRC="http://www.virtualworldframework.com:81" width="980" height="1000"></iframe>
+<iframe SRC="http://forum.virtualworldframework.com" width="980" height="1000"></iframe>
