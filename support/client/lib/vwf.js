@@ -795,7 +795,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         fields = queue.shift();
 
                         vwf.logger.info( "setState:", "removing", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 ? Array.prototype.slice.call( object ) : object
+                            return depth == 2 && object ? Array.prototype.slice.call( object ) : object
                         } ), "from queue" );
 
                         fields.respond && private_queue.push( fields );
@@ -807,7 +807,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         fields = private_queue.shift();
 
                         vwf.logger.info( "setState:", "returning", require( "vwf/utility" ).transform( fields, function( object, index, depth ) {
-                            return depth == 2 ? Array.prototype.slice.call( object ) : object
+                            return depth == 2 && object ? Array.prototype.slice.call( object ) : object
                         } ), "to queue" );
 
                         queue.push( fields );
@@ -1748,6 +1748,7 @@ if ( ! childComponent.source ) {
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
 if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
+if(vwf.tickable.nodeIDs.indexOf(nodeID) < 0)
     vwf.tickable.nodeIDs.push( childID );
 }
 
@@ -2361,7 +2362,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.groupEnd();
 		
 			if(methodName == 'tick')
-				vwf.tickable.nodeIDs.push(nodeID)
+			{
+				if(vwf.tickable.nodeIDs.indexOf(nodeID) < 0)
+					vwf.tickable.nodeIDs.push(nodeID)
+			}
         };
 		
 		this.deleteMethod = function( nodeID, methodName) {

@@ -779,7 +779,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
                 mousepos.y = mousepos.y + window.scrollY;
 
-                var returnValue = sceneNode.glgeScene.pick(mousepos.x - $('#index-vwf').offset().left, mousepos.y - $('#index-vwf').offset().top);
+                var returnValue = null;//sceneNode.glgeScene.pick(mousepos.x - $('#index-vwf').offset().left, mousepos.y - $('#index-vwf').offset().top);
+				
+				if(sceneNode.glgeScene.CPUPick)
+				{
+					var ray = sceneNode.glgeScene.makeRay(mousepos.x - $('#index-vwf').offset().left, mousepos.y - $('#index-vwf').offset().top);
+					if(ray)
+					{
+						
+						ray.coord = GLGE.scaleVec3(ray.coord,-1);
+						returnValue = sceneNode.glgeScene.CPUPick(ray.origin,ray.coord);
+						//console.log(returnValue);
+					}
+				}
+				
                 if (!returnValue) {
                     returnValue = { };
                 }
