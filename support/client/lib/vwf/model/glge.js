@@ -35,8 +35,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             this.state.sceneRootID = "index-vwf";
 
-            this.delayedProperties = {};
-
         },
 
 
@@ -56,7 +54,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 //            this.logger.enabled = true;
 //            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childURI, childName );
-//            this.logger.enable = false;
+//            this.logger.enabled = false;
 
             // find the parent node
             if ( nodeID ) {
@@ -197,7 +195,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             sourceType: childType,
                             type: childExtendsID,
                             loadingCollada: callback,
-                            sceneID: this.state.sceneRootID
+                            glgeScene: sceneNode
                         };
                         loadCollada.call( this, parentNode, node ); 
                         break;
@@ -211,7 +209,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             parentID: nodeID,
                             type: childExtendsID,
                             sourceType: childType,
-                            sceneID: this.state.sceneRootID 
+                            glgeScene: sceneNode 
                         };
                             
                         if ( sceneNode && sceneNode.glgeDocument ){
@@ -240,7 +238,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 parentID: nodeID,
                                 type: childExtendsID,
                                 sourceType: childType,
-                                sceneID: this.state.sceneRootID 
+                                glgeScene: sceneNode  
                             };
                             createMesh.call( this, node );
                         }
@@ -254,7 +252,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             parentID: nodeID,
                             type: childExtendsID,
                             sourceType: childType,
-                            sceneID: this.state.sceneRootID 
+                            glgeScene: sceneNode  
                         };
                         if ( node.glgeObject ) {
                             if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
@@ -372,7 +370,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             var value = undefined;
 
-            if ( !( propertyValue === undefined ) ) {
+            if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( !node ) node = this.state.scenes[ nodeID ];
                 if ( node ) {
@@ -397,6 +395,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            var prototypes;
             var value = undefined;
 
             if ( node && node.glgeObject && propertyValue !== undefined ) {
@@ -409,7 +408,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
 
                 value = propertyValue;
-    //            this.logger.info( namespace + ".satProperty " + path( glgeObject ) + " " + propertyName + " " + propertyValue);
 
                 if ( isAnimatable ) {
 
@@ -464,13 +462,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 var pv = propertyValue;
                 switch ( propertyName ) {
 
-
                     case "transform":
 
+                        //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
 
                         // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
-
                         if ( glgeObject instanceof GLGE.Camera ) {
                             var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 1, columny );
@@ -484,7 +481,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         // setStaticMatrix() doesn't propagate correctly for cameras, so we have to
                         // decompose camera assignments.
 
-                        if ( glgeObject instanceof GLGE.Camera || glgeObject instanceof GLGE.ParticleSystem ) { // setStaticMatrix doesn't work for cameras
+                        if ( glgeObject instanceof GLGE.Camera || glgeObject instanceof GLGE.Light || glgeObject instanceof GLGE.ParticleSystem ) { // setStaticMatrix doesn't work for cameras
 
                             var translation = goog.vec.Vec3.create();
                             goog.vec.Mat4.getColumn( transform, 3, translation );
@@ -526,14 +523,28 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
 
                     case "lookAt": {
-                            var lookAtNode = this.state.nodes[ propertyValue ];
-                            if ( lookAtNode && lookAtNode.glgeObject ) {
-                                glgeObject.setLookat( lookAtNode.glgeObject );
+                            //console.info( "settingProperty( " + nodeID + ", " + propertyName + ", " + propertyValue + " )" );
+                            if ( propertyValue == "activeCamera" ) {
+                                if ( this.state.cameraInUse ) {
+                                    glgeObject.setLookat( this.state.cameraInUse );
+                                }
                             } else {
-                                if ( glgeObject.getLookat && glgeObject.getLookat() ) 
-                                    glgeObject.setLookat( null );
+                                var lookAtNode = this.state.nodes[ propertyValue ];
+                                if ( lookAtNode && lookAtNode.glgeObject ) {
+                                    //console.info( "         settingProperty found lookat object" );
+                                    glgeObject.setLookat( lookAtNode.glgeObject );
+                                } else {
+                                    if ( glgeObject.getLookat && glgeObject.getLookat() ) 
+                                        glgeObject.setLookat( null );
+                                }
                             }
                         }
+                        break;
+
+                    case "pickable":
+                        if ( glgeObject.setPickable ){
+                            glgeObject.setPickable( propertyValue );
+                        }                            
                         break;
 
                     case "visible":
@@ -543,42 +554,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
 
                     default:
-                        switch ( node[ "type" ] ) {
-                            case "http-vwf-example-com-material-vwf":
-                                value = setMaterialProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            case "http-vwf-example-com-light-vwf":
-                                value = setLightProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            case "http-vwf-example-com-camera-vwf":
-                                value = setCameraProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            case "http-vwf-example-com-particlesystem-vwf":
-                                value = setParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;                        
-                            case "http-vwf-example-com-navscene-vwf":
-                            case "appscene-vwf":
-                                value = setSceneProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            default:
-                                if ( !validProperty ) {
-                                    value = undefined;
-                                }
-                                break;
+                        prototypes = getPrototypes.call( this, this.kernel.kernel.kernel, node["type"] );
+                        if ( isGlgeMaterialDefinition.call( this, prototypes ) ){
+                            value = setMaterialProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeCameraDefinition.call( this, prototypes ) ) {
+                            value = setCameraProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeLightDefinition.call( this, prototypes ) ) {
+                            value = setLightProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeParticleSystemDefinition.call( this, prototypes ) ) {
+                            value = setParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeSceneDefinition.call( this, prototypes ) ) {
+                            value = setSceneProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else {
+                            if ( !validProperty ) {
+                                value = undefined;
+                            }                          
                         }
                         break;
                 }
             } else if ( this.state.scenes[nodeID] ) {
                 value = setSceneProperty.call( this, nodeID, propertyName, propertyValue );
-            } else {
-                var propArray;
-                if ( !this.delayedProperties[nodeID] ) {
-                    this.delayedProperties[nodeID] = {};
-                }
-                propArray = this.delayedProperties[nodeID];
-
-                propArray[ propertyName ] = propertyValue;
-            }
+            } 
 
              return value;        
         },
@@ -590,6 +586,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
             var value = undefined;
             var glgeModel = this;
+            var prototypes = undefined;
+            var validProperty = false;
 
             if ( node && node.glgeObject ) {
 
@@ -604,14 +602,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                         case "playing":
                             value = !Boolean( glgeObject.getPaused() );
+                            validProperty = true;
                             break;
 
                         case "looping":
                             value = Boolean( glgeObject.getLoop() );
+                            validProperty = true;
                             break;
 
                         case "speed":
                             value = glgeObject.getFrameRate() / 30; // TODO: not safe to assume default speed is 30 fps
+                            validProperty = true;
                             break;
                     }
                 }
@@ -650,7 +651,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
-                        value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
+                        var scale = this.kernel.getProperty( nodeID, "scale", undefined );
+                        value = { min: [ bbox.xMin * scale[0], bbox.yMin* scale[1], bbox.zMin*scale[2] ], max: [ bbox.xMax * scale[0], bbox.yMax* scale[1], bbox.zMax*scale[2] ] };
                         break;
 
                     case "centerOffset":
@@ -689,6 +691,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
                         break;
 
+                    case "pickable":
+                        if ( glgeObject.getPickable ){
+                            value = glgeObject.getPickable();
+                        }                            
+                        break;
+
                     case "visible":
                         if ( glgeObject.getVisible ) {
                             value = glgeObject.getVisible();
@@ -696,37 +704,35 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
 
                     default:
-                        switch ( node.type ) {
-                            case "http-vwf-example-com-mesh-vwf":
-                                value = getObjectProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            case "http-vwf-example-com-material-vwf":
-                                value = getMaterialProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            case "http-vwf-example-com-light-vwf":
-                                value = getLightProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            case "http-vwf-example-com-camera-vwf":
-                                value = getCameraProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
-                            case "http-vwf-example-com-particlesystem-vwf":
-                                value = getParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;                        
-                            case "http-vwf-example-com-scene-vwf":
-                                value = getSceneProperty.call( this, nodeID, propertyName, propertyValue );
-                                break;
+                        // handle all of the other types
+                        prototypes = getPrototypes.call( this, this.kernel.kernel.kernel, node["type"] );
+                        if ( isGlgeMaterialDefinition.call( this, prototypes ) ){
+                            value = getMaterialProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeCameraDefinition.call( this, prototypes ) ) {
+                            value = getCameraProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeLightDefinition.call( this, prototypes ) ) {
+                            value = getLightProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeParticleSystemDefinition.call( this, prototypes ) ) {
+                            value = getParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else if ( isGlgeSceneDefinition.call( this, prototypes ) ) {
+                            value = getSceneProperty.call( this, nodeID, propertyName, propertyValue );
+                        } else {
+                            if ( !validProperty ) {
+                                value = undefined;
+                            }   
                         }
                         break;    
 
                 }
-            }
+            } else if ( this.state.scenes[nodeID] ) {
+                value = getSceneProperty.call( this, nodeID, propertyName, propertyValue );
+            } 
 
 //            if ( value && value instanceof Object && !( value instanceof Array ) && !( value instanceof Float32Array ) ){
 //                console.info( "WARNING: gettingProperty( "+nodeID+", "+propertyName+" ) returning an OBJECT: " + value );
 //            }
 
             return value;
-
 
         },
 
@@ -936,11 +942,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     sceneNode.glgeScene.setAmbientColor( propertyValue );
                     break;
                 case "activeCamera":
-                    if ( sceneNode.camera ) {
                         if ( this.state.nodes[ propertyValue ] ) {
                             setActiveCamera.call( this, sceneNode, propertyValue );
                         }
-                    }
                     break;
                 case "backgroundColor":
                     sceneNode.glgeScene.setBackgroundColor( propertyValue );
@@ -1090,20 +1094,88 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }            
             switch ( propertyName ) {
                 case "texture": {
+                    //console.info( "Setting the texture of: " + nodeID + " to " + propertyValue);    
                     if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
+                        var textureType = "image";
+                        if ( propertyValue == "canvas" ) {
+                            textureType = "canvas";
+                        } else if ( propertyValue.indexOf( "canvas_" ) == 0 ) {
+                            textureType = "canvas";   
+                        } else if ( this.state.nodes[propertyValue] ) {
+                            textureType = "camera";
+                        } else if ( !isImageFileRef.call( this, propertyValue ) /* isVideoFileRef.call( this, propertyValue ) */ ) {
+                            textureType = "video";
+                        }
+
+                        //console.info( "     mat: " + mat );
+                        //console.info( "     txtr: " + txtr );                        
+                        //console.info( "     textureType: " + textureType );
+
+                        var isCorrectTexture = false;
                         if ( txtr ) {
-                            if(txtr.getSrc() != propertyValue) {
-                                txtr.setSrc( propertyValue );
+                            switch ( textureType ){ 
+                                case "image":
+                                    isCorrectTexture = ( txtr instanceof GLGE.Texture );
+                                    break;
+                                case "canvas":
+                                    isCorrectTexture = ( txtr instanceof GLGE.TextureCanvas );
+                                    break;
+                                case "camera":
+                                    isCorrectTexture = ( txtr instanceof GLGE.TextureCamera );
+                                    break;
+                                case "video":
+                                    isCorrectTexture = ( txtr instanceof GLGE.TextureVideo );
+                                    break;                                    
                             }
+                        }
+
+                        //console.info( "     isCorrectTexture: " + isCorrectTexture );
+
+                        if ( isCorrectTexture ) {
+                            if ( textureType == "video" || textureType == "image" ){
+                                txtr.setSrc( propertyValue );   
+                            } else if ( "camera" ) {
+                                var camNode = this.state.nodes[ propertyValue ];
+                                var cam = findCamera.call( this, camNode );
+                                if ( cam ) {
+                                    txtr.setCamera( cam );
+                                } 
+                            } 
                         } else if ( mat ) {
-                            var ml = new GLGE.MaterialLayer;
-                            ml.setMapto( GLGE.M_COLOR );
-                            ml.setMapinput( GLGE.UV1 );
-                            var txt = new GLGE.Texture();
-                            txt.setSrc( propertyValue );
+                            var txt;
+					        var ml = new GLGE.MaterialLayer;
+					        ml.setMapto( GLGE.M_COLOR );
+					        ml.setMapinput( GLGE.UV1 );
+                            //console.info( "     textureType: " + textureType );
+
+                            switch ( textureType ) {
+                                case "image":
+                                    txt = new GLGE.Texture();
+                                    txt.setSrc( propertyValue );
+                                    break;
+                                case "canvas":
+                                    //console.info( "     GLGE.TextureCanvas with id = " + propertyValue );
+                                    txt = new GLGE.TextureCanvas( undefined, "512", "512", propertyValue );
+                                    break;
+                                case "camera":
+                                    txt = new GLGE.TextureCamera( undefined, "512", "512" );
+                                    var camNode = this.state.nodes[ propertyValue ];
+                                    var cam = findCamera.call( this, camNode );
+                                    if ( cam ) {
+                                        txt.setCamera( cam );
+                                    }                                     
+                                    break;
+                                case "video":
+                                    txt = new GLGE.TextureVideo( undefined, "512", "512" );
+                                    txt.setSrc( propertyValue );
+                                    ml.setScaleX( -1 );
+                                    ml.setScaleY( -1 );                                    
+                                    break;                                  
+                            }
+                            //console.info( "     txt: " + txt );
                             mat.addTexture( txt );
-                            ml.setTexture( txt );
-                            mat.addMaterialLayer( ml );
+					        ml.setTexture( txt );
+					        mat.addMaterialLayer( ml );
                         }
                     }
                     }
@@ -1152,7 +1224,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     function setLightProperty( nodeID, propertyName, propertyValue ) {
 
         if ( propertyValue === undefined ) return;
-        
+
         var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
 
@@ -1173,6 +1245,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
                 }
                 break;
+            case "enable":
+                if ( propertyValue && propertyValue != "false" ) {
+                    node.glgeObject.enableLight();
+                } else {
+                    node.glgeObject.disableLight();
+                }
+                break;
 
             case "constantAttenuation":
                 node.glgeObject.setAttenuationConstant( propertyValue );
@@ -1190,8 +1269,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setSpotCosCutOff( propertyValue );
                 break;
 
+            case "spotCutOff":
+                node.glgeObject.setSpotCutOff( propertyValue );
+                break;
+
             case "spotExponent":
                 node.glgeObject.setSpotExponent( propertyValue );
+                break;
+
+            case "color":
+                node.glgeObject.setColor( propertyValue );
                 break;
 
             case "diffuse":
@@ -1230,6 +1317,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setCastShadows( propertyValue );
                 break;
 
+            case "spotSoftness":
+                node.glgeObject.setSpotSoftness( propertyValue );
+                break;
+
+            case "spotSoftnessDistance":
+                node.glgeObject.setSpotSoftDistance( propertyValue );
+                break;
+
+            case "cascadeLevels":
+                node.glgeObject.setCascadeLevels( propertyValue );
+                break;
+
             default:
                 value = undefined;
                 break;
@@ -1247,19 +1346,25 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         switch ( propertyName ) {
               case "ambientColor":
                 var color = sceneNode.glgeScene.getAmbientColor();
-                value = color['a'] ? [ color['r'], color['g'], color['b'], color['a'] ] : [ color['r'], color['g'], color['b'] ];
+                if ( color['a'] !== undefined ) {
+                    value = [ color['r'], color['g'], color['b'], color['a'] ];
+                } else {
+                    value = [ color['r'], color['g'], color['b']  ];
+                }
                 break;
             case "activeCamera":
-                if ( sceneNode.glgeScene.camera && sceneNode.glgeScene.camera.ID ) {
-                    value = sceneNode.glgeScene.camera.ID;
-                } else { 
-                    value = name( sceneNode.glgeScene.camera );
+                if ( sceneNode.glgeScene.camera ) {
+                    value = getObjectID.call( this, sceneNode.glgeScene.camera, false, false );
                 }
                 break;
 
             case "backgroundColor":
                 var color = sceneNode.glgeScene.getBackgroundColor();
-                value = color['a'] ? [ color['r'], color['g'], color['b'], color['a'] ] : [ color['r'], color['g'], color['b'] ];
+                if ( color['a'] !== undefined ) {
+                    value = [ color['r'], color['g'], color['b'], color['a'] ];
+                } else {
+                    value = [ color['r'], color['g'], color['b']  ];
+                }
                 break;
             
             default:
@@ -1397,31 +1502,60 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             case "texture": {
                     if ( node.glgeMaterial && node.glgeMaterial.textures ) {
                         txtr = node.glgeMaterial.textures[0];
-                    } else if ( node.glgeObject && node.glgeObject.material ) {
-                        txtr = node.glgeObject.material.textures[0];
                     }
 
                     if ( txtr ) {
-                        value = txtr.getSrc();
+                        if ( txtr instanceof GLGE.TextureCanvas ) {
+                            var cv = txtr.getCanvas();
+                            value = "canvas";
+                            if ( cv ) {
+                                value = cv.getAttribute( 'id' );
+                            }  
+                        } else if ( txtr instanceof GLGE.TextureCamera ) {
+                            var cam = txtr.getCamera();
+                            if ( cam === this.state.cameraInUse ) {
+                                value = "activeCamera"; 
+                            } else {
+                                value = getObjectID.call( this, cam, false, false );
+                            }
+                        } else {
+                            if ( txtr.getSrc ) {
+                                value = txtr.getSrc();
+                            }
+                        }
                     }
                 }
                 break;
+
             case "color":
                 if ( mat ) { 
                     obj = mat.getColor();
-                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                    if ( obj.a !== undefined ) {
+                        value = [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ]; 
+                    } else {
+                        value = [ obj.r*255, obj.b*255, obj.g*255 ];
+                    }
                 } 
-                break;                
+                break;
+                
             case "ambient":
                 if ( mat ) { 
                     obj = mat.getAmbient();
-                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                    if ( obj.a !== undefined ) {
+                        value = [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ]; 
+                    } else {
+                        value = [ obj.r*255, obj.b*255, obj.g*255 ];
+                    }                
                 } 
                 break;
             case "specColor":
                 if ( mat ) { 
                     obj = mat.getSpecularColor();
-                    value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ]; 
+                    if ( obj.a !== undefined ) {
+                        value = [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ]; 
+                    } else {
+                        value = [ obj.r*255, obj.b*255, obj.g*255 ];
+                    }  
                 } 
                 break;
             case "shininess":
@@ -1490,8 +1624,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value = node.glgeObject.getSpotCosCutOff();
                 break;
 
+            case "spotCutOff":
+                node.glgeObject.getSpotCutOff( propertyValue );
+                break;
+
             case "spotExponent":
                 value = node.glgeObject.getSpotExponent();
+                break;
+
+            case "color":
+                var color = sceneNode.glgeScene.getBackgroundColor();
+                if ( color['a'] !== undefined ) {
+                    value = [ color['r'], color['g'], color['b'], color['a'] ];
+                } else {
+                    value = [ color['r'], color['g'], color['b']  ];
+                }
                 break;
 
             case "diffuse":
@@ -1528,6 +1675,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             case "castShadows":
                 value = node.glgeObject.getCastShadows();
+                break;
+
+            case "spotSoftness":
+                value = node.glgeObject.getSpotSoftness();
+                break;
+                
+            case "spotSoftnessDistance":
+                value = node.glgeObject.getSpotSoftDistance();
+                break;                
+
+            case "cascadeLevels":
+                value = node.glgeObject.getCascadeLevels();
                 break;
 
             default:
@@ -1628,17 +1787,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // -- setActiveCamera ------------------------------------------------------------------------------
 
-    function setActiveCamera( sceneNode, cameraID ) {
+    function setActiveCamera( sceneNode, nodeID ) {
 
-        if ( this.state.nodes[ cameraID ] ) {
-            var glgeCamera = this.state.nodes[ cameraID ].glgeObject;
+        if ( this.state.nodes[ nodeID ] ) {
+            var glgeCamera = this.state.nodes[ nodeID ].glgeObject;
             if ( glgeCamera ) {
                 var canvas = document.getElementById(this.state.sceneRootID);
                 glgeCamera.setAspect( canvas.width / canvas.height );
                 this.state.cameraInUse = glgeCamera;
-                this.state.cameraInUseID = cameraID;
                 sceneNode.glgeScene.setCamera( glgeCamera );
-                sceneNode.camera.ID = cameraID;
             }
         }
 
@@ -1663,9 +1820,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function createCamera( nodeID, childID, childName ) {
 
-        var sceneNode = this.state.scenes[nodeID];
-        var parent = sceneNode ? sceneNode : this.state.nodes[nodeID];
-        if ( !sceneNode ) sceneNode = this.state.scenes[parent.sceneID];
+        var sceneNode = this.state.scenes[nodeID]
+        var parent = sceneNode ? sceneNode : this.state.nodes[nodeID]
+        if ( !sceneNode ) sceneNode = parent.glgeScene;
         if ( sceneNode && parent ) {
             var child = this.state.nodes[childID];
             if ( child ) {
@@ -1677,6 +1834,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         sceneNode.camera.glgeCameras[childID] = cam;
                     } else {
                         cam = sceneNode.camera.glgeCameras[childID];
+                    }
+                    var glgeParent = parent.glgeObject;
+                    if ( glgeParent && ( glgeParent instanceof GLGE.Scene || glgeParent instanceof GLGE.Group )) {
+                        glgeParent.addObject( cam );
                     }
 
                     var glgeParent = parent.glgeObject;
@@ -1690,7 +1851,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     cam.name = childName;
                 }
             }
-        }
+        }  
 
     }
 
@@ -1730,9 +1891,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function getLocalBoundingBox( glgeObject ) {
 
-        var bBox = { xMin: Number.MAX_VALUE, xMax: -Number.MAX_VALUE,
-                     yMin: Number.MAX_VALUE, yMax: -Number.MAX_VALUE,
-                     zMin: Number.MAX_VALUE, zMax: -Number.MAX_VALUE };
+        var bBox = { xMin: Number.MAX_VALUE, xMax: Number.MIN_VALUE,
+                     yMin: Number.MAX_VALUE, yMax: Number.MIN_VALUE,
+                     zMin: Number.MAX_VALUE, zMax: Number.MIN_VALUE };
 
         var glgeObjectList = [];
         findAllGlgeObjects.call( this, glgeObject, glgeObjectList );
@@ -1944,20 +2105,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function loadComplete() {
-        var itemsToDelete = [];
-        for ( var id in this.delayedProperties ) {
-            if ( this.state.nodes[id] ) {
-                var props = this.delayedProperties[id];
-                for ( var propertyName in props ) {
-                    Object.getPrototypeOf( this ).settingProperty.call( this, id, propertyName, props[propertyName] );
-                }
-                itemsToDelete.push( id );
-            }
-        }
-        
-        for ( var i = 0; i < itemsToDelete.length; i++ ) {
-            delete this.delayedProperties[itemsToDelete[i]];
-        }
     }
 
     // get the list of types this ID extends
@@ -2070,7 +2217,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function findMaterial( parentID, materialName, materialNode ) {
 
-        var materialStringIndex, materialIndex, childName;
+        var materialStringIndex, materialIndex;
         var parentNode = this.state.nodes[ parentID ];
 
         // the material name is a combination of the following information
@@ -2081,34 +2228,22 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 if ( parentNode.glgeObject.constructor == GLGE.Object ) {
                     if ( materialName == "material" ) {
                         materialNode.glgeObject = parentNode.glgeObject;
-                        materialNode.glgeMaterial = materialNode.glgeObject.material;                        
+                        materialNode.glgeMaterial = materialNode.glgeObject.getMaterial();
                     }
                 } else {
-                    materialStringIndex = materialName.lastIndexOf( "Material" );
-                    materialIndex = Number( materialName.substr( materialStringIndex + 8 ) ) - 1;
-                    childName = materialName.substr( 0, materialStringIndex );
+                    var index = materialName.substr( 8 );
                     var glgeObjs = [];
-                    var found = false;
+                    if ( index == "" ) index = 0;
 
                     findAllGlgeObjects.call( this, parentNode.glgeObject, glgeObjs );
 
-                    if ( glgeObjs && glgeObjs.length ) {
-                        for ( var i = 0; i < glgeObjs.length && !found; i++ ) {
-                            if ( name( glgeObjs[i].parent ) == childName ) {
-                                materialNode.glgeObject = glgeObjs[i];
-                                materialNode.glgeMaterial = glgeObjs[i].getMaterial( materialIndex );
-                                found = true;                        
-                            }                   
-                        }
-                    } else if ( parentNode.glgeObject.children.length == 1 && parentNode.glgeObject.children[0].constructor == GLGE.Object ) {
+                    for ( var i = 1; i < glgeObjs.length; i++ ) {
+                        console.info( "WARNING:  passing other materials .......harding to index to 0 " );
+                    }
 
-                        var glgeChild = parentNode.glgeObject.children[0];
-                        materialNode.glgeObject = glgeChild;
-                        materialNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
-                
-                        if ( !( materialNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
-                            materialNode.glgeMaterial = childNode.glgeObject.material;
-                        }
+                    if ( glgeObjs && glgeObjs.length && index < glgeObjs.length ) {
+                        materialNode.glgeObject = glgeObjs[index];
+                        materialNode.glgeMaterial = glgeObjs[index].getMaterial();
                     }
                 }
             }
@@ -2150,7 +2285,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     materialNode.glgeMaterial = glgeChild.getMaterial( materialIndex );
                 
                     if ( !( materialNode.glgeMaterial ) && ( childNode.glgeObject ) ) {
-                        materialNode.glgeMaterial = childNode.glgeObject.material;
+                        materialNode.glgeMaterial = childNode.glgeObject.getMaterial();
                     }
                 }
             }
@@ -2159,6 +2294,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function createMesh( node ) {
+        //console.info( "createMesh( "+node.name+" )" );
         if ( !node.glgeParent ) {
             node.glgeParent = this.state.nodes[ node.parentID ];    
         }
@@ -2166,6 +2302,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         if ( node.glgeParent ) {
             node.glgeObject = new GLGE.Group();
             node.glgeParent.addObject( node.glgeObject );
+            var obj = new GLGE.Object();
+            obj.setMaterial( new GLGE.Material() );
+            obj.setMesh( new GLGE.Mesh() );
+            node.glgeObject.addObject( obj );
         }        
     }
 
@@ -2213,4 +2353,79 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
         }
     }
+
+    function isMovieFileRef( fileName ) {
+        var isMovieFile = false;
+        if ( fileName && fileName != "" ){
+            var fileSplit = fileName.split( "." );
+            var fileSLen = fileSplit ? fileSplit.length : 0;
+            if ( fileSLen > 0 ) {
+                switch ( fileSplit[ fileSLen-1 ] ) {
+                    case "ogv":
+                        isMovieFile = true;
+                        break;
+                }
+            }             
+        }
+        return isMovieFile;
+    }
+
+    function isImageFileRef( fileName ) {
+        var isImageFile = false;
+        if ( fileName && fileName != "" ){
+            var fileSplit = fileName.split( "." );
+            var fileSLen = fileSplit ? fileSplit.length : 0;
+            if ( fileSLen > 0 ) {
+                switch ( fileSplit[ fileSLen-1 ] ) {
+                    case "png":
+                    case "jpeg":
+                    case "bmp":
+                    case "gif":
+                    case "tif":
+                    case "tiff":
+                    case "jpg":
+                    case "tga":
+                        isImageFile = true;
+                        break;
+                }
+            }             
+        }
+        return isImageFile;
+    }
+    function isVideoFileRef( fileName ) {
+        var isVideoFile = false;
+        if ( fileName && fileName != "" ){
+            var fileSplit = fileName.split( "." );
+            var fileSLen = fileSplit ? fileSplit.length : 0;
+            if ( fileSLen > 0 ) {
+                switch ( fileSplit[ fileSLen-1 ] ) {
+                    case "ogg":
+                    case "mjeg":
+                    case "mpeg1":
+                    case "mpeg":
+                    case "avi":
+                    case "mpg":
+                    case "mp2":
+                    case "m1v":
+                        isVideoFile = true;
+                        break;
+                }
+            }             
+        }
+        return isVideoFile;
+    }  
+
+    function findCamera( camNode ) {
+        var cam = undefined;
+        if ( camNode ) {
+            if ( camNode.glgeObject && camNode.glgeObject instanceof GLGE.Camera ){
+                cam = camNode.glgeObject;
+            } else if ( camNode.glgeObject instanceof GLGE.Group ) {
+                cam = new GLGE.Camera();
+                camNode.glgeObject.addObject( cam );
+            }
+        }
+        return cam;  
+    }
+
 } );

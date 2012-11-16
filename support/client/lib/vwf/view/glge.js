@@ -266,7 +266,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
-            sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );
+            // ambientColor is a property of the scene now
+            // that property should be set instead of hardcoding here
+            //sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );
 
             this.state.cameraInUse = sceneNode.glgeScene.camera;
             this.state.cameraInUse.setAspect( ( canvas.width / canvas.height) /*/ 1.333 */ );

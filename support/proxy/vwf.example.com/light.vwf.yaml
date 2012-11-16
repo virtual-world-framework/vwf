@@ -34,7 +34,14 @@ properties:
           this.lightType = value;
           break;
       }
-    value: 
+    value: "point"
+
+  ## makes the light affect the scene
+  ## 
+  ## @name light.vwf#enable
+  ## @property
+
+  enable:
 
   ## Constant attenuation
   ## 
@@ -42,9 +49,6 @@ properties:
   ## @property
 
   constantAttenuation:
-    set: |
-      this.constantAttenuation = value;
-    value: 
 
   ## Linear attenuation
   ## 
@@ -52,9 +56,6 @@ properties:
   ## @property
 
   linearAttenuation:
-    set: |
-      this.linearAttenuation = value;
-    value: 
 
   ## Quadratic attenuation
   ## 
@@ -62,9 +63,13 @@ properties:
   ## @property
 
   quadraticAttenuation:
-    set: |
-      this.quadraticAttenuation = value;
-    value: 
+
+  ## Enables the spotCosCutOff calculations
+  ## 
+  ## @name light.vwf#spotCutOff
+  ## @property
+
+  spotCutOff:
 
   ## Represents the cosine ofthe angle beyond which the light is cut off
   ## 
@@ -72,9 +77,6 @@ properties:
   ## @property
 
   spotCosCutOff:
-    set: |
-      this.spotCosCutOff = value;
-    value: 
 
   ## Amount of "spottiness" of the spotlight
   ## 
@@ -82,9 +84,13 @@ properties:
   ## @property
 
   spotExponent:
-    set: |
-      this.spotExponent = value;
-    value: 
+
+  ## Sets the color of the light
+  ## 
+  ## @name light.vwf#color
+  ## @property
+
+  color:
 
   ## Diffuse value
   ## 
@@ -106,9 +112,6 @@ properties:
   ## @property
 
   samples:
-    set: |
-      this.samples = value;
-    value: 
 
   ## The softness value of shadow
   ## 
@@ -116,9 +119,6 @@ properties:
   ## @property
 
   softness:
-    set: |
-      this.softness = value;
-    value: 
 
   ## The Shadow Buffer Memory size for the resolution height of the shadow
   ## 
@@ -126,9 +126,6 @@ properties:
   ## @property
 
   bufferHeight:
-    set: |
-      this.bufferHeight = value;
-    value: 
 
   ## The Shadow Buffer Memory size for the resolution width of the shadow
   ## 
@@ -136,9 +133,6 @@ properties:
   ## @property
 
   bufferWidth:
-    set: |
-      this.bufferWidth = value;
-    value: 
 
   ## The shadow buffer bias. Map bias moves the shadow toward or away from the shadow-casting object(s)
   ## 
@@ -146,9 +140,6 @@ properties:
   ## @property
 
   shadowBias:
-    set: |
-      this.shadowBias = value;
-    value: 
 
   ## The shadow casting distance
   ## 
@@ -156,9 +147,6 @@ properties:
   ## @property
 
   distance:
-    set: |
-      this.distance = value;
-    value: 
 
   ## The shadow casting flag. True if casting shadows is enabled.
   ## 
@@ -166,6 +154,24 @@ properties:
   ## @property
 
   castShadows:
-    set: |
-      this.castShadows = value;
-    value: 
+
+  ## Sets the cascade levels
+  ## 
+  ## @name light.vwf#cascadeLevels
+  ## @property
+
+  cascadeLevels:
+
+  ## Sets the softness if this is a spot light
+  ## 
+  ## @name light.vwf#spotSoftness
+  ## @property
+
+  spotSoftness:
+
+  ## Sets the distance of the softness if this is a spot light
+  ## 
+  ## @name light.vwf#spotSoftness
+  ## @property
+
+  spotSoftnessDistance:

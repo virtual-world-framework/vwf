@@ -11943,6 +11943,9 @@ GLGE.Light.prototype.setSpotSoftDistance=function(spotSoftnessDistance){
 	return this;
 }
 
+GLGE.Light.prototype.getEnable=function() {
+  return !( this.type == GLGE.L_OFF && this.old_type !== undefined );
+}
 
 GLGE.Light.prototype.enableLight=function(){
     if (this.type == GLGE.L_OFF && this.old_type !== undefined) {

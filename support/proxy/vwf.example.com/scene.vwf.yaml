@@ -52,17 +52,13 @@ properties:
   ## @property
 
   ambientColor: 
-    set: |
-      this.ambientColor = value;
-    value: [ 183, 183, 183 ]
-    
+
 scripts:
 - |
     this.activeCameraComp = undefined;
     var scene = this;
     this.initialize = function() {
       this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
-      this.ambientColor = this.ambientColor;
     }
     this.getChild = function( childName, startingNode ) {
       if(!startingNode) {
