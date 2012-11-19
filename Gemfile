@@ -11,7 +11,7 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-# Specifying versions: http://docs.rubygems.org/read/chapter/16
+# Version string format: http://docs.rubygems.org/read/chapter/16
 
 source :rubygems
 
@@ -19,14 +19,14 @@ gem "sinatra", ">= 1.3", :require => "sinatra/base"
 gem "json"
 gem "websocket-rack", :require => "rack/websocket"
 gem "thin"
-gem 'rack-google-analytics', :require => 'rack/google-analytics'
+gem "rack-google-analytics", :require => "rack/google-analytics"
 
 group :development do
   gem "sinatra-reloader", :require => "sinatra/reloader"
 end
 
 group :test do
-  gem 'minitest'
+  gem "minitest"
   gem "rack-test", :require => "rack/test"
 end
 
@@ -34,7 +34,7 @@ group :build do
 
   gem "rake"
   gem "rocco"
-  gem 'kramdown'
+  gem "kramdown"
 
   # redcarpet >= 2 no longer declares a Markdown class, which Rocco expects. Having rocco require
   # "redcarpet/compat" for redcarpet >= 2 would probably also fix this.

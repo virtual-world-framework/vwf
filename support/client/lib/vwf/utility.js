@@ -110,7 +110,7 @@ define( [ "module" ], function( module ) {
 
             // -- transit --------------------------------------------------------------------------
 
-            /// vwf.utility#transform transformation function to convert an object for proper JSON
+            /// A vwf.utility#transform transformation function to convert an object for proper JSON
             /// serialization. Array-like objects are converted to actual Arrays. All other objects
             /// are unchanged. Invoke as: utility.transform( object, utility.transforms.transit ).
             /// 
@@ -153,9 +153,9 @@ define( [ "module" ], function( module ) {
 
             // -- hash -----------------------------------------------------------------------------
 
-            /// vwf.utility#transform transformation function to normalize an object so that it can
-            /// be serialized and hashed with consistent results. Numeric precision is reduced to
-            /// match the precision retained by the reflector. Non-Array objects are reordered so
+            /// A vwf.utility#transform transformation function to normalize an object so that it
+            /// can be serialized and hashed with consistent results. Numeric precision is reduced
+            /// to match the precision retained by the reflector. Non-Array objects are reordered so
             /// that their keys are in alphabetic order. Other objects are unchanged. Invoke as:
             /// utility.transform( object, utility.transforms.hash ).
             /// 

@@ -253,19 +253,20 @@
                         this.models.push( model );
                         this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
-    if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-        this.models.javascript = model;
-        while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
-    }
+if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
+    this.models.javascript = model;
+    while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
+}
 
-    if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
-        this.models.object = model;
-        while ( this.models.object.model ) this.models.object = this.models.object.model;
-    }
+if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
+    this.models.object = model;
+    while ( this.models.object.model ) this.models.object = this.models.object.model;
+}
                     }
+
                 }
 
-                }, this );
+            }, this );
 
             // Create the view interface to the kernel. Views can only make replicated calls which
             // bounce off the reflection server, are placed on the queue when received, and executed
@@ -277,13 +278,13 @@
 
             viewInitializers.forEach( function( viewInitializer ) {
 
-
                 // Skip falsy values to allow initializers to be conditionally included by the
                 // loader.
 
                 if ( viewInitializer ) { 
 
                     // Accept either { "vwf/view/name": [ arguments] } or "vwf/view/name".
+
                     if ( typeof viewInitializer == "object" && viewInitializer != null ) {
                         var viewName = Object.keys( viewInitializer )[0];
                         var viewArguments = viewInitializer[viewName];
@@ -319,6 +320,7 @@
                             this.views.push( view );
                             this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
                         }
+
                     }
 
                 }
@@ -632,7 +634,8 @@
             respond && this.respond( nodeID, actionName, memberName, parameters,
                 require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
 
-            origin == "reflector" ? this.logger.infou() : this.logger.debugu();
+            origin == "reflector" ?
+                this.logger.infou() : this.logger.debugu();
         };
 
         // -- dispatch -----------------------------------------------------------------------------
