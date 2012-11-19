@@ -75,7 +75,7 @@ Then enter these commands:
 
 	gem install bundler
 
-	bundle install --binstubs
+	bundle install
 	
 Ignore the warning about sudo not found for bundle install. If you get linker relocation errors, you probably need to tell Cygwin to rebaseall. See [Cygwin rebaseall](http://www.heikkitoivonen.net/blog/2008/11/26/cygwin-upgrades-and-rebaseall) for details. The required rebase and dash packages should already be installed.
 
@@ -83,7 +83,7 @@ Ignore the warning about sudo not found for bundle install. If you get linker re
 
 Enter the following command:
 
-	bin/thin start 
+	bundle exec thin start 
 
 *2.5 Connect*
 
@@ -143,7 +143,7 @@ Then enter these commands:
 
 	# gem install bundler
 
-On Debian-based systems, RubyGems are not automatically added to the path. Find the following lines in bash:
+On Debian-based systems, RubyGems is not automatically added to the path. Find the following lines in bash:
 
 	if [ "`id -u`" -eq 0 ]; then
 	  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -163,7 +163,7 @@ And update them to:
 
 Now you can install the RubyGems to the system (as root):
 
-	# bundle install --binstubs
+	# bundle install
 
 *3.4 Build the Server*
 

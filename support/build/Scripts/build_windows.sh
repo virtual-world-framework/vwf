@@ -47,7 +47,6 @@ tar -xvzf ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx.tar.gz
 
 cd ../../
 bundle install
-bundle install --binstubs
 
 # Setup correct permissions for build support files
 cd support/build

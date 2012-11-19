@@ -15,24 +15,27 @@ require "rake"
 require "rake/testtask"
 require "rake/clean"
 
-
-CLEAN.include "support/build/Pygments-1.4/**/*.pyc"
-CLOBBER.include "bin/*", "run.bat"
-
+import "support/build/utility.rake"
 
 # Delegate the standard tasks to any child projects.
 
 DELEGATED_TASKS = [ :build, :test, :clean, :clobber ]
 
-if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
-		puts "If you are behind a proxy, please make sure your http_proxy variable is set for Cygwin. Otherwise, the build cannot continue. You may set your proxy using the bash command:
+# Path to the standalone ruby built by support/build/Rakefile.
 
-		export http_proxy=http://proxy-server.mycorp.com:3128/
-		
-		"
-	sh "bash support/build/Scripts/update_ruby.sh"
-end
-	
+RUBY = "support/build/ruby-1.8.7-p357-i386-mingw32"  # TODO: get this from where it's defined in support/build/Rakefile
+RUBY_GEM_HOME = "#{RUBY}/lib/ruby/gems/1.8"
+
+# CLEAN and CLOBBER
+
+CLOBBER.include "bin/*", "run.bat"
+
+# Build by default.
+
+task :default => :build
+
+# Delegate standard tasks to descendant Rakefiles.
+    
 FileList[ "*/Rakefile", "*/*/Rakefile" ].map do |rakefile| # could use "*/**/Rakefile" to reach an arbitrary depth
 
     rakefile[ %r{(.*)/Rakefile}, 1 ]
@@ -58,98 +61,83 @@ end .each do |project|
     # Make the parent tasks dependent on the child tasks.
 
     DELEGATED_TASKS.each do |name|
-        task name => namespace[name]
+        task name => [ "utility:bundler", namespace[name] ]
     end
 
 end
 
-# Invoke a child rake.
+# Create a task for the support/build :ruby target.
 
-def rake *args
-  ruby "-S", "rake", *args
+support_build = namespace "support/build".gsub "/", "-" do
+    task :ruby do |task|
+        chdir "support/build" do
+            rake :ruby.to_s
+        end
+    end
 end
-
 
 # == build =========================================================================================
 
-task :build => [ :common, :windows ]
-
-# -- common ----------------------------------------------------------------------------------------
-
-desc "Update the gems (generating bin/*)."
-
-task :common do
-
-    sh "bundle install --binstubs"
-
+if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
+    task :build => :windows
 end
 
-# -- windows ---------------------------------------------------------------------------------------
+desc "Install and configure a standalone ruby for Windows."
 
-# Windows standalone build
+task :windows => [ :bundle, "run.bat" ]
 
-task :windows => :common do
+desc "Install or update the bundled gems."
 
-    if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
+task :bundle => "#{RUBY_GEM_HOME}/.bundle_install_timestamp"
 
-        DEVKIT = "../cache/ruby-devkit-tdm-32-4.5.2-20111229-1559-sfx"
-        RUBY = "../cache/ruby-1.8.7-p357-i386-mingw32"
-		CURPATH = `cygpath -w -p $PWD`
+desc "Install or update the bundled gems."
 
-        File.open( "#{DEVKIT}/config.yml", "w" ) do |io|
-            io.puts "---"
-            io.puts "- ../#{RUBY}"
-        end
+file "#{RUBY_GEM_HOME}/.bundle_install_timestamp" => [ "#{RUBY}/bin/bundle.bat", "Gemfile.lock" ] do |task|
+    cmd standalone_build_env, "bundle install --system"
+    touch task.name
+end
 
-        sh "echo '" + <<-BAT.strip.gsub( %r{^ *}, "" ) + "' | CMD.EXE"
+desc "Install the bundler gem."
+
+file "#{RUBY}/bin/bundle.bat" => support_build[:ruby] do  # TODO: import support/build/Rakefile and use a direct dependency to avoid unnecessary rebuilds
+    cmd standalone_build_env, "gem install bundler --no-rdoc --no-ri"
+end
+
+desc "Windows standalone launch script."
+
+file "run.bat" => "Rakefile" do |task|
+
+    rake_output_message "Creating #{task.name}"
+
+    File.open( task.name, "w" ) do |io|
+
+        io.puts <<-RUN.strip.gsub( %r{^ *(REM$)?}, "" )
             @ECHO OFF
-            REM Clear the bundle exec environment
-            SET BUNDLE_BIN_PATH=
-            SET BUNDLE_GEMFILE=
-            SET GEM_HOME=
-            SET GEM_PATH=
-            SET RUBYOPT=
-            REM Install DevKit in the local ruby
-            SET DEVKIT=#{ DEVKIT.gsub( "/", "\\" ) }
-            CD %DEVKIT%
-            SET RUBY=..\\#{ RUBY.gsub( "/", "\\" ) }
-            SET PATH=%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem
-            SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin
-            ruby dk.rb install
-            REM Configure the local ruby
-            CD ..\\
-            SET RUBY=#{ RUBY.gsub( "/", "\\" ) }
-            SET PATH=%SystemRoot%\\system32;%SystemRoot%;%SystemRoot%\\System32\\Wbem
-            SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin
-            gem install bundler --no-rdoc --no-ri
-			SET PWDPATH=#{ CURPATH }
-            CD %PWDPATH%
-			bundle install --system
-        BAT
+            REM
+            SETLOCAL
+            REM
+            SET PATH=#{ standalone_run_env["PATH"] }
+            REM
+            REM Show the user a hint when run in the default configuration. If arguments are provided, don't
+            REM show the hint since it probably won't be correct, and presume that the user already understands
+            REM where to connect to the server.
+            REM
+            IF NOT \"%*\" == \"\" GOTO NOMESSAGE
+            ECHO Virtual World Framework. Navigate to http://localhost:3000 to begin.
+            :NOMESSAGE
+            REM
+            REM Start the server.
+            REM
+            bundle exec thin start %*
+            REM
+            ENDLOCAL
+        RUN
 
-        File.open( "run.bat", "w" ) do |io|
-            io.puts "@ECHO OFF"
-            io.puts "ECHO ****************************************************"
-			io.puts "ECHO ****************************************************"
-			io.puts "ECHO ---------"
-			io.puts "ECHO   NOTE:  "
-			io.puts "ECHO ---------"
-			io.puts "ECHO Once Thin Server displays 'Listening on 0.0.0.0....' "
-			io.puts "ECHO this window must remain open (it is your server).    "
-			io.puts "ECHO Please use your web browser (Chrome/Firefox)         "
-			io.puts "ECHO and navigate to http://localhost:3000	to use VWF.    "
-			io.puts "ECHO *****************************************************"
-            io.puts "ECHO *****************************************************"
-            io.puts "SET RUBY=#{ RUBY.gsub( "/", "\\" ) }"
-            io.puts "SET PATH=%PATH%;%RUBY%\\bin;%RUBY%\\lib\\ruby\\gems\\1.8\\bin"
-            io.puts ""
-            io.puts "call ruby bin\\thin start %*"
-        end
+        io.chmod 0777-File.umask  # set execute permission
 
     end
-    
-end
 
+end
 
 # == test ==========================================================================================
 
@@ -161,5 +149,47 @@ Rake::TestTask.new do |task|
     task.test_files = FileList[ "test/*_test.rb", "test/*/*_test.rb" ]
 
     task.verbose = true
+
+end
+
+# Environment for running the standalone ruby.
+
+def standalone_run_env
+
+    {
+        "PATH" => [
+            "#{ native_path RUBY }\\bin",
+            "#{ native_path RUBY_GEM_HOME }\\bin",
+            "%PATH%",
+        ].join( ";" ),
+    }
+
+end
+
+# Environment for building in the standalone ruby.
+
+def standalone_build_env
+
+    {
+
+        # Reset the path to the standalone ruby and a generic Windows path.
+
+        "PATH" => [
+            "#{ native_path File.expand_path RUBY }\\bin",
+            "#{ native_path File.expand_path RUBY_GEM_HOME }\\bin",
+            "%SystemRoot%\\system32",
+            "%SystemRoot%",
+            "%SystemRoot%\\System32\\Wbem",
+        ].join( ";" ),
+
+        # Clear the inherited bundler environment.
+
+        "BUNDLE_BIN_PATH" => nil,
+        "BUNDLE_GEMFILE" => nil,
+        "GEM_HOME" => nil,
+        "GEM_PATH" => nil,
+        "RUBYOPT" => nil,
+
+    }
 
 end

@@ -1,0 +1,173 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+require "rake"
+require "rake/clean"
+
+import "utility.rake"
+
+# Names and URLs of ruby and the RubyInstaller Developer Kit.
+
+RUBY = "ruby-1.8.7-p357-i386-mingw32"
+RUBY_URL = "http://rubyforge.org/frs/download.php/75680/#{RUBY}.7z"
+
+DEVKIT = "DevKit-tdm-32-4.5.2-20111229-1559-sfx"
+DEVKIT_URL = "https://github.com/downloads/oneclick/rubyinstaller/#{DEVKIT}.exe"
+
+RUBY_GEM_HOME = "#{RUBY}/lib/ruby/gems/1.8"
+
+# Path to an optional cache directory to share downloads between projects.
+
+CACHE = "../../../cache"
+
+# CLEAN and CLOBBER
+
+CLEAN.include "Pygments-1.4/**/*.pyc", "#{RUBY}.7z", "#{DEVKIT}.7z", DEVKIT
+CLOBBER.include RUBY
+
+# Build by default.
+
+task :default => :build
+
+# Null build and test tasks.
+
+task :build
+task :test
+
+desc "Install a standalone ruby for Windows and configure DevKit."
+
+task :ruby
+
+if RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
+    task :ruby => "#{RUBY}/lib/ruby/site_ruby/devkit.rb"
+end
+
+desc "Install DevKit in the standalone ruby."
+
+file "#{RUBY}/lib/ruby/site_ruby/devkit.rb" => [ RUBY, "#{DEVKIT}/config.yml" ] do |task|
+    env = standalone_build_env2
+    chdir DEVKIT { cmd env, "ruby dk.rb install" }
+    touch task.name
+end
+
+desc "Create the DevKit configuration file."
+
+file "#{DEVKIT}/config.yml" => DEVKIT do |task|
+    rake_output_message "Creating #{task.name}"
+    File.open( task.name, "w" ) do |io|
+        io.puts "---"
+        io.puts "- ../#{RUBY}"
+    end
+end
+
+desc "Expand the DevKit archive."
+
+file DEVKIT => "#{DEVKIT}.7z" do |task|
+    begin
+        if File.exists? task.name
+            rake_output_message "Removing old #{task.name}"
+            remove_dir task.name, true
+        end
+        rake_output_message "Expanding #{task.name}"
+        mkdir task.name and chdir task.name do sh "7z x ../#{task.prerequisites.first} >/dev/null" end
+        chmod_R 0777-File.umask, task.name  # urghh, but too many to cherry pick, and DOS 7z does this anyway
+        touch task.name
+    rescue
+        rake_output_message "Removing #{task.name}"
+        remove_dir task.name, true
+    end
+end
+
+desc "Download DevKit."
+
+file "#{DEVKIT}.7z" do |task|
+    if File.directory? CACHE  # save to a shared cache directory
+        chdir CACHE do
+            unless File.exists? "#{task.name}"
+                rake_output_message "Downloading #{task.name}"
+                sh "curl -q -# -k -L -o #{task.name} #{DEVKIT_URL}"
+            end
+        end
+        File.delete task.name if File.symlink? task.name
+        File.symlink "#{CACHE}/#{task.name}", task.name
+    else  # save within the project
+        File.delete task.name if File.symlink? task.name
+        rake_output_message "Downloading #{task.name}"
+        sh "curl -q -# -k -L -o #{task.name} #{DEVKIT_URL}"
+    end
+end
+
+desc "Expand the ruby archive."
+
+file RUBY => "#{RUBY}.7z" do |task|
+    begin
+        if File.exists? task.name
+            rake_output_message "Removing old #{task.name}"
+            remove_dir task.name, true
+        end
+        rake_output_message "Expanding #{task.name}"
+        sh "7z x #{task.prerequisites.first} >/dev/null"
+        chmod_R 0777-File.umask, task.name  # urghh, but too many to cherry pick, and DOS 7z does this anyway
+        touch task.name
+    rescue
+        rake_output_message "Removing #{task.name}"
+        remove_dir task.name, true
+    end
+end
+
+desc "Download ruby."
+
+file "#{RUBY}.7z" do |task|
+    if File.directory? CACHE  # save to a shared cache directory
+        chdir CACHE do
+            unless File.exists? task.name
+                rake_output_message "Downloading #{task.name}"
+                sh "curl -q -# -L -o #{task.name} #{RUBY_URL}"
+            end
+        end
+        File.delete task.name if File.symlink? task.name
+        File.symlink "#{CACHE}/#{task.name}", task.name
+    else  # save within the project
+        File.delete task.name if File.symlink? task.name
+        rake_output_message "Downloading #{task.name}"
+        sh "curl -q -# -L -o #{task.name} #{RUBY_URL}"
+    end
+end
+
+# Environment for building in the standalone ruby.
+
+def standalone_build_env2
+
+    {
+
+        # Path to the standalone ruby and a clean Windows path.
+
+        "PATH" => [
+            "#{ native_path File.expand_path RUBY }\\bin",
+            "#{ native_path File.expand_path RUBY_GEM_HOME }\\bin",
+            "%SystemRoot%\\system32",
+            "%SystemRoot%",
+            "%SystemRoot%\\System32\\Wbem",
+        ].join( ";" ),
+
+        # Clear the inherited bundler environment.
+
+        "BUNDLE_BIN_PATH" => nil,
+        "BUNDLE_GEMFILE" => nil,
+        "GEM_HOME" => nil,
+        "GEM_PATH" => nil,
+        "RUBYOPT" => nil,
+
+    }
+
+end
