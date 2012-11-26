@@ -180,14 +180,14 @@ children:
           }
         value: 0
       headphones: false
-      anteanna:
+      antenna:
         set: |
           if ( value ) {
             this.bone1.MaxScene.Radio.playing = !value;
           } else {
-            this.logger.debug( "replace the anteanna" );
+            this.logger.debug( "replace the antenna" );
           }
-          this.anteanna = value;
+          this.antenna = value;
         value: true
       battery: true
       batteryCover: true 
@@ -708,6 +708,6 @@ children:
                 scripts:
                 - |
                     this.ic40Antennae = function() {
-                      this.parent.parent.parent.parent.anteanna = !this.parent.parent.parent.parent.anteanna; 
+                      this.parent.parent.parent.parent.antenna = !this.parent.parent.parent.parent.antenna; 
                     } 
 
