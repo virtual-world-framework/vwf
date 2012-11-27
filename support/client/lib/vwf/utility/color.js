@@ -48,8 +48,9 @@ define(function(){
 		return a;
 	};
 
-	var p2v = function(p){
-		return isPercent.test(p) ? absround(parseInt(p) * 2.55) : p;
+	var p2v = function( p ){
+		if ( typeof p === 'string' || typeof p === 'String' ) { p = Number( p ) }
+		return isPercent.test( p ) ? absround( parseInt( p ) * 2.55 ) : p;
 	};
 	
 	var isHex = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
