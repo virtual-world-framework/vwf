@@ -111,7 +111,7 @@ scripts:
               },
             }
           },
-          TankMaterial1: {
+          material: {
             extends: "http://vwf.example.com/material.vwf",
             properties: {
               texture: ""
@@ -181,8 +181,9 @@ scripts:
     }
     else if(this.colorIndex < tankMaterials.length) {
       var newPlayer = $.extend(true, {}, playerTank);
+      var tankTexture = tankMaterials[this.colorIndex];
       newPlayer.children[playerName + "Camera"] = playerCamera;
-      newPlayer.children.playerModel.children.TankMaterial1.properties.texture = tankMaterials[this.colorIndex];
+      newPlayer.children['playerModel'].children['material'].properties['texture'] = tankTexture;
       newPlayer.properties.color = tankColors[this.colorIndex];
       newPlayer.properties.translation = tankStartingPositions[this.colorIndex];
       newPlayer.properties.startingTranslation = tankStartingPositions[this.colorIndex];
@@ -208,4 +209,4 @@ scripts:
   }
   this.sendChat = function(playerName, chatToSend) {
     this.chatSent( playerName, chatToSend, this.players[playerName].color );
-  }
+  } //@ sourceURL=index.vwf
