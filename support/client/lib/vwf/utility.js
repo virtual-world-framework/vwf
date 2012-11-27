@@ -18,7 +18,7 @@
 /// @name vwf.utility
 /// @namespace
 
-define( [ "module" ], function( module ) {
+define( [ "module", "vwf/utility/color" ], function( module, color ) {
 
     return {
 
@@ -760,6 +760,16 @@ define( [ "module" ], function( module ) {
             },
 
         },
+
+        // -- Color --------------------------------------------------------------------------
+
+        /// HTML/CSS color conversion functions.
+        /// 
+        /// @name vwf.utility.Color
+        /// @namespace
+
+        color: color,
+
 
     };
 

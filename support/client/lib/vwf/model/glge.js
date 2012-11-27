@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
 
     // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
 
@@ -936,6 +936,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var value = propertyValue;
         var sceneNode = this.state.scenes[ nodeID ];
+
         if ( sceneNode && sceneNode.glgeScene ) {
             switch ( propertyName ) {
                 case "ambientColor":
@@ -1082,7 +1083,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var node = this.state.nodes[ nodeID ]; 
         var value = propertyValue;
-        var txtr, mat;
+        var txtr, mat, txtrPropValue;
 
         if ( propertyValue ) {
             if ( node.glgeMaterial && node.glgeMaterial.textures ) {
@@ -1094,8 +1095,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }            
             switch ( propertyName ) {
                 case "texture": {
+                    
+            // setting the texture back to the same value is causing a problem, need 
+            // to find out why so this get and check can be removed
+            txtrPropValue = getMaterialProperty.call( this, nodeID, propertyName );
+                    //console.info( "txtrProp = " + txtrPropValue );
                     //console.info( "Setting the texture of: " + nodeID + " to " + propertyValue);    
-                    if ( !(( propertyValue === undefined ) || ( propertyValue == "" )) ) {
+                    if ( ( propertyValue !== undefined ) && ( propertyValue != "" ) && ( propertyValue != txtrPropValue ) ) {
                         var textureType = "image";
                         if ( propertyValue == "canvas" ) {
                             textureType = "canvas";
@@ -1146,7 +1152,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 					        var ml = new GLGE.MaterialLayer;
 					        ml.setMapto( GLGE.M_COLOR );
 					        ml.setMapinput( GLGE.UV1 );
-                            //console.info( "     textureType: " + textureType );
+                            //console.info( "     new textureType: " + textureType );
 
                             switch ( textureType ) {
                                 case "image":
@@ -1341,16 +1347,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function getSceneProperty( nodeID, propertyName, propertyValue ) {
 
+        var color = undefined;
         var sceneNode = this.state.scenes[nodeID] // { name: childName, glgeObject: undefined }
         var value = undefined;
         switch ( propertyName ) {
               case "ambientColor":
-                var color = sceneNode.glgeScene.getAmbientColor();
-                if ( color['a'] !== undefined ) {
-                    value = [ color['r'], color['g'], color['b'], color['a'] ];
-                } else {
-                    value = [ color['r'], color['g'], color['b']  ];
-                }
+                color = vwfColor.call( this, sceneNode.glgeScene.getAmbientColor() );
+                value = colorToString.call( this, color );
                 break;
             case "activeCamera":
                 if ( sceneNode.glgeScene.camera ) {
@@ -1359,12 +1362,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 break;
 
             case "backgroundColor":
-                var color = sceneNode.glgeScene.getBackgroundColor();
-                if ( color['a'] !== undefined ) {
-                    value = [ color['r'], color['g'], color['b'], color['a'] ];
-                } else {
-                    value = [ color['r'], color['g'], color['b']  ];
-                }
+                color = vwfColor.call( this, sceneNode.glgeScene.getBackgroundColor() );
+                value = colorToString.call( this, color );
                 break;
             
             default:
@@ -1381,7 +1380,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     function getParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
         var value = undefined;
-        var obj;
+        var obj, color;
         var node = this.state.nodes[nodeID];
         if ( node && node.glgeObject ) {
             var ps = node.glgeObject;
@@ -1447,15 +1446,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     break;
                 case "startColor":
                     if ( ps.getStartColor ) {
-                        obj = ps.getStartColor();
-                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
-                    }
+                        color = vwfColor.call( this, ps.getStartColor() );
+                        value = colorToString.call( this, color );
+                    } else { value = undefined; }
                     break;
                 case "endColor":
                     if ( ps.getEndColor ){
-                        obj = ps.getEndColor();
-                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
-                    }
+                        color = vwfColor.call( this, ps.getEndColor() );
+                        value = colorToString.call( this, color );
+                    } else { value = undefined; }
                     break;
                 case "image":
                     if ( ps.getImage )
@@ -1496,7 +1495,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var node = this.state.nodes[ nodeID ]; 
         var value = undefined;
-        var txtr, mat, obj;
+        var txtr, mat, obj, color;
 
         switch ( propertyName ) {
             case "texture": {
@@ -1529,34 +1528,22 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             case "color":
                 if ( mat ) { 
-                    obj = mat.getColor();
-                    if ( obj.a !== undefined ) {
-                        value = [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ]; 
-                    } else {
-                        value = [ obj.r*255, obj.b*255, obj.g*255 ];
-                    }
-                } 
+                    color = vwfColor.call( this, mat.getColor() );
+                    value = colorToString.call( this, color );
+                } else { value = undefined; }
                 break;
                 
             case "ambient":
                 if ( mat ) { 
-                    obj = mat.getAmbient();
-                    if ( obj.a !== undefined ) {
-                        value = [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ]; 
-                    } else {
-                        value = [ obj.r*255, obj.b*255, obj.g*255 ];
-                    }                
-                } 
+                    color = vwfColor.call( this, mat.getAmbient() );
+                    value = colorToString.call( this, color );               
+                } else { value = undefined; }
                 break;
             case "specColor":
                 if ( mat ) { 
-                    obj = mat.getSpecularColor();
-                    if ( obj.a !== undefined ) {
-                        value = [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ]; 
-                    } else {
-                        value = [ obj.r*255, obj.b*255, obj.g*255 ];
-                    }  
-                } 
+                    color = vwfColor.call( this, mat.getSpecularColor() );
+                    value = colorToString.call( this, color );  
+                } else { value = undefined; }
                 break;
             case "shininess":
                 if ( mat ) { value = mat.getShininess(); } 
@@ -1587,7 +1574,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         var value = undefined;
         var node = this.state.nodes[ nodeID ];
-        var temp;
+        var temp, color;
 
         switch( propertyName ) {
 
@@ -1633,12 +1620,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 break;
 
             case "color":
-                var color = sceneNode.glgeScene.getBackgroundColor();
-                if ( color['a'] !== undefined ) {
-                    value = [ color['r'], color['g'], color['b'], color['a'] ];
-                } else {
-                    value = [ color['r'], color['g'], color['b']  ];
-                }
+                color = vwfColor.call( this, node.glgeObject.getColor() );
+                value = colorToString.call( this, color );  
                 break;
 
             case "diffuse":
@@ -2080,6 +2063,28 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         return sOut;
     }
 
+    function vwfColor( color ) {
+        var vwfColor;
+        color['r'] = color['r']*255;
+        color['g'] = color['g']*255;
+        color['b'] = color['b']*255;                                
+        if ( color['a'] !== undefined && color['a'] != 1 ) {
+            vwfColor = new utility.color( "rgba("+color['r']+","+color['g']+","+color['b']+","+color['a']+")" );
+        } else {
+            vwfColor = new utility.color( "rgb("+color['r']+","+color['g']+","+color['b']+")" );
+        }
+        return vwfColor;        
+    }
+
+    function colorToString( color ) {
+        var retColor = "";
+        if ( color.alpha() != 1 ) {
+            retColor = "rgba("+color.red()+","+color.green()+","+color.blue()+","+color.alpha()+")";
+        } else {
+            retColor = "rgb("+color.red()+","+color.green()+","+color.blue()+")";
+        }
+        return retColor;
+    }
 
     function getMeshVertexIndices( glgeObject ) {
         var vertexIndices = [];
@@ -2207,9 +2212,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
         }).shift();
 
-        if ( !childToReturn ) {
-            childToReturn = findGlgeObject.call( this, childName, childType );
-        }
+        // to slow, and may bind to the incorrect object
+        //if ( !childToReturn ) {
+        //    childToReturn = findGlgeObject.call( this, childName, childType );
+        //}
         //this.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
 
