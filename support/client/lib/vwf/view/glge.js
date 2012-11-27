@@ -132,15 +132,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     if ((origWidth != glgeView.width) || (origHeight != glgeView.height)) {
                         canvas.height = glgeView.height;
                         canvas.width = glgeView.width;
-                        var camID = glgeView.state.cameraInUseID
-                        if (!camID && camID != "") {
-                            var cam = glgeView.state.cameraInUse;
-                            camID = getObjectID.call( glgeView, cam, false, false);
+                        
+                        var cam = glgeView.state.cameraInUse;
+                        if ( cam ) {
+                            cam.setAspect( ( canvas.width / canvas.height )  );
                         }
-                        if (camID && camID != "") {
-                            vwf.setProperty(camID, "aspect", (glgeView.width / glgeView.height) /*/ 1.333*/);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
-                        }
-                        vwf.setProperty(glgeView.state.sceneRootID, "size", [glgeView.width, glgeView.height]);  // TODO: a view shouldn't go directly to the kernel (using "vwf"), and the aspect ratio and size are window-dependent and shouldn't be shared properties in the application
+
                         $('#topdown_a').height(canvas.height);
                         $('#topdown_b').height(canvas.height);
                         $('#client_list').height(canvas.height);
@@ -271,7 +268,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             //sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );
 
             this.state.cameraInUse = sceneNode.glgeScene.camera;
-            this.state.cameraInUse.setAspect( ( canvas.width / canvas.height) /*/ 1.333 */ );
+            this.state.cameraInUse.setAspect( ( canvas.width / canvas.height)  );
 
             // set up all of the mouse event handlers
             initMouseEvents.call( this, canvas );
