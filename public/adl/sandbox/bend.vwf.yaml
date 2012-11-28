@@ -36,6 +36,7 @@ properties:
   minAmount:
   maxAmount:
   type:
+  isModifier: true
   EditorData:
     amount:
       displayname: bend amount

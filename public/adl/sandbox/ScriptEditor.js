@@ -36,8 +36,8 @@ function ScriptEditor()
 		var w = ($('#textinnere').parent().width()-190);
 		if (w <= 0) w=($('#textinnerm').parent().width()-190);
 		
-		var h = ($('#textinnere').parent().height()-85);
-		if (h <= 50) h=($('#textinnerm').parent().height()-85);
+		var h = ($('#textinnere').parent().height()-125);
+		if (h <= 50) h=($('#textinnerm').parent().height()-125);
 		
 		$('#textinnerm').css('width',w+'px')
 		$('#textinnere').css('width',w+'px')
@@ -58,6 +58,9 @@ function ScriptEditor()
 		$('#saveEventCopy').css('top',h+'px');
 		_ScriptEditor.methodEditor.resize();
 		_ScriptEditor.eventEditor.resize();
+		
+		$('#saveMethod').css('top',$('#ScriptEditor').height()-75);
+		$('#saveEvent').css('top',$('#ScriptEditor').height()-75);
 	}
 	$(document.body).append('<script src="ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
 	$(document.body).append("<div id='ScriptEditorAbandonChanges'>You have are about to load a different script,but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.</div>");
@@ -66,7 +69,8 @@ function ScriptEditor()
 	$(document.body).append("<div id='ScriptEditorDeleteMethod'>Are you sure you want to delete this script? This cannot be undone.</div>");
 	$(document.body).append("<div id='ScriptEditorDeleteEvent'>Are you sure you want to delete this script? This cannot be undone.</div>");
 	$(document.body).append("<div id='ScriptEditorMessage'>This script contains syntax errors, and cannot be saved;</div>");
-	$(document.body).append("<div id='ScriptEditor'  style='overflow:hidden;padding: 0px 10px 0px 0px;'>" +
+	$(document.body).append("<div id='ScriptEditor'  style=''>" +
+	"<div id='scripteditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>ScriptEditor</span></div>" +
 	'<div id="ScriptEditorTabs" style="width:100%;height:100%;overflow:hidden;padding: 0px 10px 0px 0px;">'+
 	'	<ul>'+
 	'		<li><a href="#methods">Methods</a></li>'+
@@ -93,8 +97,42 @@ function ScriptEditor()
 	
 	this.MethodChanged = false;
 	this.EventChanged = false;
-	
-	$('#ScriptEditor').dialog({title:'Script Editor',autoOpen:false,resize:this.resize,height:520,width:760,position:'center'});
+	$('#ScriptEditor').resize(function(){_ScriptEditor.resize()});
+	$('#scripteditortitle').prepend('<img class="headericon" src="images/icons/script.png" />');
+	$('#scripteditortitle').append('<img id="maximizescripteditor" style="float:right" class="icon" src="images/icons/up2.png" />');
+	$('#scripteditortitle').append('<img id="hidescripteditor" class="icon" style="float:right" src="images/icons/down.png" />');
+	$('#hidescripteditor').click(function()
+	{
+		_ScriptEditor.hide();
+	});
+	$('#maximizescripteditor').click(function()
+	{
+		if(!$('#ScriptEditor').attr('maximized'))
+		{
+			
+			$('#ScriptEditor').attr('originalheight',$('#ScriptEditor').height()); 
+			$('#ScriptEditor').attr('originaltop',$('#ScriptEditor').offset().top); 
+			$('#ScriptEditor').css('top',$('#toolbar').offset().top + $('#toolbar').height() +'px');
+			$('#ScriptEditor').attr('maximized',true);
+			$('#ScriptEditor').css('height',$(window).height() - $('#toolbar').height()- $('#smoothmenu1').height()- $('#statusbar').height()+'px');
+			$('#maximizescripteditor').attr('src','images/icons/window.png');
+		}
+		else
+		{
+			
+			$('#ScriptEditor').css('top',$('#ScriptEditor').attr('originaltop')+'px');
+			$('#ScriptEditor').css('height',$(window).height() - $('#ScriptEditor').offset().top- $('#statusbar').height()+'px');
+			$('#ScriptEditor').removeAttr('maximized');
+			$('#maximizescripteditor').attr('src','images/icons/up2.png');
+					var scripteditorheight = $('#ScriptEditor').offset().top;
+		if(scripteditorheight != 0)
+		   scripteditorheight = $(window).height() - scripteditorheight;
+		$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - (scripteditorheight-25) + 'px');
+			_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+		}
+		_ScriptEditor.resize();
+	});
+	//$('#ScriptEditor').dialog({title:'Script Editor',autoOpen:false,resize:this.resize,height:520,width:760,position:'center'});
 	
 	$('#ScriptEditorDeleteMethod').dialog({title:'Delete Method?',autoOpen:false,height:'auto',width:'200px',position:'center',modal:true,buttons:{
 	'Yes':function(){_ScriptEditor.DeleteActiveMethod_imp();$('#ScriptEditorDeleteMethod').dialog('close');},
@@ -149,7 +187,7 @@ function ScriptEditor()
 	$('#eventlist').css('width','180px');
 	
 	$('#saveEvent').css('position','absolute');
-	$('#saveEvent').css('bottom','6px');
+	//$('#saveEvent').css('bottom','6px');
 	$('#saveEvent').css('width','175px');
 	
 	
@@ -163,7 +201,7 @@ function ScriptEditor()
 	
 	
 	$('#saveMethod').css('position','absolute');
-	$('#saveMethod').css('bottom','6px');
+	//$('#saveMethod').css('bottom','6px');
 	$('#saveMethod').css('width','175px');
 	
 	
@@ -408,9 +446,16 @@ function ScriptEditor()
 	
 	this.show = function()
 	{
+		window.clearInterval(window.scripthideinterval);
 		if(!this.isOpen())
 		{
-		$('#ScriptEditor').dialog('open');
+		//$('#ScriptEditor').dialog('open');
+		window.scripthideinterval = window.setInterval(function(){
+				$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px');
+				_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+				
+			},33);
+		$('#ScriptEditor').show('slide',{direction:'down'},function(){window.clearInterval(window.scripthideinterval);window.scripthideinterval=null;});
 		_ScriptEditor.resize();
 		_ScriptEditor.BuildGUI();
 		_ScriptEditor.open =true;
@@ -419,12 +464,19 @@ function ScriptEditor()
 	
 	this.hide = function()
 	{
-		$('#ScriptEditor').dialog('close');
-		
+		//$('#ScriptEditor').dialog('close');
+		window.clearInterval(window.scripthideinterval);
+		window.scripthideinterval = window.setInterval(function(){
+				$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px');
+				_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+				
+			},33);
+		$('#ScriptEditor').hide('slide',{direction:'down'},function(){ window.clearInterval(window.scripthideinterval);window.scripthideinterval=null;});
 	}
 	this.isOpen = function()
 	{
-		return $("#ScriptEditor").dialog( "isOpen" );
+		//return $("#ScriptEditor").dialog( "isOpen" );
+		return $('#ScriptEditor').is(':visible');
 	}
 	this.PostSaveMethod = function()
 	{
@@ -642,6 +694,12 @@ function ScriptEditor()
 			
 			$('#methodlist').append('<div class="scriptchoice" style="'+style+'" id="method'+i+'"></div>');
 			$('#method'+i).html(i);
+			
+			$('#method'+i).qtip({
+			content: "Edit the " + i + " method",
+			show: { delay: 1000 }
+			});
+			
 			$('#method'+i).attr('method',i);
 			$('#method'+i).click(function(){
 			
@@ -667,6 +725,10 @@ function ScriptEditor()
 			$('#eventlist').append('<div  style="'+style+'"  id="event'+i+'"></div>');
 			$('#event'+i).html(i);
 			$('#event'+i).attr('event',i);
+			$('#event'+i).qtip({
+			content: "Edit the " + i + " event",
+			show: { delay: 1000 }
+			});
 			$('#event'+i).click(function(){
 			
 				$("#eventlist").children().css('border-color','gray');
@@ -704,6 +766,10 @@ function ScriptEditor()
 			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methodtick"></div>');
 			$('#methodtick').html('tick');
 			$('#methodtick').attr('method','tick');
+			$('#methodtick').qtip({
+			content: "Create the tick method.",
+			show: { delay: 1000 }
+			});
 			$('#methodtick').click(function(){
 				$("#methodlist").children().css('border-color','gray');
 				$(this).css('border-color','blue');
@@ -721,6 +787,10 @@ function ScriptEditor()
 				var name = pointersugs[i];
 				$('#eventlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="event'+name+'"></div>');
 				$('#event'+name).html(name);
+				$('#event'+name).qtip({
+				content: "Create the " +name+" event.",
+				show: { delay: 1000 }
+				});
 				$('#event'+name).attr('event',name);
 				$('#event'+name).click(function(){
 					$("#eventlist").children().css('border-color','gray');
@@ -750,6 +820,7 @@ function ScriptEditor()
 	}
 	this.SelectionChanged = function(e,node)
 	{
+		
 		
 		if(!this.isOpen())
 		{
@@ -789,3 +860,4 @@ function ScriptEditor()
 	this.eventEditor.setFontSize('15px');
 }
 _ScriptEditor = new ScriptEditor();
+$('#ScriptEditor').hide();

@@ -3,11 +3,11 @@ function DataManager()
 	
 	//if(localStorage) throw "No localStorage available";
 	this.datahandle = "LOCALHOST:VWFTEST";
-	this.stringdata = localStorage[this.datahandle];
+	//this.stringdata = localStorage[this.datahandle];
 	this.currentSceneName = "";
-	if(this.stringdata)
-		this.rawdata = JSON.parse(this.stringdata);
-	if(!this.rawdata)
+	//if(this.stringdata)
+	//	this.rawdata = JSON.parse(this.stringdata);
+	//if(!this.rawdata)
 		this.rawdata = {scenes:{},profiles:{},inventory:{}};
 	this.loadedScene = null;	
 	this.DeleteIDs = function(t)
@@ -31,18 +31,57 @@ function DataManager()
 		}
 		return t;
 	}
+	this.GetUsers = function()
+	{
+			var data = jQuery.ajax({
+				type: 'GET',
+				url: 'http://10.100.21.71/vwfDataManager.svc/Profiles',
+				data: null,
+				success: null,
+				async:false,
+				dataType: "json"
+			});
+			data = JSON.parse(JSON.parse(data.responseText).GetProfilesResult);
+			return data;
+	}
 	this.GetProfileForUser = function(username)
 	{
+		var profile = null;
 		for(var i in this.rawdata.profiles)
 		{
 			if(this.rawdata.profiles[i].Username == username)
-				return this.rawdata.profiles[i];
+				profile = this.rawdata.profiles[i];
 		}
-		return null;
+		if(!profile)
+		{
+		
+			var UID  = this.getCurrentSession();
+			var data = jQuery.ajax({
+				type: 'GET',
+				url: 'http://10.100.21.71/vwfDataManager.svc/Profile?UID=' + username,
+				data: null,
+				success: null,
+				async:false,
+				dataType: "json"
+			});
+		
+			try{
+				data = JSON.parse(JSON.parse(data.responseText).GetProfileResult);
+				profile = data;
+				this.rawdata.inventory[username] = profile.inventory;
+				delete profile.inventory;
+				this.rawdata.profiles.push(profile);
+			}catch(e)
+			{
+			}
+		    
+		}
+		return profile;
 	}
 	this.saveProfile = function(profile)
 	{
 		this.rawdata.profiles[profile.Username] = profile;
+		profile.inventory = this.getInventory(profile.Username);
 		$.post("http://10.100.21.71/VWFDataManager.svc/Profile?UID="+profile.Username, JSON.stringify(profile),function(){});
 		this.saveData();
 	}
@@ -65,7 +104,7 @@ function DataManager()
 			inventory.scripts[name] = data;
 		if(type == 'object')
 			inventory.objects[name] = data;
-		this.saveData();			
+		this.saveProfile(this.GetProfileForUser(owner));			
 	}
 	this.renameInventoryItem = function(owner,oldname,newname,type)
 	{	
@@ -82,7 +121,7 @@ function DataManager()
 			inventory.objects[newname] = inventory.objects[oldname];
 			delete inventory.objects[oldname];
 		}
-		this.saveData();	
+		this.saveProfile(this.GetProfileForUser(owner));			
 	}
 	this.deleteInventoryItem = function(owner,item)
 	{
@@ -105,7 +144,7 @@ function DataManager()
 				break;
 			}
 		}
-		this.saveData();
+		this.saveProfile(this.GetProfileForUser(owner));			
 	}
 	this.captureScene = function(name)
 	{
@@ -195,6 +234,8 @@ function DataManager()
 			{
 				var node = this.getCleanNodePrototype(scene.children[i].id);
 				if(node.extends != "character.vwf" && node.extends != 'http://vwf.example.com/camera.vwf')
+					nodes.push(node);
+				if(node.extends == "character.vwf" && node.properties.ownerClientID == null)
 					nodes.push(node);
 			}
 		

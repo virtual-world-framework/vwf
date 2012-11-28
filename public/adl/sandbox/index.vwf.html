@@ -74,7 +74,7 @@
 	.statusbar
 	{
 		position: fixed;
-		width: 99%;
+		width: 100%;
 		height: 25px;
 		z-index: 101;
 		background-color: #414141
@@ -83,6 +83,45 @@
 	{
 		width:100%;
 		margin-bottom: 5px;
+	}
+	.headericon
+	{
+		vertical-align: middle;
+		width: 30px;
+		height: 30px;
+	}
+	.icon
+	{
+		width:25px;
+		height:25px;
+		vertical-align: middle;
+		margin-top: 3px;
+		border: 1px solid #505050;
+		margin-left: 3px;
+		border-radius: 6px;
+		background: -webkit-linear-gradient(right, white 0%, rgb(217, 238, 239) 100%);
+		padding: 1px;
+		cursor:pointer;
+	}
+	.icon:hover
+	{
+		background: -webkit-linear-gradient(left, rgb(117, 138, 339) 0%, rgb(217, 238, 239) 100%);
+		margin-top: 1px;
+		margin-left: 1px;
+		margin-right: 2px;
+		margin-bottom: 2px;
+	}
+	.seperator
+	{
+		width:25px;
+		height:25px;
+		vertical-align: middle;
+		margin-top: 3px;
+		border-left: 1px solid #545454;
+		margin-left: 10px;
+		margin-right: 5px;
+		padding: 1px;
+		display:inline;
 	}
 	.usertable tr td
 	{
@@ -110,7 +149,129 @@
 		margin-right: 3px;
 		font-family: sans-serif;
 		text-shadow: 1px 1px 3px black;
-}
+	}
+	#sidepanel
+	{
+		z-index: 100;
+		position: fixed;
+		width: 320px;
+		background-color: #414141;
+	}
+	#ScriptEditor
+	{
+		overflow: hidden;
+		padding: 0px 0px 0px 0px;
+		display: inline-table;
+		position: fixed;
+		
+		z-index: 101;
+		width: 100%;
+		left: 0px;
+	
+	}
+	#toolbar
+	{
+		z-index: 100;
+		position: fixed;
+		width: 100%;
+		background-color: #414141;
+		
+	}
+	.primeditorinputbox
+	{
+		display: inline;
+		float: right;
+		padding: 0;
+		width: 50px;
+		border-radius: 6px;
+		background: transparent;
+		text-align: center;
+		border-width: 1px;
+		color: grey;
+	}
+	@media only screen and (max-width:1600px)
+	{
+		#ScriptEditor
+		{
+			top: 683px;
+			height: 405px;
+		}
+	}
+	@media only screen and (max-width:1280px)
+	{
+		#ScriptEditor
+		{
+			top: 683px;
+			height: 405px;
+		}
+		.seperator
+		{
+			margin-left: 5px;
+			margin-right: 0px;
+			padding: 0px;
+			
+		}
+		.icon
+		{
+			margin-left: 0px;
+		}
+		#sidepanel
+		{
+			width: 220px;
+		}
+	}
+	@media only screen and (max-width:1024px)
+	{
+		#ScriptEditor
+		{
+			top: 531px;
+			height: 405px;
+		}
+		#sidepanel
+		{
+			width: 250px;
+		}
+		.seperator
+		{
+			margin-left: 5px;
+			margin-right: 0px;
+			padding: 0px;
+			
+		}
+		.icon
+		{
+			width:20px;
+			height:20px;
+		}
+	}
+	@media only screen and (max-width:800px)
+	{
+		#toolbar
+		{
+			
+		}
+		#ScriptEditor
+		{
+			top: 531px;
+			height: 380px;
+		}
+		#sidepanel
+		{
+			width: 200px;
+		}
+		.seperator
+		{
+			margin-left: 0px;
+			margin-right: 0px;
+		}
+		.primeditorinputbox
+		{
+			display: block;
+			float: none;
+			margin-top: 0px;
+			margin-left: 0px;
+		}
+	}
 
 	</style>
 	
@@ -140,6 +301,9 @@
 	<script type="text/javascript" src="_3DRIntegration.js"></script>
 	<script type="text/javascript" src="InventoryManager.js"></script>
 	<script type="text/javascript" src="_GLGERayTracer.js"></script>
+	<script type="text/javascript" src="jquery.qtip-1.0.0-rc3.min.js"></script>
+	<script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha256.js"></script>
+	
 	<script type="text/javascript">
 	
 	$(document).ready(
@@ -313,6 +477,9 @@
 		$('#MenuSetParent').click(function(e){
 			_Editor.SetParent();
 		});
+		$('#MenuRemoveParent').click(function(e){
+			_Editor.RemoveParent();
+		});
 		
 		$('#MenuSelectParent').click(function(e){
 			_Editor.SelectParent();
@@ -335,7 +502,13 @@
 			$('#ChatWindow').dialog('open');
 		});
 		$('#MenuUsers').click(function(e){
-			$('#Players').dialog('open');
+			
+			$('#Players').prependTo($('#Players').parent());
+			$('#Players').show('blind',function(){
+			
+			});
+			
+			showSidePanel();
 		});
 		$('#MenuModels').click(function(e){
 			_ModelLibrary.show();
@@ -411,6 +584,15 @@
 			_DataManager.chooseInstance();
 		});
 		
+		$('#ChatInput').keypress(function(e){
+			e.stopPropagation();
+			ChatKeypress(e);
+		});
+		$('#ChatInput').keydown(function(e){
+			e.stopPropagation();
+			
+		});
+		
 		function focusSelected()
 		{
 			if(_Editor.GetSelectedVWFNode())
@@ -418,7 +600,10 @@
 				if(_Editor.GetSelectedVWFNode())
 				 {
 					var gizpos = [_Editor.GetMoveGizmo().getLocX(),_Editor.GetMoveGizmo().getLocY(),_Editor.GetMoveGizmo().getLocZ()];
+					var box = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).GetBoundingBox();
+					var dist = GLGE.distanceVec3(box.max,box.min);
 					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
+					vwf.models[0].model.nodes['index-vwf'].zoom = dist * 2;
 					vwf.models[0].model.nodes['index-vwf'].updateCamera();
 				 }
 			 }
@@ -452,7 +637,7 @@
 		
 		$('#MenuCameraFirstPerson').click(function(e){
 			
-			vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes['player-' + document.PlayerNumber]);
+			vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes['-object-Object-player-' + document.PlayerNumber]);
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('FirstPerson');
 		});
 		
@@ -526,10 +711,195 @@
 				return "Are you sure you want to leave this VWF world?";
 			}		
 		};
+		
+		$(window).resize(function(){
+		$('#smoothmenu1').css('top','0px');
+		$('#smoothmenu1').css('left','0px');
+		$('#toolbar').css('top',$('#smoothmenu1').height());
+		//$('#toolbar').css('height','35px');
+		$('#toolbar').css('left','0px');
+		$('#statusbar').css('left','0px');
+		if($('#sidepanel').offset().left + 5 < window.innerWidth)
+			$('#index-vwf').css('width',window.innerWidth - $('#sidepanel').width() + 'px');
+		else
+			$('#index-vwf').css('width',window.innerWidth + 'px');
+		
+		$('#ScriptEditor').css('top',$(window).height() - $('#ScriptEditor').height()-$('#statusbar').height());
+		//$('#ScriptEditor').css('height',	$(window).height() - $('#ScriptEditor').offset().top - $('#statusbar').height() + 'px');
+		
+		$('#ScriptEditor').css('width',$('#index-vwf').width());	
+		if($('#ScriptEditor').attr('maximized'))
+		{
+			$('#ScriptEditor').css('top',$('#toolbar').offset().top + $('#toolbar').height() +'px');
+			$('#ScriptEditor').css('height',$(window).height() - $('#toolbar').height()- $('#smoothmenu1').height()- $('#statusbar').height()+'px');
+		}
+		else
+		{
+			
+			//$('#ScriptEditor').css('top',$('#ScriptEditor').attr('originaltop')+'px');
+			//$('#ScriptEditor').css('height',$(window).height() - $('#ScriptEditor').offset().top- $('#statusbar').height()+'px');
+			
+		}
+		_ScriptEditor.resize();
+		$('#index-vwf').css('height',window.innerHeight + 'px' - $('#ScriptEditor').offset().top);
+		
+		$('#index-vwf').css('top',$('#toolbar').offset().top+$('#toolbar').height());
+		$('#index-vwf').css('position','absolute');
+		$('#vwf-root').css('overflow','visible');
+		$('#vwf-root').css('left','0px');
+		$('#vwf-root').css('top','0px');
+		var scripteditorheight = $('#ScriptEditor').offset().top;
+		if(scripteditorheight != 0)
+		   scripteditorheight = $(window).height() - scripteditorheight;
+		$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - (scripteditorheight-25) + 'px');
+		
+		$('#sidepanel').css('left',$('#index-vwf').width() + $('#index-vwf').offset().left);
+		//$('#sidepanel').css('width',320);
+		$('#sidepanel').css('top',$('#toolbar').offset().top+$('#toolbar').height());
+		$('#sidepanel').css('height',$(window).height());
+		$('#statusbar').css('top',($(window).height() - 25) + 'px');
+		
+		
+		
+		_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+		});
+		$(window).resize();
+		
+		window.setTimeout(function(){$(window).resize();hideSidePanel();},500);
+		
+		$( "#sidepanel" ).sortable({distance: 15});
+        $( "#sidepanel" ).disableSelection();
+		$(document.body).disableSelection();
+		$(document.body).css('overflow','hidden');
+		
+		createIcon('images/icons/logout.png','MenuLogIn','Log In');
+		createIcon('images/icons/login.png','MenuLogOut','Log Out');
+		createSeperator();
+		createIcon('images/icons/Move.png','MenuMove','Move Tool');
+		createIcon('images/icons/rotate.png','MenuRotate','Rotate Tool');
+		createIcon('images/icons/scale.png','MenuScale','Scale Tool');
+		createSeperator();
+		createIcon('images/icons/worldspace.png','MenuWorld','Use World Coordinates');
+		createIcon('images/icons/localspace.png','MenuLocal','Use Local Coordinates');
+		createSeperator();
+		createIcon('images/icons/pick.png','MenuSelectPick','Select by clicking');
+		createIcon('images/icons/selectnone.png','MenuSelectNone','Select None');
+		createSeperator();
+		createIcon('images/icons/copy.png','MenuCopy','Copy');
+		createIcon('images/icons/paste.png','MenuPaste','Paste');
+		createIcon('images/icons/duplicate.png','MenuDuplicate','Duplicate');
+		createIcon('images/icons/save.png','MenuSaveCopy','Save to Inventory');
+		createIcon('images/icons/delete.png','MenuDelete','Delete');
+		createSeperator();
+		createIcon('images/icons/link.png','MenuSetParent','Link');
+		createIcon('images/icons/unlink.png','MenuRemoveParent','Unlink');
+		createIcon('images/icons/up.png','MenuSelectParent','Select Parent');
+		createSeperator();
+		createIcon('images/icons/camera.png','MenuCameraOrbit','Orbit Camera');
+		createIcon('images/icons/firstperson.png','MenuCameraFirstPerson','First Person Camera');
+		createIcon('images/icons/navigate.png','MenuCameraNavigate','Navigation Camera');
+		createIcon('images/icons/free.png','MenuCameraFree','Free Camera');
+		createIcon('images/icons/target.png','MenuFocusSelected','Focus to selected object');
+		createSeperator();
+		createIcon('images/icons/sphere.png','MenuCreateSphere','Create Sphere');
+		createIcon('images/icons/cube.png','MenuCreateBox','Create Box');
+		createIcon('images/icons/Cylinder.png','MenuCreateCylinder','Create Cylinder');
+		createIcon('images/icons/cone.png','MenuCreateCone','Create Cone');
+		createIcon('images/icons/pyramid.png','MenuCreatePyramid','Create Pyramid');
+		createIcon('images/icons/plane.png','MenuCreatePlane','Create Plane');
+		createSeperator();
+		
+	
+  
+		createIcon('images/icons/users.png','MenuUsers','Show Users Window');
+		createIcon('images/icons/chat.png','MenuChat','Show Chat Window');
+		createIcon('images/icons/material.png','MenuMaterialEditor','Show Material Editor Window');
+		createIcon('images/icons/script.png','MenuScriptEditor','Show Script Editor Window');
+		createIcon('images/icons/properties.png','MenuObjectProperties','Show Object Properties Window');
+		createIcon('images/icons/models.png','MenuModels','Show Model Library Window');
+		createIcon('images/icons/inventory.png','MenuInventory','Show Inventory Window');
+		
+		createPanelShowHide();
 	});
-	
-	
-	
+	var sizeTimeoutHandle;
+	function sizeWindowTimer()
+	{
+		_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+		_ScriptEditor.resize();
+		
+	}
+	function createIcon(src,menuitemname,tooltip)
+	{ 
+		
+		var iconname = menuitemname+"icon";
+		var mn = menuitemname;
+		$('#toolbar').append('<img src="'+src+'" id="'+iconname+'" class="icon" />');
+		$('#'+iconname).click(function()
+		{
+			
+			$('#'+mn).click();
+			$(this).css('background: -webkit-linear-gradient(left, rgb(317, 138, 139) 0%, rgb(217, 238, 239) 100%);');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		}
+		);
+		
+		$('#'+iconname).qtip({
+			content: tooltip,
+			show: { delay: 1000 }
+			});
+	}
+	function createPanelShowHide(src)
+	{ 
+		
+		var iconname = "togglesidepanelicon";
+		$('#toolbar').append('<img src="images/icons/left.png" id="'+iconname+'" class="icon" />');
+		$('#togglesidepanelicon').css('float','right');
+		$('#'+iconname).click(function()
+		{
+			if($('#sidepanel').offset().left < $(window).width())
+				hideSidePanel();
+			else
+				showSidePanel();
+		}
+		);
+	}
+	function createSeperator()
+	{
+		
+		
+		$('#toolbar').append('<div class="seperator" />');
+		
+	}
+
+	function hideSidePanel()
+	{
+		window.clearInterval(window.sizeTimeoutHandle);
+		window.sizeTimeoutHandle = window.setInterval(sizeWindowTimer,33);
+		$('#togglesidepanelicon').attr('src','images/icons/left.png');
+		$('#sidepanel').animate({'left':$(window).width()});
+		$('#ScriptEditor').animate({'width':$(window).width()});
+		$('#index-vwf').animate({'width':$(window).width()},function()
+		{
+			window.clearInterval(window.sizeTimeoutHandle);
+			sizeWindowTimer();
+			window.sizeTimeoutHandle = null;
+			
+		});
+	}
+	function showSidePanel()
+	{
+		window.clearInterval(window.sizeTimeoutHandle);
+		window.sizeTimeoutHandle = window.setInterval(sizeWindowTimer,33);
+		$('#togglesidepanelicon').attr('src','images/icons/right.png');
+		$('#sidepanel').animate({'left':$(window).width()-$('#sidepanel').width()});
+		$('#ScriptEditor').animate({'width':$(window).width()-$('#sidepanel').width()});
+		$('#index-vwf').animate({'width':$(window).width()-$('#sidepanel').width()},function()
+		{
+			window.clearInterval(window.sizeTimeoutHandle);
+			window.sizeTimeoutHandle = null;
+			
+		});
+	}
 	function SendChatMessage()
 	{
 	
@@ -570,7 +940,7 @@
 			$('#PM'+e).dialog("open");
 		}else
 		{
-			$(document.body).append("<div id='"+'PM'+e+"' style='width: 100%;margin:0px;padding:0px;overflow:hidden'/>");
+			$(document.body).prepend("<div id='"+'PM'+e+"' style='width: 100%;margin:0px;padding:0px;overflow:hidden'/>");
 			$('#PM'+e).dialog({title:"Chat with " + s,autoOpen:true});
 			$('#PM'+e).attr('receiver',s);
 			
@@ -598,7 +968,24 @@
 					SendPM(text,rec);
 					$(this).val('');
 				}
+				//e.preventDefault();
+				e.stopImmediatePropagation();
+				
 			});
+			$('#ChatInput'+e).keydown(function(e){
+				e.stopImmediatePropagation();
+				
+				
+			});
+			$('#ChatInput'+e).keyup(function(e){
+				e.stopImmediatePropagation();
+				
+			});
+			$('#ChatInput'+e).change(function(e){
+				e.stopImmediatePropagation();
+				
+			});
+			
 			
 		}
 	}
@@ -672,6 +1059,7 @@
 	function ChatKeypress(e)
 	{
 		 var key;
+		 
 		 if(window.event)
 			  key = window.event.keyCode;     //IE
 		 else
@@ -710,8 +1098,9 @@
   </head>
   <body style="font-size:10px; background-color: #515151">
     
-	
-<div id="smoothmenu1" class="ddsmoothmenu" style="z-index: 100;position: fixed;width: 99%">
+<div id="sidepanel" style=""> </div>
+<div id="toolbar" style=""> </div>		
+<div id="smoothmenu1" class="ddsmoothmenu" style="z-index: 100;position: fixed;width: 100%;border-bottom: 1px solid #555555;">
 <ul>
 <li><a href="#">File</a>
 <ul>
@@ -770,8 +1159,8 @@
 </li>
 <li><a href="#">Heirarchy</a>
   <ul>
-  <li><a href="#" id="MenuSetParent" >Set Parent</a></li>
-  <li><a href="#" id="MenuRemoveParent" >Remove Parent</a></li>
+  <li><a href="#" id="MenuSetParent" >Link</a></li>
+  <li><a href="#" id="MenuRemoveParent" >Unlink</a></li>
   <li><a href="#" id="MenuSelectParent" >Select Parent</a></li>
   </ul>
 </li>
@@ -826,7 +1215,7 @@
 			</table>
 		</div>
 	    
-		<input type="text" name="ChatInput" id="ChatInput" onKeyPress="return ChatKeypress(event)" class="text ui-widget-content ui-corner-all" style="width: 99%;top: 92%;position: absolute;padding: 0px;font-size: 1.2em;"/>		
+		<input type="text" name="ChatInput" id="ChatInput" class="text ui-widget-content ui-corner-all" style="width: 99%;top: 92%;position: absolute;padding: 0px;font-size: 1.2em;"/>		
 	</div>
 
   </body>

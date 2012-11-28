@@ -203,8 +203,13 @@ function _3DRIntegration()
 	$('#ModelSearchPanel').append("<div id='ResultsPages' style='display: inline;'></div>");
 	$('#ModelSearchButton').button({label:'Search'});
 	
-	$('#ModelLibrary').dialog({title:'Search 3DR',autoOpen:false,maxHeight:400,maxWidth:750,width:750,height:'auto',resizable:false,position:'center',modal:true,movable:true});
-	$('#ModelDetails').dialog({title:'Search 3DR',autoOpen:false,maxHeight:400,maxWidth:400,width:400,height:'400',resizable:false,position:'center',modal:true,movable:false,buttons:{
+	$('#ModelSearchTerm').keydown(function(e){
+			e.stopPropagation();
+	});
+	
+	
+	$('#ModelLibrary').dialog({title:'Search 3DR',autoOpen:false,maxHeight:400,maxWidth:750,width:750,height:'auto',minHeight:20,resizable:false,position:'center',modal:true,movable:true});
+	$('#ModelDetails').dialog({title:'Model Details',autoOpen:false,maxHeight:400,maxWidth:400,width:400,height:'auto',resizable:false,position:'center',modal:true,movable:false,buttons:{
 	Close:function(){$('#ModelDetails').dialog('close');},
 	Create:function(){
 		$('#ModelDetails').dialog('close');
@@ -299,7 +304,7 @@ function _3DRIntegration()
 		if(_ModelLibrary.MetadataCache[pid].AnonymousDownloadAvailable)
 		{
 		var proto  = { 
-                    extends: 'http://vwf.example.com/node3.vwf',
+                    extends: '3DRObject.vwf',
                     source: _ModelLibrary.BuildModelRequest(pid),
                     type: 'model/vnd.osgjs+json+compressed',
 					
@@ -307,7 +312,8 @@ function _3DRIntegration()
 					  rotation: [ 1, 0, 0, 0 ],
 					  translation: pos,
 					  scale: [_ModelLibrary.MetadataCache[pid].UnitScale,_ModelLibrary.MetadataCache[pid].UnitScale,_ModelLibrary.MetadataCache[pid].UnitScale],
-					  owner:document.PlayerNumber
+					  owner:document.PlayerNumber,
+					  type:'3DR Object'
 					  }
                     };
 		//vwf_view.kernel.createNode(proto , null);

@@ -839,7 +839,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // -- getState -----------------------------------------------------------------------------
 
         this.getState = function( full, normalize ) {
-
+			
+			if(full === undefined)
+				full = true;
             this.logger.group( "vwf.getState", full, normalize );
 
             // Direct property accessors to suppress kernel reentry so that we can read the state
@@ -933,7 +935,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // an initialization function.
 
         this.createNode = function( nodeComponent, create_callback /* ( nodeID ) */ ) {
-
+			
             this.logger.group( "vwf.createNode " + (
                 typeof nodeComponent == "string" || nodeComponent instanceof String ?
                     nodeComponent : JSON.stringify( loggableComponent( nodeComponent ) )
@@ -1494,7 +1496,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
 
-            var childID = childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
+            var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
 
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
@@ -1748,7 +1750,7 @@ if ( ! childComponent.source ) {
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
 if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
-if(vwf.tickable.nodeIDs.indexOf(nodeID) < 0)
+if(vwf.tickable.nodeIDs.indexOf(childID) < 0)
     vwf.tickable.nodeIDs.push( childID );
 }
 

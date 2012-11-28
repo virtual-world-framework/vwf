@@ -20,6 +20,7 @@ properties:
             this.dirtyStack();            
   minAmount:
   maxAmount:
+  isModifier: true
   type:
   EditorData:
     amount:

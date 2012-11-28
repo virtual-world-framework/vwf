@@ -1,35 +1,48 @@
 function MaterialEditor()
 {
 	
-	$(document.body).append("<div id='materialeditor'>" +
-					
+	$('#sidepanel').append("<div id='materialeditor'>" +
+					"<div id='materialeditortitle' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >Material Editor</div>"+
 					"</div>");
 
-	$('#materialeditor').dialog({title:'Material Editor',autoOpen:false});
+	//$('#materialeditor').dialog({title:'Material Editor',autoOpen:false});
 	
+		$('#materialeditor').css('border-bottom','5px solid #444444')
+		$('#materialeditor').css('border-left','2px solid #444444')
+		
+		
 	$(document.head).append('<link rel="stylesheet" media="screen" type="text/css" href="css/colorpicker.css" />');
 	$(document.head).append('<script type="text/javascript" src="js/colorpicker.js"></script>');
 	
 	this.show = function()
 	{
-		$('#materialeditor').dialog('open');
+		//$('#materialeditor').dialog('open');
+		$('#materialeditor').prependTo($('#materialeditor').parent());
+		$('#materialeditor').show('blind',function(){
+		
+		});
+		showSidePanel();
+		
 		this.BuildGUI();
-		if(_PrimitiveEditor.isOpen())
-			$('#materialeditor').dialog('option','position',[1282,456]);
-		else
-			$('#materialeditor').dialog('option','position',[1282,40]);
-		this.open =true;
+		//if(_PrimitiveEditor.isOpen())
+			//$('#materialeditor').dialog('option','position',[1282,456]);
+		//else
+			//$('#materialeditor').dialog('option','position',[1282,40]);
+		//this.open =true;
 	}
 	
 	this.hide = function()
 	{
-		$('#materialeditor').dialog('close');
+		//$('#materialeditor').dialog('close');
+		$('#materialeditor').hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
+				hideSidePanel();});
 		
 	}
 	
 	this.isOpen = function()
 	{
-		$("#materialeditor").dialog( "isOpen" )
+		//$("#materialeditor").dialog( "isOpen" )
+		return $('#materialeditor').is(':visible');
 	}
 	this.RootPropTypein = function()
 	{
@@ -93,18 +106,20 @@ function MaterialEditor()
 		{prop:'shininess',min:0,max:10,step:.05}
 		];
 		$("#materialeditor").empty();
-		
+		$("#materialeditor").append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material Editor</span></div>");
+		$('#materialeditortitle').append('<a href="#" id="materialeditorclose" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
+		$('#materialeditortitle').prepend('<img class="headericon" src="images/icons/material.png" />');	
 		$("#materialeditor").append(
 					'<div id="materialaccordion" style="height:100%;overflow:hidden">'+
 					'	<h3>'+
-					'		<a href="#">Transforms</a>'+
+					'		<a href="#">Material Base</a>'+
 					'	</h3>'+
 					'	<div id="MaterialBasicSettings">'+
 					'	</div>'+
 					'</div>'
 					);
 
-				
+		$("#materialeditorclose").click(function(){_MaterialEditor.hide()});
 		for(var i = 0; i < sliderprops.length;i++)
 		{
 			var prop = sliderprops[i].prop;
@@ -269,7 +284,7 @@ function MaterialEditor()
 		
 			$('#'+rootid).append('<img id="'+rootid+'thumb" class="BigTextureThumb"/>');
 			$('#'+rootid+'thumb').attr('src',this.currentMaterial.layers[i].src);
-			$('#'+rootid).append('<div id="'+rootid+'thumbsrc" class="BigTextureThumb" style="text-align: center;font-weight: bold;border: none;"/>');
+			$('#'+rootid).append('<div id="'+rootid+'thumbsrc" class="BigTextureThumb" style="overflow:hidden; text-overflow:ellipsis; text-align: center;font-weight: bold;border: none;"/>');
 			$('#'+rootid+'thumbsrc').html(this.currentMaterial.layers[i].src);
 			
 			$('#'+rootid+'thumb').attr('layer',i);
@@ -387,8 +402,18 @@ function MaterialEditor()
 		
 		
 		$( "#materialaccordion" ).accordion({
-			
+			fillSpace:true,
+			heightStyle: "content"
 		});
+		
+		$( ".ui-accordion-content").css('height','auto');
+		
+		//$('#materialeditor').resizable({
+        //    maxHeight: 550,
+        //    maxWidth: 320,
+        //    minHeight: 150,
+        //    minWidth: 320
+        //});
 		
 	}
 	this.setActiveTextureSrc = function(e)
@@ -453,7 +478,18 @@ function MapBrowser()
 {
 	
 	$(document.body).append("<div id='MapBrowser' />");
+	$(document.body).append("<div id='AddMap'> <input type='text' id='newmapurl' /> </div>");
 	$('#MapBrowser').dialog({title:'Map Broser',autoOpen:false,modal:true});
+	$('#AddMap').dialog({title:'Add Map',autoOpen:false,modal:true, buttons:{
+		'Ok':function()
+		{
+			_TextureList.push({texture:$('#newmapurl').val(),thumb:$('#newmapurl').val()});
+			$('#AddMap').dialog('close');
+		},
+		'Cancel':function(){
+			$('#AddMap').dialog('close');
+		}
+	}});
 	$(document.head).append('<script type="text/javascript" src="textures/textureLibrary.js"></script>');
 	
 	this.texturePicked = function()
@@ -463,17 +499,27 @@ function MapBrowser()
 		_MaterialEditor.setActiveTextureSrc(texture);
 	}
 	
-	for(var i = 0; i < _TextureList.length; i++)
+	this.BuildGUI = function()
 	{
-	
-		$('#MapBrowser').append('<img id="MapChoice'+i+'" class="textureChoice" />');
-		$('#MapChoice'+i).attr('src',_TextureList[i].thumb);
-		$('#MapChoice'+i).attr('texture',_TextureList[i].texture);
-		$('#MapChoice'+i).click(this.texturePicked);
+		$('#MapBrowser').empty();
+		for(var i = 0; i < _TextureList.length; i++)
+		{
+		
+			$('#MapBrowser').append('<img id="MapChoice'+i+'" class="textureChoice" />');
+			$('#MapChoice'+i).attr('src',_TextureList[i].thumb);
+			$('#MapChoice'+i).attr('texture',_TextureList[i].texture);
+			$('#MapChoice'+i).click(this.texturePicked);
+		}
+		$('#MapBrowser').append('<img id="MapChoiceadd" class="textureChoice" src="images/plus.png" />');
+		$('#MapChoiceadd').click(this.addTextureURLClick);
 	}
-	
+	this.addTextureURLClick = function()
+	{
+		$('#AddMap').dialog('open');
+	}
 	this.show = function()
 	{
+		this.BuildGUI();
 		$('#MapBrowser').dialog('open');
 		$('#MapBrowser').dialog('option','position','center');
 		this.open =true;
@@ -492,3 +538,4 @@ function MapBrowser()
 }
 _MapBrowser = new MapBrowser();
 _MaterialEditor = new MaterialEditor();
+_MaterialEditor.hide();

@@ -17,11 +17,11 @@ function Notifier()
 	}
 	this.alert = function(text)
 	{
-			$('#NotifierAlertMessage').html('Currently, only models marked with anonymous download permissions may be loaded.');
+			$('#NotifierAlertMessage').html(text);
 			$('#NotifierAlertMessage').dialog('open');
 	}
 	
-	$('#NotifierAlertMessage').dialog({title:'Syntax Error',autoOpen:false,height:'auto',width:'200px',position:'center',modal:true,buttons:{
+	$('#NotifierAlertMessage').dialog({title:'Message',autoOpen:false,height:'auto',width:'200px',position:'center',modal:true,buttons:{
 	'Ok':function(){$('#NotifierAlertMessage').dialog('close');},
 	}});
 	

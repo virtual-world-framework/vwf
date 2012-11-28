@@ -77,7 +77,7 @@ buildmenu:function($, setting){
 		var $subul=$(this).find('ul:eq(0)').css({display:'block'})
 		$subul.data('timers', {})
 
-		this._dimensions={w:this.offsetWidth, h:30, subulw:$subul.outerWidth(), subulh:$subul.outerHeight()}
+		this._dimensions={w:this.offsetWidth, h:20, subulw:$subul.outerWidth(), subulh:$subul.outerHeight()}
 		this.istopheader=$curobj.parents("ul").length==1? true : false //is top level header?
 		$subul.css({top:this.istopheader && setting.orientation!='v'? this._dimensions.h+"px" : 0})
 		$curobj.children("a:eq(0)").css(this.istopheader? {paddingRight: smoothmenu.arrowimages.down[2]} : {}).append( //add arrow images

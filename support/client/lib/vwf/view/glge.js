@@ -775,8 +775,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( sceneNode.frameCount > 10 && sceneNode.pendingLoads == 0 ) {
 
                 var objectIDFound = -1;
+				
                 var mousepos=mouse.getMousePosition();
-                mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
+                mousepos.x = mousepos.x + window.scrollX;
                 mousepos.y = mousepos.y + window.scrollY;
 
                 var returnValue = null;//sceneNode.glgeScene.pick(mousepos.x - $('#index-vwf').offset().left, mousepos.y - $('#index-vwf').offset().top);
@@ -796,7 +797,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 if (!returnValue) {
                     returnValue = { };
                 }
-
+				
                 var originRay = sceneNode.glgeScene.makeRay(mousepos.x, mousepos.y)
                 returnValue.pickOrigin = originRay ? originRay.origin : undefined;
 

@@ -38,6 +38,8 @@ scripts:
                 return null;
             var newMaterial = {};
             var currentMaterial = this.mesh.material;
+            if(!currentMaterial)
+                return;
             newMaterial.shininess = currentMaterial.getShininess();
             newMaterial.alpha = currentMaterial.getAlpha();
             newMaterial.ambient = currentMaterial.getAmbient();
@@ -49,9 +51,9 @@ scripts:
             
             newMaterial.specularColor = currentMaterial.getSpecularColor();
             newMaterial.specularLevel = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
-            newMaterial.specularColor.r = newMaterial.specularColor.r/newMaterial.specularLevel || 0;
-            newMaterial.specularColor.g = newMaterial.specularColor.g/newMaterial.specularLevel || 0;
-            newMaterial.specularColor.b = newMaterial.specularColor.b/newMaterial.specularLevel || 0;
+            newMaterial.specularColor.r = newMaterial.specularColor.r/newMaterial.specularLevel || 0.01;
+            newMaterial.specularColor.g = newMaterial.specularColor.g/newMaterial.specularLevel || 0.01;
+            newMaterial.specularColor.b = newMaterial.specularColor.b/newMaterial.specularLevel || 0.01;
             newMaterial.layers = [];
             for(var i = 0; i<currentMaterial.layers.length;i++)
             {
@@ -97,9 +99,9 @@ scripts:
              
              
              
-             newMaterial.specularColor.r = newMaterial.specularColor.r || 0;
-             newMaterial.specularColor.g = newMaterial.specularColor.g || 0;
-             newMaterial.specularColor.b = newMaterial.specularColor.b || 0;
+             newMaterial.specularColor.r = newMaterial.specularColor.r || 0.01;
+             newMaterial.specularColor.g = newMaterial.specularColor.g || 0.01;
+             newMaterial.specularColor.b = newMaterial.specularColor.b || 0.01;
              
              var norm = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
              newMaterial.specularColor.r /= norm;
@@ -160,7 +162,8 @@ scripts:
     {
         
         this.mesh.setMesh(this.Build());
-        this.mesh.mesh.dirtyMesh = true;		
+        if(this.mesh.mesh)
+            this.mesh.mesh.dirtyMesh = true;		
     }
     this.dirtyStack = function()
     {
@@ -175,7 +178,8 @@ scripts:
         {
             return vwf.callMethod(this.children[i].id,'updateStack');
         }
-        this.mesh.mesh.dirtyMesh = true;
+        if(this.mesh.mesh)
+            this.mesh.mesh.dirtyMesh = true;
     }
     this.GetBounds = function()
     {

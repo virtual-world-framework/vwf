@@ -1,10 +1,12 @@
 function InventoryManager()
 {
 	
-	$(document.body).append("<div id='InventoryManager' style='overflow:hidden'></div>");
+	$('#sidepanel').append("<div id='InventoryManager' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
 	$(document.body).append("<div id='InventoryViewer' style='overflow:hidden'><div id='InventoryView' style='width: 100%;height: 100%;margin: -5px -5px 5px -10px;'/></div>");
 	
-	$('#InventoryManager').append("<div id='InventoryDisplay' style='background:#FFFFF8;border: 1px black solid;margin: 3px 3px 3px 3px;'></div>");
+	
+	$('#InventoryManager').append("<div id='inventorymanagertitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Inventory</span></div>");
+	$('#InventoryManager').append("<div id='InventoryDisplay' style='font:1.5em sans-serif;padding-bottom:5px;background:#FFFFF8;border: 1px black solid;margin: 3px 3px 3px 3px;height:auto'></div>");
 	$('#InventoryManager').append("<div id='InventoryManagerCreate'></div>");
 	$('#InventoryManager').append("<div id='InventoryManagerDelete'></div>");
 	$('#InventoryManager').append("<div id='InventoryManagerView'></div>");
@@ -14,6 +16,12 @@ function InventoryManager()
 	$('#InventoryManagerDelete').button({label:'Delete'});
 	$('#InventoryManagerView').button({label:'View'});
 	$('#InventoryManagerRename').button({label:'Rename'});
+	$('#inventorymanagertitle').append('<a id="inventoryclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
+	$('#inventorymanagertitle').prepend('<img class="headericon" src="images/icons/inventory.png" />');	
+	$('#InventoryManager').css('border-bottom','5px solid #444444')
+	$('#InventoryManager').css('border-left','2px solid #444444')
+		
+		$('#inventoryclose').click(function(){_InventoryManager.hide()});
 	this.renameSelectedItem = function()
 	{
 		$('#InventoryRename').show();
@@ -26,7 +34,7 @@ function InventoryManager()
 		if(!_Editor.GetSelectedVWFNode() && _InventoryManager.selectedType == 'script')
 		{
 			$('#InventoryManagerMessage').html('You must select an object before createing a script from inventory');
-			$('#InventoryManagerMessage').dialog('open');
+			//$('#InventoryManagerMessage').dialog('open');
 		}	
 		if(_Editor.GetSelectedVWFNode() && _InventoryManager.selectedType == 'script')
 		{
@@ -54,6 +62,7 @@ function InventoryManager()
 			t.properties.translation[0] = newintersectxy[0];
 			t.properties.translation[1] = newintersectxy[1];
 			t.properties.translation[2] = newintersectxy[2];
+			t.properties.owner = _UserManager.GetCurrentUserName();
 			_InventoryManager.createChild('index-vwf',GUID(),t,null,null); 
 		}		
 	}
@@ -67,7 +76,7 @@ function InventoryManager()
 	$('#InventoryManagerDelete').click(this.deleteSelectedItem);
 	this.viewInventoryItem = function()
 	{
-		$('#InventoryViewer').dialog('open');
+		//$('#InventoryViewer').dialog('open');
 		if(_InventoryManager.selectedType == 'object')
 		{
 		
@@ -153,11 +162,11 @@ function InventoryManager()
 	this.DeleteIDsAndOwner = function(t)
 	{
 		
-		if(t.id != undefined)
-		{
-			delete t.id;
-			delete t.owner;
-		}
+		
+		delete t.id;
+		delete t.owner;
+		delete t.properties.owner;
+		
 		if(t.children)
 		{	
 			var children = []
@@ -175,9 +184,8 @@ function InventoryManager()
 	}
 	this.Take = function()
 	{
-		var t = vwf.getNode(_Editor.GetSelectedVWFNode().id);
-		t = JSON.stringify(t);
-		t = JSON.parse(t);
+		
+		var t = _DataManager.getCleanNodePrototype(_Editor.GetSelectedVWFNode().id);
 		_InventoryManager.DeleteIDsAndOwner(t);
 		_DataManager.addInventoryItem(document.PlayerNumber,t,GUID(),'object');
 		_InventoryManager.BuildGUI();
@@ -194,9 +202,16 @@ function InventoryManager()
 	}
 	this.show = function()
 	{
-		$('#InventoryManager').dialog('open');
-		$('#InventoryManager').dialog('option','position',[1282,40]);
+		//$('#InventoryManager').dialog('open');
+		$('#InventoryManager').prependTo($('#InventoryManager').parent());
+		$('#InventoryManager').show('blind',function()
+		{
+			
+		});
+		
+		//$('#InventoryManager').dialog('option','position',[1282,40]);
 		_InventoryManager.BuildGUI();
+		showSidePanel();
 		_InventoryManager.open =true;
 		this.resize();
 	}
@@ -212,11 +227,11 @@ function InventoryManager()
 	this.resize = function()
 	{
 		
-		var h = ($('#InventoryDisplay').parent().height()-45);
-		$('#InventoryDisplay').css('height',h+'px');
+		//var h = ($('#InventoryDisplay').parent().height()-45);
+		//$('#InventoryDisplay').css('height',h+'px');
 	}
-	$('#InventoryManager').dialog({title:'Inventory',modal:false,autoOpen:false,resizable:true,resize:this.resize,width:'300px',height:435});
-	$('#InventoryManager').dialog('option','position',[1282,640]);
+	//$('#InventoryManager').dialog({title:'Inventory',modal:false,autoOpen:false,resizable:true,resize:this.resize,width:'300px',height:435});
+	//$('#InventoryManager').dialog('option','position',[1282,640]);
 	$('#InventoryManagerMessage').dialog({title:'Inventory Message',modal:true,autoOpen:false,resizable:false});
 	
 	$('#InventoryViewer').dialog({title:'Inventory Viewer',modal:true,autoOpen:false,width:600,height:600,resizable:true,resize:function()
@@ -224,15 +239,18 @@ function InventoryManager()
 		_InventoryManager.itemViewer.resize();
 		
 	}});
-	$('#InventoryManager').dialog('option','position','center');
+	//$('#InventoryManager').dialog('option','position','center');
 	this.hide = function()
 	{
-		$('#InventoryManager').dialog('close');
+		//$('#InventoryManager').dialog('close');
+		$('#InventoryManager').hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
+				hideSidePanel();});
 		
 	}
 	this.isOpen = function()
 	{
-		return $("#InventoryManager").dialog( "isOpen" );
+		//return $("#InventoryManager").dialog( "isOpen" );
+		return $('#InventoryManager').is(':visible');
 	}
 	this.offClicked = function()
 	{
@@ -295,7 +313,7 @@ function InventoryManager()
 	{
 		
 		$('#InventoryDisplay').empty();
-		$('#InventoryDisplay').append("<input type='text' id='InventoryRename' style='display: inline-block;top: 22.0px;position: absolute;padding: 0px;border: 1px solid black;margin: 0px;width: 80%;'/>");
+		$('#InventoryDisplay').append("<input type='text' id='InventoryRename' style='display: inline-block;top: 22.0px;position: absolute;padding: 0px;font: 1.0em sans-serif;border: 1px solid black;margin: 0px;width: 80%;'/>");
 		$('#InventoryRename').hide();
 		$('#InventoryRename').keypress(_InventoryManager.rename)
 		$('#InventoryRename').keydown(function(e){e.stopPropagation();})
@@ -331,3 +349,4 @@ function InventoryManager()
 	this.itemViewer.setFontSize('15px');
 }
 _InventoryManager = new InventoryManager();
+_InventoryManager.hide();

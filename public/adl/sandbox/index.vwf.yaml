@@ -96,9 +96,10 @@ scripts:
        findscene().setAmbientColor('rgb(200,200,200)');
        this.CreateSky();
        
-       findscene().setFogType(GLGE.FOG_SKYQUADRATIC);
-       findscene().setFogFar(30);
+       findscene().setFogType(GLGE.FOG_QUADRATIC);
+       findscene().setFogFar(60);
        findscene().setFogNear(10);
+       findscene().setFogColor('#dcc6af');
        this.updateCamera();
     }
     this.keyDown = function(e)
@@ -289,10 +290,10 @@ scripts:
     this.GetWorldPickRay = function(e)
     {
 
-        var OldX = e.clientX - $('#vwf-root').offset().left;
-        var OldY = e.clientY - $('#vwf-root').offset().top;
+       var OldX = e.clientX - $('#index-vwf').offset().left;
+        var OldY = e.clientY - $('#index-vwf').offset().top;
 
-        var screenmousepos = [OldX/document.getElementById('vwf-root').clientWidth,OldY/document.getElementById('vwf-root').clientHeight,0,1];
+        var screenmousepos = [OldX/document.getElementById('index-vwf').clientWidth,OldY/document.getElementById('index-vwf').clientHeight,0,1];
         screenmousepos[0] *= 2;
         screenmousepos[1] *= 2;
         screenmousepos[0] -= 1;
@@ -339,6 +340,9 @@ scripts:
 
            var dxy = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
            var oldintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
+           
+           oldintersectxy = findscene().CPUPick(campos,ray).point;
+           
            this.navpoint =  oldintersectxy;
       }
      
@@ -360,7 +364,20 @@ scripts:
         else
             this.zoom *=.5;
       }
+       
+
         
+        if(this.cameramode == 'Navigate')
+        {   
+            if(e.wheelDelta < 0)
+            this.zoom *= 1.1;
+            else
+            {
+            this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(this.navpoint,this.center),.15));
+            
+            this.zoom = this.zoom + (3- this.zoom )*.05;
+            }
+        }       
         
       this.updateCamera();
         if(this.cameramode == 'Free')
@@ -421,7 +438,7 @@ scripts:
         worldmousepos2[1] /= worldmousepos2[3];
         worldmousepos2[2] /= worldmousepos2[3];
        
-        this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(worldmousepos2,worldmousepos),13));
+        this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(worldmousepos2,worldmousepos),5 * this.zoom));
         this.updateCamera();
         
       }
@@ -432,9 +449,13 @@ scripts:
            var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
            var ray = this.GetWorldPickRay(parms);
 
-           var dxy = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
+           var dxy = this.intersectLinePlane(ray,campos,[0,0,this.navpoint[2]],[0,0,1]);
            var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
+           
+           var len  = GLGE.subVec3(this.navpoint,newintersectxy)
+           
            this.center = GLGE.addVec3(this.center,GLGE.subVec3(this.navpoint,newintersectxy));
+          
            this.updateCamera();
       }
       
@@ -485,12 +506,15 @@ scripts:
             var finaldist = GLGE.lengthVec3(offset);  
             offset = GLGE.scaleVec3(offset,1/finaldist);            
             var start = GLGE.addVec3(this.center,GLGE.scaleVec3(offset,.3));
+            
+            var oldpickstate = findviewnode(this.objectFollowed.id).InvisibleToCPUPick;
+            findviewnode(this.objectFollowed.id).InvisibleToCPUPick = true;
             var hit = findscene().CPUPick(start,GLGE.scaleVec3(offset,1));
             if(hit)
             {
                 finaldist = Math.min(finaldist,hit.distance-.2);
             }
-            
+            findviewnode(this.objectFollowed.id).InvisibleToCPUPick = oldpickstate;
             offset = GLGE.scaleVec3(offset,finaldist);
             
             var finalpos = GLGE.addVec3(offset,start);
@@ -556,10 +580,18 @@ scripts:
     }
     this.pointerWheel = function( parms, pickInfo ) {
        
-        if(pickInfo.wheel.deltaY > 0 )
-        this.zoom *= 1.1;
-        else
-        this.zoom *= .9;
+        if(this.cameramode != 'Navigate')
+        { 
+            if(pickInfo.wheel.deltaY > 0 )
+            this.zoom *= 1.1;
+            else
+            this.zoom *= .9;
+        }
+        if(this.cameramode == 'Navigate')
+        {  
+            this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(this.navpoint,this.center),.05));
+            this.zoom = this.zoom + (3- this.zoom )*.01;
+        }
         
         this.updateCamera();
     }
@@ -617,13 +649,13 @@ scripts:
         {
             this.players.push(proto.properties.PlayerNumber);
             _UserManager.PlayerCreated(proto.properties.PlayerNumber);
-            
+            debugger;
             //This is odd. It seems like supplying an ID for the new object causes the initialize not to fire
-            proto.id = "player-"+proto.properties.PlayerNumber;
-            proto.uri = "player-"+proto.properties.PlayerNumber;
+            delete proto.id;//"player-"+proto.properties.PlayerNumber;
+            proto.uri = "-object-Object-player-"+proto.properties.PlayerNumber;
             //vwf_view.kernel.kernel.createNode(proto,  function(){this.updateCamera();vwf_view.kernel.kernel.models[0].model.nodes[proto.id].initialize();
             //}.bind(this));
-            this.children.create(proto.id,proto);
+            this.children.create("player-"+proto.properties.PlayerNumber,proto);
             
             
             

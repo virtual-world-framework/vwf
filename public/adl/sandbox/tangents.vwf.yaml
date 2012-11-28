@@ -5,6 +5,7 @@ properties:
     set: |
             this.active = value;
             this.dirtyStack();
+  isModifier: true
   type:
   EditorData:
     active:

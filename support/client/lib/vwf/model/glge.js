@@ -2389,7 +2389,7 @@ var JSONNode = function(node,callback)
 				src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/NoRedirect/" + encodeURIComponent(texturename) +"?ID=00-00-00";
 			else
 				src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/" + encodeURIComponent(texturename) +"?ID=00-00-00";
-			console.log(src);
+			
 			src = src.replace("AnonymousUser:@","");
 			var tex = new GLGE.Texture();
 			tex.setSrc(src);
@@ -2402,7 +2402,9 @@ var JSONNode = function(node,callback)
 	
 	this.error = function(e)
 	{
-		alert(e.responseText);
+		console.log("Error loading model: " + e.responseText);
+		if(this.callback)
+			this.callback(this);
 	}.bind(this);
 	
 	$.ajax({
@@ -2546,7 +2548,7 @@ function ParseSceneGraph(node, texture_load_callback) {
 			matrix.push(node.matrix[i]);
 		var glmat = GLGE.Mat4(matrix);
 		glmat = GLGE.transposeMat4(glmat);
-		console.log(glmat[3],glmat[7],glmat[11]);
+		
 		
 	    var mat=GLGE.Mat4([glmat[0], glmat[1], glmat[2], 0,
 								glmat[4], glmat[5], glmat[6], 0,

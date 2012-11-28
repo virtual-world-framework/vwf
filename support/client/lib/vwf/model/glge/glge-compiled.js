@@ -7192,7 +7192,7 @@ GLGE.Material.prototype.getFragmentShader=function(lights,colors,shaderInjection
 	shader=shader+"if(fogtype=="+GLGE.FOG_SKYLINEAR+" || fogtype=="+GLGE.FOG_SKYQUADRATIC+"){";
 	shader=shader+"vec4 view=projection * vec4(-eyevec,1.0);\n";
 	shader=shader+"vec2 fogCoords=view.xy/view.w*0.5+0.5;\n";
-	shader=shader+"fc=texture2D(sky,fogCoords.xy).rgb;\n";
+	shader=shader+"fc=texture2D(sky,fogCoords.xy,5.0).rgb;\n";
 	shader=shader+"}\n";
 			
 	shader=shader+"vec4 finalColor =vec4(specvalue.rgb+color.rgb*lightvalue.rgb+em.rgb,al)*fogfact+vec4(fc,al)*(1.0-fogfact);\n";
@@ -14113,7 +14113,7 @@ GLGE.Scene.prototype.makeRay=function(x,y){
 	if(!this.camera){
 		GLGE.error("No camera set for picking");
 		return null;
-	}else if(this.camera.matrix && this.camera.pMatrix){
+	}else if(this.camera.matrix && this.camera.getProjectionMatrix()){
 		//correct xy account for canvas scaling
 		var canvas=this.renderer.canvas;
 		x=x/canvas.offsetWidth*canvas.width;

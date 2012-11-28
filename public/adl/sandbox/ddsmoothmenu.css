@@ -28,6 +28,8 @@ padding: 8px 10px;
 border-right: 1px solid #778;
 color: #2d2b2b;
 text-decoration: none;
+padding-bottom: 3px;
+padding-top: 3px;
 }
 
 * html .ddsmoothmenu ul li a{ /*IE6 hack to get sub menu links to behave correctly*/
@@ -71,7 +73,7 @@ top: 0;
 .ddsmoothmenu ul li ul li a{
 font: normal 13px Verdana;
 width: 160px; /*width of sub menus*/
-padding: 5px;
+padding: 2px 5px 2px 5px;
 margin: 0;
 border-top-width: 0;
 border-bottom: 1px solid gray;
@@ -85,7 +87,7 @@ border-bottom: 1px solid gray;
 
 .downarrowclass{
 position: absolute;
-top: 12px;
+top: 6px;
 right: 7px;
 }
 

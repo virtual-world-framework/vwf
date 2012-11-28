@@ -49,6 +49,7 @@ properties:
             this.dirtyStack();              
   minAmount:
   maxAmount:
+  isModifier: true
   type:
   EditorData:
     amount:
@@ -250,7 +251,11 @@ scripts:
          var Random = this.Random(seed);
          if(this.amount == undefined) return;
          var mesh = this.GetMesh();
+         if(!mesh)
+            return;
          var m = mesh.getMesh();
+         if(!m)
+            return;
          var positions = [];
          for(var i=0;i<m.positions.length-2; i+=3)
          {
@@ -289,7 +294,7 @@ scripts:
              var thispos = positions[i];
              if(useWorldSpace == true)
              {
-                thispos = GLGE.mulMat4Vec3(mesh.matrix,thispos);
+                thispos = GLGE.mulMat4Vec3(mesh.getModelMatrix(),thispos);
              }
              if(effectZ)
              {

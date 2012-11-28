@@ -116,7 +116,7 @@ scripts:
        
        this._initialized = true;
        window.setTimeout(this.dirtyStack.bind(this),500); 
-        window.setTimeout(this.initTexture.bind(this),500);        
+        window.setTimeout(this.setupMaterial.bind(this),500);        
     }
     this.Build = function()
     {

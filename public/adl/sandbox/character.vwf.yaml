@@ -65,7 +65,7 @@ scripts:
             };
         
           
-          this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
+          //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
           this.updatecounter = 0;
           this.mesh = findChildViewNode(findscene(),this.id);
           this.jumpcounter = 0.0;
@@ -119,14 +119,14 @@ scripts:
     {
     
       var newdiv = document.createElement('div');
-      $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: absolute; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
-      newdiv.style.position = 'absolute';
+      $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
+      newdiv.style.position = 'fixed';
       newdiv.id = "Player " + PlayerNumber + 'label';
-      newdiv.innerHTML = "Player " + PlayerNumber;
+      newdiv.innerHTML = "" + PlayerNumber;
       newdiv.style.left = '0px';
       newdiv.style.top = '0px';
       
-      $('#vwf-root').append(newdiv);
+      $(document.body).append(newdiv);
                   
                  
     }
@@ -141,36 +141,47 @@ scripts:
     {
       
       
-      
+      var wh = document.getElementById('index-vwf').offsetHeight;
+      var ww = document.getElementById('index-vwf').offsetWidth;
       var div = document.getElementById("Player " + this.PlayerNumber + 'label');
       var pos = this.translation;
       pos = [pos[0],pos[1],pos[2]+1.620,1];
          
       var viewprojection = vwf.views[0].state.cameraInUse.getViewProjection();
+      
       var screen = GLGE.mulMat4Vec4(viewprojection,pos);
       screen[0] /= screen[3];
       screen[1] /= screen[3];
-      screen[2] /= screen[3];
+     
       screen[0] /= 2;
       screen[1] /= 2;
       screen[2] /= 2;
       screen[0] += .5;
       screen[1] += .5;
-      screen[2] += .5;
+      
   
-      screen[0] *= window.innerWidth;
-      screen[1] *= window.innerHeight;
-      screen[2] *= window.innerHeight;
-     
-      screen[1] = window.innerHeight - screen[1];
-     
+      screen[0] *= ww;
+      screen[1] *= wh;
       
-      div.style.left = screen[0]  +'px';
-      div.style.top = (screen[1]-25)  +  'px';
-      div.innerHTML = this.PlayerNumber;
-      
+     
+      screen[1] = wh - screen[1];
+
+      div.style.top = (screen[1])  +  'px';
       div.style.left = (screen[0] - div.offsetWidth/2)  +'px';
- 
+     
+     return;
+      if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
+            div.style.display = 'none';
+      else
+      {
+          if(screen[2] > 10 || screen[2] < 0)
+             div.style.display = 'none';
+          if(screen[2] < 10 && screen[2] > 0)
+             div.style.display = 'block';
+      }
+         
+      
+         
     }
     this.startloop = function()
     {
@@ -325,7 +336,10 @@ scripts:
                     }
                 }
                 var falldist = 1000;
+               
                 var intersect = findscene().CPUPick(GLGE.addVec3(this.translation,[0,0,1.7]),[0,0,-1]);
+                //console.log(intersect);
+               
                 falldist = intersect?intersect.distance:falldist;
                 if( falldist)
                 {
@@ -360,8 +374,10 @@ scripts:
                 {
                     //console.log(zdiff);
                     var zdiff = standing - intersect.distance;
+                    console.log(zdiff);
                     if(zdiff > 0.17 )
                     {
+                        
                         var zdiff = standing - intersect.distance;
                         //console.log(zdiff);
                         var zmove = zdiff;
@@ -383,6 +399,7 @@ scripts:
         //note that we could change the update mechanism to avoid getting out of sync
         if(this.updatecounter > 80 && document["PlayerNumber"] == this.PlayerNumber)
           {
+            
              vwf_view.kernel.setProperties(this.id,{'translation':[this.mesh.getLocX(),this.mesh.getLocY(),this.mesh.getLocZ()],rotZ:this.mesh.getRotZ()},0,null);
              this.updatecounter = 0;
           }
