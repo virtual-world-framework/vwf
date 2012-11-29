@@ -41,6 +41,7 @@ jQuery.fn.combobox = function(select){
     var sel = jQuery(this);
 	
     sel.prev().val(sel.val());
+	sel.prev().change();
     sel.prev().select();
     sel.prev().attr('pop_up_selection', sel.attr('selectedIndex'));
     sel.attr('selectedIndex', -1);
@@ -81,26 +82,30 @@ jQuery.fn.combobox = function(select){
         position: 'absolute',
         left: 0,
         top: '1px',
-        width: (width+22)+'px'};
+        width: (width+22)+'px',
+		height:'26px'};
     } else if (jQuery.browser.opera) {
       width = input.parent().width();
       style = {clip: 'rect(0 '+(width+2)+'px 30px '+(width-15)+'px)',
         position: 'absolute',
         left: 0,
         top: '1px',
-        width: (width+2)+'px'};
+        width: (width+2)+'px',
+		height:'26px'};
 
     } else if (jQuery.browser.safari) {
       style = {clip: 'rect(0px, '+(width+18)+'px, 30px, '+(width+2)+'px)',
         position: 'absolute',
         right: '0',
-        width: (width+18)+'px'};
+        width: (width+18)+'px',
+		height:'26px'};
     } else { // Mozilla
       style = {clip: 'rect(0px, '+(width+22)+'px, 30px, '+(width+4)+'px)',
         position: 'absolute',
         right: '0',
         width: (width+22)+'px',
-        top:'0'};
+        top:'0',
+		height:'26px'};
     }
     
     menu.css(style);
@@ -147,15 +152,31 @@ function UserManager()
 	});
 	$(document.body).append('<div id="Logon">'+
 	'	<form id="loginForm">'+
-	'      <input type="text" id="profilenames" style="padding:0px" pop_up_selection="0"> </input>'+
-	'      <input type="password" placeholder="password" id="password" style="padding:0px" pop_up_selection="0"> </input>'+
+	'      <input type="text" id="profilenames" style="font-size: 1.6em;width: 90%;height: 22px;padding: 0px;margin-right: 16px;border-radius: 3px;" pop_up_selection="0"> </input>'+
+	'      <input type="password" placeholder="password" id="password" style="font-size: 1.6em;width:90%;padding:0px;border-radius: 3px;" pop_up_selection="0"> </input>'+
 	//'			<input type="text" name="name" id="name" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />'+
 	//'			<div id="AvatarChoice">'+
 	//'				<input type="radio" id="radio1" name="radio" value="usmale.dae" checked="checked" /><label for="radio1">Human</label>'+
 	//'				<input type="radio" id="radio2" name="radio" value="mech.dae" /><label for="radio2">Robot</label>'+
 	//'			</div>'+
 	'	</form>'+
+	'<div style="margin-top: 2em;color: grey;font-size: 0.8em;">Please note that this login system is not indended to be secure in any way. This is only a demonstration system. Your profile, inventory, and access to any objects you create are easily available to anyone with malicious intent. We never store your password, so this information is safe, but please consider this warning when creating content. If you would like to export a permanant copy of your work for archival purposes, please contact the site administrators. Content, profiles, and inventories are subject to deletion and removal at any time. </div>'+
 	'</div>');
+		$('#password').hide();
+	$('#profilenames').change(function()
+	{
+		if($('#profilenames').val() == 'New Profile...')
+		{
+			$('#Logon').parent().children().last().children().first().children().first().children().first().html('Create Profile');
+			$('#password').hide();
+		
+		}else
+		{
+			$('#Logon').parent().children().last().children().first().children().first().children().first().html('Log in');
+			$('#password').show();
+		}
+		
+	});
 	
 	$('#sidepanel').append('<div id="Players"  class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="width: 100%;margin:0px;padding:0px">'+
 	"<div id='playerstitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Players</span></div>"+
@@ -218,7 +239,9 @@ function UserManager()
 			e.stopPropagation();
 	});
 	
-	
+	$('#password').keydown(function(e){
+			e.stopPropagation();
+	});
 	$("#EditProfile").button({label:'Edit My Profile'});
 	$("#EditProfile").click(function()
 	{
@@ -394,7 +417,7 @@ function UserManager()
 	}
     $(window).unload(function(){this.SceneDestroy();}.bind(this));
 	//$('#Players').dialog({ position:['left','bottom'],width:300,height:200,title: "Players",autoOpen:false});
-	$('#Logon').dialog({autoOpen:false,title:'Select Profile',modal:true,buttons:{"Log In":function(){ 
+	$('#Logon').dialog({autoOpen:false,title:'Select Profile',modal:true,buttons:{"Create Profile":function(){ 
 		if($('#profilenames').val() == "New Profile...") 
 			_UserManager.showCreateProfile(); 
 		else
@@ -405,7 +428,7 @@ function UserManager()
 				alert('There is no account with that username');
 				return;
 			}
-			debugger;
+			
 			if(profile.Password != CryptoJS.SHA256($('#password').val()) + '')
 			{
 				alert('The password is incorrect.');

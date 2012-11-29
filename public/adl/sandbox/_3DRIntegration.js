@@ -216,11 +216,9 @@ function _3DRIntegration()
 		$('#ModelLibrary').dialog('close');
 		_ModelLibrary.insertObject(_ModelLibrary.DetailsPID);
 	}
-	
-	
-	
+
 	}});
-	
+	$('#ModelLibrary').append("<div style='margin-top: 2em;color: grey;font-size: 0.8em;'>This interface allows you to load 3D models from a library of content. This content will be created at the center of your viewport. Type a search term in the box above. Click on thumbnails to display additional data about the objects. If you wish to upload content, please visit the <a target='new' href='http://3dr.adlnet.gov'>ADL 3D Repository</a>. Here, you can upload assets to be included in this virtual world. Be careful to mark your content as publically accessable, as this system can only load public content at this time.</div>");
 	this.currentPage = 0;
 	this.pageLength = 42;
 	this.Results = [];

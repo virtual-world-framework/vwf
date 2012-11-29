@@ -15,10 +15,7 @@
 extends: http://vwf.example.com/node3.vwf
 properties:
   translation:
-  rotZ: 
-        set: |
-            if(this.mesh)
-               this.mesh.setRotZ(value);
+  rotZ: 0
 methods:
   update:
   tick:
@@ -65,7 +62,7 @@ scripts:
             };
         
           
-          //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
+          this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
           this.updatecounter = 0;
           this.mesh = findChildViewNode(findscene(),this.id);
           this.jumpcounter = 0.0;
@@ -169,7 +166,7 @@ scripts:
       div.style.top = (screen[1])  +  'px';
       div.style.left = (screen[0] - div.offsetWidth/2)  +'px';
      
-     return;
+     
       if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
             div.style.display = 'none';
       else
@@ -244,11 +241,13 @@ scripts:
             this.cycleName =  this.motionStack[i];
             if(this.cycleName == 'turnright')
             {
-                this.mesh.setRotZ(this.mesh.getRotZ()-.07*updateFreqDivisor);
+                this.rotZ += -.07*updateFreqDivisor;
+                this.mesh.setRotZ(this.rotZ);
             }
             if(this.cycleName == 'turnleft')
             {
-                this.mesh.setRotZ(this.mesh.getRotZ()+.07*updateFreqDivisor);
+                this.rotZ += +.07*updateFreqDivisor;
+                this.mesh.setRotZ(this.rotZ);
             }
             if(this.cycleName == 'walk')
             {
@@ -400,7 +399,7 @@ scripts:
         if(this.updatecounter > 80 && document["PlayerNumber"] == this.PlayerNumber)
           {
             
-             vwf_view.kernel.setProperties(this.id,{'translation':[this.mesh.getLocX(),this.mesh.getLocY(),this.mesh.getLocZ()],rotZ:this.mesh.getRotZ()},0,null);
+             //vwf_view.kernel.setProperties(this.id,{'translation':[this.mesh.getLocX(),this.mesh.getLocY(),this.mesh.getLocZ()],rotZ:this.rotZ},0,null);
              this.updatecounter = 0;
           }
           

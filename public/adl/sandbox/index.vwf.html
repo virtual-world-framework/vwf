@@ -189,7 +189,15 @@
 		border-width: 1px;
 		color: grey;
 	}
-	@media only screen and (max-width:1600px)
+	@media only screen and (max-height:1200px)
+	{
+		#ScriptEditor
+		{
+			top: 683px;
+			height: 405px;
+		}
+	}
+	@media only screen and (max-height:1024px)
 	{
 		#ScriptEditor
 		{
@@ -199,11 +207,7 @@
 	}
 	@media only screen and (max-width:1280px)
 	{
-		#ScriptEditor
-		{
-			top: 683px;
-			height: 405px;
-		}
+		
 		.seperator
 		{
 			margin-left: 5px;
@@ -220,13 +224,16 @@
 			width: 220px;
 		}
 	}
-	@media only screen and (max-width:1024px)
+	@media only screen and (max-height:768px)
 	{
 		#ScriptEditor
 		{
 			top: 531px;
 			height: 405px;
 		}
+	}
+	@media only screen and (max-width:1024px)
+	{
 		#sidepanel
 		{
 			width: 250px;
@@ -301,6 +308,7 @@
 	<script type="text/javascript" src="_3DRIntegration.js"></script>
 	<script type="text/javascript" src="InventoryManager.js"></script>
 	<script type="text/javascript" src="_GLGERayTracer.js"></script>
+	<script type="text/javascript" src="Help.js"></script>
 	<script type="text/javascript" src="jquery.qtip-1.0.0-rc3.min.js"></script>
 	<script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha256.js"></script>
 	
@@ -703,6 +711,7 @@
 		{
 			_DataManager.loadFromServer();
 		}	
+	
 		window.setTimeout(function(){_DataManager.saveTimer();},60000);		
 		window.onbeforeunload = function(){
 			if(_DataManager.getClientCount() == 1)
@@ -1100,7 +1109,7 @@
     
 <div id="sidepanel" style=""> </div>
 <div id="toolbar" style=""> </div>		
-<div id="smoothmenu1" class="ddsmoothmenu" style="z-index: 100;position: fixed;width: 100%;border-bottom: 1px solid #555555;">
+<div id="smoothmenu1" class="ddsmoothmenu" style="z-index: 1000;position: fixed;width: 100%;border-bottom: 1px solid #555555;">
 <ul>
 <li><a href="#">File</a>
 <ul>
@@ -1157,7 +1166,7 @@
   <li><a href="#" id="MenuCameraNavigate">Navigate</a></li>
   </ul>
 </li>
-<li><a href="#">Heirarchy</a>
+<li><a href="#">Hierarchy</a>
   <ul>
   <li><a href="#" id="MenuSetParent" >Link</a></li>
   <li><a href="#" id="MenuRemoveParent" >Unlink</a></li>
@@ -1200,6 +1209,12 @@
   <li><a href="#" id="MenuObjectProperties">Object Properties</a></li>
   <li><a href="#" id="MenuModels">Models</a></li>
   <li><a href="#" id="MenuInventory">Inventory</a></li>
+  </ul>
+</li>
+<li><a href="#">Help</a>
+  <ul>
+  <li><a href="#" id="MenuHelpAbout">About</a></li>
+  <li><a href="#" id="MenuHelpBrowse">Browse All Topics...</a></li>
   </ul>
 </li>
 </ul>

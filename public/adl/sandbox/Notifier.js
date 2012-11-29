@@ -1,6 +1,6 @@
 function Notifier()
 {
-	var style = "width: 71%;height: 14%;position: fixed;background: #454545;opacity: .8;border-radius: 50px;top: 75%;left: 15.5%;box-shadow: 10px 10px 20px,0px 0px 30px grey inset;text-align: center;vertical-align: middle;line-height: 4em;font-size: 4em;font-family: sans-serif;text-shadow: 0px 0px 5px white;color: #1F1F1F;"
+	var style = "z-index:99999;width: 71%;height: 14%;position: fixed;background: #454545;opacity: .8;border-radius: 50px;top: 75%;left: 15.5%;box-shadow: 10px 10px 20px,0px 0px 30px grey inset;text-align: center;vertical-align: middle;line-height: 4em;font-size: 4em;font-family: sans-serif;text-shadow: 0px 0px 5px white;color: #1F1F1F;"
 	$(document.body).append("<div style='"+style+"' id='NotifierWindow'>This is a test of the multi </div>");
 	$(document.body).append("<div id='WaitingWindow'><div style='text-align: center;margin-top: 50px;'><img src='images/loading.gif'><div style='font-size: 1.5em;' id='waittitle'/></div></div>");
 	$(document.body).append("<div id='NotifierAlertMessage'></div>");
@@ -9,6 +9,7 @@ function Notifier()
 	this.notify = function(text)
 	{
 	    clearTimeout($('#element').stop().data('timer'));
+		$('#NotifierWindow').css('font-size',$(window).height()/25 + 'px');
 		$('#NotifierWindow').html(text);
 		$('#NotifierWindow').fadeIn(function() {
 			var elem = $(this);

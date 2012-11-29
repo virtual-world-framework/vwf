@@ -2442,6 +2442,31 @@ function ApplyMaterial(newnode,newmaterial)
 			ApplyMaterial(newnode.children[0],newmaterial);
 	}	
 }	
+function isIdentityMatrix(matrix)
+{
+	
+	if(matrix == null)
+		return true;
+	if(
+	matrix[0] == 1 &&	
+	matrix[1] == 0 &&
+	matrix[2] == 0 &&
+	matrix[3] == 0 &&
+	matrix[4] == 0 &&
+	matrix[5] == 1 &&
+	matrix[6] == 0 &&
+	matrix[7] == 0 &&
+	matrix[8] == 0 &&
+	matrix[9] == 0 &&
+	matrix[10] == 1 &&
+	matrix[11] == 0 &&
+	matrix[12] == 0 &&
+	matrix[13] == 0 &&
+	matrix[14] == 0 &&
+	matrix[15] == 1)
+		return true;
+	return false;	
+}
 function ParseSceneGraph(node, texture_load_callback) {
 
     var newnode;
@@ -2574,7 +2599,9 @@ function ParseSceneGraph(node, texture_load_callback) {
 	
     if(node.name && newnode)
 		newnode.name = node.name;
-		
+	//optimization for deep trees that have no need for the depth	
+	if(newnode && newnode.children && newnode.children.length == 1 && isIdentityMatrix(newnode.getLocalMatrix()))
+		return newnode.children[0];
     return newnode;
 }
 var blobsfound = 0;

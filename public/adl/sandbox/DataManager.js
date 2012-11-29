@@ -9,12 +9,43 @@ function DataManager()
 	//	this.rawdata = JSON.parse(this.stringdata);
 	//if(!this.rawdata)
 		this.rawdata = {scenes:{},profiles:{},inventory:{}};
+	
+	$(document.body).append("<div id='NewInstanceDialog'><input type='text' id='NewInstanceName' style='width: 90%;border-radius: 6px;font-size: 1.6em;'/><div style='margin-top: 2em;color: grey;font-size: 0.8em;'>The name of the instance must be a 16 letter word with no spaces and only alphanumeric characters. The string you enter above will be modified to enforce these rules. Please note that the creator of an instance has no special right or abilities within the instance.</div></div>");	
+	
+	
+	$('#NewInstanceName').keydown(function(e){
+			e.stopPropagation();
+	});
+	
+	$('#NewInstanceDialog').dialog({title:"New Instance",modal:true,autoOpen:false,buttons:{
+	Create:function(){
+		
+		$('#NewInstanceDialog').dialog('close');
+		window.location = _DataManager.getCurrentApplication() + "/" + _DataManager.CleanInstanceName($('#NewInstanceName').val());
+	},
+	Cancel:function()
+	{
+		$('#NewInstanceDialog').dialog('close');
+	}
+	}
+	}
+	);
 	this.loadedScene = null;	
+	this.CleanInstanceName = function(name)
+	{
+		while(name.length < 16) name = name +'0';
+		if(name.length>16);
+		name = name.substr(0,16);
+		name = name.replace(/[^0-9a-zA-Z]/g,'0');
+		return name;
+	}
 	this.DeleteIDs = function(t)
 	{
 		
 		if(t.id != undefined)
 			delete t.id;
+		if(t.name != undefined)
+			delete t.name;	
 		if(t.children)
 		{	
 			var children = []
@@ -218,7 +249,10 @@ function DataManager()
 	}
 	this.getCleanNodePrototype = function(id)
 	{
+		if(typeof id === "string")
 		return this.DeleteIDs(this.fixExtends(this.GetNode(id)));
+		else
+		return this.DeleteIDs(this.fixExtends(id));
 	}
 	this.saveToServer = function()
 	{
@@ -360,6 +394,8 @@ function DataManager()
 			
 			$(document.body).append('<div id="InstanceDialog" style="overflow:auto;overflow: auto;min-height: 61.40000009536743px;height: auto;box-shadow: -3px -3px 18px gray inset;width: 91%;border-radius: 10px;"/>');
 			$('#InstanceDialog').append('<div style="border-radius:10px;width:95%;" id="InstanceDialogList" />');
+			$('#InstanceDialog').append('<div style="margin-top: 2em;color: grey;font-size: 0.8em;">Each instance is separate world. While these worlds share the same server,they exist independantly. Worlds are saved frequently by the server to prevent data loss. Select an instance and click "Load" to switch to it. You will have to log in each time you join a new instance. </div>'+
+			'</div>');
 			var instances = this.getInstances();
 			for(var j =0; j<instances.length;j++)
 			{
@@ -378,15 +414,20 @@ function DataManager()
 				autoOpen:true,
 				modal:true,
 				buttons:{
-					cancel:function(){
+					Cancel:function(){
 						$('#InstanceDialog').dialog('close');
 					},
-					load:function(){
+					Load:function(){
 						
 						var name = $("#InstanceDialogList .loadchoice[selected=selected]").attr('instancename');
 						_DataManager.switchInstance(name);
 						$('#InstanceDialog').dialog('close');
+					},
+					"New Instance":function()
+					{
+						$('#NewInstanceDialog').dialog('open');
 					}
+					
 				}
 			});
 		}else
@@ -487,6 +528,8 @@ function DataManager()
 		}catch(e)
 		{
 			data = [];
+			
+		    startHelp();
 		}
 		this.loadedScene = data;
 		this.rawdata.scenes[UID] = data;

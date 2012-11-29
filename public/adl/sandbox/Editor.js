@@ -773,7 +773,7 @@ function Editor()
 				{		
 					
 					var angleaxis = RotationToVWFAngleAxis(findviewnode(SelectedVWFNode.id).getRotMatrix());
-					console.log(angleaxis);
+					
 					this.setProperty(SelectedVWFNode.id,'rotation',[angleaxis.axis[0],angleaxis.axis[1],angleaxis.axis[2],angleaxis.angle]);
 				}
 				triggerSelectionTransformed(SelectedVWFNode);
@@ -1324,7 +1324,7 @@ function Editor()
 	}.bind(this);
 	this.PickParentCallback = function(parentnode)
 	{
-		debugger;
+		
 		this.TempPickCallback = null;
 		var node = _DataManager.getCleanNodePrototype(this.GetSelectedVWFNode().id);
 		
@@ -1422,9 +1422,13 @@ function Editor()
 	}.bind(this);
 	var GetSelectedVWFNode = function()
 	{
-		if(SelectedVWFNode)
-		return vwf.getNode(SelectedVWFNode.id);
-		return null;
+		try{
+			if(SelectedVWFNode)
+			return vwf.getNode(SelectedVWFNode.id);
+		}catch(e)
+		{
+			return null;
+		}
 	}.bind(this);
 	var findscene = function()
 	{

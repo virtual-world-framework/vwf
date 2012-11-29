@@ -62,9 +62,22 @@ function InventoryManager()
 			t.properties.translation[0] = newintersectxy[0];
 			t.properties.translation[1] = newintersectxy[1];
 			t.properties.translation[2] = newintersectxy[2];
-			t.properties.owner = _UserManager.GetCurrentUserName();
+			
+			t = _DataManager.getCleanNodePrototype(t);
+			_InventoryManager.setOwner(t,_UserManager.GetCurrentUserName());
 			_InventoryManager.createChild('index-vwf',GUID(),t,null,null); 
 		}		
+	}
+	this.setOwner = function(t,owner)
+	{
+		t.properties.owner = owner;
+		if(t.children)
+		{
+			for(var i in t.children)
+			{
+				this.setOwner(t.children[i],owner);
+			}
+		}
 	}
 	$('#InventoryManagerCreate').click(this.createInventoryItem);
 	this.deleteSelectedItem = function()
@@ -76,7 +89,7 @@ function InventoryManager()
 	$('#InventoryManagerDelete').click(this.deleteSelectedItem);
 	this.viewInventoryItem = function()
 	{
-		//$('#InventoryViewer').dialog('open');
+		$('#InventoryViewer').dialog('open');
 		if(_InventoryManager.selectedType == 'object')
 		{
 		
@@ -184,9 +197,7 @@ function InventoryManager()
 	}
 	this.Take = function()
 	{
-		
 		var t = _DataManager.getCleanNodePrototype(_Editor.GetSelectedVWFNode().id);
-		_InventoryManager.DeleteIDsAndOwner(t);
 		_DataManager.addInventoryItem(document.PlayerNumber,t,GUID(),'object');
 		_InventoryManager.BuildGUI();
 	}	

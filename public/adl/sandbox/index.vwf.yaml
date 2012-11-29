@@ -52,7 +52,7 @@ scripts:
        this.rightdown= false;
        this.last_x = 0;
        this.last_y = 0;
-       
+       this.navmode = 'none';
        
         
        document.getElementById('index-vwf').onmousewheel=this.localmousewheel.bind(this);
@@ -649,7 +649,7 @@ scripts:
         {
             this.players.push(proto.properties.PlayerNumber);
             _UserManager.PlayerCreated(proto.properties.PlayerNumber);
-            debugger;
+           
             //This is odd. It seems like supplying an ID for the new object causes the initialize not to fire
             delete proto.id;//"player-"+proto.properties.PlayerNumber;
             proto.uri = "-object-Object-player-"+proto.properties.PlayerNumber;
