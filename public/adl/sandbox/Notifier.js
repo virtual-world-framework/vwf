@@ -16,14 +16,24 @@ function Notifier()
 			$.data(this, 'timer', setTimeout(function() { elem.fadeOut(); }, 2000));
 		  });
 	}
-	this.alert = function(text)
+	this.alert = function(text,callback)
 	{
 			$('#NotifierAlertMessage').html(text);
 			$('#NotifierAlertMessage').dialog('open');
+			this.alertcallback = callback;
 	}
 	
 	$('#NotifierAlertMessage').dialog({title:'Message',autoOpen:false,height:'auto',width:'200px',position:'center',modal:true,buttons:{
-	'Ok':function(){$('#NotifierAlertMessage').dialog('close');},
+	'Ok':function(){
+		$('#NotifierAlertMessage').dialog('close');
+		if(_Notifier.alertcallback)
+		{
+			var c = _Notifier.alertcallback;
+			_Notifier.alertcallback = null;	
+			c();
+		}
+		
+	},
 	}});
 	
 	this.startLoad = function()
