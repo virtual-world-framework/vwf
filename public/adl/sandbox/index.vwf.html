@@ -491,6 +491,11 @@
 			_InventoryManager.Take();
 		});
 		
+		
+		$('#MenuShare').click(function(e){
+			$('#ShareWithDialog').dialog('open');
+		});
+		
 		$('#MenuSetParent').click(function(e){
 			_Editor.SetParent();
 		});
@@ -1151,6 +1156,7 @@
 	  <li><a href="#" id="MenuChangeInstance">Change Instance ...</a></li>
 </ul>
 </li>
+
 <li><a href="#">Edit</a>
   <ul>
 	  	  
@@ -1159,6 +1165,7 @@
 	  <li><a href="#" id="MenuDuplicate">Duplicate</a></li>
 	  <li><a href="#" id="MenuDelete">Delete</a></li>
 	  <li><a href="#" id="MenuSaveCopy">Save Copy</a></li>
+	  <li><a href="#" id="MenuShare">Share</a></li>
 	  <li><a href="#">Select</a>
 		<ul>
 			<li><a href="#" id="MenuSelectName">Select By Name</a></li>

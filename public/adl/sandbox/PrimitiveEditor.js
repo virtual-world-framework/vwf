@@ -4,7 +4,32 @@ function PrimitiveEditor()
 	
 		
 	
-
+	$(document.body).append("<div id='ShareWithDialog'> <select id='ShareWithNames'/> </div>");
+	$('#ShareWithDialog').dialog({title:"Share With User",autoOpen:false,moveable:false,modal:true,resizable:false,open:function()
+	{
+	$('#ShareWithNames').empty();
+		for(var i =0; i < document.Players.length; i++)
+		{
+			$('#ShareWithNames').append("<option value='"+document.Players[i]+"'>" + document.Players[i]+"</option>");
+		}
+		if(!_Editor.GetSelectedVWFNode())
+		{
+			_Notifier.notify('No object selected');
+			$('#ShareWithDialog').dialog('close');
+		}
+	},buttons:{Ok:function()
+	{
+		var owner = vwf.getProperty(_Editor.GetSelectedVWFNode().id,'owner');
+		if(typeof owner === "string")
+			owner = [owner];
+		owner = owner.slice(0);	
+		owner.push($('#ShareWithNames').val());
+		_Editor.setProperty(_Editor.GetSelectedVWFNode().id,'owner',owner);
+		$('#ShareWithDialog').dialog('close');
+	},Cancel:function(){
+	
+	}}});
+	
 	$('#sidepanel').append("<div id='PrimitiveEditor'>" +
 	"<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>"+
 					'<div id="accordion" style="height:100%;overflow:hidden">'+
