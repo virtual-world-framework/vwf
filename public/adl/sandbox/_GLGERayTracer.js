@@ -691,6 +691,11 @@ GLGE.Mesh.prototype.GetBoundingBox = function()
 	  }
 	  return this.BoundingBox;
 }
+//Get the bounds for an object
+GLGE.Mesh.prototype.setPickMesh = function(pickmesh)
+{
+	  this.PickMesh = pickmesh;
+}
 //Do the actuall intersection with the mesh;
 GLGE.Mesh.prototype.CPUPick = function(origin,direction,maxdist)
 {
@@ -698,7 +703,11 @@ GLGE.Mesh.prototype.CPUPick = function(origin,direction,maxdist)
 	  
 	  if(this.InvisibleToCPUPick)
 		return null;
-	 
+	  
+	  //allow a picking mesh that differs from the visible mesh
+	  if(this.PickMesh)
+		return this.PickMesh.CPUPick(origin,direction,maxdist);
+		
       //if for some reason dont have good bounds, generate	 
 	  if(!this.BoundingSphere || !this.BoundingBox || this.dirtyMesh)
 	  {
@@ -786,7 +795,7 @@ GLGE.Object.prototype.CPUPick = function(origin,direction,maxdist)
 				ret[i].norm = GLGE.scaleVec3(ret[i].norm,1.0/GLGE.lengthVec3(ret[i].norm));
 				ret[i].distance = GLGE.distanceVec3(origin,ret[i].point);
 				ret[i].object = this;
-				ret[i].priority = this.PickPriority ? this.PickPriority :  1;
+				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
 			}
 	  }
 	  return ret;

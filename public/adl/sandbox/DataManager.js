@@ -1,3 +1,4 @@
+var PersistanceServer = 'http://10.100.21.71';
 function DataManager()
 {
 	
@@ -66,7 +67,7 @@ function DataManager()
 	{
 			var data = jQuery.ajax({
 				type: 'GET',
-				url: 'http://10.100.21.71/vwfDataManager.svc/Profiles',
+				url: PersistanceServer + '/vwfDataManager.svc/Profiles',
 				data: null,
 				success: null,
 				async:false,
@@ -89,7 +90,7 @@ function DataManager()
 			var UID  = this.getCurrentSession();
 			var data = jQuery.ajax({
 				type: 'GET',
-				url: 'http://10.100.21.71/vwfDataManager.svc/Profile?UID=' + username,
+				url: PersistanceServer + '/vwfDataManager.svc/Profile?UID=' + username,
 				data: null,
 				success: null,
 				async:false,
@@ -283,7 +284,7 @@ function DataManager()
 		if(nodes.length > 0)
 		jQuery.ajax({
 			type: 'POST',
-			url: 'http://10.100.21.71/vwfDataManager.svc/State?UID=' + UID,
+			url: PersistanceServer + '/vwfDataManager.svc/State?UID=' + UID,
 			data: JSON.stringify(nodes),
 			success: null,
 			async:false,
@@ -373,7 +374,7 @@ function DataManager()
 	{
 		var data = jQuery.ajax({
 			type: 'GET',
-			url: 'http://10.100.21.71/vwfDataManager.svc/States',
+			url: PersistanceServer + '/vwfDataManager.svc/States',
 			data: null,
 			success: null,
 			async:false,
@@ -516,7 +517,7 @@ function DataManager()
 		var UID  = this.getCurrentSession();
 		var data = jQuery.ajax({
 			type: 'GET',
-			url: 'http://10.100.21.71/vwfDataManager.svc/State?UID=' + UID,
+			url: PersistanceServer + '/vwfDataManager.svc/State?UID=' + UID,
 			data: null,
 			success: null,
 			async:false,

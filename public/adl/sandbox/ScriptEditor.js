@@ -344,9 +344,9 @@ function ScriptEditor()
 			_Notifier.notify('You must log in to edit scripts');
 			return false;
 		}
-		if(_ScriptEditor.currentNode.properties.owner != _UserManager.GetCurrentUserName())
+		if(!_Editor.isOwner(_ScriptEditor.currentNode.id,_UserManager.GetCurrentUserName()))
 		{
-			_Notifier.notify('You may not edit this object. It is owned by ' + _ScriptEditor.currentNode.properties.owner);
+			_Notifier.notify('You do not have permission to script this object');
 			return false;
 		}
 		return true;

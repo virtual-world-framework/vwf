@@ -262,12 +262,15 @@ scripts:
                 var thisj = lengthsegs * i + (j+1);
                 var thisi1 = lengthsegs * (i+1) + j;
                 var thisi1j1 = lengthsegs * (i+1) + (j+1);
-                faces.push(thisi + faceDownpos);
+               
+               faces.push(thisi + faceDownpos);
                 faces.push(thisj + faceDownpos);
                 faces.push(thisi1 + faceDownpos);
+                
                 faces.push(thisi1 + faceDownpos);
+                
+                faces.push(thisj + faceDownpos);
                 faces.push(thisi1j1 + faceDownpos);
-                faces.push(thisj + faceDownpos);
             }
         }
         
@@ -279,8 +282,9 @@ scripts:
                 var thisj = heightsegs * i + (j+1);
                 var thisi1 = heightsegs * (i+1) + j;
                 var thisi1j1 = heightsegs * (i+1) + (j+1);
-                faces.push(thisi + faceFrontpos);
+                
                 faces.push(thisj + faceFrontpos);
+                faces.push(thisi + faceFrontpos);
                 faces.push(thisi1 + faceFrontpos);
                 faces.push(thisi1 + faceFrontpos);
                 faces.push(thisi1j1 + faceFrontpos);
@@ -300,8 +304,9 @@ scripts:
                 faces.push(thisj + faceBackpos);
                 faces.push(thisi1 + faceBackpos);
                 faces.push(thisi1 + faceBackpos);
-                faces.push(thisi1j1 + faceBackpos);
+                
                 faces.push(thisj + faceBackpos);
+                faces.push(thisi1j1 + faceBackpos);
             }
         }
         
@@ -314,8 +319,9 @@ scripts:
                 var thisi1 = heightsegs * (i+1) + j;
                 var thisi1j1 = heightsegs * (i+1) + (j+1);
                 faces.push(thisi + faceLeftpos);
+                 faces.push(thisi1 + faceLeftpos);
                 faces.push(thisj + faceLeftpos);
-                faces.push(thisi1 + faceLeftpos);
+               
                 faces.push(thisi1 + faceLeftpos);
                 faces.push(thisi1j1 + faceLeftpos);
                 faces.push(thisj + faceLeftpos);
@@ -334,8 +340,9 @@ scripts:
                 faces.push(thisj + faceRightpos);
                 faces.push(thisi1 + faceRightpos);
                 faces.push(thisi1 + faceRightpos);
+              
+                faces.push(thisj + faceRightpos);  
                 faces.push(thisi1j1 + faceRightpos);
-                faces.push(thisj + faceRightpos);
             }
         }
        

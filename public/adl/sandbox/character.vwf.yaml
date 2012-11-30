@@ -60,9 +60,9 @@ scripts:
                 jump:{start:30,length:48,speed:1.25,current:0,loop:false},
                 runningjump:{start:109,length:48,speed:1.25,current:0,loop:false}
             };
-        
-          
-          this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
+          this.prerendercallback = this.placeNameTag.bind(this);
+          $(document).bind('prerender',this.prerendercallback);
+          //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
           this.updatecounter = 0;
           this.mesh = findChildViewNode(findscene(),this.id);
           this.jumpcounter = 0.0;
@@ -124,27 +124,31 @@ scripts:
       newdiv.style.top = '0px';
       
       $(document.body).append(newdiv);
-                  
+      this.nametag = newdiv;
                  
     }
     this.deinitialize = function()
     {
-       findVWFscene().removeUpdateCallback(this.callbacknum);
+       //findVWFscene().removeUpdateCallback(this.callbacknum);
+       $(document).unbind('prerender',this.prerendercallback);
        this.deleteMe = true;            
        
        
     }
-    this.placeNameTag = function()
+    this.placeNameTag = function(e,viewprojection)
     {
-      
-      
-      var wh = document.getElementById('index-vwf').offsetHeight;
-      var ww = document.getElementById('index-vwf').offsetWidth;
-      var div = document.getElementById("Player " + this.PlayerNumber + 'label');
+      if(!this.ownerClientID)  
+        return;
+      var rootdiv = document.getElementById('index-vwf');
+      var h = rootdiv.style.height;
+      var w = rootdiv.style.width;
+      var wh = parseInt(h.substr(0,h.length-2));
+      var ww = parseInt(w.substr(0,w.length-2));
+      var div = this.nametag;
       var pos = this.translation;
       pos = [pos[0],pos[1],pos[2]+1.620,1];
          
-      var viewprojection = vwf.views[0].state.cameraInUse.getViewProjection();
+      
       
       var screen = GLGE.mulMat4Vec4(viewprojection,pos);
       screen[0] /= screen[3];
@@ -168,12 +172,15 @@ scripts:
      
      
       if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
-            div.style.display = 'none';
+      {
+            if(div.style.display != 'none')
+                div.style.display = 'none';
+      }
       else
       {
-          if(screen[2] > 10 || screen[2] < 0)
+          if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')
              div.style.display = 'none';
-          if(screen[2] < 10 && screen[2] > 0)
+          if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
              div.style.display = 'block';
       }
          
@@ -193,15 +200,7 @@ scripts:
         var time = new Date();
         this.updatecounter++;
         var updateFreqDivisor = 1;
-        if(Math.ceil(this.updatecounter/updateFreqDivisor) - this.updatecounter/updateFreqDivisor != 0) 
-        {
-            if(this.activeCycle != null)
-            {
-                this.mesh.setFrameRate(0);
-                this.mesh.setStartFrame(this.activeCycle.getFrame(),0,false);
-            }
-            return;
-        }
+        
         if(this.id == 'character-vwf') return;
        
         
@@ -221,12 +220,22 @@ scripts:
             return;
         }
         
-        this.placeNameTag();
+        //this.placeNameTag();
         var standing = 1.703559666;
         if(this.activeCycle)
         {
-            this.mesh.setFrameRate(0);
-            this.mesh.setStartFrame(this.activeCycle.increment(updateFreqDivisor),0,false);
+            
+            var newframe = this.activeCycle.increment(updateFreqDivisor);
+            if(this.currentframe != newframe)
+            {
+                console.log('animate');
+                this.mesh.setFrameRate(0);
+                this.mesh.setPaused(GLGE.FALSE)
+                this.mesh.setStartFrame(newframe,0,false);
+                this.mesh.animate();
+                this.mesh.setPaused(GLGE.TRUE)
+            }
+            this.currentframe = newframe;
         }
         
         
@@ -301,6 +310,7 @@ scripts:
                 this.translation = [this.translation[0],this.translation[1],this.jumpstart + jumpamt];
                 this.jumpcounter += ((hangtime+preptime+preptime)/39.0) *updateFreqDivisor;
             }
+            
         }
         
         
@@ -393,7 +403,8 @@ scripts:
         this.originalvelocity[2] = 0;
        // this.translation = GLGE.addVec3(this.translation,GLGE.scaleVec3(this.originalvelocity,.97));
         this.originalvelocity = GLGE.subVec3(this.translation,originalpos);
-            //console.log(this.originalvelocity);
+        if(this.translation[2] < 0)
+            this.translation = [this.translation[0],this.translation[1],0];
         //every 2 seconds, update the position and rotation that tend to run out of sync
         //note that we could change the update mechanism to avoid getting out of sync
         if(this.updatecounter > 80 && document["PlayerNumber"] == this.PlayerNumber)

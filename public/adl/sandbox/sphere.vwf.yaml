@@ -137,8 +137,9 @@ scripts:
                     faces.push(ynum1+znum1);
                     
                     faces.push(ynum1+znum1);
-                    faces.push(ynum+znum);
                     faces.push(ynum+znum1);;
+                    faces.push(ynum+znum);
+                    
                 }
             }
             

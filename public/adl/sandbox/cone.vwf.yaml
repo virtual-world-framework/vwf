@@ -176,8 +176,9 @@ scripts:
                     var znum1 = (z_rot + 1);
                    
                     faces.push(ynum+znum);
-                    faces.push(ynum1+znum);
                     faces.push(ynum1+znum1);
+                    faces.push(ynum1+znum);
+                    
                     
                     faces.push(ynum1+znum1);
                     faces.push(ynum+znum);
@@ -215,8 +216,9 @@ scripts:
         for(var i = capindexstart; i < capindexstart+360/zinc -1;i++)
         {
             faces.push(capindexstart+1);
-            faces.push(i+1);
             faces.push(i+2);
+            faces.push(i+1);
+            
         }
         
 

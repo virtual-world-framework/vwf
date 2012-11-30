@@ -95,10 +95,9 @@ function PrimitiveEditor()
 			_Notifier.notify('You must log in to participate');
 			return;
 		}
-		var owner = vwf.getProperty(id,'owner');
-		if(owner!=document.PlayerNumber)
+		if(!_Editor.isOwner(id,_UserManager.GetCurrentUserName()))
 		{
-			_Notifier.notify('You do not own this object. It`s owned by '+ owner);
+			_Notifier.notify('You do not have permission to edit this object');
 			return;
 		}
 		vwf_view.kernel.setProperty(id,prop,val)
@@ -289,16 +288,22 @@ function PrimitiveEditor()
 			return;
 		}
 		var id = $(this).attr('nodename');
-	    var owner = vwf.getProperty(id,'owner');
-		if(owner!=document.PlayerNumber)
+		if(!_Editor.isOwner(id,_UserManager.GetCurrentUserName()))
 		{
-			_Notifier.notify('You do not own this object. It`s owned by '+ owner);
+			_Notifier.notify('You do not have permission to delete this object');
 			return;
 		}
-		
-		vwf_view.kernel.deleteNode(id);
-		vwf_view.kernel.callMethod(_Editor.GetSelectedVWFNode().id,'dirtyStack');
-		window.setTimeout(function(){_PrimitiveEditor.SelectionChanged(null,_Editor.GetSelectedVWFNode());},500);
+		if(id == _Editor.GetSelectedVWFNode().id)
+		{
+			_Editor.DeleteSelection();
+
+		}else
+		{
+			vwf_view.kernel.deleteNode(id);
+			vwf_view.kernel.callMethod(_Editor.GetSelectedVWFNode().id,'dirtyStack');
+			window.setTimeout(function(){_PrimitiveEditor.SelectionChanged(null,_Editor.GetSelectedVWFNode());},500);
+		}
+
 	}
 	this.modifierAmountUpdate = function(e,ui)
 	{

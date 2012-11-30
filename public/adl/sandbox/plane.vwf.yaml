@@ -145,13 +145,16 @@ scripts:
                 var thisj = heightsegs * i + (j+1);
                 var thisi1 = heightsegs * (i+1) + j;
                 var thisi1j1 = heightsegs * (i+1) + (j+1);
+                
                 faces.push(thisi);
-                faces.push(thisj);
                 faces.push(thisi1);
+                faces.push(thisj);
+                
 
                 faces.push(thisi1j1);
-                faces.push(thisi1);
                 faces.push(thisj);
+                faces.push(thisi1);
+                
                 
                 
             }

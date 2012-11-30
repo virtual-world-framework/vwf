@@ -247,6 +247,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 
 				lastPickTime = time;
 			}
+			
+			var vp = vwf.views[0].state.cameraInUse.getViewProjection();
+			$(document).trigger('prerender',[vp]);
             renderer.render();
         };
 
@@ -257,6 +260,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			var oldMouseX = mouse.getMousePosition().x;
 			var oldMouseY = mouse.getMousePosition().y;
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
+			sceneNode.glgeRenderer.cullFaces = true;
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
             sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );

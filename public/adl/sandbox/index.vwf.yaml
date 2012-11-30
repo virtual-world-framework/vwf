@@ -119,9 +119,11 @@ scripts:
         var hh = height/2;
         
         var planemesh = new GLGE.Mesh();
+       
         var planeobj = new GLGE.Object();
+        planeobj.PickPriority = 0;
         planeobj.setMesh(planemesh);
-        planemesh.setPositions([-hw,-hh,0, hw,-hh,0, hw,hh,0, -hw,hh,0]);
+        planemesh.setPositions([-hw,-hh,-.001, hw,-hh,-.001, hw,hh,-.001, -hw,hh,-.001]);
         planemesh.setTangents([-hw,-hh,0, hw,-hh,0, hw,hh,0, -hw,hh,0]);
         planemesh.setVertexColors([-hw,-hh,0,1, hw,-hh,0,1, hw,hh,0,1, -hw,hh,0,1]);
         planemesh.setFaces([0,1,2,2,3,0]);

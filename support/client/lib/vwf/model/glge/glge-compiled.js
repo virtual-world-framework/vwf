@@ -2356,7 +2356,6 @@ GLGE.Animatable.prototype.animate=function(now,nocache){
 	if(!this.paused && this.animation){
 		if(!now) now=parseInt(new Date().getTime());
 		var frame=this.getFrameNumber(now);
-		
 		if(!this.animation.animationCache) this.animation.animationCache={};
 		if(frame!=this.lastFrame || this.blendTime!=0){
 			this.lastFrame=frame;
@@ -2440,7 +2439,7 @@ GLGE.Animatable.prototype.animate=function(now,nocache){
 			}
 		}
 	}
-	if(this.children){
+	if(!this.paused && this.children){
 		for(var i=0; i<this.children.length;i++){
 			if(this.children[i].animate){
 				this.children[i].animate(now,nocache);
@@ -4064,19 +4063,20 @@ GLGE.Group.prototype.getBoundingVolume=function(local){
 * @returns {GLGE.Object[]} an array of GLGE.Objects
 */
 GLGE.Group.prototype.getObjects=function(objects){
-	if(this.lookAt) this.Lookat(this.lookAt);
-	if(this.animation) this.animate();
+	//if(this.lookAt) this.Lookat(this.lookAt);
+	//if(this.animation) this.animate();
 
 	if(!objects) objects=[];
 	for(var i=0; i<this.children.length;i++){
-		if(this.children[i].className=="Object" || this.children[i].className=="Text" || this.children[i].toRender){
-			if(this.children[i].visible || this.children[i].visible==undefined){
-				if(this.children[i].renderFirst) objects.unshift(this.children[i]);
-					else	objects.push(this.children[i]);
+		var thischild = this.children[i];
+		if(thischild.className=="Object" || thischild.className=="Text" || thischild.toRender){
+			if(thischild.visible || thischild.visible==undefined){
+				if(thischild.renderFirst) objects.unshift(thischild);
+					else	objects.push(thischild);
 			}
-		}else if(this.children[i].getObjects){
-			if(this.children[i].visible || this.children[i].visible==undefined){
-				this.children[i].getObjects(objects);
+		}else if(thischild.getObjects){
+			if(thischild.visible || thischild.visible==undefined){
+				thischild.getObjects(objects);
 			}
 		}
 	}
@@ -5160,6 +5160,7 @@ GLGE.augment(GLGE.QuickNotation,GLGE.Mesh);
 GLGE.augment(GLGE.JSONLoader,GLGE.Mesh);
 GLGE.augment(GLGE.Events,GLGE.Mesh);
 GLGE.Mesh.prototype.gl=null;
+GLGE.Mesh.prototype.cullFaces=true;
 GLGE.Mesh.prototype.className="Mesh";
 GLGE.Mesh.prototype.GLbuffers=null;
 GLGE.Mesh.prototype.buffers=null;
@@ -10743,8 +10744,9 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 	if(this.lookAt) this.Lookat(this.lookAt);
  
 	//animate this object
+	//for the love of god how many places is the called from?
 	if(renderType==GLGE.RENDER_DEFAULT){
-		if(this.animation) this.animate();
+		//if(this.animation) this.animate();
 	}
 	
 	if(!this.renderCaches[renderType]) this.renderCaches[renderType]={};
@@ -10860,7 +10862,7 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 			this.GLUniforms(gl,renderType,pickindex);
 			switch (this.mesh.windingOrder) {
 				case GLGE.Mesh.WINDING_ORDER_UNKNOWN:
-					if (gl.scene.renderer.cullFaces){
+					if (gl.scene.renderer.cullFaces && this.mesh.cullFaces){
 						gl.cullFace(gl.scene.mirror ? gl.FRONT : gl.BACK);
 						gl.enable(gl.CULL_FACE); 
 					}else{

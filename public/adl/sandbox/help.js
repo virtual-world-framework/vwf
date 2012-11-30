@@ -161,10 +161,17 @@ function PointAtAndClick(div,callback)
     duration:1500
 	},'linear');
 }
+function tutStep13()
+{
+		$(document).unbind('selectionTransformedLocal',tutStep13);
+		_Notifier.alert('Good! You`ve manually typed in a transformation on this object. You can also modify some other properties of the sphere.',function(){
+			_Notifier.alert('Now, lets look at some of the properties this object allows you to modify',tutStep11);
+	});
+}
 function tutStep12()
 {
 		_Notifier.alert('As you can see, this window shows you the transforms for the object. Type a number in one of these fields, and hit enter.',function(){
-			
+			$(document).bind('selectionTransformedLocal',tutStep13);
 		});	
 }
 function tutStep11()

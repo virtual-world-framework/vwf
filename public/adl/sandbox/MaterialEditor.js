@@ -86,10 +86,10 @@ function MaterialEditor()
 			_Notifier.notify('You must log in to participate');
 			return;
 		}
-		var owner = vwf.getProperty(_Editor.GetSelectedVWFNode().id,'owner');
-		if(owner!=document.PlayerNumber)
+		
+		if(!_Editor.isOwner(_Editor.GetSelectedVWFNode().id,document.PlayerNumber))
 		{
-			_Notifier.notify('You do not own this object. It`s owned by '+ owner);
+			_Notifier.notify('You do not have permission to edit this material');
 			return;
 		}
 		

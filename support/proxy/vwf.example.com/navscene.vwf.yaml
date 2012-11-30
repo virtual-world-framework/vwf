@@ -194,6 +194,7 @@ scripts:
       this.input.pickInfo = undefined;              
     }
     this.pointerWheel = function( parms, pickInfo ) {
+         return;
       this.input.pointerEventTime = this.time;
 
       this.input.lastPointerInfo = this.input.pointerInfo;
@@ -265,6 +266,7 @@ scripts:
       this.input.keyInfo = parms;
     }
     this.handleKeyDown = function() {
+    return;
       if (!this.activeCameraComp) {
         this.getActiveCamera();
       }      

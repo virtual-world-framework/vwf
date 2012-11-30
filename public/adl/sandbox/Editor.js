@@ -138,8 +138,8 @@ function Editor()
 	}.bind(this);
 	//$('#vwf-root').mousewheel(function(event, delta, deltaX, deltaY) {
 	var mousewheel = 	function(event, delta, deltaX, deltaY){
-		if(MoveGizmo)
-		updateGizmoSize();	
+		//if(MoveGizmo)
+		//updateGizmoSize();	
 	}.bind(this);
 	//$('#vwf-root').mouseup(function(e){
 	var mouseup = function(e){ 		
@@ -190,9 +190,9 @@ function Editor()
 			return;
 		}
 		var owner = vwf.getProperty(SelectedVWFNode.id,'owner');
-		if(owner!=document.PlayerNumber)
+		if(!_Editor.isOwner(SelectedVWFNode.id,document.PlayerNumber))
 		{
-			_Notifier.notify('You do not own this object. It`s owned by '+ owner);
+			_Notifier.notify('You do not have permission to delete this object');
 			return;
 		}
 		if(SelectedVWFNode)
@@ -200,6 +200,10 @@ function Editor()
 			vwf_view.kernel.deleteNode(SelectedVWFNode.id);
 			$('#StatusSelectedID').html('No Selection');
 			$('#StatusPickMode').html('Pick: None');
+			_PrimitiveEditor.hide();
+			_MaterialEditor.hide();
+			if(_ScriptEditor.isOpen())
+				_ScriptEditor.hide();
 		}
 		SelectObject(null);
 	}.bind(this);
@@ -453,7 +457,7 @@ function Editor()
 			return;
 		}
 		var originalGizmoPos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
-		updateGizmoSize();
+		//updateGizmoSize();
 		updateGizmoOrientation(false);
 		if(document.AxisSelected != -1)
 		{
@@ -760,13 +764,14 @@ function Editor()
 					var targetLoc = lastpos;
 					var newloc = GLGE.addVec3(targetLoc,gizoffset);
 					lastpos = newloc;
-					this.setProperty(SelectedVWFNode.id,'translation',newloc);				
+					var success = this.setProperty(SelectedVWFNode.id,'translation',newloc);	
+					if(!success) SetLocation(MoveGizmo,originalGizmoPos);
 				}
 				
 				if(wasScaled && tempscale[0] > 0 && tempscale[1] > 0 && tempscale[2] > 0)
                 {
 					lastscale = tempscale;
-                    this.setProperty(SelectedVWFNode.id,'scale',[tempscale[0],tempscale[1],tempscale[2]]);
+                    var success = this.setProperty(SelectedVWFNode.id,'scale',[tempscale[0],tempscale[1],tempscale[2]]);
                     //findviewnode(SelectedVWFNode.id).setScale(tempscale[0],tempscale[1],tempscale[2]);
                 }
 				if(wasRotated)
@@ -774,7 +779,7 @@ function Editor()
 					
 					var angleaxis = RotationToVWFAngleAxis(findviewnode(SelectedVWFNode.id).getRotMatrix());
 					
-					this.setProperty(SelectedVWFNode.id,'rotation',[angleaxis.axis[0],angleaxis.axis[1],angleaxis.axis[2],angleaxis.angle]);
+					var success = this.setProperty(SelectedVWFNode.id,'rotation',[angleaxis.axis[0],angleaxis.axis[1],angleaxis.axis[2],angleaxis.angle]);
 				}
 				triggerSelectionTransformed(SelectedVWFNode);
 				var mat = _Editor.findviewnode(SelectedVWFNode.id).getModelMatrix().slice(0);
@@ -807,20 +812,34 @@ function Editor()
 		}
 		
 	}.bind(this);
+	this.isOwner = function(id,player)
+	{
+		var owner = vwf.getProperty(id,'owner');
+		if(typeof owner === 'string' && owner==player)
+		{
+			return true;
+		}
+		if(typeof owner === 'object' && owner.indexOf && owner.indexOf(player) != -1)
+		{
+			return true;
+		}
+		return false;
+	}
 	this.setProperty = function(id,prop,val)
 	{
 		if(document.PlayerNumber == null)
 		{
 			_Notifier.notify('You must log in to participate');
-			return;
+			return false;
 		}
-		var owner = vwf.getProperty(id,'owner');
-		if(owner!=document.PlayerNumber)
+		
+		if(!_Editor.isOwner(id,document.PlayerNumber))
 		{
-			_Notifier.notify('You do not own this object. It`s owned by '+ owner);
-			return;
+			_Notifier.notify('You do not permission to edit this object.');
+			return false;
 		}
 		vwf_view.kernel.setProperty(id,prop,val)
+		return true;
 	}
 	this.createChild = function(parent,name,proto,uri,callback)
 	{
@@ -886,9 +905,9 @@ function Editor()
 			var id = GetFirstChildLeaf(GetSelectedVWFNode()).id;
 			
 			var owner = vwf.getProperty(id,'owner');
-			if(owner!=document.PlayerNumber)
+			if(!_Editor.isOwner(id,document.PlayerNumber))
 			{
-				_Notifier.notify('You do not own this object. It`s owned by '+ owner);
+				_Notifier.notify('You do not have permission to edit this object');
 				return;
 			}
 		
@@ -1077,8 +1096,8 @@ function Editor()
 		var dist = GLGE.lengthVec3(GLGE.subVec3(gizpos,campos));
 		dist = dist/10;
 		
-		var windowXadj = 1600.0/$(window).width();
-		var windowYadj = 1200.0/$(window).height();
+		var windowXadj = 1600.0/$('#index-vwf').width();
+		var windowYadj = 1200.0/$('#index-vwf').height();
 		var winadj = Math.max(windowXadj,windowYadj);
 		MoveGizmo.setScaleX(dist*winadj);
 		MoveGizmo.setScaleY(dist*winadj);
@@ -1096,8 +1115,11 @@ function Editor()
 		
 		MoveGizmo = new GLGE.Group();
 		MoveGizmo.addChild(BuildBox([1,.030,.030],[.5,0,0],red));               //move x
+		MoveGizmo.children[0].getMesh().setPickMesh(BuildBox([1,.20,.20],[.5,0,0],red).getMesh());
 		MoveGizmo.addChild(BuildBox([.030,1,.030],[0,.5,0],green));//move y
+		MoveGizmo.children[1].getMesh().setPickMesh(BuildBox([.2,1,.20],[0,.5,0],red).getMesh());
 		MoveGizmo.addChild(BuildBox([.030,.030,1],[0,0,.5],blue));//move z
+		MoveGizmo.children[2].getMesh().setPickMesh(BuildBox([.2,.20,1],[0,0,.5],red).getMesh());
 		MoveGizmo.addChild(BuildRing([0,1.070,0],[0,1,0],[1,0,0],6,red,25,62));//rotate x
 		MoveGizmo.addChild(BuildRing([0,0,1.070],[0,0,1],[0,1,0],6,green,25,62));//rotate y
 		MoveGizmo.addChild(BuildRing([0,1.070,0],[0,1,0],[0,0,-1],6,blue,25,62));//rotate z
@@ -1108,13 +1130,20 @@ function Editor()
 		MoveGizmo.addChild(BuildBox([.085,.085,.085],[0,.925,0],green));//scale xyz
 		MoveGizmo.addChild(BuildBox([.085,.085,.085],[0,0,.925],blue));//scale xyz
 		MoveGizmo.addChild(BuildBox([.150,.150,.030],[.075,.075,.015],[.75,.75,25,1]));//movexy
+		MoveGizmo.children[12].getMesh().setPickMesh(BuildBox([.50,.50,.030],[.25,.25,.015],red).getMesh());
 		MoveGizmo.addChild(BuildBox([.150,.030,.150],[.075,.015,.075],[.75,.25,.75,1]));//movexz
+		MoveGizmo.children[13].getMesh().setPickMesh(BuildBox([.50,.030,.5],[.25,.015,.25],red).getMesh());
 		MoveGizmo.addChild(BuildBox([.030,.150,.150],[.015,.075,.075],[.25,.75,.75,1]));//moveyz
+		MoveGizmo.children[14].getMesh().setPickMesh(BuildBox([.030,.50,.5],[.015,.25,.25],red).getMesh());
 		MoveGizmo.addChild(BuildRing([0,.170,0],[0,.240,0],[0,0,-1],4,[1,1,1,1],90,450));//rotate z
 		
-		MoveGizmo.addChild(BuildRing([0,1.120,0],[0,1,0],[1,0,0],37,red,0,370));//rotate x
-		MoveGizmo.addChild(BuildRing([0,0,1.120],[0,0,1],[0,1,0],37,green,0,370));//rotate y
-		MoveGizmo.addChild(BuildRing([0,1.120,0],[0,1,0],[0,0,-1],37,blue,0,370));//rotate z
+		MoveGizmo.addChild(BuildRing([0,1.050,0],[0,1,0],[1,0,0],37,red,0,370));//rotate x
+		MoveGizmo.addChild(BuildRing([0,0,1.050],[0,0,1],[0,1,0],37,green,0,370));//rotate y
+		MoveGizmo.addChild(BuildRing([0,1.050,0],[0,1,0],[0,0,-1],37,blue,0,370));//rotate z
+		
+		MoveGizmo.children[16].getMesh().setPickMesh(BuildRing([0,1.120,0],[0,.9,0],[1,0,0],37,red,0,370).getMesh());//rotate x
+		MoveGizmo.children[17].getMesh().setPickMesh(BuildRing([0,0,1.120],[0,0,.9],[0,1,0],37,green,0,370).getMesh());//rotate y
+		MoveGizmo.children[18].getMesh().setPickMesh(BuildRing([0,1.120,0],[0,.9,0],[0,0,-1],37,blue,0,370).getMesh());//rotate z
 		
 		MoveGizmo.addChild(BuildBox([.5,.5,.5],[0,0,0],[1,1,1,1]));//scale uniform
 		MoveGizmo.addChild(BuildBox([.030,.5,.5],[.5,0,0],red));//scale uniform
@@ -1258,12 +1287,13 @@ function Editor()
 		planemesh.setPositions(positions);
 		planemesh.setFaces(faces);
 		planemesh.setVertexColors(colors);
-		
+		planemesh.cullFaces = false;
 		var mat = new GLGE.Material();
 		
 		planeobj.setPickable(true);
 		planeobj.setMaterial(mat);
 		mat.setVertexColorMode(GLGE.VC_MUL);
+		mat.setShadeless(true);
 		//mat.setColor(color);
 		//mat.setShadeless(true);
 		//mat.setAmbient([.5,.5,.5,1]);
@@ -1304,12 +1334,17 @@ function Editor()
 			colors.push(color[3]);
 		}
 		
-		var indexes = [0,2,6,6,4,0,1,3,7,7,5,1,0,1,3,3,2,0,4,5,7,7,6,4,0,1,5,5,4,0,2,3,7,7,6,2];
+		var indexes = [0,2,6,6,4,0,
+					   1,3,7,7,5,1,
+					   0,1,3,3,2,0,
+					   4,5,7,7,6,4,
+					   0,1,5,5,4,0,
+					   2,3,7,7,6,2];
 		
 		planemesh.setPositions(positions);
 		planemesh.setVertexColors(colors);
 		planemesh.setFaces(indexes);
-		
+		planemesh.cullFaces = false;
 		var mat = new GLGE.Material();
 		
 		planeobj.setPickable(true);
@@ -1497,7 +1532,8 @@ function Editor()
 	this.GetRotationMatrix = GetRotationMatrix;
 	BuildMoveGizmo();
 	SelectObject(null);
-	
+	$(document).bind('prerender',this.updateGizmoSize.bind(this));
+	//$(document).bind('prerender',this.updateGizmoOrientation.bind(this));
 }
 
 _Editor = new Editor();
