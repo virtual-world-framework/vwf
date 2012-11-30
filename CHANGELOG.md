@@ -3,6 +3,8 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 
 ----------------------------------
 
+Note: (*) indicates an API change.
+
 0.6.0.x Release
 ----------------------------------------------------------------------------
 - BUG: Fix exception on pointerHover event for undefined.
@@ -15,8 +17,8 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 - CHG: Replace humvee application model. Model now includes interior of the vehicle and articulated parts.
 - NEW: Create bzflag application based on the classic arcade game, including tank navigation and firing effects. 
 - BUG: Rename earth's "camera" to avoid a name conflict with the default camera.
-- NEW: Add placeholder for Google Earth configuration options.
-- NEW: Use a dedicated driver flag for Cesium.
+- NEW*: Add placeholder for Google Earth configuration options.
+- NEW*: Use a dedicated driver flag for Cesium.
 - NEW: Integrate ADL's hwmvee application into the VWF core.
 - NEW: Integrate AGI's Cesium application into the VWF core.
 - CHG: Update editor tabs to new names.
@@ -30,7 +32,7 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 - CHG: Change the camera speed to default to 1, and remove from the tutorial application, as the default value is sufficient.
 - NEW: Create worldTransform test to test the worldTransform for a pointer follower.
 - CHG: Move worldTransform property getter from glge to node3 component implementation.
-- NEW: Add replicated random function, using the Alea psuedorandom number generator.
+- NEW*: Add replicated random function, using the Alea psuedorandom number generator.
 - NEW: Add origin information to pickInfo.
 - CHG: Update build process to include the application API.
 - NEW: Add API descriptions to the components in the proxy folder.
@@ -38,12 +40,13 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 - CHG: Clarify installation instructions. Add instructions to build website.
 - NEW: Create video of sandtable tutorial.
 - BUG: Correct catalog to display sessions for applications with a forward slash in their name.
-- CHG: Adapt to the logger's infoc()-to-infox() API change.
+- CHG*: Adapt to the logger's infoc()-to-infox() API change.
 - CHG: Switch to MiniTest for compatibility with Ruby 1.9.
 - NEW: Create third-stage branch for development, feeding into integration, then to master.
 - NEW: Add echo note for run.bat file to give some initial hint of what to do next when the server is started.
 - BUG: Update build process to create Pygmentize in usr/bin and give it full permissions if it does not already exist.
-- BUG: Clean up undefined kernel and model/view API references that were appearing in the vwf/view/document prototype.
+- CHG*: Remove undefined kernel and view function properties from vwf_view.
+- CHG*: Swap the modelGenerator/viewGenerator and kernelGenerator parameters in model.load()/view.load() to allow drivers can omit the kernel generator argument.
 
 0.5.2.x Patch
 ----------------------------------------------------------------------------
