@@ -468,12 +468,21 @@
 		});
 		$('#MenuMove').click(function(e){
 			_Editor.SetGizmoMode(_Editor.Move);
+			$('#MenuRotateicon').css('background',"");
+			$('#MenuScaleicon').css('background',"");
+			$('#MenuMoveicon').css('background',"#9999FF");
 		});
 		$('#MenuRotate').click(function(e){
 			_Editor.SetGizmoMode(_Editor.Rotate);
+			$('#MenuRotateicon').css('background',"#9999FF");
+			$('#MenuScaleicon').css('background',"");
+			$('#MenuMoveicon').css('background',"");
 		});
 		$('#MenuScale').click(function(e){
 			_Editor.SetGizmoMode(_Editor.Scale);
+			$('#MenuRotateicon').css('background',"");
+			$('#MenuScaleicon').css('background',"#9999FF");
+			$('#MenuMoveicon').css('background',"");
 		});
 		$('#MenuMulti').click(function(e){
 			_Editor.SetGizmoMode(_Editor.Multi);
@@ -621,8 +630,8 @@
 		});
 		$('#MenuCameraOrbit').click(function(e){
 			
-
-			 
+				clearCameraModeIcons();
+				$('#MenuCameraOrbiticon').css('background','#9999FF');
 				var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 				var ray = _Editor.GetCameraCenterRay();
 				var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
@@ -634,19 +643,31 @@
 		
 		
 		$('#MenuCameraNavigate').click(function(e){
+			clearCameraModeIcons();
+			$('#MenuCameraNavigateicon').css('background','#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Navigate');
 			
 		});
 		$('#MenuCameraFree').click(function(e){
+			clearCameraModeIcons();
+			$('#MenuCameraFreeicon').css('background','#9999FF');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Orbit');
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Free');
 		});
 		
 		$('#MenuCameraFirstPerson').click(function(e){
 			
-			vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes['-object-Object-player-' + document.PlayerNumber]);
-			vwf.models[0].model.nodes['index-vwf'].setCameraMode('FirstPerson');
+			if(_UserManager.GetCurrentUserName())
+			{
+				clearCameraModeIcons();
+				$('#MenuCameraFirstPersonicon').css('background','#9999FF');
+				vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes['-object-Object-player-' + _UserManager.GetCurrentUserName()]);
+				vwf.models[0].model.nodes['index-vwf'].setCameraMode('FirstPerson');
+			}else
+			{
+				_Notifier.alert('First person mode is not available when you are not logged in.');
+			}
 		});
 		
 		$('#MenuCreateBox').click(function(e){
@@ -829,6 +850,11 @@
 		createIcon('images/icons/inventory.png','MenuInventory','Show Inventory Window');
 		
 		createPanelShowHide();
+		$(document).disableSelection();
+		$('#MenuCameraOrbiticon').css('background','#9999FF');
+		$('#MenuMoveicon').css('background',"#9999FF");
+		$('#MenuWorldicon').css('background',"#9999FF");
+		$('#MenuLogOuticon').css('background',"#555555");
 	});
 	var sizeTimeoutHandle;
 	function sizeWindowTimer()
@@ -856,6 +882,13 @@
 			content: tooltip,
 			show: { delay: 1000 }
 			});
+	}
+	function clearCameraModeIcons()
+	{
+		$('#MenuCameraOrbiticon').css('background','');
+		$('#MenuCameraFirstPersonicon').css('background','');
+		$('#MenuCameraNavigateicon').css('background','');
+		$('#MenuCameraFreeicon').css('background','');
 	}
 	function createPanelShowHide(src)
 	{ 

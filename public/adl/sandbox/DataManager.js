@@ -101,10 +101,12 @@ function DataManager()
 				data = JSON.parse(JSON.parse(data.responseText).GetProfileResult);
 				profile = data;
 				this.rawdata.inventory[username] = profile.inventory;
-				delete profile.inventory;
-				this.rawdata.profiles.push(profile);
+				if(profile.inventory)
+					delete profile.inventory;
+				this.rawdata.profiles[username] = profile;
 			}catch(e)
 			{
+				debugger;
 			}
 		    
 		}

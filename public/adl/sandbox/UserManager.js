@@ -316,7 +316,8 @@ function UserManager()
                     };
 	this.Login = function(profile)
 	{
-	    
+	    $('#MenuLogInicon').css('background',"#555555");
+		$('#MenuLogOuticon').css('background',"");
         $('#MenuLogIn').attr('disabled','disabled');
 		$('#MenuLogOut').removeAttr('disabled');
 		this.PlayerProto.source= profile['Avatar'];
@@ -377,7 +378,8 @@ function UserManager()
 	}
 	this.SceneDestroy = function()
 	{
-        
+        $('#MenuLogOuticon').css('background',"#555555");
+		$('#MenuLogInicon').css('background',"");
 		$('#MenuLogIn').removeAttr('disabled');
 		$('#MenuLogOut').attr('disabled','disabled');
 	    var parms = new Array();
@@ -390,6 +392,7 @@ function UserManager()
 		vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
 		document[document.PlayerNumber +'link'] = null;
 		document.PlayerNumber = null;
+		_UserManager.currentUsername = null;
 		
 	}
 	this.showCreateProfile = function()

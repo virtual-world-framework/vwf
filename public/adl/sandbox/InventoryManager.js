@@ -197,9 +197,16 @@ function InventoryManager()
 	}
 	this.Take = function()
 	{
+		
 		var t = _DataManager.getCleanNodePrototype(_Editor.GetSelectedVWFNode().id);
-		_DataManager.addInventoryItem(document.PlayerNumber,t,GUID(),'object');
+		var name = GUID();
+		_DataManager.addInventoryItem(document.PlayerNumber,t,name,'object');
 		_InventoryManager.BuildGUI();
+		showSidePanel();
+		window.setTimeout(function(){
+		_InventoryManager.selectItem(name,'object');},450);
+		if(!_InventoryManager.isOpen())
+			_InventoryManager.show();
 	}	
 	this.createChild = function(parent,name,proto,uri,callback)
 	{
@@ -286,8 +293,7 @@ function InventoryManager()
 			_InventoryManager.inRename = false;
 		}
 		$('#InventoryRename').hide();
-		$(".inventoryItem").css('background','#FFFFF8');
-		$(this).css('background','lightblue');
+		
 		var name = $(this).attr('name');
 		var type = $(this).attr('type');
 		_InventoryManager.selectItem(name,type);
@@ -305,6 +311,8 @@ function InventoryManager()
 		_InventoryManager.selectedItem = inventory.objects[name];
 		_InventoryManager.selectedType = type;
 		_InventoryManager.selectedName = name;
+		$(".inventoryItem").css('background','#FFFFF8');
+		$('#InventoryDisplay').find('[name="'+name+'"]').css('background','lightblue');
 	}
 	this.rename = function(e)
 	{

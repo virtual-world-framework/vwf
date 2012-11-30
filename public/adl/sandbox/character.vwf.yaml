@@ -228,7 +228,7 @@ scripts:
             var newframe = this.activeCycle.increment(updateFreqDivisor);
             if(this.currentframe != newframe)
             {
-                console.log('animate');
+                
                 this.mesh.setFrameRate(0);
                 this.mesh.setPaused(GLGE.FALSE)
                 this.mesh.setStartFrame(newframe,0,false);
@@ -383,7 +383,7 @@ scripts:
                 {
                     //console.log(zdiff);
                     var zdiff = standing - intersect.distance;
-                    console.log(zdiff);
+                   
                     if(zdiff > 0.17 )
                     {
                         
@@ -430,7 +430,7 @@ scripts:
         var time2 = new Date();
         var t = time2-time;
         
-        document.title = t;
+        
     }
      function findChildViewNode(node, name)
      {

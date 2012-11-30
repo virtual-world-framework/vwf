@@ -200,8 +200,10 @@ function Editor()
 			vwf_view.kernel.deleteNode(SelectedVWFNode.id);
 			$('#StatusSelectedID').html('No Selection');
 			$('#StatusPickMode').html('Pick: None');
-			_PrimitiveEditor.hide();
-			_MaterialEditor.hide();
+			if(_PrimitiveEditor.isOpen())
+				_PrimitiveEditor.hide();
+			if(_MaterialEditor.isOpen())
+				_MaterialEditor.hide();
 			if(_ScriptEditor.isOpen())
 				_ScriptEditor.hide();
 		}
@@ -1426,6 +1428,11 @@ function Editor()
 	{
 		SelectMode = e;
 		$('#StatusPickMode').html('Pick: ' + e);
+		if(e == 'Pick')
+			$('#MenuSelectPickicon').css('background',"#9999FF");
+		else
+			$('#MenuSelectPickicon').css('background',"");	
+			
 		if(SelectMode == 'TempPick')
 		{
 			$('#index-vwf').css('cursor','crosshair');
@@ -1438,9 +1445,17 @@ function Editor()
 	{
 		CoordSystem = e;
 		if(e == WorldCoords)
+		{
 			$('#StatusCoords').html('World Coords');
+			$('#MenuWorldicon').css('background',"#9999FF");
+			$('#MenuLocalicon').css('background',"");
+		}
 		else
+		{
 			$('#StatusCoords').html('Local Coords');
+			$('#MenuWorldicon').css('background',"");
+			$('#MenuLocalicon').css('background',"#9999FF");
+		}
 	}.bind(this);
 	var GetMoveGizmo = function(e)
 	{	
