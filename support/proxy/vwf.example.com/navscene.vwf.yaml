@@ -318,10 +318,8 @@ scripts:
       this.input.keyInfo = parms;
       if ( Object.keys( parms.keysDown ).length == 0 ){
         this.handleKeyDown();
-        this.input.lastInputTime = undefined;
-      } else {
-        this.input.lastInputTime = this.time;
-      }
+      } 
+      this.input.lastInputTime = this.time;
     }
     this.handleKeyDown = function() {
       if (!this.activeCameraComp) {
@@ -445,7 +443,6 @@ scripts:
     this.look = function( x, y ) {
       if (!this.activeCameraComp) 
         this.getActiveCamera();
-      
       if ( this.activeCameraComp ) {
         if ( this.input.pointerInfo && this.input.pointerInfo.modifiers.ctrl ) {
           if ( y != 0 ) { this.activeCameraComp.rotateBy( [ 1, 0, 0, -y * this.angularDistance() ], 0 ) }
