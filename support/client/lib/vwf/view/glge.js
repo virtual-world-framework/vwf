@@ -230,6 +230,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         
         var lastPickTime = 0;
         function renderScene(time) {
+            time = time || 0;
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
             if((time - lastPickTime) > 10) {
@@ -281,7 +282,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
 
-            renderScene((+new Date));
+            renderScene();
         }
     } 
 
