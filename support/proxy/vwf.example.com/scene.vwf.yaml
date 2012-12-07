@@ -53,6 +53,13 @@ properties:
 
   ambientColor: 
 
+  ## Back ground color
+  ## 
+  ## @name scene.vwf#backgroundColor
+  ## @property
+
+  backgroundColor:   
+
 scripts:
 - |
     this.activeCameraComp = undefined;
