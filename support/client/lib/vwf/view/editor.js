@@ -135,6 +135,9 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+
+            var nodeIDAttribute = $.encoder.encodeForHTMLAttribute("id", nodeID, true);
+            var childIDAttribute = $.encoder.encodeForHTMLAttribute("id", childID, true);
             
             var kernel = this.kernel.kernel;
             var self = this;
@@ -165,9 +168,9 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             if ( nodeID === this.currentNodeID && this.editingScript == false )
             {
                 $('#children > div:last').css('border-bottom-width', '1px');
-                $("#children").append("<div id='" + childID + "' class='childContainer'><div class='childEntry'><b>" + childName + "</b></div></div>");
-                $('#' + childID).click( function(evt) {
-                    drillDown.call(self, $(this).attr("id"), nodeID);
+                $("#children").append("<div id='" + childIDAttribute + "' class='childContainer'><div class='childEntry'><b>" + $.encoder.encodeForHTML(childName) + "</b></div></div>");
+                $('#' + childIDAttribute).click( function(evt) {
+                    drillDown.call(self, $(this).attr("id"), nodeIDAttribute);
                 });
                 $('#children > div:last').css('border-bottom-width', '3px');
             }
@@ -181,7 +184,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         initializedProperty: function (nodeID, propertyName, propertyValue) {
    
             var node = this.nodes[ nodeID ];
-if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
+            if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 
             var property = node.properties[ propertyName ] = {
                 name: propertyName,
@@ -189,6 +192,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             };
 
             try {
+                propertyValue = require( "vwf/utility" ).transform( propertyValue, require( "vwf/utility" ).transforms.transit );
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
                 this.logger.warnx( "createdProperty", nodeID, propertyName, propertyValue,
@@ -196,15 +200,14 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 node.properties[ propertyName ].value = propertyValue;
             }
             
-            if ( node ) {
-                node.properties.push( property );
-            }
+            node.properties.push( property );
         },
         
         deletedNode: function (nodeID) {
             var node = this.nodes[ nodeID ];
             node.parent.children.splice( node );
-            $('#' + nodeID).remove();
+            var nodeIDAttribute = $.encoder.encodeForHTMLAttribute("id", nodeID, true);
+            $('#' + nodeIDAttribute).remove();
             $('#children > div:last').css('border-bottom-width', '3px');
         },
 
@@ -212,11 +215,10 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         //removedChild: [ /* nodeID, childID */ ],
 
         satProperty: function (nodeID, propertyName, propertyValue) {
-
             var node = this.nodes[ nodeID ];
-if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
-
+            if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
             try {
+                propertyValue = require( "vwf/utility" ).transform( propertyValue, require( "vwf/utility" ).transforms.transit );
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
                 this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue,
@@ -224,7 +226,11 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 node.properties[ propertyName ].value = propertyValue;
             }
 
-            $('#input-' + nodeID + '-' + propertyName).val(node.properties[ propertyName ].value);
+            var nodeIDAttribute = $.encoder.encodeForHTMLAttribute("id", nodeID, true);
+            var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", propertyName, true);
+            
+            // No need to escape propertyValue, because .val does its own escaping
+            $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).val(node.properties[ propertyName ].value);
         },
         
         //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
@@ -521,12 +527,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             jQuery.each( data, function( key, value ) {
                 if ( match = /* assignment! */ key.match( RegExp( "/([^/]*)$" ) ) ) {
 
-                    var instanceHTML = String( match[1] ).
-                      replace( /&/g, "&amp;" ).
-                      replace( /"/g, "&quot;" ).
-                      replace( /'/g, "&#39;" ).
-                      replace( /</g, "&lt;" ).
-                      replace( />/g, "&gt;" );
+                    var instanceHTML = $.encoder.encodeForHTML(String( match[1] ));
 
                     if(instanceHTML == inst)
                     {
@@ -606,32 +607,35 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var self = this;
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
+        var nodeIDAttribute = $.encoder.encodeForHTMLAttribute("id", nodeID, true);
+        var drillBackIDAttribute = $.encoder.encodeForHTMLAttribute("id", drillBackID, true);
 
         $(topdownName).html(''); // Clear alternate div first to ensure content is added correctly
         
         var node = this.nodes[ nodeID ];
         this.currentNodeID = nodeID;
 
-        if(!drillBackID) drillBackID = node.parentID;
+        if(!drillBackID) drillBackIDAttribute = $.encoder.encodeForHTMLAttribute("id", node.parentID, true);
      
-        if(nodeID == "index-vwf") 
+        if(nodeIDAttribute == "index-vwf") 
         {
             $(topdownTemp).html("<div class='header'>index</div>");
         }
         else
         {
-            $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + nodeID + "-back' alt='back'/> " + node.name + "</div>");
-            jQuery('#' + nodeID + '-back').click ( function(evt) {
-                drillUp.call(self, drillBackID);
+            $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + nodeIDAttribute + "-back' alt='back'/> " + $.encoder.encodeForHTML(node.name) + "</div>");
+            jQuery('#' + nodeIDAttribute + '-back').click ( function(evt) {
+                drillUp.call(self, drillBackIDAttribute);
             });
         }
 
         // Add node children
         $(topdownTemp).append("<div id='children'></div>");
         for ( var i = 0; i < node.children.length; i++ ) {
-            $('#children').append("<div id='" + node.children[i].ID + "' class='childContainer'><div class='childEntry'><b>" + node.children[i].name + "</b></div></div>");
-            $('#' + node.children[i].ID).click( function(evt) {
-                drillDown.call(self, $(this).attr("id"), nodeID);
+            var nodeChildIDAttribute = $.encoder.encodeForHTMLAttribute("id", node.children[i].ID, true);
+            $('#children').append("<div id='" + nodeChildIDAttribute + "' class='childContainer'><div class='childEntry'><b>" + $.encoder.encodeForHTML(node.children[i].name) + "</b></div></div>");
+            $('#' + nodeChildIDAttribute).click( function(evt) {
+                drillDown.call(self, $(this).attr("id"), nodeIDAttribute);
             });
         }
 
@@ -643,9 +647,10 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         for ( var key in prototypeChildren)       
         {
             var child = prototypeChildren[key];
-            $('#prototypeChildren').append("<div id='" + child.ID + "' class='childContainer'><div class='childEntry'><b>" + child.name + "</b></div></div>");
-            $('#' + child.ID).click( function(evt) {
-                drillDown.call(self, $(this).attr("id"), nodeID);
+            var prototypeChildIDAttribute = $.encoder.encodeForHTMLAttribute("id", child.ID, true);
+            $('#prototypeChildren').append("<div id='" + prototypeChildIDAttribute + "' class='childContainer'><div class='childEntry'><b>" + $.encoder.encodeForHTML(child.name) + "</b></div></div>");
+            $('#' + prototypeChildIDAttribute).click( function(evt) {
+                drillDown.call(self, $(this).attr("id"), nodeIDAttribute);
             });
         }
 
@@ -657,16 +662,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         for ( var i = 0; i < node.properties.length; i++ ) {
             if ( !displayedProperties[ node.properties[i].name ] ) {
                 displayedProperties[ node.properties[i].name ] = "instance";
-                $('#properties').append("<div id='" + nodeID + "-" + node.properties[i].name + "' class='propEntry'><table><tr><td><b>" + node.properties[i].name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + node.properties[i].name + "' value='" + node.properties[i].value + "'></td></tr></table></div>");
+                var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", node.properties[i].name, true);
+                var propertyNameHTML = $.encoder.encodeForHTML(node.properties[i].name);
+                var propertyValueAttribute = $.encoder.encodeForHTMLAttribute("val", node.properties[i].value, true);
+                $('#properties').append("<div id='" + nodeIDAttribute + "-" + propertyNameAttribute + "' class='propEntry'><table><tr><td><b>" + propertyNameHTML + " </b></td><td><input type='text' class='input_text' id='input-" + nodeIDAttribute + "-" + propertyNameAttribute + "' value='" + propertyValueAttribute + "'></td></tr></table></div>");
             
-                $('#input-' + nodeID + '-' + node.properties[i].name).change( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).change( function(evt) {
                     var inputID = ($(this).attr("id"));
-                    var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
-                    var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                    var nodeID = $.encoder.canonicalize(inputID.substring(6, inputID.lastIndexOf('-')));
+                    var propName = $.encoder.canonicalize(inputID.substring(inputID.lastIndexOf('-')+1));
                     var propValue = $(this).val();
                 
                     try {
-                        propValue = JSON.parse(propValue);
+                        propValue = JSON.parse($.encoder.canonicalize(propValue));
                         self.kernel.setProperty(nodeID, propName, propValue);
                     } catch (e) {
                         // restore the original value on error
@@ -674,15 +682,15 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     }
                 } );
 
-                $('#input-' + nodeID + '-' + node.properties[i].name).keydown( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).keydown( function(evt) {
                     evt.stopPropagation();
                 });
 
-                $('#input-' + nodeID + '-' + node.properties[i].name).keypress( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).keypress( function(evt) {
                     evt.stopPropagation();
                 });
 
-                $('#input-' + nodeID + '-' + node.properties[i].name).keyup( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).keyup( function(evt) {
                     evt.stopPropagation();
                 });
             }
@@ -703,16 +711,20 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 {
                     prop.value = JSON.stringify( vwf.getProperty( nodeID, prop.name, []) );
                 }
-                $('#prototypeProperties').append("<div id='" + nodeID + "-" + prop.name + "' class='propEntry'><table><tr><td><b>" + prop.name + " </b></td><td><input type='text' class='input_text' id='input-" + nodeID + "-" + prop.name + "' value='" + prop.value + "'></td></tr></table></div>");
+
+                var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", prop.name, true);
+                var propertyNameHTML = $.encoder.encodeForHTML(prop.name);
+                var propertyValueAttribute = $.encoder.encodeForHTMLAttribute("val", prop.value, true);
+                $('#prototypeProperties').append("<div id='" + nodeIDAttribute + "-" + propertyNameAttribute + "' class='propEntry'><table><tr><td><b>" + propertyNameHTML + " </b></td><td><input type='text' class='input_text' id='input-" + nodeIDAttribute + "-" + propertyNameAttribute + "' value='" + propertyValueAttribute + "'></td></tr></table></div>");
             
-                $('#input-' + nodeID + '-' + prop.name).change( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).change( function(evt) {
                     var inputID = ($(this).attr("id"));
-                    var nodeID = inputID.substring(6, inputID.lastIndexOf('-'));
-                    var propName = inputID.substring(inputID.lastIndexOf('-')+1);
+                    var nodeID = $.encoder.canonicalize(inputID.substring(6, inputID.lastIndexOf('-')));
+                    var propName = $.encoder.canonicalize(inputID.substring(inputID.lastIndexOf('-')+1));
                     var propValue = $(this).val();
                 
                     try {
-                        propValue = JSON.parse(propValue);
+                        propValue = JSON.parse($.encoder.canonicalize(propValue));
                         self.kernel.setProperty(nodeID, propName, propValue);
                     } catch (e) {
                         // restore the original value on error
@@ -720,15 +732,15 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                     }
                 } );
 
-                $('#input-' + nodeID + '-' + prop.name).keydown( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).keydown( function(evt) {
                     evt.stopPropagation();
                 });
 
-                $('#input-' + nodeID + '-' + prop.name).keypress( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).keypress( function(evt) {
                     evt.stopPropagation();
                 });
 
-                $('#input-' + nodeID + '-' + prop.name).keyup( function(evt) {
+                $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).keyup( function(evt) {
                     evt.stopPropagation();
                 });
             }
@@ -740,17 +752,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         $(topdownTemp).append("<div id='methods'></div>");
         for ( var key in node.methods ) {
             var method = node.methods[key];
-            $('#methods').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
-            $('#rollover-' + key).mouseover( function(evt) {
+            var methodNameAttribute = $.encoder.encodeForHTMLAttribute("id", key, true);
+            var methodNameHTML = $.encoder.encodeForHTML(key);
+            $('#methods').append("<div id='" + methodNameAttribute + "' class='methodEntry'><table><tr><td><b>" + methodNameHTML + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + methodNameAttribute + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + methodNameAttribute + "' value='Call'><img id='param-" + methodNameAttribute + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
+            $('#rollover-' + methodNameAttribute).mouseover( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
-            $('#rollover-' + key).mouseleave( function(evt) {
+            $('#rollover-' + methodNameAttribute).mouseleave( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
             });
-            $('#call-' + key).click( function(evt) {
-                self.kernel.callMethod( nodeID, $(this).attr("id").substring(5) );
+            $('#call-' + methodNameAttribute).click( function(evt) {
+                self.kernel.callMethod( nodeID, $.encoder.canonicalize($(this).attr("id").substring(5)) );
             });
-            $('#param-' + key).click( function(evt) {
+            $('#param-' + methodNameAttribute).click( function(evt) {
                 setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
             });
         }
@@ -762,17 +776,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var prototypeMethods = getMethods.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeMethods ) {
             var method = prototypeMethods[key];
-            $('#prototypeMethods').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + key + "' value='Call'><img id='param-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
-            $('#rollover-' + key).mouseover( function(evt) {
+            var prototypeMethodNameAttribute = $.encoder.encodeForHTMLAttribute("id", key, true);
+            var prototypeMethodNameHTML = $.encoder.encodeForHTML(key);
+            $('#prototypeMethods').append("<div id='" + prototypeMethodNameAttribute + "' class='methodEntry'><table><tr><td><b>" + prototypeMethodNameHTML + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + prototypeMethodNameAttribute + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='call-" + prototypeMethodNameAttribute + "' value='Call'><img id='param-" + prototypeMethodNameAttribute + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
+            $('#rollover-' + prototypeMethodNameAttribute).mouseover( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
-            $('#rollover-' + key).mouseleave( function(evt) {
+            $('#rollover-' + prototypeMethodNameAttribute).mouseleave( function(evt) {
                 $('#param-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
             });
-            $('#call-' + key).click( function(evt) {
-                self.kernel.callMethod( nodeID, $(this).attr("id").substring(5) );
+            $('#call-' + prototypeMethodNameAttribute).click( function(evt) {
+                self.kernel.callMethod( nodeID, $.encoder.canonicalize($(this).attr("id").substring(5)) );
             });
-            $('#param-' + key).click( function(evt) {
+            $('#param-' + prototypeMethodNameAttribute).click( function(evt) {
                 setParams.call(self, $(this).attr("id").substring(6), method, nodeID);                
             });
         }
@@ -783,17 +799,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         $(topdownTemp).append("<div id='events'></div>");
         for ( var key in node.events ) {
             var nodeEvent = node.events[key];
-            $('#events').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
-            $('#rollover-' + key).mouseover( function(evt) {
+            var eventNameAttribute = $.encoder.encodeForHTMLAttribute("id", key, true);
+            var eventNameHTML = $.encoder.encodeForHTML(key);
+            $('#events').append("<div id='" + eventNameAttribute + "' class='methodEntry'><table><tr><td><b>" + eventNameHTML + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + eventNameAttribute + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + eventNameAttribute + "' value='Fire'><img id='arg-" + eventNameAttribute + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
+            $('#rollover-' + eventNameAttribute).mouseover( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
-            $('#rollover-' + key).mouseleave( function(evt) {
+            $('#rollover-' + eventNameAttribute).mouseleave( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
             });
-            $('#fire-' + key).click( function(evt) {
-                self.kernel.fireEvent( nodeID, $(this).attr("id").substring(5) );
+            $('#fire-' + eventNameAttribute).click( function(evt) {
+                self.kernel.fireEvent( nodeID, $.encoder.canonicalize($(this).attr("id").substring(5)) );
             });
-            $('#arg-' + key).click( function(evt) {
+            $('#arg-' + eventNameAttribute).click( function(evt) {
                 setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
             });
         }
@@ -805,17 +823,19 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var prototypeEvents = getEvents.call( this, this.kernel.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
-            $('#prototypeEvents').append("<div id='" + key + "' class='methodEntry'><table><tr><td><b>" + key + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + key + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + key + "' value='Fire'><img id='arg-" + key + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
-            $('#rollover-' + key).mouseover( function(evt) {
+            var prototypeEventNameAttribute = $.encoder.encodeForHTMLAttribute("id", key, true);
+            var prototypeEventNameHTML = $.encoder.encodeForHTML(key);
+            $('#prototypeEvents').append("<div id='" + prototypeEventNameAttribute + "' class='methodEntry'><table><tr><td><b>" + prototypeEventNameHTML + " </b></td><td style='text-align:right;overflow:visible'><div id='rollover-" + prototypeEventNameAttribute + "' style='position:relative;left:12px'><input type='button' class='input_button_call' id='fire-" + prototypeEventNameAttribute + "' value='Fire'><img id='arg-" + prototypeEventNameAttribute + "' src='images/arrow.png' alt='arrow' style='position:relative;top:4px;left:2px;visibility:hidden'></div></td></tr></table></div>");
+            $('#rollover-' + prototypeEventNameAttribute).mouseover( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'visible');
             });
-            $('#rollover-' + key).mouseleave( function(evt) {
+            $('#rollover-' + prototypeEventNameAttribute).mouseleave( function(evt) {
                 $('#arg-' + $(this).attr("id").substring(9)).css('visibility', 'hidden');
             });
-            $('#fire-' + key).click( function(evt) {
+            $('#fire-' + prototypeEventNameAttribute).click( function(evt) {
                 self.kernel.fireEvent( nodeID, $(this).attr("id").substring(5) );
             });
-            $('#arg-' + key).click( function(evt) {
+            $('#arg-' + prototypeEventNameAttribute).click( function(evt) {
                 setArgs.call(self, $(this).attr("id").substring(4), nodeEvent, nodeID); 
             });
         }
@@ -825,7 +845,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         // Add node behaviors
         $(topdownTemp).append("<div id='behaviors'></div>");
         for ( var i = 0; i < node.implementsIDs.length; i++ ) {
-            $('#behaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + node.implementsIDs[i] + "</b></td><td><input id='" + node.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
+            var nodeImplementsIDAttribute = $.encoder.encodeForHTMLAttribute("id", node.implementsIDs[i], true);
+            var nodeImplementsIDHTML = $.encoder.encodeForHTML(node.implementsIDs[i]);
+            $('#behaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + nodeImplementsIDHTML + "</b></td><td><input id='" + nodeImplementsIDAttribute + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
 
             /* 
             //Placeholder to Enable/Disable behaviors
@@ -842,7 +864,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         var prototypeNode = this.nodes[ node.extendsID ];
         for ( var i=0; i < prototypeNode.implementsIDs.length; i++)
         {
-            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeNode.implementsIDs[i] + "</b></td><td><input id='" + prototypeNode.implementsIDs[i] + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
+            var prototypeImplementsIDAttribute = $.encoder.encodeForHTMLAttribute("id", prototypeNode.implementsIDs[i], true);
+            var prototypeImplementsIDHTML = $.encoder.encodeForHTML(prototypeNode.implementsIDs[i]);
+            $('#prototypeBehaviors').append("<div class='propEntry'><table><tr><td style='width:92%'><b>" + prototypeImplementsIDHTML + "</b></td><td><input id='" + prototypeImplementsIDAttribute + "-enable' type='checkbox' checked='checked' disabled='disabled' /></td></tr></table></div>");
         }
 
         $('#prototypeBehaviors > div:last').css('border-bottom-width', '3px');
@@ -863,9 +887,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             if(scriptFull != undefined)
             {
                 var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $('#scripts').append("<div id='script-" + nodeID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
-                $('#script-' + nodeID + "-" + i).click( function(evt) {
-                    var id = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                $('#scripts').append("<div id='script-" + nodeIDAttribute + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
+                $('#script-' + nodeIDAttribute + "-" + i).click( function(evt) {
+                    var id = $.encoder.canonicalize($(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-')));
                     var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
                     viewScript.call(self, id, scriptID, undefined);
                 });
@@ -881,10 +905,11 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             var scriptFull = this.allScripts[node.extendsID][i].text;
             if(scriptFull != undefined)
             {
+                var nodeExtendsIDAttribute = $.encoder.encodeForHTMLAttribute("id", node.extendsID, true);
                 var scriptName = scriptFull.substring(0, scriptFull.indexOf('='));
-                $('#prototypeScripts').append("<div id='script-" + node.extendsID + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
-                $('#script-' + node.extendsID + "-" + i).click( function(evt) {
-                    var extendsId = $(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-'));
+                $('#prototypeScripts').append("<div id='script-" + nodeExtendsIDAttribute + "-" + i + "' class='childContainer'><div class='childEntry'><b>script </b>" + scriptName + "</div></div>");
+                $('#script-' + nodeExtendsIDAttribute + "-" + i).click( function(evt) {
+                    var extendsId = $.encoder.canonicalize($(this).attr("id").substring($(this).attr("id").indexOf('-')+1,$(this).attr("id").lastIndexOf('-')));
                     var scriptID = $(this).attr("id").substring($(this).attr("id").lastIndexOf('-')+1);
                     viewScript.call(self, nodeID, scriptID, extendsId);
                 });
