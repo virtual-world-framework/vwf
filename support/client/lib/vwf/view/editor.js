@@ -709,7 +709,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
                 if(prop.value == undefined)
                 {
-                    prop.value = JSON.stringify( vwf.getProperty( nodeID, prop.name, []) );
+                    prop.value = JSON.stringify( require( "vwf/utility" ).transform( vwf.getProperty( nodeID, prop.name, []), require( "vwf/utility" ).transforms.transit ) );
                 }
 
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", prop.name, true);
