@@ -1018,9 +1018,12 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         var self = this;
         var topdownName = this.topdownName;
         var topdownTemp = this.topdownTemp;
+
+        var methodNameAttribute = $.encoder.encodeForHTMLAttribute("id", methodName, true);
+        var methodNameHTML = $.encoder.encodeForHTML(methodName);
      
-        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodName + "-back' alt='back'/> " + methodName + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:33px'></input></div>");
-        jQuery('#' + methodName + '-back').click ( function(evt) {
+        $(topdownTemp).html("<div class='header'><img src='images/back.png' id='" + methodNameAttribute + "-back' alt='back'/> " + methodNameHTML + "<input type='button' class='input_button_call' id='call' value='Call' style='float:right;position:relative;top:5px;right:33px'></input></div>");
+        jQuery('#' + methodNameAttribute + '-back').click ( function(evt) {
             
             drillUp.call(self, nodeID);
         });
@@ -1039,7 +1042,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 {
                     var prmtr = $('#input-param'+ i).val();
                     try {
-                        prmtr = JSON.parse(prmtr);
+                        prmtr = JSON.parse($.encoder.canonicalize(prmtr));
                         parameters.push( prmtr );
                     } catch (e) {
                         this.logger.error('Invalid Value');
