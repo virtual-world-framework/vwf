@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
+define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, version, view, utility ) {
 
     // vwf/view/editor creates a view interface for editor functions. 
 
@@ -22,7 +22,6 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         // == Module Definition ====================================================================
 
         initialize: function() {
-
             var self = this;
             window.slideOffset = 0;
 
@@ -193,7 +192,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             };
 
             try {
-                propertyValue = require( "vwf/utility" ).transform( propertyValue, require( "vwf/utility" ).transforms.transit );
+                propertyValue = utility.transform( propertyValue, utility.transforms.transit );
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
                 this.logger.warnx( "createdProperty", nodeID, propertyName, propertyValue,
@@ -219,7 +218,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             var node = this.nodes[ nodeID ];
             if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
             try {
-                propertyValue = require( "vwf/utility" ).transform( propertyValue, require( "vwf/utility" ).transforms.transit );
+                propertyValue = utility.transform( propertyValue, utility.transforms.transit );
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
             } catch (e) {
                 this.logger.warnx( "satProperty", nodeID, propertyName, propertyValue,
@@ -710,7 +709,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
                 if(prop.value == undefined)
                 {
-                    prop.value = JSON.stringify( require( "vwf/utility" ).transform( vwf.getProperty( nodeID, prop.name, []), require( "vwf/utility" ).transforms.transit ) );
+                    prop.value = JSON.stringify( utility.transform( vwf.getProperty( nodeID, prop.name, []), utility.transforms.transit ) );
                 }
 
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", prop.name, true);
