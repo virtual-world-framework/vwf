@@ -66,7 +66,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                  case "http://vwf.example.com/node3.vwf":
                  case "http://vwf.example.com/mesh.vwf":
                     this.nodes[ childID ] = {};
-    /* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
+                    this.nodes[ childID ].sceneID = vwf.find("", "/")[0];
                     this.nodes[ childID ].name = childName;
                     this.nodes[ childID ].ID = childID;
                     this.nodes[ childID ].parentID = nodeID;
@@ -490,7 +490,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if ( elaspedTime > 0 ) {
                     if (elaspedTime > 0.05) elaspedTime = 0.05;
                     var activeObj, posRotProp, pos, rot, posRot;
-                    var sceneNode = this.scenes["index-vwf"];               
+                    var sceneNode = this.scenes[vwf.find("", "/")[0]];               
 
                     if ( sceneNode && sceneNode.system ) {
                         sceneNode.system.integrate( elaspedTime );

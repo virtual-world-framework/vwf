@@ -111,7 +111,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
             $('#model_a').hide();
             $('#model_b').hide();
             
-            var canvas = document.getElementById("index-vwf");
+            var canvas = document.getElementById(vwf.find("", "/")[0]);
             if ( canvas ) {
                 $('#topdown_a').height(canvas.height);
                 $('#topdown_b').height(canvas.height);
@@ -157,7 +157,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
                 parent.children.push( node );
             }
 
-            if ( childID == "index-vwf" && childExtendsID && this.kernel.test( childExtendsID,
+            if ( childID == vwf.find("", "/")[0] && childExtendsID && this.kernel.test( childExtendsID,
                     "self::element(*,'http://vwf.example.com/scene.vwf')", childExtendsID ) ) {
                 this.scenes[ childID ] = node;
             }
@@ -319,7 +319,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
                 if( this.currentNodeID == '' )
                 {
-                    this.currentNodeID = "index-vwf";
+                    this.currentNodeID = vwf.find("", "/")[0];
                 }
 
                 drill.call(this, this.currentNodeID, undefined);
@@ -559,7 +559,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         
         drill.call(this, nodeID, drillBackID);
         
-        if(nodeID != "index-vwf") $(topdownName).hide('slide', {direction: 'left'}, 175); 
+        if(nodeID != vwf.find("", "/")[0]) $(topdownName).hide('slide', {direction: 'left'}, 175); 
         $(topdownTemp).show('slide', {direction: 'right'}, 175);    
         
         this.topdownName = topdownTemp;
@@ -614,7 +614,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         if(!drillBackID) drillBackID = node.parentID;
      
-        if(nodeID == "index-vwf") 
+        if(nodeID == vwf.find("", "/")[0]) 
         {
             $(topdownTemp).html("<div class='header'>index</div>");
         }
