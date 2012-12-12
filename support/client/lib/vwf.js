@@ -1474,6 +1474,10 @@ var useLegacyID = [  // TODO: fix static ID references and remove
     // ... but not for tests
     require.toUrl( "dummy" ).indexOf( "../lib/" ) != 0;
 
+useLegacyID = childURI &&
+    ( childURI == "index.vwf" || childURI == "appscene-vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
+    childURI != "http://vwf.example.com/node.vwf";
+    
 useLegacyID = useLegacyID ||
     // work around model/glge creating a camera on a not-initialized application node
     nodeID == "index-vwf" && ! this.models.object.objects[nodeID] && childName == "camera";
