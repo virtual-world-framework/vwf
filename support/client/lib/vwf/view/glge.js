@@ -690,7 +690,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     }
 
                     if ( object ) {
-                        sceneView.kernel.createChild( vwf.find("", "/")[0], fileName, object );                
+                        sceneView.kernel.createChild( sceneView.kernel.find("", "/")[0], fileName, object );                
                     }
 
                 } catch ( e ) {

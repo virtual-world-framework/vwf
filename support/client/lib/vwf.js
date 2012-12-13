@@ -847,7 +847,7 @@
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( vwf.find("", "/")[0], full ), require( "vwf/utility" ).transforms.transit ),
+                    require( "vwf/utility" ).transform( this.getNode( this.find("", "/")[0], full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // Message queue.

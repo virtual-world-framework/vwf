@@ -33,7 +33,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.kernel = this.kernel.kernel.kernel;
 
-            this.state.sceneRootID = vwf.find("", "/")[0];
+            this.state.sceneRootID = this.kernel.find("", "/")[0];
 
             this.delayedProperties = {};
 
