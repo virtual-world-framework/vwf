@@ -20,7 +20,7 @@
 extends: http://vwf.example.com/scene.vwf
 properties: 
   
-  ## Navigation mode
+  ## Navigation mode. Default value is 'walk.' Other options include 'orbit' and 'none.'
   ## 
   ## @name navscene.vwf#navmode
   ## @property
