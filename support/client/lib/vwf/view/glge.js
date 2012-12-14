@@ -234,7 +234,19 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
             if((time - lastPickTime) > 10) {
+				
+				
                 var newPick = mousePick.call( this, mouse, sceneNode );
+				
+				var newPickId = newPick ? getPickObjectID.call( view, newPick, false ) : view.state.sceneRootID;
+                if(self.lastPickId != newPickId && self.lastEventData)
+				{
+					
+                    view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                    view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+				}
+				
+				self.lastPickId = newPickId
                 self.lastPick = newPick;
                 if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
                     oldMouseX = mouse.getMousePosition().x;
@@ -786,7 +798,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
                 mousepos.y = mousepos.y + window.scrollY;
 
-                var returnValue = sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
+                var returnValue = sceneNode.glgeScene.pick(mousepos.x - $('#index-vwf').offset().left, mousepos.y - $('#index-vwf').offset().top);
                 if (!returnValue) {
                     returnValue = { };
                 }

@@ -8053,10 +8053,6 @@ GLGE.Texture.prototype.setSrc=function(url){
 	this.url=url;
 	this.state=0;
 	this.image=new Image();
-	if(url.indexOf('@')!=-1)
-		this.image.crossOrigin = "use-credentials";
-	else
-		this.image.crossOrigin = 'anonymous';
 	var texture=this;
 	this.image.onload = function(){
 		texture.state=1;
@@ -11947,9 +11943,6 @@ GLGE.Light.prototype.setSpotSoftDistance=function(spotSoftnessDistance){
 	return this;
 }
 
-GLGE.Light.prototype.getEnable=function() {
-  return !( this.type == GLGE.L_OFF && this.old_type !== undefined );
-}
 
 GLGE.Light.prototype.enableLight=function(){
     if (this.type == GLGE.L_OFF && this.old_type !== undefined) {
@@ -12826,7 +12819,7 @@ GLGE.Scene.prototype.renderPass=function(gl,renderObjects,offsetx,offsety,width,
 	gl.clearDepth(1.0);
 	gl.depthFunc(gl.LEQUAL);
 	gl.viewport(offsetx,offsety,width,height);
-	gl.enable(this.gl.DEPTH_TEST);
+	
 	gl.clearColor(this.backgroundColor.r, this.backgroundColor.g, this.backgroundColor.b, this.backgroundColor.a);
 	if(!type) {
 		gl.scissor(offsetx,offsety,width,height);
@@ -12975,25 +12968,9 @@ GLGE.Scene.prototype.ray=function(origin,direction){
 			var cvp=this.camera.getViewProjection();
 			objects=this.objectsInViewFrustum(objects,cvp);
 		}*/
-		var pickableDepthTestObjects = [];
-		var pickableNoDepthObjects = [];
-		var ordermap = {}
 		for(var i=0; i<objects.length;i++){
-			if(objects[i].pickable && objects[i].depthTest) pickableDepthTestObjects.push(objects[i]);//objects[i].GLRender(gl,GLGE.RENDER_PICK,i+1);
-			if(objects[i].pickable && !objects[i].depthTest) pickableNoDepthObjects.push(objects[i]);
-			ordermap[objects[i].uid] = i+1;
+			if(objects[i].pickable) objects[i].GLRender(gl,GLGE.RENDER_PICK,i+1);
 		}
-		gl.enable(this.gl.DEPTH_TEST);
-		gl.depthFunc(gl.LEQUAL);
-		for(var i=0; i<pickableDepthTestObjects.length;i++){
-			pickableDepthTestObjects[i].GLRender(gl,GLGE.RENDER_PICK,ordermap[pickableDepthTestObjects[i].uid]);
-		}
-		
-		gl.disable(this.gl.DEPTH_TEST);
-		for(var i=0; i<pickableNoDepthObjects.length;i++){
-			pickableNoDepthObjects[i].GLRender(gl,GLGE.RENDER_PICK,ordermap[pickableNoDepthObjects[i].uid]);
-		}
-		gl.enable(this.gl.DEPTH_TEST);
 		//gl.flush();
 
 		var data = new Uint8Array(8 * 1 * 4);
