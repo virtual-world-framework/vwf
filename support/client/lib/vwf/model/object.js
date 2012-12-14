@@ -81,7 +81,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- prototyping --------------------------------------------------------------------------
 
         prototyping: function( nodeID ) {  // TODO: not for global anchor node 0
-            return this.objects[nodeID].extends;
+            if(this.objects[nodeID])
+				return this.objects[nodeID].extends;
+			return null;	
         },
 
         // -- behavioring --------------------------------------------------------------------------

@@ -124,6 +124,7 @@ scripts:
       newdiv.style.top = '0px';
       
       $(document.body).append(newdiv);
+      $(newdiv).disableSelection();
       this.nametag = newdiv;
                  
     }

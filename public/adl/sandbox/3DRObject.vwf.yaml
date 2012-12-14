@@ -23,6 +23,7 @@ methods:
   setupMaterial:
   backupMesh:
   restoreMesh:
+  initialize:
 properties:
   materialDef:
     get: |
@@ -39,7 +40,7 @@ scripts:
             if(!this.GetMesh())
                 return null;
             var newMaterial = {};
-            var currentMaterial = this.GetMesh().material;
+            var currentMaterial = this.GetMesh().getMaterial();
             if(!currentMaterial)
                 return;
             newMaterial.shininess = currentMaterial.getShininess();
@@ -76,19 +77,22 @@ scripts:
             return newMaterial;
     
     }
-   
-    this.setupMaterial = function()
+    this.initialize = function()
     {
-
-        this.GetMesh().setMaterial(new GLGE.Material());
-        this.initTexture();
+        this.dirtyStack();
     }
     this.initTexture = function(value)
     {
- 
+           
              var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
              if(!newMaterial) return;
              var currentMaterial = this.GetMesh().getMaterial();
+             if(!this.GetMesh().originalMaterial)
+             {
+                this.GetMesh().originalMaterial = currentMaterial;
+                currentMaterial = new GLGE.Material();
+                this.GetMesh().setMaterial(currentMaterial);
+             }
              if(!currentMaterial) return;
              currentMaterial.setShininess(newMaterial.shininess);
              currentMaterial.setAlpha(newMaterial.alpha);
@@ -164,7 +168,7 @@ scripts:
     }
     function findleaf(node)
     {
-        if(node.mesh)
+        if(node.getMesh && node.getMesh())
             return node;
         if(node.children)
         {
@@ -184,46 +188,64 @@ scripts:
         
         return mesh;
     }
-    this.backupMesh = function(mesh)
+    this.backupMesh = function()
     {
-        this.originalPositions = mesh.mesh.positions.slice(0);
-        this.originalNormals = mesh.mesh.normals.slice(0);
-        this.originalFaces = mesh.mesh.faces.data.slice(0);
-        this.originalUV1 = mesh.mesh.uv1set.slice(0);
-        this.originalUV2 = mesh.mesh.uv2set.slice(0);
+        if(!this.GetMesh())
+            return;
+        var mesh = this.GetMesh().getMesh();
+        if(mesh.positions)
+            mesh.originalPositions = mesh.positions.slice(0);
+        if(mesh.normals)
+            mesh.originalNormals = mesh.normals.slice(0);
+        if(mesh.faces)
+            mesh.originalFaces = mesh.faces.data.slice(0);
+        if(mesh.uv1set)
+            mesh.originalUV1 = mesh.uv1set.slice(0);
+        if(mesh.uv2set)
+            mesh.originalUV2 = mesh.uv2set.slice(0);
     }
     this.restoreMesh = function()
     {
-        this.GetMesh().mesh.setPositions(this.originalPositions.slice(0));
-        this.GetMesh().mesh.setNormals(this.originalNormals.slice(0));
-        this.GetMesh().mesh.setFaces(this.originalFaces.slice(0));
-        this.GetMesh().mesh.setUV(this.originalUV1.slice(0));
-        this.GetMesh().mesh.setUV2(this.originalUV2.slice(0));
+      if(!this.GetMesh())
+            return;
+        var mesh = this.GetMesh().getMesh();
+        if(mesh.originalPositions)
+            mesh.setPositions(mesh.originalPositions.slice(0));
+        if(mesh.originalNormals)    
+            mesh.setNormals(mesh.originalNormals.slice(0));
+        if(mesh.originalFaces)
+            mesh.setFaces(mesh.originalFaces.slice(0));
+        if(mesh.originalUV1)        
+            mesh.setUV(mesh.originalUV1.slice(0));
+        if(mesh.originalUV2)
+            mesh.setUV2(mesh.originalUV2.slice(0));
     }
     this.updateSelf = function()
     {
-        if(!this.originalPositions)
-            this.backupMesh(this.GetMesh());
+      if(!this.GetMesh())
+            return;
+        if(!this.GetMesh().getMesh().originalPositions)
+            this.backupMesh();
         else   
             this.restoreMesh();
-        if(this.GetMesh().mesh)
-            this.GetMesh().mesh.dirtyMesh = true;		
+        if(this.GetMesh().getMesh())
+            this.GetMesh().getMesh().dirtyMesh = true;		
     }
     this.dirtyStack = function()
     {
-        
+      
         this.updateStack();
     }
     this.updateStack = function()
     {
- 
+        
         this.updateSelf();
         for(var i in this.children)
         {
             return vwf.callMethod(this.children[i].id,'updateStack');
         }
-        if(this.mesh.mesh)
-            this.mesh.mesh.dirtyMesh = true;
+        if(this.GetMesh().getMesh())
+            this.GetMesh().getMesh().dirtyMesh = true;
     }
     this.GetBounds = function()
     {

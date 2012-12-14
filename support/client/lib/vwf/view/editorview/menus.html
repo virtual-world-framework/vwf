@@ -1,0 +1,129 @@
+
+<div id="sidepanel" style=""> </div>
+<div id="toolbar" style=""> </div>		
+<div id="smoothmenu1" class="ddsmoothmenu" style="z-index: 1000;position: fixed;width: 100%;border-bottom: 1px solid #555555;">
+<ul>
+<li><a href="#">File</a>
+<ul>
+	  <li><a href="#" id="MenuLogIn">Log In</a></li>	  
+	  <li><a href="#" id="MenuLogOut">Log Out</a></li>
+	  <li><a href="#" id="MenuChangeInstance">Change Instance ...</a></li>
+</ul>
+</li>
+
+<li><a href="#">Edit</a>
+  <ul>
+	  	  
+	  <li><a href="#" id="MenuCopy">Copy</a></li>
+	  <li><a href="#" id="MenuPaste">Paste</a></li>
+	  <li><a href="#" id="MenuDuplicate">Duplicate</a></li>
+	  <li><a href="#" id="MenuDelete">Delete</a></li>
+	  <li><a href="#" id="MenuSaveCopy">Save Copy</a></li>
+	  <li><a href="#" id="MenuShare">Share</a></li>
+	  <li><a href="#">Select</a>
+		<ul>
+			<li><a href="#" id="MenuSelectName">Select By Name</a></li>
+			<li><a href="#" id="MenuSelectPick">Pick</a></li>
+			<li><a href="#" id="MenuSelectNone">Select None</a></li>
+		</ul>	
+	  </li>
+	  <li><a href="#">Transform</a>
+		  <ul>
+			  <li><a href="#" id="MenuMove">Move</a></li>
+			  <li><a href="#" id="MenuRotate">Rotate</a></li>
+			  <li><a href="#" id="MenuScale">Scale</a></li>
+			  <li><a href="#" id="MenuMulti">Multi</a></li>
+			  <li><a href="#" ></a></li>
+			  <li><a href="#" id="MenuLocal">Local Coords</a></li>
+			  <li><a href="#" id="MenuWorld">World Coords</a></li>
+			  <li><a href="#" ></a></li>
+			  <li><a href="#">Snaps</a>
+			  <ul>
+				  <li><a href="#" id="MenuSnapLarge">Large</a></li>
+				  <li><a href="#" id="MenuSnapMedium">Medium</a></li>
+				  <li><a href="#" id="MenuSnapSmall">Small</a></li>
+				  <li><a href="#" id="MenuSnapOff">Off</a></li>
+				  
+			  </ul>
+		  </li>
+		  </ul>
+	  </li>
+	  
+</ul>
+</li>
+<li><a href="#">Camera</a>
+  <ul>
+  <li><a href="#" id="MenuFocusSelected" >Focus Selected</a></li>
+  <li><a href="#" id="MenuCameraOrbit">Orbit</a></li>
+  <li><a href="#" id="MenuCameraFree">Free</a></li>
+  <li><a href="#" id="MenuCameraFirstPerson">First Person</a></li>
+  <li><a href="#" id="MenuCameraNavigate">Navigate</a></li>
+  </ul>
+</li>
+<li><a href="#">Hierarchy</a>
+  <ul>
+  <li><a href="#" id="MenuSetParent" >Link</a></li>
+  <li><a href="#" id="MenuRemoveParent" >Unlink</a></li>
+  <li><a href="#" id="MenuSelectParent" >Select Parent</a></li>
+  <li><a href="#" id="MenuHierarchyManager">Show Hierarchy</a></li>
+  </ul>
+</li>
+
+<li><a href="#">Create</a>
+  <ul>
+    <li><a href="#">Primitives</a>
+		<ul>
+		  <li><a href="#" id="MenuCreateSphere">Sphere</a></li>
+		  <li><a href="#" id="MenuCreateBox">Box</a></li>
+		  <li><a href="#" id="MenuCreatePlane">Plane</a></li>
+		  <li><a href="#" id="MenuCreateCylinder">Cylinder</a></li>
+		  <li><a href="#" id="MenuCreateCone">Cone</a></li>
+		  <li><a href="#" id="MenuCreatePyramid">Pyramid</a></li>
+		</ul>
+	</li>
+	<li><a href="#">Modifiers</a>
+		<ul>
+		  <li><a href="#" id="MenuCreateBend">Bend</a></li>
+		  <li><a href="#" id="MenuCreateTwist">Twist</a></li>
+		  <li><a href="#" id="MenuCreateTaper">Taper</a></li>
+		  <li><a href="#" id="MenuCreateUVMap">UVMap</a></li>
+		  <li><a href="#" id="MenuCreateNoise">Noise</a></li>
+		  <li><a href="#" id="MenuCreateOffset">Offset</a></li>
+		  <li><a href="#" id="MenuCreateStretch">Stretch</a></li>
+		  <li><a href="#" id="MenuCreateTangents">Build Tangents</a></li>
+		</ul>
+	</li>
+  </ul>
+</li>
+<li><a href="#">Windows</a>
+  <ul>
+  <li><a href="#" id="MenuChat">Chat</a></li>
+  <li><a href="#" id="MenuUsers">Users</a></li>
+  <li><a href="#" id="MenuMaterialEditor">Material Editor</a></li>
+  <li><a href="#" id="MenuScriptEditor">Script Editor</a></li>
+  <li><a href="#" id="MenuObjectProperties">Object Properties</a></li>
+  <li><a href="#" id="MenuModels">Models</a></li>
+  <li><a href="#" id="MenuInventory">Inventory</a></li>
+  </ul>
+</li>
+<li><a href="#">Help</a>
+  <ul>
+  <li><a href="#" id="MenuHelpAbout">About</a></li>
+  <li><a href="#" id="MenuHelpBrowse">Browse All Topics...</a></li>
+  </ul>
+</li>
+</ul>
+<br style="clear: left" />
+</div>
+
+
+	<div id="ChatWindow" style="width: 100%;margin:0px;padding:0px">
+		
+		<div class="text ui-widget-content ui-corner-all" style="background-image: -webkit-linear-gradient(top, white 0%, #D9EEEF 100%);width: 99%;top: 0%; height:90%;padding:0px;margin:0px;position: absolute;overflow-y:auto">
+			<table id="ChatLog" style='width:100%;background-color: transparent;'>
+			
+			</table>
+		</div>
+	    
+		<input type="text" name="ChatInput" id="ChatInput" class="text ui-widget-content ui-corner-all" style="width: 99%;top: 92%;position: absolute;padding: 0px;font-size: 1.2em;"/>		
+	</div>

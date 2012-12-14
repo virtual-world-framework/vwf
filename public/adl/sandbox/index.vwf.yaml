@@ -31,6 +31,7 @@ methods:
 scripts:
 - |
 
+
     this.initialize = function(){
  
        
@@ -54,13 +55,12 @@ scripts:
        this.last_y = 0;
        this.navmode = 'none';
        
-        
-       document.getElementById('index-vwf').onmousewheel=this.localmousewheel.bind(this);
+      
         $('#index-vwf').mousedown(function(e){this.localpointerDown(e);}.bind(this));
         $('#index-vwf').mouseup(function(e){this.localpointerUp(e);}.bind(this));
         $('#index-vwf').mouseleave(function(e){this.localpointerUp(e);}.bind(this));
         $('#index-vwf').mousemove(function(e){this.localpointerMove(e);}.bind(this));
-    //    $('#index-vwf').mousewheel(function(e){this.localmousewheel(e);}.bind(this));
+
        this.updateCallbacks = [];
        this.OwnedPrims = [];
       
@@ -349,45 +349,6 @@ scripts:
       }
      
     }
-    this.localmousewheel = function( e ){
-     
-      if(this.cameramode == 'Orbit')
-      {
-        if(e.wheelDelta < 0)
-            this.zoom *= 1.1;
-        else
-            this.zoom *=.9;
-      }
-      
-      if(this.cameramode == 'Free')
-      {
-        if(e.wheelDelta < 0)
-            this.zoom *= 1.5;
-        else
-            this.zoom *=.5;
-      }
-       
-
-        
-        if(this.cameramode == 'Navigate')
-        {   
-            if(e.wheelDelta < 0)
-            this.zoom *= 1.1;
-            else
-            {
-            this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(this.navpoint,this.center),.15));
-            
-            this.zoom = this.zoom + (3- this.zoom )*.05;
-            }
-        }       
-        
-      this.updateCamera();
-        if(this.cameramode == 'Free')
-        {
-           this.ReprojectCameraCenter();
-        }      
-     
-    }
     this.localpointerUp = function( parms, pickInfo ){
       
       if(parms.which == 1) this.leftdown = false;
@@ -582,9 +543,10 @@ scripts:
     }
     this.pointerWheel = function( parms, pickInfo ) {
        
+        if(this.client != this.moniker) return;
         if(this.cameramode != 'Navigate')
         { 
-            if(pickInfo.wheel.deltaY > 0 )
+            if(pickInfo.wheel.deltaY < 0 )
             this.zoom *= 1.1;
             else
             this.zoom *= .9;

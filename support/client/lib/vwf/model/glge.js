@@ -201,6 +201,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         loadCollada.call( this, parentNode, node ); 
                         break;
 					case "model/vnd.osgjs+json+compressed":
+						
                         callback( false );
                         node = this.state.nodes[childID] = {
                             name: childName,  
@@ -254,8 +255,36 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             };
                         }
                         break;
-
-                    default:
+					case "link_existing/glge" :{
+							node = this.state.nodes[childID] = {
+								name: childName,  
+								glgeObject: null,
+								ID: childID,
+								parentID: nodeID,
+								type: childExtendsID,
+								sourceType: childType, 
+							};
+							node.glgeObject = findChildByName(parentNode.glgeObject,childSource);
+							//we need to mark this node - because the VWF node is layered onto a GLGE node loaded from the art asset, deleteing the VWF node should not
+							//delete the GLGE node. This should probably undo any changes made to the GLGE node by the VWF. This is tricky. I'm going to backup the matrix, and reset it
+							//when deleting the VWF node.
+							if(node.glgeObject)
+							{
+								node.glgeObject.initializedFromAsset = true;
+								node.glgeObject.backupMatrix = [];
+								node.glgeObject.vwfID = node.ID;
+								for(var u=0; u < 16; u++)
+									node.glgeObject.backupMatrix.push(node.glgeObject.getLocalMatrix()[u]);
+							}
+							else
+							{
+								console.log("failed to find view node for " + childSource);
+								node.glgeObject = new GLGE.Group();
+								node.glgeObject.vwfID = node.ID;
+							}
+						}
+						break;
+					default:
                         node = this.state.nodes[childID] = {
                             name: childName,  
                             glgeObject: glgeChild,
@@ -265,6 +294,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             sourceType: childType, 
                         };
                         if ( node.glgeObject ) {
+							node.glgeObject.vwfID = node.ID;
+							
                             if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
                                 callback( false );
                                 node.glgeObject.vwfID = childID;
@@ -274,6 +305,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             }
                         } else {
                             node.glgeObject = new GLGE.Group();
+							node.glgeObject.vwfID = node.ID;
                             if ( parentNode ) {
                                 if ( parentNode.glgeObject ) {
                                     parentNode.glgeObject.addObject( node.glgeObject );
@@ -343,9 +375,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     var obj = node.glgeObject;
                     var parent = obj.parent;
                     if ( parent ) {
-                        if ( parent.removeChild ) parent.removeChild( obj );
-                        node.glgeObject = undefined;
-                        //delete obj;
+						
+						//this node was created in whole by the VWF, so it can be deleted
+						if(! node.glgeObject.initializedFromAsset)
+						{
+							if ( parent.removeChild ) parent.removeChild( obj );
+							node.glgeObject = undefined;
+							//delete obj;
+						}
+						//This node is a sub node of an asset that was loaded by the VWF. Deleteing the VWF node should reset the asset sub node.
+						//we need to undo some of the changes made by the framework to this asset. 
+						//coded here for now, probably need a delete callback in the framworkd
+						else
+						{
+							restoreObject(node.glgeObject);
+						}
                     }
                 }
                 delete this.state.nodes[ nodeID ];
@@ -419,6 +463,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
+			
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
@@ -2155,14 +2200,72 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
+	
+	function restoreObject(node)
+	{
+		if(!node)
+			return;
+			
+		if(node.originalPositions)
+			node.setPositions(node.originalPositions.slice(0));
+		if(node.originalNormals)    
+			node.setNormals(node.originalNormals.slice(0));
+		if(node.originalFaces)
+			node.setFaces(node.originalFaces.slice(0));
+		if(node.originalUV1)        
+			node.setUV(node.originalUV1.slice(0));
+		if(node.originalUV2)
+			node.setUV2(node.originalUV2.slice(0));
+		if(node.backupMatrix)
+			node.setStaticMatrix(node.backupMatrix);
+		if(node.originalMaterial)
+			node.setMaterial(node.originalMaterial);
+		
+		delete node.initializedFromAsset;
+		delete node.vwfID;
+		delete node.originalPositions;
+		delete node.originalNormals;
+		delete node.originalFaces;
+		delete node.originalUV1;
+		delete node.originalUV2;
+		delete node.originalMaterial;
+		delete node.backupMatrix;
+		
+		if(node.getMesh && node.getMesh())
+			restoreObject(node.getMesh());
+		if(node.children)
+		{
+			for(var i=0; i < node.children.length; i++)
+				restoreObject(node.children[i]);
+		}		
+	}
+	
     // Search a GLGE.Object, GLGE.Collada, GLGE.Light for a child with the given name.  TODO: really, it's anything with children[]; could be the same as glgeSceneChild().
-
+    function findChildByName( glgeChild, childName )
+	{
+		if((glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName)
+			return glgeChild;
+		var found = null;
+		if(glgeChild && glgeChild.children)
+		for(var i = 0; i < glgeChild.children.length; i++)
+		{
+				var temp = findChildByName(glgeChild.children[i],childName);
+				if(temp)
+				{
+					found =  temp;
+					break;
+				}
+		}
+		return found;
+	}
     function glgeObjectChild( glgeObject, childName, childType ) {
         
         var childToReturn = jQuery.grep( glgeObject.children || [], function ( glgeChild ) {
             return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
         }).shift();
-
+		
+		//childToReturn = findChildByName(glgeObject,childName);
+	
         if ( !childToReturn ) {
             childToReturn = findGlgeObject.call( this, childName, childType );
         }

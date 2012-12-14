@@ -269,7 +269,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Create and attach each configured view.
 
             viewInitializers.forEach( function( viewInitializer ) {
-
+			
                 // Accept either { "vwf/view/name": [ arguments] } or "vwf/view/name".
 
                 if ( typeof viewInitializer == "object" && viewInitializer != null ) {
@@ -1222,6 +1222,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
         this.getNode = function( nodeID, full ) {  // TODO: include/exclude children, prototypes
 
+			if(!nodeID)
+				return null;
             this.logger.group( "vwf.getNode " + nodeID + " " + full );
 
             // Direct property accessors to suppress kernel reentry so that we can read the state
@@ -1497,7 +1499,9 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Allocate an ID for the node. We just use an incrementing counter.  // TODO: must be unique and consistent regardless of load order; this is a gross hack.
 
             var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
-
+			
+			
+				
             var childPrototypeID = undefined, childBehaviorIDs = [], deferredInitializations = {};
 
             async.series( [

@@ -59,7 +59,10 @@
     <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
     <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
     <script type="text/javascript">connected && google.load( "earth", "1" )</script>
-
+  <!-- This is the common view implementation and an example view that summarizes the          -->
+    <!-- simulation state in HTML on the main page.                                              -->
+    <script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
+    <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
     <script type="text/javascript">
 
         require( [
@@ -78,7 +81,7 @@
             "vwf/model/stage/log",
             "vwf/kernel/view",
             "vwf/view/document",
-            "vwf/view/editor",
+			"vwf/view/EditorView",
             "vwf/view/glge",
             "vwf/view/googleEarth",
             "vwf/utility",
@@ -129,6 +132,7 @@
 						{ "vwf/view/glge": "#vwf-root" },
                         "vwf/view/document",
                         //"vwf/view/editor",
+						"vwf/view/EditorView",
                     	"vwf/view/googleEarth",
                     ]
 
@@ -140,10 +144,7 @@
 
     </script>
 
-    <!-- This is the common view implementation and an example view that summarizes the          -->
-    <!-- simulation state in HTML on the main page.                                              -->
-    <script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
-    <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
+  
 
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
@@ -181,6 +182,24 @@
     <script type="text/javascript">
         updateOverlay();
     </script>
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
   </body>
 
