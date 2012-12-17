@@ -10182,7 +10182,8 @@ distribution.
 		}
 						
 		var sphere = info.body0;
-		var box = info.body1;		
+		var box = info.body1;
+
 		if (!sphere.hitTestObject3D(box)) 
 			return;
 
@@ -10498,7 +10499,10 @@ distribution.
 	var JNumber3D=jigLib.JNumber3D;
 	var JConstraint=jigLib.JConstraint;
 	var JConfig=jigLib.JConfig;
-	var JSphere=jigLib.JSphere;	var MaterialProperties=jigLib.MaterialProperties;	var CollPointInfo=jigLib.CollPointInfo;	var CollisionInfo=jigLib.CollisionInfo;
+	var JSphere=jigLib.JSphere;
+	var MaterialProperties=jigLib.MaterialProperties;
+	var CollPointInfo=jigLib.CollPointInfo;
+	var CollisionInfo=jigLib.CollisionInfo;
 	 
 	/**
 	 * @author Muzer(muzerly@gmail.com)
@@ -10530,7 +10534,7 @@ distribution.
 	 **/
 	CollDetectSphereSphere.prototype.collDetect=function(info, collArr){
 		var sphere0 = info.body0;
-		var sphere1 = info.body1;
+		var sphere1 = info.body1;
 		var oldDelta = Vector3DUtil.subtract(sphere0.get_oldState().position, sphere1.get_oldState().position);
 		var newDelta = Vector3DUtil.subtract(sphere0.get_currentState().position, sphere1.get_currentState().position);
 
