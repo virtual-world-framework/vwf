@@ -22,7 +22,7 @@
       mousePressed = false;
 
       function setColor(color) {
-        vwf_view.kernel.find("index-vwf", "toolbar", function(toolbarID) {
+        vwf_view.kernel.find("", "/toolbar", function(toolbarID) {
           vwf_view.kernel.setProperty( toolbarID, "selectedColor", color );
         });
         highlightColor(color);
@@ -54,11 +54,11 @@
             vColor = [0, 0, 0];
             break;
         }
-        vwf_view.kernel.setProperty("index-vwf", "lineColor", vColor);
+        vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "lineColor", vColor);
       }
 
       function setMode(mode) {
-        vwf_view.kernel.find("index-vwf", "toolbar", function(toolbarID) {
+        vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
           vwf_view.kernel.setProperty( toolbarID, "inputMode", mode );
         });
         highlightMode(mode);
@@ -70,11 +70,11 @@
         document.getElementById('pindrop').style.border = "2px solid black";
 
         document.getElementById(mode).style.border = "3px solid red";
-        vwf_view.kernel.setProperty("index-vwf", "mouseMode", mode);
+        vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "mouseMode", mode);
       }
 
       function clearOverlay() {
-        vwf_view.kernel.find("index-vwf", "toolbar", function(toolbarID) {
+        vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
           vwf_view.kernel.callMethod( toolbarID, "clear" );
         });
         setColor('black');
@@ -107,7 +107,7 @@
       // $('#toolbar').animate({ opacity:0.0 }, 1);
 
       vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-        if (vwf_view.kernel.test("index-vwf", "toolbar", nodeId)) {
+        if (vwf_view.kernel.test(vwf_view.kernel.find("", "/")[0], "toolbar", nodeId)) {
           switch (propertyName) {
             case "selectedColor":
               highlightColor(propertyValue);
@@ -122,7 +122,7 @@
       // vwf_view doesn't currently get messages from the document launch. Force a property update
       // so that vwf_view.satProperty() can update the toolbar with the current values.
 
-      vwf_view.kernel.find("index-vwf", "toolbar", function(toolbarID) {
+      vwf_view.kernel.find(vwf_view.kernel.find("", "/")[0], "toolbar", function(toolbarID) {
         vwf_view.kernel.execute( toolbarID, "this.selectedColor = this.selectedColor" );
         vwf_view.kernel.execute( toolbarID, "this.inputMode = this.inputMode" );
       });

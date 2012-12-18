@@ -30,7 +30,7 @@ properties:
         this.attachedToCamera = function( value ) {
           if ( vwf ) {
             if ( value ) {
-              this.camera.attachNodeID = 'http-vwf-example-com-car-vwf-pick_up_truck02';
+              this.camera.attachNodeID = this.find("//pick_up_truck02")[0].id;
             } else {
               this.camera.attachNodeID = '';
             }

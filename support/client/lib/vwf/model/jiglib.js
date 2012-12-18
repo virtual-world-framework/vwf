@@ -40,7 +40,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
           childSource, childType, childURI, childName, callback /* ( ready ) */) {
 
-          var kernel = this.kernel.kernel.kernel;
+          var kernel = this.kernel;
           //this.logger.enable = true;
           //this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
           //                  childSource, childType, childURI, childName );
@@ -66,7 +66,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                  case "http://vwf.example.com/node3.vwf":
                  case "http://vwf.example.com/mesh.vwf":
                     this.nodes[ childID ] = {};
-    /* hardcoded */ this.nodes[ childID ].sceneID = "index-vwf";
+                    this.nodes[ childID ].sceneID = this.kernel.find("", "/")[0];
                     this.nodes[ childID ].name = childName;
                     this.nodes[ childID ].ID = childID;
                     this.nodes[ childID ].parentID = nodeID;
@@ -236,10 +236,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var value = undefined;
-//            this.logger.enabled = !this.updating;
-//            if ( nodeID != "http-vwf-example-com-camera-vwf-camera" )
-//                this.logger.infox( "settingProperty", nodeID, propertyName, propertyValue );
-//            this.logger.enabled = false;
 
             if ( propertyValue === undefined )
                 return value;
@@ -381,10 +377,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- gettingProperty ----------------------------------------------------------------------
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
-            //this.logger.enabled = true;
-            //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
-            //    this.logger.infox( "gettingProperty", nodeID, propertyName, propertyValue );
-            //this.logger.enabled = false;
           
             propertyValue = undefined;
 
@@ -498,7 +490,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if ( elaspedTime > 0 ) {
                     if (elaspedTime > 0.05) elaspedTime = 0.05;
                     var activeObj, posRotProp, pos, rot, posRot;
-                    var sceneNode = this.scenes["index-vwf"];               
+                    var sceneNode = this.scenes[this.kernel.find("", "/")[0]];               
 
                     if ( sceneNode && sceneNode.system ) {
                         sceneNode.system.integrate( elaspedTime );
@@ -537,22 +529,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         raduis = Math.sqrt( radius );
         return radius;
     }
-
-//    // == findMeshChildren =================================================================
-
-//    function findMeshChildren( nodeID, childList ) {
-//        var children = this.kernel.children( nodeID );
-
-//        if ( this.nodes[nodeID] &&  this.nodes[nodeID].extendsID == "http-vwf-example-com-mesh-vwf" ) {
-//            childList.push( this.nodes[nodeID] ); 
-//        }
-
-//        if ( children && children.length ) {
-//            for ( var i = 0; i < children.length; i++ ) {
-//                findMeshChildren.call( this, children[i], childList );
-//            }
-//        }
-//    }
 
     // == createJBox =====================================================================
 

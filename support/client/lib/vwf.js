@@ -850,7 +850,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( "index-vwf", full ), require( "vwf/utility" ).transforms.transit ),
+                    require( "vwf/utility" ).transform( this.getNode( this.find("", "/")[0], full ), require( "vwf/utility" ).transforms.transit ),
                 ],
 
                 // Message queue.
@@ -1504,9 +1504,13 @@ var useLegacyID = [  // TODO: fix static ID references and remove
     // ... but not for tests
     require.toUrl( "dummy" ).indexOf( "../lib/" ) != 0;
 
+useLegacyID = childURI &&
+    ( childURI == "index.vwf" || childURI == "appscene-vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
+    childURI != "http://vwf.example.com/node.vwf";
+    
 useLegacyID = useLegacyID ||
     // work around model/glge creating a camera on a not-initialized application node
-    nodeID == "index-vwf" && ! this.models.object.objects[nodeID] && childName == "camera";
+    nodeID == this.find("", "/")[0] && ! this.models.object.objects[nodeID] && childName == "camera";
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;

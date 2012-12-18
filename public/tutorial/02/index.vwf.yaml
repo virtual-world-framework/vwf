@@ -45,5 +45,5 @@ scripts:
     this.camera.translation = [ 0, 20000, 10000 ];
     this.camera.far = 500000;
     this.camera.near = 2;
-    this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
+    this.camera.lookAt = this.sceneCenter.id;
   }
