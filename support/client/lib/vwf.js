@@ -1480,7 +1480,7 @@ useLegacyID = childURI &&
     
 useLegacyID = useLegacyID ||
     // work around model/glge creating a camera on a not-initialized application node
-    nodeID == "index-vwf" && ! this.models.object.objects[nodeID] && childName == "camera";
+    nodeID == this.find("", "/")[0] && ! this.models.object.objects[nodeID] && childName == "camera";
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;

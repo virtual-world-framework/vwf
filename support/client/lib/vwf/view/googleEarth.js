@@ -76,7 +76,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     
                     this.state.nodes[ childID ] = node;
                     var view = this;
-                    if ( childID == "http-vwf-example-com-node3-vwf-earth" ) {
+                    if ( childName == "earth" ) {
                        
                         var interval;
                         var view = this;
@@ -106,7 +106,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                                     la.setLongitude( -77 );
                                     node.earthInst.getView().setAbstractView(la);
 
-                                    view.kernel.execute("http-vwf-example-com-node3-vwf-lookAt", "this.cameraData = this.cameraData");
+                                    if(view.kernel.find("", "//lookAt").length > 0) {
+                                        view.kernel.execute(view.kernel.find("", "//lookAt")[0], "this.cameraData = this.cameraData");
+                                    }
     
                                     view.control = false;
 
@@ -178,74 +180,75 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
             var value = undefined;
             var obj, earth, ge;
-            var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
-            if ( propertyValue ) {
+            for(var node in this.state.nodes) {
+                if(this.state.nodes[node].name == "earth") {
+                    earth = this.state.nodes[node];
+                }
+            }
+            if ( propertyValue && earth ) {
                 //this.logger.infox( "satProperty", nodeID, propertyName, propertyValue );
                 if ( propertyName == "controlClient" ) {
                     this.controlClient = propertyValue;
                     value = propertyValue;
                 } else if ( this.kernel.client() != this.kernel.moniker() ) { 
 
-                    switch ( nodeID ) {
-                        case "http-vwf-example-com-node3-vwf-camera":
-                        case "http-vwf-example-com-node3-vwf-lookAt":
-                            if ( earth && earth.earthInst ) {
-                                ge = earth.earthInst;
-                                if ( nodeID == "http-vwf-example-com-node3-vwf-lookAt" ) {
-                                    obj = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
-                                } else {
-                                    obj = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
-                                }
-                                switch ( propertyName ) {
-                                    case "longitude":
-                                        obj.setLongitude( propertyValue );
-                                        ge.getView().setAbstractView(obj);
-                                        value = propertyValue; 
-                                        break;
-                                    case "latitude":
-                                        obj.setLatitude( propertyValue );
-                                        ge.getView().setAbstractView(obj);
-                                        value = propertyValue;  
-                                        break;
-                                    case "altitude":
-                                        obj.setAltitude( propertyValue );
-                                        ge.getView().setAbstractView(obj);
-                                        value = propertyValue;
-                                        break; 
-                                    case "altitudeMode":
-                                        obj.setAltitudeMode( propertyValue );
-                                        ge.getView().setAbstractView(obj);
-                                        value = propertyValue;
-                                        break;
-                                    case "heading":
-                                        obj.setHeading( propertyValue );
-                                        ge.getView().setAbstractView(obj);
-                                        value = propertyValue;
-                                        break;
-                                    case "tilt":
-                                        obj.setTilt( propertyValue );
-                                        ge.getView().setAbstractView(obj);
-                                        value = propertyValue;
-                                        break; 
-                                    case "range":
-                                        obj.setRange( propertyValue );
-                                        ge.getView().setAbstractView(obj);
-                                        value = propertyValue;
-                                        break;                                                                                                                                                                                      
-                                    case "cameraData":
-                                        obj.setLongitude( propertyValue[0] );
-                                        obj.setLatitude( propertyValue[1] );
-                                        obj.setAltitude( propertyValue[2] );
-                                        obj.setAltitudeMode( propertyValue[3] );
-                                        obj.setHeading( propertyValue[4] );
-                                        obj.setTilt( propertyValue[5] );
-                                        obj.setRange( propertyValue[6] );
-                                        ge.getView().setAbstractView( obj );
-                                        value = propertyValue;
-                                        break; 
-                                }
+                    if(vwf_view.kernel.test("", "/camera", nodeID) || vwf_view.kernel.test("", "/lookAt", nodeID)) {
+                        if ( earth && earth.earthInst ) {
+                            ge = earth.earthInst;
+                            if ( vwf_view.kernel.test("", "/lookAt", nodeID) ) {
+                                obj = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                            } else {
+                                obj = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
                             }
-                            break;
+                            switch ( propertyName ) {
+                                case "longitude":
+                                    obj.setLongitude( propertyValue );
+                                    ge.getView().setAbstractView(obj);
+                                    value = propertyValue; 
+                                    break;
+                                case "latitude":
+                                    obj.setLatitude( propertyValue );
+                                    ge.getView().setAbstractView(obj);
+                                    value = propertyValue;  
+                                    break;
+                                case "altitude":
+                                    obj.setAltitude( propertyValue );
+                                    ge.getView().setAbstractView(obj);
+                                    value = propertyValue;
+                                    break; 
+                                case "altitudeMode":
+                                    obj.setAltitudeMode( propertyValue );
+                                    ge.getView().setAbstractView(obj);
+                                    value = propertyValue;
+                                    break;
+                                case "heading":
+                                    obj.setHeading( propertyValue );
+                                    ge.getView().setAbstractView(obj);
+                                    value = propertyValue;
+                                    break;
+                                case "tilt":
+                                    obj.setTilt( propertyValue );
+                                    ge.getView().setAbstractView(obj);
+                                    value = propertyValue;
+                                    break; 
+                                case "range":
+                                    obj.setRange( propertyValue );
+                                    ge.getView().setAbstractView(obj);
+                                    value = propertyValue;
+                                    break;                                                                                                                                                                                      
+                                case "cameraData":
+                                    obj.setLongitude( propertyValue[0] );
+                                    obj.setLatitude( propertyValue[1] );
+                                    obj.setAltitude( propertyValue[2] );
+                                    obj.setAltitudeMode( propertyValue[3] );
+                                    obj.setHeading( propertyValue[4] );
+                                    obj.setTilt( propertyValue[5] );
+                                    obj.setRange( propertyValue[6] );
+                                    ge.getView().setAbstractView( obj );
+                                    value = propertyValue;
+                                    break; 
+                            }
+                        }
                     }
                 } 
             }
@@ -257,57 +260,63 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             var value = undefined;
             var obj, earth, ge;
-            var earth = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
-            switch ( nodeID ) {
-                case "http-vwf-example-com-node3-vwf-camera":
-                case "http-vwf-example-com-node3-vwf-lookAt":
-                    if ( earth && earth.earthInst ) {
-                        ge = earth.earthInst;
-                        if ( nodeID == "http-vwf-example-com-node3-vwf-lookAt" ) {
-                            obj = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
-                        } else {
-                            obj = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
-                        }                        
-                        switch ( propertyName ) {
-                            case "longitude":
-                                value = obj.getLongitude();
-                                break;
-                            case "latitude":
-                                value = obj.getLatitude();
-                                break;
-                            case "altitude":
-                                value = obj.getAltitude();
-                                break;
-                            case "altitudeMode":
-                                value = obj.getAltitudeMode();
-                                break;
-                            case "heading":
-                                value = obj.getHeading();
-                                break;
-                            case "tilt":
-                                value = obj.getTilt();
-                                break;
-                            case "range":
-                                if ( obj.getRange )
-                                    value = obj.getRange();
-                                break;
-                            case "cameraData":
-                                value = [ obj.getLongitude(), obj.getLatitude(), obj.getAltitude(),
-                                          obj.getAltitudeMode(), obj.getHeading(), obj.getTilt(),
-                                          obj.getRange ? obj.getRange() : undefined ];
-                                break;
-                        }
-                    }
-                    break;
-                default:
-                    switch ( propertyName ) { 
-                        case "controlClient":
-                            value = this.controlClient;
+            var cameraNode, lookAtNode;
+            for(var node in this.state.nodes) {
+                if(this.state.nodes[node].name == "camera") {
+                    cameraNode = this.state.nodes[node];
+                }
+                else if(this.state.nodes[node].name == "lookAt") {
+                    lookAtNode = this.state.nodes[node];
+                }
+            }
+            if((cameraNode && cameraNode.ID == nodeID) || (lookAtNode && lookAtNode.ID == nodeID)) {
+                earth = this.state.nodes[ this.kernel.find("", "//earth")[0] ];
+                if ( earth && earth.earthInst ) {
+                    ge = earth.earthInst;
+                    if ( lookAtNode && lookAtNode.ID == nodeID ) {
+                        obj = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                    } else {
+                        obj = ge.getView().copyAsCamera(ge.ALTITUDE_RELATIVE_TO_GROUND);
+                    }                        
+                    switch ( propertyName ) {
+                        case "longitude":
+                            value = obj.getLongitude();
+                            break;
+                        case "latitude":
+                            value = obj.getLatitude();
+                            break;
+                        case "altitude":
+                            value = obj.getAltitude();
+                            break;
+                        case "altitudeMode":
+                            value = obj.getAltitudeMode();
+                            break;
+                        case "heading":
+                            value = obj.getHeading();
+                            break;
+                        case "tilt":
+                            value = obj.getTilt();
+                            break;
+                        case "range":
+                            if ( obj.getRange )
+                                value = obj.getRange();
+                            break;
+                        case "cameraData":
+                            value = [ obj.getLongitude(), obj.getLatitude(), obj.getAltitude(),
+                                      obj.getAltitudeMode(), obj.getHeading(), obj.getTilt(),
+                                      obj.getRange ? obj.getRange() : undefined ];
                             break;
                     }
-                    break; 
-
+                }
             }
+            else {
+                switch ( propertyName ) { 
+                    case "controlClient":
+                        value = this.controlClient;
+                        break;
+                }
+            }
+
             propertyValue = value;
             return value;
         },
@@ -315,15 +324,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     function broadcastCameraData() {
         var node, ge;   
-        if ( this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ] ) {
-            node = this.state.nodes[ "http-vwf-example-com-node3-vwf-earth" ];
+        if ( this.kernel.find("", "//earth").length > 0 ) {
+            node = this.state.nodes[ this.kernel.find("", "//earth")[0] ];
             ge = node.earthInst;
             if ( ge ) {
                 var la = ge.getView().copyAsLookAt( ge.ALTITUDE_RELATIVE_TO_GROUND );
                 var cameraData = [ la.getLongitude(), la.getLatitude(), la.getAltitude(),
                                     la.getAltitudeMode(), la.getHeading(), la.getTilt(), la.getRange()  ];                          
 
-                this.kernel.setProperty( "http-vwf-example-com-node3-vwf-lookAt", "cameraData", cameraData );
+                this.kernel.setProperty( this.kernel.find("", "//lookAt")[0], "cameraData", cameraData );
             }
         }
     }
