@@ -40,7 +40,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
           childSource, childType, childURI, childName, callback /* ( ready ) */) {
 
-          var kernel = this.kernel.kernel.kernel;
+          var kernel = this.kernel;
           //this.logger.enable = true;
           //this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
           //                  childSource, childType, childURI, childName );

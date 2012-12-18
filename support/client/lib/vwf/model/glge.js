@@ -31,7 +31,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
  
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
-            this.state.kernel = this.kernel.kernel.kernel;
+            this.state.kernel = this.kernel;
 
             this.state.sceneRootID = this.kernel.find("", "/")[0];
 
@@ -48,7 +48,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 childSource, childType, childURI, childName, callback ) {
 
             var node, parentNode, glgeChild, prototypes;
-            var kernel = this.kernel.kernel.kernel;
+            var kernel = this.kernel;
 
             if ( childExtendsID === undefined /* || childName === undefined */ )
                 return;

@@ -139,7 +139,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             var childIDAttribute = $.encoder.encodeForHTMLAttribute("id", childID, true);
             var childIDAlpha = $.encoder.encodeForAlphaNumeric(childID);
             
-            var kernel = this.kernel.kernel;
+            var kernel = this.kernel;
             var self = this;
             var parent = this.nodes[ nodeID ];
             var node = this.nodes[ childID ] = {
@@ -643,7 +643,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype children
         $(topdownTemp).append("<div id='prototypeChildren'></div>");
-        var prototypeChildren = getChildren.call( this, this.kernel.kernel, node.extendsID ); 
+        var prototypeChildren = getChildren.call( this, this.kernel, node.extendsID ); 
         for ( var key in prototypeChildren)       
         {
             var child = prototypeChildren[key];
@@ -702,7 +702,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype properties
         $(topdownTemp).append("<div id='prototypeProperties'></div>");
-        var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
+        var prototypeProperties = getProperties.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeProperties ) {
             var prop = prototypeProperties[key].prop;
             if ( !displayedProperties[ prop.name ]  ) {
@@ -773,7 +773,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype methods
         $(topdownTemp).append("<div id='prototypeMethods'></div>");
-        var prototypeMethods = getMethods.call( this, this.kernel.kernel, node.extendsID );
+        var prototypeMethods = getMethods.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeMethods ) {
             var method = prototypeMethods[key];
             var prototypeMethodNameAlpha = $.encoder.encodeForAlphaNumeric(key);
@@ -822,7 +822,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype events
         $(topdownTemp).append("<div id='prototypeEvents'></div>");
-        var prototypeEvents = getEvents.call( this, this.kernel.kernel, node.extendsID );
+        var prototypeEvents = getEvents.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
             var prototypeEventNameAlpha = $.encoder.encodeForHTMLAttribute(key);
