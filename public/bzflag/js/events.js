@@ -214,7 +214,7 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
           case "playerJoined":
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + eventParameters[0] + " joined.</b><br/></span>" );
-            vwf_view.kernel.getProperty('index-vwf', 'scoreBoard');
+            vwf_view.kernel.getProperty(vwf_view.kernel.find("","/")[0], 'scoreBoard');
             $('#pop')[0].play();
             break;
           case "playerRespawned":
@@ -230,7 +230,7 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
             var name = eventParameters[0].substring(9);
             $('#serverContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
             $('#allContent').append( "<span style='color:#888888'><b>Player " + name + " destroyed.</b><br/></span>" );
-            vwf_view.kernel.getProperty('index-vwf', 'scoreBoard');
+            vwf_view.kernel.getProperty(vwf_view.kernel.find("","/")[0], 'scoreBoard');
             $('#boom')[0].play();
             break;
           case "playerScored": 

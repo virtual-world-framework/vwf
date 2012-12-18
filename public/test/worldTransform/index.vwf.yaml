@@ -29,7 +29,7 @@ children:
             extends: http://vwf.example.com/camera.vwf
             properties:
               translation: [ 0, 20, 10 ]
-              lookAt: "http-vwf-example-com-node3-vwf-centerCube"
+              lookAt: 
           pointerSphere: 
             extends: http://vwf.example.com/node3.vwf
             source: UnitSphereGreen.dae
@@ -54,6 +54,7 @@ scripts:
 - |
   this.initialize = function() {
     this.activeCamera = this.participantGroup.participant.navcamera.id;
+    this.participantGroup.participant.navcamera.lookAt = this.centerCube.id;
   }
   this.keyDown = function(params, pickInfo) { 
     var kd = this.input.keyInfo.keysDown;

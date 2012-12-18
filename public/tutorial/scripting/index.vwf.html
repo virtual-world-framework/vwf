@@ -19,7 +19,7 @@
 
       function changeDirection( newDirection )
       {
-        vwf_view.kernel.setProperty("index-vwf", "driveDirection", newDirection);
+        vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "driveDirection", newDirection);
       }
 
     </script>

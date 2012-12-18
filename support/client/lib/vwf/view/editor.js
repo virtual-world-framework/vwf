@@ -110,7 +110,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             $('#model_a').hide();
             $('#model_b').hide();
             
-            var canvas = document.getElementById("index-vwf");
+            var canvas = document.getElementById(vwf_view.kernel.find("", "/")[0]);
             if ( canvas ) {
                 $('#topdown_a').height(canvas.height);
                 $('#topdown_b').height(canvas.height);
@@ -139,7 +139,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             var childIDAttribute = $.encoder.encodeForHTMLAttribute("id", childID, true);
             var childIDAlpha = $.encoder.encodeForAlphaNumeric(childID);
             
-            var kernel = this.kernel.kernel;
+            var kernel = this.kernel;
             var self = this;
             var parent = this.nodes[ nodeID ];
             var node = this.nodes[ childID ] = {
@@ -160,7 +160,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 parent.children.push( node );
             }
 
-            if ( childID == "index-vwf" && childExtendsID && this.kernel.test( childExtendsID,
+            if ( childID == vwf_view.kernel.find("", "/")[0] && childExtendsID && this.kernel.test( childExtendsID,
                     "self::element(*,'http://vwf.example.com/scene.vwf')", childExtendsID ) ) {
                 this.scenes[ childID ] = node;
             }
@@ -325,7 +325,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
                 if( this.currentNodeID == '' )
                 {
-                    this.currentNodeID = "index-vwf";
+                    this.currentNodeID = vwf_view.kernel.find("", "/")[0];
                 }
 
                 drill.call(this, this.currentNodeID, undefined);
@@ -560,7 +560,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         
         drill.call(this, nodeID, drillBackID);
         
-        if(nodeID != "index-vwf") $(topdownName).hide('slide', {direction: 'left'}, 175); 
+        if(nodeID != vwf_view.kernel.find("", "/")[0]) $(topdownName).hide('slide', {direction: 'left'}, 175); 
         $(topdownTemp).show('slide', {direction: 'right'}, 175);    
         
         this.topdownName = topdownTemp;
@@ -616,7 +616,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         if(!drillBackID) drillBackID = node.parentID;
      
-        if(nodeID == "index-vwf") 
+        if(nodeID == vwf_view.kernel.find("", "/")[0]) 
         {
             $(topdownTemp).html("<div class='header'>index</div>");
         }
@@ -643,7 +643,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype children
         $(topdownTemp).append("<div id='prototypeChildren'></div>");
-        var prototypeChildren = getChildren.call( this, this.kernel.kernel, node.extendsID ); 
+        var prototypeChildren = getChildren.call( this, this.kernel, node.extendsID ); 
         for ( var key in prototypeChildren)       
         {
             var child = prototypeChildren[key];
@@ -702,7 +702,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype properties
         $(topdownTemp).append("<div id='prototypeProperties'></div>");
-        var prototypeProperties = getProperties.call( this, this.kernel.kernel, node.extendsID );
+        var prototypeProperties = getProperties.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeProperties ) {
             var prop = prototypeProperties[key].prop;
             if ( !displayedProperties[ prop.name ]  ) {
@@ -773,7 +773,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype methods
         $(topdownTemp).append("<div id='prototypeMethods'></div>");
-        var prototypeMethods = getMethods.call( this, this.kernel.kernel, node.extendsID );
+        var prototypeMethods = getMethods.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeMethods ) {
             var method = prototypeMethods[key];
             var prototypeMethodNameAlpha = $.encoder.encodeForAlphaNumeric(key);
@@ -822,7 +822,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Add prototype events
         $(topdownTemp).append("<div id='prototypeEvents'></div>");
-        var prototypeEvents = getEvents.call( this, this.kernel.kernel, node.extendsID );
+        var prototypeEvents = getEvents.call( this, this.kernel, node.extendsID );
         for ( var key in prototypeEvents ) {
             var nodeEvent = prototypeEvents[key];
             var prototypeEventNameAlpha = $.encoder.encodeForHTMLAttribute(key);

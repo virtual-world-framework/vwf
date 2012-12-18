@@ -51,7 +51,6 @@ For this navigation mode, we can add an additional child to the application, cal
 	---
 	extends: http://vwf.example.com/navscene.vwf
 	properties:
-	  activeCamera: "http-vwf-example-com-camera-vwf-camera"
 	  backgroundColor: [ 83, 157, 194 ]
 	  navmode: "orbit"
 	children:
@@ -72,7 +71,7 @@ For this navigation mode, we can add an additional child to the application, cal
 	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
-	    this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
+	    this.camera.lookAt = this.sceneCenter.id;
 	  }
 
 In this application, the WASD controls can be used for navigation; however, the camera will continue to focus on the sceneCenter point.
@@ -88,7 +87,6 @@ In the third stage, we'll add an additional child node for a predator vehicle ca
 	---
 	extends: http://vwf.example.com/navscene.vwf
 	properties:
-	  activeCamera: "http-vwf-example-com-camera-vwf-camera"
 	  backgroundColor: [ 83, 157, 194 ]
 	  navmode: "orbit"
 	children:
@@ -120,7 +118,7 @@ In the third stage, we'll add an additional child node for a predator vehicle ca
 	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
-	    this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
+	    this.camera.lookAt = this.sceneCenter.id;
 	  }
 
 Example: [Multiple Models and Behaviors](../../tutorial/02)
@@ -138,7 +136,6 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	---
 	extends: http://vwf.example.com/navscene.vwf
 	properties:
-	  activeCamera: "http-vwf-example-com-camera-vwf-camera"
 	  backgroundColor: [ 83, 157, 194 ]
 	  navmode: "orbit"
 	  mouseMode:
@@ -178,7 +175,7 @@ In the yaml file, we'll add a mouseMode property with a setter. This property wi
 	    this.camera.translation = [ 0, 20000, 10000 ];
 	    this.camera.far = 500000;
 	    this.camera.near = 2;
-	    this.camera.lookAt = "http-vwf-example-com-node3-vwf-sceneCenter";
+	    this.camera.lookAt = this.sceneCenter.id;
 	  }
 	  var pushpinIndex = 1;
 	  var pushpin = {
@@ -208,7 +205,7 @@ Finally, back in the HTML file, we'll need to add a few javascript functions to 
 
 	function setMode(mode) {
     	highlightMode(mode);
-        vwf_view.kernel.setProperty("index-vwf", "mouseMode", mode);
+        vwf_view.kernel.setProperty(vwf.find("", "/")[0], "mouseMode", mode);
   	}
 
     function highlightMode(mode) {
@@ -219,7 +216,7 @@ Finally, back in the HTML file, we'll need to add a few javascript functions to 
     }
 
     vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-      	if (nodeId == "index-vwf" ) {
+      	if (nodeId == vwf.find("", "/")[0] ) {
       		switch (propertyName) {
       		  case "mouseMode":
       		    highlightMode( propertyValue );
