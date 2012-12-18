@@ -114,7 +114,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                                     gg.earth.addEventListener( node.earthInst.getWindow(), 'mousedown', function() {
                                         view.controlClient = view.kernel.moniker();
-                                        view.kernel.setProperty( "http-vwf-example-com-googleEarth-vwf", "controlClient", view.kernel.moniker() );
+                                        view.kernel.setProperty( vwf_view.kernel.prototype(vwf_view.kernel.find("","/")), "controlClient", view.kernel.moniker() );
                                     });
 //                                    gg.earth.addEventListener( node.earthInst.getWindow(), 'mousemove', function() {
 //                                        //view.pointerDown = false;    
