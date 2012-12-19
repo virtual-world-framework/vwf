@@ -67,10 +67,12 @@
     <!-- directives from a connection to an outside engine that is not visible to all users- but -->
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
 
-    <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
-    <script type="text/javascript">var cesium = window.location.search.indexOf( "?cesium" ) == 0</script>
-    <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
-    <script type="text/javascript">connected && google.load( "earth", "1" )</script>
+    <script type="text/javascript">
+        var googleEarth = window.location.search.indexOf( "?google-earth" ) == 0;
+        var cesium = window.location.search.indexOf( "?cesium" ) == 0;
+    </script>
+    <script>googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
+    <script>googleEarth && google.load( "earth", "1" )</script>
 
     <script type="text/javascript">
 
@@ -95,7 +97,7 @@
             "vwf/view/glge",
             "vwf/view/touch",
             "vwf/utility",
-            connected && "vwf/view/googleEarth",
+            googleEarth && "vwf/view/googleEarth",
             cesium && "vwf/view/cesium"
 			
         ], function( ready ) {
@@ -143,8 +145,7 @@
 						{ "vwf/view/glge": "#vwf-root" },
                         "vwf/view/document",
                         "vwf/view/editor",
-                        "vwf/view/touch",
-						connected && "vwf/view/googleEarth",
+						googleEarth && "vwf/view/googleEarth",
 						cesium && "vwf/view/cesium"
                     ]
 
