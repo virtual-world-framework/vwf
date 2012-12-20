@@ -17,7 +17,6 @@ The VWF serves as a replicated computing platform for multi-user interactive 2D 
 Installation/Upgrade Instructions
 =====================
 
-
 Windows
 -
 Download the latest VWF Windows Build zip file from: 
