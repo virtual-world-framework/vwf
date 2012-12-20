@@ -18,6 +18,19 @@ Installation/Upgrade Instructions
 =====================
 
 
+Windows
+-
+Download the latest VWF Windows Build zip file from: 
+<pre><code>http://localhost:3000/web/downloads.html
+</code></pre>
+
+and then execute the _run.bat_ file provided at the root level of the extracted folder.
+
+Development Environment Setup and Manual Installation 
+-
+For additional information please visit: http://www.virtual.wf/web/docs/install.html
+
+
 Ubuntu/Debian
 -
 Perform the following shell command at a user shell prompt:
@@ -34,17 +47,6 @@ Perform the following shell command at a user shell prompt:
 
 This command may be re-executed to upgrade the installation to the latest version of VWF at any time.
 
-Windows
--
-Download the Virtual World Framework Zip from: 
-<pre><code>https://github.com/virtual-world-framework/vwf/downloads
-</code></pre>
-
-and then execute the _run.bat_ file provided at the root level of the extracted folder.
-
-Development Environment Setup and Manual Installation 
--
-For additional information please visit: http://www.virtual.wf/web/docs/install.html
 
 VWF Examples
 =====================
