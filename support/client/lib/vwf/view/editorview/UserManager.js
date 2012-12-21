@@ -199,11 +199,20 @@ function UserManager()
 			return;
 		}
 		
+		var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
+		var ray = _Editor.GetCameraCenterRay();
+		_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+		var pick = _Editor.findscene().CPUPick(campos,ray);
+		_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+		var dxy = pick.distance;
+		var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
+		
 		$('#Logon').dialog('close');
 		this.PlayerProto.properties.PlayerNumber = name;
 		this.PlayerProto.properties.owner = name;
         this.PlayerProto.properties.ownerClientID = vwf.moniker();
 		this.PlayerProto.properties.profile = profile;
+		this.PlayerProto.properties.translation = newintersectxy;
 		document[name + 'link'] = null;
 		this.PlayerProto.id = "player"+name;
 		document["PlayerNumber"] = name;
@@ -214,6 +223,8 @@ function UserManager()
 		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
 		
 		this.currentUsername = profile.Username;
+		if(vwf.getProperty('index-vwf','owner') == null)
+			vwf.setProperty('index-vwf','owner',this.currentUsername);
 		var parms = new Array();
 		parms.push(JSON.stringify({sender:'*System*',text:(document.PlayerNumber + " logging on")}));
 		vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);

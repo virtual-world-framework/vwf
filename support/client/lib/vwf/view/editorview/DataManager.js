@@ -295,7 +295,9 @@ function DataManager()
 		// {
 			// alert('Something must have gone wrong. A node is missing that you did not own. Save canceled.')
 			// return;
-		// }		
+		// }	
+		
+		nodes.push(vwf.getProperties('index-vwf'));
 		var UID  = this.getCurrentSession();
 		if(nodes.length > 0)
 		jQuery.ajax({
@@ -513,10 +515,13 @@ function DataManager()
 	this.loadScene  = function(num)
 	{
 		this.clearScene();
-		for(var i =0; i<this.rawdata.scenes[num].length; i++)
+		for(var i =0; i<this.rawdata.scenes[num].length-1; i++)
 		{
 			vwf_view.kernel.createChild('index-vwf',GUID(),this.rawdata.scenes[num][i],null,null);
 		}
+		var props = this.rawdata.scenes[num][this.rawdata.scenes[num].length-1]
+		for(var i in props){if(props[i] !== undefined && i!='EditorData')vwf.setProperty('index-vwf',i,props[i])};
+		
 		this.currentSceneName = name;
 		$('#SceneName').html(name);
 	}
@@ -548,6 +553,7 @@ function DataManager()
 			
 		    startHelp();
 		}
+		
 		this.loadedScene = data;
 		this.rawdata.scenes[UID] = data;
 		this.loadScene(UID);

@@ -21,6 +21,7 @@ methods:
   initTexture:
   getTexture:
   setupMaterial:
+  setTransparent:
 properties:
   materialDef:
     get: |
@@ -29,6 +30,9 @@ properties:
              
              this.materialDef = value;
              this.initTexture(value);
+  transparent:           
+    set: |
+             this.setTransparent(value); 
 scripts:
 - |  
     this.getTexture = function()
@@ -153,6 +157,11 @@ scripts:
              while(currentMaterial.layers.length > newMaterial.layers.length)
                 currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
     
+    }
+    this.setTransparent = function(v)
+    {
+        if(this.mesh &&  this.mesh)
+            this.mesh.setZtransparent(v);
     }
     this.GetMesh = function()
     {

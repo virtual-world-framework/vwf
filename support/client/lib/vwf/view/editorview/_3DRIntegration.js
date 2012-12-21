@@ -288,9 +288,12 @@ function _3DRIntegration()
 		if(_Editor)
 		{
 		var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-		var ray = _Editor.GetCameraCenterRay();
-		var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
-		var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
+			var ray = _Editor.GetCameraCenterRay();
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+			var dxy = pick.distance;
+			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
 		pos = newintersectxy;
 		}
 		

@@ -15,6 +15,256 @@
 extends: http://vwf.example.com/navscene.vwf
 properties:
   navmode: none
+  ambientColor:
+    set: |
+            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+            scene.setAmbientColor(value);
+    get: |
+            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+            return scene.getAmbientColor();
+  ambientR:
+    set: |
+            this.ambientColor = 'rgb('+value+','+this.ambientG+','+this.ambientB+')';
+  ambientG:
+    set: |
+            this.ambientColor = 'rgb('+this.ambientR+','+value+','+this.ambientB+')';
+  ambientB:
+    set: |
+            this.ambientColor = 'rgb('+this.ambientR+','+this.ambientG+','+value+')';            
+  fogColor:
+    set: |  
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           scene.setFogColor(value);
+    get: |
+            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+            return scene.getFogColor();
+  fogR:
+    set: |  
+           var color = this.fogColor;
+           color.r = value/255;
+           
+    get: |
+            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+            return scene.getFogColor().r * 255;
+  fogG:
+    set: |  
+           var color = this.fogColor;
+           color.g = value/255;
+           
+    get: |
+            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+            return scene.getFogColor().g* 255; 
+  fogB:
+    set: |  
+           var color = this.fogColor;
+           color.b = value/255;
+           
+    get: |
+            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+            return scene.getFogColor().b* 255;                
+  sunR:
+    set: |  
+           this.sun.getColor().r = value/255;
+    get: |
+            this.sun.getColor().r* 255;
+  sunG:
+    set: |  
+          this.sun.getColor().g = value/255;
+    get: |
+            this.sun.getColor().g* 255;
+  sunB:
+    set: |  
+           this.sun.getColor().b = value/255;
+    get: |
+            this.sun.getColor().b* 255;
+  sunX:
+    set: |  
+           this.sun.setRotX(value);
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           scene.updateMatrix();
+    get: |
+           this.sun.getRotX();
+  sunY:
+    set: |  
+           this.sun.setRotY(value);
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           scene.updateMatrix();
+    get: |
+           this.sun.getRotY();
+  sunZ:
+    set: |  
+           this.sun.setRotZ(value);
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           scene.updateMatrix();
+    get: |
+           this.sun.getRotZ();           
+  fogNear:
+    set: |  
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           scene.setFogNear(value);
+    get: |
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           return scene.getFogNear();
+  fogFar:
+    set: |  
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           scene.setFogFar(value);
+    get: |
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           return scene.getFogFar();
+  fogType:
+    set: |  
+           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
+           scene.setFogType(value);
+  materialDef:
+    set: |  
+           return this.setTexture(value);
+    get: |  
+            return this.getTexture();
+  skyTexture:
+    set: |
+            this.CreateSky(value);
+  owner:
+  type: scene
+  EditorData:
+    fogNear:
+      displayname: fogNear
+      property: fogNear
+      type: slider
+      min: 0
+      max: 2000
+      step: 1
+    fogFar:
+      displayname: fogFar
+      property: fogFar
+      type: slider
+      min: 0
+      max: 2000
+      step: 1
+    fogType:
+      displayname: fogType
+      property: fogType
+      type: choice
+      labels: 
+        - None
+        - Linear
+        - Quad
+        - SkyLinear
+        - SkyQuad
+      values:
+        - 1
+        - 2
+        - 3  
+        - 4  
+        - 5  
+    fogColorR:
+      displayname: fogColorR
+      property: fogR
+      type: slider
+      min: 0
+      max: 256
+      step: 1
+    fogColorG:
+      displayname: fogColorG
+      property: fogG
+      type: slider
+      min: 0
+      max: 256
+      step: 1 
+    fogColorB:
+      displayname: fogColorB
+      property: fogB
+      type: slider
+      min: 0
+      max: 256
+      step: 1
+    ambientR:
+      displayname: ambientR
+      property: ambientR
+      type: slider
+      min: 0
+      max: 256
+      step: 1  
+    ambientG:
+      displayname: ambientG
+      property: ambientG
+      type: slider
+      min: 0
+      max: 256
+      step: 1  
+    ambientB:
+      displayname: ambientB
+      property: ambientB
+      type: slider
+      min: 0
+      max: 256
+      step: 1        
+    sunColorB:
+      displayname: sunColorB
+      property: sunB
+      type: slider
+      min: 0
+      max: 256
+      step: 1
+    sunColorR:
+      displayname: sunColorR
+      property: sunR
+      type: slider
+      min: 0
+      max: 256
+      step: 1
+    sunColorG:
+      displayname: sunColorG
+      property: sunG
+      type: slider
+      min: 0
+      max: 256
+      step: 1
+    sunRotX:
+      displayname: sunRotX
+      property: sunX
+      type: slider
+      min: 0
+      max: 3.14
+      step: .1
+    sunRotY:
+      displayname: sunRotY
+      property: sunY
+      type: slider
+      min: 0
+      max: 3.14
+      step: .1   
+    sunRotZ:
+      displayname: sunRotZ
+      property: sunZ
+      type: slider
+      min: 0
+      max: 3.14
+      step: .1
+    skyTexture:
+      displayname: skyTexture
+      property: skyTexture
+      type: choice
+      labels: 
+        - CloudyNoon
+        - Morning
+        - Evening
+        - Morning2
+        - Storm
+        - ThunderStorm
+        - Night1
+        - Night2
+        - Bright
+      values:
+        - cloudy_noon
+        - early_morning
+        - evening  
+        - morning  
+        - stormy
+        - StormClouds   
+        - night1
+        - night2
+        - bright
 events:
   keyDown:
   keyUp:
@@ -41,8 +291,8 @@ scripts:
        this.activeCameraComp = false;
        this.loaded = false;
        this.zoom = 4;
-       this.x_rot = .1;
-       this.y_rot = .2;
+       this.x_rot = 0.15687500000000001;
+       this.y_rot = 0.5839999999999994;
        //this.updateCamera();
        this.players = [];
        this.rel_x = 0;
@@ -64,42 +314,39 @@ scripts:
        this.updateCallbacks = [];
        this.OwnedPrims = [];
       
-       findscene().camera.setFovY(60);
-       var ground = this.CreatePlane(500,500);
+       findscene().camera.setFovY(70);
+       var ground = this.CreatePlane(250,250);
        
        var grass = new GLGE.Material();
        var grassTex = new GLGE.MaterialLayer();
-       var grassTex2 = new GLGE.MaterialLayer();
        var grasstexsrc = new GLGE.Texture();
-       grasstexsrc.setSrc('textures/dirt.jpg');
+       grasstexsrc.setSrc('textures/grid.jpg');
        grassTex.setTexture(grasstexsrc);
        grassTex.setMapinput(GLGE.UV1);
        grassTex.setMapto(GLGE.M_COLOR);
-       
-       grassTex2.setTexture(grasstexsrc);
-       grassTex2.setMapinput(GLGE.UV1);
-       grassTex2.setMapto(GLGE.M_COLOR + GLGE.M_SPECULAR);
-       grassTex2.setScaleX(10);
-       grassTex2.setScaleY(10);
-       grassTex2.setAlpha(.5);
+       grassTex.setScaleX(10);
+       grassTex.setScaleY(10);
        grass.addMaterialLayer(grassTex);
-       grass.addMaterialLayer(grassTex2);
        grass.addTexture(grasstexsrc);
        ground.setMaterial(grass);
-       grass.setSpecular(.6);
+       
+       this.groundplane = ground;
+       
+       grass.setSpecular(.0);
        grass.setShininess(15);
        var l = new GLGE.Light();
+       this.sun = l;
        l.setType(2);
        l.setColor('rgb(200,200,200)');
        l.setRotX(1);
        findscene().addChild(l);
        findscene().setAmbientColor('rgb(200,200,200)');
-       this.CreateSky();
+       this.CreateSky('white');
        
        findscene().setFogType(GLGE.FOG_QUADRATIC);
-       findscene().setFogFar(60);
-       findscene().setFogNear(10);
-       findscene().setFogColor('#dcc6af');
+       findscene().setFogFar(360);
+       findscene().setFogNear(100);
+       findscene().setFogColor('#FFFFFF');
        this.updateCamera();
     }
     this.keyDown = function(e)
@@ -125,14 +372,13 @@ scripts:
         planeobj.setMesh(planemesh);
         planemesh.setPositions([-hw,-hh,-.001, hw,-hh,-.001, hw,hh,-.001, -hw,hh,-.001]);
         planemesh.setTangents([-hw,-hh,0, hw,-hh,0, hw,hh,0, -hw,hh,0]);
-        planemesh.setVertexColors([-hw,-hh,0,1, hw,-hh,0,1, hw,hh,0,1, -hw,hh,0,1]);
         planemesh.setFaces([0,1,2,2,3,0]);
         planemesh.setUV([0,0,10,0,10,10,0,10]);
         findscene().addChild(planeobj);
         planeobj.InvisibleToCPUPick = false;
         return planeobj;
     }
-    this.CreateSky = function()
+    this.CreateSky = function(sky_name)
     {
         var filter = new GLGE.Filter2d;
         findscene().setSkyFilter(filter);
@@ -141,12 +387,12 @@ scripts:
         filter.setFilterType(GLGE.FILTER_SKY);
         var tex = new GLGE.TextureCube();
         
-        tex.setSrcNegX('skys/cloudy_noon_BK.jpg');
-        tex.setSrcNegY('skys/cloudy_noon_LF.jpg');
-        tex.setSrcNegZ('skys/cloudy_noon_DN.jpg');
-        tex.setSrcPosX('skys/cloudy_noon_FR.jpg');
-        tex.setSrcPosY('skys/cloudy_noon_RT.jpg');
-        tex.setSrcPosZ('skys/cloudy_noon_UP.jpg');
+        tex.setSrcNegX('skys/'+sky_name+'_BK.jpg');
+        tex.setSrcNegY('skys/'+sky_name+'_LF.jpg');
+        tex.setSrcNegZ('skys/'+sky_name+'_DN.jpg');
+        tex.setSrcPosX('skys/'+sky_name+'_FR.jpg');
+        tex.setSrcPosY('skys/'+sky_name+'_RT.jpg');
+        tex.setSrcPosZ('skys/'+sky_name+'_UP.jpg');
         
         filter.addTexture(tex);
         
@@ -366,7 +612,7 @@ scripts:
       this.rel_x = this.last_x - parms.clientX/window.screen.width;
       this.rel_y = this.last_y - parms.clientY/window.screen.height;
       
-      if((this.leftdown==true && this.middledown==false))
+      if((this.rightdown==true && this.middledown==false))
       {
       
         this.x_rot += this.rel_x;
@@ -625,6 +871,123 @@ scripts:
             
         }
         
+    }
+    
+    this.getTexture = function()
+    {
+            if(this.materialDef) return this.materialDef;    
+           
+            var newMaterial = {};
+            var currentMaterial = this.groundplane.getMaterial();
+            if(!currentMaterial)
+                return;
+            newMaterial.shininess = currentMaterial.getShininess();
+            newMaterial.alpha = currentMaterial.getAlpha();
+            newMaterial.ambient = currentMaterial.getAmbient();
+            newMaterial.color = currentMaterial.getColor();
+            newMaterial.emit = currentMaterial.getEmit();
+            newMaterial.reflect = currentMaterial.getReflectivity();
+            newMaterial.shadeless = currentMaterial.getShadeless();
+            newMaterial.shadow = currentMaterial.getShadow();
+            
+            newMaterial.specularColor = currentMaterial.getSpecularColor();
+            newMaterial.specularLevel = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
+            newMaterial.specularColor.r = newMaterial.specularColor.r/newMaterial.specularLevel || 0.01;
+            newMaterial.specularColor.g = newMaterial.specularColor.g/newMaterial.specularLevel || 0.01;
+            newMaterial.specularColor.b = newMaterial.specularColor.b/newMaterial.specularLevel || 0.01;
+            newMaterial.layers = [];
+            for(var i = 0; i<currentMaterial.layers.length;i++)
+            {
+                var newLayer = {};
+                newMaterial.layers.push(newLayer);
+                newLayer.src = currentMaterial.layers[i].getTexture().getSrc();
+                newLayer.mapTo = currentMaterial.layers[i].getMapto();
+                newLayer.blendMode = currentMaterial.layers[i].getBlendMode();
+                newLayer.alpha = currentMaterial.layers[i].getAlpha();
+                
+                newLayer.scalex = currentMaterial.layers[i].getScaleX();
+                newLayer.scaley = currentMaterial.layers[i].getScaleY();
+                newLayer.offsetx = currentMaterial.layers[i].getOffsetX();
+                newLayer.offsety = currentMaterial.layers[i].getOffsetY();
+                newLayer.rot = currentMaterial.layers[i].getRotZ();
+                newLayer.mapInput = currentMaterial.layers[i].getMapinput();
+            }            
+            return newMaterial;
+    
+    }
+    this.setTexture = function(value)
+    {
+             
+             var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
+             if(!newMaterial) return;
+             var currentMaterial = this.groundplane.getMaterial();
+             if(!currentMaterial) return;
+             currentMaterial.setShininess(newMaterial.shininess);
+             currentMaterial.setAlpha(newMaterial.alpha);
+             currentMaterial.setAmbient(newMaterial.ambient);
+             currentMaterial.setColor(newMaterial.color);
+             currentMaterial.setEmit(newMaterial.emit);
+             currentMaterial.setReflectivity(newMaterial.reflect);
+             currentMaterial.setShadeless(newMaterial.shadeless);
+             currentMaterial.setShadow(newMaterial.shadow);
+            
+             
+             
+             
+             newMaterial.specularColor.r = newMaterial.specularColor.r || 0.01;
+             newMaterial.specularColor.g = newMaterial.specularColor.g || 0.01;
+             newMaterial.specularColor.b = newMaterial.specularColor.b || 0.01;
+             
+             var norm = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
+             newMaterial.specularColor.r /= norm;
+             newMaterial.specularColor.g /= norm;
+             newMaterial.specularColor.b /= norm;
+             
+             newMaterial.specularColor.r *= newMaterial.specularLevel;
+             newMaterial.specularColor.g *= newMaterial.specularLevel;
+             newMaterial.specularColor.b *= newMaterial.specularLevel;
+             currentMaterial.setSpecularColor(newMaterial.specularColor);
+             for(var i=0 ; i < newMaterial.layers.length; i++)
+             {
+                var layer = currentMaterial.layers[i];
+                var newLayer = newMaterial.layers[i];
+                if(!layer)
+                {
+                    layer = new GLGE.MaterialLayer();
+                    layer.setMapinput(GLGE.UV1);
+                    currentMaterial.addMaterialLayer(layer);
+                }
+                
+                layer.setMapto(newLayer.mapTo);
+                layer.setBlendMode(newLayer.blendMode);
+                layer.setAlpha(newLayer.alpha);
+                
+                layer.setScaleX(newLayer.scalex);
+                layer.setScaleY(newLayer.scaley);
+                layer.setOffsetX(newLayer.offsetx);
+                layer.setOffsetY(newLayer.offsety);
+                layer.setRotZ(newLayer.rot);
+                layer.setMapinput(newLayer.mapInput );
+                
+                var texture = layer.getTexture();
+                if(texture && texture.getSrc() != newMaterial.layers[i].src)
+                {
+                    //currentMaterial.removeTexture(texture);
+                    layer.setTexture(null);
+                    texture = null;
+                }
+                if(!texture)
+                {
+                    texture = new GLGE.Texture();
+                    layer.setTexture(texture);
+                    currentMaterial.addTexture(texture);
+                    texture.setSrc(newMaterial.layers[i].src);
+                }
+                
+             }
+             while(currentMaterial.layers.length > newMaterial.layers.length)
+                currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
+    
     }
     
     

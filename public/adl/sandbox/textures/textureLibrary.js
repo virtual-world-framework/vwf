@@ -42,5 +42,17 @@ _TextureList = [
 	{
 		'texture': 'textures/waternormal.jpg' ,
 		'thumb': 'textures/waternormal.jpg'
+	},
+	{
+		'texture': 'textures/ocean.jpg' ,
+		'thumb': 'textures/ocean.jpg'
+	},
+	{
+		'texture': 'textures/tree.png' ,
+		'thumb': 'textures/tree.png'
+	},
+	{
+		'texture': 'textures/tree2.png' ,
+		'thumb': 'textures/tree2.png'
 	}
 ]

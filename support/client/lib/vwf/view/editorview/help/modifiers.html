@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
+<!-- Secretary of Defense (Personnel & Readiness).                                               -->
+<!--                                                                                             -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
+<!-- except in compliance with the License. You may obtain a copy of the License at              -->
+<!--                                                                                             -->
+<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
+<!--                                                                                             -->
+<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
+<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
+<!-- either express or implied. See the License for the specific language governing permissions  -->
+<!-- and limitations under the License.                                                          -->
+
+<html>
+  <head>
+	<style type="text/css">
+	.background
+	{
+		background: -webkit-gradient(linear, left top, right top, from(rgb(30, 63, 104)), color-stop(0.2, rgb(255, 255, 255)), color-stop(0.5, rgb(255, 255, 255)), color-stop(0.8, rgb(255, 255, 255)), to(rgb(30, 63, 104)));
+	}
+	.center
+	{
+		width: 66%;
+		margin-left: auto;
+		margin-right: auto;
+		background: white;
+		border: 2px solid black;
+		padding: 18px;
+		box-shadow: 10px 10px 10px black, 10px 10px 50px gray inset;
+	}
+	.h1
+	{
+		font-size: 2.6em;
+		font-family: sans-serif;
+		font-weight: bold;
+		margin-bottom: 1em;
+		border-bottom: 1px solid black;
+	}
+	.h2
+	{
+		font-size: 1.6em;
+		font-family: sans-serif;
+		font-weight: bold;
+		display: inline;
+	}
+	.icon
+	{
+		height: 1.6em;
+	}
+	.text
+	{
+		font-size: 1.2em;
+		margin-top: 1em;
+		margin-bottom: 1em;
+	}
+
+	</style>
+
+  </head>
+  <body class='background'>
+	<div class="center">
+    <div class="h1">Modifiers</div>
+	<div class="text">Modifiers are settings that can be added to an object to edit that object in some way. Most of the existing modifiers edit the geometry of the node, but it’s possible for a modifier to change any property. Modifiers that are applied to an object are listed in the “Object Properties” window, where you can delete them or modify their properties. When you add a new modifier to an object, it is applied to the result of any previous modifiers. Thus, you can bend an object after twisting it, to create something like a mobius strip. You must be the owner of objects that you wish to modify. To create add a modifier to an object, select the object, then choose ‘Create->Modifier->(type)’ from the main menu. You must have an object selected before creating a modifier.
+</div>	
+	
+	<div class="h2">Bend (Create-Modifiers->Bend)</div>
+	<div class="text">The Bend Modifier curves an object around an axis. The amount setting describes the total bend angle. A higher number will produce a tighter angle. A negative amound will bend the object in the opposite direction. Choosing an axis can be tricky. The major axis is easier to visualize – this is the axis the object will bend around. The minor axis is the axis that the shape will bend away from.  It might take some guessing to get the exact effect you desire. A good way to get a feel is to create a box that is tall, with the maximum height segments. Bend this with a major axis of X and a minor of Y. Now, try reversing these settings. Note that the major and minor axis should never be the same.</div>	
+	
+	<div class="h2">Twist(Create-Modifiers->Twist)</div>
+	<div class="text">A cube shape. The height, width, and length are editable, and you may specify the number of segments in each direction. When selecting ‘Pivot from Base’, the cube will move up, such that its center is at the negative extent, rather than the geometric middle.</div>	
+	
+	<div class="h2">Offset (Create-Modifiers->Offset)</div>
+	<div class="text">The offset modifier moves the geometry away from its center point. This is useful to make objects that rotate around a point other than their default center, like a door. You can offset the object in any axis. Note that the axis is always in local space. The offset can be added before a bend or twist for some very interesting effects!</div>	
+	
+	<div class="h2">Taper (Create-Modifiers->Taper)</div>
+	<div class="text">The taper modifier simply scales an object along the Z axis. A taper of one will make the object have a point at the maximum Z, and a taper of -1 will move the point to the minimum.</div>	
+	
+	<div class="h2">Stretch (Create-Modifiers->Stretch)</div>
+	<div class="text">The stretch modifier will scale an object in one axis, while making it thinner in the others. Image this effect like pulling taffy – as the two ends get farther apart, the center of the taffy gets thinner. The effect axis selects the direction to pull. Stretch Amount is how far to pull the ends, and Bulge amount is how much the object should thin given the stretch amount.</div>	
+	
+	<div class="h2">Noise (Create-Modifiers->Noise)</div>
+	<div class="text">The noise modifier is used to randomly offset each vertex in a model. It can be used to turn a plane into a terrain, or a sphere into a rock. You can specify which axis to deform with the ‘Effect X’, ‘Effect Y’, or ‘Effect Z’ buttons. Increasing the ‘iterations’ will layer additional smaller noise on the first, basically controlling the smoothness of the noise. The ‘noise scale’ slider can be used to control the size of the noise features, and the random seed can be changed to generate new unique noise.</div>	
+	
+	<div class="h2">UV map (Create-Modifiers->UV map)</div>
+	<div class="text">The UV map modifier can edit the way a texture applies to an object. For now, you can only specify the x and y scale, and the rotation. The ‘offset’ setting will slide the texture over the surface. Note than many similar properties can be controlled per material as well.</div>	
+	
+	</div>
+	</body>
+</html>

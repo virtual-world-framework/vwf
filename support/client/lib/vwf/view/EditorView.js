@@ -152,7 +152,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		});
 		$('#vwf-root').keydown(function(e){
 			
-			console.log('here');
+			
 			_Editor.keydown(e)
 			if(e.keyCode == 32 && e.shiftKey)
 				focusSelected();
@@ -241,6 +241,9 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		
 		$('#MenuSetParent').click(function(e){
 			_Editor.SetParent();
+		});
+		$('#MenuSelectScene').click(function(e){
+			_Editor.SelectScene();
 		});
 		$('#MenuRemoveParent').click(function(e){
 			_Editor.RemoveParent();
@@ -430,10 +433,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		
 		$('#MenuCreateBox').click(function(e){
 			
-			
 			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 			var ray = _Editor.GetCameraCenterRay();
-			var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
 			_Editor.CreatePrim('box',newintersectxy,[1,1,1],'checker.jpg',document.PlayerNumber,'');
 			
@@ -443,7 +446,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 			var ray = _Editor.GetCameraCenterRay();
-			var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
 			_Editor.CreatePrim('sphere',newintersectxy,[.5,1,1],'checker.jpg',document.PlayerNumber,'');
 			
@@ -452,7 +458,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 			var ray = _Editor.GetCameraCenterRay();
-			var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
 			_Editor.CreatePrim('plane',newintersectxy,[1,1,5],'checker.jpg',document.PlayerNumber,'');
 			
@@ -461,7 +470,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 			var ray = _Editor.GetCameraCenterRay();
-			var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
 			_Editor.CreatePrim('cylinder',newintersectxy,[1,.5,.5],'checker.jpg',document.PlayerNumber,'');
 			
@@ -470,7 +482,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 			var ray = _Editor.GetCameraCenterRay();
-			var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
 			_Editor.CreatePrim('cone',newintersectxy,[.500,1,.5],'checker.jpg',document.PlayerNumber,'');
 			
@@ -479,7 +494,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 			var ray = _Editor.GetCameraCenterRay();
-			var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
 			_Editor.CreatePrim('pyramid',newintersectxy,[1,1,1],'checker.jpg',document.PlayerNumber,'');
 			

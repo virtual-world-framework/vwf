@@ -24,6 +24,7 @@ methods:
   backupMesh:
   restoreMesh:
   initialize:
+  setTransparent:
 properties:
   materialDef:
     get: |
@@ -32,6 +33,10 @@ properties:
              
              this.materialDef = value;
              this.initTexture(value);
+  transparent:
+    set: |
+            
+             this.setTransparent(value);
 scripts: 
 - |  
     this.getTexture = function()
@@ -180,6 +185,23 @@ scripts:
             }
         }
         return null;
+    }
+    this.setTransparentR = function(node, v)
+    {
+     
+        if(node.setZtransparent)
+           node.setZtransparent(v);
+        if(node.children)
+        {
+            for(var i = 0; i < node.children.length; i++)
+            {
+                setTransparentR(node.children[i],v);
+            }
+        }
+    }
+    this.setTransparent = function(v)
+    {
+        this.setTransparentR(this.GetMesh(),v);
     }
     this.GetMesh = function()
     {

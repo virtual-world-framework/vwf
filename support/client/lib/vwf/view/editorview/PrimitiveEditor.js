@@ -54,6 +54,7 @@ function PrimitiveEditor()
 							"<input type='text' class='TransformEditorInput' id='ScaleY'/>" +
 							"<input type='text' class='TransformEditorInput' id='ScaleZ'/>" +
 							"</div>"+
+							"<div id='otherprops'> <input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isTransparent'>transparent</input></div>"+
 						'</div>'+					
 					'</div>'+	
 					"</div>" 
@@ -65,6 +66,7 @@ function PrimitiveEditor()
 			_PrimitiveEditor.hide();
 			
 		});
+		$('#isTransparent').change(function(e){_PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id,'transparent',this.checked)});
 		$('#PrimitiveEditor').css('border-bottom','5px solid #444444')
 		$('#PrimitiveEditor').css('border-left','2px solid #444444')
 		//$('#PrimitiveEditor').resizable({
@@ -133,10 +135,12 @@ function PrimitiveEditor()
 		
 			if(node)
 			{
+				
 				$( "#accordion" ).accordion('destroy');
 				$( "#accordion" ).children('.modifiersection').remove();
 				//update to ensure freshness
 				node = vwf.getNode(node.id);
+				node.properties = vwf.getProperties(node.id);
 				if(!node.properties)
 					return;
 				var type = vwf.getProperty(node.id,'type');
