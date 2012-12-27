@@ -320,12 +320,12 @@ scripts:
        var grass = new GLGE.Material();
        var grassTex = new GLGE.MaterialLayer();
        var grasstexsrc = new GLGE.Texture();
-       grasstexsrc.setSrc('textures/grid.jpg');
+       grasstexsrc.setSrc('textures/grid2.gif');
        grassTex.setTexture(grasstexsrc);
        grassTex.setMapinput(GLGE.UV1);
        grassTex.setMapto(GLGE.M_COLOR);
-       grassTex.setScaleX(10);
-       grassTex.setScaleY(10);
+       grassTex.setScaleX(1);
+       grassTex.setScaleY(1);
        grass.addMaterialLayer(grassTex);
        grass.addTexture(grasstexsrc);
        ground.setMaterial(grass);
@@ -373,7 +373,7 @@ scripts:
         planemesh.setPositions([-hw,-hh,-.001, hw,-hh,-.001, hw,hh,-.001, -hw,hh,-.001]);
         planemesh.setTangents([-hw,-hh,0, hw,-hh,0, hw,hh,0, -hw,hh,0]);
         planemesh.setFaces([0,1,2,2,3,0]);
-        planemesh.setUV([0,0,10,0,10,10,0,10]);
+        planemesh.setUV([0,0,250/4 ,0,250/4,250/4,0,250/4]);
         findscene().addChild(planeobj);
         planeobj.InvisibleToCPUPick = false;
         return planeobj;

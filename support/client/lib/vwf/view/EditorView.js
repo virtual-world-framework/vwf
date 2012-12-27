@@ -88,13 +88,9 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         },
 
         satProperty: function (nodeID, propertyName, propertyValue) {
-			if(window._Editor && _Editor.SelectedVWFID == nodeID && propertyName == 'transform')
+			if(window._Editor && _Editor.isSelected(nodeID) && _Editor.getSelectionCount() == 1 && propertyName == 'transform')
 			{
-				_Editor.updateGizmoLocation();
-				_Editor.updateGizmoOrientation(false)
-				_Editor.updateGizmoLocation();
-				_Editor.updateBounds();
-				
+				_Editor.updateBoundsAndGizmoLoc();
 			}
         },
         
@@ -156,6 +152,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			_Editor.keydown(e)
 			if(e.keyCode == 32 && e.shiftKey)
 				focusSelected();
+		});
+		$('#vwf-root').keyup(function(e){
+
+			_Editor.keyup(e)
+			
 		});
 		$('#vwf-root').css('overflow','hidden');
 		$(document.body).css('font-size','10px');
@@ -285,10 +286,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			_ModelLibrary.show();
 		});
 		$('#MenuSnapLarge').click(function(e){
-			_Editor.SetSnaps(.5,15 * 0.0174532925,5);
+			_Editor.SetSnaps(.60,15 * 0.0174532925,5);
 		});
 		$('#MenuSnapMedium').click(function(e){
-			_Editor.SetSnaps(.25,5 * 0.0174532925,2);
+			_Editor.SetSnaps(.20,5 * 0.0174532925,2);
 		});
 		$('#MenuSnapSmall').click(function(e){
 			_Editor.SetSnaps(.1,1 * 0.0174532925,.5);
