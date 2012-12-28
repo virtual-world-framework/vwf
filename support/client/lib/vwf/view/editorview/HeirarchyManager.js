@@ -116,7 +116,8 @@ function hierarchyManager()
 					source: childname,
 					properties:{
 					  owner:document.PlayerNumber,
-					  type:'3DR Object'
+					  type:'3DR Object',
+					  DisplayName:childname
 					  }
                     };
 			
@@ -246,7 +247,11 @@ function hierarchyManager()
 			var thisid = 'VWFChild' + ToSafeID(i.name) + i.depth;
 			$('#VWFChildren').append('<div class="hierarchyItem" style="font-weight:normal;white-space: nowrap;text-overflow: ellipsis;height:1.3em;overflow:hidden;background:#FFFFF8;padding-left:0px;" id="'+thisid+'" />');
 			
-			$('#' + thisid).html(i.name);
+			var dispName = vwf.getProperty(i.name,'DisplayName');
+			if(dispName)
+				$('#' + thisid).html(dispName);
+			else
+				$('#' + thisid).html(i.name);	
 			for(var t=0; t<i.depth;t++)
 				$('#' + thisid).prepend('<div style="padding-bottom: 5px;border-left: 1px solid lightgray;margin-right: 10px;margin-left: 0px;display: inline;height: 1.3em;white-space: nowrap;" />');
 				

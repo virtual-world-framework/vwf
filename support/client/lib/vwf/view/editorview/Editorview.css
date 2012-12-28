@@ -63,6 +63,16 @@
 		padding-left: 6px;
 		color: lightblue;
 	}
+	.ContextMenuAction
+	{
+		background: #404040;
+		padding-left:5px;
+		color: lightgreen;
+	}
+	.ContextMenuAction:hover
+	{
+	background: #4040A0;
+	}
 	.ContextMenuItem
 	{
 		background: #404040;

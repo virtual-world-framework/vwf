@@ -452,6 +452,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }          
 
         canvas.onmousedown = function( e ) {
+		    
+			if(window._Editor && (window._Editor.GetSelectMode() == 'Pick' || window._Editor.GetSelectMode() == 'TempPick') && e.button == 0)
+			{
+				return;
+			}
+			if(e.button == 2) return;
            switch( e.button ) {
                 case 2: 
                     mouseRightDown = true;
@@ -471,6 +477,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         canvas.onmouseup = function( e ) {
+		if(window._Editor && (window._Editor.GetSelectMode() == 'Pick' || window._Editor.GetSelectMode() == 'TempPick') && e.button == 0)
+		{
+			return;
+		}
+		if(e.button == 2) return;
             var ctrlDown = e.ctrlKey;
             var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;

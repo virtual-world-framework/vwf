@@ -129,8 +129,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#vwf-root').mousedown(function(e){_Editor.mousedown(e)});
 		
 		$('#vwf-root').mouseup(function(e){_Editor.mouseup(e)});
+		$('#vwf-root').click(function(e){_Editor.click(e)});
 		$('#vwf-root').mouseleave(function(e){e.mouseleave = true; _Editor.mouseup(e)});
 		$('#vwf-root').mousemove(function(e){_Editor.mousemove(e)});
+		$('#index-vwf').attr('tabindex',0);
 		$('#index-vwf').on('touchstart',function(e){
 			e.preventDefault();
 			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
@@ -148,10 +150,14 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		});
 		$('#vwf-root').keydown(function(e){
 			
-			
+			try{
 			_Editor.keydown(e)
 			if(e.keyCode == 32 && e.shiftKey)
 				focusSelected();
+			}catch(e)
+			{
+				
+			}
 		});
 		$('#vwf-root').keyup(function(e){
 

@@ -53,7 +53,10 @@ function InventoryManager()
 		
 			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
 			var ray = _Editor.GetCameraCenterRay();
-			var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
 			
 			t.properties.transform[12] = newintersectxy[0];
@@ -62,6 +65,7 @@ function InventoryManager()
 			t.properties.translation[0] = newintersectxy[0];
 			t.properties.translation[1] = newintersectxy[1];
 			t.properties.translation[2] = newintersectxy[2];
+			t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
 			
 			t = _DataManager.getCleanNodePrototype(t);
 			_InventoryManager.setOwner(t,_UserManager.GetCurrentUserName());

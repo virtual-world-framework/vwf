@@ -171,6 +171,7 @@ function ScriptEditor()
 		
 		var name=$('#newEventName').val();
 		name = name.substring(0,name.indexOf('('));
+		name = $.trim(name);
 		_ScriptEditor.setSelectedEvent(name,'function '+$('#newEventName').val()+'{\n\n console.log("got here"); \n\n}');
 		$('#ScriptEditorCreateEvent').dialog('close');
 		},
@@ -270,7 +271,7 @@ function ScriptEditor()
 		
 		
 		
-		if(!_ScriptEditor.checkMethodSyntax())
+		if(!_ScriptEditor.checkEventSyntax())
 		{
 			return
 		}
@@ -530,10 +531,17 @@ function ScriptEditor()
 			return false;
 		}
 		
-		var methodname = _ScriptEditor.selectedMethod;
+		var methodname = $.trim(_ScriptEditor.selectedMethod);
 		var rawtext = _ScriptEditor.methodEditor.getValue();
 		var params = rawtext.substring(rawtext.indexOf('(')+1,	rawtext.indexOf(')'));
 		params = params.split(',');
+		var cleanParams = [];
+		for(var i=0; i<params.length;i++)
+		{
+			params[i] = $.trim(params[i]);
+			if(params[i] != '' && params[i] != null && params[i]!== undefined)
+			cleanParams.push(params[i]);
+		}
 		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.lastIndexOf('}'));
 		body = $.trim(body);
 		
@@ -543,7 +551,7 @@ function ScriptEditor()
 		{
 			vwf_view.kernel.deleteMethod(_ScriptEditor.currentNode.id,methodname);
 		}
-		vwf_view.kernel.createMethod(_ScriptEditor.currentNode.id,methodname,null,body);
+		vwf_view.kernel.createMethod(_ScriptEditor.currentNode.id,methodname,cleanParams,body);
 		window.setTimeout(_ScriptEditor.PostSaveMethod,500);
 		return true;
 	}
@@ -566,17 +574,28 @@ function ScriptEditor()
 			//show dialog;
 			return false;
 		}
+		
 		var eventname = _ScriptEditor.selectedEvent;
+		eventname = $.trim(eventname);
 		var rawtext = _ScriptEditor.eventEditor.getValue();
 		var params = rawtext.substring(rawtext.indexOf('(')+1,	rawtext.indexOf(')'));
 		params = params.split(',');
+		var cleanParams = [];
+		for(var i=0; i<params.length;i++)
+		{
+			params[i] = $.trim(params[i]);
+			if(params[i] != '' && params[i] != null && params[i]!== undefined)
+			cleanParams.push(params[i]);
+		}
+		
+		
 		var body = rawtext.substring(rawtext.indexOf('{')+1,	rawtext.lastIndexOf('}'));
 		body = $.trim(body);
 		if(_ScriptEditor.currentNode.events && _ScriptEditor.currentNode.events[eventname])
 		{
 			vwf_view.kernel.deleteEvent(_ScriptEditor.currentNode.id,eventname);
 		}
-		vwf_view.kernel.createEvent(_ScriptEditor.currentNode.id,eventname,params,body);
+		vwf_view.kernel.createEvent(_ScriptEditor.currentNode.id,eventname,cleanParams,body);
 		window.setTimeout(_ScriptEditor.PostSaveEvent,500);
 		return true;
 	}

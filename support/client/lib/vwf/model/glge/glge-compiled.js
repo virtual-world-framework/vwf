@@ -13568,6 +13568,11 @@ GLGE.Scene.prototype.GLDestroy=function(gl){
 * sort function
 */
 GLGE.Scene.sortFunc=function(a,b){
+
+	if(!a.object.RenderPriority) a.object.RenderPriority = 0;
+	if(!b.object.RenderPriority) b.object.RenderPriority = 0;
+	var RenderPriority = a.object.RenderPriority - b.object.RenderPriority;
+	if(RenderPriority != 0){  return RenderPriority};
 	return a.zdepth-b.zdepth;
 }
 

@@ -33,7 +33,16 @@ function PrimitiveEditor()
 	$('#sidepanel').append("<div id='PrimitiveEditor'>" +
 	"<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>"+
 					'<div id="accordion" style="height:100%;overflow:hidden">'+
-					'<h3><a href="#">Transforms</a></h3>'+
+						'<h3><a href="#">Flags</a></h3>'+
+						'<div>'+
+							"<div id='otherprops'>"+
+							"<input class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispName'>Name</input><br/>"+
+							"<input disabled='disabled' class='TransformEditorInput' style='width:50%;margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='text' id='dispOwner'>Owners</input><br/>"+
+							"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isTransparent'>Transparent</input><br/>"+
+							"<input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isStatic'>Static</input><br/>"+
+							"</div>"+
+						'</div>'+		
+						'<h3><a href="#">Transforms</a></h3>'+
 						'<div>'+
 							"<div class='EditorLabel'>Translation</div>" +
 							"<div id='Translation'>" +
@@ -54,10 +63,10 @@ function PrimitiveEditor()
 							"<input type='text' class='TransformEditorInput' id='ScaleY'/>" +
 							"<input type='text' class='TransformEditorInput' id='ScaleZ'/>" +
 							"</div>"+
-							"<div id='otherprops'> <input style='margin: 7px 2px 6px 0px;text-align: center;vertical-align: middle;' type='checkbox' id='isTransparent'>transparent</input></div>"+
 						'</div>'+					
-					'</div>'+	
-					"</div>" 
+									
+					'</div>'	
+					
 					);
 		$('#primeditortitle').append('<a id="primitiveeditorclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
 		$('#primeditortitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/properties.png" />');
@@ -67,6 +76,14 @@ function PrimitiveEditor()
 			
 		});
 		$('#isTransparent').change(function(e){_PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id,'transparent',this.checked)});
+		$('#dispName').blur(function(e)
+			{
+				if(vwf.getProperty(_Editor.GetSelectedVWFNode().id,'DisplayName') === undefined)
+				{
+					vwf.createProperty(_Editor.GetSelectedVWFNode().id,'DisplayName',$(this).val());
+				}
+				_PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id,'DisplayName',$(this).val());
+			});
 		$('#PrimitiveEditor').css('border-bottom','5px solid #444444')
 		$('#PrimitiveEditor').css('border-left','2px solid #444444')
 		//$('#PrimitiveEditor').resizable({
@@ -143,16 +160,20 @@ function PrimitiveEditor()
 				node.properties = vwf.getProperties(node.id);
 				if(!node.properties)
 					return;
-				var type = vwf.getProperty(node.id,'type');
-				if(type == 'cylinder' || type == 'cone')
-				$('#RadiusLabel').html('Radius');
-				else
-				$('#RadiusLabel').html('Length');
-				var val = vwf.getProperty(node.id,'size');
-				//$("#Radius").slider("value",val[0]);
-				//$("#Width").slider("value",val[1]);
-				//$("#Height").slider("value",val[2]);
 				
+				$('#dispName').val(vwf.getProperty(node.id,'DisplayName'));
+				if($('#dispName').val() == "")
+				{
+					$('#dispName').val(node.name);
+				}
+				$('#dispOwner').val(vwf.getProperty(node.id,'owner'));
+				if(vwf.getProperty(node.id,'transparent'))
+				{
+					$('#isTransparent').attr('checked','checked');
+				}else
+				{
+					$('#isTransparent').removeAttr('checked');
+				}
 				$('#BaseSectionTitle').html(node.properties.type + ": " + node.id);
 				this.SelectionTransformed(null,node);
 				this.setupEditorData(node);
@@ -346,8 +367,8 @@ function PrimitiveEditor()
 	this.positionChanged = function()
 	{
 		var val = [0,0,0];
-		val[1] = $('#PositionX').val();
-		val[0] = $('#PositionY').val();
+		val[0] = $('#PositionX').val();
+		val[1] = $('#PositionY').val();
 		val[2] = $('#PositionZ').val();
 	
 		this.setProperty(_Editor.GetSelectedVWFNode().id,'translation',val);

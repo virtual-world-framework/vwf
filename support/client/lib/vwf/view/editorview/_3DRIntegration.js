@@ -314,9 +314,11 @@ function _3DRIntegration()
 					  translation: pos,
 					  scale: [_ModelLibrary.MetadataCache[pid].UnitScale,_ModelLibrary.MetadataCache[pid].UnitScale,_ModelLibrary.MetadataCache[pid].UnitScale],
 					  owner:document.PlayerNumber,
-					  type:'3DR Object'
+					  type:'3DR Object',
+					  DisplayName:_ModelLibrary.MetadataCache[pid].Title
 					  }
                     };
+		proto.properties.DisplayName = _Editor.GetUniqueName(proto.properties.DisplayName);			
 		//vwf_view.kernel.createNode(proto , null);
 		//vwf_view.kernel.createChild('index-vwf',GUID(),proto,null,null); 
 		vwf_view.kernel.createChild('index-vwf',_ModelLibrary.MetadataCache[pid].Title,proto,null,null);

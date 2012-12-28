@@ -76,11 +76,10 @@ function Editor()
 	//	$('#vwf-root').mousedown(function(e){
 	var mousedown = function(e)
 	{	
-		//if(e.button != 2)
-		{
+		$('#index-vwf').focus();
 			$('#ContextMenu').hide();
 			$('#ContextMenu').css('z-index','-1');
-		}
+		
 		MouseMoved = false;
 		if(MoveGizmo && e.button == 0)
 		{
@@ -150,18 +149,28 @@ function Editor()
 		//if(MoveGizmo)
 		//updateGizmoSize();	
 	}.bind(this);
-	//$('#vwf-root').mouseup(function(e){
 	
-	var mouseup = function(e){ 		
-		
-		
-		if(e.button == 2 && !MouseMoved)
+	this.GetUniqueName = function(newname)
+	{	
+		if(!newname) newname = 'Object';
+		newname = newname.replace(/[0-9]*$/g,"");
+		var nodes = vwf.models[0].model.nodes;
+		var count = 1;
+		for(var i in nodes)
 		{
-			$('#ContextMenu').show();
-			$('#ContextMenu').css('z-index','1000000');
-			$('#ContextMenu').css('left',e.clientX + 'px');
-			$('#ContextMenu').css('top',e.clientY + 'px');
-			this.ContextShowEvent = e;
+			var thisname = nodes[i].properties.DisplayName || '';
+			thisname = thisname.replace(/[0-9]*$/g,"");
+			if(thisname == newname)
+				count++;
+		}
+		return newname+count;
+	}
+	var click=function(e)
+	{
+		
+	}.bind(this);
+	this.ShowContextMenu = function(e)
+	{
 			e.preventDefault();
 			e.stopPropagation();
 			var ray = GetWorldPickRay(e);
@@ -197,7 +206,48 @@ function Editor()
 					$('#ContextMenuSelect').show();
 				}
 			}
-			$('#ContextMenuName').html(vwfnode || "{none selected}");
+			var dispName;
+			if(vwfnode)
+				dispName = vwf.getProperty(vwfnode,'DisplayName');
+			if(!dispName)
+				dispName = vwfnode;
+			$('#ContextMenuName').html(dispName || "{none selected}");
+			$('#ContextMenuName').attr('VWFID',vwfnode);
+			
+			$('#ContextMenu').show();
+			$('#ContextMenu').css('z-index','1000000');
+			$('#ContextMenu').css('left',e.clientX + 'px');
+			$('#ContextMenu').css('top',e.clientY + 'px');
+			this.ContextShowEvent = e;
+			$('#ContextMenuActions').empty();
+			
+			var actions = vwf.getEvents(vwfnode);
+			
+			for(var i in actions)
+			{
+				if(actions[i].parameters.length == 1 && $.trim(actions[i].parameters[0]) == '')
+				{
+					$('#ContextMenuActions').append('<div id="Action'+i+'" class="ContextMenuAction">'+i+'</div>');
+					
+					$('#Action'+i).attr('EventName',i);
+					$('#Action'+i).click(function(){
+						$('#ContextMenu').hide();
+						$('#ContextMenu').css('z-index','-1');
+						$(".ddsmoothmenu").find('li').trigger('mouseleave');
+						$('#index-vwf').focus();
+						console.log($(this).attr('EventName'));
+						vwf_view.kernel.dispatchEvent(vwfnode,$(this).attr('EventName'));
+					});
+				}
+			}
+	}
+	var mouseup = function(e){ 		
+		
+		
+		if(e.button == 2 && !MouseMoved)
+		{
+			_Editor.ShowContextMenu(e);
+			
 			
 			return false;
 		}
@@ -1063,6 +1113,7 @@ function Editor()
 			proto.properties.texture = texture;
 			proto.properties.type = type;
 			proto.properties.tempid = id;
+			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			
 			this.createChild('index-vwf',GUID(),proto,null,null); 
 		
@@ -1090,6 +1141,7 @@ function Editor()
 			proto.properties.rotation = [0,0,1,0];
 			proto.properties.owner = owner;
 			proto.properties.type = type;
+			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			
 			var id = GetFirstChildLeaf(GetSelectedVWFNode()).id;
 			
@@ -1126,6 +1178,7 @@ function Editor()
 		for(var i = 0; i < SelectedVWFNodes.length; i++)
 		{
 			var proto = _DataManager.getCleanNodePrototype(SelectedVWFNodes[i].id);
+			proto.properties.DisplayName = _Editor.GetUniqueName(proto.properties.DisplayName);
 			var parent = vwf.parent(_Editor.GetSelectedVWFNode().id);
 			_Editor.createChild(parent,GUID(),proto,null,null,function(){alert();}); 
 		}
@@ -1196,6 +1249,7 @@ function Editor()
 			t.properties.translation[0] += newintersectxy[0];
 			t.properties.translation[1] += newintersectxy[1];
 			t.properties.translation[2] += newintersectxy[2];
+			proto.properties.DisplayName = _Editor.GetUniqueName(proto.properties.DisplayName);
 			_Editor.SelectOnNextCreate();
 			this.createChild('index-vwf',GUID(),t,null,null); 
 			t.properties.transform[12] -= newintersectxy[0];
@@ -1313,6 +1367,7 @@ function Editor()
 				SelectionBounds.setZtransparent(true);
 				SelectionBounds.setCull(GLGE.NONE);
 				SelectionBounds.setPickable(false);
+				SelectionBounds.RenderPriority = 999;
 				findscene().addChild(SelectionBounds);
 	}
 	this.getSelectionCount =function()
@@ -1485,6 +1540,7 @@ function Editor()
 			MoveGizmo.children[i].setZtransparent(true); MoveGizmo.children[i].setDepthTest(false);
 			SetGizmoMode(Move);
 			MoveGizmo.children[i].PickPriority = Infinity;
+			MoveGizmo.children[i].RenderPriority = 1000+i;
 		}
 		MoveGizmo.InvisibleToCPUPick = false;
 		findscene().addChild(MoveGizmo);
@@ -1834,12 +1890,14 @@ function Editor()
 					_Editor.createNodeCallback = null;
 		});
 	}
-	var GetSelectedVWFNode = function()
+	var GetSelectedVWFNode = function(idx)
 	{
+		if(idx === undefined)
+			idx = 0;
 		try{
 			
-			if(SelectedVWFNodes[0])
-			return vwf.getNode(SelectedVWFNodes[0].id);
+			if(SelectedVWFNodes[idx])
+			return vwf.getNode(SelectedVWFNodes[idx].id);
 		}catch(e)
 		{
 			
@@ -1908,12 +1966,14 @@ function Editor()
 	this.GetSelectedVWFNode = GetSelectedVWFNode;
 	this.SelectObject = SelectObject;
 	this.Copy = Copy;
+	this.click=click;
 	this.Paste = Paste;
 	this.Duplicate = Duplicate;
 	this.CreateModifier = CreateModifier;
 	this.GetRotationMatrix = GetRotationMatrix;
 	this.updateBoundsAndGizmoLoc = updateBoundsAndGizmoLoc;
 	this.keyup = keyup;
+	this.GetSelectMode = function(){return SelectMode;}
 	
 	BuildMoveGizmo();
 	SelectObject(null);
@@ -1921,8 +1981,10 @@ function Editor()
 	document.oncontextmenu = function() {return false;};
 
 	$(document.body).append('<div id="ContextMenu" />');
-	$('#ContextMenu').append('<div id="ContextMenuName" style="border-bottom: 1px solid gray;">name</div>');
-	$('#ContextMenu').append('<div id="ContextMenuSelect" class="ContextMenuItem">Select</div>');
+	
+	$('#ContextMenu').append('<div id="ContextMenuName" style="border-bottom: 3px solid gray;">name</div>');
+	$('#ContextMenu').append('<div id="ContextMenuActions" style="border-bottom: 2px gray dotted;"></div>');
+	$('#ContextMenu').append('<div id="ContextMenuSelect" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Select</div>');
 	$('#ContextMenu').append('<div id="ContextMenuSelectNone" class="ContextMenuItem" style="border-bottom: 1px solid gray;" >Select None</div>');
 	$('#ContextMenu').append('<div id="ContextMenuMove" class="ContextMenuItem">Move</div>');
 	$('#ContextMenu').append('<div id="ContextMenuRotate" class="ContextMenuItem">Rotate</div>');
@@ -1931,23 +1993,28 @@ function Editor()
 	$('#ContextMenu').append('<div id="ContextMenuCopy" class="ContextMenuItem">Copy</div>');
 	$('#ContextMenu').append('<div id="ContextMenuPaste" class="ContextMenuItem">Paste</div>');
 	$('#ContextMenu').append('<div id="ContextMenuDuplicate" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Duplicate</div>');
-	$('#ContextMenu').append('<div id="ContextMenuDelete" class="ContextMenuItem">Delete</div>');
+	$('#ContextMenu').append('<div id="ContextMenuDelete" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Delete</div>');
+	
+	
 	$('#ContextMenu').disableSelection();
 	
 	$('#ContextMenuSelect').click(function()
 	{
-		_Editor.SelectObject($('#ContextMenuName').html());
+		_Editor.SelectObject($('#ContextMenuName').attr('VWFID'));
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	
 	$('#ContextMenuSelectNone').click(function()
 	{
 		_Editor.SelectObject(null);
+		_Editor.SetSelectMode('None');
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenuMove').click(function()
 	{
@@ -1955,6 +2022,7 @@ function Editor()
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenuRotate').click(function()
 	{
@@ -1962,6 +2030,7 @@ function Editor()
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenuScale').click(function()
 	{
@@ -1969,6 +2038,7 @@ function Editor()
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenuFocus').click(function()
 	{
@@ -1976,6 +2046,7 @@ function Editor()
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenuCopy').click(function()
 	{
@@ -1983,6 +2054,7 @@ function Editor()
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenuPaste').click(function(e)
 	{
@@ -1996,6 +2068,7 @@ function Editor()
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenuDelete').click(function()
 	{
@@ -2003,6 +2076,7 @@ function Editor()
 		$('#ContextMenu').hide();
 		$('#ContextMenu').css('z-index','-1');
 		$(".ddsmoothmenu").find('li').trigger('mouseleave');
+		$('#index-vwf').focus();
 	});
 	$('#ContextMenu').hide();
 	//$(document).bind('prerender',this.updateGizmoOrientation.bind(this));
