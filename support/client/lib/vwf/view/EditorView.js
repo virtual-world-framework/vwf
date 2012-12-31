@@ -646,7 +646,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		document.addEventListener("touchmove", touchHandler, true);
 		document.addEventListener("touchend", touchHandler, true);
 		document.addEventListener("touchcancel", touchHandler, true); 
-	
+		$('* :not(input)').disableSelection();
 	}
 	
 	function touchHandler(event)

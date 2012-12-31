@@ -11,6 +11,10 @@ function Editor()
 	var oldintersectxz = [];
 	var oldintersectyz = [];
 	
+	this.mouseDownScreenPoint = [0,0];
+	this.mouseUpScreenPoint = [0,0];
+	this.selectionMarquee = null; 
+	
 	var WorldCoords = 0;
 	var LocalCoords = 1;
 	var CoordSystem = WorldCoords;
@@ -36,7 +40,7 @@ function Editor()
 	var oldyrot = 0;
 	var oldzrot = 0;
 	
-	var SelectionBounds = null;
+	var SelectionBounds = [];
 	
 	var lastscale = [1,1,1];
 	var lastpos = [1,1,1];
@@ -80,9 +84,12 @@ function Editor()
 			$('#ContextMenu').hide();
 			$('#ContextMenu').css('z-index','-1');
 		
+		
 		MouseMoved = false;
 		if(MoveGizmo && e.button == 0)
 		{
+			
+			
 			
 			OldX = e.clientX;
 			OldY = e.clientY;
@@ -131,6 +138,18 @@ function Editor()
 			}			
 			
 			document.AxisSelected = axis;
+			if(document.AxisSelected == -1 && SelectMode == 'Pick')
+			{
+				this.MouseLeftDown = true;
+				this.mouseDownScreenPoint = [e.clientX,e.clientY];
+				this.selectionMarquee.css('left',this.mouseDownScreenPoint[0]);
+				this.selectionMarquee.css('top',this.mouseDownScreenPoint[1]);
+				this.selectionMarquee.css('width','0');
+				this.selectionMarquee.css('height','0');
+				this.selectionMarquee.show();
+				this.selectionMarquee.css('z-index','100');
+			}
+			
 			$('#StatusAxis').html('Axis: '+axis);
 			for(var i =0; i < MoveGizmo.children.length;i++)
 			{
@@ -255,11 +274,78 @@ function Editor()
 		{
 			return;
 		}
-		if(vwf.views[0].lastPickId && document.AxisSelected == -1 && MouseMoved == false && e.button == 0)
+		
+		this.MouseLeftDown = false;
+		this.selectionMarquee.hide();
+		this.selectionMarquee.css('z-index','-1');
+		
+		this.mouseUpScreenPoint = [e.clientX,e.clientY];
+		
+		var w = this.mouseUpScreenPoint[0]-this.mouseDownScreenPoint[0];
+		var h = this.mouseUpScreenPoint[1]-this.mouseDownScreenPoint[1];
+		var picksize = Math.sqrt(w*w+h*h);
+		
+	
+		if( document.AxisSelected == -1 && e.button == 0)
 		{	
+			
 			if(SelectMode=='Pick')
 			{
-				SelectObject(vwf.getNode(vwf.views[0].lastPickId),this.PickMod);	
+				if(picksize < 10)
+				{
+					if(vwf.views[0].lastPickId)
+						SelectObject(vwf.getNode(vwf.views[0].lastPickId),this.PickMod);	
+				}
+				else
+				{
+					
+						var top = this.mouseDownScreenPoint[1];
+						var left = this.mouseDownScreenPoint[0]
+						var bottom = this.mouseUpScreenPoint[1];
+						var right = this.mouseUpScreenPoint[0];
+						if(h < 0)
+						{
+							top = top + h;
+							bottom = top + -h;
+						}		
+						if(w < 0)
+						{
+							left = left + w;
+							right = left + -w;
+						}	
+		
+					var TopLeftRay = GetWorldPickRay({clientX:left,clientY:top});
+					var TopRightRay = GetWorldPickRay({clientX:right,clientY:top});
+					var BottomLeftRay = GetWorldPickRay({clientX:left,clientY:bottom});
+					var BottomRighttRay = GetWorldPickRay({clientX:right,clientY:bottom});
+					var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+					
+					var ntl = GLGE.addVec3(campos,TopLeftRay);
+					var ntr = GLGE.addVec3(campos,TopRightRay);
+					var nbl = GLGE.addVec3(campos,BottomLeftRay);
+					var nbr = GLGE.addVec3(campos,BottomRighttRay);
+					
+					var ftl = GLGE.addVec3(campos,GLGE.scaleVec3(TopLeftRay,10000));
+					var ftr = GLGE.addVec3(campos,GLGE.scaleVec3(TopRightRay,10000));
+					var fbl = GLGE.addVec3(campos,GLGE.scaleVec3(BottomLeftRay,10000));
+					var fbr = GLGE.addVec3(campos,GLGE.scaleVec3(BottomRighttRay,10000));
+					
+					var frustrum = new Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr);	
+					
+					var hits = this.findscene().FrustrumCast(frustrum);
+					var vwfhits = [];
+					for(var i = 0; i < hits.length; i++)
+					{
+						var vwfnode;
+						while(hits[i] && hits[i].object && !hits[i].object.vwfID)
+							hits[i].object = hits[i].object.parent;
+						if(hits[i] && hits[i].object)
+							vwfnode = hits[i].object.vwfID;
+						if(vwfhits.indexOf(vwfnode) == -1)
+							vwfhits.push(vwfnode);	
+					}
+					SelectObject(vwfhits,this.PickMod);
+				}				
 				e.stopPropagation();
 			}
 			if(SelectMode=='TempPick')
@@ -658,6 +744,27 @@ function Editor()
 		var originalGizmoPos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
 		//updateGizmoSize();
 		updateGizmoOrientation(false);
+		
+		if(this.MouseLeftDown)
+		{
+			this.mouseLastScreenPoint = [e.clientX,e.clientY];
+			var w = this.mouseLastScreenPoint[0] - this.mouseDownScreenPoint[0];
+			var h = this.mouseLastScreenPoint[1] - this.mouseDownScreenPoint[1];
+			if(w > 0)
+				this.selectionMarquee.css('width',w);
+			else
+			  {
+				this.selectionMarquee.css('width',-w);
+				this.selectionMarquee.css('left',this.mouseLastScreenPoint[0]);
+			  }			  
+			if(h > 0)  
+				this.selectionMarquee.css('height',h);
+			else
+			{
+				this.selectionMarquee.css('height',-h);
+				this.selectionMarquee.css('top',this.mouseLastScreenPoint[1]);
+			}
+		}
 		
 		if(document.AxisSelected != -1)
 		{
@@ -1325,50 +1432,37 @@ function Editor()
 	}
 	this.updateBounds = function()
 	{
-				if(SelectionBounds != null)
+			
+			for(var i =0; i < SelectionBounds.length; i++)
 			{
-				SelectionBounds.parent.removeChild(SelectionBounds);
-				SelectionBounds = null;
+				SelectionBounds[i].parent.removeChild(SelectionBounds[i]);
 			}
+			SelectionBounds = [];
+			for(var i =0; i < SelectedVWFNodes.length; i++)
+			{	
 				var box;
 				var mat;
-				if(SelectedVWFNodes.length == 1)
-				{
-					box = _Editor.findviewnode(SelectedVWFNodes[0].id).GetBoundingBox(true);
-					mat = _Editor.findviewnode(SelectedVWFNodes[0].id).getModelMatrix().slice(0);;
-				}else
-				{
-					box = new BoundingBoxRTAS();
-					mat = [1,0,0,0,
-					       0,1,0,0,
-						   0,0,1,0,
-						   0,0,0,1];
-						   
-					for(var s =0; s < SelectedVWFNodes.length; s++)
-					{
-						box.expandBy(_Editor.findviewnode(SelectedVWFNodes[s].id).GetBoundingBox());
-					}
-				}
-				//mat = GLGE.inverseMat4(mat);
-				//mat[3] = 0;
-				//mat[7] = 0;
-				//mat[11] = 0;
+				
+				box = _Editor.findviewnode(SelectedVWFNodes[i].id).GetBoundingBox(true);
+				mat = _Editor.findviewnode(SelectedVWFNodes[i].id).getModelMatrix().slice(0);
+				
 				
 				var color = [1,1,1,1];
-				if(findviewnode(SelectedVWFNodes[0].id).initializedFromAsset)
+				if(findviewnode(SelectedVWFNodes[i].id).initializedFromAsset)
 					color = [1,0,0,1];
-				SelectionBounds = BuildBox([box.max[0] - box.min[0],box.max[1] - box.min[1],box.max[2] - box.min[2]],[box.min[0] + (box.max[0] - box.min[0])/2,box.min[1] + (box.max[1] - box.min[1])/2,box.min[2] + (box.max[2] - box.min[2])/2],color);
+				SelectionBounds[i] = BuildBox([box.max[0] - box.min[0],box.max[1] - box.min[1],box.max[2] - box.min[2]],[box.min[0] + (box.max[0] - box.min[0])/2,box.min[1] + (box.max[1] - box.min[1])/2,box.min[2] + (box.max[2] - box.min[2])/2],color);
 				
 			
-				SelectionBounds.setStaticMatrix(mat);
-				SelectionBounds.InvisibleToCPUPick = true;
-				SelectionBounds.setDrawType(GLGE.DRAW_LINELOOPS);
-				SelectionBounds.setDepthTest(false);
-				SelectionBounds.setZtransparent(true);
-				SelectionBounds.setCull(GLGE.NONE);
-				SelectionBounds.setPickable(false);
-				SelectionBounds.RenderPriority = 999;
-				findscene().addChild(SelectionBounds);
+				SelectionBounds[i].setStaticMatrix(mat);
+				SelectionBounds[i].InvisibleToCPUPick = true;
+				SelectionBounds[i].setDrawType(GLGE.DRAW_LINELOOPS);
+				SelectionBounds[i].setDepthTest(false);
+				SelectionBounds[i].setZtransparent(true);
+				SelectionBounds[i].setCull(GLGE.NONE);
+				SelectionBounds[i].setPickable(false);
+				SelectionBounds[i].RenderPriority = 999;
+				this.SelectionBoundsContainer.addChild(SelectionBounds[i]);
+			}
 	}
 	this.getSelectionCount =function()
 	{
@@ -1388,45 +1482,59 @@ function Editor()
 	}.bind(this);
 	var SelectObject = function(VWFNode,selectmod)
 	{
-		if(typeof(VWFNode) == 'string')
-			VWFNode = vwf.getNode(VWFNode);
+		
+		if(VWFNode && VWFNode.constructor.name == 'Array')
+		{
+			for(var i =0; i < VWFNode.length; i++)
+				VWFNode[i] = vwf.getNode(VWFNode[i]);
+		}else if(typeof(VWFNode) == 'object')
+			VWFNode = [VWFNode];
+		else if(typeof(VWFNode) == 'string')
+			VWFNode = [vwf.getNode(VWFNode)];
 			
 		
-		
+			
 		
 		if(!selectmod)
 		{
 			SelectedVWFNodes = [];
-			if(VWFNode)
-				SelectedVWFNodes.push(VWFNode);
 		}
 		
-		if(selectmod == Add)
+		if(VWFNode)
+		for(var i =0; i < VWFNode.length; i++)
 		{
+			if(!selectmod)
+			{
+				if(VWFNode[i])
+					SelectedVWFNodes.push(VWFNode[i]);
+			}
 			
-			if(!this.isSelected(VWFNode.id) )
-				SelectedVWFNodes.push(VWFNode);
+			if(selectmod == Add)
+			{
+				
+				if(!this.isSelected(VWFNode[i].id) )
+					SelectedVWFNodes.push(VWFNode[i]);
+			}
+			
+			if(selectmod == Subtract)
+			{
+				var index = -1;
+				
+				for(var j = 0; j < SelectedVWFNodes.length; j++)
+					if(SelectedVWFNodes[j] && SelectedVWFNodes[j].id == VWFNode[i].id)
+						index = j;
+						
+				SelectedVWFNodes.splice(index,1);		
+				
+			}
 		}
-		
-		if(selectmod == Subtract)
-		{
-			var index = -1;
-			
-			for(var i = 0; i < SelectedVWFNodes.length; i++)
-				if(SelectedVWFNodes[i] && SelectedVWFNodes[i].id == VWFNode.id)
-					index = i;
-					
-			SelectedVWFNodes.splice(index,1);		
-			
-		}
-		
 		
 		if(SelectedVWFNodes[0])
 			this.SelectedVWFID = SelectedVWFNodes[0].id;
 		else
 			this.SelectedVWFID = null;
 			
-		triggerSelectionChanged(VWFNode);
+		triggerSelectionChanged(SelectedVWFNodes[0]);
 		
 		if(MoveGizmo == null)
 		{
@@ -1451,10 +1559,13 @@ function Editor()
 		{
 			MoveGizmo.setVisible(false);
 			MoveGizmo.InvisibleToCPUPick = true;
-			if(SelectionBounds != null)
+			if(SelectionBounds.length > 0)
 			{
-				SelectionBounds.parent.removeChild(SelectionBounds);
-				SelectionBounds = null;
+				for(var i =0; i < SelectionBounds.length; i++)
+				{
+					SelectionBounds[i].parent.removeChild(SelectionBounds[i]);
+				}
+				SelectionBounds = [];
 			}
 		}
 	}.bind(this);
@@ -1909,6 +2020,142 @@ function Editor()
 		return vwf.views[0].state.scenes["index-vwf"].glgeScene;
         
 	}.bind(this);
+	this.buildContextMenu = function()
+	{
+		$(document.body).append('<div id="ContextMenu" />');
+		
+		$('#ContextMenu').append('<div id="ContextMenuName" style="border-bottom: 3px solid gray;">name</div>');
+		$('#ContextMenu').append('<div id="ContextMenuActions" style="border-bottom: 2px gray dotted;"></div>');
+		$('#ContextMenu').append('<div id="ContextMenuSelect" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Select</div>');
+		$('#ContextMenu').append('<div id="ContextMenuSelectNone" class="ContextMenuItem" style="border-bottom: 1px solid gray;" >Select None</div>');
+		$('#ContextMenu').append('<div id="ContextMenuMove" class="ContextMenuItem">Move</div>');
+		$('#ContextMenu').append('<div id="ContextMenuRotate" class="ContextMenuItem">Rotate</div>');
+		$('#ContextMenu').append('<div id="ContextMenuScale" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Scale</div>');
+		$('#ContextMenu').append('<div id="ContextMenuFocus" class="ContextMenuItem" style="border-bottom: 1px solid gray;" >Focus</div>');
+		$('#ContextMenu').append('<div id="ContextMenuCopy" class="ContextMenuItem">Copy</div>');
+		$('#ContextMenu').append('<div id="ContextMenuPaste" class="ContextMenuItem">Paste</div>');
+		$('#ContextMenu').append('<div id="ContextMenuDuplicate" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Duplicate</div>');
+		$('#ContextMenu').append('<div id="ContextMenuDelete" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Delete</div>');
+		
+		
+		$('#ContextMenu').disableSelection();
+		
+		$('#ContextMenuSelect').click(function()
+		{
+			_Editor.SelectObject($('#ContextMenuName').attr('VWFID'));
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		
+		$('#ContextMenuSelectNone').click(function()
+		{
+			_Editor.SelectObject(null);
+			_Editor.SetSelectMode('None');
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		$('#ContextMenuMove').click(function()
+		{
+			$('#MenuMove').click();
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		$('#ContextMenuRotate').click(function()
+		{
+			$('#MenuRotate').click();
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		$('#ContextMenuScale').click(function()
+		{
+			$('#MenuScale').click();
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		$('#ContextMenuFocus').click(function()
+		{
+			$('#MenuFocusSelected').click();
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		$('#ContextMenuCopy').click(function()
+		{
+			$('#MenuCopy').click();
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		$('#ContextMenuPaste').click(function(e)
+		{
+			_Editor.Paste(true);
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+		});
+		$('#ContextMenuDuplicate').click(function()
+		{
+			$('#MenuDuplicate').click();
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		$('#ContextMenuDelete').click(function()
+		{
+			$('#MenuDelete').click();
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+			$(".ddsmoothmenu").find('li').trigger('mouseleave');
+			$('#index-vwf').focus();
+		});
+		
+	}
+	
+	this.initialize = function()
+	{
+		
+		this.BuildMoveGizmo();
+		this.SelectObject(null);
+		$(document).bind('prerender',this.updateGizmoSize.bind(this));
+		document.oncontextmenu = function() {return false;};
+		this.SelectionBoundsContainer = new GLGE.Group();
+		this.findscene().addChild(this.SelectionBoundsContainer);
+		this.buildContextMenu();
+		
+		this.mouseDownScreenPoint = [0,0];
+		this.mouseUpScreenPoint = [0,0];
+		
+		$(document.body).append('<div id="selectionMarquee" />');
+		this.selectionMarquee = $('#selectionMarquee'); 
+		this.selectionMarquee.css('position','absolute');
+		this.selectionMarquee.css('width','100');
+		this.selectionMarquee.css('height','100');
+		this.selectionMarquee.css('top','100');
+		this.selectionMarquee.css('left','100');
+		this.selectionMarquee.css('z-index','100');
+		this.selectionMarquee.css('border','2px dashed gray');
+		this.selectionMarquee.css('border-radius','10px');
+		//this.selectionMarquee.css('box-shadow','0px 0px 10px lightgray, 0px 0px 10px lightgray inset');
+		this.selectionMarquee.mousedown(function(e){_Editor.mousedown(e);e.preventDefault();e.stopPropagation();return false;});
+		this.selectionMarquee.mouseup(function(e){_Editor.mouseup(e);e.preventDefault();e.stopPropagation();return false;});
+		this.selectionMarquee.mousemove(function(e){_Editor.mousemove(e);e.preventDefault();e.stopPropagation();return false;});
+		
+		$('body *').not(':has(input)').not('input').disableSelection();
+		this.selectionMarquee.hide();
+		$('#ContextMenu').hide();
+	}
 	
 	this.GetSelectionBounds = function(){return SelectionBounds;};
 	this.findscene = findscene;
@@ -1975,111 +2222,11 @@ function Editor()
 	this.keyup = keyup;
 	this.GetSelectMode = function(){return SelectMode;}
 	
-	BuildMoveGizmo();
-	SelectObject(null);
-	$(document).bind('prerender',this.updateGizmoSize.bind(this));
-	document.oncontextmenu = function() {return false;};
+	
+	
 
-	$(document.body).append('<div id="ContextMenu" />');
-	
-	$('#ContextMenu').append('<div id="ContextMenuName" style="border-bottom: 3px solid gray;">name</div>');
-	$('#ContextMenu').append('<div id="ContextMenuActions" style="border-bottom: 2px gray dotted;"></div>');
-	$('#ContextMenu').append('<div id="ContextMenuSelect" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Select</div>');
-	$('#ContextMenu').append('<div id="ContextMenuSelectNone" class="ContextMenuItem" style="border-bottom: 1px solid gray;" >Select None</div>');
-	$('#ContextMenu').append('<div id="ContextMenuMove" class="ContextMenuItem">Move</div>');
-	$('#ContextMenu').append('<div id="ContextMenuRotate" class="ContextMenuItem">Rotate</div>');
-	$('#ContextMenu').append('<div id="ContextMenuScale" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Scale</div>');
-	$('#ContextMenu').append('<div id="ContextMenuFocus" class="ContextMenuItem" style="border-bottom: 1px solid gray;" >Focus</div>');
-	$('#ContextMenu').append('<div id="ContextMenuCopy" class="ContextMenuItem">Copy</div>');
-	$('#ContextMenu').append('<div id="ContextMenuPaste" class="ContextMenuItem">Paste</div>');
-	$('#ContextMenu').append('<div id="ContextMenuDuplicate" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Duplicate</div>');
-	$('#ContextMenu').append('<div id="ContextMenuDelete" class="ContextMenuItem" style="border-bottom: 1px solid gray;">Delete</div>');
-	
-	
-	$('#ContextMenu').disableSelection();
-	
-	$('#ContextMenuSelect').click(function()
-	{
-		_Editor.SelectObject($('#ContextMenuName').attr('VWFID'));
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	
-	$('#ContextMenuSelectNone').click(function()
-	{
-		_Editor.SelectObject(null);
-		_Editor.SetSelectMode('None');
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenuMove').click(function()
-	{
-		$('#MenuMove').click();
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenuRotate').click(function()
-	{
-		$('#MenuRotate').click();
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenuScale').click(function()
-	{
-		$('#MenuScale').click();
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenuFocus').click(function()
-	{
-		$('#MenuFocusSelected').click();
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenuCopy').click(function()
-	{
-		$('#MenuCopy').click();
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenuPaste').click(function(e)
-	{
-		_Editor.Paste(true);
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-	});
-	$('#ContextMenuDuplicate').click(function()
-	{
-		$('#MenuDuplicate').click();
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenuDelete').click(function()
-	{
-		$('#MenuDelete').click();
-		$('#ContextMenu').hide();
-		$('#ContextMenu').css('z-index','-1');
-		$(".ddsmoothmenu").find('li').trigger('mouseleave');
-		$('#index-vwf').focus();
-	});
-	$('#ContextMenu').hide();
 	//$(document).bind('prerender',this.updateGizmoOrientation.bind(this));
 }
 
 _Editor = new Editor();
+_Editor.initialize();

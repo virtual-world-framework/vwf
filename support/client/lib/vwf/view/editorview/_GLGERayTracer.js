@@ -41,6 +41,28 @@ GLGE.Scene.prototype.CPUPick = function(origin,direction,maxdist)
 	  return hitlist[0];
 }
 
+
+// Return all hits, takes a list of planes
+GLGE.Scene.prototype.FrustrumCast = function(frustrum)
+{
+	
+	  //concat all hits from children	  
+      var hitlist = [];
+	  for(var i=0; i <  this.children.length; i++)
+	  {
+	     if(this.children[i].FrustrumCast)
+		 {
+			 var hit = this.children[i].FrustrumCast(frustrum);
+			 if(hit)
+			 {
+				for(var j =0; j<hit.length; j++)
+					hitlist.push(hit[j]);
+			 }
+		 }
+	  }
+	  return hitlist;
+}
+
 //Get the bounding box for a group
 GLGE.Group.prototype.GetBoundingBox = function(local)
 {
@@ -116,9 +138,35 @@ GLGE.Group.prototype.CPUPick = function(origin,direction,maxdist)
 	  }
 	  return hitlist;
 }
+
+GLGE.Group.prototype.FrustrumCast = function(frustrum)
+{
+	  if(this.InvisibleToCPUPick)
+		return [];
+	
+      var hitlist = [];
+	  
+	  //iterate the children and concat all hits
+	  for(var i=0; i <  this.children.length; i++)
+	  {
+		 if(this.children[i].FrustrumCast)
+		 {
+			 var hit = this.children[i].FrustrumCast(frustrum);
+			 if(hit)
+			 {
+				for(var j =0; j<hit.length; j++)
+					hitlist.push(hit[j]);
+			 }
+		 }
+	  }
+	  return hitlist;
+}
+
 GLGE.Collada.prototype.CPUPick = GLGE.Group.prototype.CPUPick;
+GLGE.Collada.prototype.FrustrumCast = GLGE.Group.prototype.FrustrumCast;
 //this is a custom geometry type, not included in GLGE distro
 JSONNode.prototype.CPUPick = GLGE.Group.prototype.CPUPick;
+JSONNode.prototype.FrustrumCast = GLGE.Group.prototype.FrustrumCast;
 GLGE.Collada.prototype.GetBoundingBox = GLGE.Group.prototype.GetBoundingBox;
 JSONNode.prototype.GetBoundingBox = GLGE.Group.prototype.GetBoundingBox;
 
@@ -210,6 +258,39 @@ function vector(a,b,c)
 	a[1] = b[1] - c[1];
 	a[2] = b[2] - c[2];
 }
+function pointInFrustrum(point,frustrum)
+{
+//checks if cube points are within the frustum planes
+	
+	
+	var x, y, z;
+	
+		x=point[0];
+		y=point[1];
+		z=point[2];
+	
+	for(var i = 0; i < frustrum.planes.length; i++)
+	{
+		var vec = GLGE.subVec3(point,frustrum.planes[i].point);
+		vec = GLGE.toUnitVec3(vec);
+		if(GLGE.dotVec3(vec,frustrum.planes[i].normal) < 0)
+			return false;
+	}
+	return true;
+
+}
+
+face.prototype.intersectFrustrum = function(frustrum)
+{
+	if(pointInFrustrum(this.v0,frustrum)||pointInFrustrum(this.v0,frustrum)||pointInFrustrum(this.v0,frustrum))
+	{
+		var point = this.c;
+		var norm = this.norm;
+		return {point:point,norm:norm,face:this};
+	}
+	return null;
+}
+
 //intersect a ray with a face
 face.prototype.intersect1 = function(p,d)
 {
@@ -303,6 +384,18 @@ SimpleFaceListRTAS.prototype.intersect = function(origin,direction)
 	}
 	return intersects;
 }
+//Intersect a frustrum with a list of faces
+SimpleFaceListRTAS.prototype.intersectFrustrum = function(frustrum)
+{
+	var intersects = [];
+    for(var i =0; i < this.faces.length; i++)
+	{
+		var intersect = this.faces[i].intersectFrustrum(frustrum);
+		if(intersect)
+		intersects.push(intersect);
+	}
+	return intersects;
+}
 //a quick structure to test bounding spheres
 function BoundingSphereRTAS(min,max)
 {
@@ -370,6 +463,26 @@ BoundingBoxRTAS.prototype.transformBy = function(matrix)
 	var min2 = bounds[0];
 	var max2 = bounds[1];
 	return new  BoundingBoxRTAS(min2,max2);
+}
+
+BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum)
+{
+	var p0 = [this.min[0],this.min[1],this.min[2]];
+	var p1 = [this.min[0],this.min[1],this.max[2]];
+	var p2 = [this.min[0],this.max[1],this.min[2]];
+	var p3 = [this.min[0],this.max[1],this.max[2]];
+	var p4 = [this.max[0],this.min[1],this.min[2]];
+	var p5 = [this.max[0],this.min[1],this.max[2]];
+	var p6 = [this.max[0],this.max[1],this.min[2]];
+	var p7 = [this.max[0],this.max[1],this.max[2]];
+	
+	var points = [p0,p1,p2,p3,p4,p5,p6,p7];
+	for(var i =0; i < 8; i++)
+	{
+		if(pointInFrustrum(points[i],frustrum))
+			return [true];
+	}
+	return [];
 }
 //intersect ray and bounding box
 BoundingBoxRTAS.prototype.intersect = function(o,d)
@@ -446,6 +559,7 @@ function OctreeRegion(min,max,depth)
 }
 //testing the bounds of the octree region is the same as testing a bounding box
 OctreeRegion.prototype.testBounds = BoundingBoxRTAS.prototype.intersect;
+OctreeRegion.prototype.testBoundsFrustrum = BoundingBoxRTAS.prototype.intersectFrustrum;
 
 //add a face, and split if necessary
 OctreeRegion.prototype.addFace = function(face)
@@ -570,6 +684,54 @@ OctreeRegion.prototype.intersect = function(o,d)
 	}
 	return hits;
 }
+
+//Test a ray against an octree region
+OctreeRegion.prototype.intersectFrustrum = function(frustrum)
+{
+	
+	var hits = [];
+	//if no faces, can be no hits. 
+	//remember, faces is all faces in this node AND its children
+	if(this.faces.length == 0)
+		return hits;
+	
+	//if the node is split, then we test the non distributed faces, which are not in any children
+	var facelist = this.faces;
+	if(this.isSplit)
+	   facelist = this.facesNotDistributed;
+	
+	//check either this nodes faces, or the not distributed faces. for a leaf, this will just loop all faces,
+	//for a non leaf, this will iterate over the faces that for some reason are not in children, which SHOULD be none
+	for(var i = 0; i < facelist.length; i++)
+	{
+		var facehits = facelist[i].intersectFrustrum(frustrum);
+		if(facehits)
+			hits.push(facehits);
+	}
+	
+	//reject this node if the ray does not intersect it's bounding box
+	if(this.testBoundsFrustrum(frustrum).length == 0)
+	{
+		//console.log('region rejected');
+		return hits;
+	}
+	
+	//if the node is split, concat the hits from all children
+	if(this.isSplit)
+	{
+		for(var i = 0; i < this.children.length; i++)
+		{
+			var childhits = this.children[i].intersectFrustrum(frustrum);
+			if(childhits)
+			{
+				for(var j = 0; j < childhits.length; j++)
+				    hits.push(childhits[j]);
+			}
+		}
+	}
+	return hits;
+}
+
 //generate the children nodes from this node, and set the proper min and max
 //boy, getting this right is a bit tricky.
 OctreeRegion.prototype.split = function()
@@ -667,6 +829,10 @@ OctreeRTAS.prototype.intersect = function(o,d)
 {
 	return this.root.intersect(o,d);
 }
+OctreeRTAS.prototype.intersectFrustrum = function(frustrum)
+{
+	return this.root.intersectFrustrum(frustrum);
+}
 //Generate either an octree of a face list to test rays.
 //note: the max faces can make big performance difference here.
 GLGE.Mesh.prototype.BuildRayTraceAccelerationStructure = function()
@@ -744,6 +910,41 @@ GLGE.Mesh.prototype.CPUPick = function(origin,direction,maxdist)
 	 
 
 }
+//Do the actuall intersection with the mesh;
+GLGE.Mesh.prototype.FrustrumCast = function(frustrum)
+{
+	  if(this.InvisibleToCPUPick)
+		return null;
+	  
+	  //allow a picking mesh that differs from the visible mesh
+	  if(this.PickMesh)
+		return this.PickMesh.FrustrumCast(frustrum);
+		
+      //if for some reason dont have good bounds, generate	 
+	  if(!this.BoundingSphere || !this.BoundingBox || this.dirtyMesh)
+	  {
+			this.GenerateBounds();
+	  }
+	   	
+	 var intersections = [];
+	 //try to reject based on bounding box.
+	 //var bbhit = this.BoundingBox.intersectFrustrum(planes); 
+	
+	 //if(bbhit.length > 0)
+	 {
+		 //build the octree or the facelist
+		 if(!this.RayTraceAccelerationStructure || this.dirtyMesh)
+		 {
+			 this.BuildRayTraceAccelerationStructure();
+			
+		 }
+		 //do actual mesh intersection
+		 intersections = this.RayTraceAccelerationStructure.intersectFrustrum(frustrum); 		 
+	 }
+	  
+	  this.dirtyMesh = false;
+      return intersections;
+}
 //Gets it in this groups local space!
 GLGE.Object.prototype.GetBoundingBox = function(local)
 {
@@ -801,5 +1002,99 @@ GLGE.Object.prototype.CPUPick = function(origin,direction,maxdist)
 	  }
 	  return ret;
 }
+function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
+{
+	this.ntl = ntl;
+	this.ntr = ntr;
+	this.nbl = nbl;
+	this.nbr = nbr;
+					
+	this.ftl = ftl;
+	this.ftr = ftr;
+	this.fbl = fbl;
+	this.fbr = fbr;
+					
 
+	this.nearnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ntr,this.nbr),GLGE.subVec3(this.nbl,this.nbr)));
+	this.farnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ftl,this.fbl),GLGE.subVec3(this.ftr,this.fbl)));
+	this.leftnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.nbl,this.fbl),GLGE.subVec3(this.ftl,this.fbl)));
+	this.rightnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ftr,this.ntr),GLGE.subVec3(this.ntr,this.nbr)));
+	this.topnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ftl,this.ntr),GLGE.subVec3(this.ntr,this.ftr)));
+	this.bottomnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.nbl,this.nbr),GLGE.subVec3(this.fbl,this.nbl)));
+	
+	this.nearplane = {point:this.ntl,normal:GLGE.scaleVec3(this.nearnorm,-1)};
+	this.farplane = {point:this.ftl,normal:GLGE.scaleVec3(this.farnorm,-1)};
+	this.leftplane = {point:this.ftl,normal:GLGE.scaleVec3(this.leftnorm,-1)};
+	this.rightplane = {point:this.ntr,normal:GLGE.scaleVec3(this.rightnorm,-1)};
+	this.topplane = {point:this.ftl,normal:GLGE.scaleVec3(this.topnorm,-1)};
+	this.bottomplane = {point:this.fbl,normal:GLGE.scaleVec3(this.bottomnorm,-1)};
+	this.planes = [this.nearplane,this.farplane,this.leftplane,this.rightplane,this.topplane,this.bottomplane];
+	this.transformBy = function(matrix)
+	{
+		var ntl = GLGE.mulMat4Vec3(matrix,this.ntl);
+		var ntr = GLGE.mulMat4Vec3(matrix,this.ntr);
+		var nbl = GLGE.mulMat4Vec3(matrix,this.nbl);
+		var nbr = GLGE.mulMat4Vec3(matrix,this.nbr);
+		
+		var ftl = GLGE.mulMat4Vec3(matrix,this.ftl);
+		var ftr = GLGE.mulMat4Vec3(matrix,this.ftr);
+		var fbl = GLGE.mulMat4Vec3(matrix,this.fbl);
+		var fbr = GLGE.mulMat4Vec3(matrix,this.fbr);
+		
+		return new Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr);	
+	}
+}
+GLGE.Object.prototype.FrustrumCast = function(frustrum)
+{
+	  if(this.InvisibleToCPUPick || this.getVisible() == false)
+		return null;
+
+	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
+	  var mat;
+	  var mat2;
+	  
+	 
+	  mat = this.getModelMatrix().slice(0);
+	//  mat2 = this.getModelMatrix().slice(0);
+	//  mat[3] = 0;
+	//  mat[7] = 0;
+	 // mat[11] = 0;
+	  
+	  
+	  
+	 // mat[0] = 1;
+	 // mat[5] = 1;
+	 // mat[10] = 1;
+	  
+	 // mat2[0] = 1;
+	 // mat2[5] = 1;
+	 // mat2[10] = 1;
+	  
+	  mat = GLGE.inverseMat4(mat);
+	  var tfrustrum = frustrum.transformBy(mat);
+	  
+	  
+	  var ret = [];
+      if(this.mesh)
+	  {
+			//collide with the mesh
+			ret = this.mesh.FrustrumCast(tfrustrum);
+			
+			for(var i = 0; i < ret.length; i++)
+			{	
+				//move the normal and hit point into worldspace
+				var mat2 = this.getModelMatrix().slice(0);
+				ret[i].point = GLGE.mulMat4Vec3(mat2,ret[i].point);
+				mat2[3] = 0;
+				mat2[7] = 0;
+				mat2[11] = 0;
+				ret[i].norm = GLGE.mulMat4Vec3(mat2,ret[i].norm);
+				ret[i].norm = GLGE.scaleVec3(ret[i].norm,1.0/GLGE.lengthVec3(ret[i].norm));
+				ret[i].distance = GLGE.distanceVec3([0,0,0],ret[i].point);
+				ret[i].object = this;
+				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+			}
+	  }
+	  return ret;
+}
 
