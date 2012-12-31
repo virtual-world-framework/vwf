@@ -168,7 +168,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                if ( !node.glgeObject ) {
+                if ( !node.glgeObject && nodeID ) {
                     createLight.call( this, nodeID, childID, childName );
                 }
             } else if ( prototypes && isGlgeParticleSystemDefinition.call( this, prototypes ) ) {
@@ -179,7 +179,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     parentID: nodeID,
                     type: childExtendsID
                 };
-                if ( !node.glgeObject ) {
+                if ( !node.glgeObject && nodeID) {
                     createParticleSystem.call( this, nodeID, childID, childName );
                 }
             } else if ( prototypes && isGlgeNodeDefinition.call( this, prototypes ) ) {

@@ -1197,6 +1197,34 @@ function Editor()
 		
 		vwf_view.kernel.createChild(parent,name,proto,uri,callback);
 	}
+	this.createLight = function()
+	{
+				var proto  = { 
+                    extends: 'SandboxLight.vwf',
+					properties:{
+					  rotation: [ 1, 0, 0, 0 ],
+					  translation: [0, 0, 0],
+					  owner:document.PlayerNumber,
+					  type:'Light',
+					  DisplayName: _Editor.GetUniqueName('Light')
+					  }
+                    };
+		this.createChild('index-vwf',GUID(),proto,null,null); 
+	}
+	this.createParticleSystem = function()
+	{
+				var proto  = { 
+                    extends: 'SandboxParticleSystem.vwf',
+					properties:{
+					  rotation: [ 1, 0, 0, 0 ],
+					  translation: [0, 0, 0],
+					  owner:document.PlayerNumber,
+					  type:'ParticleSystem',
+					  DisplayName: _Editor.GetUniqueName('ParticleSystem')
+					  }
+                    };
+		this.createChild('index-vwf',GUID(),proto,null,null); 
+	}
 	var CreatePrim = function(type,translation,size,texture,owner,id)
 	{       
 			translation[0] = SnapTo(translation[0],MoveSnap);
@@ -2145,7 +2173,7 @@ function Editor()
 		this.selectionMarquee.css('top','100');
 		this.selectionMarquee.css('left','100');
 		this.selectionMarquee.css('z-index','100');
-		this.selectionMarquee.css('border','2px dashed gray');
+		this.selectionMarquee.css('border','2px dotted darkslategray');
 		this.selectionMarquee.css('border-radius','10px');
 		//this.selectionMarquee.css('box-shadow','0px 0px 10px lightgray, 0px 0px 10px lightgray inset');
 		this.selectionMarquee.mousedown(function(e){_Editor.mousedown(e);e.preventDefault();e.stopPropagation();return false;});
