@@ -348,6 +348,11 @@ scripts:
        findscene().setFogNear(100);
        findscene().setFogColor('#FFFFFF');
        this.updateCamera();
+       
+         if(this.id == 'Scene-vwf') return;
+          this.prerendercallback = this.placeNameTag.bind(this);
+          $(document).bind('prerender',this.prerendercallback);
+          this.createNameTag();
     }
     this.keyDown = function(e)
     {
@@ -989,6 +994,86 @@ scripts:
                 currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
     
     }
+    this.createNameTag = function()
+    {
+    
+      var newdiv = document.createElement('img');
+      $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
+      newdiv.style.position = 'fixed';
+      newdiv.id = "Player " + this.name + 'icon';
+      //newdiv.innerHTML = "" + this.name;
+      $(newdiv).attr('src','../vwf/view/editorview/images/icons/scene.png');
+      newdiv.style.left = '0px';
+      newdiv.style.top = '0px';
+      
+      $(document.body).append(newdiv);
+      $(newdiv).disableSelection();
+      //$(newdiv).mousedown(_Editor.mousedown);
+      //$(newdiv).mouseup(_Editor.mouseup);
+      //$(newdiv).mousemove(_Editor.mousemove);
+      $(newdiv).click(function(e){if(_Editor.GetSelectMode() != "None")  _Editor.SelectObject(this.id)}.bind(this));
+      this.nametag = newdiv;
+                 
+    }
+    this.deinitialize = function()
+    {
+       $(document).unbind('prerender',this.prerendercallback);
+       $(this.nametag).remove();
+    }
+    this.placeNameTag = function(e,viewprojection)
+    {
+      
+      var rootdiv = document.getElementById('index-vwf');
+      var h = rootdiv.style.height;
+      var w = rootdiv.style.width;
+      var wh = parseInt(h.substr(0,h.length-2));
+      var ww = parseInt(w.substr(0,w.length-2));
+      var div = this.nametag;
+      var pos = [0,0,0];
+      pos = [pos[0],pos[1],pos[2],1];
+         
+      
+      
+      var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+      screen[0] /= screen[3];
+      screen[1] /= screen[3];
+     
+      screen[0] /= 2;
+      screen[1] /= 2;
+      screen[2] /= 2;
+      screen[0] += .5;
+      screen[1] += .5;
+      
+  
+      screen[0] *= ww;
+      screen[1] *= wh;
+      
+     
+      screen[1] = wh - screen[1];
+
+      div.style.top = (screen[1]+35)  +  'px';
+      div.style.left = (screen[0]  - div.offsetWidth/2)  +'px';
+     
+     
+      if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
+      {
+            if(div.style.display != 'none')
+                div.style.display = 'none';
+      }
+      else
+      {
+          if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')
+             div.style.display = 'none';
+          if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
+             div.style.display = 'block';
+      }
+         
+      
+         
+    }    
+          
+
+	  
     
     
  

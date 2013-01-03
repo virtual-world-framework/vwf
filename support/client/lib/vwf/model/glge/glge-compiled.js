@@ -6853,7 +6853,7 @@ GLGE.Material.prototype.getFragmentShader=function(lights,colors,shaderInjection
 	shader=shader+"vec3 em=emit;\n"; 
 	shader=shader+"float al=alpha;\n"; 
 	shader=shader+"vec3 amblight=vec3(1.0,1.0,1.0);\n"; 
-	shader=shader+"vec4 normalmap= vec4(n,0.0);\n"
+	shader=shader+"vec4 normalmap= vec4(normalize(n),0.0);\n"
 	if(colors && this.vertexColorMode==GLGE.VC_BASE){
 		shader=shader+"vec4 color= vcolor;";
 		shader=shader+"al = vcolor.a;";
@@ -7300,9 +7300,9 @@ GLGE.Material.prototype.textureUniforms=function(gl,shaderProgram,lights,object)
 			      GLGE.setUniform3(gl,"3f",GLGE.getUniformLocation(gl,shaderProgram, "lightcolor"+i), lights[i].color.r,lights[i].color.g,lights[i].color.b);
 			      pc["lightcolor"][i]= { r: lights[i].color.r, g: lights[i].color.g, b: lights[i].color.b };
 			    }
-			    if(pc["lightAttenuation"][i]!=lights[i].constantAttenuation){
+			    if(pc["lightAttenuation"][i]!=lights[i].constantAttenuation+lights[i].linearAttenuation+lights[i].quadraticAttenuation){
 			      GLGE.setUniform3(gl,"3f",GLGE.getUniformLocation(gl,shaderProgram, "lightAttenuation"+i), lights[i].constantAttenuation,lights[i].linearAttenuation,lights[i].quadraticAttenuation);
-			      pc["lightAttenuation"][i]=lights[i].constantAttenuation;
+			      pc["lightAttenuation"][i]=lights[i].constantAttenuation+lights[i].linearAttenuation+lights[i].quadraticAttenuation;
 			    }
 			    if(pc["spotCosCutOff"][i]!=lights[i].spotCosCutOff){
 			      GLGE.setUniform(gl,"1f",GLGE.getUniformLocation(gl,shaderProgram, "spotCosCutOff"+i), lights[i].spotCosCutOff);
@@ -10333,7 +10333,7 @@ GLGE.Object.prototype.GLGenerateShader=function(gl){
 		    vertexStr.push("pos=GLGE_Position(vec4(pos.xyz, 1.0));\n");
 		}
 		vertexStr.push("pos = worldView * vec4(pos.xyz, 1.0);\n");
-		vertexStr.push("norm = worldInverseTranspose * vec4(norm.xyz, 1.0);\n");
+		vertexStr.push("norm = normalize(worldInverseTranspose * vec4(norm.xyz, 1.0));\n");
 		if(tangent) vertexStr.push("tang = (worldInverseTranspose*vec4(tang4.xyz,1.0)).xyz;\n");
 	}else{	
 		if(morph){
@@ -14726,7 +14726,7 @@ GLGE.ParticleSystem.prototype.setAccelerationFunction=function(func){
 * @param {function} func the new function
 */
 GLGE.ParticleSystem.prototype.setPositionFunction=function(func){
-	this.colorFunction=func;
+	this.positionFunction=func;
 	this.particles=null;
 }
 /**
@@ -14734,7 +14734,7 @@ GLGE.ParticleSystem.prototype.setPositionFunction=function(func){
 * @param {function} func the new function
 */
 GLGE.ParticleSystem.prototype.setColorFunction=function(func){
-	this.positionFunction=func;
+	this.colorFunction=func;
 	this.particles=null;
 }
 /**
@@ -14777,7 +14777,7 @@ GLGE.ParticleSystem.prototype.generateParticles=function(gl){
 	//create the face buffer
 	for(var i=0; i<num_particles;i=i+4){
 		this.faces.push(0+i,1+i,2+i);
-		this.faces.push(1+i,2+i,3+i);
+		this.faces.push(2+i,1+i,3+i);
 	}
 	this.facesGL=gl.createBuffer();
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.facesGL);

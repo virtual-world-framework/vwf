@@ -96,6 +96,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     pendingLoads: 0,
                 };
 
+				//sceneNode.glgeScene.vwfID = childID;
+				
                 if ( sceneNode.glgeScene.camera ) {
                         sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = sceneNode.glgeScene.camera;
                 } else {
@@ -379,8 +381,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 						//this node was created in whole by the VWF, so it can be deleted
 						if(! node.glgeObject.initializedFromAsset)
 						{
+							
 							if ( parent.removeChild ) parent.removeChild( obj );
 							node.glgeObject = undefined;
+							if(obj instanceof GLGE.Light)
+							{
+								var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+								sceneNode.glgeScene.updateAllPrograms();
+							}
 							//delete obj;
 						}
 						//This node is a sub node of an asset that was loaded by the VWF. Deleteing the VWF node should reset the asset sub node.
@@ -576,6 +584,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             glgeObject.setStaticMatrix(
                                 goog.vec.Mat4.transpose( transform, goog.vec.Mat4.create() )
                             );
+							if(glgeObject instanceof GLGE.Light)
+							{
+								var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+								sceneNode.glgeScene.updateMatrix();
+							}
                         }
 
                         break;
@@ -629,7 +642,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 value = setSceneProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
                             default:
-                                if ( !validProperty ) {
+                                if(glgeObject instanceof GLGE.Light)
+								{
+									value = setLightProperty.call( this, nodeID, propertyName, propertyValue );
+								}
+								if(glgeObject instanceof GLGE.ParticleSystem)
+								{
+									value = setParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
+								}
+								if ( !validProperty ) {
                                     value = undefined;
                                 }
                                 break;
@@ -802,6 +823,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             case "http-vwf-example-com-scene-vwf":
                                 value = getSceneProperty.call( this, nodeID, propertyName, propertyValue );
                                 break;
+							default:
+								
+								if(glgeObject instanceof GLGE.Light)
+									value = getLightProperty.call( this, nodeID, propertyName, propertyValue );
+								if(glgeObject instanceof GLGE.ParticleSystem)
+									value = getParticleSystemProperty.call( this, nodeID, propertyName, propertyValue );
+							    break;
                         }
                         break;    
 
@@ -1110,12 +1138,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function setParticleSystemProperty( nodeID, propertyName, propertyValue ) {
 
+		
         var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
         var value = propertyValue;
         switch ( propertyName ) {
             case "numberParticles":
                 node.glgeObject.setNumParticles( propertyValue );
                 break;
+			case "blendMode":
+                node.glgeObject.setBlend(propertyValue);
+                break;	
             case "lifeTime":
                 node.glgeObject.setLifeTime( propertyValue );
                 break;
@@ -1162,14 +1194,43 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setMinEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;
             case "startColor":
-                node.glgeObject.setStartColor( propertyValue );
+                node.glgeObject.startColor.r = propertyValue[0];
+				node.glgeObject.startColor.g = propertyValue[1];
+				node.glgeObject.startColor.b = propertyValue[2];
+				node.glgeObject.attribute = null;
                 break;
             case "endColor":
-                node.glgeObject.setEndColor( propertyValue );
+                node.glgeObject.endColor.r = propertyValue[0];
+				node.glgeObject.endColor.g = propertyValue[1];
+				node.glgeObject.endColor.b = propertyValue[2];
+				node.glgeObject.attribute = null;
                 break;
             case "image":
                 node.glgeObject.setImage( propertyValue );
                 break;
+			case "endAlpha":
+                node.glgeObject.endColor.a = propertyValue
+				node.glgeObject.attribute = null;
+                break;
+			case "startAlpha":
+                node.glgeObject.startColor.a = propertyValue
+				node.glgeObject.attribute = null;
+                break;
+			case "emitter":	
+				debugger;	
+				if(	propertyValue == 'box')
+				{
+					node.glgeObject.setPositionFunction(function(i){
+						return [Math.random()*3,Math.random()*3,Math.random()*3];
+					});
+				}
+				if(	propertyValue == 'point')
+				{
+					node.glgeObject.setPositionFunction(function(i){
+						return [0,0,0];				
+					});
+				}
+				break;
             default:
                 value = undefined;
                 break;
@@ -1299,7 +1360,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     // -- setLightProperty ------------------------------------------------------------------------
 
     function setLightProperty( nodeID, propertyName, propertyValue ) {
-
+		
         if ( propertyValue === undefined ) return;
         
         var node = this.state.nodes[nodeID]; // { name: childName, glgeObject: undefined }
@@ -1335,10 +1396,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setAttenuationQuadratic( propertyValue );
                 break;
 
-            case "spotCosCutOff":
-                node.glgeObject.setSpotCosCutOff( propertyValue );
-                break;
-
             case "spotExponent":
                 node.glgeObject.setSpotExponent( propertyValue );
                 break;
@@ -1350,7 +1407,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             case "specular":
                 node.glgeObject.specular = propertyValue; // no setSpecular() in GLGE 0.7
                 break;
-
+			case "color":
+				node.glgeObject.originalColor = propertyValue;
+				node.glgeObject.color.r = node.glgeObject.originalColor[0] * (node.glgeObject.brightness || 1); 
+				node.glgeObject.color.g = node.glgeObject.originalColor[1] * (node.glgeObject.brightness || 1);
+				node.glgeObject.color.b = node.glgeObject.originalColor[2] * (node.glgeObject.brightness || 1);
+                break;
+			case "brightness":
+				node.glgeObject.brightness = propertyValue;
+				if(node.glgeObject.originalColor)
+				{
+					node.glgeObject.color.r = node.glgeObject.originalColor[0] * (node.glgeObject.brightness || 1); 
+					node.glgeObject.color.g = node.glgeObject.originalColor[1] * (node.glgeObject.brightness || 1);
+					node.glgeObject.color.b = node.glgeObject.originalColor[2] * (node.glgeObject.brightness || 1);
+				}
+                break;
             case "samples":
                 node.glgeObject.setShadowSamples( propertyValue );
                 break;
@@ -1423,87 +1494,89 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     // -- getParticleSystemProperty ------------------------------------------------------------------------------
 
     function getParticleSystemProperty( nodeID, propertyName, propertyValue ) {
-
+	
         var value = undefined;
         var obj;
         var node = this.state.nodes[nodeID];
         if ( node && node.glgeObject ) {
             var ps = node.glgeObject;
+			
             switch ( propertyName ) {
+			
                 case "numberParticles":
-                    if ( ps.getNumParticles )
-                        value = ps.getNumParticles();
+                    if ( ps.numParticles )
+                        value = ps.numParticles;
                     break;
                 case "maxLifeTime":
-                    if ( ps.getMaxLifeTime )
-                        value = ps.getMaxLifeTime();
+                    if ( ps.maxLifeTime )
+                        value = ps.maxLifeTime;
                     break;
                 case "minLifeTime":
-                    if ( ps.getMinLifeTime )
-                    value = ps.getMinLifeTime();
+                    if ( ps.minLifeTime )
+                    value = ps.minLifeTime;
                     break;
                 case "startSize":
-                    if ( ps.getStartSize )
-                        value = ps.getStartSize();
+                    if ( ps.startSize )
+                        value = ps.startSize;
                     break;
                 case "endSize":
-                    if ( ps.getEndSize )
-                        value = ps.getEndSize();
+                    if ( ps.endSize )
+                        value = ps.endSize;
                     break;
                 case "loop":
                     if ( ps.getLoop )
                         value = ps.getLoop();
                     break;
                 case "maxVelocity":
-                    if ( ps.getMaxVelocity ) {
-                        obj = ps.getMaxVelocity();    
+                    if ( ps.startMaxVelocity ) {
+                        obj = ps.startMaxVelocity;    
                         value = [ obj.x, obj.y, obj.z ]; 
                     }
                     break;            
                 case "minVelocity":
-                    if ( ps.getMinVelocity ) {
-                        obj = ps.getMinVelocity();
+                    if ( ps.startMinVelocity ) {
+                        obj = ps.startMinVelocity;
                         value = [ obj.x, obj.y, obj.z ];
                     }
                     break;    
                 case "maxStartAcceleration":
-                    if ( ps.getMaxStartAccelertaion ) {
-                        obj = ps.getMaxStartAccelertaion();
+                    if ( ps.startMaxAcceleration ) {
+                        obj = ps.startMaxAcceleration;
                         value = [ obj.x, obj.y, obj.z ];
                     }
                     break;
                 case "maxEndAcceleration":
-                    if ( ps.getMaxEndAccelertaion ) {
-                       obj = ps.getMaxEndAccelertaion();
+                    if ( ps.endMaxAcceleration ) {
+                       obj = ps.endMaxAcceleration;
                        value = [ obj.x, obj.y, obj.z ];
                     }
                     break;
                 case "minStartAcceleration":
-                    if ( ps.getMinStartAccelertaion ) {
-                        obj = ps.getMinStartAccelertaion();
+                    if ( ps.startMinAcceleration ) {
+                        obj = ps.startMinAcceleration;
                         value = [ obj.x, obj.y, obj.z ];
                     }
                     break;
                 case "minEndAcceleration":
-                    if ( ps.getMinEndAccelertaion )
-                        obj = ps.getMinEndAccelertaion();
+                    if ( ps.endMinAcceleration )
+                        obj = ps.endMinAcceleration;
                         value = [ obj.x, obj.y, obj.z ]; 
                     break;
                 case "startColor":
-                    if ( ps.getStartColor ) {
-                        obj = ps.getStartColor();
-                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
+                    if ( ps.startColor ) {
+                        obj = ps.startColor;
+                        value = [ obj.r, obj.b, obj.g];
                     }
                     break;
                 case "endColor":
-                    if ( ps.getEndColor ){
-                        obj = ps.getEndColor();
-                        value = obj.a ? [ obj.r*255, obj.b*255, obj.g*255, obj.a*255 ] : [ obj.r*255, obj.b*255, obj.g*255 ];
+                    if ( ps.endColor ){
+                        obj = ps.endColor;
+                        value = [ obj.r, obj.b, obj.g];
                     }
                     break;
                 case "image":
                     if ( ps.getImage )
-                        value = ps.getImage();
+                        value = ps.getImage().src;
                     break;
                 default:
                     value = undefined;
@@ -1803,6 +1876,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             child.glgeObject.name = childName;
             child.name = childName;
             child.uid = child.glgeObject.uid;
+			child.glgeObject.vwfID = childID;
             addGlgeChild.call( this, nodeID, childID );
         } 
                
@@ -1856,6 +1930,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
         if ( glgeParent ) {
             var ps = new GLGE.ParticleSystem();
+			ps.vwfID = childID;
             this.state.nodes[ childID ].glgeObject = ps; 
             glgeParent.addObject( ps );
         }

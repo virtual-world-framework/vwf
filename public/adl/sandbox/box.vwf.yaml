@@ -122,8 +122,8 @@ scripts:
 - |
     this.initialize = function(){
         
-        
-        if(this.uri == "box.vwf")
+       
+        if(this.uri == "box-vwf")
             return;
 
        var primobj = new GLGE.Object();
@@ -161,6 +161,7 @@ scripts:
 
     this.BuildCube = function(length,width,height,lengthsegs,widthsegs,heightsegs,base2pivot)
     {
+        
         var positions = [];
         var faces = [];
         var uvs = []
@@ -379,7 +380,7 @@ scripts:
                 faces.push(thisj + faceRightpos);
             }
         }
-       
+        
         var planemesh = new GLGE.Mesh();
           
         planemesh.setPositions(positions);

@@ -278,9 +278,19 @@ node.id = childID; // TODO: move to vwf/model/object
 
         deletingNode: function( nodeID ) {
 
+			
             var child = this.nodes[nodeID];
             var node = child.parent;
 
+			var scriptText = "this.deinitialize && this.deinitialize()";
+
+            try {
+                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+            } catch ( e ) {
+                this.logger.warnc( "deinitializingNode", childID,
+                    "exception in deinitialize:", utility.exceptionMessage( e ) );
+            }
+			
             if ( node ) {
 
                 var index = node.children.indexOf( child );

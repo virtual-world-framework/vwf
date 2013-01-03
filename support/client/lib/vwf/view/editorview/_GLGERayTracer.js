@@ -42,27 +42,6 @@ GLGE.Scene.prototype.CPUPick = function(origin,direction,maxdist)
 }
 
 
-// Return all hits, takes a list of planes
-GLGE.Scene.prototype.FrustrumCast = function(frustrum)
-{
-	
-	  //concat all hits from children	  
-      var hitlist = [];
-	  for(var i=0; i <  this.children.length; i++)
-	  {
-	     if(this.children[i].FrustrumCast)
-		 {
-			 var hit = this.children[i].FrustrumCast(frustrum);
-			 if(hit)
-			 {
-				for(var j =0; j<hit.length; j++)
-					hitlist.push(hit[j]);
-			 }
-		 }
-	  }
-	  return hitlist;
-}
-
 //Get the bounding box for a group
 GLGE.Group.prototype.GetBoundingBox = function(local)
 {
@@ -288,6 +267,16 @@ face.prototype.intersectFrustrum = function(frustrum)
 		var norm = this.norm;
 		return {point:point,norm:norm,face:this};
 	}
+	for(var i=0; i < 4; i ++)
+	{
+		
+		if(this.intersect1(frustrum.cornerRays[i].o,frustrum.cornerRays[i].d))
+		{
+			var point = this.c;
+			var norm = this.norm;
+			return {point:point,norm:norm,face:this};	
+		}
+	}
 	return null;
 }
 
@@ -480,6 +469,11 @@ BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum)
 	for(var i =0; i < 8; i++)
 	{
 		if(pointInFrustrum(points[i],frustrum))
+			return [true];
+	}
+	for(var i=0; i < 4; i ++)
+	{
+		if(this.intersect(frustrum.cornerRays[i].o,frustrum.cornerRays[i].d).length > 0)
 			return [true];
 	}
 	return [];
@@ -928,9 +922,9 @@ GLGE.Mesh.prototype.FrustrumCast = function(frustrum)
 	   	
 	 var intersections = [];
 	 //try to reject based on bounding box.
-	 //var bbhit = this.BoundingBox.intersectFrustrum(planes); 
+	 var bbhit = this.BoundingBox.intersectFrustrum(frustrum); 
 	
-	 //if(bbhit.length > 0)
+	 if(bbhit.length > 0)
 	 {
 		 //build the octree or the facelist
 		 if(!this.RayTraceAccelerationStructure || this.dirtyMesh)
@@ -1002,90 +996,7 @@ GLGE.Object.prototype.CPUPick = function(origin,direction,maxdist)
 	  }
 	  return ret;
 }
-GLGE.Light.prototype.CPUPick = function(origin,direction,maxdist)
-{
-	  
 
-	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
-	  var mat = this.getModelMatrix().slice(0);
-	  mat = GLGE.inverseMat4(mat);
-	  var newo = GLGE.mulMat4Vec3(mat,origin);
-	  var nmaxdist = maxdist;// * Math.abs(mat[0]);
-	  mat = this.getModelMatrix().slice(0);
-	  mat[3] = 0;
-	  mat[7] = 0;
-	  mat[11] = 0;
-	  mat = GLGE.inverseMat4(mat);
-      var newd = GLGE.mulMat4Vec3(mat,direction);
-	  
-	  
-	  
-	  var ret = [];
-      
-			
-			//collide with the mesh
-			ret = this.GetBoundingBox().intersect(newo,newd);
-			
-			for(var i = 0; i < ret.length; i++)
-			{	
-				
-				//move the normal and hit point into worldspace
-				var mat2 = this.getModelMatrix().slice(0);
-				ret[i] = {};
-				ret[i].point = GLGE.mulMat4Vec3(mat2,[0,0,0]);
-				mat2[3] = 0;
-				mat2[7] = 0;
-				mat2[11] = 0;
-				ret[i].norm = GLGE.mulMat4Vec3(mat2,[0,0,1]);
-				ret[i].distance = GLGE.distanceVec3(origin,ret[i].point);
-				ret[i].object = this;
-				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
-			}
-	  
-	  return ret;
-}
-GLGE.ParticleSystem.prototype.CPUPick = function(origin,direction,maxdist)
-{
-	  
-
-	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
-	  var mat = this.getModelMatrix().slice(0);
-	  mat = GLGE.inverseMat4(mat);
-	  var newo = GLGE.mulMat4Vec3(mat,origin);
-	  var nmaxdist = maxdist;// * Math.abs(mat[0]);
-	  mat = this.getModelMatrix().slice(0);
-	  mat[3] = 0;
-	  mat[7] = 0;
-	  mat[11] = 0;
-	  mat = GLGE.inverseMat4(mat);
-      var newd = GLGE.mulMat4Vec3(mat,direction);
-	  
-	  
-	  
-	  var ret = [];
-      
-			
-			//collide with the mesh
-			ret = this.GetBoundingBox().intersect(newo,newd);
-			
-			for(var i = 0; i < ret.length; i++)
-			{	
-				
-				//move the normal and hit point into worldspace
-				var mat2 = this.getModelMatrix().slice(0);
-				ret[i] = {};
-				ret[i].point = GLGE.mulMat4Vec3(mat2,[0,0,0]);
-				mat2[3] = 0;
-				mat2[7] = 0;
-				mat2[11] = 0;
-				ret[i].norm = GLGE.mulMat4Vec3(mat2,[0,0,1]);
-				ret[i].distance = GLGE.distanceVec3(origin,ret[i].point);
-				ret[i].object = this;
-				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
-			}
-	  
-	  return ret;
-}
 function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
 {
 	this.ntl = ntl;
@@ -1113,6 +1024,19 @@ function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
 	this.topplane = {point:this.ftl,normal:GLGE.scaleVec3(this.topnorm,-1)};
 	this.bottomplane = {point:this.fbl,normal:GLGE.scaleVec3(this.bottomnorm,-1)};
 	this.planes = [this.nearplane,this.farplane,this.leftplane,this.rightplane,this.topplane,this.bottomplane];
+	
+	this.cornerRays = [];
+	var rayTL = GLGE.toUnitVec3(GLGE.subVec3(this.ftl,this.ntl));
+	var rayTR = GLGE.toUnitVec3(GLGE.subVec3(this.ftr,this.ntr));
+	var rayBL = GLGE.toUnitVec3(GLGE.subVec3(this.fbl,this.nbl));
+	var rayBR = GLGE.toUnitVec3(GLGE.subVec3(this.fbr,this.nbr));
+	
+	this.cornerRays.push({o:this.ntl,d:rayTL});
+	this.cornerRays.push({o:this.ntr,d:rayTR});
+	this.cornerRays.push({o:this.nbl,d:rayBL});
+	this.cornerRays.push({o:this.nbr,d:rayBR});
+	
+	
 	this.transformBy = function(matrix)
 	{
 		var ntl = GLGE.mulMat4Vec3(matrix,this.ntl);
@@ -1128,6 +1052,7 @@ function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
 		return new Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr);	
 	}
 }
+
 GLGE.Object.prototype.FrustrumCast = function(frustrum)
 {
 	  if(this.InvisibleToCPUPick || this.getVisible() == false)
@@ -1181,5 +1106,180 @@ GLGE.Object.prototype.FrustrumCast = function(frustrum)
 	  }
 	  return ret;
 }
-GLGE.ParticleSystem.prototype.GetBoundingBox = function(){return new BoundingBoxRTAS([-1,-1,-1],[1,1,1]);}
-GLGE.Light.prototype.GetBoundingBox = function(){return new BoundingBoxRTAS([-1,-1,-1],[1,1,1]);}
+
+/* GLGE.Light.prototype.CPUPick = function(origin,direction,maxdist)
+{
+	  
+
+	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
+	  var mat = this.getModelMatrix().slice(0);
+	  mat = GLGE.inverseMat4(mat);
+	  var newo = GLGE.mulMat4Vec3(mat,origin);
+	  var nmaxdist = maxdist;// * Math.abs(mat[0]);
+	  mat = this.getModelMatrix().slice(0);
+	  mat[3] = 0;
+	  mat[7] = 0;
+	  mat[11] = 0;
+	  mat = GLGE.inverseMat4(mat);
+      var newd = GLGE.mulMat4Vec3(mat,direction);
+	  
+	  
+	  
+	  var ret = [];
+      
+			
+			//collide with the mesh
+			ret = this.GetBoundingBox().intersect(newo,newd);
+			
+			for(var i = 0; i < ret.length; i++)
+			{	
+				
+				//move the normal and hit point into worldspace
+				var mat2 = this.getModelMatrix().slice(0);
+				ret[i] = {};
+				ret[i].point = GLGE.mulMat4Vec3(mat2,[0,0,0]);
+				mat2[3] = 0;
+				mat2[7] = 0;
+				mat2[11] = 0;
+				ret[i].norm = GLGE.mulMat4Vec3(mat2,[0,0,1]);
+				ret[i].distance = GLGE.distanceVec3(origin,ret[i].point);
+				ret[i].object = this;
+				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+			}
+	  
+	  return ret;
+} */
+/*
+GLGE.ParticleSystem.prototype.CPUPick = function(origin,direction,maxdist)
+{
+	  
+
+	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
+	  var mat = this.getModelMatrix().slice(0);
+	  mat = GLGE.inverseMat4(mat);
+	  var newo = GLGE.mulMat4Vec3(mat,origin);
+	  var nmaxdist = maxdist;// * Math.abs(mat[0]);
+	  mat = this.getModelMatrix().slice(0);
+	  mat[3] = 0;
+	  mat[7] = 0;
+	  mat[11] = 0;
+	  mat = GLGE.inverseMat4(mat);
+      var newd = GLGE.mulMat4Vec3(mat,direction);
+	  
+	  
+	  
+	  var ret = [];
+      
+			
+			//collide with the mesh
+			ret = this.GetBoundingBox().intersect(newo,newd);
+			
+			for(var i = 0; i < ret.length; i++)
+			{	
+				
+				//move the normal and hit point into worldspace
+				var mat2 = this.getModelMatrix().slice(0);
+				ret[i] = {};
+				ret[i].point = GLGE.mulMat4Vec3(mat2,[0,0,0]);
+				mat2[3] = 0;
+				mat2[7] = 0;
+				mat2[11] = 0;
+				ret[i].norm = GLGE.mulMat4Vec3(mat2,[0,0,1]);
+				ret[i].distance = GLGE.distanceVec3(origin,ret[i].point);
+				ret[i].object = this;
+				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+			}
+	  
+	  return ret;
+}
+*/
+
+
+function findscene(node)
+{
+	while(node && !(node instanceof GLGE.Scene))
+		node = node.parent;
+	return node;	
+}
+
+GLGE.Light.prototype.GetBoundingBox = function()
+{
+	var bound = 1;
+	var camera = findscene(this).camera;
+	var cMat = camera.getModelMatrix();
+    var camerapos = [cMat[3],cMat[7],cMat[11]];	
+	var thismat = this.getModelMatrix();
+	var thispos = [thismat[3],thismat[7],thismat[11]];
+	bound = GLGE.distanceVec3(camerapos,thispos)/300;
+	return new BoundingBoxRTAS([-bound,-bound,-bound],[bound,bound,bound]);
+
+}
+GLGE.ParticleSystem.prototype.GetBoundingBox = GLGE.Light.prototype.GetBoundingBox;
+GLGE.Scene.prototype.GetBoundingBox = function(){return new BoundingBoxRTAS([-.0001,-.0001,-.0001],[.0001,.0001,.0001]);}
+//Do the actuall intersection with the mesh;
+GLGE.Light.prototype.FrustrumCast = function(frustrum)
+{
+	
+	
+	//try to reject based on bounding box.
+	var mat2 = this.getModelMatrix().slice(0);
+	var mat = GLGE.inverseMat4(mat2);
+	var tfrustrum = frustrum.transformBy(mat);
+	var ret = this.GetBoundingBox().intersectFrustrum(tfrustrum); 
+	
+	for(var i = 0; i < ret.length; i++)
+	{	
+		//move the normal and hit point into worldspace
+		
+		ret[i] = {};
+		ret[i].point = GLGE.mulMat4Vec3(mat2,[0,0,0]);
+		mat2[3] = 0;
+		mat2[7] = 0;
+		mat2[11] = 0;
+		ret[i].norm = GLGE.mulMat4Vec3(mat2,[0,0,1]);
+		ret[i].norm = GLGE.scaleVec3(ret[i].norm,1.0/GLGE.lengthVec3(ret[i].norm));
+		ret[i].distance = GLGE.distanceVec3([0,0,0],ret[i].point);
+		ret[i].object = this;
+		ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+	}
+	return ret;
+}
+
+GLGE.ParticleSystem.prototype.FrustrumCast = GLGE.Light.prototype.FrustrumCast;
+GLGE.Scene.prototype.FrustrumCast =  function(frustrum)
+{
+	
+	var hitlist = this.GetBoundingBox().intersectFrustrum(frustrum); 
+	
+	for(var i = 0; i < hitlist.length; i++)
+	{	
+		//move the normal and hit point into worldspace
+		
+		hitlist[i] = {};
+		hitlist[i].point = [0,0,0];
+		
+		hitlist[i].norm = [0,0,1];
+		hitlist[i].norm = GLGE.scaleVec3(hitlist[i].norm,1.0/GLGE.lengthVec3(hitlist[i].norm));
+		hitlist[i].distance = GLGE.distanceVec3([0,0,0],hitlist[i].point);
+		hitlist[i].object = this;
+		hitlist[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+	}
+	
+	
+	  //concat all hits from children	  
+     
+	  for(var i=0; i <  this.children.length; i++)
+	  {
+	     if(this.children[i].FrustrumCast)
+		 {
+			 var hit = this.children[i].FrustrumCast(frustrum);
+			 if(hit)
+			 {
+				for(var j =0; j<hit.length; j++)
+					hitlist.push(hit[j]);
+			 }
+		 }
+	  }
+	  return hitlist;
+	
+}

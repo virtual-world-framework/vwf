@@ -491,12 +491,21 @@ function MapBrowser()
 		}
 	}});
 	$(document.head).append('<script type="text/javascript" src="textures/textureLibrary.js"></script>');
-	
+	this.setTexturePickedCallback = function(e)
+	{
+		this.texturePickedCallback = e;
+	}
 	this.texturePicked = function()
 	{
 		
 		var texture = $(this).attr('texture');
-		_MaterialEditor.setActiveTextureSrc(texture);
+		if(_MapBrowser.texturePickedCallback)
+		{
+			_MapBrowser.texturePickedCallback(texture);
+		}else
+		{
+			_MaterialEditor.setActiveTextureSrc(texture);
+		}
 	}
 	
 	this.BuildGUI = function()

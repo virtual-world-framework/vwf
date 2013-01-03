@@ -15,13 +15,154 @@ extends: http://vwf.example.com/light.vwf
 methods:
 properties:
   lightType: "directional"
+  brightness: 1
   constantAttenuation: 1
   type: "Light"
   EditorData:
     brightness:
       displayname: brightness
-      property: amount
+      property: brightness
       type: slider
       min: 0
       max: 5
       step: .01
+    spotConeAngle:
+      displayname: "Spot Cone Angle"
+      property: spotCosCutOff
+      type: slider
+      min: 0
+      max: 3.14
+      step: .01 
+    constantAttenuation:
+      displayname: "constant Attenuation"
+      property: constantAttenuation
+      type: slider
+      min: 0
+      max: 300
+      step: .1
+    linearAttenuation:
+      displayname: "linear Attenuation"
+      property: linearAttenuation
+      type: slider
+      min: 0
+      max: 3
+      step: .0001 
+    quadraticAttenuation:
+      displayname: "quadratic Attenuation"
+      property: quadraticAttenuation
+      type: slider
+      min: .01
+      max: 3
+      step: .0001
+    spotExponent:
+      displayname: "Spot Exponent"
+      property: spotExponent
+      type: slider
+      min: 0
+      max: 30
+      step: .01       
+    color:
+      displayname: "Diffuse Color"
+      property: color
+      type: color
+    ZZZLightType:
+      displayname: "Light Type"
+      property: lightType
+      type: choice
+      labels: 
+        - Spot
+        - Point
+        - Directional
+      values:
+        - spot
+        - point
+        - directional       
+scripts:
+-  |
+    this.initialize = function()
+    {
+          
+          if(this.id == 'SandboxLight-vwf') return;
+          this.prerendercallback = this.placeNameTag.bind(this);
+          $(document).bind('prerender',this.prerendercallback);
+          this.createNameTag();
+          
+        
+    }
+    this.createNameTag = function()
+    {
+    
+      var newdiv = document.createElement('img');
+      $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
+      newdiv.style.position = 'fixed';
+      newdiv.id = "Player " + this.name + 'icon';
+      //newdiv.innerHTML = "" + this.name;
+      $(newdiv).attr('src','../vwf/view/editorview/images/icons/light_icon.png');
+      newdiv.style.left = '0px';
+      newdiv.style.top = '0px';
+      
+      $(document.body).append(newdiv);
+      $(newdiv).disableSelection();
+      //$(newdiv).mousedown(_Editor.mousedown);
+      //$(newdiv).mouseup(_Editor.mouseup);
+      //$(newdiv).mousemove(_Editor.mousemove);
+      $(newdiv).click(function(e){if(_Editor.GetSelectMode() != "None") _Editor.SelectObject(this.id)}.bind(this));
+      this.nametag = newdiv;
+                 
+    }
+    this.deinitialize = function()
+    {
+       $(document).unbind('prerender',this.prerendercallback);
+       $(this.nametag).remove();
+    }
+    this.placeNameTag = function(e,viewprojection)
+    {
+      
+      var rootdiv = document.getElementById('index-vwf');
+      var h = rootdiv.style.height;
+      var w = rootdiv.style.width;
+      var wh = parseInt(h.substr(0,h.length-2));
+      var ww = parseInt(w.substr(0,w.length-2));
+      var div = this.nametag;
+      var pos = this.translation;
+      pos = [pos[0],pos[1],pos[2],1];
+         
+      
+      
+      var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+      screen[0] /= screen[3];
+      screen[1] /= screen[3];
+     
+      screen[0] /= 2;
+      screen[1] /= 2;
+      screen[2] /= 2;
+      screen[0] += .5;
+      screen[1] += .5;
+      
+  
+      screen[0] *= ww;
+      screen[1] *= wh;
+      
+     
+      screen[1] = wh - screen[1];
+
+      div.style.top = (screen[1]+35)  +  'px';
+      div.style.left = (screen[0]  - div.offsetWidth/2)  +'px';
+     
+     
+      if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
+      {
+            if(div.style.display != 'none')
+                div.style.display = 'none';
+      }
+      else
+      {
+          if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')
+             div.style.display = 'none';
+          if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
+             div.style.display = 'block';
+      }
+         
+      
+         
+    }

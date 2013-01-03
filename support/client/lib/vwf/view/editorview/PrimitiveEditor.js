@@ -46,22 +46,22 @@ function PrimitiveEditor()
 						'<div>'+
 							"<div class='EditorLabel'>Translation</div>" +
 							"<div id='Translation'>" +
-							"<input type='text' class='TransformEditorInput' id='PositionX'/>" +
-							"<input type='text' class='TransformEditorInput' id='PositionY'/>" +
-							"<input type='text' class='TransformEditorInput' id='PositionZ'/>" +
+							"<input type='number' class='TransformEditorInput' id='PositionX'/>" +
+							"<input type='number' class='TransformEditorInput' id='PositionY'/>" +
+							"<input type='number' class='TransformEditorInput' id='PositionZ'/>" +
 							"</div>"+
 							"<div class='EditorLabel'>Rotation</div>" +
 							"<div id='Rotation'>" +
-							"<input type='text' class='TransformEditorInput' id='RotationX'/>" +
-							"<input type='text' class='TransformEditorInput' id='RotationY'/>" +
-							"<input type='text' class='TransformEditorInput' id='RotationZ'/>" +
-							"<input type='text' class='TransformEditorInput' id='RotationW'/>" +
+							"<input type='number' class='TransformEditorInput' id='RotationX'/>" +
+							"<input type='number' class='TransformEditorInput' id='RotationY'/>" +
+							"<input type='number' class='TransformEditorInput' id='RotationZ'/>" +
+							"<input type='number' class='TransformEditorInput' id='RotationW'/>" +
 							"</div>"+
 							"<div class='EditorLabel'>Scale</div>" +
 							"<div id='Scale'>" +
-							"<input type='text' class='TransformEditorInput' id='ScaleX'/>" +
-							"<input type='text' class='TransformEditorInput' id='ScaleY'/>" +
-							"<input type='text' class='TransformEditorInput' id='ScaleZ'/>" +
+							"<input type='number' class='TransformEditorInput' id='ScaleX'/>" +
+							"<input type='number' class='TransformEditorInput' id='ScaleY'/>" +
+							"<input type='number' class='TransformEditorInput' id='ScaleZ'/>" +
 							"</div>"+
 						'</div>'+					
 									
@@ -227,7 +227,7 @@ function PrimitiveEditor()
 		var prop = $(this).attr('propname');
 		$('#'+id+prop+'value').val(ui.value);
 		var amount = ui.value;
-		_PrimitiveEditor.setProperty(id,prop,amount);
+		_PrimitiveEditor.setProperty(id,prop,parseFloat(amount));
 	}
 	this.primPropertyTypein = function(e,ui)
 	{
@@ -237,7 +237,7 @@ function PrimitiveEditor()
 		var amount = $(this).val();
 		var slider = $(this).attr('slider');
 		$(slider).slider('value',amount);
-		_PrimitiveEditor.setProperty(id,prop,amount);
+		_PrimitiveEditor.setProperty(id,prop,parseFloat(amount));
 	}
 	this.primPropertyValue = function(e,ui)
 	{
@@ -281,7 +281,7 @@ function PrimitiveEditor()
 			{
 				var inputstyle = "";
 				$('#basicSettings'+node.id).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">'+editordata[i].displayname+': </div>');
-				$('#basicSettings'+node.id).append('<input class="primeditorinputbox" style="'+inputstyle+'" id="'+node.id+editordata[i].property+'value"></input>');
+				$('#basicSettings'+node.id).append('<input class="primeditorinputbox" style="'+inputstyle+'" type="number" id="'+node.id+editordata[i].property+'value"></input>');
 				$('#'+node.id+editordata[i].property+'value').val(vwf.getProperty(node.id,editordata[i].property));
 				$('#'+node.id+editordata[i].property+'value').change(this.primPropertyTypein);
 				$('#'+node.id+editordata[i].property+'value').attr("nodename",node.id);
@@ -324,6 +324,146 @@ function PrimitiveEditor()
 				$('#' + id).buttonset();
 				
 				//$('#'+i).
+			}
+			if(editordata[i].type == 'rangeslider')
+			{
+				$('#basicSettings'+node.id).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">'+editordata[i].displayname+': </div>');
+				$('#basicSettings'+node.id).append('<div style="display: block;margin: 5px;" id="'+node.id+i+'" nodename="'+node.id+'" propnamemax="'+editordata[i].property[2]+'" propnamemin="'+editordata[i].property[1]+'"/>');
+				
+				var setval = vwf.getProperty(node.id,editordata[i].property[0]);
+				var minval = vwf.getProperty(node.id,editordata[i].property[1]);
+				var maxval = vwf.getProperty(node.id,editordata[i].property[2]);
+				var val = [minval || editordata[i].min, maxval || editordata[i].max]
+				$('#'+node.id+i).slider({range:false,step:parseFloat(editordata[i].step),min:parseFloat(editordata[i].min),max:parseFloat(editordata[i].max),values:val,
+					slide:function(e, ui)
+					{
+						var propmin = $(this).attr('propnamemin');
+						var propmax = $(this).attr('propnamemax');
+						var nodeid = $(this).attr('nodename');
+						_PrimitiveEditor.setProperty(nodeid,propmin,parseFloat(ui.values[0]));
+						_PrimitiveEditor.setProperty(nodeid,propmax,parseFloat(ui.values[1]));
+					},
+					stop:function(e, ui){
+						var propmin = $(this).attr('propnamemin');
+						var propmax = $(this).attr('propnamemax');
+						var nodeid = $(this).attr('nodename');
+						_PrimitiveEditor.setProperty(nodeid,propmin,parseFloat(ui.values[0]));
+						_PrimitiveEditor.setProperty(nodeid,propmax,parseFloat(ui.values[1]));
+					}
+				});
+			}
+			if(editordata[i].type == 'rangevector')
+			{
+				var vecvalchanged = function(e)
+				{
+					debugger;
+					var propname = $(this).attr('propname');
+					var component = $(this).attr('component');
+					var nodeid = $(this).attr('nodename');
+					var thisid = $(this).attr('id');
+					thisid = thisid.substr(0,thisid.length - 1);
+					var x = $('#'+thisid+'X').val();
+					var y = $('#'+thisid+'Y').val();
+					var z = $('#'+thisid+'Z').val();
+								
+					_PrimitiveEditor.setProperty(nodeid,propname,[parseFloat(x),parseFloat(y),parseFloat(z)]);
+				}
+			
+				$('#basicSettings'+node.id).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">'+editordata[i].displayname+': </div>');
+				
+				var baseid = 'basicSettings'+node.id+i+'min';
+				
+				$('#basicSettings'+node.id).append('<div style="text-align:right"><div style="display:inline" >min:</div> <div style="display:inline-block;">'+
+															  '<input id="'+baseid+'X'+'" component="X" nodename="'+node.id+'" propname="'+editordata[i].property[0]+'" type="number" step="'+editordata[i].step+'" class="vectorinputfront"/>'+
+															  '<input id="'+baseid+'Y'+'" component="Y" nodename="'+node.id+'" propname="'+editordata[i].property[0]+'" type="number" step="'+editordata[i].step+'" class="vectorinput"/>'+
+															  '<input id="'+baseid+'Z'+'" component="Z" nodename="'+node.id+'" propname="'+editordata[i].property[0]+'" type="number" step="'+editordata[i].step+'" class="vectorinput"/>' +
+													'</div></div>');
+				
+				var propmin = vwf.getProperty(node.id, editordata[i].property[0]);
+				if(propmin)
+				{
+					$('#'+baseid+'X').val(propmin[0]);
+					$('#'+baseid+'Y').val(propmin[1]);
+					$('#'+baseid+'Z').val(propmin[2]);
+				}
+				$('#'+baseid+'X').change(vecvalchanged);
+				$('#'+baseid+'Y').change(vecvalchanged);
+				$('#'+baseid+'Z').change(vecvalchanged);
+				
+				baseid = 'basicSettings'+node.id+i+'max';
+				
+				
+				$('#basicSettings'+node.id).append('<div style="text-align:right"><div style="display:inline">max:</div> <div style="display:inline-block;">'+
+															  '<input id="'+baseid+'X'+'" component="X" nodename="'+node.id+'" propname="'+editordata[i].property[1]+'" type="number" step="'+editordata[i].step+'"  class="vectorinputfront"/>'+
+															  '<input id="'+baseid+'Y'+'" component="Y" nodename="'+node.id+'" propname="'+editordata[i].property[1]+'" type="number" step="'+editordata[i].step+'"  class="vectorinput"/>'+
+															  '<input id="'+baseid+'Z'+'" component="Z" nodename="'+node.id+'" propname="'+editordata[i].property[1]+'" type="number" step="'+editordata[i].step+'"  class="vectorinput"/>' +
+													'</div></div>');									
+				
+				var propmax = vwf.getProperty(node.id, editordata[i].property[1]);
+				if(propmax)
+				{
+					$('#'+baseid+'X').val(propmax[0]);
+					$('#'+baseid+'Y').val(propmax[1]);
+					$('#'+baseid+'Z').val(propmax[2]);
+				}
+				$('#'+baseid+'X').change(vecvalchanged);
+				$('#'+baseid+'Y').change(vecvalchanged);
+				$('#'+baseid+'Z').change(vecvalchanged);
+			}
+			if(editordata[i].type == 'map')
+			{
+				$('#basicSettings'+node.id).append('<div style="display: block;margin: 5px;" id="'+node.id+i+'" nodename="'+node.id+'" propname="'+editordata[i].property+'"/>');
+				$('#'+node.id+i).button({label:editordata[i].displayname});
+				$('#'+node.id+i).click(function(){
+					
+					
+					_MapBrowser.setTexturePickedCallback(function(e)
+					{
+						
+						var propname = $(this).attr('propname');
+						var nodename = $(this).attr('nodename');
+						_MapBrowser.setTexturePickedCallback(null);
+						_PrimitiveEditor.setProperty(nodename,propname,e);
+						_MapBrowser.hide();
+					
+					}.bind(this));
+					_MapBrowser.show();
+				});
+			}
+			if(editordata[i].type == 'color')
+			{
+				var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
+				$('#basicSettings'+node.id).append('<div style="margin-bottom:10px" id="'+node.id+i+'" />');
+				$('#'+node.id+i+'').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 15px;">'+editordata[i].displayname+': </div>');
+				$('#'+node.id+i+'').append('<div id="'+node.id+i+'ColorPicker" style="'+colorswatchstyle+'"></div>')
+				var spec = [0,1,0];
+				$('#'+node.id+i+'ColorPicker').css('background-color','rgb('+Math.floor(spec[0]*255)+','+Math.floor(spec[0]*255)+','+Math.floor(spec[0]*255)+')');
+				
+				var parentid = node.id+i+'ColorPicker';
+				
+				$('#'+node.id+i+'ColorPicker').ColorPicker({colorpickerId:parentid+'picker',onShow:function(e){$(e).fadeIn();},onHide:function(e){$(e).fadeOut();return false},
+				
+					
+					onSubmit:function(hsb, hex, rgb)
+					{
+						
+						$('#'+(this.attr('parentid'))).css('background-color',"#"+hex);
+						_PrimitiveEditor.setProperty(this.attr('nodeid'),this.attr('propname'),[rgb.r/255,rgb.g/255,rgb.b/255]);
+
+					},onChange:function(hsb, hex, rgb)
+					{
+						
+						
+						$('#'+(this.attr('parentid'))).css('background-color',"#"+hex);
+						_PrimitiveEditor.setProperty(this.attr('nodeid'),this.attr('propname'),[rgb.r/255,rgb.g/255,rgb.b/255]);
+					}
+				
+				});
+				
+				$('#'+$('#'+node.id+i+'ColorPicker').data('colorpickerId')).attr('parentid',parentid);;
+				$('#'+$('#'+node.id+i+'ColorPicker').data('colorpickerId')).attr('propname',editordata[i].property);
+				$('#'+$('#'+node.id+i+'ColorPicker').data('colorpickerId')).attr('nodeid',node.id);
+				
 			}
 		}
 		

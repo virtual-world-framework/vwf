@@ -95,6 +95,7 @@
 		margin: 0px;
 		padding: 0px;
 		color:grey;
+		height:16px;
 	}
 	.EditorLabel
 	{
@@ -209,6 +210,34 @@
 		background-color: #414141;
 		
 	}
+	.vectorinputfront
+	{
+		display: inline;
+		
+		padding: 0;
+		width: 50px;
+		border-radius: 6px 0px 0px 6px;
+		background: transparent;
+		text-align: center;
+		border-width: 1px;
+		color: grey;
+		height: 16px;
+		margin: 1px 0px 1px -2px;
+	}
+	.vectorinput
+	{
+		display: inline;
+		
+		padding: 0;
+		width: 50px;
+		border-radius: 0px 0px 0px 0px;
+		background: transparent;
+		text-align: center;
+		border-width: 1px;
+		color: grey;
+		height: 16px;
+		margin: 1px 0px 1px -2px;
+	}
 	.primeditorinputbox
 	{
 		display: inline;
@@ -220,6 +249,8 @@
 		text-align: center;
 		border-width: 1px;
 		color: grey;
+		height:16px;
+		margin:1px;
 	}
 	@media only screen and (max-height:1200px)
 	{

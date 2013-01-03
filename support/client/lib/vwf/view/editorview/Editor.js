@@ -173,7 +173,7 @@ function Editor()
 	{	
 		if(!newname) newname = 'Object';
 		newname = newname.replace(/[0-9]*$/g,"");
-		var nodes = vwf.models[0].model.nodes;
+		var nodes = vwf.models[3].model.objects;
 		var count = 1;
 		for(var i in nodes)
 		{
@@ -1434,6 +1434,7 @@ function Editor()
 	}.bind(this);
 	this.updateGizmoLocation = function()
 	{
+			
 			var childmat = this.findviewnode(this.GetSelectedVWFNode().id).getModelMatrix();
 			
 			lastpos[0] = [childmat[3],childmat[7],childmat[11]];
@@ -1577,8 +1578,11 @@ function Editor()
 				
 				MoveGizmo.setVisible(true);
 				
-				findviewnode(SelectedVWFNodes[s].id).setTransformMode(GLGE.P_MATRIX);
-				findviewnode(SelectedVWFNodes[s].id).setRotMatrix(GetRotationMatrix(findviewnode(SelectedVWFNodes[s].id).getLocalMatrix()));
+				if(findviewnode(SelectedVWFNodes[s].id))
+				{
+					findviewnode(SelectedVWFNodes[s].id).setTransformMode(GLGE.P_MATRIX);
+					findviewnode(SelectedVWFNodes[s].id).setRotMatrix(GetRotationMatrix(findviewnode(SelectedVWFNodes[s].id).getLocalMatrix()));
+				}
 			}
 			updateBoundsAndGizmoLoc();
 
@@ -1944,7 +1948,10 @@ function Editor()
 	{
 		for(var i =0; i<vwf.views.length;i++)
 		{
-			if(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].glgeObject) return vwf.views[i].state.nodes[id].glgeObject;
+			if(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].glgeObject ) return vwf.views[i].state.nodes[id].glgeObject ;
+			if(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.scenes && vwf.views[i].state.scenes[id] && vwf.views[i].state.scenes[id].glgeScene ) return vwf.views[i].state.scenes[id].glgeScene ;
+			
+			
 		}
 		return null;
 	}.bind(this);
