@@ -55,18 +55,36 @@
 
 				<!-- Convert source.txt using markdown converter: http://daringfireball.net/projects/markdown/dingus -->
 				<!-- INSERT MARKDOWN HERE -->
-<p>The Virtual World Framework (VWF) makes it easy to create web apps that are:</p>
+<p>Use the Virtual World Framework (VWF) to create apps that are:</p>
 
 <ul>
-  <li>3D (immerse yourself in a virtual world)</li>
-  <li>Collaborative (allow others to join you there)</li>
-  <li>Component-based (create reusable building blocks and use those from others to reduce development time)</li>
+  <li><strong>3D</strong></li>
+  <li><strong>Collaborative</strong></li>
+  <li><strong>Web-based</strong></li>
 </ul>
 
-<p>&hellip; all running in your web browser without a plugin!</p>
+<p>&hellip; and create them <strong>fast</strong>.</p>
 
-<iframe height="450" width="450" src="../duck/0000000000000000"></iframe>
-<iframe height="450" width="450" src="../duck/0000000000000000"></iframe>
+<script>
+  this.createAppUrl = function() {
+	var sessionId = "";
+	var chars = [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ];
+  	for ( var i = 0; i < 16; i++ )
+  		sessionId += chars[ Math.floor( Math.random() * 16 ) ];
+  	return "../duck/" + sessionId;
+  };
+
+  this.Url = this.createAppUrl();
+
+  this.createIframes = function() {
+    document.write( "<p>Imagine that you are in New York...</p>" );
+  	document.write( "<iframe height='455' width='455' src='" + this.Url + "'></iframe>" );
+    document.write( "<p>...and you're working with someone in San Francisco.</p>" );
+    document.write( "<p>Click the duck to see them spin in synchrony.</p>" );
+  	document.write( "<iframe height='455' width='455' src='" + this.Url + "'></iframe>" );
+  }();
+</script>
+
 
 				<!-- END MARKDOWN -->	
 	</div>

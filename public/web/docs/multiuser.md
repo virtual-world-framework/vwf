@@ -2,7 +2,7 @@
 
 # (This is a work in progress)
 
-All that is needed for a VWF app to become a multi-user app is for a second person to log in to the same url.  However, by default, both users share the same view of the virtual world.  Often, you will want your users to be different "characters" in the scene.  For this to happen, we need to create three things when a new user joins:
+All that is needed for a VWF app to become a multi-user app is for a second person to navigate to the same url.  However, by default, both users share the same view of the virtual world.  Often, you will want your users to be different "characters" in the scene.  For this to happen, we need to create three things when a new user joins:
 
 - A camera that the user's point of view will be rendered from
 - A 3D model for the user's avatar (optional if you don't want other users to be able to see them)
