@@ -57,7 +57,7 @@ VWF Branches
 =====================
 
 There are currently four VWF branches available on github:
-* master - This branch contains a stable release of VWF. However, this branch contains only a snapshot of the baseline, and is not currently the most recent stable version. Thus, on January 2, 2013, this branch will be moved and the apprentice branch migrated to master. 
-* apprentice - This branch contains the latest stable version of VWF. It will be migrated to master on January 2, 2013. 
+* master - This branch contains a stable release of VWF. However, this branch contains only a snapshot of the baseline, and is not currently the most recent stable version. Thus, on January 28, 2013, this branch will be moved and the apprentice branch migrated to master. 
+* apprentice - This branch contains the latest stable version of VWF. It will be migrated to master on February 18, 2013. 
 * integration - This branch serves as the main location for merging features from development into the stable baseline. 
 * development - This branch contains the latest development and new features of the framework. 
