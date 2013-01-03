@@ -2,6 +2,8 @@ Virtual World Framework
 =====================
 ---------------------
 
+**WARNING: The master branch contains only a snapshot of the VWF baseline, and is not currently the most recent stable version. On January 28, 2013, this branch will be moved and the apprentice branch migrated to master. To avoid interruption, please move over to using apprentice, the latest stable version of the framework.**
+
 The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing secure, scalable, component-based, and collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers. These technologies include:
 
 * HTML 5 – a significant upgrade in expressive power for the web
