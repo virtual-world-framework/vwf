@@ -1065,13 +1065,10 @@ scripts:
           if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
              div.style.display = 'block';
       }
-         
-      
-         
     }    
           
 
-	  
+        
     
     
  
