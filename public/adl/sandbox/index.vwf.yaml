@@ -280,8 +280,6 @@ methods:
   PM:
 scripts:
 - |
-
-
     this.initialize = function(){
  
        
