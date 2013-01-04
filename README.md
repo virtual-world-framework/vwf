@@ -20,7 +20,7 @@ Installation/Upgrade Instructions
 Windows
 -
 Download the latest VWF Windows Build zip file from: 
-<pre><code>http://localhost:3000/web/downloads.html
+<pre><code>http://virtualworldframework.com/web/downloads.html
 </code></pre>
 
 and then execute the _run.bat_ file provided at the root level of the extracted folder.
