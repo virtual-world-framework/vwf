@@ -309,7 +309,7 @@ methods:
   ## @function
   ##
   ## @param {Array} translation
-  ## @param {Number} duraion
+  ## @param {Number} duration
   ##
   ## @returns undefined
 
