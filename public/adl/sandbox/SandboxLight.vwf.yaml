@@ -106,7 +106,7 @@ scripts:
       //$(newdiv).mousedown(_Editor.mousedown);
       //$(newdiv).mouseup(_Editor.mouseup);
       //$(newdiv).mousemove(_Editor.mousemove);
-      $(newdiv).click(function(e){if(_Editor.GetSelectMode() != "None") _Editor.SelectObject(this.id)}.bind(this));
+      $(newdiv).click(function(e){$('index-vwf').focus(); if(_Editor.GetSelectMode() != "None") _Editor.SelectObject(this.id)}.bind(this));
       this.nametag = newdiv;
                  
     }

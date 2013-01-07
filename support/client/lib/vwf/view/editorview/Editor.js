@@ -1187,6 +1187,18 @@ function Editor()
 		vwf_view.kernel.setProperty(id,prop,val)
 		return true;
 	}
+	this.GetInsertPoint = function()
+	{
+			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
+			var ray = _Editor.GetCameraCenterRay();
+			var pick = _Editor.findscene().CPUPick(campos,ray);
+			var dxy = pick.distance;
+			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
+			
+			var dxy2 = _Editor.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
+			var newintersectxy2 = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy2));
+			return newintersectxy[2] > newintersectxy2[2]?newintersectxy:newintersectxy2;
+	}
 	this.createChild = function(parent,name,proto,uri,callback)
 	{
 		if(document.PlayerNumber == null)
@@ -1197,28 +1209,31 @@ function Editor()
 		
 		vwf_view.kernel.createChild(parent,name,proto,uri,callback);
 	}
-	this.createLight = function()
+	this.createLight = function(type,pos,owner)
 	{
+		
 				var proto  = { 
                     extends: 'SandboxLight.vwf',
 					properties:{
 					  rotation: [ 1, 0, 0, 0 ],
-					  translation: [0, 0, 0],
-					  owner:document.PlayerNumber,
+					  translation: pos,
+					  owner:owner,
 					  type:'Light',
+					  lightType:type,
 					  DisplayName: _Editor.GetUniqueName('Light')
 					  }
                     };
 		this.createChild('index-vwf',GUID(),proto,null,null); 
 	}
-	this.createParticleSystem = function()
+	this.createParticleSystem = function(type,pos,owner)
 	{
+	
 				var proto  = { 
                     extends: 'SandboxParticleSystem.vwf',
 					properties:{
 					  rotation: [ 1, 0, 0, 0 ],
-					  translation: [0, 0, 0],
-					  owner:document.PlayerNumber,
+					  translation: pos,
+					  owner:owner,
 					  type:'ParticleSystem',
 					  DisplayName: _Editor.GetUniqueName('ParticleSystem')
 					  }

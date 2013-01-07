@@ -130,7 +130,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		
 		$('#vwf-root').mouseup(function(e){_Editor.mouseup(e)});
 		$('#vwf-root').click(function(e){_Editor.click(e)});
-		$('#vwf-root').mouseleave(function(e){e.mouseleave = true; _Editor.mouseup(e)});
+		//$('#vwf-root').mouseleave(function(e){e.mouseleave = true; _Editor.mouseup(e)});
 		$('#vwf-root').mousemove(function(e){_Editor.mousemove(e)});
 		$('#index-vwf').attr('tabindex',0);
 		$('#index-vwf').on('touchstart',function(e){
@@ -138,6 +138,18 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
 			_Editor.mousedown(touch)
 		});
+		
+		$('#index-vwf')[0].requestPointerLock = $('#index-vwf')[0].requestPointerLock ||
+			     $('#index-vwf')[0].mozRequestPointerLock ||
+			     $('#index-vwf')[0].webkitRequestPointerLock;
+		
+
+		// Ask the browser to release the pointer
+		document.exitPointerLock = document.exitPointerLock ||
+					   document.mozExitPointerLock ||
+					   document.webkitExitPointerLock;
+		
+		
 		$('#index-vwf').on('touchmove',function(e){
 		e.preventDefault();
 			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
@@ -315,6 +327,13 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#MenuObjectProperties').click(function(e){
 			_PrimitiveEditor.show();
 		});
+		
+		$('#MenuLatencyTest').click(function(e){
+			var e = {};
+			e.time = new Date();
+			vwf_view.kernel.callMethod('index-vwf','latencyTest',[e]);
+		});
+		
 		$('#MenuCopy').click(function(e){
 			_Editor.Copy();
 		});
@@ -438,75 +457,49 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			}
 		});
 		
+		$('#MenuCreateParticlesBasic').click(function(e){
+			_Editor.createParticleSystem('basic',_Editor.GetInsertPoint(),document.PlayerNumber);
+		});
+		
+		$('#MenuCreateLightPoint').click(function(e){
+			_Editor.createLight('point',_Editor.GetInsertPoint(),document.PlayerNumber);
+		});
+		
+		$('#MenuCreateLightSpot').click(function(e){
+			_Editor.createLight('spot',_Editor.GetInsertPoint(),document.PlayerNumber);
+		});
+		$('#MenuCreateLightDirectional').click(function(e){
+			_Editor.createLight('directional',_Editor.GetInsertPoint(),document.PlayerNumber);
+		});
 		$('#MenuCreateBox').click(function(e){
 			
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
-			_Editor.CreatePrim('box',newintersectxy,[1,1,1],'checker.jpg',document.PlayerNumber,'');
+			_Editor.CreatePrim('box',_Editor.GetInsertPoint(),[1,1,1],'checker.jpg',document.PlayerNumber,'');
 			
 		});
 		$('#MenuCreateSphere').click(function(e){
 			
-			
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
-			_Editor.CreatePrim('sphere',newintersectxy,[.5,1,1],'checker.jpg',document.PlayerNumber,'');
+			_Editor.CreatePrim('sphere',_Editor.GetInsertPoint(),[.5,1,1],'checker.jpg',document.PlayerNumber,'');
 			
 		});
 		$('#MenuCreatePlane').click(function(e){
 			
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
-			_Editor.CreatePrim('plane',newintersectxy,[1,1,5],'checker.jpg',document.PlayerNumber,'');
+			_Editor.CreatePrim('plane',_Editor.GetInsertPoint(),[1,1,5],'checker.jpg',document.PlayerNumber,'');
 			
 		});
 		$('#MenuCreateCylinder').click(function(e){
 			
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
-			_Editor.CreatePrim('cylinder',newintersectxy,[1,.5,.5],'checker.jpg',document.PlayerNumber,'');
+			_Editor.CreatePrim('cylinder',_Editor.GetInsertPoint(),[1,.5,.5],'checker.jpg',document.PlayerNumber,'');
 			
 		});
 		$('#MenuCreateCone').click(function(e){
 			
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
-			_Editor.CreatePrim('cone',newintersectxy,[.500,1,.5],'checker.jpg',document.PlayerNumber,'');
+
+			_Editor.CreatePrim('cone',_Editor.GetInsertPoint(),[.500,1,.5],'checker.jpg',document.PlayerNumber,'');
 			
 		});
 		$('#MenuCreatePyramid').click(function(e){
 			
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
-			_Editor.CreatePrim('pyramid',newintersectxy,[1,1,1],'checker.jpg',document.PlayerNumber,'');
+			_Editor.CreatePrim('pyramid',_Editor.GetInsertPoint(),[1,1,1],'checker.jpg',document.PlayerNumber,'');
 			
 		});
 		 

@@ -278,6 +278,7 @@ methods:
   CreatePlane:
   CreateSky:
   PM:
+  latencyTest:
 scripts:
 - |
     this.initialize = function(){
@@ -307,7 +308,7 @@ scripts:
         $('#index-vwf').mousedown(function(e){this.localpointerDown(e);}.bind(this));
         $('#index-vwf').mouseup(function(e){this.localpointerUp(e);}.bind(this));
         $('#index-vwf').mouseleave(function(e){this.localpointerUp(e);}.bind(this));
-        $('#index-vwf').mousemove(function(e){this.localpointerMove(e);}.bind(this));
+        $(document).mousemove(function(e){this.localpointerMove(e);}.bind(this));
 
        this.updateCallbacks = [];
        this.OwnedPrims = [];
@@ -351,6 +352,15 @@ scripts:
           this.prerendercallback = this.placeNameTag.bind(this);
           $(document).bind('prerender',this.prerendercallback);
           this.createNameTag();
+    }
+    this.latencyTest = function(e)
+    {
+        if(this.moniker == this.client)
+        {
+            var time = new Date(e.time);
+            var thistime = (new Date()) - time;
+            _Notifier.alert("The round trip time to the server was: " + thistime +"ms");
+        }
     }
     this.keyDown = function(e)
     {
@@ -580,6 +590,12 @@ scripts:
       if(parms.which == 2) this.middledown = true;
       if(parms.which == 3) this.rightdown = true;
      
+      if(parms.which == 3 || parms.which == 2 && (this.cameramode == 'Orbit' || this.cameramode == 'Free'))
+        {
+        // Ask the browser to lock the pointer
+        $('#index-vwf')[0].requestPointerLock();
+        }      
+     
       this.last_x = parms.clientX/window.screen.width;
       this.last_y = parms.clientY/window.screen.height;
       
@@ -603,9 +619,15 @@ scripts:
       if(parms.which == 1) this.leftdown = false;
       if(parms.which == 3) this.rightdown = false;
       if(parms.which == 2) this.middledown = false;
+      if(parms.which == 2 || parms.which == 3)
+        {
+        // Ask the browser to lock the pointer
+        document.exitPointerLock();
+        }    
     }
     this.localpointerMove = function( parms, pickInfo ){
 
+      
       if(document.AxisSelected != null)  
       if(document.AxisSelected != -1)
         return;
@@ -615,9 +637,16 @@ scripts:
       this.rel_x = this.last_x - parms.clientX/window.screen.width;
       this.rel_y = this.last_y - parms.clientY/window.screen.height;
       
+      if((this.rightdown==true || this.middledown==true))
+      {
+        this.rel_x = -(parms.originalEvent.webkitMovementX || parms.originalEvent.mozMovementX || parms.originalEvent.MovementX)/1000 || this.rel_x;
+        this.rel_y = -(parms.originalEvent.webkitMovementY || parms.originalEvent.mozMovementY || parms.originalEvent.MovementY)/1000 || this.rel_y;
+      }
+      
       if((this.rightdown==true && this.middledown==false))
       {
-      
+        
+       
         this.x_rot += this.rel_x;
         this.y_rot += this.rel_y;
         this.updateCamera();
@@ -628,7 +657,7 @@ scripts:
       {
         
         
-        var screenmousepos = [parms.clientX/window.screen.width,parms.clientY/window.screen.height,0,1];
+        var screenmousepos = [(parms.clientX-this.rel_x*1000)/window.screen.width,(parms.clientY-this.rel_y*1000)/window.screen.height,0,1];
         screenmousepos[0] *= 2;
         screenmousepos[1] *= 2;
         screenmousepos[0] -= 1;
@@ -657,7 +686,6 @@ scripts:
       
       if(this.cameramode == 'Navigate' && this.middledown == true)
       {   
-           
            var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
            var ray = this.GetWorldPickRay(parms);
 
@@ -1009,7 +1037,7 @@ scripts:
       //$(newdiv).mousedown(_Editor.mousedown);
       //$(newdiv).mouseup(_Editor.mouseup);
       //$(newdiv).mousemove(_Editor.mousemove);
-      $(newdiv).click(function(e){if(_Editor.GetSelectMode() != "None")  _Editor.SelectObject(this.id)}.bind(this));
+      $(newdiv).click(function(e){$('index-vwf').focus(); if(_Editor.GetSelectMode() != "None")  _Editor.SelectObject(this.id)}.bind(this));
       this.nametag = newdiv;
                  
     }
