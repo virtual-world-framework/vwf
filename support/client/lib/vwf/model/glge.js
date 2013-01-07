@@ -1217,7 +1217,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 				node.glgeObject.attribute = null;
                 break;
 			case "emitter":	
-				debugger;	
+					
 				if(	propertyValue == 'box')
 				{
 					node.glgeObject.setPositionFunction(function(i){
