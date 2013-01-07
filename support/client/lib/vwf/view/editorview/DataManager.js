@@ -200,7 +200,7 @@ function DataManager()
 			  object.extends = object.extends.patches;
 		for(var i in object.properties)
 		{
-			if(object.properties[i].constructor == Float32Array)
+			if(object.properties[i] && object.properties[i].constructor == Float32Array)
 			{
 				var newval = [];
 				for(var j=0; j<object.properties[i].length; j++)
