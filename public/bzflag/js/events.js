@@ -55,8 +55,8 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
         playerNode = childID;
     }
     else if(childName == (playerName + "Camera")) {
-        var viewState = vwf_view.kernel.kernel.views[0].state;
-        var glgeCamera = vwf.views[0].state.nodes[ childID ].glgeObject;
+        var viewState = vwf.views["vwf/view/glge"].state;
+        var glgeCamera = viewState.nodes[ childID ].glgeObject;
         glgeCamera.setAspect(canvas.width / canvas.height);
         viewState.cameraInUse = glgeCamera;
         viewState.cameraInUseID = childID;
