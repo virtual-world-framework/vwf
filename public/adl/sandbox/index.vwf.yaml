@@ -340,7 +340,7 @@ scripts:
        l.setColor('rgb(200,200,200)');
        l.setRotX(1);
        l.setDistance(300);
-       l.setShadowBias(.000001);
+       l.setShadowBias(-.001);
        l.setVarianceMin(.0000000001)
        
        findscene().addChild(l);
