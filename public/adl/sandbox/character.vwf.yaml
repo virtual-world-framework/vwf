@@ -15,7 +15,8 @@
 extends: http://vwf.example.com/node3.vwf
 properties:
   translation:
-  rotZ: 0
+  rotZ: 0       
+  test:  
 methods:
   update:
   tick:
@@ -33,6 +34,7 @@ scripts:
          this.DownKeys= [];
          this.motionStack= [];
          this.jumpcounter = 0;
+        
         if(this.hasOwnProperty('PlayerNumber') == false) return;
         var PlayerNumber = vwf.getProperty(this.id,'PlayerNumber');
         
@@ -55,9 +57,11 @@ scripts:
             {
                 stand:{start:0,length:0,speed:1.25,current:0,loop:false},
                 walk:{start:0,length:30,speed:1.25,current:0,loop:true},
+                straferight:{start:31,length:29,speed:1.5,current:0,loop:true},
+                strafeleft:{start:31,length:29,speed:-1.5,current:0,loop:true},
                 walkback:{start:0,length:30,speed:-1.25,current:0,loop:true},
-                run:{start:79,length:30,speed:1.25,current:0,loop:true},
-                jump:{start:30,length:48,speed:1.25,current:0,loop:false},
+                run:{start:60,length:30,speed:1.25,current:0,loop:true},
+                jump:{start:90,length:48,speed:1.25,current:0,loop:false},
                 runningjump:{start:109,length:48,speed:1.25,current:0,loop:false}
             };
           this.prerendercallback = this.placeNameTag.bind(this);
@@ -69,7 +73,7 @@ scripts:
           this.stand();
          
           this.createNameTag(PlayerNumber);
-          this.followOffset = [0,0,1.333];
+          this.followOffset = [0,0,1.733];
           this.initCycles();
           this.activeCycle = this.cycles.stand;
           this.updateLoopStarted = false;
@@ -221,6 +225,8 @@ scripts:
             return;
         }
         
+        this.mesh.setRotZ(this.rotZ);
+        
         //this.placeNameTag();
         var standing = 1.703559666;
         if(this.activeCycle)
@@ -258,6 +264,16 @@ scripts:
             {
                 this.rotZ += +.07*updateFreqDivisor;
                 this.mesh.setRotZ(this.rotZ);
+            }
+             if(this.cycleName == 'straferight')
+            {
+                 var left = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[-.03*updateFreqDivisor,0,0]);
+                 this.translation = GLGE.addVec3(left,this.translation);
+            }
+            if(this.cycleName == 'strafeleft')
+            {
+                var left = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[.03*updateFreqDivisor,0,0]);
+                 this.translation = GLGE.addVec3(left,this.translation);
             }
             if(this.cycleName == 'walk')
             {
@@ -564,9 +580,9 @@ scripts:
             if(!e.keysDown.S)
                 this.removeMotion('walkback');    
             if(!e.keysDown.D)
-                {this.removeMotion('turnright'); this.removeMotion('turnleft');}
+                {this.removeMotion('straferight'); this.removeMotion('strafeleft');}
             if(!e.keysDown.A)
-                {this.removeMotion('turnleft');this.removeMotion('turnright');}
+                {this.removeMotion('strafeleft');this.removeMotion('straferight');}
             if(!e.keysDown.W && this.inMotion('run'))
                 this.cancelRun();       
             
@@ -587,13 +603,13 @@ scripts:
                     this.runningjump();
             }
             if(e.keysDown.D && !this.inMotion('walkback'))
-                this.addMotion('turnright');
+               { this.addMotion('straferight');  this.activeCycle = this.cycles.straferight;  }
             if(e.keysDown.D && this.inMotion('walkback'))
-                this.addMotion('turnleft');    
+               { this.addMotion('strafeleft');  this.activeCycle = this.cycles.strafeleft;  }
             if(e.keysDown.A && !this.inMotion('walkback'))
-                this.addMotion('turnleft');  
+               { this.addMotion('strafeleft');    this.activeCycle = this.cycles.strafeleft;   }
             if(e.keysDown.A && this.inMotion('walkback'))
-                this.addMotion('turnright');      
+               { this.addMotion('straferight');   this.activeCycle = this.cycles.straferight;   }
             if(e.mods.shift && e.keysDown.W)
                 this.run();    
          }

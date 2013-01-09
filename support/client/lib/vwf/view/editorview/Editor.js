@@ -1499,6 +1499,7 @@ function Editor()
 			
 				SelectionBounds[i].setStaticMatrix(mat);
 				SelectionBounds[i].InvisibleToCPUPick = true;
+				SelectionBounds[i].setCastShadows(false);
 				SelectionBounds[i].setDrawType(GLGE.DRAW_LINELOOPS);
 				SelectionBounds[i].setDepthTest(false);
 				SelectionBounds[i].setZtransparent(true);
@@ -1699,6 +1700,7 @@ function Editor()
 			SetGizmoMode(Move);
 			MoveGizmo.children[i].PickPriority = Infinity;
 			MoveGizmo.children[i].RenderPriority = 1000+i;
+			MoveGizmo.children[i].setCastShadows(false);
 		}
 		MoveGizmo.InvisibleToCPUPick = false;
 		findscene().addChild(MoveGizmo);

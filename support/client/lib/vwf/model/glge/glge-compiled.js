@@ -7169,7 +7169,12 @@ GLGE.Material.prototype.getFragmentShader=function(lights,colors,shaderInjection
 				shader=shader+"variance = min(max(d2-d1*d1, 0.0)+"+lights[i].varianceMin+", 1.0);\n";					
 				shader=shader+"prob=variance /(  variance + sDepth*sDepth );\n";
 				shader=shader+"prob=smoothstep("+lights[i].bleedCutoff.toFixed(2)+",1.0,prob);\n";
-				shader=shader+"shadowfact"+i+"=prob;\n";				
+				shader=shader+"shadowfact"+i+"=prob;\n";
+				shader=shader+"if(scoord.x > 1.0 || scoord.x < 0.0 || scoord.y > 1.0 || scoord.y < 0.0) shadowfact"+i+" = 1.0;\n";	
+				shader=shader+"vec2 slens = scoord-vec2(0.5,0.5);\n";
+				shader=shader+"float slength = max(abs(slens.x),abs(slens.y));\n";
+				shader=shader+"shadowfact"+i+" += clamp(slength-0.4,0.0,1.0)*10.0;\n";
+				shader=shader+"shadowfact"+i+" = clamp(shadowfact"+i+",0.0,1.0);\n";					
 			}else{
 				shader=shader+"float shadowfact"+i+" = 1.0;\n";
 			}
@@ -12163,8 +12168,8 @@ GLGE.Light.prototype.type=GLGE.L_POINT;
 GLGE.Light.prototype.frameBuffer=null;
 GLGE.Light.prototype.renderBuffer=null;
 GLGE.Light.prototype.texture=null;
-GLGE.Light.prototype.bufferHeight=512;
-GLGE.Light.prototype.bufferWidth=512;
+GLGE.Light.prototype.bufferHeight=1024;
+GLGE.Light.prototype.bufferWidth=1024;
 GLGE.Light.prototype.shadowBias=0.0005;
 GLGE.Light.prototype.varianceMin=0.00000005;
 GLGE.Light.prototype.bleedCutoff=0.3;
@@ -12700,6 +12705,7 @@ GLGE.Light.prototype.calcDirMatrix=function(camera, lightDir,light, invlight) {
 	lispMtx[13] = 1;
 	lispMtx[15] = 0;
 
+	
 	var lightProj=GLGE.mulMat4(lispMtx,lightView);
 
 	tPoints=this.transformPoints(points,lightProj);
@@ -12709,7 +12715,18 @@ GLGE.Light.prototype.calcDirMatrix=function(camera, lightDir,light, invlight) {
 	lightProj=this.scaleTranslateToFit(min,max);
 
 	lightProj=GLGE.mulMat4(lightProj,lispMtx); 
+	
 	lightProj=GLGE.mulMat4(lightProj,GLGE.mulMat4(lightView,GLGE.inverseMat4(invlight)));
+	
+	var shadowsize = 7;
+	var boxcenter = GLGE.mulMat4Vec3(GLGE.inverseMat4(camera.getModelMatrix()),[0,0,-shadowsize]);
+	
+	var min = [-shadowsize+boxcenter[0],-shadowsize+boxcenter[1],-shadowsize+boxcenter[2]];
+	var max = [shadowsize+boxcenter[0],shadowsize+boxcenter[1],shadowsize+boxcenter[2]];
+	var box = new BoundingBoxRTAS(min,max);
+	box = box.transformBy(invlight);
+	
+	return GLGE.makeOrtho(box.min[0],box.max[0],box.min[1],box.max[1],.1,500);
 	
 	return lightProj;	
 	
@@ -13791,7 +13808,7 @@ GLGE.Scene.prototype.render=function(gl){
 				var tvec=GLGE.mulMat4Vec4(cameraPMatrix,[0,0,lights[i].distance,1]);
 				projectedDistance=tvec[3]/tvec[2]; //this is wrong?
 			}
-			
+				
 				gl.bindFramebuffer(gl.FRAMEBUFFER, lights[i].frameBuffer);
 
 				if(!lights[i].s_cache) lights[i].s_cache={};
@@ -13813,7 +13830,7 @@ GLGE.Scene.prototype.render=function(gl){
 
 
 				gl.viewport(0,0,width,height);						
-
+				
 				this.camera.setProjectionMatrix(lights[i].s_cache.pmatrix);
 				this.camera.matrix=lights[i].s_cache.imvmatrix;
 				//draw shadows
@@ -13826,7 +13843,8 @@ GLGE.Scene.prototype.render=function(gl){
 						renderObjects[n].object.GLRender(gl, GLGE.RENDER_DEPTH,n,renderObjects[n].multiMaterial,lights[i].distance);
 					}
 				}
-
+				
+				
 				
 				lights[i].s_cache.smatrix=GLGE.mulMat4(lights[i].s_cache.pmatrix,lights[i].s_cache.imvmatrix);
 			

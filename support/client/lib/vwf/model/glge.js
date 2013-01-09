@@ -2846,6 +2846,7 @@ data = DecompressStrings(data,"\"attributes\":","A:");
 data = DecompressStrings(data,"\"primitives\":","p:");
 data = DecompressStrings(data,"\"projection\":","pr:");
 data = DecompressStrings(data,"\"matrix\":","M:");
+data = DecompressStrings(data,"\"Color\":","COL:");
 
 return data;
 }

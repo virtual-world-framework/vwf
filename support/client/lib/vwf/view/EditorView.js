@@ -443,14 +443,14 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Free');
 		});
 		
-		$('#MenuCameraFirstPerson').click(function(e){
+		$('#MenuCamera3RDPerson').click(function(e){
 			
 			if(_UserManager.GetCurrentUserName())
 			{
 				clearCameraModeIcons();
-				$('#MenuCameraFirstPersonicon').css('background','#9999FF');
+				$('#MenuCamera3RDPersonicon').css('background','#9999FF');
 				vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes['-object-Object-player-' + _UserManager.GetCurrentUserName()]);
-				vwf.models[0].model.nodes['index-vwf'].setCameraMode('FirstPerson');
+				vwf.models[0].model.nodes['index-vwf'].setCameraMode('3RDPerson');
 			}else
 			{
 				_Notifier.alert('First person mode is not available when you are not logged in.');
@@ -601,7 +601,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		createIcon('../vwf/view/editorview/images/icons/up.png','MenuSelectParent','Select Parent');
 		createSeperator();
 		createIcon('../vwf/view/editorview/images/icons/camera.png','MenuCameraOrbit','Orbit Camera');
-		createIcon('../vwf/view/editorview/images/icons/firstperson.png','MenuCameraFirstPerson','First Person Camera');
+		createIcon('../vwf/view/editorview/images/icons/firstperson.png','MenuCamera3RDPerson','First Person Camera');
 		createIcon('../vwf/view/editorview/images/icons/navigate.png','MenuCameraNavigate','Navigation Camera');
 		createIcon('../vwf/view/editorview/images/icons/free.png','MenuCameraFree','Free Camera');
 		createIcon('../vwf/view/editorview/images/icons/target.png','MenuFocusSelected','Focus to selected object');
@@ -711,7 +711,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 	function clearCameraModeIcons()
 	{
 		$('#MenuCameraOrbiticon').css('background','');
-		$('#MenuCameraFirstPersonicon').css('background','');
+		$('#MenuCamera3RDPersonicon').css('background','');
 		$('#MenuCameraNavigateicon').css('background','');
 		$('#MenuCameraFreeicon').css('background','');
 	}

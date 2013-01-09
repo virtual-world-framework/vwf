@@ -336,8 +336,13 @@ scripts:
        var l = new GLGE.Light();
        this.sun = l;
        l.setType(2);
+       l.setCastShadows(true);
        l.setColor('rgb(200,200,200)');
        l.setRotX(1);
+       l.setDistance(300);
+       l.setShadowBias(.000001);
+       l.setVarianceMin(.0000000001)
+       
        findscene().addChild(l);
        findscene().setAmbientColor('rgb(200,200,200)');
        this.CreateSky('white');
@@ -443,6 +448,8 @@ scripts:
             }
         }
         this.objectFollowed = value; 
+        if(this.objectFollowed)
+        this.oldRotZ = vwf.getProperty(this.objectFollowed.id,'rotZ');
     }
     this.targetUpdated = function(obj)
     {
@@ -590,6 +597,9 @@ scripts:
       if(parms.which == 2) this.middledown = true;
       if(parms.which == 3) this.rightdown = true;
      
+      if(this.objectFollowed)
+        this.oldRotZ = vwf.getProperty(this.objectFollowed.id,'rotZ');
+     
       if(parms.which == 3 || parms.which == 2 && (this.cameramode == 'Orbit' || this.cameramode == 'Free'))
         {
         // Ask the browser to lock the pointer
@@ -646,7 +656,14 @@ scripts:
       if((this.rightdown==true && this.middledown==false))
       {
         
-       
+        if(this.objectFollowed)
+        {  
+            this.oldRotZ += this.rel_x*10 || 0;
+            vwf_view.kernel.setProperty(this.objectFollowed.id,'rotZ', this.oldRotZ);
+            _Editor.findviewnode(this.objectFollowed.id).setRotZ(this.oldRotZ);
+            
+        }
+        
         this.x_rot += this.rel_x;
         this.y_rot += this.rel_y;
         this.updateCamera();
@@ -679,7 +696,11 @@ scripts:
         worldmousepos2[1] /= worldmousepos2[3];
         worldmousepos2[2] /= worldmousepos2[3];
        
-        this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(worldmousepos2,worldmousepos),5 * this.zoom));
+       var panfactor = 5;
+       if(this.cameramode == 'Free')
+       panfactor = 50;
+       
+        this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(worldmousepos2,worldmousepos),panfactor * this.zoom));
         this.updateCamera();
         
       }
@@ -710,7 +731,7 @@ scripts:
         if(this.objectFollowed != null)    
             this.targetUpdated(this.objectFollowed);
         
-        if(this.cameramode != 'FirstPerson')
+        if(this.cameramode != '3RDPerson' && this.cameramode != 'FirstPerson')
         {
             if(this.x_rot == undefined) return;
             var xmatrix = GLGE.angleAxis(this.x_rot*10,[0,0,1]);
@@ -718,9 +739,10 @@ scripts:
             var offset = GLGE.mulMat4Vec3(xmatrix,[1,0,0]);
             offset = GLGE.scaleVec3(offset,1/GLGE.lengthVec3(offset));
             var side = GLGE.crossVec3([0,0,1],offset);
-           
-            if(this.y_rot < .479) this.y_rot = .479;
-            if(this.y_rot > .628) this.y_rot = .628;
+            
+            if(this.y_rot < .479 ) this.y_rot = .479;
+            if(this.y_rot > .628 && this.cameramode != 'Free') this.y_rot = .628;
+            if(this.y_rot > .783 && this.cameramode == 'Free') this.y_rot = .783;
             
             var crossmatrix = GLGE.angleAxis(this.y_rot*10,side);
             var stage2offset = GLGE.mulMat4Vec3(crossmatrix,offset);
@@ -736,11 +758,39 @@ scripts:
             findscene().camera.Lookat(this.center);
             findscene().camera.setFar(Math.abs(1000));
             findscene().camera.setNear(Math.abs(.1));
-        }else
+        }else if(this.cameramode == 'FirstPerson')
+        {
+            //this.oldRotZ var xmatrix = GLGE.angleAxis(this.x_rot*10,[0,0,1]);
+            var rotation = this.objectFollowed.rotation;
+            var xmatrix = GLGE.angleAxis(this.oldRotZ,[0,0,1]);
+            var offset = GLGE.mulMat4Vec3(xmatrix,[0,1.5,.5]);
+            
+            offset = GLGE.scaleVec3(offset,1/GLGE.lengthVec3(offset));
+            var side = GLGE.crossVec3([0,0,1],offset);
+           
+            if(this.y_rot < .479 ) this.y_rot = .479;
+            if(this.y_rot > .783 ) this.y_rot = .783;
+            
+            var crossmatrix = GLGE.angleAxis(this.y_rot*10,side);
+            var stage2offset = GLGE.mulMat4Vec3(crossmatrix,offset);
+            
+            stage2offset = GLGE.scaleVec3(stage2offset,1/GLGE.lengthVec3(stage2offset));
+            var finaloffset = GLGE.scaleVec3(stage2offset,this.zoom);
+            if(this.center[2] < .05)
+             this.center[2] = .05;
+            var finalpos = GLGE.addVec3(finaloffset,this.center);
+            
+            //this.camera.translation = finalpos;
+            findscene().camera.setLoc(finalpos[0],finalpos[1],finalpos[2]);
+            findscene().camera.Lookat(this.center);
+            findscene().camera.setFar(Math.abs(1000));
+            findscene().camera.setNear(Math.abs(.2));
+            this.zoom = .0001;
+            
+        }else  if(this.cameramode == '3RDPerson')
         {
             
-            var rotation = this.objectFollowed.rotation;
-            var xmatrix = GLGE.angleAxis(rotation[3]*0.0174532925,[rotation[0],rotation[1],rotation[2]]);
+            var xmatrix = GLGE.angleAxis(this.oldRotZ,[0,0,1]);
             var offset = GLGE.mulMat4Vec3(xmatrix,[0,1.5,.5]);
             
             var finaldist = GLGE.lengthVec3(offset);  
@@ -821,7 +871,7 @@ scripts:
     this.pointerWheel = function( parms, pickInfo ) {
        
         if(this.client != this.moniker) return;
-        if(this.cameramode != 'Navigate')
+        if(this.cameramode != 'Navigate' && this.cameramode != 'Free')
         { 
             if(pickInfo.wheel.deltaY < 0 )
             this.zoom *= 1.1;
@@ -834,6 +884,23 @@ scripts:
             this.zoom = this.zoom + (3- this.zoom )*.01;
         }
         
+        if(this.cameramode == 'Free')
+        { 
+            if(pickInfo.wheel.deltaY < 0 )
+            this.center = GLGE.subVec3(this.center,this.GetCameraCenterRay());
+            else
+            this.center = GLGE.addVec3(this.GetCameraCenterRay(),this.center);
+            
+        }
+        if(this.cameramode == 'FirstPerson' && pickInfo.wheel.deltaY < 0)
+        {
+            this.cameramode = '3RDPerson';
+        }
+        else if(this.cameramode == '3RDPerson' && pickInfo.wheel.deltaY > 0)
+        {
+            this.y_rot =.6245;
+            this.cameramode = 'FirstPerson';
+        }
         this.updateCamera();
     }
     this.deleteplayer = function(e)
