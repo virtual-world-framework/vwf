@@ -19,32 +19,32 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         initialize: function( rootSelector ) {
            
-			this.rootSelector = rootSelector;
-			this.height = 600;
+            this.rootSelector = rootSelector;
+            this.height = 600;
             this.width = 800;
             this.canvasQuery = null;
             if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
             if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
-			this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
+            this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childURI, childName, callback /* ( ready ) */) {
-			
-			
-			//the created node is a scene, and has already been added to the state by the model.
-			//how/when does the model set the state object? 
-			if(this.state.scenes[childID])
-			{
-				var threeview = this;
-				var domWin = window;
-				
-				
-				this.canvasQuery = jQuery(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
+            
+            
+            //the created node is a scene, and has already been added to the state by the model.
+            //how/when does the model set the state object? 
+            if(this.state.scenes[childID])
+            {
+                var threeview = this;
+                var domWin = window;
+                
+                
+                this.canvasQuery = jQuery(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
-				
-				initScene.call(this,this.state.scenes[childID]);
-			}
+                
+                initScene.call(this,this.state.scenes[childID]);
+            }
         },
  
  
@@ -73,53 +73,53 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function (nodeID, propertyName, propertyValue) {
-		
-		    //console.log([nodeID,propertyName,propertyValue]);
-		    var node = this.state.nodes[ nodeID ]; // { name: childName, threeObject: undefined }
-			if(!node) node = this.state.scenes[nodeID];
-		    var value = undefined;
-		  
-		    //this driver has no representation of this node, so there is nothing to do.
-		    if(!node) return;
-		  
-		    var threeObject = node.threeObject;
-		    if(!threeObject)
-			  threeObject = node.threeScene;
-		  
-		    //There is not three object for this node, so there is nothing this driver can do. return
-		    if(!threeObject) return value;	
-			  
-			if ( node && threeObject && propertyValue !== undefined ) 
-			{
-				if(threeObject instanceof THREE.Scene)
-				{
-					if(propertyName == 'enableShadows')
-					{
-						debugger;
-						var sceneNode = this.state.scenes[nodeID];
-						sceneNode.renderer.shadowMapEnabled = propertyValue;
-					}
-					if(propertyName == 'ambientColor')
-					{
-						
-						for(var i = 0; i < threeObject.__lights.length; i++)
-						{
-							if(threeObject.__lights[i] instanceof THREE.AmbientLight)
-							{
-								
-								threeObject.__lights[i].color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-								//SetMaterialAmbients.call(this);
-							}
-							
-						}
-						
-					}
-				}
-			}
-		
-		
-		
-		}
+        
+            //console.log([nodeID,propertyName,propertyValue]);
+            var node = this.state.nodes[ nodeID ]; // { name: childName, threeObject: undefined }
+            if(!node) node = this.state.scenes[nodeID];
+            var value = undefined;
+          
+            //this driver has no representation of this node, so there is nothing to do.
+            if(!node) return;
+          
+            var threeObject = node.threeObject;
+            if(!threeObject)
+              threeObject = node.threeScene;
+          
+            //There is not three object for this node, so there is nothing this driver can do. return
+            if(!threeObject) return value;  
+              
+            if ( node && threeObject && propertyValue !== undefined ) 
+            {
+                if(threeObject instanceof THREE.Scene)
+                {
+                    if(propertyName == 'enableShadows')
+                    {
+                        //debugger;
+                        var sceneNode = this.state.scenes[nodeID];
+                        sceneNode.renderer.shadowMapEnabled = propertyValue;
+                    }
+                    if(propertyName == 'ambientColor')
+                    {
+                        
+                        for(var i = 0; i < threeObject.__lights.length; i++)
+                        {
+                            if(threeObject.__lights[i] instanceof THREE.AmbientLight)
+                            {
+                                
+                                threeObject.__lights[i].color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+                                //SetMaterialAmbients.call(this);
+                            }
+                            
+                        }
+                        
+                    }
+                }
+            }
+        
+        
+        
+        }
 
         // -- gotProperty ------------------------------------------------------------------------------
 
@@ -127,8 +127,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     
     
     } );
-	// private ===============================================================================
-	    function initScene( sceneNode ) {
+    // private ===============================================================================
+        function initScene( sceneNode ) {
     
         var self = this;
         var requestAnimFrame, cancelAnimFrame;
@@ -165,27 +165,27 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
         }());
         
-		
+        
         function renderScene(time) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-			if(sceneNode.frameCount > 10)
-			{
-				
-				sceneNode.frameCount == 0
-			
-				
-				var newPick = ThreeJSPick.call(self,sceneNode);
-				
-				var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+            if(sceneNode.frameCount > 10)
+            {
+                
+                sceneNode.frameCount == 0
+            
+                
+                var newPick = ThreeJSPick.call(self,sceneNode);
+                
+                var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
                 if(self.lastPickId != newPickId && self.lastEventData)
-				{
-					
+                {
+                    
                     view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-				}
-				
-				self.lastPickId = newPickId
+                }
+                
+                self.lastPickId = newPickId
                 self.lastPick = newPick;
                 if(view.lastEventData && (view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || view.lastEventData.eventData[0].screenPosition[1] != oldMouseY)) {
                     oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
@@ -201,78 +201,78 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     hovering = true;
                 }
                 
-			}
+            }
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
         };
 
         var mycanvas = this.canvasQuery.get( 0 );
-		
-		function detectWebGL()
-		{
-			var asa; var canvas; var dcanvas; var gl; var expmt;
+        
+        function detectWebGL()
+        {
+            var asa; var canvas; var dcanvas; var gl; var expmt;
 
-			$(document.body).append('<canvas width="100" height="100" id="testWebGLSupport" />');
-			canvas = $('#testWebGLSupport');
-			console.log(canvas);
+            $(document.body).append('<canvas width="100" height="100" id="testWebGLSupport" />');
+            canvas = $('#testWebGLSupport');
+            console.log(canvas);
 
-			// check to see if we can do webgl
-			// ALERT FOR JQUERY PEEPS: canvas is a jquery obj - access the dom obj at canvas[0]
-				dcanvas = canvas[0];
-				expmt = false;
-				if ("WebGLRenderingContext" in window) {
-					console.log("browser at least knows what webgl is.");
-				}
-				// some browsers don't have a .getContext for canvas...
-				try { gl = dcanvas.getContext("webgl"); }
-				catch (x) { gl = null; }
-				if (gl == null) {
-					try { gl = dcanvas.getContext("experimental-webgl"); }
-					catch (x) { gl = null; }
-					if (gl == null) { console.log('but can\'t speak it'); }
-					else { expmt = true; console.log('and speaks it experimentally.'); }
-				} else {
-					console.log('and speaks it natively.');
-				}
+            // check to see if we can do webgl
+            // ALERT FOR JQUERY PEEPS: canvas is a jquery obj - access the dom obj at canvas[0]
+                dcanvas = canvas[0];
+                expmt = false;
+                if ("WebGLRenderingContext" in window) {
+                    console.log("browser at least knows what webgl is.");
+                }
+                // some browsers don't have a .getContext for canvas...
+                try { gl = dcanvas.getContext("webgl"); }
+                catch (x) { gl = null; }
+                if (gl == null) {
+                    try { gl = dcanvas.getContext("experimental-webgl"); }
+                    catch (x) { gl = null; }
+                    if (gl == null) { console.log('but can\'t speak it'); }
+                    else { expmt = true; console.log('and speaks it experimentally.'); }
+                } else {
+                    console.log('and speaks it natively.');
+                }
 
-				if (gl || expmt) {
-					console.log("loading webgl content."); canvas.remove(); return true;
-				} else {
-					console.log("image-only fallback. no webgl.");
-					canvas.remove();
-					return false;
-				}
+                if (gl || expmt) {
+                    console.log("loading webgl content."); canvas.remove(); return true;
+                } else {
+                    console.log("image-only fallback. no webgl.");
+                    canvas.remove();
+                    return false;
+                }
 
-			
-		
-		
-		}
-		function getURLParameter(name) {
-			return decodeURI(
-				(RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
-			);
-		}
-		
+            
+        
+        
+        }
+        function getURLParameter(name) {
+            return decodeURI(
+                (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+            );
+        }
+        
         if ( mycanvas ) {
             var oldMouseX = 0;
             var oldMouseY = 0;
             var hovering = false;
-			
-		    if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
-			{
-				sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
-			}else
-			{
-				sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
-				sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
-			}
+            
+            if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
+            {
+                sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
+            }else
+            {
+                sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
+                sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
+            }
             sceneNode.renderer.setClearColor({r:.5,g:1,b:1},1.0);
-			var ambientlight = new THREE.AmbientLight('#000000');
-			ambientlight.color.setRGB(.7,.7,.7);
-			sceneNode.threeScene.add(ambientlight);
-			
-			rebuildAllMaterials.call(this);
-			if(sceneNode.renderer.setFaceCulling)
-				sceneNode.renderer.setFaceCulling(false);
+            var ambientlight = new THREE.AmbientLight('#000000');
+            ambientlight.color.setRGB(.7,.7,.7);
+            sceneNode.threeScene.add(ambientlight);
+            
+            rebuildAllMaterials.call(this);
+            if(sceneNode.renderer.setFaceCulling)
+                sceneNode.renderer.setFaceCulling(false);
             this.state.cameraInUse = sceneNode.threeScene.children[0];
            // this.state.cameraInUse.setAspect( ( mycanvas.width / mycanvas.height) /*/ 1.333 */ );
 
@@ -282,65 +282,65 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var view = this;
             var scene = sceneNode.threeScene;
             var renderer = sceneNode.renderer;
-			var scenenode = sceneNode;
-			window._dScene = scene;
-			window._dRenderer = renderer;
+            var scenenode = sceneNode;
+            window._dScene = scene;
+            window._dRenderer = renderer;
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
-			
-			initInputEvents.call(this,mycanvas);
+            
+            initInputEvents.call(this,mycanvas);
             renderScene((+new Date));
         }
     }
-	function rebuildAllMaterials(start)
-	{
-		
-		if(!start)
-		{
-			for(var i in this.state.scenes)
-			{
-				rebuildAllMaterials(this.state.scenes[i].threeScene);
-			}
-		}else
-		{
-			if(start && start.material)
-			{
-				start.material.needsUpdate = true;
-			}
-			if(start && start.children)
-			{
-			   for(var i in start.children)
-				rebuildAllMaterials(start.children[i]);
-			}
-		}
-	}	
-	//necessary when settign the amibent color to match GLGE behavior
-	//Three js mults scene ambient by material ambient
-	function SetMaterialAmbients(start)
-	{
-		
-		if(!start)
-		{
-			for(var i in this.state.scenes)
-			{
-				SetMaterialAmbients(this.state.scenes[i].threeScene);
-			}
-		}else
-		{
-			if(start && start.material)
-			{
-				//.005 chosen to make the 255 range for the ambient light mult to values that look like GLGE values.
-				//this will override any ambient colors set in materials.
-				if(start.material.ambient)
-					start.material.ambient.setRGB(1,1,1);
-			}
-			if(start && start.children)
-			{
-			   for(var i in start.children)
-				SetMaterialAmbients(start.children[i]);
-			}
-		}
-	}
-	    // -- initInputEvents ------------------------------------------------------------------------
+    function rebuildAllMaterials(start)
+    {
+        
+        if(!start)
+        {
+            for(var i in this.state.scenes)
+            {
+                rebuildAllMaterials(this.state.scenes[i].threeScene);
+            }
+        }else
+        {
+            if(start && start.material)
+            {
+                start.material.needsUpdate = true;
+            }
+            if(start && start.children)
+            {
+               for(var i in start.children)
+                rebuildAllMaterials(start.children[i]);
+            }
+        }
+    }   
+    //necessary when settign the amibent color to match GLGE behavior
+    //Three js mults scene ambient by material ambient
+    function SetMaterialAmbients(start)
+    {
+        
+        if(!start)
+        {
+            for(var i in this.state.scenes)
+            {
+                SetMaterialAmbients(this.state.scenes[i].threeScene);
+            }
+        }else
+        {
+            if(start && start.material)
+            {
+                //.005 chosen to make the 255 range for the ambient light mult to values that look like GLGE values.
+                //this will override any ambient colors set in materials.
+                if(start.material.ambient)
+                    start.material.ambient.setRGB(1,1,1);
+            }
+            if(start && start.children)
+            {
+               for(var i in start.children)
+                SetMaterialAmbients(start.children[i]);
+            }
+        }
+    }
+        // -- initInputEvents ------------------------------------------------------------------------
 
     function initInputEvents( canvas ) {
         var sceneNode = this.state.scenes[this.state.sceneRootID], child;
@@ -578,7 +578,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         canvas.onmousemove = function( e ) {
             var eData = getEventData( e, false );
-			
+            
             if ( eData ) {
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
                     sceneView.kernel.dispatchEvent( pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData );
@@ -613,9 +613,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         canvas.setAttribute("onmousewheel", '');
-		
-		window.onkeydown = function (event) {
-					
+        
+        window.onkeydown = function (event) {
+                    
                     var key = undefined;
                     var validKey = false;
                     var keyAlreadyDown = false;
@@ -678,7 +678,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     }
 
                 };
-		
+        
         if(typeof canvas.onmousewheel == "function") {
             canvas.removeAttribute("onmousewheel");
             canvas.onmousewheel = function( e ) {
@@ -814,62 +814,62 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         };
          
     };
-	function mouseXPos(e) {
+    function mouseXPos(e) {
         return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
     }
 
     function mouseYPos(e) {
         return e.clientY - e.currentTarget.offsetTop + window.scrollY;
     }
-	function ThreeJSPick(sceneNode)
-	{
-		if(!this.lastEventData) return;
-		
-		
-		var threeCam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
-	    if(!this.ray) this.ray = new THREE.Ray();
-		if(!this.projector) this.projector = new THREE.Projector();
-		
-		var SCREEN_HEIGHT = window.innerHeight;
-		var SCREEN_WIDTH = window.innerWidth;
-		var x = ( this.lastEventData.eventData[0].screenPosition[0] / SCREEN_WIDTH ) * 2 - 1;
-		var y = -( this.lastEventData.eventData[0].screenPosition[1] / SCREEN_HEIGHT ) * 2 + 1;
-		var directionVector = new THREE.Vector3();
-		
-		directionVector.set(x, y, .5);
-		
-		this.projector.unprojectVector(directionVector, threeCam);
-		var pos = new THREE.Vector3();
-		pos.copy(threeCam.matrix.getPosition());
-		directionVector.subSelf(pos);
-		directionVector.normalize();
-		
-		
-		this.ray.set(pos, directionVector);
-		var intersects = this.ray.intersectObjects(sceneNode.threeScene.children, true);
-		if (intersects.length) {
-			// intersections are, by default, ordered by distance,
-			// so we only care for the first one. The intersection
-			// object holds the intersection point, the face that's
-			// been "hit" by the ray, and the object to which that
-			// face belongs. We only care for the object itself.
-			var target = intersects[0].object;
-			
-			var ID = getPickObjectID.call(this,target);
-			return intersects[0];
-		}
-		return null;
-	}
-	function getPickObjectID(threeObject)
-	{	
-		
-		if(threeObject.vwfID)
-			return threeObject.vwfID;
-		else if(threeObject.parent)
-		 return getPickObjectID(threeObject.parent);
-		return null;	
-	}
-	    function getKeyValue( keyCode ) {
+    function ThreeJSPick(sceneNode)
+    {
+        if(!this.lastEventData) return;
+        
+        
+        var threeCam = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
+        if(!this.ray) this.ray = new THREE.Ray();
+        if(!this.projector) this.projector = new THREE.Projector();
+        
+        var SCREEN_HEIGHT = window.innerHeight;
+        var SCREEN_WIDTH = window.innerWidth;
+        var x = ( this.lastEventData.eventData[0].screenPosition[0] / SCREEN_WIDTH ) * 2 - 1;
+        var y = -( this.lastEventData.eventData[0].screenPosition[1] / SCREEN_HEIGHT ) * 2 + 1;
+        var directionVector = new THREE.Vector3();
+        
+        directionVector.set(x, y, .5);
+        
+        this.projector.unprojectVector(directionVector, threeCam);
+        var pos = new THREE.Vector3();
+        pos.copy(threeCam.matrix.getPosition());
+        directionVector.subSelf(pos);
+        directionVector.normalize();
+        
+        
+        this.ray.set(pos, directionVector);
+        var intersects = this.ray.intersectObjects(sceneNode.threeScene.children, true);
+        if (intersects.length) {
+            // intersections are, by default, ordered by distance,
+            // so we only care for the first one. The intersection
+            // object holds the intersection point, the face that's
+            // been "hit" by the ray, and the object to which that
+            // face belongs. We only care for the object itself.
+            var target = intersects[0].object;
+            
+            var ID = getPickObjectID.call(this,target);
+            return intersects[0];
+        }
+        return null;
+    }
+    function getPickObjectID(threeObject)
+    {   
+        
+        if(threeObject.vwfID)
+            return threeObject.vwfID;
+        else if(threeObject.parent)
+         return getPickObjectID(threeObject.parent);
+        return null;    
+    }
+        function getKeyValue( keyCode ) {
         var key = { key: undefined, code: keyCode, char: undefined };
         switch ( keyCode ) {
             case 8:
