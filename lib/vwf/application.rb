@@ -23,7 +23,8 @@ class VWF::Application
           Reflector.new,                                                        # The WebSocket reflector  # TODO: not for instance==nil?  # debugging: Reflector.new( :debug => true, :backend => { :debug => true } ),
           Client.new( File.join VWF.settings.support, "client/lib" ),           # Client files from ^/support/client/lib
           Rack::File.new( File.join VWF.settings.public_folder, root ),         # Public content from ^/public/path/to/application
-          Component.new( File.join VWF.settings.public_folder, root )           # A component descriptor, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
+          Component.new( File.join VWF.settings.public_folder, root ),          # A component descriptor, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
+          Persistence.new( File.join VWF.settings.public_folder, root )         # EXPERIMENTAL: Save state to ^/public/path/to/application; DON'T ENABLE ON A PRODUCTION SERVER
         ]
 
       end

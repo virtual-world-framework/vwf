@@ -516,6 +516,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
     // -- updateClients ---------------------------------------------------------------------
 
     function updateClients() {
+        var self = this;
         var app = window.location.pathname;
         var root = app.substring(1, app.length-18);
         var inst = app.substring(app.length-17, app.length-1);
@@ -536,12 +537,14 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                             clients$.append("<div class='clientEntry'>" + clientID + "</div>"); 
                         }
 
-                        clients$.append("<div style='padding:6px'><input class='update_button' type='button' id='load' value='Load' /><input class='update_button' type='button' id='save' value='Save' /></div>");
-                        $('#load').click(function(evt) {
-                            // Call function here
-                        });
+                        clients$.append("<div style='padding:6px'><input class='file_name' type='text' id='fileName' /><input class='update_button' type='button' id='save' value='Save' /></div>");
                         $('#save').click(function(evt) {
-                            // Call function here
+                            saveStateAsFile.call(self, $('#fileName').val());
+                        });
+
+                        clients$.append("<div style='padding:6px'><input class='update_button' type='button' id='load' value='Load' /></div>");
+                        $('#load').click(function(evt) {
+                            console.info('load clicked');
                         });
                     }
                 }
@@ -1516,5 +1519,87 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         
         this.models = modelsTemp;
         this.modelsTemp = models;
+    }
+
+    // -- SaveStateAsFile -------------------------------------------------------------------------
+
+    function saveStateAsFile(filename) // invoke with the view as "this"
+    {
+        if(supportAjaxUploadWithProgress.call(this))
+        {
+            var xhr = new XMLHttpRequest();
+
+            var state = vwf.getState();
+
+            var objectIsTypedArray = function( candidate ) {
+                var typedArrayTypes = [
+                    Int8Array,
+                    Uint8Array,
+                    // Uint8ClampedArray,
+                    Int16Array,
+                    Uint16Array,
+                    Int32Array,
+                    Uint32Array,
+                    Float32Array,
+                    Float64Array
+                ];
+
+                var isTypedArray = false;
+
+                if ( typeof candidate == "object" && candidate != null ) {
+                    typedArrayTypes.forEach( function( typedArrayType ) {
+                        isTypedArray = isTypedArray || candidate instanceof typedArrayType;
+                    } );
+                }
+
+                return isTypedArray;
+            };
+
+            var transitTransformation = function( object ) {
+                return objectIsTypedArray( object ) ?
+                    Array.prototype.slice.call( object ) : object;
+            };
+
+            var json = JSON.stringify(
+                require("vwf/utility").transform(
+                    state, transitTransformation
+                )
+            );
+
+            var path = window.location.pathname;
+            var root = path.substring(1, path.length - 18);
+            var inst = path.substring(path.length-17, path.length-1);
+            
+            if(filename == '') filename = inst ;
+
+            xhr.open("POST", "/duck", true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.send("filename="+filename+"&root="+root+"&inst="+inst+"&jsonState="+json);
+        }
+
+        else
+        {
+            console.error("Unable to save state.");
+        }
+    }
+
+    // -- Load drillDown --------------------------------------------------------------------------
+
+    function loadDrillDown() 
+    {
+        console.info("enter loading");
+    }
+
+    // -- SupportAjax -----------------------------------------------------------------------------
+
+    function supportAjaxUploadWithProgress()
+    {
+        return supportAjaxUploadProgressEvents();
+
+        function supportAjaxUploadProgressEvents() 
+        {
+            var xhr = new XMLHttpRequest();
+            return !! (xhr && ('upload' in xhr) && ('onprogress' in xhr.upload));
+        }
     }
 } );
