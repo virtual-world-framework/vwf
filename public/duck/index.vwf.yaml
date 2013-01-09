@@ -45,14 +45,18 @@ children:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
-      constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
+      translation: [ 0, 400, 600 ]
+      distance: 2000
+      intensity: 0.7
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
-      constantAttenuation: 1
       rotation: [ -1, 0, 0, 225 ]
+      translation: [ 0, 400, 600 ]
+      distance: 2000
+      intensity: 0.7
 scripts:
 - |
     this.initialize = function(){

@@ -43,17 +43,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             
             //console.log([nodeID,childID,childExtendsID,childType]);
             //console.log("Create " + childID);
-            var parentNode;
-            var threeChild;
+            var parentNode, threeChild, threeParent;
             
-            if(nodeID)
+            if ( nodeID )
             {
                 var parentNode = this.state.nodes[nodeID];
-                if(!parentNode)
+                if ( !parentNode )
                     parentNode = this.state.scenes[nodeID];
-                if(parentNode)
+                if ( parentNode )
                 {
-                    var threeParent = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
+                    threeParent = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
                     if(threeParent && childName)
                     {
                         threeChild = FindChildByName.call(this,threeParent,childName,childExtendsID);
@@ -223,15 +222,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     callback( false );
                     node = this.state.nodes[childID] = {
                         name: childName,  
-                        threeObject: threeChild,
+                        //threeObject: threeChild,
                         source: utility.resolveURI( childSource, childURI ),
                         ID: childID,
                         parentID: nodeID,
                         sourceType: childType,
                         type: childExtendsID,
                         sceneID: this.state.sceneRootID,
-                        threeObject: new THREE.Object3D()
                     };
+                    node.threeObject = new THREE.Object3D(); 
+                    if ( threeParent !== undefined ) {
+                        threeParent.add( node.threeObject ); 
+                    } 
                 } else {     
                         
                         node = this.state.nodes[childID] = {
@@ -246,11 +248,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             //loadingCallback: callback,
                             sceneID: this.state.sceneRootID
                         };
-                        if(!node.threeObject)
+                        if( !node.threeObject )
                             node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
                         //The parent three object did not have any childrent with the name matching the nodeID, so make a new group
-                        if(!node.threeObject)
+                        if( !node.threeObject ) {
+                            // doesn't this object need to be added to the parent node
                             node.threeObject = new THREE.Object3D(); 
+                            if ( threeParent !== undefined ) {
+                                threeParent.add( node.threeObject ); 
+                            } 
+                        }
                 }
             
                 if(node && node.threeObject)
@@ -654,12 +661,23 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     {
                               //handled in view
                     }
-                    if(propertyName == 'backgroundColor')
+                    if ( propertyName == 'backgroundColor' )
                     {
-                              //handled in view 
+                        if ( node && node.renderer ) {
+                            if ( propertyValue instanceof Array ) {
+                                switch ( propertyValue.length ) {
+                                     case 3:
+                                         node.renderer.setClearColor( { r:propertyValue[0], g:propertyValue[1], b:propertyValue[2] } );    
+                                         break;
+                                     case 4:
+                                         node.renderer.setClearColor( { r:propertyValue[0], g:propertyValue[1], b:propertyValue[2] }, propertyValue[3] );    
+                                         break;          
+                                 }
+                             }
+                        }
                     }
                 }   
-                if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight)
+                if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight || threeObject instanceof THREE.SpotLight )
                 {
                     if(propertyName == 'lightType')
                     {
@@ -667,8 +685,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         {
 
                             var newlight = new THREE.PointLight('FFFFFF',1,0);
-                            newlight.distance = 100;
-                            newlight.color.setRGB(1,1,1);
+                            //newlight.distance = 100;
+                            //newlight.color.setRGB(1,1,1);
                             newlight.matrixAutoUpdate = false;
                             CopyProperties(threeObject,newlight);
                             var parent = threeObject.parent;
@@ -681,8 +699,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         {
                             
                             var newlight = new THREE.DirectionalLight('FFFFFF',1,0);
-                            newlight.distance = 100;
-                            newlight.color.setRGB(1,1,1);
+                            //newlight.distance = 100;
+                            //newlight.color.setRGB(1,1,1);
                             newlight.matrixAutoUpdate = false;
                             CopyProperties(threeObject,newlight);
                             var parent = threeObject.parent;
@@ -696,7 +714,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             
                             var newlight = new THREE.SpotLight('FFFFFF',1,0);
                             CopyProperties(threeObject,newlight);
-                            newlight.color.setRGB(1,1,1);
+                            //newlight.color.setRGB(1,1,1);
                             newlight.matrixAutoUpdate = false;
                             var parent = threeObject.parent;
                             parent.remove(threeObject);
@@ -706,10 +724,23 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
                         
                     }
-                    if(propertyName == 'diffuse')
+                    //if(propertyName == 'diffuse')
+                    //{
+                    //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+                    //}
+        console.info( "Set Light property: " + propertyName + " = " + propertyValue );
+                    if(propertyName == 'distance')
+                    {
+                        threeObject.distance = propertyValue;
+                    }
+                    if(propertyName == 'color')
                     {
                         threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     }
+                    if(propertyName == 'intensity')
+                    {
+                        threeObject.intensity = propertyValue;
+                    }                    
                     if(propertyName == 'castShadows')
                     {
                         //debugger;
@@ -764,10 +795,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         //                          elements[3],elements[11],elements[7],elements[15]);
                             if(threeObject.parent instanceof THREE.Scene)
                             {                           
-                            var flipmat = new THREE.Matrix4(1, 0,0,0,
-                                                            0, 0,1,0,
-                                                            0,1,0,0,
-                                                            0, 0,0,1);
+                            var flipmat = new THREE.Matrix4(1, 0, 0, 0,
+                                                            0, 0, 1, 0,
+                                                            0, 1, 0, 0,
+                                                            0, 0, 0, 1);
                             
                                             
                             propertyValue = propertyValue.multiply(flipmat,propertyValue);
@@ -811,28 +842,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     }
                     if(propertyName ==  "boundingbox")
                     {
-                        var bbox = getLocalBoundingBox.call( this, glgeObject );
-                        value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
+                        value = getBoundingBox.call( this, threeObject, true );
+                        return value;
                     }
-/*
-                    if(propertyName ==  "centerOffset")
+                    if ( propertyName == "centerOffset" )
                     {
-                        var centerOff = getCenterOffset.call( this, glgeObject );
-                        var scale = this.kernel.getProperty( nodeID, "scale", undefined );
-                        value = new Array;
-                        value.push( centerOff[0] * scale[0], centerOff[1] * scale[1], centerOff[2] * scale[2] ); 
+                        value = getCenterOffset.call( this, threeObject );
+                        return value;
                     }
 
-                    if(propertyName ==  "vertices")
-                    {
-                        value = getMeshVertices.call( this, glgeObject );
-                    }
-
-                    if(propertyName ==  "vertexIndices")
-                    {
-                        value = getMeshVertexIndices.call( this, glgeObject );
-                    }
-*/
                     if(propertyName ==  "meshData")
                     {
                         
@@ -1360,8 +1378,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             child.threeObject.shadowCameraLeft      = -500;
             child.threeObject.shadowCameraTop       =  500;
             child.threeObject.shadowCameraBottom    = -500;
-            child.threeObject.distance = 100;
-            child.threeObject.color.setRGB(1,1,1);
+            
+            // these properties are now exposed as properties
+            //child.threeObject.distance = 100;
+            //child.threeObject.color.setRGB(1,1,1);
+
             child.threeObject.matrixAutoUpdate = false;
         
             child.threeObject.name = childName;
@@ -1536,6 +1557,132 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 SetVisible(node.children[i],state);
             }
     }
+
+   // -- getBoundingBox ------------------------------------------------------------------------------
+
+    function getBoundingBox( object3, local ) {
+
+        //var objWorldTrans = getTransform.call( this, object3, false );
+        var bBox = { 
+            min: { x: Number.MAX_VALUE, y: Number.MAX_VALUE, z: Number.MAX_VALUE },
+            max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
+        };
+        var bObjBox;
+
+        var objectList = [], obj, wldTrans, bx, foundBBox = 0 ;
+        if ( object3.getDescendants ) {
+            objectList = object3.getDescendants();
+        }
+        objectList.push( object3 );
+
+        for ( var j = 0; j < objectList.length; j++ ) {
+
+            bObjBox = { 
+                        min: { x: Number.MAX_VALUE, y: Number.MAX_VALUE, z: Number.MAX_VALUE },
+                        max: { x: -Number.MAX_VALUE, y: -Number.MAX_VALUE, z: -Number.MAX_VALUE }
+                    };
+
+            obj = objectList[ j ];
+            if ( obj ) {
+
+                //wldTrans = getTransform.call( this, obj, false );
+
+                if ( obj.geometry ) {
+                    
+                    if ( obj.geometry.computeBoundingBox ) {
+                        
+                        obj.geometry.computeBoundingBox();
+                        bx = obj.geometry.boundingBox;
+                        foundBBox++;
+
+                        if ( foundBBox > 1 ) {
+                            // TODO
+                            // in this case we need to deal with the offsets of the origins
+                            // each object is in it's on local space which may not have the same origin
+                        } else {
+                            bBox = { 
+                                min: { x: bx.min.x, y: bx.min.y, z: bx.min.z },
+                                max: { x: bx.max.x, y: bx.max.y, z: bx.max.z }
+                            };
+                        }
+
+                    }
+
+                } 
+            }
+        }
+
+        return bBox; 
+           
+    }
+
+    function getCenterOffset( object3 ) {
+        var offset = [ 0, 0, 0 ];
+        if ( object3 ) {
+            var bBox = getBoundingBox.call( this, object3, true );
+            offset[0] = ( bBox.max.x + bBox.min.x ) * 0.50;
+            offset[1] = ( bBox.max.y + bBox.min.y ) * 0.50;
+            offset[2] = ( bBox.max.z + bBox.min.z ) * 0.50;
+        }
+        return offset;
+    }
+
+    function getTransform( threeObject, local ) {
+
+        var propertyValue = new THREE.Matrix4();
+        var elements = threeObject.matrix.elements;    
+        propertyValue.set( elements[0],elements[8],elements[4],elements[12],
+                                    elements[2],elements[10],elements[6],elements[14],
+                                    elements[1],elements[9],elements[5],elements[13],
+                                    elements[3],elements[11],elements[7],elements[15] );
+
+        if( threeObject.parent instanceof THREE.Scene )
+        {                            
+            var flipmat = new THREE.Matrix4(1, 0, 0, 0,
+                                            0, 0, 1, 0,
+                                            0, 1, 0, 0,
+                                            0, 0, 0, 1);
+            
+                            
+            propertyValue = propertyValue.multiply( flipmat, propertyValue );
+        }
+        
+        var translation = new THREE.Vector3();
+        var quat = new THREE.Quaternion();
+        var scale = new THREE.Vector3();
+    
+        propertyValue.decompose( translation, quat, scale );
+        var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
+        var angle = 0;
+        var axis = [0,0,0];
+        angle = goog.vec.Quaternion.toAngleAxis( googquat, axis );
+        if( isNaN( angle ) )
+            angle = 0;
+        axis[0] *= -1;
+        axis[2] *= -1;
+        
+        var vx = new THREE.Vector3();
+        vx.set( axis[0], axis[1], axis[2] );
+        quat.setFromAxisAngle( vx, angle );
+        if( !isNaN( quat.w ) )
+        propertyValue.setRotationFromQuaternion( quat );
+        
+        propertyValue = propertyValue.scale( scale );
+        propertyValue.elements[13] *= -1;
+    
+        //if ( !local ) {
+        //    if ( object3.parent ) {
+        //        var parentTrans = getTransform.call( this, object3.parent, false );
+        //        var parentInverse = goog.vec.Mat4.create();
+        //        if ( this.parent && goog.vec.Mat4.invert( this.transformFromValue( this.parent.worldTransform ), parentInverse ) ) {
+        //          return goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Mat4.create() );
+        //       }                        
+        //    }
+        // }
+
+        return propertyValue.elements;
+    }    
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     //UTF8 loader
     
@@ -1916,4 +2063,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         data = decompressJsonStrings(data);
         return data;
     }
+
+
+
 });

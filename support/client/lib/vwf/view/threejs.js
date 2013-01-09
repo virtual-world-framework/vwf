@@ -99,18 +99,24 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         var sceneNode = this.state.scenes[nodeID];
                         sceneNode.renderer.shadowMapEnabled = propertyValue;
                     }
-                    if(propertyName == 'ambientColor')
+                    if ( propertyName == 'ambientColor' )
                     {
-                        
-                        for(var i = 0; i < threeObject.__lights.length; i++)
+                        var lightsFound = 0;
+                        for( var i = 0; i < threeObject.__lights.length; i++ )
                         {
                             if(threeObject.__lights[i] instanceof THREE.AmbientLight)
                             {
-                                
                                 threeObject.__lights[i].color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-                                //SetMaterialAmbients.call(this);
+                                SetMaterialAmbients.call(this);
+                                lightsFound++;
                             }
                             
+                        }
+                        if ( lightsFound == 0 ) {
+                            var ambientlight = new THREE.AmbientLight( '#000000' );
+                            ambientlight.color.setRGB( propertyValue[0]/255, propertyValue[1]/255, propertyValue[2]/255 );
+                            node.threeScene.add( ambientlight );
+                            SetMaterialAmbients.call(this);                            
                         }
                         
                     }
@@ -257,6 +263,23 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var oldMouseY = 0;
             var hovering = false;
             
+            window.onresize = function () {
+                var origWidth = self.width;
+                var origHeight = self.height;
+                if ( window && window.innerHeight ) self.height = window.innerHeight - 20;
+                if ( window && window.innerWidth ) self.width = window.innerWidth - 20;
+
+                if ((origWidth != self.width) || (origHeight != self.height)) {
+                    mycanvas.height = self.height;
+                    mycanvas.width = self.width;
+                    
+                    //var cam = self.state.cameraInUse;
+                    //if ( cam ) {
+                    //    cam.aspect = mycanvas.width / mycanvas.height;
+                    //}
+                }
+            }
+
             if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
             {
                 sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
@@ -541,26 +564,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 if ( mouseUpObjectID && pointerDownID && mouseUpObjectID == pointerDownID ) {
                     sceneView.kernel.dispatchEvent( mouseUpObjectID, "pointerClick", eData.eventData, eData.eventNodeData );
 
-                    var glgeObj = sceneView.state.nodes[mouseUpObjectID].threeObject;
-                    if ( glgeObj ) {
-                        if( ctrlDown && !atlDown ) {
-                            if ( sceneView.state.nodes[mouseUpObjectID] ) {
-                                var colladaObj;
-                                var currentObj = glgeObj;
-                                while ( !colladaObj && currentObj ) {
-                                    if ( currentObj.constructor == GLGE.Collada )
-                                        colladaObj = currentObj;
-                                    else
-                                        currentObj = currentObj.parent;
-                                } 
-                                if ( colladaObj ) {
-                                    recurseGroup.call( sceneView, colladaObj, 0 );
-                                }
-                            }                
-                        } else if ( atlDown && !ctrlDown ) {
-                            recurseGroup.call( sceneView, glgeObj, 0 ); 
-                        }
-                    }
+                    // TODO: hierarchy output, helpful for setting up applications
+                    //var obj3js = sceneView.state.nodes[mouseUpObjectID].threeObject;
+                    //if ( obj3js ) {
+                    //    if ( atlDown && !ctrlDown ) {
+                    //        recurseGroup.call( sceneView, obj3js, 0 ); 
+                    //    }
+                    //}
                 }
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
