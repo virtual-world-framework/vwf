@@ -97,7 +97,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     modelInited: false,
                     pendingLoads: 0,
                 };
-				debugger;
+				//debugger;
 				sceneNode.glgeScene.addChild(BuildAxis());
 				
                 if ( sceneNode.glgeScene.camera ) {
@@ -658,8 +658,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
                 
                     case "boundingbox":
-                        var bbox = getLocalBoundingBox.call( this, glgeObject );
-                        value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin ], max: [ bbox.xMax, bbox.yMax, bbox.zMax ] };
+                        var bbox;
+                        if ( glgeObject.getBoundingVolume ) {
+                            bb = glgeObject.getBoundingVolume( true );
+                            value = { min: [ bb.limits[0], bb.limits[2], bb.limits[4] ], max: [ bb.limits[1], bb.limits[3], bb.limits[5] ] };
+                        } else {
+                            bbox = getLocalBoundingBox.call( this, glgeObject );
+                            value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
+                        }
                         break;
 
                     case "centerOffset":
@@ -1266,27 +1272,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
                 break;
 
-            case "constantAttenuation":
+            case "glge-constantAttenuation":
                 node.glgeObject.setAttenuationConstant( propertyValue );
                 break;
 
-            case "linearAttenuation":
+            case "glge-linearAttenuation":
                 node.glgeObject.setAttenuationLinear( propertyValue );
                 break;
 
-            case "quadraticAttenuation":
+            case "glge-quadraticAttenuation":
                 node.glgeObject.setAttenuationQuadratic( propertyValue );
                 break;
 
-            case "spotCosCutOff":
+            case "glge-spotCosCutOff":
                 node.glgeObject.setSpotCosCutOff( propertyValue );
                 break;
 
-            case "spotCutOff":
+            case "glge-spotCutOff":
                 node.glgeObject.setSpotCutOff( propertyValue );
                 break;
 
-            case "spotExponent":
+            case "glge-spotExponent":
                 node.glgeObject.setSpotExponent( propertyValue );
                 break;
 
@@ -1298,27 +1304,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setColor(propertyValue); // no setDiffuse() in GLGE 0.7
                 break;
 
-            case "specular":
+            case "glge-specular":
                 node.glgeObject.specular = propertyValue; // no setSpecular() in GLGE 0.7
                 break;
 
-            case "samples":
+            case "glge-samples":
                 node.glgeObject.setShadowSamples( propertyValue );
                 break;
 
-            case "softness":
+            case "glge-softness":
                 node.glgeObject.setShadowSoftness( propertyValue );
                 break;
 
-            case "bufferHeight":
+            case "glge-bufferHeight":
                 node.glgeObject.setBufferHeight( propertyValue );
                 break;
 
-            case "bufferWidth":
+            case "glge-bufferWidth":
                 node.glgeObject.setBufferWidth( propertyValue );
                 break;
 
-            case "shadowBias":
+            case "glge-shadowBias":
                 node.glgeObject.setShadowBias( propertyValue );
                 break;
 
@@ -1330,15 +1336,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setCastShadows( propertyValue );
                 break;
 
-            case "spotSoftness":
+            case "glge-spotSoftness":
                 node.glgeObject.setSpotSoftness( propertyValue );
                 break;
 
-            case "spotSoftnessDistance":
+            case "glge-spotSoftnessDistance":
                 node.glgeObject.setSpotSoftDistance( propertyValue );
                 break;
 
-            case "cascadeLevels":
+            case "glge-cascadeLevels":
                 node.glgeObject.setCascadeLevels( propertyValue );
                 break;
 
@@ -1599,26 +1605,26 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
                 break;
 
-            case "constantAttenuation":
+            case "glge-constantAttenuation":
                 temp = node.glgeObject.getAttenuation();
                 value = temp.constant;
                 break;
 
-            case "linearAttenuation":
+            case "glge-linearAttenuation":
                 temp = node.glgeObject.getAttenuation();
                 value = temp.linear;
                 break;
 
-            case "quadraticAttenuation":
+            case "glge-quadraticAttenuation":
                 temp = node.glgeObject.getAttenuation();
                 value = temp.quadratic;
                 break;
 
-            case "spotCosCutOff":
+            case "glge-spotCosCutOff":
                 value = node.glgeObject.getSpotCosCutOff();
                 break;
 
-            case "spotCutOff":
+            case "glge-spotCutOff":
                 node.glgeObject.getSpotCutOff( propertyValue );
                 break;
 
@@ -1635,27 +1641,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value = node.glgeObject.diffuse; // no getDiffuse() in GLGE 0.7
                 break;
 
-            case "specular":
+            case "glge-specular":
                 value = node.glgeObject.specular; // no getSpecular() in GLGE 0.7
                 break;
 
-            case "samples":
+            case "glge-samples":
                 value = node.glgeObject.getShadowSamples();
                 break;
 
-            case "softness":
+            case "glge-softness":
                 value = node.glgeObject.getShadowSoftness();
                 break;
 
-            case "bufferHeight":
+            case "glge-bufferHeight":
                 value = node.glgeObject.getBufferHeight();
                 break;
 
-            case "bufferWidth":
+            case "glge-bufferWidth":
                 value = node.glgeObject.getBufferWidth();
                 break;
 
-            case "shadowBias":
+            case "glge-shadowBias":
                 value = node.glgeObject.getShadowBias();
                 break;
 
@@ -1667,15 +1673,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value = node.glgeObject.getCastShadows();
                 break;
 
-            case "spotSoftness":
+            case "glge-spotSoftness":
                 value = node.glgeObject.getSpotSoftness();
                 break;
                 
-            case "spotSoftnessDistance":
+            case "glge-spotSoftnessDistance":
                 value = node.glgeObject.getSpotSoftDistance();
                 break;                
 
-            case "cascadeLevels":
+            case "glge-cascadeLevels":
                 value = node.glgeObject.getCascadeLevels();
                 break;
 

@@ -729,22 +729,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
         console.info( "Set Light property: " + propertyName + " = " + propertyValue );
-                    if(propertyName == 'distance')
-                    {
+                    if ( propertyName == 'distance' ) {
                         threeObject.distance = propertyValue;
                     }
-                    if(propertyName == 'color')
-                    {
-                        threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+                    if ( propertyName == 'color' ) {
+                        threeObject.color.setRGB( propertyValue[0]/255, propertyValue[1]/255, propertyValue[2]/255);
                     }
-                    if(propertyName == 'intensity')
-                    {
+                    if ( propertyName == 'intensity' ) {
                         threeObject.intensity = propertyValue;
                     }                    
-                    if(propertyName == 'castShadows')
-                    {
-                        //debugger;
-                        threeObject.castShadow = true;
+                    if ( propertyName == 'castShadows' ) {
+                        threeObject.castShadow = propertyValue;
                     }
 
                 }
@@ -764,13 +759,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
           if(!node) return;
           
           var threeObject = node.threeObject;
-          if(!threeObject)
+          if( !threeObject )
             threeObject = node.threeScene;
           
           //if it's a material node, we'll work with the threeMaterial
           //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
           //in case we later need access to the object the material is on.
-          if(node.threeMaterial)
+          if( node.threeMaterial )
             threeObject = node.threeMaterial;
             
           //There is not three object for this node, so there is nothing this driver can do. return
@@ -793,8 +788,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         //                          elements[2],elements[10],elements[6],elements[14],
                         //                          elements[1],elements[9],elements[5],elements[13],
                         //                          elements[3],elements[11],elements[7],elements[15]);
-                            if(threeObject.parent instanceof THREE.Scene)
-                            {                           
+                        if(threeObject.parent instanceof THREE.Scene)
+                        {                           
                             var flipmat = new THREE.Matrix4(1, 0, 0, 0,
                                                             0, 0, 1, 0,
                                                             0, 1, 0, 0,
@@ -802,41 +797,41 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             
                                             
                             propertyValue = propertyValue.multiply(flipmat,propertyValue);
-                            }
+                        }
                             
                             
-                            var translation = new THREE.Vector3();
-                            var quat = new THREE.Quaternion();
-                            var scale = new THREE.Vector3();
-                            
-                            
-                        
-                            propertyValue.decompose(translation,quat,scale);
-                            var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
-                            var angle = 0;
-                            var axis = [0,0,0];
-                            angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
-                            if(isNaN(angle))
-                                angle = 0;
-                            axis[0] *= -1;
-                            axis[2] *= -1;
-                            
-                            var vx = new THREE.Vector3();
-                            vx.set(axis[0],axis[1],axis[2]);
-                            quat.setFromAxisAngle(vx,angle);
-                            if(!isNaN(quat.w))
-                            propertyValue.setRotationFromQuaternion(quat);
-                            
-                            
-                            propertyValue = propertyValue.scale(scale);
-                            propertyValue.elements[13] *= -1;
-                            
-                            
-                            
-                                                                
+                        var translation = new THREE.Vector3();
+                        var quat = new THREE.Quaternion();
+                        var scale = new THREE.Vector3();
                         
                         
-                            return propertyValue.elements;                  
+                    
+                        propertyValue.decompose(translation,quat,scale);
+                        var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
+                        var angle = 0;
+                        var axis = [0,0,0];
+                        angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
+                        if(isNaN(angle))
+                            angle = 0;
+                        axis[0] *= -1;
+                        axis[2] *= -1;
+                        
+                        var vx = new THREE.Vector3();
+                        vx.set(axis[0],axis[1],axis[2]);
+                        quat.setFromAxisAngle(vx,angle);
+                        if(!isNaN(quat.w))
+                        propertyValue.setRotationFromQuaternion(quat);
+                        
+                        
+                        propertyValue = propertyValue.scale(scale);
+                        propertyValue.elements[13] *= -1;
+                        
+                        
+                        
+                                                            
+                    
+                    
+                        return propertyValue.elements;                  
                                                     
                     
                     }

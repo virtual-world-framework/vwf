@@ -40,27 +40,29 @@ children:
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
-      translation: [ 12, 0, 76 ]
+      translation: [ 0, 0, 0 ]
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
-      rotation: [ 1, 0, 0, -45 ]
-      translation: [ 0, 400, 600 ]
+      rotation: [ 0, 0, 1, -45 ]
+      translation: [ -400, 400, 0 ]
       distance: 2000
-      intensity: 0.7
+      intensity: 0.9
+      castShadows: false
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
-      rotation: [ -1, 0, 0, 225 ]
-      translation: [ 0, 400, 600 ]
+      rotation: [ 0, 0, 1, 225 ]
+      translation: [ 400, -400, 0 ]
       distance: 2000
-      intensity: 0.7
+      intensity: 0.9
+      castShadows: false
 scripts:
 - |
     this.initialize = function(){
        
-      this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,16,616,90,1 ];
+      this.camera.transform = [ -1,0,0,0, 0,-1,0,0, 0,0,1,0, 16,600,90,1 ];
       this.camera.far = this.camera.far * 4;
     }

@@ -41,7 +41,7 @@ properties:
           this.lightType = value;
           break;
       }
-    value: "point"
+    value:
 
   ## makes the light affect the scene
   ## 
@@ -50,48 +50,6 @@ properties:
 
   enable:
 
-  ## Constant attenuation
-  ## 
-  ## @name light.vwf#constantAttenuation
-  ## @property
-
-  constantAttenuation:
-
-  ## Linear attenuation
-  ## 
-  ## @name light.vwf#linearAttenuation
-  ## @property
-
-  linearAttenuation:
-
-  ## Quadratic attenuation
-  ## 
-  ## @name light.vwf#quadraticAttenuation
-  ## @property
-
-  quadraticAttenuation:
-
-  ## Enables the spotCosCutOff calculations
-  ## 
-  ## @name light.vwf#spotCutOff
-  ## @property
-
-  spotCutOff:
-
-  ## Represents the cosine ofthe angle beyond which the light is cut off
-  ## 
-  ## @name light.vwf#spotCosCutOff
-  ## @property
-
-  spotCosCutOff:
-
-  ## Amount of "spottiness" of the spotlight
-  ## 
-  ## @name light.vwf#spotExponent
-  ## @property
-
-  spotExponent:
-
   ## Sets the color of the light
   ## 
   ## @name light.vwf#color
@@ -99,86 +57,16 @@ properties:
 
   color:
 
-  ## Diffuse value
-  ## 
-  ## @name light.vwf#diffuse
-  ## @property
-
-  diffuse:
-
-  ## Specular value
-  ## 
-  ## @name light.vwf#specular
-  ## @property
-
-  specular:
-
-  ## The number of samples for shadow
-  ## 
-  ## @name light.vwf#samples
-  ## @property
-
-  samples:
-
-  ## The softness value of shadow
-  ## 
-  ## @name light.vwf#softness
-  ## @property
-
-  softness:
-
-  ## The Shadow Buffer Memory size for the resolution height of the shadow
-  ## 
-  ## @name light.vwf#bufferHeight
-  ## @property
-
-  bufferHeight:
-
-  ## The Shadow Buffer Memory size for the resolution width of the shadow
-  ## 
-  ## @name light.vwf#bufferWidth
-  ## @property
-
-  bufferWidth:
-
-  ## The shadow buffer bias. Map bias moves the shadow toward or away from the shadow-casting object(s)
-  ## 
-  ## @name light.vwf#shadowBias
-  ## @property
-
-  shadowBias:
-
-  ## The shadow casting distance
+  ## Distance value
   ## 
   ## @name light.vwf#distance
   ## @property
 
   distance:
 
-  ## The shadow casting flag. True if casting shadows is enabled.
+  ## Intensity value
   ## 
-  ## @name light.vwf#castShadows
+  ## @name light.vwf#intensity
   ## @property
 
-  castShadows:
-
-  ## Sets the cascade levels
-  ## 
-  ## @name light.vwf#cascadeLevels
-  ## @property
-
-  cascadeLevels:
-
-  ## Sets the softness if this is a spot light
-  ## 
-  ## @name light.vwf#spotSoftness
-  ## @property
-
-  spotSoftness:
-
-  ## Sets the distance of the softness if this is a spot light
-  ## 
-  ## @name light.vwf#spotSoftness
-  ## @property
-
-  spotSoftnessDistance:
+  intensity:

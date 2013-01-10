@@ -288,7 +288,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
-            sceneNode.renderer.setClearColor({r:.5,g:1,b:1},1.0);
+            //sceneNode.renderer.setClearColor({r:.5,g:1,b:1},1.0);
             var ambientlight = new THREE.AmbientLight('#000000');
             ambientlight.color.setRGB(.7,.7,.7);
             sceneNode.threeScene.add(ambientlight);
