@@ -12,17 +12,17 @@ Often, you will want your users to be different "characters" in the scene.  For 
 - A 3D model for the user's avatar (optional if you don't want other users to be able to see them) -<br/>&nbsp;&nbsp;This will also go in the model (.yaml) so everyone will see it
 - A reference that tells the user that this camera and 3D model is "theirs" -<br/>&nbsp;&nbsp;This will go in the view (.html) so every user's can be different
 
-## How to create the avatar
+## How to create them
 
 You will need a method in your model (index.vwf.yaml) that we can call each time a user joins.  This one will do nicely:
 
 >	var count = 0;
 >	
->	this.createUser = function() {
+>	this.createUser = function( userName, callbackWhenUserIsCreated ) {
 >	
->	  // Ready the parameters to the call to create the child (3 steps)
->	  // Step 1: Set a unique user name
->	  var userName = "User" + count++;
+>	  // Ready the parameters to the call to create the child (2 steps)
+>	  // Step 1: Make the user name unique
+>	  var userName += count++;
 >	
 >	  // Step 2: Create the definition of an object that will groups a camera w/ an avatar 3D model
 >	  var userDef = { 
@@ -38,9 +38,6 @@ You will need a method in your model (index.vwf.yaml) that we can call each time
 >	  }
 >	  userDef.children[ "camera" ] = cameraDef;
 >	  userDef.children[ "avatar" ] = avatarDef;
->	
->	  // Step 3: Create a callback function that will be called when the user object has been created
->	  var callbackWhenUserIsCreated = function( child ) { //Whatever you want here };
 >	
 >	  // Create the user object
 >	  this.children.create( userName, userDef, callbackWhenUserIsCreated );
@@ -78,25 +75,56 @@ In your index.vwf.html file you could have a login dialog like so:
 
 And then connect a script to the login button that will call your createUser function (also in index.vwf.html):
 
+>	view = this;
+>	view.myUserObject = null;
+>	
 > 	$( "loginElementName" ).click( function( e ) {
 >	  var userName = $( "#userName" ).val();
 >	  if !( ( userName == "Your Name" ) || ( userName == "" ) ) {
 >	    userName = userName.replace(/ /g,"_");
 >	    userName = userName.replace(/([^0-9A-Za-z])/g,"");
 >	    $( "#main" ).show();
->	    $( "#loginDialog" ).modal( "hide" );	
->	    vwf_view.kernel.callMethod( "index-vwf", "createUser", [ userName /*any parameters you want*/ ] );
+>	    $( "#loginDialog" ).modal( "hide" );
+>	    var view = this;
+>	    vwf_view.kernel.callMethod( "index-vwf", "createUser", [ userName, function() { ... } ] );
 >	  }
 >	});
 
-(Pick up here!)
+## Setting the user's camera
 
-- Get a return from this to save the reference to the user
+The callback after the user has been created is important because it will save the reference to the user object so the user knows which object is his.  It will also tell the renderer to render from the point of view of this user's camera.  It is important to do this from the view (.html), since this behavior is specific to this user.  That *function() { ... }* above should be replaced with something like:
 
-## How to have your user control just his character
+> 	function() {
+>	  view.myUserObject = this;
+>	  var camera = view.myUserObject.camera;
+>	  camera.setAspect( canvas.width / canvas.height );
+>	  var viewState = vwf_view.kernel.views[0].state;
+>	  viewState.cameraInUse = camera;
+>	  viewState.cameraInUseID = camera.id;
+>	  viewState.scenes[ sceneNode ].glgeScene.setCamera( camera );
+>	  viewState.scenes[ sceneNode ].camera.ID = camera.id;
+>	});
 
-- Use reference to set properties and call methods on your particular user object, using vwf_view.kernel
+Note: This code makes reference to renderer-specific objects (everything after *scenes[ sceneNode ]* is GLGE-specific).  Soon, all renderer references will go through the *state* and we will no longer need to access renderer-specific objects.
+
+We can now make the user's interactions affect his specific character by updating the properties of myUserObject:
+
+>	window.onkeydown = function( eventArg ) {
+>	  if ( view.myUserObject ) {
+>	    switch ( eventArg.keyCode ) {
+>	      case 87: // 'W' key
+>	        vwf_view.kernel.callMethod( view.myUserObject, "translateBy", [ [ 0, 1, 0 ] ] );
+>	        break;
+>	    }
+>	  }
+>	}
 
 ## Pitfalls
 
-Don't use this.moniker anywhere in the model.  Because this.moniker is unique per user, if it appears in the model, it can cause each user's model state to diverge - bad!
+- Do not use *this.moniker* in the model (.yaml)!
+
+*this.moniker* contains an id that is unique for every user in the application.  It might be tempting to make users behave differently by creating conditionals around this variable.  However, doing so breaks VWF's replicated computation since each user's model then diverges from the others.  All user-specific actions need to be on the view side.
+
+- Do not access the *vwf* variable anywhere
+
+*vwf* gives a coder direct access to manipulate the model.  This may seem convenient, but it side-steps VWF's mechanisms to ensure that state stays synchronized between users.  In the future this variable will be hidden from us coders for our safety, but in the mean time, steer clear of it!
