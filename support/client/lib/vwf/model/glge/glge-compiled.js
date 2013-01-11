@@ -7253,7 +7253,7 @@ GLGE.Material.prototype.getFragmentShader=function(lights,colors,shaderInjection
 * @private
 */
 GLGE.Material.prototype.textureUniforms=function(gl,shaderProgram,lights,object){
-		  if(this.animation) this.animate();
+		  //if(this.animation) this.animate();
 		  var pc=shaderProgram.caches;
 
 		  if(!pc.baseColor || pc.baseColor.r!=this.color.r || pc.baseColor.g!=this.color.g || pc.baseColor.b!=this.color.b || pc.baseColor.a!=this.color.a){
@@ -10761,10 +10761,66 @@ GLGE.Object.prototype.GLUniforms=function(gl,renderType,pickindex){
 	}
 
 
-	if(this.material && (renderType==GLGE.RENDER_DEFAULT || renderType==GLGE.RENDER_EMIT || this.shadowAlpha) && gl.scene.lastMaterial!=this.material){
-		this.material.textureUniforms(gl,program,lights,this,renderType);
-		gl.scene.lastMaterial=this.material;
+	if(this.material && (renderType==GLGE.RENDER_DEFAULT || renderType==GLGE.RENDER_EMIT || this.shadowAlpha))
+	{
+		
+		if(!GLGE.CompareMaterials(gl.scene.lastMaterial,this.material)){
+			this.material.textureUniforms(gl,program,lights,this,renderType);
+			GLGE.textureUniformsCalled++;
+			gl.scene.lastMaterial=this.material;
+		}else
+		{
+			GLGE.textureUniformsSkipped++;
+		}
 	}
+}
+GLGE.CompareVec=function(vec1, vec2)
+{
+	if(!vec1 && vec2) return false;
+	if(vec1 && !vec2) return false;
+	if(!vec1 && !vec2) return true;
+	if(vec1.length != vec2.length) return false;
+	for(var i=0;i<vec1.length;i++)
+	{
+		if(Math.abs(vec1[i]-vec2[i]) > .001) return false;
+	}
+	return true;
+}
+GLGE.CompareMaterials=function(mat1, mat2)
+{
+
+	if(!mat1 && mat2) return false;
+	if(mat1 && !mat2) return false;
+	if(!mat1 && !mat2) return true;
+	
+	if(mat1.getAlpha() != mat2.getAlpha()) return false;
+	if(!GLGE.CompareVec(mat1.getAmbient(),mat2.getAmbient())) return false;
+	if(!GLGE.CompareVec(mat1.getColor(),mat2.getColor())) return false;
+	if(!GLGE.CompareVec(mat1.getEmit(),mat2.getEmit())) return false;
+	if(mat1.getReflectivity() != mat2.getReflectivity()) return false;
+	if(mat1.getShadeless() != mat2.getShadeless()) return false;
+	if(mat1.getShadow() != mat2.getShadow()) return false;
+	if(mat1.getShininess() != mat2.getShininess()) return false;
+	if(!GLGE.CompareVec(mat1.getSpecularColor(),mat2.getSpecularColor())) return false;
+	if(mat1.getVertexColorMode() != mat2.getVertexColorMode()) return false;
+	if(mat1.getLayers().length != mat2.getLayers().length) return false;
+	for(var i =0; i < mat1.getLayers().length; i++)
+	{
+	
+		if(mat1.getLayers()[i].getAlpha() != mat2.getLayers()[i].getAlpha()) return false;
+		if(mat1.getLayers()[i].getBlendFunction() != mat2.getLayers()[i].getBlendFunction()) return false;
+		if(mat1.getLayers()[i].getBlendMode() != mat2.getLayers()[i].getBlendMode()) return false;
+		if(mat1.getLayers()[i].getMapinput() != mat2.getLayers()[i].getMapinput()) return false;
+		if(mat1.getLayers()[i].getMapto() != mat2.getLayers()[i].getMapto()) return false;
+		if(mat1.getLayers()[i].getTexture() && !mat2.getLayers()[i].getTexture()) return false;
+		if(!mat1.getLayers()[i].getTexture() && mat2.getLayers()[i].getTexture()) return false;
+		if(mat1.getLayers()[i].getTexture() && mat2.getLayers()[i].getTexture())
+		{
+		  if(mat1.getLayers()[i].getTexture().url != mat2.getLayers()[i].getTexture().url) return false;
+		}
+		if(!GLGE.CompareVec(mat1.getLayers()[i].getMatrix(),mat2.getLayers()[i].getMatrix())) return false;
+	}
+	return true;
 }
 /**
 * Renders the object to the screen
@@ -12745,6 +12801,8 @@ GLGE.Light.prototype.calcDirMatrix=function(camera, lightDir,light, invlight) {
 	
 	lightProj=GLGE.mulMat4(lightProj,GLGE.mulMat4(lightView,GLGE.inverseMat4(invlight)));
 	
+	 if(window.BoundingBoxRTAS )
+	{
 	var shadowsize = 7;
 	var boxcenter = GLGE.mulMat4Vec3(GLGE.inverseMat4(camera.getModelMatrix()),[0,0,-shadowsize]);
 	
@@ -12754,7 +12812,7 @@ GLGE.Light.prototype.calcDirMatrix=function(camera, lightDir,light, invlight) {
 	box = box.transformBy(invlight);
 	
 	return GLGE.makeOrtho(box.min[0],box.max[0],box.min[1],box.max[1],.1,500);
-	
+	} 
 	return lightProj;	
 	
 }
@@ -13688,7 +13746,7 @@ GLGE.Scene.prototype.objectsInViewFrustum=function(renderObjects,cvp){
 	var returnObjects=[];
 	var planes=GLGE.cameraViewProjectionToPlanes(cvp);
 	for(var i=0;i<renderObjects.length;i++){
-		obj=renderObjects[i];
+		obj=renderObjects[i].object;
 		if(obj.getBoundingVolume && obj.cull){
 			var boundingVolume=obj.getBoundingVolume();
 			var center=boundingVolume.getCenter();
@@ -13696,7 +13754,7 @@ GLGE.Scene.prototype.objectsInViewFrustum=function(renderObjects,cvp){
 			if(GLGE.sphereInFrustumPlanes([center[0],center[1],center[2],radius],planes)){
 				var points=boundingVolume.getCornerPoints();
 				if(GLGE.pointsInFrustumPlanes(points,planes)){
-					returnObjects.push(obj);
+					returnObjects.push(renderObjects[i]);
 					if(obj.culled) obj.fireEvent("willRender",{});
 					obj.culled=false;
 				}else{
@@ -13708,7 +13766,7 @@ GLGE.Scene.prototype.objectsInViewFrustum=function(renderObjects,cvp){
 				obj.culled=true;
 			}
 		}else{
-			returnObjects.push(obj);
+			returnObjects.push(renderObjects[i]);
 		}
 	}
 	return returnObjects;	
@@ -13809,13 +13867,26 @@ GLGE.Scene.prototype.render=function(gl){
 
 	var renderObjects=this.getObjects();
 	var cvp=this.camera.getViewProjection();
-	
-	if(this.culling){
-		var cvp=this.camera.getViewProjection();
-		renderObjects=this.objectsInViewFrustum(renderObjects,cvp);
-	}
 	renderObjects=this.unfoldRenderObject(renderObjects);
-	renderObjects=renderObjects.sort(this.stateSort);
+	var nonBatched = []
+	for(var i = 0; i < renderObjects.length; i++)
+	{
+		if(!this.isBatched(renderObjects[i].object))
+			nonBatched.push(renderObjects[i]);
+		if(renderObjects[i].object.batchDirty == true)	
+		{
+			this.batch(renderObjects[i].object);
+		}		
+	}
+	renderObjects = nonBatched;
+	if(this.renderBatches)
+	{
+		
+		for(var i = 0; i < this.renderBatches.length; i++)
+		{
+			renderObjects.push({multiMaterial:0,object:this.renderBatches[i].renderObject});
+		}
+	}
 
 	
 	//shadow stuff
@@ -13860,14 +13931,22 @@ GLGE.Scene.prototype.render=function(gl){
 				
 				this.camera.setProjectionMatrix(lights[i].s_cache.pmatrix);
 				this.camera.matrix=lights[i].s_cache.imvmatrix;
+				
+				var shadowObjects = [];
+				if(this.culling){
+					var cvp=this.camera.getViewProjection();
+					
+					shadowObjects=this.objectsInViewFrustum(renderObjects,cvp);
+				}
+				
 				//draw shadows
-				for(var n=0; n<renderObjects.length;n++){
-					if(renderObjects[n].object.getCastShadows && !renderObjects[n].object.getCastShadows()) continue;
-					if(renderObjects[n].object.className=="ParticleSystem") {continue;}
+				for(var n=0; n<shadowObjects.length;n++){
+					if(shadowObjects[n].object.getCastShadows && !shadowObjects[n].object.getCastShadows()) continue;
+					if(shadowObjects[n].object.className=="ParticleSystem") {continue;}
 					if(lights[i].getType()==GLGE.L_SPOT){
-						renderObjects[n].object.GLRender(gl, GLGE.RENDER_SHADOW,n,renderObjects[n].multiMaterial,lights[i].distance);
+						shadowObjects[n].object.GLRender(gl, GLGE.RENDER_SHADOW,n,shadowObjects[n].multiMaterial,lights[i].distance);
 					}else{
-						renderObjects[n].object.GLRender(gl, GLGE.RENDER_DEPTH,n,renderObjects[n].multiMaterial,lights[i].distance);
+						shadowObjects[n].object.GLRender(gl, GLGE.RENDER_DEPTH,n,shadowObjects[n].multiMaterial,lights[i].distance);
 					}
 				}
 				
@@ -13893,12 +13972,13 @@ GLGE.Scene.prototype.render=function(gl){
 	if(this.camera.animation) this.camera.animate();
 	
 	//null render pass to findout what else needs rendering
-	this.getPasses(gl,renderObjects);	
+	//this.getPasses(gl,renderObjects);	
 	
 	//first off render the passes
 	var cameraMatrix=this.camera.matrix;
 	var cameraPMatrix=this.camera.getProjectionMatrix();
 	this.allowPasses=false;
+	
 	while(this.passes.length>0){
 		var pass=this.passes.pop();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, pass.frameBuffer);
@@ -13912,14 +13992,397 @@ GLGE.Scene.prototype.render=function(gl){
 	this.camera.matrix=cameraMatrix;
 	this.camera.setProjectionMatrix(cameraPMatrix);
 	
-	gl.bindFramebuffer(gl.FRAMEBUFFER, this.filter ? this.framebuffer : this.transbuffer);
-	this.renderPass(gl,renderObjects,this.renderer.getViewportOffsetX(),this.renderer.getViewportOffsetY(),this.renderer.getViewportWidth(),this.renderer.getViewportHeight());	
-
+	//gl.bindFramebuffer(gl.FRAMEBUFFER, this.filter ? this.framebuffer : this.transbuffer);
+	//var buffer = this.getRTTBuffer(gl)[0];
 	
-	this.applyFilter(gl,renderObjects, this.transbuffer);
+	//gl.bindFramebuffer(gl.FRAMEBUFFER, buffer );
+	GLGE.textureUniformsCalled = 0;
+	GLGE.textureUniformsSkipped = 0;
+	//renderObjects=renderObjects.sort(this.stateSort);
+	renderObjects=renderObjects.sort(function(a,b){
+		return (GLGE.CompareMaterials(a.object.getMaterial(),b.object.getMaterial()));
+	})
+	this.renderPass(gl,renderObjects,this.renderer.getViewportOffsetX(),this.renderer.getViewportOffsetY(),this.renderer.getViewportWidth(),this.renderer.getViewportHeight());	
+	//console.log(GLGE.textureUniformsCalled +":"+GLGE.textureUniformsSkipped);
+	//gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	
+	this.applyFilter(gl,renderObjects, this.framebuffer);
 	
 	this.allowPasses=true;
 }
+GLGE.RenderBatch = function()
+{
+	this.objects = [];
+	this.renderObject = null;
+	this.material = null;
+	this.addObject = function(o)
+	{
+		if(this.objects.length ==0)
+		{
+			this.material = o.getMaterial();
+			this.objects.push(o);
+		}else
+		{
+			this.objects.push(o);
+		}
+	}
+	function tI(x,y)
+	{
+		x = x-1;
+		y=y-1;
+		return x*4+y;
+	}
+	function GetRotationMatrix(mat)
+	{
+		
+		var rmat = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+		for(var i = 0; i < mat.length; i++)
+		rmat[i] = mat[i];
+		rmat[3] = 0;
+		rmat[7] = 0;
+		rmat[11] = 0;
+		rmat = GLGE.transposeMat4(rmat)
+		
+		var sx = Math.sqrt(mat[tI(1,1)]*mat[tI(1,1)]     + mat[tI(1,2)]*mat[tI(1,2)]    +       mat[tI(1,3)]*mat[tI(1,3)] );
+		var sy = Math.sqrt(mat[tI(2,1)]*mat[tI(2,1)]     + mat[tI(2,2)]*mat[tI(2,2)]    +       mat[tI(2,3)]*mat[tI(2,3)] );
+		var sz = Math.sqrt(mat[tI(3,1)]*mat[tI(3,1)]     + mat[tI(3,2)]*mat[tI(3,2)]    +       mat[tI(3,3)]*mat[tI(3,3)] );
+
+		rmat[tI(1,1)] = mat[tI(1,1)]/sx; rmat[tI(1,2)] = mat[tI(1,2)]/sx; rmat[tI(1,3)] = mat[tI(1,3)]/sx;	
+		rmat[tI(2,1)] = mat[tI(2,1)]/sy; rmat[tI(2,2)] = mat[tI(2,2)]/sy; rmat[tI(2,3)] = mat[tI(2,3)]/sy;
+		rmat[tI(3,1)] = mat[tI(3,1)]/sz; rmat[tI(3,2)] = mat[tI(3,2)]/sz; rmat[tI(3,3)] = mat[tI(3,3)]/sz;			
+	
+		
+		return GLGE.transposeMat4(mat);
+	}
+	this.buildRenderObject = function()
+	{
+		
+		this.renderObject = new GLGE.Object();
+		this.renderObject.setZtransparent(this.objects[0].zTrans);
+		this.renderObject.setMaterial(this.material);
+		var mesh = new GLGE.Mesh();
+		var positions = [];
+		var colors = [];
+		var faces = [];
+		var uvs = [];
+		var uvs2 = [];
+		var normals = [];
+		var tangents = [];
+		
+		var needTC1 = false;
+		var needTC2 = false;
+		var needVC = false;
+		var needTan = false;
+		
+		for(var i = 0; i < this.objects.length;i++)
+		{
+			 var tm = this.objects[i].getMesh();
+		     needTC1 = needTC1 || tm.uv1set ? true : false;
+			 needTC2 = needTC2 || tm.uv2set ? true : false;
+			 needVC = needVC || tm.colors ? true : false;
+			 needTan = needTan || tm.tangents ? true : false;
+		}
+		for(var i = 0; i < this.objects.length;i++)
+		{
+			var tm = this.objects[i].getMesh();
+			var tp = tm.positions.slice();
+			var tn = tm.normals.slice();
+			var tuv = tm.uv1set || [];
+			var tuv2 = tm.uv2set || [];
+			var tf = tm.faces.data.slice();
+			var tc = tm.colors || [];
+		    var tt = tm.tangents || [];
+			
+			var mm = this.objects[i].getModelMatrix().slice();
+			var nm = GetRotationMatrix(mm);
+			
+			var ttp = [];
+			for(var j=0; j<tp.length; j+=3)
+			{
+				var pos = [tp[j],tp[j+1],tp[j+2]];
+				pos = GLGE.mulMat4Vec3(mm,pos);
+				ttp.push(pos[0]);
+				ttp.push(pos[1]);
+				ttp.push(pos[2]);
+			}
+			tp = ttp;
+			
+			mm[3] = 0;
+			mm[7] = 0;
+			mm[11] = 0;
+			var ttn = [];
+			for(var j=0; j<tn.length; j+=3)
+			{
+				var norm = [tn[j],tn[j+1],tn[j+2]];
+				norm = GLGE.mulMat4Vec3(mm,norm);
+				norm = GLGE.toUnitVec3(norm);
+				ttn.push(norm[0]);
+				ttn.push(norm[1]);
+				ttn.push(norm[2]);
+				
+			}
+			tn = ttn;
+			
+			for(var j = 0; j < tf.length; j++)
+			{
+				tf[j] += positions.length/3;
+			}
+			
+			if( needTC1 && tuv.length == 0)
+			{
+				for(var j=0; j<tp.length/3; j++)
+				{tuv.push(0);tuv.push(0)}
+			}
+			
+			if( needTan && tt.length == 0)
+			{
+				for(var j=0; j<tp.length/3; j++)
+				{tt.push(0);tt.push(0);tt.push(0)}
+			}
+			
+			if( needTC2 && tuv2.length == 0)
+			{
+				for(var j=0; j<tp.length/3; j++)
+				{tuv2.push(0);tuv2.push(0)}
+			}
+			
+			if(tn.length == 0)
+			{
+				for(var j=0; j<tp.length/3; j++)
+				{tn.push(0);tn.push(0);tn.push(0)}
+			}
+			
+			if(needVC && tc.length == 0)
+			{
+				for(var j=0; j<tp.length/3; j++)
+				{tc.push(1);tc.push(1);tc.push(1);tc.push(1)}
+			}
+			
+			positions = positions.concat(tp);
+			if(needVC) colors = colors.concat(tc);
+			faces = faces.concat(tf);
+			if(needTC1) uvs = uvs.concat(tuv);
+			if(needTC2) uvs2 = uvs2.concat(tuv2);
+			if(needTan) tangents = tangents.concat(tt);
+			normals = normals.concat(tn);
+		}
+		
+		
+		mesh.setPositions(positions);
+        if(needVC) mesh.setVertexColors(colors);
+        mesh.setFaces(faces);
+        if(needTC1) mesh.setUV(uvs);
+		if(needTC2) mesh.setUV2(uvs2);
+        mesh.setNormals(normals);
+		if(needTan) mesh.setTangents(tangents);
+		this.renderObject.setMesh(mesh);
+	}
+	this.render = function()
+	{
+		if(!this.renderObject)
+			this.buildRenderObject();
+		this.renderObject.render();	
+	}
+	this.validObject = function(obj)
+	{
+		return GLGE.CompareMaterials(this.material,obj.getMaterial());
+	}
+	this.removeObject = function(obj)
+	{
+		var index = this.objects.indexOf(obj);
+		this.objects = this.objects.splice(index,1);
+	}
+}
+GLGE.Scene.prototype.isBatched = function(o)
+{
+	if(!this.renderBatches) return false;
+	for(var i = 0; i < this.renderBatches.length; i++)
+	{
+		for(var j = 0; j < this.renderBatches[i].objects.length; j++)
+		{
+			if(this.renderBatches[i].objects[j] == o) return true;
+		}
+	}
+	return false;
+}
+GLGE.Scene.prototype.getBatchForObject = function(obj)
+{
+	if(!this.renderBatches) return false;
+	for(var i = 0; i < this.renderBatches.length; i++)
+	{
+		for(var j = 0; j < this.renderBatches[i].objects.length; j++)
+		{
+			if(this.renderBatches[i].objects[j] == obj) return this.renderBatches[i];
+		}
+	}
+	return null;
+}
+GLGE.Scene.prototype.deBatch = function(obj)
+{
+	var oldbatch = this.getBatchForObject(obj);
+	if(oldbatch)
+	{
+		oldbatch.removeObject(obj);
+		if(oldbatch.objects.length == 0)
+		{
+			var index = this.renderBatches.indexOf(oldbatch);
+			this.renderBatches.splice(index,1);
+		}else
+		{
+			oldbatch.buildRenderObject();
+		}
+	}
+	obj.batchDirty=false;
+}
+GLGE.Scene.prototype.batch = function(obj, force)
+{
+	if(!this.renderBatches)
+		this.renderBatches = [];
+		
+	if(force)
+	{
+		obj.isStatic = true;
+	}
+	if(!obj.isStatic)
+		return;
+		
+	var oldbatch = this.getBatchForObject(obj);
+	if(oldbatch)
+	{
+		oldbatch.removeObject(obj);
+		if(oldbatch.objects.length == 0)
+		{
+			var index = this.renderBatches.indexOf(oldbatch);
+			this.renderBatches.splice(index,1);
+		}else
+		{
+			oldbatch.buildRenderObject();
+		}
+	}
+		var added = false;
+		for(var j = 0; j < this.renderBatches.length && !added; j++)
+		{
+			if(this.renderBatches[j].validObject(obj))
+			{
+				this.renderBatches[j].addObject(obj);
+				this.renderBatches[j].buildRenderObject();
+				added = true;
+			}
+		}
+		if(!added)
+		{
+			var newBatch = new GLGE.RenderBatch();
+			newBatch.addObject(obj);
+			newBatch.buildRenderObject();
+			this.renderBatches.push(newBatch);
+		}
+	obj.batchDirty=false;
+}
+GLGE.Scene.prototype.destroyBatches =function()
+{
+	this.renderBatches = [];
+}
+GLGE.Scene.prototype.buildBatches =function(force)
+{
+	if(!this.renderBatches)
+		this.renderBatches = [];
+	var renderObjects=this.getObjects();
+	renderObjects=this.unfoldRenderObject(renderObjects);
+	
+	if(force)
+	{
+		for(var i = 0; i < renderObjects.length; i++)
+		{
+			renderObjects[i].object.isStatic = true;
+		}
+	}
+	
+	for(var i = 0; i < renderObjects.length; i++)
+	{
+		if(renderObjects[i].object.isStatic)
+		{
+			var added = false;
+			for(var j = 0; j < this.renderBatches.length && !added; j++)
+			{
+				if(this.renderBatches[j].validObject(renderObjects[i].object))
+				{
+					this.renderBatches[j].addObject(renderObjects[i].object);
+					added = true;
+				}
+			}
+			if(!added)
+			{
+				var newBatch = new GLGE.RenderBatch();
+				newBatch.addObject(renderObjects[i].object);
+				this.renderBatches.push(newBatch);
+			}
+			renderObjects[i].object.batchDirty=false;
+		}
+	}
+	for(var i = 0; i < this.renderBatches.length; i++)
+	{
+		this.renderBatches[i].buildRenderObject();
+	}
+}
+GLGE.Scene.prototype.getRTTBuffer=function(gl,width,height){
+	
+	if(this.rtt) return this.rtt;
+	var rttFramebuffer;
+    var rttTexture;
+
+
+    rttFramebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
+    rttFramebuffer.width = 512;
+    rttFramebuffer.height = 512;
+
+    rttTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, rttTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rttFramebuffer.width, rttFramebuffer.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    var renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, rttFramebuffer.width, rttFramebuffer.height);
+
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rttTexture, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	this.rtt = [rttFramebuffer];
+    return [rttFramebuffer];
+	
+	
+	
+	if(this.rtt) return this.rtt;
+	if(!width) width=gl.canvas.width;
+	if(!height) height=gl.canvas.height;
+	var frameBuffer = gl.createFramebuffer();
+	var renderBuffer = gl.createRenderbuffer();
+	var texture = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+
+	var tex = new Uint8Array(width*height*4);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, tex);
+    
+	gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+	gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
+	gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    
+	gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer);
+	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+	
+	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	this.rtt = [frameBuffer,renderBuffer,texture]
+	return [frameBuffer,renderBuffer,texture];
+}
+
 /**
 * gets the passes needed to render this scene
 * @private
@@ -13955,8 +14418,11 @@ GLGE.Scene.prototype.renderPass=function(gl,renderObjects,offsetx,offsety,width,
 		}
 	}
 	
+	
+	
 	var transObjects=[];
 	gl.disable(gl.BLEND);
+	
 	for(var i=0; i<renderObjects.length;i++){
 		if((!renderObjects[i].object.zTrans ||  type!=GLGE.RENDER_DEFAULT) && renderObjects[i].object!=self) renderObjects[i].object.GLRender(gl,type,0,renderObjects[i].multiMaterial);
 			else if(renderObjects[i].object!=self) transObjects.push(renderObjects[i]);
@@ -16471,7 +16937,7 @@ GLGE.Filter2d.prototype.GLRender=function(gl,buffer){
 		for(var i=0;i<this.passes.length;i++){
 			//set the frame buffer here
 			if(this.passes.length-1==i){
-				gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
+				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 			}else{
 				if(!this.passes[i].buffer) this.passes[i].buffer=this.createBuffer(gl,this.passes[i].width,this.passes[i].height);
 				gl.bindFramebuffer(gl.FRAMEBUFFER, this.passes[i].buffer[0]);
@@ -16517,6 +16983,30 @@ GLGE.Filter2d.prototype.clearPersist=function(gl){
 }
 
 var glmat=new Float32Array(16);
+
+GLGE.Filter2d.prototype.getRenderTexture=function(gl)
+{
+	debugger;
+	if(this.rendertexture) return this.rendertexture;
+    var width, height;
+	if(!width) width=gl.canvas.width;
+	if(!height) height=gl.canvas.height;
+	var frameBuffer = _Editor.findscene().framebuffer;
+	var texture = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+
+	var tex = new Uint8Array(width*height*4);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, tex);
+    
+	gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+	
+	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	this.rendertexture = texture;
+	return texture;
+}
 
 GLGE.Filter2d.prototype.GLSetUniforms=function(gl,pass){
 	if(this.filterType==GLGE.FILTER_SKY){
@@ -17110,7 +17600,7 @@ GLGE.FilterAO.prototype.createPasses=function(){
 	pass2.push("gl_FragColor = vec4(vec3(result),1.0);");
 	
 
-	if(this.useRender) pass2.push("gl_FragColor = vec4(texture2D(GLGE_RENDER, texCoord.xy).rgb*gl_FragColor.r,1.0);");
+	//pass2.push("gl_FragColor = vec4(texture2D(GLGE_RENDER, texCoord.xy).rgb*gl_FragColor.r,1.0);");
 	pass2.push("}");
 	
 	var pass3=[]
@@ -17160,12 +17650,13 @@ GLGE.FilterAO.prototype.createPasses=function(){
 		pass3.push("	if((lumaB < lumaMin) || (lumaB > lumaMax)) gl_FragColor = vec4(rgbA,1.0);");
 		pass3.push("	    else gl_FragColor = vec4(rgbB,1.0);");
 		pass3.push("	if(length(rgbM)>10.0) gl_FragColor = vec4(rgbM,1.0);");
+		
 		pass3.push("}");
 		
 	this.passes=[];
 	this.addPass(pass1.join(""),width,height);
 	this.addPass(pass2.join(""));
-	this.addPass(pass3.join("\n"));
+	//this.addPass(pass3.join("\n"));
 }
 
 
