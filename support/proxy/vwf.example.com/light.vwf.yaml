@@ -25,7 +25,7 @@ properties:
   ## @name light.vwf#lightType
   ## @property
 
-  castShadows:
+  castShadows: false
   
   ## The type of light (point, directional, spot)
   ## 
@@ -48,25 +48,25 @@ properties:
   ## @name light.vwf#enable
   ## @property
 
-  enable:
+  enable: true
 
   ## Sets the color of the light
   ## 
   ## @name light.vwf#color
   ## @property
 
-  color:
+  color: [ 255, 255, 255 ]
 
   ## Distance value
   ## 
   ## @name light.vwf#distance
   ## @property
 
-  distance:
+  distance: 1000
 
   ## Intensity value
   ## 
   ## @name light.vwf#intensity
   ## @property
 
-  intensity:
+  intensity: 1

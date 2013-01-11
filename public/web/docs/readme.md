@@ -160,7 +160,7 @@ Code View: *index.vwf.yaml*
 		properties:
 		  translation: [ 0, 0, 5 ]
 		children:
-		  HelloMaterial:
+		  material:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
 			  texture: "images/red.png"
@@ -171,7 +171,7 @@ Code View: *index.vwf.yaml*
 		properties:
 		  translation: [ 0, 0, -5 ]
 		children:
-		  WorldMaterial:
+		  material:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
 			  texture: "images/blue.png"
@@ -264,7 +264,7 @@ Code View: *index.vwf.yaml*
 		properties:
 		  translation: [ 0, 0, 5 ]
 		children:
-		  HelloTextMaterial1:
+		  material:
             extends: http://vwf.example.com/material.vwf
             properties: 
               texture: ""
@@ -287,7 +287,7 @@ Code View: *index.vwf.yaml*
 		properties: 
 		  translation: [ 0, 0, -5 ]
 		children:
-		  WorldTextMaterial1:
+		  material:
 			extends: http://vwf.example.com/material.vwf
 			properties: 
 			  texture: ""

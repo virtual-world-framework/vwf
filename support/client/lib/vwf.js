@@ -1758,7 +1758,11 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 var useLegacyID = [  // TODO: fix static ID references and remove
     // use the legacy ID scheme except for nodes with these names, ...
     // "...",
-    "material", 
+    "material",
+    "material1",
+    "material2",
+    "material3",
+    "material4", 
     "media", 
     "plane", 
     "border", 
@@ -1775,7 +1779,6 @@ var useLegacyID = [  // TODO: fix static ID references and remove
     "Scene",
     "Tank",
     "playerModel",
-    "TankMaterial1",
     "laserModel",
     "laserParticle"
 ].indexOf( childName ) < 0 && [

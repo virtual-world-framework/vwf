@@ -862,8 +862,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
     function outputMaterial( obj, iIndent, objName, index  ) {
 
-        var sOut = indent.call( this,iIndent + 1);
-        this.logger.info( indent.call( this,iIndent) + objName + "Material" + index + ":" );
+        var sOut = indent.call( this, iIndent + 1 );
+        this.logger.info( indent.call( this, iIndent) + "material" + index + ":" );
         this.logger.info( sOut + "extends: http://vwf.example.com/material.vwf");
 
     }

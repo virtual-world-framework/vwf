@@ -362,6 +362,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
           //There is not three object for this node, so there is nothing this driver can do. return
           if(!threeObject) return value;    
           
+
               if ( node && threeObject && propertyValue !== undefined ) 
               {
                 if(threeObject instanceof THREE.Object3D)
@@ -681,44 +682,50 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 {
                     if(propertyName == 'lightType')
                     {
+                        var newlight;
+                        var parent = threeObject.parent;
+                        console.info( "LOL = " + JSON.stringify( threeObject.color ) );
+                        var currProps = {
+                            "distance": threeObject.distance,
+                            "color":  threeObject.color,
+                            "intensity": threeObject.intensity,
+                            "castShadows": threeObject.castShadow,
+                            "clone": function( newObj ) {
+                                newObj.distance = this.distance;
+                                console.info( "light.clone.color = " + JSON.stringify( this.color ) )
+                                newObj.color.setRGB( this.color.r, this.color.g, this.color.b );
+                                newObj.intensity = this.intensity;
+                                newObj.castShadows = this.castShadows;
+                            }
+                        };
+
                         if(propertyValue == 'point' && !(threeObject instanceof THREE.PointLight))
                         {
-
-                            var newlight = new THREE.PointLight('FFFFFF',1,0);
-                            //newlight.distance = 100;
-                            //newlight.color.setRGB(1,1,1);
+                            newlight = new THREE.PointLight('FFFFFF',1,0);
+                            currProps.clone( newlight );                            
                             newlight.matrixAutoUpdate = false;
-                            CopyProperties(threeObject,newlight);
-                            var parent = threeObject.parent;
-                            parent.remove(threeObject);
-                            parent.add(newlight);
+                            parent.remove( node.threeObject );
+                            parent.add( newlight );
                             node.threeObject = newlight;
                             rebuildAllMaterials.call(this);
                         }
                         if(propertyValue == 'directional' && !(threeObject instanceof THREE.DirectionalLight))
                         {
-                            
-                            var newlight = new THREE.DirectionalLight('FFFFFF',1,0);
-                            //newlight.distance = 100;
-                            //newlight.color.setRGB(1,1,1);
+                            newlight = new THREE.DirectionalLight('FFFFFF',1,0);
+                            currProps.clone( newlight );                            
                             newlight.matrixAutoUpdate = false;
-                            CopyProperties(threeObject,newlight);
-                            var parent = threeObject.parent;
-                            parent.remove(threeObject);
-                            parent.add(newlight);
+                            parent.remove( node.threeObject );
+                            parent.add( newlight );
                             node.threeObject = newlight;
                             rebuildAllMaterials.call(this);
                         }
                         if(propertyValue == 'spot' && !(threeObject instanceof THREE.SpotLight))
                         {
-                            
-                            var newlight = new THREE.SpotLight('FFFFFF',1,0);
-                            CopyProperties(threeObject,newlight);
-                            //newlight.color.setRGB(1,1,1);
+                            newlight = new THREE.SpotLight('FFFFFF',1,0);
+                            currProps.clone( newlight );
                             newlight.matrixAutoUpdate = false;
-                            var parent = threeObject.parent;
-                            parent.remove(threeObject);
-                            parent.add(newlight);
+                            parent.remove( node.threeObject );
+                            parent.add( newlight );
                             node.threeObject = newlight;
                             rebuildAllMaterials.call(this);
                         }
@@ -728,11 +735,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
-        console.info( "Set Light property: " + propertyName + " = " + propertyValue );
+       if ( propertyName != "transform" && propertyName != "translation" ) console.info( "Set Light property: " + propertyName + " = " + propertyValue );
                     if ( propertyName == 'distance' ) {
                         threeObject.distance = propertyValue;
                     }
                     if ( propertyName == 'color' ) {
+                        console.info( "======        Set Light.color property: " + propertyName + " = " + JSON.stringify( propertyValue ) );
                         threeObject.color.setRGB( propertyValue[0]/255, propertyValue[1]/255, propertyValue[2]/255);
                     }
                     if ( propertyName == 'intensity' ) {
@@ -1369,10 +1377,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var child = this.state.nodes[childID];
         if ( child ) {
             child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
-            child.threeObject.shadowCameraRight     =  500;
-            child.threeObject.shadowCameraLeft      = -500;
-            child.threeObject.shadowCameraTop       =  500;
-            child.threeObject.shadowCameraBottom    = -500;
+            //child.threeObject.shadowCameraRight     =  500;
+            //child.threeObject.shadowCameraLeft      = -500;
+            //child.threeObject.shadowCameraTop       =  500;
+            //child.threeObject.shadowCameraBottom    = -500;
             
             // these properties are now exposed as properties
             //child.threeObject.distance = 100;

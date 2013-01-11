@@ -44,20 +44,22 @@ children:
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: "directional"
-      rotation: [ 0, 0, 1, -45 ]
-      translation: [ -400, 400, 0 ]
+      lightType: "point"
+      #rotation: [ 0, 0, 1, -45 ]
+      translation: [ -400, 400, 100 ]
       distance: 2000
       intensity: 0.9
+      color: [ 255, 255, 255 ]      
       castShadows: false
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: "directional"
-      rotation: [ 0, 0, 1, 225 ]
-      translation: [ 400, -400, 0 ]
+      lightType: "point"
+      #rotation: [ 0, 0, 1, 225 ]
+      translation: [ 400, -400, 100 ]
       distance: 2000
       intensity: 0.9
+      color: [ 255, 255, 255 ]
       castShadows: false
 scripts:
 - |
