@@ -73,8 +73,9 @@
             { driver: "vwf/configuration", active: true },
             { driver: "vwf/kernel/model", active: true },
             { driver: "vwf/model/javascript", active: true },
-            { driver: "vwf/model/jiglib", active: false },
-            { driver: "vwf/model/glge", active: false },
+            { driver: "vwf/model/jiglib", linkedDrivers: ["vwf/model/jiglib/jiglib"], active: false },
+            { driver: "vwf/model/glge", linkedDrivers: ["vwf/model/glge/glge-compiled"], active: false },
+            { driver: "vwf/model/threejs", linkedDrivers: ["vwf/model/threejs/three"], active: false },
             { driver: "vwf/model/scenejs", active: true },
             { driver: "vwf/model/object", active: true },
             { driver: "vwf/model/stage/log", active: true },
@@ -82,7 +83,11 @@
             { driver: "vwf/view/document", active: true },
             { driver: "vwf/view/editor", active: true },
             { driver: "vwf/view/glge", active: false },
+            { driver: "vwf/view/threejs", active: false },
             { driver: "vwf/utility", active: true },
+            { driver: "vwf/model/glge/glge-compiled", active: false },
+            { driver: "vwf/model/threejs/three", active: false },
+            { driver: "vwf/model/jiglib/jiglib", active: false },
             { driver: "vwf/view/google-earth", active: false },
             { driver: "vwf/view/cesium", active: false }
         ];
@@ -91,10 +96,12 @@
             { driver: "vwf/model/javascript", active: true },
             { driver: "vwf/model/jiglib", active: false },
             { driver: "vwf/model/glge", active: false },
+            { driver: "vwf/model/threejs", active: false },
             { driver: "vwf/model/object", active: true }
         ];
         var viewDrivers = [
             { driver: "vwf/view/glge", arguments: "#vwf-root", active: false },
+            { driver: "vwf/view/threejs", arguments: "#vwf-root", active: false },
             { driver: "vwf/view/document", active: true },
             { driver: "vwf/view/editor", active: true },
             { driver: "vwf/view/google-earth", active: false },
@@ -118,6 +125,11 @@
                 if(arguments && arguments != "") {
                     modelDrivers[key].arguments = arguments;
                 }
+                if(requireArray[key].linkedDrivers) {
+                    for(var i=0; i<requireArray[key].linkedDrivers.length; i++) {
+                        requireArray[requireArray[key].linkedDrivers[i]].active = true;
+                    }
+                }
             }
             else {
                 console.warn("Unknown driver specified: ", key);
@@ -133,6 +145,11 @@
                 if(arguments && arguments != "") {
                     viewDrivers[key].arguments = arguments;
                 }
+                if(requireArray[key].linkedDrivers) {
+                    for(var linkedKey in requireArray[key].linkedDrivers) {
+                        requireArray[linkedKey].active = true;
+                    }
+                }
             }
             else {
                 console.warn("Unknown driver specified: ", key);
@@ -145,6 +162,7 @@
         if(queryString == "" && hashString == "") {
             requireArray["vwf/model/glge"].active = true;
             requireArray["vwf/view/glge"].active = true;
+            requireArray["vwf/model/glge/glge-compiled"].active = true;
             modelDrivers["vwf/model/glge"].active = true;
             viewDrivers["vwf/view/glge"].active = true;
         }
@@ -225,8 +243,8 @@
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
-    <script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
-    <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
+    <!--<script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
+    <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>-->
  	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
