@@ -14190,7 +14190,7 @@ GLGE.RenderBatch = function()
 	this.removeObject = function(obj)
 	{
 		var index = this.objects.indexOf(obj);
-		this.objects = this.objects.splice(index,1);
+		this.objects.splice(index,1);
 	}
 }
 GLGE.Scene.prototype.isBatched = function(o)
