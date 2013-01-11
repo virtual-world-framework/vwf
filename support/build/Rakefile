@@ -56,7 +56,9 @@ desc "Install DevKit in the standalone ruby."
 
 file "#{RUBY}/lib/ruby/site_ruby/devkit.rb" => [ RUBY, "#{DEVKIT}/config.yml" ] do |task|
     env = standalone_build_env2
-    chdir DEVKIT { cmd env, "ruby dk.rb install" }
+    chdir DEVKIT do
+        cmd env, "ruby dk.rb install"
+    end
     touch task.name
 end
 
