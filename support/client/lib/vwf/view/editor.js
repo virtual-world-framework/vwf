@@ -537,14 +537,24 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                             clients$.append("<div class='clientEntry'>" + clientID + "</div>"); 
                         }
 
-                        clients$.append("<div style='padding:6px'><input class='file_name' type='text' id='fileName' /><input class='update_button' type='button' id='save' value='Save' /></div>");
+                        clients$.append("<div style='padding:6px'><input class='filename_entry' type='text' id='fileName' /><input class='update_button' type='button' id='save' value='Save' /></div>");
                         $('#save').click(function(evt) {
                             saveStateAsFile.call(self, $('#fileName').val());
                         });
 
+                        clients$.append("<div style='padding:6px'><select class='filename_select' id='fileToLoad' /></select></div>");
+                        $('#fileToLoad').append("<option value='none'></option>");
+
+                        $.getJSON( "/" + root + "/admin/files", function( data ) {
+                            $.each( data, function( key, value ) {
+                                var fileName = encodeURIComponent(value['basename']);
+                                $('#fileToLoad').append("<option value='"+fileName+"'>"+fileName+"</option>");
+                            } );
+                        } );
+
                         clients$.append("<div style='padding:6px'><input class='update_button' type='button' id='load' value='Load' /></div>");
                         $('#load').click(function(evt) {
-                            console.info('load clicked');
+                            loadSavedState.call(self, $('#fileToLoad').val());
                         });
                     }
                 }
@@ -1583,11 +1593,13 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         }
     }
 
-    // -- Load drillDown --------------------------------------------------------------------------
+    // -- LoadSavedState --------------------------------------------------------------------------
 
-    function loadDrillDown() 
+    function loadSavedState(filename) 
     {
-        console.info("enter loading");
+        $.get(filename,function(data,status){
+            vwf.setState(data);
+        });
     }
 
     // -- SupportAjax -----------------------------------------------------------------------------

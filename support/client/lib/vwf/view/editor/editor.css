@@ -202,9 +202,16 @@ textarea:focus, input:focus{
 	background:#153255;
 }
 
-.file_name
+.filename_entry
 {
 	width:240px;
+	font:10pt Arial;
+	padding:2px;
+}
+
+.filename_select
+{
+	width:247px;
 	font:10pt Arial;
 	padding:2px;
 }
