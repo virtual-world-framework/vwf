@@ -1,7 +1,5 @@
 # How to create a multi-user application
 
-## (This is a work in progress)
-
 All that is needed for a VWF app to become a multi-user app is for a second person to navigate to the same url.  By default, both users share the same view of the virtual world.
 
 Often, you will want your users to be different "characters" in the scene.  For this to happen, we need to create three things when a new user joins.
