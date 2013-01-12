@@ -23,7 +23,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         initialize: function() {
             var self = this;
-            window.slideOffset = 0;
 
             this.nodes = {};
             this.scenes = {};
@@ -424,7 +423,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             if(this.editorView == 0)
             {
-                window.slideOffset = 260;
                 $('#vwf-root').animate({ 'left' : "-=260px" }, 175);
                 $('#editor').animate({ 'left' : "-260px" }, 175);
                 $('#x').delay(1000).css({ 'display' : 'inline' });
@@ -440,8 +438,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
     function closeEditor() // invoke with the view as "this"
     {
         var topdownName = this.topdownName;
-
-        window.slideOffset = 0;
 
         if (this.editorOpen && this.editorView == 1) // Hierarchy view open
         {
