@@ -13030,8 +13030,13 @@ GLGE.Scene.prototype.makeRay=function(x,y){
 	}else if(this.camera.matrix && this.camera.pMatrix){
 		//correct xy account for canvas scaling
 		var canvas=this.renderer.canvas;
-		x=x/canvas.offsetWidth*canvas.width;
-		y=y/canvas.offsetHeight*canvas.height;
+		var computedStyle=document.defaultView.getComputedStyle(canvas);
+		var paddingWidth=(parseFloat(computedStyle.getPropertyValue("padding-left"))||0)+
+			(parseFloat(computedStyle.getPropertyValue("padding-right"))||0);
+		var paddingHeight=(parseFloat(computedStyle.getPropertyValue("padding-top"))||0)+
+			(parseFloat(computedStyle.getPropertyValue("padding-bottom"))||0);
+		x=x/(canvas.clientWidth-paddingWidth)*canvas.width;
+		y=y/(canvas.clientHeight-paddingHeight)*canvas.height;
 		
 		var height=this.renderer.getViewportHeight();
 		var width=this.renderer.getViewportWidth();
