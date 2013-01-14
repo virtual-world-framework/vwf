@@ -18,7 +18,15 @@
 /// @name vwf.utility
 /// @namespace
 
-define( [ "module", "vwf/utility/xpath", "vwf/utility/color" ], function( module, xpath, color ) {
+define( [ "module",
+    "vwf/utility/xpath",
+    "vwf/utility/color",
+    "vwf/utility/coordinates"
+], function( module,
+    xpath,
+    color,
+    coordinates
+) {
 
     return {
 
@@ -300,6 +308,15 @@ define( [ "module", "vwf/utility/xpath", "vwf/utility/color" ], function( module
         /// @namespace
 
         color: color,
+
+        // -- coordinates --------------------------------------------------------------------------
+
+        /// DOM element coordinate conversion functions.
+        /// 
+        /// @name vwf.utility.coordinates
+        /// @namespace
+
+        coordinates: coordinates,
 
     };
 
