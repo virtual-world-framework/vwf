@@ -761,15 +761,14 @@ define( [ "module", "vwf/utility/color" ], function( module, color ) {
 
         },
 
-        // -- Color --------------------------------------------------------------------------
+        // -- color --------------------------------------------------------------------------------
 
         /// HTML/CSS color conversion functions.
         /// 
-        /// @name vwf.utility.Color
+        /// @name vwf.utility.color
         /// @namespace
 
         color: color,
-
 
     };
 
