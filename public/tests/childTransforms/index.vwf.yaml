@@ -17,7 +17,7 @@ properties:
   navmode: none
   counter: 0
 methods:
-  tick:  
+  update:  
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -43,9 +43,15 @@ children:
     properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 0
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false      
+      glge-constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
@@ -63,12 +69,15 @@ scripts:
         vwf.setProperty('http-vwf-example-com-node3-vwf-childchildduck','scale',[.5,.5,.5]);
         vwf.setProperty('http-vwf-example-com-node3-vwf-childchildchildduck','translation',[200,0,50]);
         vwf.setProperty('http-vwf-example-com-node3-vwf-childchildchildduck','scale',[.5,.5,.5]);
+        this.future(0.2).update();
+      
     }
-    this.tick = function()
+    this.update = function()
     {
         vwf.setProperty('http-vwf-example-com-node3-vwf-duck','rotation',[0,0,1,this.counter]);
         vwf.setProperty('http-vwf-example-com-node3-vwf-childduck','rotation',[0,0,1,this.counter*4]);
         vwf.setProperty('http-vwf-example-com-node3-vwf-childchildduck','rotation',[0,0,1,this.counter*8]);
         vwf.setProperty('http-vwf-example-com-node3-vwf-childchildchildduck','rotation',[0,1,0,this.counter*16]);
         this.counter++;
+        this.future(0.2).update();
     }

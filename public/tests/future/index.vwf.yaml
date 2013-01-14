@@ -26,9 +26,15 @@ children:
       scale: [ .5, .5, .5]   
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 1
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false   
+      glge-constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 methods:
@@ -38,7 +44,7 @@ scripts:
     this.initialize = function()
     {
       this.counter = 0;
-        this.future(.333).update();
+        this.future(0.2).update();
        
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
@@ -52,5 +58,5 @@ scripts:
          this.counter = 0;
          
         this.duck.rotation = [0,0,1,this.counter]; 
-        this.future(.0333).update();
+        this.future(0.0333).update();
     }

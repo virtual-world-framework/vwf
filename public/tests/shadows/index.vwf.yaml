@@ -15,23 +15,32 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
+  enableShadows: true
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
     source: duck.dae
     type: model/vnd.collada+xml
+    properties:
+      castShadows: true
+      receiveShadows: true
   camera:
     extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      constantAttenuation: 1
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: true  
+      glge-constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
       translation: [ 0, -1000, 1000]
 methods:
-  tick:      
+  update:      
 scripts:
 - | 
     this.initialize = function()
@@ -42,23 +51,23 @@ scripts:
         this.camera.far = 800;
         
         this.enableShadows = true;
-        vwf.setProperty(this.id,'enableShadows',true);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','castShadows',true);
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','castShadows',true);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','receiveShadows',true);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','rotation',[1,0,0,0])
+        //vwf.setProperty(this.id,'enableShadows',true);
+        this.duck.castShadows = true;
+        this.dir1.castShadows = true;
+        this.duck.receiveShadows = true;
+        this.duck.rotation = [1,0,0,0];
         this.counter = 0;
+        this.future(0.1).update();
        
     }
-    this.tick = function()
+    this.update = function()
     {
         this.counter++;
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','rotation',[0,0,1,this.counter/2])
-        
+        this.duck.rotation = [0,0,1,this.counter/2];
        
         if(this.counter == 200)
         {
             this.counter = 0;
         }
-        
+        this.future(0.1).update();
     }

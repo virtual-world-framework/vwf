@@ -41,7 +41,7 @@ properties:
           this.lightType = value;
           break;
       }
-    value:
+    value: "point"
 
   ## makes the light affect the scene
   ## 

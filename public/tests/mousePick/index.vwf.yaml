@@ -27,7 +27,6 @@ children:
     - |
          this.initialize = function()
          {
-           
             $(document.body).append('<div style = "position: fixed;font-size: 5em;width: 100%;text-align: center;background-color: white;opacity: .5;" id="MouseOverTest"/>');
             $('#MouseOverTest').html('Mouse Over Test');
          }
@@ -51,7 +50,6 @@ children:
         - |
              this.initialize = function()
              {
-               
                 $(document.body).append('<div style = "position: fixed;font-size: 5em;width: 100%;text-align: center;background-color: white;opacity: .5;" id="MouseOverTest"/>');
                 $('#MouseOverTest').html('Mouse Over Test');
              }
@@ -72,10 +70,6 @@ children:
       pointerOut:
     scripts:
     - |
-         this.initialize = function()
-         {
-          
-         }
          this.pointerOver = function(e,ed)
          {
             $('#MouseOverTest').html('Mouse is Over Duck2!');
@@ -86,25 +80,29 @@ children:
          }                   
   camera:
     extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 1
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false    
+      glge-constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
 - | 
     this.initialize = function()
     {
-       
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,-100,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[-50,-50,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck2','translation',[50,50,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck3','translation',[0,-100,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck3','scale',[.5,.5,.5])
+        this.dir1.translation = [0,-100,0];
+        this.duck.translation = [-50,-50,0];
+        this.duck2.translation = [50,50,0];
+        this.duck3.translation = [0,-100,0];
+        this.duck3.scale = [.5,.5,.5];
     }
     

@@ -43,24 +43,24 @@ children:
       translation: [ 0, 0, 0 ]
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      #rotation: [ 0, 0, 1, -45 ]
-      translation: [ -400, 400, 100 ]
       distance: 2000
       intensity: 0.9
-      color: [ 255, 255, 255 ]      
-      castShadows: false
+      color: [255,255,255]
+      translation: [ -400, 400, 100 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      #rotation: [ 0, 0, 1, 225 ]
-      translation: [ 400, -400, 100 ]
       distance: 2000
       intensity: 0.9
-      color: [ 255, 255, 255 ]
-      castShadows: false
+      color: [255,255,255]
+      translation: [ 400, -400, 100 ]
 scripts:
 - |
     this.initialize = function(){

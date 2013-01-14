@@ -53,9 +53,11 @@ children:
       restitution: 0      
   light1:
     extends: "http://vwf.example.com/light.vwf"
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties: 
       lightType: "directional"
-      constantAttenuation: 100000
-      linearAttenuation: 0.00000001
-      quadraticAttenuation: 0.00001
+      distance: 2000
+      intensity: 0.9
+      color: [255,255,255]
       translation: [ 0, 0, 1]

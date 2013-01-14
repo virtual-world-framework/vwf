@@ -65,9 +65,14 @@ children:
     extends: http://vwf.example.com/node3.vwf
   light1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 1
+      distance: 2000
+      intensity: 0.9
+      color: [255,255,255]
+      glge-constantAttenuation: 1
   predator1:
     extends: http://vwf.example.com/node3.vwf 
     methods:

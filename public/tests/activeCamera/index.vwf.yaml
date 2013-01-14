@@ -17,7 +17,7 @@ properties:
   navmode: none
   counter: 0
 methods:
-  tick: 
+  update: 
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -31,9 +31,14 @@ children:
     properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 0
+      distance: 2000
+      intensity: 0.9
+      color: [255,255,255]
+      glge-constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
@@ -42,21 +47,23 @@ scripts:
     {
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        vwf.setProperty('http-vwf-example-com-camera-vwf-camera2','rotation',[0,0,1,90]);
-        vwf.setProperty('http-vwf-example-com-camera-vwf-camera2','translation',[500,0,50]);
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,-100,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[0,0,0]);
-        vwf.setProperty('index-vwf','activeCamera','camera2');
+        this.camera2.rotation = [0,0,1,90];
+        this.camera2.translation = [500,0,50];
+        this.dir1.translation = [0,-100,0];
+        this.duck.translation = [0,0,0];
+
+        //vwf.setProperty('index-vwf','activeCamera','camera2');
+        this.future(0.2).update();
     }
-    this.tick = function()
+    this.update = function()
     {
         if(this.counter == 0)
-            vwf.setProperty('index-vwf','activeCamera','http-vwf-example-com-camera-vwf-camera');
-        if(this.counter == 30)
-            vwf.setProperty('index-vwf','activeCamera','http-vwf-example-com-camera-vwf-camera2');   
+            this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+        if(this.counter == 60)
+            this.activeCamera = 'http-vwf-example-com-camera-vwf-camera2';   
         
         this.counter++;  
-        if(this.counter == 60)            
+        if(this.counter == 120)            
             this.counter = 0;
-          
+        this.future(0.2).update();  
     }

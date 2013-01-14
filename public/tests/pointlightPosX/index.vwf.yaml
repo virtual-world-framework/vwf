@@ -23,19 +23,21 @@ children:
     type: model/vnd.collada+xml
   camera:
     extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       distance: 1000
       intensity: 1
       color: [ 255, 255, 255 ]
       castShadows: false
+      glge-constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 methods:
-  tick:      
+  update:      
 scripts:
 - | 
     this.initialize = function()
@@ -45,9 +47,11 @@ scripts:
         this.dir1.translation = [ 0,-100,0 ];
         this.dir1.translation = [ 0,0,0 ];
         this.counter = 0;
+        this.future(0.1).update();
     }
-    this.tick = function()
+    this.update = function()
     {
         this.counter++;
         this.dir1.translation = [ Math.sin( this.counter / 10 ) * 200, -70,  50 ];
+        this.future(0.1).update();
     }

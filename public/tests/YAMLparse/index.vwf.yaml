@@ -38,12 +38,17 @@ children:
         - .5        
   camera:
     extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 1
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false      
+      glge-constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:

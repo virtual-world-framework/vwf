@@ -52,16 +52,13 @@ children:
     extends: http://vwf.example.com/node3.vwf  
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      constantAttenuation: 1
-      rotationOLD: [ -0.79, -3.34, -0.22 ]
-  dir2:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      constantAttenuation: 1
-      rotationOLD: [ 0.279, 0.9539, -0.08268 ]
+      distance: 2000
+      intensity: 0.9
+      color: [255,255,255]
 scripts:
 - |
     this.initialize = function(){

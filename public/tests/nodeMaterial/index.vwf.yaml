@@ -29,57 +29,62 @@ children:
         texture:
         diffuse:
     methods:
-      tick:    
+      update:    
     scripts:
     - |
          this.initialize = function()
          {
-                this.counter = 0;
-               this.material.texture = "";
+            this.counter = 0;
+            this.material.texture = "";
+            this.future(0.1).update();
          }
-         this.tick = function()   
+         this.update = function()   
          {
             this.counter++;
             if(this.counter == 100)
-                vwf.setProperty(this.id,'material','green')
+                this.material = 'green';
             if(this.counter == 200)   
-                 vwf.setProperty(this.id,'material','red')
+                this.material = 'red';
             if(this.counter == 300)  
-                 vwf.setProperty(this.id,'material','blue')
+                this.material = 'blue';
             if(this.counter == 400)  
-                 vwf.setProperty(this.id,'material','purple')
+                this.material = 'purple';
             if(this.counter == 500)  
-                 vwf.setProperty(this.id,'material','orange')
+                this.material = 'orange';
             if(this.counter == 600)  
-                 vwf.setProperty(this.id,'material','gray')                 
+                this.material = 'gray';                
             if(this.counter == 700)  
-                 vwf.setProperty(this.id,'material','yellow')
+                this.material = 'yellow';
             if(this.counter == 800)  
-                 vwf.setProperty(this.id,'material','white')
+                this.material = 'white';
             if(this.counter == 900) 
             {            
                 this.counter = 0;
-                vwf.setProperty(this.id,'material','black')        
+                this.material = 'black';        
             }
-                
+            this.future(0.1).update();    
          }
   camera:
     extends: http://vwf.example.com/camera.vwf
-    properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 1
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false  
+      glge-constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
 - | 
     this.initialize = function()
     {
-       
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,-100,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[0,0,0]);
+        this.dir1.translation = [0,-100,0];
+        this.duck.translation = [0,0,0];
     }

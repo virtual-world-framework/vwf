@@ -40,9 +40,15 @@ children:
         - 0
   dir5:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 1
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false      
+      glge-constantAttenuation: 1
       rotation: 
        - 1 
        - 0

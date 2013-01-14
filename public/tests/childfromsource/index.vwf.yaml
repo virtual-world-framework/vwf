@@ -20,7 +20,7 @@ properties:
   navmode: none
   counter: 0
 methods:
-  tick:  
+  update:  
 children:
   box01:
     extends: http://vwf.example.com/node3.vwf
@@ -44,9 +44,15 @@ children:
     properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
-      lightType: "point"
-      constantAttenuation: 0
+      lightType: "directional"
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false      
+      glge-constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
@@ -56,17 +62,18 @@ scripts:
        
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,100,100]);
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','lightType','directional');
-        vwf.setProperty('http-vwf-example-com-node3-vwf-node-Box01','translation',[0,0,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-node-Box02','translation',[0,-20,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-node-Box03','translation',[0,-20,0]);
+        this.dir1.translation = [0,100,100];
+        this.box01['node-Scene_Root']['node-Box01'].translation = [0,0,0];
+        this.box01['node-Scene_Root']['node-Box01']['node-Box02'].translation = [0,-20,0];
+        this.box01['node-Scene_Root']['node-Box01']['node-Box02']['node-Box03'].translation = [0,-20,0];
+        this.future(0.2).update();
 
     }
     this.tick = function()
     {
-        vwf.setProperty('http-vwf-example-com-node3-vwf-node-Box01','rotation',[0,1,0,this.counter]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-node-Box02','rotation',[0,1,0,this.counter*4]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-node-Box03','rotation',[0,1,0,this.counter*8]);
+        this.box01['node-Scene_Root']['node-Box01'].rotation = [0,1,0,this.counter];
+        this.box01['node-Scene_Root']['node-Box01']['node-Box02'].rotation = [0,1,0,this.counter*4];
+        this.box01['node-Scene_Root']['node-Box01']['node-Box02']['node-Box03'].rotation = [0,1,0,this.counter*8];
         this.counter++;
+        this.future(0.2).update();
     }

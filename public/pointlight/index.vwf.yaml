@@ -34,52 +34,19 @@ children:
     children:
       testLight:
         extends: http://vwf.example.com/light.vwf
+        implements:
+        - http://vwf.example.com/glgeLight.vwf
         properties: 
           lightType: "point"
-          enable: true
-          constantAttenuation: 0.3
-          linearAttenuation: 0.00000001
-          quadraticAttenuation: 0.0000001
+          distance: 2000
+          intensity: 0.9
+          color: [255,255,255]
           translation: [ 120, 0, 0 ]
 scripts:
 - |
     this.initialize = function(){
       this.camera.transform = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,-15,0,1 ];
       this.future(1.0).spin();
-      /*
-      pointLight:
-        extends: http://vwf.example.com/node3.vwf
-        children:  
-          grpLight:
-            extends: http://vwf.example.com/node3.vwf
-            properties:
-              translation: [ 200, 0, 0 ]
-            children:
-              glgeLight:
-                extends: http://vwf.example.com/light.vwf
-                properties: 
-                  lightType: "point"
-                  enable: true
-                  constantAttenuation: 0.1
-                  #linearAttenuation: 0.002
-                  #quadraticAttenuation: 0.0008
-                  #spotCosCutOff: 0.95
-                  #spotCutOff: true
-                  #spotExponent: 10
-                  #color: [ 255, 255, 255 ]
-                  #diffuse: true
-                  #specular: true
-                  #samples: 0
-                  #softness: 0.01
-                  #bufferHeight: 256
-                  #bufferWidth: 256
-                  #shadowBias: 0.002
-                  #castShadows: false
-                  #cascadeLevels: 3
-                  #distance: 10000
-                  #spotSoftness: 0
-                  #spotSoftnessDistance: 0.3    
-      */
     }
     this.spin = function() {
       if ( this.spinning ) {

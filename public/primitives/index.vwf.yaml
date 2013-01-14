@@ -7,37 +7,49 @@ type: model/x-glge
 children: 
   dir_duck_1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      constantAttenuation: 1
-      linearAttenuation: 0.002
-      quadraticAttenuation: 0.0008
-      spotCosCutOff: 0.95
-      spotExponent: 10
-      diffuse: true 
-      specular: true
-      samples: 0
-      softness: 0.01
-      bufferHeight: 256
-      bufferWidth: 256
-      shadowBias: 2.0
-      distance: 100.0
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
       castShadows: false
+      glge-constantAttenuation: 1
+      glge-linearAttenuation: 0.002
+      glge-quadraticAttenuation: 0.0008
+      glge-spotCosCutOff: 0.95
+      glge-spotExponent: 10
+      glge-diffuse: true 
+      glge-specular: true
+      glge-samples: 0
+      glge-softness: 0.01
+      glge-bufferHeight: 256
+      glge-bufferWidth: 256
+      glge-shadowBias: 2.0
+      #glge-distance: 100.0
+      #glge-castShadows: false
   dir_plane_1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      constantAttenuation: 1
-      linearAttenuation: 0.002
-      quadraticAttenuation: 0.0008
-      spotCosCutOff: 0.95
-      spotExponent: 10
-      diffuse: true 
-      specular: true
-      samples: 0
-      softness: 0.01
-      bufferHeight: 256
-      bufferWidth: 256
-      shadowBias: 2.0
-      distance: 100.0
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
       castShadows: false
+      glge-constantAttenuation: 1
+      glge-linearAttenuation: 0.002
+      glge-quadraticAttenuation: 0.0008
+      glge-spotCosCutOff: 0.95
+      glge-spotExponent: 10
+      glge-diffuse: true 
+      glge-specular: true
+      glge-samples: 0
+      glge-softness: 0.01
+      glge-bufferHeight: 256
+      glge-bufferWidth: 256
+      glge-shadowBias: 2.0
+      #glge-distance: 100.0
+      #glge-castShadows: false

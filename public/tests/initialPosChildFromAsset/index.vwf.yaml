@@ -20,7 +20,7 @@ properties:
   navmode: none
   counter: 0
 methods:
-  tick:  
+  update:  
 children:
   assetbox01:
     extends: http://vwf.example.com/node3.vwf
@@ -44,9 +44,15 @@ children:
     properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
-      lightType: "point"
-      constantAttenuation: 0
+      lightType: "directional"
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false
+      glge-constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
@@ -56,22 +62,13 @@ scripts:
        
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,100,100]);
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','lightType','directional');
-        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box01','translation',[0,0,0]);
-        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box02','translation',[0,-20,0]);
-        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box03','translation',[0,-20,0]);
-        var pos = vwf.getProperty('http-vwf-example-com-node3-vwf-Box03','translation');
-        alert('the next prompt should not say "0, 0, 0"');
-        alert(pos[0] +', ' + pos[1] +', ' + pos[2]);
+        this.dir1.translation = [0,100,100];
+        this.future(0.2).update();
     }
-    this.tick = function()
+    this.update = function()
     {
-        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box01','rotation',[0,1,0,this.counter]);
-        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box02','rotation',[0,1,0,this.counter*4]);
-        //vwf.setProperty('http-vwf-example-com-node3-vwf-Box03','rotation',[0,1,0,this.counter*8]);
-        var p = vwf.getProperty('http-vwf-example-com-node3-vwf-Box03','translation');
+        var p = this.assetbox01.Scene_Root.Box01.Box02.Box03.translation;
         p[0] += .1;
-        vwf.setProperty('http-vwf-example-com-node3-vwf-Box03','translation',p);
-        this.counter++;
+        this.assetbox01.Scene_Root.Box01.Box02.Box03.translation = p;
+        this.future(0.2).update();
     }

@@ -32,9 +32,14 @@ children:
       scale: [.001,.001,.001]
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      constantAttenuation: 1
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false
       rotation: [ 1, 0, 0, -45 ]
 scripts:
 - |

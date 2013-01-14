@@ -16,8 +16,9 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
   counter: 0
+  ambientColor: [183,183,183]
 methods:
-  tick:  
+  update:  
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -28,9 +29,15 @@ children:
     properties:
   dir1:
     extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      constantAttenuation: 0
+      distance: 1000
+      intensity: 1
+      color: [ 255, 255, 255 ]
+      castShadows: false  
+      glge-constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
@@ -40,15 +47,17 @@ scripts:
        
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,-100,0]);
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','diffuse',[0,0,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[0,0,0]);
+        this.dir1.translation = [0,-100,0];
+        this.dir1.color = [0,0,0];
+        this.duck.translation = [0,0,0];
+        this.future(0.1).update();
         
     }
-    this.tick = function()
+    this.update = function()
     {
         this.ambientColor = [(Math.sin(this.counter/10) + 1)/2 * 255, 
                             (Math.sin(this.counter/20) + 1)/2 * 255,
                             (Math.sin(this.counter/30) + 1)/2 * 255];
         this.counter++;
+        this.future(0.1).update();
     }
