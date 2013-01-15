@@ -15,6 +15,7 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
+  counter: 0
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -29,13 +30,15 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      distance: 1000
-      intensity: 1
+      enable: true
+      distance: 2000
+      intensity: 1.2
       color: [ 255, 255, 255 ]
-      castShadows: false      
-      glge-constantAttenuation: 1
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [0,-300,0]
 methods:
   update:      
 scripts:
@@ -67,4 +70,4 @@ scripts:
           this.counter = 0;
       }
       this.future(0.2).update();
-    }
+    } //@ sourceURL=index.vwf
