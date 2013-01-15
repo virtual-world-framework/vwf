@@ -16,6 +16,7 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
   counter: 0
+  activeCamera:
 methods:
   update: 
 children:
@@ -26,29 +27,35 @@ children:
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:
+      rotation: [0,1,0,0]
+      translation: [0,-600,50]
   camera2:
     extends: http://vwf.example.com/camera.vwf
     properties:
+      rotation: [0,0,1,90]
+      translation: [500,0,50]
   dir1:
     extends: http://vwf.example.com/light.vwf
     implements:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
+      enable: true
       distance: 2000
-      intensity: 0.9
-      color: [255,255,255]
-      glge-constantAttenuation: 0
-      rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      intensity: 1.4
+      color: [ 255, 255, 255 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      translation: [0,-300,0]
 scripts:
 - | 
     this.initialize = function()
     {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera2.rotation = [0,0,1,90];
-        this.camera2.translation = [500,0,50];
+        //this.camera.rotation = [0,1,0,0];
+        //this.camera.translation = [0,-600,50];
+        //this.camera2.rotation = [0,0,1,90];
+        //this.camera2.translation = [500,0,50];
         this.dir1.translation = [0,-100,0];
         this.duck.translation = [0,0,0];
 
@@ -58,12 +65,12 @@ scripts:
     this.update = function()
     {
         if(this.counter == 0)
-            this.activeCamera = "http-vwf-example-com-camera-vwf-camera";
+            this.activeCamera = this.camera.id;
         if(this.counter == 60)
-            this.activeCamera = 'http-vwf-example-com-camera-vwf-camera2';   
+            this.activeCamera = this.camera2.id;   
         
         this.counter++;  
         if(this.counter == 120)            
             this.counter = 0;
         this.future(0.2).update();  
-    }
+    } //@ sourceURL=index.vwf
