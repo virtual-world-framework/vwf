@@ -69,10 +69,13 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
+      enable: true
       distance: 2000
-      intensity: 0.9
-      color: [255,255,255]
-      glge-constantAttenuation: 1
+      intensity: 3
+      color: [ 255, 255, 255 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
   predator1:
     extends: http://vwf.example.com/node3.vwf 
     methods:
