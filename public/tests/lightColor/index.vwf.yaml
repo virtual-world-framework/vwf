@@ -48,8 +48,8 @@ scripts:
        
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        this.dir1 = translation = [0,-100,0];
-        this.duck = translation = [0,0,0];
+        this.dir1.translation = [0,-100,0];
+        this.duck.translation = [0,0,0];
         this.future(0.2).update();
     }
     this.update = function()
