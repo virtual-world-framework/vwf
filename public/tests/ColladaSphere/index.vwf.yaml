@@ -30,11 +30,13 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      distance: 1000
-      intensity: 1
+      enable: true
+      distance: 2000
+      intensity: 1.4
       color: [ 255, 255, 255 ]
-      castShadows: false      
-      glge-constantAttenuation: 1
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,0,0]
 methods:
@@ -54,5 +56,5 @@ scripts:
        
         this.counter++;
         //this.sphere.rotation = [1,0,0,this.counter];
-        this.future(0.2).update();
+        this.future(0.04).update();
     }
