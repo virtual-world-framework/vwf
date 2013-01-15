@@ -15,7 +15,7 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
-  counter:
+  counter: 0
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -29,14 +29,16 @@ children:
     implements:
     - http://vwf.example.com/glgeLight.vwf
     properties:
-      lightType: "point"
-      distance: 1000
-      intensity: 1
+      lightType: "directional"
+      enable: true
+      distance: 2000
+      intensity: 1.4
       color: [ 255, 255, 255 ]
-      castShadows: false      
-      glge-constantAttenuation: 1
-      rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      rotation: [ 0, 0, 1, 90 ]
+      translation: [0,-300,0]
 methods:
   update:      
 scripts:
@@ -54,5 +56,5 @@ scripts:
     {
         this.counter++;
         this.dir1.translation = [Math.sin(this.counter/10)*1,.1,.1];
-        this.future(0.2).update();
+        this.future(0.06).update();
     }
