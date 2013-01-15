@@ -15,6 +15,7 @@
 extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
+  counter: 0
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
