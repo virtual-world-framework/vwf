@@ -153,7 +153,7 @@
                         return elements;                 
 	}
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
 
 
     return model.load( module, {
@@ -181,7 +181,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
             
-            //console.log([nodeID,childID,childExtendsID,childType]);
+            //console.log(["creatingNode:",nodeID,childID,childExtendsID,childType]);
             //console.log("Create " + childID);
             var parentNode, threeChild, threeParent;
             
@@ -464,7 +464,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
-          var value = undefined;
+            var value = undefined;
+            //console.log(["initializingProperty: ",nodeID,propertyName,propertyValue]);
 
             if ( !( propertyValue === undefined ) ) {
                 var node = this.state.nodes[ nodeID ];
@@ -489,7 +490,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
         
-          //console.log([nodeID,propertyName,propertyValue]);
+          //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
           var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
           if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
           var value = undefined;
@@ -729,7 +730,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 {
                     if(propertyName == "texture")
                     {
-                        
+                        //debugger;
                         if(propertyValue !== "")
                         {
                             var img = new Image();
@@ -746,11 +747,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     }
                     if(propertyName == "color")
                     {
-                        
-                        threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+                        // use utility to allow for colors, web colors....
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( vwfColor !== undefined ) {
+                            threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                        } else {
+                            threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+                        }
+
                         threeObject.needsUpdate = true;
-                        threeObject.ambient.setRGB( threeObject.color.r,threeObject.color.g,threeObject.color.b);
-                    }
+                        if ( threeObject.ambient !== undefined ) {
+                            threeObject.ambient.setRGB( threeObject.color.r, threeObject.color.g, threeObject.color.b );                    }
+                        }
                 }
                 if(threeObject instanceof THREE.Scene)
                 {
@@ -936,7 +944,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 {
                     if(propertyName == "texture")
                     {
-                        if(threeObject.map && threeObject.map.image)
+                        //debugger;
+                        if( threeObject.map && threeObject.map.image )
                             return threeObject.map.image.src;
                             
                     }
@@ -1272,20 +1281,22 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
     function createMesh( node, meshDef ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
-            var i;
+            var i, face;
             var geo = new THREE.Geometry();
             var mat = new THREE.MeshBasicMaterial( { color: meshDef.color ? meshDef.color : 0xffffff } )
 
-            for ( i = 0; meshDef.positions && i < meshDef.positions.length; i++ ) {
+            for ( i = 0; geo.vertices && meshDef.positions && i < meshDef.positions.length; i++ ) {
                 geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
             }
-            for ( i = 0; meshDef.faces && i < meshDef.faces.length; i++ ) {
-                geo.faces.push( new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] ) );   
-            }            
-            for ( i = 0; meshDef.normals && i < meshDef.normals.length; i++ ) {
-                geo.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
+            for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
+                face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
+                geo.faces.push( face );   
             } 
-            for ( i = 0; meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
+            for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
+                face = geo.faces[ i ];
+                face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
+            }
+            for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
                 geo.faceVertexUvs.push( new THREE.UV( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
             }             
             node.threeObject.add( new THREE.Mesh( geo, mat ) ); 
