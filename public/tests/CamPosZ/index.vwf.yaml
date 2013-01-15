@@ -30,13 +30,14 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      distance: 1000
-      intensity: 1
+      enable: true
+      distance: 2000
+      intensity: 1.4
       color: [ 255, 255, 255 ]
-      castShadows: false      
-      glge-constantAttenuation: 0
-      rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      translation: [0,-300,0]
 methods:
   update:      
 scripts:
@@ -56,5 +57,5 @@ scripts:
        
       this.counter++;
       this.camera.translation = [0,-500,Math.sin(this.counter/100)*100];
-      this.future(0.2).update();
+      this.future(0.02).update();
     }
