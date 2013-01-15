@@ -59,22 +59,27 @@ scripts:
 - | 
     this.initialize = function()
     {
-       
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.dir1.translation = [0,100,100];
-        this.box01['Scene_Root']['Box01'].translation = [0,0,0];
-        this.box01['Scene_Root']['Box01']['Box02'].translation = [0,-20,0];
-        this.box01['Scene_Root']['Box01']['Box02']['Box03'].translation = [0,-20,0];
-        this.future(0.2).update();
+      this.root = this.box01.children['Scene_Root']; 
+      this.box1 = this.root.children['Box01'];
+      this.box2 = this.box1.children['Box02'];
+      this.box3 = this.box2.children['Box03'];
+      
+      this.camera.rotation = [0,1,0,0];
+      this.camera.translation = [0,-600,50];
+      
+      this.dir1.translation = [0,100,100];
+      this.box1.translation = [0,0,0];
+      this.box2.translation = [0,-20,0];
+      this.box3.translation = [0,-20,0];
+      
+      this.future(0.2).update();
 
     }
     this.update = function()
     {
-        
-        this.box01['Scene_Root']['Box01'].rotation = [0,1,0,this.counter];
-        this.box01['Scene_Root']['Box01']['Box02'].rotation = [0,1,0,this.counter*4];
-        this.box01['Scene_Root']['Box01']['Box02']['Box03'].rotation = [0,1,0,this.counter*8];
+        this.box1.rotation = [0,1,0,this.counter];
+        this.box2.rotation = [0,1,0,this.counter*4];
+        this.box3.rotation = [0,1,0,this.counter*8];
         this.counter++;
-        this.future(0.2).update();
-    }
+        this.future(0.05).update();
+    } //@ sourceURL=index.vwf
