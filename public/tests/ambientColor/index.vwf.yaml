@@ -16,8 +16,9 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
   counter: 0
+  ambientColor: [183,183,183]
 methods:
-  tick:  
+  update:  
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -32,24 +33,27 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
+      enable: true
       distance: 2000
-      intensity: 0.9
-      color: [255,255,255]
-      glge-constantAttenuation: 0
+      intensity: 1.2
+      color: [ 255, 255, 255 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [0,-300,0]
 scripts:
 - | 
     this.initialize = function()
     {
-       
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,-100,0];
         this.duck.translation = [0,0,0];
-        this.duck.rotation = [0,0,1,0];   
+        this.duck.rotation = [0,0,1,0];  
+        this.future(0.1).update(); 
     }
-    this.tick = function()
+    this.update = function()
     {
         var color = [(Math.sin(this.counter/10) + 1)/2 * 255, 
                             (Math.sin(this.counter/20) + 1)/2 * 255,
@@ -58,4 +62,5 @@ scripts:
         this.ambientColor = color;		
         
         this.counter++;
-    }
+        this.future(0.1).update();
+    } //@ sourceURL=index.vwf
