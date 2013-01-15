@@ -660,8 +660,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     case "boundingbox":
                         var bbox;
                         if ( glgeObject.getBoundingVolume ) {
-                            bb = glgeObject.getBoundingVolume( true );
-                            value = { min: [ bb.limits[0], bb.limits[2], bb.limits[4] ], max: [ bb.limits[1], bb.limits[3], bb.limits[5] ] };
+                            bbox = glgeObject.getBoundingVolume( true );
+                            value = { min: [ bbox.limits[0], bbox.limits[2], bbox.limits[4] ], max: [ bbox.limits[1], bbox.limits[3], bbox.limits[5] ] };
                         } else {
                             bbox = getLocalBoundingBox.call( this, glgeObject );
                             value = { min: [ bbox.xMin, bbox.yMin, bbox.zMin], max: [ bbox.xMax, bbox.yMax, bbox.zMax] };
