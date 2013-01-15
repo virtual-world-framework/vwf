@@ -67,7 +67,6 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      lightType: "point"
       distance: 1000
       intensity: 1
       color: [ 255, 255, 255 ]
@@ -81,7 +80,6 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
-      lightType: "point"
       distance: 1000
       intensity: 1
       color: [ 255, 255, 255 ]
