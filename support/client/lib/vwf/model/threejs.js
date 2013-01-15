@@ -1306,7 +1306,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
            
             SetMaterialAmbients.call(threeModel,asset);
 			//asset.rotation.z = Math.PI;
-			debugger;
+			
             nodeCopy.threeObject.add(asset);
             nodeCopy.threeObject.matrixAutoUpdate = false;
             //no idea what this is doing here
