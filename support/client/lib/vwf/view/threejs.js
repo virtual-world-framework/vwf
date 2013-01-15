@@ -175,6 +175,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         function renderScene(time) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
+			
+			
+			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
+			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
+			sceneNode.axes.position = pos;
+			sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
+			sceneNode.axes.updateMatrix();
             if(sceneNode.frameCount > 10)
             {
                 

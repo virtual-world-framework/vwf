@@ -13,6 +13,146 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+	function matCpy(mat)
+	{
+		var ret = [];
+		for(var i =0; i < 16; i++)
+			ret.push(mat[i]);
+		return ret.slice(0);	
+	}
+	function transformMatrix2(propertyValue,flip)
+	{
+	
+		var flipmat = new THREE.Matrix4(-1, 0,0,0,
+                                                            0, 0,1,0,
+                                                            0,1,0,0,
+                                                            0, 0,0,1);
+                            
+                                            
+        var matrix = new THREE.Matrix4();
+		matrix.elements = propertyValue;
+		matrix = matrix.multiply(flipmat,matrix);
+		return matrix.elements;
+	}
+	function unTransformMatrix2(propertyValue,flip)
+	{
+		
+		var flipmat = new THREE.Matrix4(-1, 0,0,0,
+                                                            0, 0,1,0,
+                                                            0,1,0,0,
+                                                            0, 0,0,1);
+                            
+        flipmat = flipmat.getInverse(flipmat)                               
+        var matrix = new THREE.Matrix4();
+		matrix.elements = propertyValue;
+		matrix = matrix.multiply(flipmat,matrix);
+		return matrix.elements;
+	}
+	function transformMatrix (propertyValue,flip)
+	{
+	  
+	  //set is columns, not rows
+                        var matrix = new THREE.Matrix4(propertyValue[0],propertyValue[4],propertyValue[8],propertyValue[12],
+                                                      propertyValue[1],propertyValue[5],propertyValue[9],propertyValue[13],
+                                                      propertyValue[2],propertyValue[6],propertyValue[10],propertyValue[14],
+                                                      propertyValue[3],propertyValue[7],propertyValue[11],propertyValue[15]);
+                        
+                        
+                            matrix.elements[13] *= -1;
+                            var translation = new THREE.Vector3();
+                            var quat = new THREE.Quaternion();
+                            var scale = new THREE.Vector3();
+                            
+                            
+                        
+                            matrix.decompose(translation,quat,scale);
+                            var googquat = goog.vec.Quaternion.createFromValues(quat.x,quat.y,quat.z,quat.w);
+                            var angle = 0;
+                            var axis = [0,0,0];
+                            angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
+                            if(isNaN(angle))
+                                angle = 0;
+                            axis[0] *= -1;
+                            axis[2] *= -1;
+                            
+                            var vx = new THREE.Vector3();
+                            vx.set(axis[0],axis[1],axis[2]);
+                            quat.setFromAxisAngle(vx,angle);
+                            if(!isNaN(quat.w))
+                            matrix.setRotationFromQuaternion(quat);
+                            
+                            matrix = matrix.scale(scale);
+							
+							
+							
+                            if(flip)
+                            {                           
+                            var flipmat = new THREE.Matrix4(1, 0,0,0,
+                                                            0, 0,1,0,
+                                                            0,1,0,0,
+                                                            0, 0,0,1);
+                            
+                                            
+                            matrix = matrix.multiply(flipmat,matrix);
+                            }
+                            
+                            var elements = matrix.elements;
+                            
+                            matrix.set(elements[0],elements[8],elements[4],elements[12],
+                                                    elements[2],elements[10],elements[6],elements[14],
+                                                    elements[1],elements[9],elements[5],elements[13],
+                                                    elements[3],elements[11],elements[7],elements[15]);
+                                                                
+							return matrix.elements;
+	
+	}
+	function unTransformMatrix (inelements,flip)
+	{
+						var propertyValue = new THREE.Matrix4();
+						propertyValue.set(inelements[0],inelements[8],inelements[4],inelements[12],
+                                                  inelements[2],inelements[10],inelements[6],inelements[14],
+                                                  inelements[1],inelements[9],inelements[5],inelements[13],
+                                                  inelements[3],inelements[11],inelements[7],inelements[15]);
+                        if(flip)
+                        {                           
+                            var flipmat = new THREE.Matrix4(1, 0, 0, 0,
+                                                            0, 0, 1, 0,
+                                                            0, 1, 0, 0,
+                                                            0, 0, 0, 1);    
+                            propertyValue = propertyValue.multiply(flipmat,propertyValue);
+                        }
+                            
+                            
+                        var translation = new THREE.Vector3();
+                        var quat = new THREE.Quaternion();
+                        var scale = new THREE.Vector3();
+                        
+                        
+                    
+                        propertyValue.decompose(translation,quat,scale);
+                        var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
+                        var angle = 0;
+                        var axis = [0,0,0];
+                        angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
+                        if(isNaN(angle))
+                            angle = 0;
+                        axis[0] *= -1;
+                        axis[2] *= -1;
+                        
+                        var vx = new THREE.Vector3();
+                        vx.set(axis[0],axis[1],axis[2]);
+                        quat.setFromAxisAngle(vx,angle);
+                        if(!isNaN(quat.w))
+                        propertyValue.setRotationFromQuaternion(quat);
+                        
+                        
+                        propertyValue = propertyValue.scale(scale);
+                        propertyValue.elements[13] *= -1;
+                        
+						var elements = propertyValue.elements; 
+                        return elements;                 
+	}
+
 define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
 
@@ -97,10 +237,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 group.add(cubeY);
                 group.add(cubeZ);
                 group.vwfID = "TEST DUMMY AXIS GIZMO";
-                //sceneNode.threeScene.add(group);
+                
+				sceneNode.axes = group;
+				sceneNode.threeScene.add(group);
                 //cam.position.set(0, 0, 0);
                 //cam.lookAt( sceneNode.threeScene.position );
-                cam.name = 'camera';
+                
+				cam.name = 'camera';
                 this.state.cameraInUse = cam;
                 var camType = "http://vwf.example.com/camera.vwf";
                 
@@ -370,60 +513,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     if(propertyName == 'transform')
                     {
                         
-                    
-                        
-                        //set is columns, not rows
-                        var matrix = new THREE.Matrix4(propertyValue[0],propertyValue[4],propertyValue[8],propertyValue[12],
-                                                      propertyValue[1],propertyValue[5],propertyValue[9],propertyValue[13],
-                                                      propertyValue[2],propertyValue[6],propertyValue[10],propertyValue[14],
-                                                      propertyValue[3],propertyValue[7],propertyValue[11],propertyValue[15]);
-                        
-                        
-                            matrix.elements[13] *= -1;
-                            var translation = new THREE.Vector3();
-                            var quat = new THREE.Quaternion();
-                            var scale = new THREE.Vector3();
-                            
-                            
-                        
-                            matrix.decompose(translation,quat,scale);
-                            var googquat = goog.vec.Quaternion.createFromValues(quat.x,quat.y,quat.z,quat.w);
-                            var angle = 0;
-                            var axis = [0,0,0];
-                            angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
-                            if(isNaN(angle))
-                                angle = 0;
-                            axis[0] *= -1;
-                            axis[2] *= -1;
-                            
-                            var vx = new THREE.Vector3();
-                            vx.set(axis[0],axis[1],axis[2]);
-                            quat.setFromAxisAngle(vx,angle);
-                            if(!isNaN(quat.w))
-                            matrix.setRotationFromQuaternion(quat);
-                            
                             threeObject.matrixAutoUpdate = false;
                             threeObject.up = new THREE.Vector3(0,0,1);
-                            matrix = matrix.scale(scale);
+                            var flip = false;
                             if(threeObject.parent instanceof THREE.Scene)
                             {                           
-                            var flipmat = new THREE.Matrix4(1, 0,0,0,
-                                                            0, 0,1,0,
-                                                            0,1,0,0,
-                                                            0, 0,0,1);
-                            
-                                            
-                            matrix = matrix.multiply(flipmat,matrix);
+								flip = true;
                             }
                             
-                            var elements = matrix.elements;
-                            
-                            threeObject.matrix.set(elements[0],elements[8],elements[4],elements[12],
-                                                    elements[2],elements[10],elements[6],elements[14],
-                                                    elements[1],elements[9],elements[5],elements[13],
-                                                    elements[3],elements[11],elements[7],elements[15]);
-                                                                
-                        
+                            threeObject.matrix.elements = transformMatrix(matCpy(propertyValue),flip);
                             threeObject.updateMatrixWorld(true);                        
                                                     
                     
@@ -735,7 +833,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
-       if ( propertyName != "transform" && propertyName != "translation" ) console.info( "Set Light property: " + propertyName + " = " + propertyValue );
+			if ( propertyName != "transform" && propertyName != "translation" ) console.info( "Set Light property: " + propertyName + " = " + propertyValue );
                     if ( propertyName == 'distance' ) {
                         threeObject.distance = propertyValue;
                     }
@@ -786,61 +884,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     if(propertyName == 'transform')
                     {
                         
-                        var propertyValue = new THREE.Matrix4();
-                        var elements = threeObject.matrix.elements; 
-                        propertyValue.set(elements[0],elements[8],elements[4],elements[12],
-                                                    elements[2],elements[10],elements[6],elements[14],
-                                                    elements[1],elements[9],elements[5],elements[13],
-                                                    elements[3],elements[11],elements[7],elements[15]);
-                        //propertyValue.set(elements[0],elements[8],elements[4],elements[12],
-                        //                          elements[2],elements[10],elements[6],elements[14],
-                        //                          elements[1],elements[9],elements[5],elements[13],
-                        //                          elements[3],elements[11],elements[7],elements[15]);
-                        if(threeObject.parent instanceof THREE.Scene)
-                        {                           
-                            var flipmat = new THREE.Matrix4(1, 0, 0, 0,
-                                                            0, 0, 1, 0,
-                                                            0, 1, 0, 0,
-                                                            0, 0, 0, 1);
-                            
-                                            
-                            propertyValue = propertyValue.multiply(flipmat,propertyValue);
-                        }
-                            
-                            
-                        var translation = new THREE.Vector3();
-                        var quat = new THREE.Quaternion();
-                        var scale = new THREE.Vector3();
+                        var flip = false;
+                            if(threeObject.parent instanceof THREE.Scene)
+                            {                           
+								flip = true;
+                            }
+                        var elements = matCpy(threeObject.matrix.elements); 
+						
+						
+						var ret =  unTransformMatrix(elements,flip);	
+						return ret;
                         
-                        
-                    
-                        propertyValue.decompose(translation,quat,scale);
-                        var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
-                        var angle = 0;
-                        var axis = [0,0,0];
-                        angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
-                        if(isNaN(angle))
-                            angle = 0;
-                        axis[0] *= -1;
-                        axis[2] *= -1;
-                        
-                        var vx = new THREE.Vector3();
-                        vx.set(axis[0],axis[1],axis[2]);
-                        quat.setFromAxisAngle(vx,angle);
-                        if(!isNaN(quat.w))
-                        propertyValue.setRotationFromQuaternion(quat);
-                        
-                        
-                        propertyValue = propertyValue.scale(scale);
-                        propertyValue.elements[13] *= -1;
-                        
-                        
-                        
-                                                            
-                    
-                    
-                        return propertyValue.elements;                  
-                                                    
                     
                     }
                     if(propertyName ==  "boundingbox")
@@ -1070,7 +1124,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
         cam.matrixAutoUpdate = false;
         cam.up = new THREE.Vector3(0,0,1);
-        cam.matrix.elements = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+		cam.matrix.elements = transformMatrix([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
         cam.updateMatrixWorld(true);    
         return cam;
     }
@@ -1110,6 +1164,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
     }
+
+	
     function findAllMeshes(threeObject,list)
     {
         
@@ -1249,9 +1305,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             var removed = false;
            
             SetMaterialAmbients.call(threeModel,asset);
+			//asset.rotation.z = Math.PI;
+			debugger;
             nodeCopy.threeObject.add(asset);
             nodeCopy.threeObject.matrixAutoUpdate = false;
-            nodeCopy.threeObject.matrix.elements = [ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
             //no idea what this is doing here
             if ( nodeCopy && nodeCopy.assetLoaded ) {
                 nodeCopy.assetLoaded( true );
@@ -1285,7 +1342,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
         node.name = childName;
         if(!node.threeObject)
+		{
             node.threeObject = new THREE.Object3D();
+			node.threeObject.matrixAutoUpdate = false;
+			node.threeObject.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
+			node.threeObject.updateMatrixWorld(true);
+			
+		}
         sceneNode.srcAssetObjects.push( node.threeObject );
         node.threeObject.vwfID = nodeID;
 
@@ -1630,61 +1693,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         return offset;
     }
 
-    function getTransform( threeObject, local ) {
-
-        var propertyValue = new THREE.Matrix4();
-        var elements = threeObject.matrix.elements;    
-        propertyValue.set( elements[0],elements[8],elements[4],elements[12],
-                                    elements[2],elements[10],elements[6],elements[14],
-                                    elements[1],elements[9],elements[5],elements[13],
-                                    elements[3],elements[11],elements[7],elements[15] );
-
-        if( threeObject.parent instanceof THREE.Scene )
-        {                            
-            var flipmat = new THREE.Matrix4(1, 0, 0, 0,
-                                            0, 0, 1, 0,
-                                            0, 1, 0, 0,
-                                            0, 0, 0, 1);
-            
-                            
-            propertyValue = propertyValue.multiply( flipmat, propertyValue );
-        }
-        
-        var translation = new THREE.Vector3();
-        var quat = new THREE.Quaternion();
-        var scale = new THREE.Vector3();
-    
-        propertyValue.decompose( translation, quat, scale );
-        var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
-        var angle = 0;
-        var axis = [0,0,0];
-        angle = goog.vec.Quaternion.toAngleAxis( googquat, axis );
-        if( isNaN( angle ) )
-            angle = 0;
-        axis[0] *= -1;
-        axis[2] *= -1;
-        
-        var vx = new THREE.Vector3();
-        vx.set( axis[0], axis[1], axis[2] );
-        quat.setFromAxisAngle( vx, angle );
-        if( !isNaN( quat.w ) )
-        propertyValue.setRotationFromQuaternion( quat );
-        
-        propertyValue = propertyValue.scale( scale );
-        propertyValue.elements[13] *= -1;
-    
-        //if ( !local ) {
-        //    if ( object3.parent ) {
-        //        var parentTrans = getTransform.call( this, object3.parent, false );
-        //        var parentInverse = goog.vec.Mat4.create();
-        //        if ( this.parent && goog.vec.Mat4.invert( this.transformFromValue( this.parent.worldTransform ), parentInverse ) ) {
-        //          return goog.vec.Mat4.multMat( parentInverse, this.transformFromValue( value ), goog.vec.Mat4.create() );
-        //       }                        
-        //    }
-        // }
-
-        return propertyValue.elements;
-    }    
+   
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     //UTF8 loader
