@@ -38,10 +38,14 @@ children:
         - http://vwf.example.com/glgeLight.vwf
         properties: 
           lightType: "point"
+          enable: true
           distance: 2000
           intensity: 0.9
-          color: [255,255,255]
+          color: [ 255, 255, 255 ]
           translation: [ 120, 0, 0 ]
+          glge-constantAttenuation: 0.3
+          glge-linearAttenuation: 0.00000001
+          glge-quadraticAttenuation: 0.0000001        
 scripts:
 - |
     this.initialize = function(){
