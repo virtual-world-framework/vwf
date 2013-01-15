@@ -1,3 +1,4 @@
 /bin/*
 /.bundle/
 /run.bat
+/support/build/

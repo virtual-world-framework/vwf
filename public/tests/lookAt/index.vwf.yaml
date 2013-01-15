@@ -59,12 +59,12 @@ scripts:
     this.update = function()
     {
         if( this.counter == 0 )
-            this.camera.lookAt = 'http-vwf-example-com-node3-vwf-duck';
-        if( this.counter == 60 )
-            this.camera.lookAt = 'http-vwf-example-com-node3-vwf-duck2';
+            this.camera.lookAt = this.duck.id;
+        if( this.counter == 6 )
+            this.camera.lookAt = this.duck2.id;
         
         this.counter++;  
-        if(this.counter == 120)            
+        if(this.counter == 12)            
             this.counter = 0;
         this.future(0.2).update();          
     }

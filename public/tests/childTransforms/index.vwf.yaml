@@ -61,25 +61,25 @@ scripts:
     this.initialize = function()
     {
        
-        this.camera.rotation = [0,1,0,0];
+           this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        vwf.setProperty('http-vwf-example-com-light-vwf-dir1','translation',[0,-100,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','translation',[0,0,0]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childduck','translation',[200,0,50]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childduck','scale',[.5,.5,.5]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childchildduck','translation',[200,0,50]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childchildduck','scale',[.5,.5,.5]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childchildchildduck','translation',[200,0,50]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childchildchildduck','scale',[.5,.5,.5]);
+        this.dir1.translation =[0,-100,0];
+        this.duck.translation =[0,0,0];
+        this.duck.childduck.translation =[200,0,50];
+        this.duck.childduck.scale =[.5,.5,.5];
+        this.duck.childduck.childchildduck.translation =[200,0,50];
+        this.duck.childduck.childchildduck.scale =[.5,.5,.5];
+        this.duck.childduck.childchildduck.childchildchildduck.translation =[200,0,50];
+        this.duck.childduck.childchildduck.childchildchildduck.scale =[.5,.5,.5];
         this.future(0.2).update();
       
     }
     this.update = function()
     {
-        vwf.setProperty('http-vwf-example-com-node3-vwf-duck','rotation',[0,0,1,this.counter]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childduck','rotation',[0,0,1,this.counter*4]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childchildduck','rotation',[0,0,1,this.counter*8]);
-        vwf.setProperty('http-vwf-example-com-node3-vwf-childchildchildduck','rotation',[0,1,0,this.counter*16]);
+       this.duck.rotation=[0,0,1,this.counter];
+        this.duck.childduck.rotation=[0,0,1,this.counter*4];
+        this.duck.childduck.childchildduck.rotation=[0,0,1,this.counter*8];
+        this.duck.childduck.childchildduck.childchildchildduck.rotation=[0,1,0,this.counter*16];
         this.counter++;
         this.future(0.04).update();
     }

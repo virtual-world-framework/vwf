@@ -49,11 +49,11 @@ scripts:
       this.camera.translation = [0,-600,50];
       this.dir1.translation = [0,-100,0];
       this.counter = 0;
-      this.future(0.2).udpate();
+      this.future(0.2).update();
     }
     this.update = function()
     {
       this.counter++;
       this.duck.translation = [0,0,Math.sin(this.counter/100)*100];
-      this.future(0.2).udpate();
+      this.future(0.2).update();
     }

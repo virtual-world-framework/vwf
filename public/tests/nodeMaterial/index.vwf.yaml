@@ -40,27 +40,28 @@ children:
          }
          this.update = function()   
          {
+           
             this.counter++;
-            if(this.counter == 100)
-                this.material = 'green';
-            if(this.counter == 200)   
-                this.material = 'red';
-            if(this.counter == 300)  
-                this.material = 'blue';
-            if(this.counter == 400)  
-                this.material = 'purple';
-            if(this.counter == 500)  
-                this.material = 'orange';
-            if(this.counter == 600)  
-                this.material = 'gray';                
-            if(this.counter == 700)  
-                this.material = 'yellow';
-            if(this.counter == 800)  
-                this.material = 'white';
-            if(this.counter == 900) 
+            if(this.counter == 10)
+                vwf.setProperty(this.id,'material' , 'green');
+            if(this.counter == 20)   
+                vwf.setProperty(this.id,'material' ,  'red');
+            if(this.counter == 30)  
+                vwf.setProperty(this.id,'material' ,  'blue');
+            if(this.counter == 40)  
+                vwf.setProperty(this.id,'material' ,  'purple');
+            if(this.counter == 50)  
+                vwf.setProperty(this.id,'material' ,  'orange');
+            if(this.counter == 60)  
+                vwf.setProperty(this.id,'material' ,  'gray');                
+            if(this.counter == 70)  
+                vwf.setProperty(this.id,'material' ,  'yellow');
+            if(this.counter == 80)  
+                vwf.setProperty(this.id,'material' ,  'white');
+            if(this.counter == 90) 
             {            
                 this.counter = 0;
-                this.material = 'black';        
+                vwf.setProperty(this.id,'material' ,  'black');        
             }
             this.future(0.1).update();    
          }

@@ -27,16 +27,16 @@ children:
     source: model.dae
     type: model/vnd.collada+xml
     children:
-      node-Scene_Root:
+      Scene_Root:
         extends: http://vwf.example.com/node3.vwf
         children:
-          node-Box01:
+          Box01:
             extends: http://vwf.example.com/node3.vwf
             children:
-              node-Box02:
+              Box02:
                 extends: http://vwf.example.com/node3.vwf
                 children:
-                  node-Box03:
+                  Box03:
                     extends: http://vwf.example.com/node3.vwf
                     children:
   camera:
@@ -63,17 +63,18 @@ scripts:
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,100,100];
-        this.box01['node-Scene_Root']['node-Box01'].translation = [0,0,0];
-        this.box01['node-Scene_Root']['node-Box01']['node-Box02'].translation = [0,-20,0];
-        this.box01['node-Scene_Root']['node-Box01']['node-Box02']['node-Box03'].translation = [0,-20,0];
+        this.box01['Scene_Root']['Box01'].translation = [0,0,0];
+        this.box01['Scene_Root']['Box01']['Box02'].translation = [0,-20,0];
+        this.box01['Scene_Root']['Box01']['Box02']['Box03'].translation = [0,-20,0];
         this.future(0.2).update();
 
     }
-    this.tick = function()
+    this.update = function()
     {
-        this.box01['node-Scene_Root']['node-Box01'].rotation = [0,1,0,this.counter];
-        this.box01['node-Scene_Root']['node-Box01']['node-Box02'].rotation = [0,1,0,this.counter*4];
-        this.box01['node-Scene_Root']['node-Box01']['node-Box02']['node-Box03'].rotation = [0,1,0,this.counter*8];
+        
+        this.box01['Scene_Root']['Box01'].rotation = [0,1,0,this.counter];
+        this.box01['Scene_Root']['Box01']['Box02'].rotation = [0,1,0,this.counter*4];
+        this.box01['Scene_Root']['Box01']['Box02']['Box03'].rotation = [0,1,0,this.counter*8];
         this.counter++;
         this.future(0.2).update();
     }

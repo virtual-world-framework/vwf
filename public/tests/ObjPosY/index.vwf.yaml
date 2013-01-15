@@ -52,7 +52,7 @@ scripts:
     }
     this.update = function()
     {
-        this.counter++;
+        this.counter+=10;
         this.duck.translation = [ 0, Math.sin(this.counter/100)*100, 0 ];
         this.future(0.2).update();
     }

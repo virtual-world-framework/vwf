@@ -58,7 +58,7 @@ scripts:
     this.update = function()
     {
         this.counter++;
-        this.duck.rotation = [0,0,1,this.counter/2])
+        this.duck.rotation = [0,0,1,this.counter/2];
         this.camera.near = 600 - 100 * (1+Math.sin(this.counter/10))/2;
         this.camera.far = 600 + 100 * (1+Math.sin(this.counter/10))/2;
         if(this.counter == 200)
