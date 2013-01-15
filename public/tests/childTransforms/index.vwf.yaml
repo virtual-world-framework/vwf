@@ -47,11 +47,13 @@ children:
     - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
-      distance: 1000
-      intensity: 1
+      enable: true
+      distance: 2000
+      intensity: 1.4
       color: [ 255, 255, 255 ]
-      castShadows: false      
-      glge-constantAttenuation: 0
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
@@ -79,5 +81,5 @@ scripts:
         vwf.setProperty('http-vwf-example-com-node3-vwf-childchildduck','rotation',[0,0,1,this.counter*8]);
         vwf.setProperty('http-vwf-example-com-node3-vwf-childchildchildduck','rotation',[0,1,0,this.counter*16]);
         this.counter++;
-        this.future(0.2).update();
+        this.future(0.04).update();
     }
