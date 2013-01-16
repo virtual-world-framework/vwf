@@ -14011,7 +14011,9 @@ GLGE.Scene.prototype.render=function(gl){
 	GLGE.textureUniformsSkipped = 0;
 	//renderObjects=renderObjects.sort(this.stateSort);
 	renderObjects=renderObjects.sort(function(a,b){
-		return (GLGE.CompareMaterials(a.object.getMaterial(),b.object.getMaterial()));
+		if(a.object.getMaterial && b.object.getMaterial)
+			return (GLGE.CompareMaterials(a.object.getMaterial(),b.object.getMaterial()));
+		return 0;	
 	})
 	this.renderPass(gl,renderObjects,this.renderer.getViewportOffsetX(),this.renderer.getViewportOffsetY(),this.renderer.getViewportWidth(),this.renderer.getViewportHeight());	
 	//console.log(GLGE.textureUniformsCalled +":"+GLGE.textureUniformsSkipped);
@@ -14346,6 +14348,8 @@ GLGE.Scene.prototype.updateBatches =function()
 GLGE.Scene.prototype.batch = function(obj, force)
 {
 	
+	if(!(obj instanceof GLGE.Object)) return;
+	
 	if(!this.renderBatches)
 		this.renderBatches = [];
 		
@@ -14369,23 +14373,23 @@ GLGE.Scene.prototype.batch = function(obj, force)
 			oldbatch.needsRebuild = true;
 		}
 	}
-		var added = false;
-		for(var j = 0; j < this.renderBatches.length && !added; j++)
+	var added = false;
+	for(var j = 0; j < this.renderBatches.length && !added; j++)
+	{
+		if(this.renderBatches[j].validObject(obj))
 		{
-			if(this.renderBatches[j].validObject(obj))
-			{
-				this.renderBatches[j].addObject(obj);
-				this.renderBatches[j].needsRebuild = true;
-				added = true;
-			}
+			this.renderBatches[j].addObject(obj);
+			this.renderBatches[j].needsRebuild = true;
+			added = true;
 		}
-		if(!added)
-		{
-			var newBatch = new GLGE.RenderBatch();
-			newBatch.addObject(obj);
-			newBatch.needsRebuild = true;
-			this.renderBatches.push(newBatch);
-		}
+	}
+	if(!added)
+	{
+		var newBatch = new GLGE.RenderBatch();
+		newBatch.addObject(obj);
+		newBatch.needsRebuild = true;
+		this.renderBatches.push(newBatch);
+	}
 	obj.batchDirty=false;
 }
 GLGE.Scene.prototype.destroyBatches =function()
@@ -14433,7 +14437,7 @@ GLGE.Scene.prototype.buildBatches =function(force,object)
 	
 	for(var i = 0; i < renderObjects.length; i++)
 	{
-		if(renderObjects[i].object.isStatic)
+		if(renderObjects[i].object.isStatic && renderObjects[i].object instanceof GLGE.Object)
 		{
 			var added = false;
 			for(var j = 0; j < existingBatches.length && !added; j++)

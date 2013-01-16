@@ -591,29 +591,34 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							}
                         }
 						
-						var objs = glgeObject.getObjects();
-						
-						for(var i=0 ; i<objs.length;i++)
+						if(glgeObject.getObjects)
 						{
-							if(objs[i].isStatic == true)
-								objs[i].batchDirty = true;
+							var objs = glgeObject.getObjects();
+							
+							for(var i=0 ; i<objs.length;i++)
+							{
+								if(objs[i].isStatic == true)
+									objs[i].batchDirty = true;
+							}
 						}
-						
                         break;
 					case "static":{
 					
 						
-						var objs = glgeObject.getObjects();
-						for(var i=0 ; i<objs.length;i++)
+						if(glgeObject.getObjects)
 						{
-							objs[i].isStatic = propertyValue;
-							if(propertyValue)
-								objs[i].batchDirty =  true;
-							else
+							var objs = glgeObject.getObjects();
+							for(var i=0 ; i<objs.length;i++)
 							{
-								var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-								sceneNode.glgeScene.deBatch(objs[i]);
-							}		
+								objs[i].isStatic = propertyValue;
+								if(propertyValue)
+									objs[i].batchDirty =  true;
+								else
+								{
+									var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+									sceneNode.glgeScene.deBatch(objs[i]);
+								}		
+							}
 						}
 					}
 					break;
