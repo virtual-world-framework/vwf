@@ -1,10 +1,10 @@
-# How to create a simulation
+# Create a simulation
 
 Let's define a *simulation* as any application that models a sequence of causes and effects.  Here's how to create one:
 
 ## Load the 3D scene
 
-Let's use the radio model that comes with the VWF source in /public/radio.  Let's load it in our index.vwf.yaml file:
+Let's use the 3D model of a radio that comes with the VWF source in /public/radio.  Let's load it in our index.vwf.yaml file:
 
 >	---
 >	extends: http://vwf.example.com/navscene.vwf
@@ -13,6 +13,8 @@ Let's use the radio model that comes with the VWF source in /public/radio.  Let'
 >	    extends: http://vwf.example.com/node3.vwf
 >	    source: radio.DAE
 >	
+
+![The radio 3D model for this recipe](images/radio.png)
 
 ## Add a behavior to an object that reacts to user interaction
 
