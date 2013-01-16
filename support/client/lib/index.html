@@ -66,179 +66,37 @@
     <!-- in a shared world. Views may accept external input -such as pointer and key events or   -->
     <!-- directives from a connection to an outside engine that is not visible to all users- but -->
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
-
+    
     <script type="text/javascript">
-        var requireArray = [
-            { driver: "domReady", active: true },
-            { driver: "vwf/configuration", active: true },
-            { driver: "vwf/kernel/model", active: true },
-            { driver: "vwf/model/javascript", active: true },
-            { driver: "vwf/model/jiglib", linkedDrivers: ["vwf/model/jiglib/jiglib"], active: false },
-            { driver: "vwf/model/glge", linkedDrivers: ["vwf/model/glge/glge-compiled"], active: false },
-            { driver: "vwf/model/threejs", linkedDrivers: ["vwf/model/threejs/three"], active: false },
-            { driver: "vwf/model/scenejs", active: true },
-            { driver: "vwf/model/object", active: true },
-            { driver: "vwf/model/stage/log", active: true },
-            { driver: "vwf/kernel/view", active: true },
-            { driver: "vwf/view/document", active: true },
-            { driver: "vwf/view/editor", active: true },
-            { driver: "vwf/view/glge", active: false },
-            { driver: "vwf/view/threejs", active: false },
-            { driver: "vwf/utility", active: true },
-            { driver: "vwf/model/glge/glge-compiled", active: false },
-            { driver: "vwf/model/threejs/three", active: false },
-            { driver: "vwf/model/jiglib/jiglib", active: false },
-            { driver: "vwf/view/google-earth", active: false },
-            { driver: "vwf/view/cesium", active: false }
-        ];
-
-        var modelDrivers = [
-            { driver: "vwf/model/javascript", active: true },
-            { driver: "vwf/model/jiglib", active: false },
-            { driver: "vwf/model/glge", active: false },
-            { driver: "vwf/model/threejs", active: false },
-            { driver: "vwf/model/object", active: true }
-        ];
-        var viewDrivers = [
-            { driver: "vwf/view/glge", arguments: "#vwf-root", active: false },
-            { driver: "vwf/view/threejs", arguments: "#vwf-root", active: false },
-            { driver: "vwf/view/document", active: true },
-            { driver: "vwf/view/editor", active: true },
-            { driver: "vwf/view/google-earth", active: false },
-            { driver: "vwf/view/cesium", active: false }
-        ];
-        mapDriverName(requireArray);
-        mapDriverName(modelDrivers);
-        mapDriverName(viewDrivers);
-        var googleEarth = false;
         var queryString = window.location.search.substring(1);
         var hashString = window.location.hash.substring(2);
+        var modelDrivers = {};
+        var viewDrivers = {};
+        var googleEarth = false;
         var match;
         var regex = /([^&=]+)=?([^&]*)/g;
 
         while(match = regex.exec(queryString)) {
             var key = "vwf/model/" + $.encoder.canonicalize(match[1]);
-            var arguments = $.encoder.canonicalize(match[2]);
-            if(requireArray[key] && modelDrivers[key]) {
-                requireArray[key].active = true;
-                modelDrivers[key].active = true;
-                if(arguments && arguments != "") {
-                    modelDrivers[key].arguments = arguments;
-                }
-                if(requireArray[key].linkedDrivers) {
-                    for(var i=0; i<requireArray[key].linkedDrivers.length; i++) {
-                        requireArray[requireArray[key].linkedDrivers[i]].active = true;
-                    }
-                }
-            }
-            else {
-                console.warn("Unknown driver specified: ", key);
-            }
+            var parameters = $.encoder.canonicalize(match[2]);
+            modelDrivers[key] = (parameters && parameters != "") ? parameters : undefined;
         }
 
         while(match = regex.exec(hashString)) {
             var key = "vwf/view/" + $.encoder.canonicalize(match[1]);
-            var arguments = $.encoder.canonicalize(match[2]);
-            if(requireArray[key] && viewDrivers[key]) {
-                requireArray[key].active = true;
-                viewDrivers[key].active = true;
-                if(arguments && arguments != "") {
-                    viewDrivers[key].arguments = arguments;
-                }
-                if(requireArray[key].linkedDrivers) {
-                    for(var linkedKey in requireArray[key].linkedDrivers) {
-                        requireArray[linkedKey].active = true;
-                    }
-                }
-            }
-            else {
-                console.warn("Unknown driver specified: ", key);
-            }
+            var parameters = $.encoder.canonicalize(match[2]);
+            viewDrivers[key] = (parameters && parameters != "") ? parameters : undefined;
             if(key == "vwf/view/google-earth") {
                 googleEarth = true;
             }
         }
 
-        if(queryString == "" && hashString == "") {
-            requireArray["vwf/model/glge"].active = true;
-            requireArray["vwf/view/glge"].active = true;
-            requireArray["vwf/model/glge/glge-compiled"].active = true;
-            modelDrivers["vwf/model/glge"].active = true;
-            viewDrivers["vwf/view/glge"].active = true;
-        }
-
-        function mapDriverName(array) {
-            for(var i=0;i<array.length;i++) {
-                array[array[i].driver] = array[i];
-            }
-        }
-
-        function getActiveDrivers(driverList, includeArguments) {
-            var activeDriverList = [];
-            for(var i=0; i<driverList.length; i++) {
-                if(driverList[i].active) {
-                    if(includeArguments) {
-                        var activeDriver = {};
-                        activeDriver[driverList[i].driver] = driverList[i].arguments;
-                        activeDriverList.push(activeDriver);
-                    }
-                    else {
-                        activeDriverList.push(driverList[i].driver);
-                    }
-                }
-            }
-            return activeDriverList;
-        }
+        googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")
     </script>
-    <script>googleEarth && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
-    <script>googleEarth && google.load( "earth", "1" )</script>
-
+    <script type="text/javascript">googleEarth && google.load( "earth", "1" )</script>
+    
     <script type="text/javascript">
-
-        require( getActiveDrivers(requireArray, false), function( ready ) {
-
-            ready( function() {
-
-                // With the scripts loaded, we must initialize the framework. vwf.initialize()
-                // accepts three parameters: a world specification, model configuration parameters,
-                // and view configuration parameters.
-
-                vwf.initialize(
-
-                    // This is the world specification. The world may be specified using a component
-                    // literal as shown here, or the specification may be placed in a network-
-                    // visible location and specified here as a URI or as a query parameter to this
-                    // index page.
-     
-                    // As a literal:
-                    //     { extends: "http://vwf.example.com/example-type.vwf", properties: { ... }, ... }
-     
-                    // As a string:
-                    //     "http://vwf.example.com/example-type.vwf",
-     
-                    // These are the model configurations. Each key within the configuration object
-                    // is a model name, and each value is an argument or an array of arguments to be
-                    // passed to the model's constructor.
-     
-                    // With an array of arguments for the "example" model:
-                    //     { example: [ p1, p2, ... ], // ==> new vwf.modules.example( vwf, p1, p2, ... ) }
-     
-                    // As a single argument to the "html" view:
-                    //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
-     
-                    getActiveDrivers(modelDrivers, true),
-
-                    // These are the view configurations. They use the same format as the model
-                    // configurations.
-
-                    getActiveDrivers(viewDrivers, true)
-
-                );
-
-            } );
-
-        } );
-
+        vwf.loadDriverConfiguration(modelDrivers, viewDrivers);
     </script>
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
