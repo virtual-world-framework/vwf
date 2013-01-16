@@ -603,7 +603,7 @@ scripts:
       if(parms.which == 3 || parms.which == 2 && (this.cameramode == 'Orbit' || this.cameramode == 'Free'))
         {
         // Ask the browser to lock the pointer
-        $('#index-vwf')[0].requestPointerLock();
+       // $('#index-vwf')[0].requestPointerLock();
         }      
      
       this.last_x = parms.clientX/window.screen.width;
@@ -632,7 +632,7 @@ scripts:
       if(parms.which == 2 || parms.which == 3)
         {
         // Ask the browser to lock the pointer
-        document.exitPointerLock();
+        //document.exitPointerLock();
         }    
     }
     this.localpointerMove = function( parms, pickInfo ){

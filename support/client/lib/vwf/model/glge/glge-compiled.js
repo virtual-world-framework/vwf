@@ -7254,6 +7254,7 @@ GLGE.Material.prototype.getFragmentShader=function(lights,colors,shaderInjection
 */
 GLGE.Material.prototype.textureUniforms=function(gl,shaderProgram,lights,object){
 		  //if(this.animation) this.animate();
+		  GLGE.Stats.MaterialCalls++;
 		  var pc=shaderProgram.caches;
 
 		  if(!pc.baseColor || pc.baseColor.r!=this.color.r || pc.baseColor.g!=this.color.g || pc.baseColor.b!=this.color.b || pc.baseColor.a!=this.color.a){
@@ -10827,6 +10828,8 @@ GLGE.CompareMaterials=function(mat1, mat2)
 * @private
 */
 GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,distance){
+	GLGE.Stats.DrawCalls++;
+	
 	if(!gl) return;
 	if(!this.gl) this.GLInit(gl);
 	
@@ -10890,6 +10893,8 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 			}
 			this.mesh=lod.mesh;
 			this.material=lod.material;
+			
+			if(this.mesh) GLGE.Stats.Verticies += this.mesh.faces.data.length/3;
 			
 			var drawType;
 			switch(this.drawType){
@@ -11337,6 +11342,7 @@ GLGE.Text.prototype.updateCanvas=function(gl){
 * @private
 */
 GLGE.Text.prototype.GLRender=function(gl,renderType,pickindex){
+	GLGE.Stats.DrawCalls++;
 	if(!this.gl){
 		this.GLInit(gl);
 	}	
@@ -13483,7 +13489,7 @@ GLGE.Scene.prototype.fogType=GLGE.FOG_NONE;
 GLGE.Scene.prototype.passes=null;
 GLGE.Scene.prototype.transbuffer=null;
 GLGE.Scene.prototype.culling=true;
-
+GLGE.Scene.prototype.staticBatchingEnabled = true;
 
 /**
 * Gets the fog falloff type
@@ -13850,6 +13856,8 @@ GLGE.Scene.prototype.createSkyBuffer=function(gl){
 * @private
 */
 GLGE.Scene.prototype.render=function(gl){
+
+	GLGE.Stats.startFrame();
 	this.animate();
 	//if look at is set then look
 	if(this.camera.lookAt) this.camera.Lookat(this.camera.lookAt);	
@@ -13864,7 +13872,7 @@ GLGE.Scene.prototype.render=function(gl){
 	
 	this.framebuffer=this.getFrameBuffer(gl);
 	
-
+	GLGE.Stats.startTraverse();
 	var renderObjects=this.getObjects();
 	var cvp=this.camera.getViewProjection();
 	renderObjects=this.unfoldRenderObject(renderObjects);
@@ -13873,11 +13881,12 @@ GLGE.Scene.prototype.render=function(gl){
 	{
 		if(!this.isBatched(renderObjects[i].object))
 			nonBatched.push(renderObjects[i]);
-		if(renderObjects[i].object.batchDirty == true)	
+		if(renderObjects[i].object.batchDirty == true && this.staticBatchingEnabled && renderObjects[i].object.isStatic == true)	
 		{
 			this.batch(renderObjects[i].object);
 		}		
 	}
+	this.updateBatches();
 	renderObjects = nonBatched;
 	if(this.renderBatches)
 	{
@@ -13887,7 +13896,7 @@ GLGE.Scene.prototype.render=function(gl){
 			renderObjects.push({multiMaterial:0,object:this.renderBatches[i].renderObject});
 		}
 	}
-
+	GLGE.Stats.endTraverse();
 	
 	//shadow stuff
 	for(var i=0; i<lights.length;i++){
@@ -13963,7 +13972,9 @@ GLGE.Scene.prototype.render=function(gl){
 	
 	if(this.culling){
 		var cvp=this.camera.getViewProjection();
+		GLGE.Stats.startCull();
 		renderObjects=this.objectsInViewFrustum(renderObjects,cvp);
+		GLGE.Stats.endCull();
 	}
 	
 	gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
@@ -14009,12 +14020,97 @@ GLGE.Scene.prototype.render=function(gl){
 	this.applyFilter(gl,renderObjects, this.framebuffer);
 	
 	this.allowPasses=true;
+	
+	GLGE.Stats.endFrame();
 }
+GLGE.Statistics = function()
+{
+	this.DrawCalls = 0;
+	this.MaterialCalls = 0;
+	this.Verticies = 0;
+	this.FPS = 0;
+	this.lastFrameTime = null;
+	this.displayDiv = null;
+	this.FrameTimes = [];
+	this.cullTime = 0;
+	this.startCull = function()
+	{	
+		this.cullTime = new Date();
+	}
+	this.endCull = function()
+	{
+		this.cullTime = (new Date()) - this.cullTime;
+	}
+	this.traverseTime = 0;
+	this.startTraverse = function()
+	{	
+		this.traverseTime = new Date();
+	}
+	this.endTraverse = function()
+	{
+		this.traverseTime = (new Date()) - this.traverseTime;
+	}
+	this.showDisplay = function()
+	{
+		if(!this.displayDiv)
+		{
+		
+			$(document.body).append('<div id = "GLGEStat" class="GLGEStat"><div id="CloseStats" style="cursor:pointer;color: black;font-size: 18px;float: right;background: white;border: 1px solid white;border-radius: 3px;padding: 0px;margin: 0px;line-height: 1em;font-family: monospace;font-weight: bold;">Close</div></div>')
+			$('#GLGEStat').append('<table>'+
+									'<tr><td>FPS</td>          <td id="GLGEStatFPS" >60</td></tr>'+
+									'<tr><td>FrameTime</td>    <td id="GLGEStatLastFrame">60</td></tr>'+
+									'<tr><td>TraverseTime</td>    <td id="GLGEStatTraverseTime">60</td></tr>'+
+									'<tr><td>CullTime</td>    <td id="GLGEStatCullTime">60</td></tr>'+
+									'<tr><td>DrawCalls</td>    <td id="GLGEStatDrawCalls">60</td></tr>'+
+									'<tr><td>MaterialCalls</td><td id="GLGEStatMaterialsCalls">60</td></tr>'+
+									'<tr><td>Verticies</td>    <td id="GLGEStatVerticies">60</td></tr>'+
+									+'</table>')
+		
+			this.displayDiv = $('#GLGEStat');
+			$('#CloseStats').click(function(){$('#GLGEStat').hide()});
+		}
+		else
+		{
+			$(this.displayDiv).show();
+		}
+	}
+	this.startFrame = function()
+	{
+		this.DrawCalls = 0;
+		this.MaterialCalls = 0;
+		this.Verticies = 0;
+		this.FPS = 0;
+		this.lastFrameTime = new Date();
+	}
+	this.endFrame = function()
+	{
+		this.FrameTimes.push((new Date() - this.lastFrameTime));
+		if(this.FrameTimes.length > 10 ) this.FrameTimes.shift();
+		this.RunningAverageTime = this.FrameTimes.reduce(function(previousValue, currentValue, index, array){return previousValue + currentValue})/10;
+		this.FPS = parseInt(this.RunningAverageTime ? 1000/this.RunningAverageTime : 60);
+		this.updateDisplay();
+	}
+	this.updateDisplay = function()
+	{
+		if(!this.displayDiv)
+			return;
+		$('#GLGEStatFPS').html(this.FPS);
+		$('#GLGEStatLastFrame').html(this.FrameTimes[this.FrameTimes.length-1]  + " ms");
+		$('#GLGEStatDrawCalls').html(this.DrawCalls);
+		$('#GLGEStatMaterialsCalls').html(this.MaterialCalls);
+		$('#GLGEStatVerticies').html(this.Verticies);
+		$('#GLGEStatTraverseTime').html(this.traverseTime + " ms");
+		$('#GLGEStatCullTime').html(this.cullTime + " ms");
+	}
+}
+GLGE.Stats = new GLGE.Statistics();
+
 GLGE.RenderBatch = function()
 {
 	this.objects = [];
 	this.renderObject = null;
 	this.material = null;
+	this.needsRebuild = false;
 	this.addObject = function(o)
 	{
 		if(this.objects.length ==0)
@@ -14234,8 +14330,22 @@ GLGE.Scene.prototype.deBatch = function(obj)
 	}
 	obj.batchDirty=false;
 }
+GLGE.Scene.prototype.updateBatches =function()
+{
+	if(!this.renderBatches) return;
+		for(var j = 0; j < this.renderBatches.length; j++)
+		{
+			if(this.renderBatches[j].needsRebuild === true)
+			{
+				this.renderBatches[j].buildRenderObject();
+				this.renderBatches[j].needsRebuild = false;
+			}
+			
+		}
+}
 GLGE.Scene.prototype.batch = function(obj, force)
 {
+	
 	if(!this.renderBatches)
 		this.renderBatches = [];
 		
@@ -14256,7 +14366,7 @@ GLGE.Scene.prototype.batch = function(obj, force)
 			this.renderBatches.splice(index,1);
 		}else
 		{
-			oldbatch.buildRenderObject();
+			oldbatch.needsRebuild = true;
 		}
 	}
 		var added = false;
@@ -14265,7 +14375,7 @@ GLGE.Scene.prototype.batch = function(obj, force)
 			if(this.renderBatches[j].validObject(obj))
 			{
 				this.renderBatches[j].addObject(obj);
-				this.renderBatches[j].buildRenderObject();
+				this.renderBatches[j].needsRebuild = true;
 				added = true;
 			}
 		}
@@ -14273,22 +14383,36 @@ GLGE.Scene.prototype.batch = function(obj, force)
 		{
 			var newBatch = new GLGE.RenderBatch();
 			newBatch.addObject(obj);
-			newBatch.buildRenderObject();
+			newBatch.needsRebuild = true;
 			this.renderBatches.push(newBatch);
 		}
 	obj.batchDirty=false;
 }
 GLGE.Scene.prototype.destroyBatches =function()
 {
+	var renderObjects = this.getObjects();
+	for(var i =0; i < renderObjects.length; i++)
+	{
+		if(renderObjects[i].isStatic)
+			renderObjects[i].batchDirty = true;
+	}
 	this.renderBatches = [];
 }
-GLGE.Scene.prototype.buildBatches =function(force)
+GLGE.Scene.prototype.buildBatches =function(force,object)
 {
+
 	if(!this.renderBatches)
 		this.renderBatches = [];
-	var renderObjects=this.getObjects();
+	var renderObjects;
+	if(!object)
+	{
+		renderObjects = this.getObjects();
+		
+	}else
+	{
+		renderObjects = object.getObjects();
+	}
 	renderObjects=this.unfoldRenderObject(renderObjects);
-	
 	if(force)
 	{
 		for(var i = 0; i < renderObjects.length; i++)
@@ -14297,16 +14421,26 @@ GLGE.Scene.prototype.buildBatches =function(force)
 		}
 	}
 	
+	var existingBatches;
+	if(!object)
+	{
+		existingBatches = this.renderBatches;
+	}
+	else
+	{
+		existingBatches = [];
+	}
+	
 	for(var i = 0; i < renderObjects.length; i++)
 	{
 		if(renderObjects[i].object.isStatic)
 		{
 			var added = false;
-			for(var j = 0; j < this.renderBatches.length && !added; j++)
+			for(var j = 0; j < existingBatches.length && !added; j++)
 			{
-				if(this.renderBatches[j].validObject(renderObjects[i].object))
+				if(existingBatches[j].validObject(renderObjects[i].object))
 				{
-					this.renderBatches[j].addObject(renderObjects[i].object);
+					existingBatches[j].addObject(renderObjects[i].object);
 					added = true;
 				}
 			}
@@ -14314,14 +14448,24 @@ GLGE.Scene.prototype.buildBatches =function(force)
 			{
 				var newBatch = new GLGE.RenderBatch();
 				newBatch.addObject(renderObjects[i].object);
-				this.renderBatches.push(newBatch);
+				existingBatches.push(newBatch);
 			}
 			renderObjects[i].object.batchDirty=false;
 		}
 	}
-	for(var i = 0; i < this.renderBatches.length; i++)
+	for(var i = 0; i < existingBatches.length; i++)
 	{
-		this.renderBatches[i].buildRenderObject();
+		existingBatches[i].buildRenderObject();
+	}
+	if(object)
+	{
+		object.originalChildren = object.children;
+		object.children = [];
+		for(var i = 0; i < existingBatches.length; i++)
+		{
+			object.children.push(existingBatches[i].renderObject);
+		}
+		
 	}
 }
 GLGE.Scene.prototype.getRTTBuffer=function(gl,width,height){
@@ -15531,6 +15675,8 @@ GLGE.ParticleSystem.prototype.setAttributes=function(gl){
 * @private
 */
 GLGE.ParticleSystem.prototype.GLRender=function(gl){
+
+	GLGE.Stats.DrawCalls++
 	if(!this.attribute) this.generateParticles(gl);
 	if(!this.program) this.generateProgram(gl);
 	
@@ -16931,6 +17077,7 @@ GLGE.Filter2d.prototype.createPersistTexture=function(gl){
 
 //does all passes and renders result to screen
 GLGE.Filter2d.prototype.GLRender=function(gl,buffer){
+	GLGE.Stats.DrawCalls++;
 	gl.disable(gl.BLEND);
 	if(!buffer) buffer=null;
 	if(this.passes){

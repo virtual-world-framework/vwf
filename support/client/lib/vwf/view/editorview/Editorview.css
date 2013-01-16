@@ -210,6 +210,20 @@
 		background-color: #414141;
 		
 	}
+	.GLGEStat
+	{
+		z-index: 999999;
+		background-color: black;
+		position: absolute;
+		border: 1px solid white;
+		border-radius: 10px;
+		opacity: .8;
+		
+	}
+	.GLGEStat table tbody tr td
+	{
+		color: white;
+	}
 	.vectorinputfront
 	{
 		display: inline;

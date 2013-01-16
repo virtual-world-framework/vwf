@@ -49,10 +49,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             var node, parentNode, glgeChild, prototypes;
             var kernel = this.kernel.kernel.kernel;
-
+			
             if ( childExtendsID === undefined /* || childName === undefined */ )
                 return;
-
+			
 //            this.logger.enabled = true;
 //            this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
 //                                childSource, childType, childURI, childName );
@@ -602,6 +602,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
 					case "static":{
 					
+						
 						var objs = glgeObject.getObjects();
 						for(var i=0 ; i<objs.length;i++)
 						{
@@ -614,6 +615,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 								sceneNode.glgeScene.deBatch(objs[i]);
 							}		
 						}
+					}
+					break;
+					case "optimize":{
+							var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+							sceneNode.glgeScene.buildBatches(true,glgeObject);
 					}
 					break;
                     case "material": {
@@ -2581,15 +2587,19 @@ var JSONNode = function(node,callback)
 	this.jsonLoaded = function(e)
 	{
 	    var test = 1+1;
+		
 		var jsonData = JSON.parse(decompress(e));
 		var texture_load_callback = function(texturename)
 		{
-			
+			if(!texturename)
+				return null;
 			var src = "";
 			if(this.url.toLowerCase().indexOf('3dr_federation') != -1)
 				src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/NoRedirect/" + encodeURIComponent(texturename) +"?ID=00-00-00";
-			else
+			else 
+			{
 				src = this.url.substr(0,this.url.indexOf("Model/")) + "textures/" + encodeURIComponent(texturename) +"?ID=00-00-00";
+			}
 			
 			src = src.replace("AnonymousUser:@","");
 			var tex = new GLGE.Texture();
@@ -2870,7 +2880,7 @@ data = DecompressStrings(data,"\"primitives\":","p:");
 data = DecompressStrings(data,"\"projection\":","pr:");
 data = DecompressStrings(data,"\"matrix\":","M:");
 data = DecompressStrings(data,"\"Color\":","COL:");
-
+data = DecompressStrings(data,"\\","/");
 return data;
 }
 

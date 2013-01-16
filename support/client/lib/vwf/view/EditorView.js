@@ -139,15 +139,15 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			_Editor.mousedown(touch)
 		});
 		
-		$('#index-vwf')[0].requestPointerLock = $('#index-vwf')[0].requestPointerLock ||
-			     $('#index-vwf')[0].mozRequestPointerLock ||
-			     $('#index-vwf')[0].webkitRequestPointerLock;
+		// $('#index-vwf')[0].requestPointerLock = $('#index-vwf')[0].requestPointerLock ||
+			     // $('#index-vwf')[0].mozRequestPointerLock ||
+			     // $('#index-vwf')[0].webkitRequestPointerLock;
 		
 
-		// Ask the browser to release the pointer
-		document.exitPointerLock = document.exitPointerLock ||
-					   document.mozExitPointerLock ||
-					   document.webkitExitPointerLock;
+		//Ask the browser to release the pointer
+		// document.exitPointerLock = document.exitPointerLock ||
+					   // document.mozExitPointerLock ||
+					   // document.webkitExitPointerLock;
 		
 		
 		$('#index-vwf').on('touchmove',function(e){
@@ -396,6 +396,42 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			e.stopPropagation();
 			
 		});
+		
+		
+		$('#MenuViewStats').click(function(e){
+			GLGE.Stats.showDisplay();
+		});
+		$('#MenuViewShadows').click(function(e){
+			var val = !_Editor.findscene().children[1].castShadows;
+			_Editor.findscene().children[1].setCastShadows(val);
+		});
+		$('#MenuViewBatchingForce').click(function(e){
+			_Editor.findscene().buildBatches(true);
+		});
+		
+		$('#MenuViewStaticBatching').click(function(e){
+			_Editor.findscene().staticBatchingEnabled = !_Editor.findscene().staticBatchingEnabled;
+			if(!_Editor.findscene().staticBatchingEnabled)
+			{
+				_Editor.findscene().destroyBatches();
+				_Notifier.notify('static batching disabled');
+			}else
+			{
+				_Notifier.notify('static batching enabled');
+			}
+		});
+		
+		$('#MenuViewToggleAO').click(function(e){
+			if(_Editor.findscene().getFilter2d())
+			{
+				_Editor.findscene().setFilter2d();
+			}else
+			{
+				var ao = new GLGE.FilterAO();
+				_Editor.findscene().setFilter2d(ao)
+			}
+		});
+		
 		
 		function focusSelected()
 		{

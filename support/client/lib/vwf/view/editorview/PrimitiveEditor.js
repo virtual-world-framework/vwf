@@ -76,6 +76,7 @@ function PrimitiveEditor()
 			
 		});
 		$('#isTransparent').change(function(e){_PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id,'transparent',this.checked)});
+		$('#isStatic').change(function(e){_PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id,'static',this.checked)});
 		$('#dispName').blur(function(e)
 			{
 				if(vwf.getProperty(_Editor.GetSelectedVWFNode().id,'DisplayName') === undefined)
@@ -174,6 +175,16 @@ function PrimitiveEditor()
 				{
 					$('#isTransparent').removeAttr('checked');
 				}
+				
+				if(vwf.getProperty(node.id,'static'))
+				{
+					$('#isStatic').attr('checked','checked');
+				}else
+				{
+					$('#isStatic').removeAttr('checked');
+				}
+				
+				
 				$('#BaseSectionTitle').html(node.properties.type + ": " + node.id);
 				this.SelectionTransformed(null,node);
 				this.setupEditorData(node);
