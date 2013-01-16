@@ -171,6 +171,8 @@ scripts:
     {
         
         this.mesh.setMesh(this.Build());
+        this.mesh.isStatic = vwf.getProperty(this.id,'static');
+        this.mesh.batchDirty = true;
         if(this.mesh.mesh)
             this.mesh.mesh.dirtyMesh = true;		
     }
