@@ -538,6 +538,15 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                         }
 
                         clients$.append("<div style='padding:6px'><input class='filename_entry' type='text' id='fileName' /><input class='update_button' type='button' id='save' value='Save' /></div>");
+                        $('#fileName').keydown( function(evt) {
+                            evt.stopPropagation();
+                        });
+                        $('#fileName').keypress( function(evt) {
+                            evt.stopPropagation();
+                        });
+                        $('#fileName').keyup( function(evt) {
+                            evt.stopPropagation();
+                        });
                         $('#save').click(function(evt) {
                             saveStateAsFile.call(self, $('#fileName').val());
                         });
@@ -623,7 +632,6 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var nodeIDAlpha = $.encoder.encodeForAlphaNumeric(nodeID);
 
         $(topdownName).html(''); // Clear alternate div first to ensure content is added correctly
-        console.info(nodeID);
         var node = this.nodes[ nodeID ];
         this.currentNodeID = nodeID;
 
@@ -1535,11 +1543,16 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
     function saveStateAsFile(filename) // invoke with the view as "this"
     {
+        this.logger.info("Saving: " + filename);
+
         if(supportAjaxUploadWithProgress.call(this))
         {
             var xhr = new XMLHttpRequest();
 
             var state = vwf.getState();
+
+            // Remove queue component of state
+            delete state["queue"];
 
             var objectIsTypedArray = function( candidate ) {
                 var typedArrayTypes = [
@@ -1597,6 +1610,8 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
     function loadSavedState(filename) 
     {
+        this.logger.info("Loading: " + filename);
+
         $.get(filename,function(data,status){
             vwf.setState(data);
         });

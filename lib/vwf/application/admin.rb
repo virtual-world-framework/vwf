@@ -116,7 +116,6 @@ class VWF::Application::Admin < Sinatra::Base
     directory._call({'SCRIPT_NAME'=>request.scheme+'://'+request.host_with_port, 'PATH_INFO'=>request.env["vwf.root"]})
     dirContents = directory.list_directory[2].files 
     dirContents.map do |dirContent|
-      puts dirContent[3]
       if dirContent[3] == "application/json"
         Hash[ "url"=>dirContent[0], "basename"=>dirContent[1], "size"=>dirContent[2], "type"=>dirContent[3], "mtime"=>dirContent[4] ]
       end

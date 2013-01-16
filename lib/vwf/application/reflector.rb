@@ -47,14 +47,30 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       logger.debug "VWF::Application::Reflector#connect #{ object_id } " +
           "launching #{id} from #{ env["vwf.application"] }"
 
-      send "time" => session[:transport].time,
-        "action" => "setState",
-        "parameters" => [ {
-          "configuration" =>
-            { "environment" => ENV['RACK_ENV'] || "development" },
-          "nodes" =>
-            [ env["vwf.application"] ]
-        } ]
+      # TODO: check for file format not that json exists
+      if( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
+
+        contents = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json")
+        json = JSON.parse("#{ contents }")
+
+        send "time" => session[:transport].time,
+          "action" => "setState",
+          "parameters" => [
+              json
+            ]
+
+      else
+
+        send "time" => session[:transport].time,
+          "action" => "setState",
+          "parameters" => [ {
+            "configuration" =>
+              { "environment" => ENV['RACK_ENV'] || "development" },
+            "nodes" =>
+              [ env["vwf.application"] ]
+          } ]
+
+      end
 
     # second
 
