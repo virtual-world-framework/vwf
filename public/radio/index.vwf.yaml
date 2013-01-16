@@ -86,7 +86,7 @@ children:
       rotation: [ 1, 0, 0, -90 ]
       powerOn:
         set: |
-          if ( this.powerOwn != Boolean( value ) ){
+          if ( this.powerOn != Boolean( value ) ){
             this.powerOn = Boolean( value );
             if ( value ) {
               this.volume = 10;

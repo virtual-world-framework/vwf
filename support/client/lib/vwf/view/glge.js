@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
     return view.load( module, {
 
@@ -342,6 +342,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     break;
             };
 
+            var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.clientX, y: e.clientY } ); // canvas coordinates from window coordinates
+
             returnData.eventData = [ {
                 /*client: "123456789ABCDEFG", */
                 button: mouseButton,
@@ -357,8 +359,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         shift: e.shiftKey,
                         meta: e.metaKey,
                     },
-                position: [ mouseXPos.call( this,e)/sceneView.width, mouseYPos.call( this,e)/sceneView.height ],
-                screenPosition: [mouseXPos.call(this,e), mouseYPos.call(this,e)]
+                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
+                screenPosition: [ mousePos.x, mousePos.y ]
             } ];
 
 
@@ -727,14 +729,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         return sOut;
     }
 
-    function mouseXPos(e) {
-        return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
-    }
-
-    function mouseYPos(e) {
-        return e.clientY - e.currentTarget.offsetTop + window.scrollY;
-    }
-
     function getPickObjectID( pickInfo, debug ) {
 
         if ( pickInfo && pickInfo.object ) {
@@ -782,9 +776,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( sceneNode.frameCount > 10 && sceneNode.pendingLoads == 0 ) {
 
                 var objectIDFound = -1;
-                var mousepos=mouse.getMousePosition();
-                mousepos.x = mousepos.x + window.scrollX + window.slideOffset;
-                mousepos.y = mousepos.y + window.scrollY;
+
+                var mousepos=mouse.getMousePosition(); // window coordinates
+                mousepos = utility.coordinates.contentFromWindow( mouse.element, mousepos ); // canvas coordinates
 
                 var returnValue = sceneNode.glgeScene.pick(mousepos.x, mousepos.y);
                 if (!returnValue) {

@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
+define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
 
