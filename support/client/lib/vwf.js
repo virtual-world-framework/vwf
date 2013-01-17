@@ -210,7 +210,28 @@
 
         // == Public functions =====================================================================
 
-        this.loadDriverConfiguration = function(modelConfigurations, viewConfigurations) {
+        // -- loadDriverConfiguration ---------------------------------------------------------------------------
+
+        // The main page only needs to call vwf.loadDriverConfiguration() to launch the application. Use
+        // require.ready() or jQuery(document).ready() to call loadDriverConfiguration() once the page has
+        // loaded. loadDriverConfiguration() accepts two parameters.
+        // 
+        // modelInitializers and viewInitializers identify the model and view drivers that were parsed
+        // out of the URL that should be attached to the simulation. Each is specified as an object with each driver 
+        // name as a property of the object with any arguments as the value of the property.
+        // Arguments may be specified as an array [1], as a single value if there is only one [2], or as 
+        // undefined if there are none[3].
+        // 
+        //     [1] vwf.loadDriverConfiguration( ..., { "vwf/model/glge": [ "#scene, "second param" ] }, { ... } )
+        //     [2] vwf.loadDriverConfiguration( ..., { "vwf/model/glge": "#scene" }, { ... } )
+        //     [3] vwf.loadDriverConfiguration( ..., { "vwf/model/javascript": undefined }, { ... } )
+        this.loadDriverConfiguration = function(/* { modelInitializers }
+            { viewInitializers } */) {
+            var args = Array.prototype.slice.call( arguments );
+
+            var modelInitializers = args.shift() || {};
+            var viewInitializers = args.shift() || {};
+
             var requireArray = [
                 { driver: "domReady", active: true },
                 { driver: "vwf/configuration", active: true },
@@ -278,12 +299,12 @@
             }
             // TODO Read config file
             
-            Object.keys(modelConfigurations).forEach(function(driverName) {
+            Object.keys(modelInitializers).forEach(function(driverName) {
                 if(requireArray[driverName] && modelDrivers[driverName]) {
                     requireArray[driverName].active = true;
                     modelDrivers[driverName].active = true;
-                    if(modelConfigurations[driverName] && modelConfigurations[driverName] != "") {
-                        modelDrivers[driverName].parameters = modelConfigurations[driverName];
+                    if(modelInitializers[driverName] && modelInitializers[driverName] != "") {
+                        modelDrivers[driverName].parameters = modelInitializers[driverName];
                     }
                     if(requireArray[driverName].linkedDrivers) {
                         for(var i=0; i<requireArray[driverName].linkedDrivers.length; i++) {
@@ -292,12 +313,12 @@
                     }
                 }
             });
-            Object.keys(viewConfigurations).forEach(function(driverName) {
+            Object.keys(viewInitializers).forEach(function(driverName) {
                 if(requireArray[driverName] && viewDrivers[driverName]) {
                     requireArray[driverName].active = true;
                     viewDrivers[driverName].active = true;
-                    if(viewConfigurations[driverName] && viewConfigurations[driverName] != "") {
-                        viewDrivers[driverName].parameters = viewConfigurations[driverName];
+                    if(viewInitializers[driverName] && viewInitializers[driverName] != "") {
+                        viewDrivers[driverName].parameters = viewInitializers[driverName];
                     }
                     if(requireArray[driverName].linkedDrivers) {
                         for(var i=0; i<requireArray[driverName].linkedDrivers.length; i++) {
@@ -309,7 +330,7 @@
 
             // Load default renderer if no other drivers specified
             // TODO Add check if any drivers loaded from config file
-            if(Object.keys(modelConfigurations).length == 0 && Object.keys(viewConfigurations).length == 0) {
+            if(Object.keys(modelInitializers).length == 0 && Object.keys(viewInitializers).length == 0) {
                 requireArray["vwf/model/glge"].active = true;
                 requireArray["vwf/view/glge"].active = true;
                 requireArray["vwf/model/glge/glge-compiled"].active = true;

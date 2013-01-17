@@ -68,6 +68,8 @@
     <!-- may only affect the simulation indirectly through the synchronization server.           -->
     
     <script type="text/javascript">
+        // Users can specify which drivers the application will load by adding parameters to the URL.
+        // Model drivers are specified as a query parameter and view parameters as a hash fragment.
         var queryString = window.location.search.substring(1);
         var hashString = window.location.hash.substring(2);
         var modelDrivers = {};
