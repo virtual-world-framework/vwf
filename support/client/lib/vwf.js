@@ -210,22 +210,22 @@
 
         // == Public functions =====================================================================
 
-        // -- loadDriverConfiguration ---------------------------------------------------------------------------
+        // -- loadConfiguration ---------------------------------------------------------------------------
 
-        // The main page only needs to call vwf.loadDriverConfiguration() to launch the application. Use
-        // require.ready() or jQuery(document).ready() to call loadDriverConfiguration() once the page has
-        // loaded. loadDriverConfiguration() accepts two parameters.
+        // The main page only needs to call vwf.loadConfiguration() to launch the application. Use
+        // require.ready() or jQuery(document).ready() to call loadConfiguration() once the page has
+        // loaded. loadConfiguration() accepts two parameters.
         // 
-        // modelInitializers and viewInitializers identify the model and view drivers that were parsed
-        // out of the URL that should be attached to the simulation. Each is specified as an object with each driver 
+        // modelInitializers and viewInitializers identify the model and view libraries that were parsed
+        // out of the URL that should be attached to the simulation. Each is specified as an object with each library 
         // name as a property of the object with any arguments as the value of the property.
         // Arguments may be specified as an array [1], as a single value if there is only one [2], or as 
         // undefined if there are none[3].
         // 
-        //     [1] vwf.loadDriverConfiguration( ..., { "vwf/model/glge": [ "#scene, "second param" ] }, { ... } )
-        //     [2] vwf.loadDriverConfiguration( ..., { "vwf/model/glge": "#scene" }, { ... } )
-        //     [3] vwf.loadDriverConfiguration( ..., { "vwf/model/javascript": undefined }, { ... } )
-        this.loadDriverConfiguration = function(/* { modelInitializers }
+        //     [1] vwf.loadConfiguration( ..., { "vwf/model/glge": [ "#scene, "second param" ] }, { ... } )
+        //     [2] vwf.loadConfiguration( ..., { "vwf/model/glge": "#scene" }, { ... } )
+        //     [3] vwf.loadConfiguration( ..., { "vwf/model/javascript": undefined }, { ... } )
+        this.loadConfiguration = function(/* { modelInitializers }
             { viewInitializers } */) {
             var args = Array.prototype.slice.call( arguments );
 
@@ -233,112 +233,112 @@
             var viewInitializers = args.shift() || {};
 
             var requireArray = [
-                { driver: "domReady", active: true },
-                { driver: "vwf/configuration", active: true },
-                { driver: "vwf/kernel/model", active: true },
-                { driver: "vwf/model/javascript", active: true },
-                { driver: "vwf/model/jiglib", linkedDrivers: ["vwf/model/jiglib/jiglib"], active: false },
-                { driver: "vwf/model/glge", linkedDrivers: ["vwf/model/glge/glge-compiled"], active: false },
-                { driver: "vwf/model/threejs", linkedDrivers: ["vwf/model/threejs/three"], active: false },
-                { driver: "vwf/model/scenejs", active: true },
-                { driver: "vwf/model/object", active: true },
-                { driver: "vwf/model/stage/log", active: true },
-                { driver: "vwf/kernel/view", active: true },
-                { driver: "vwf/view/document", active: true },
-                { driver: "vwf/view/editor", active: true },
-                { driver: "vwf/view/glge", active: false },
-                { driver: "vwf/view/threejs", active: false },
-                { driver: "vwf/utility", active: true },
-                { driver: "vwf/model/glge/glge-compiled", active: false },
-                { driver: "vwf/model/threejs/three", active: false },
-                { driver: "vwf/model/jiglib/jiglib", active: false },
-                { driver: "vwf/view/google-earth", active: false },
-                { driver: "vwf/view/cesium", active: false }
+                { library: "domReady", active: true },
+                { library: "vwf/configuration", active: true },
+                { library: "vwf/kernel/model", active: true },
+                { library: "vwf/model/javascript", active: true },
+                { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
+                { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], active: false },
+                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three"], active: false },
+                { library: "vwf/model/scenejs", active: true },
+                { library: "vwf/model/object", active: true },
+                { library: "vwf/model/stage/log", active: true },
+                { library: "vwf/kernel/view", active: true },
+                { library: "vwf/view/document", active: true },
+                { library: "vwf/view/editor", active: true },
+                { library: "vwf/view/glge", active: false },
+                { library: "vwf/view/threejs", active: false },
+                { library: "vwf/utility", active: true },
+                { library: "vwf/model/glge/glge-compiled", active: false },
+                { library: "vwf/model/threejs/three", active: false },
+                { library: "vwf/model/jiglib/jiglib", active: false },
+                { library: "vwf/view/google-earth", active: false },
+                { library: "vwf/view/cesium", active: false }
             ];
 
-            var modelDrivers = [
-                { driver: "vwf/model/javascript", active: true },
-                { driver: "vwf/model/jiglib", active: false },
-                { driver: "vwf/model/glge", active: false },
-                { driver: "vwf/model/threejs", active: false },
-                { driver: "vwf/model/object", active: true }
+            var modelLibraries = [
+                { library: "vwf/model/javascript", active: true },
+                { library: "vwf/model/jiglib", active: false },
+                { library: "vwf/model/glge", active: false },
+                { library: "vwf/model/threejs", active: false },
+                { library: "vwf/model/object", active: true }
             ];
-            var viewDrivers = [
-                { driver: "vwf/view/glge", parameters: "#vwf-root", active: false },
-                { driver: "vwf/view/threejs", parameters: "#vwf-root", active: false },
-                { driver: "vwf/view/document", active: true },
-                { driver: "vwf/view/editor", active: true },
-                { driver: "vwf/view/google-earth", active: false },
-                { driver: "vwf/view/cesium", active: false }
+            var viewLibraries = [
+                { library: "vwf/view/glge", parameters: "#vwf-root", active: false },
+                { library: "vwf/view/threejs", parameters: "#vwf-root", active: false },
+                { library: "vwf/view/document", active: true },
+                { library: "vwf/view/editor", active: true },
+                { library: "vwf/view/google-earth", active: false },
+                { library: "vwf/view/cesium", active: false }
             ];
-            mapDriverName(requireArray);
-            mapDriverName(modelDrivers);
-            mapDriverName(viewDrivers);
+            mapLibraryName(requireArray);
+            mapLibraryName(modelLibraries);
+            mapLibraryName(viewLibraries);
 
-            function mapDriverName(array) {
+            function mapLibraryName(array) {
                 for(var i=0;i<array.length;i++) {
-                    array[array[i].driver] = array[i];
+                    array[array[i].library] = array[i];
                 }
             }
 
-            function getActiveDrivers(driverList, includeParameters) {
-                var activeDriverList = [];
-                for(var i=0; i<driverList.length; i++) {
-                    if(driverList[i].active) {
+            function getActiveLibraries(libraryList, includeParameters) {
+                var activeLibraryList = [];
+                for(var i=0; i<libraryList.length; i++) {
+                    if(libraryList[i].active) {
                         if(includeParameters) {
-                            var activeDriver = {};
-                            activeDriver[driverList[i].driver] = driverList[i].parameters;
-                            activeDriverList.push(activeDriver);
+                            var activeLibrary = {};
+                            activeLibrary[libraryList[i].library] = libraryList[i].parameters;
+                            activeLibraryList.push(activeLibrary);
                         }
                         else {
-                            activeDriverList.push(driverList[i].driver);
+                            activeLibraryList.push(libraryList[i].library);
                         }
                     }
                 }
-                return activeDriverList;
+                return activeLibraryList;
             }
             // TODO Read config file
             
-            Object.keys(modelInitializers).forEach(function(driverName) {
-                if(requireArray[driverName] && modelDrivers[driverName]) {
-                    requireArray[driverName].active = true;
-                    modelDrivers[driverName].active = true;
-                    if(modelInitializers[driverName] && modelInitializers[driverName] != "") {
-                        modelDrivers[driverName].parameters = modelInitializers[driverName];
+            Object.keys(modelInitializers).forEach(function(libraryName) {
+                if(requireArray[libraryName] && modelLibraries[libraryName]) {
+                    requireArray[libraryName].active = true;
+                    modelLibraries[libraryName].active = true;
+                    if(modelInitializers[libraryName] && modelInitializers[libraryName] != "") {
+                        modelLibraries[libraryName].parameters = modelInitializers[libraryName];
                     }
-                    if(requireArray[driverName].linkedDrivers) {
-                        for(var i=0; i<requireArray[driverName].linkedDrivers.length; i++) {
-                            requireArray[requireArray[driverName].linkedDrivers[i]].active = true;
+                    if(requireArray[libraryName].linkedLibraries) {
+                        for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
+                            requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
                         }
                     }
                 }
             });
-            Object.keys(viewInitializers).forEach(function(driverName) {
-                if(requireArray[driverName] && viewDrivers[driverName]) {
-                    requireArray[driverName].active = true;
-                    viewDrivers[driverName].active = true;
-                    if(viewInitializers[driverName] && viewInitializers[driverName] != "") {
-                        viewDrivers[driverName].parameters = viewInitializers[driverName];
+            Object.keys(viewInitializers).forEach(function(libraryName) {
+                if(requireArray[libraryName] && viewLibraries[libraryName]) {
+                    requireArray[libraryName].active = true;
+                    viewLibraries[libraryName].active = true;
+                    if(viewInitializers[libraryName] && viewInitializers[libraryName] != "") {
+                        viewLibraries[libraryName].parameters = viewInitializers[libraryName];
                     }
-                    if(requireArray[driverName].linkedDrivers) {
-                        for(var i=0; i<requireArray[driverName].linkedDrivers.length; i++) {
-                            requireArray[requireArray[driverName].linkedDrivers[i]].active = true;
+                    if(requireArray[libraryName].linkedLibraries) {
+                        for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
+                            requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
                         }
                     }
                 }
             });
 
-            // Load default renderer if no other drivers specified
-            // TODO Add check if any drivers loaded from config file
+            // Load default renderer if no other librarys specified
+            // TODO Add check if any librarys loaded from config file
             if(Object.keys(modelInitializers).length == 0 && Object.keys(viewInitializers).length == 0) {
                 requireArray["vwf/model/glge"].active = true;
                 requireArray["vwf/view/glge"].active = true;
                 requireArray["vwf/model/glge/glge-compiled"].active = true;
-                modelDrivers["vwf/model/glge"].active = true;
-                viewDrivers["vwf/view/glge"].active = true;
+                modelLibraries["vwf/model/glge"].active = true;
+                viewLibraries["vwf/view/glge"].active = true;
             }
 
-            require( getActiveDrivers(requireArray, false), function( ready ) {
+            require( getActiveLibraries(requireArray, false), function( ready ) {
 
                 ready( function() {
 
@@ -346,7 +346,7 @@
                     // accepts three parameters: a world specification, model configuration parameters,
                     // and view configuration parameters.
 
-                    vwf.initialize(getActiveDrivers(modelDrivers, true), getActiveDrivers(viewDrivers, true));
+                    vwf.initialize(getActiveLibraries(modelLibraries, true), getActiveLibraries(viewLibraries, true));
 
                 } );
 
