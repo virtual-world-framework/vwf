@@ -280,7 +280,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     var viewArguments = undefined;
                 }
 
-                if ( ! viewName.match( "^vwf/view/" ) ) { // old way
+                if (! viewName.match( "^vwf/view/" ) ) { // old way
 
                     var view = this.modules[viewName];
 

@@ -11,10 +11,5 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-require File.dirname(__FILE__) + '/init.rb'
-
-map "/" do
-# Uncomment and add your Google Analytics ID to inject website analytics into your VWF server pages.
-# use Rack::GoogleAnalytics, :tracker => 'UA-xxxxxx-x'
-  run VWF
-end
+--- 
+extends: http://vwf.example.com/node.vwf
