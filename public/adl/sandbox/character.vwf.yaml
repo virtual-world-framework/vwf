@@ -248,10 +248,12 @@ scripts:
         
         
         var originalpos = [this.translation[0],this.translation[1],this.translation[2]];
-
-        
+        var originalpos2 = [this.translation[0],this.translation[1],this.translation[2]].slice(0);
+        //console.log("t:" + [this.translation[0],this.translation[1],this.translation[2]]);
         if(this.motionStack.length == 0)
             this.stand();
+        
+        var motionvec = null;
         for(var i=0; i < this.motionStack.length; i++)
         {
             this.cycleName =  this.motionStack[i];
@@ -267,28 +269,28 @@ scripts:
             }
              if(this.cycleName == 'straferight')
             {
-                 var left = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[-.03*updateFreqDivisor,0,0]);
-                 this.translation = GLGE.addVec3(left,this.translation);
+                 motionvec = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[-.03*updateFreqDivisor,0,0]);
+                 this.translation = GLGE.addVec3(motionvec,this.translation);
             }
             if(this.cycleName == 'strafeleft')
             {
-                var left = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[.03*updateFreqDivisor,0,0]);
-                 this.translation = GLGE.addVec3(left,this.translation);
+                 motionvec = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[.03*updateFreqDivisor,0,0]);
+                 this.translation = GLGE.addVec3(motionvec,this.translation);
             }
             if(this.cycleName == 'walk')
             {
-                    var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,-.06*updateFreqDivisor,0]);
-                    this.translation = GLGE.addVec3(forward,this.translation);
+                    motionvec = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,-.06*updateFreqDivisor,0]);
+                    this.translation = GLGE.addVec3(motionvec,this.translation);
             }
             if(this.cycleName == 'walkback')
             {
-                    var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,+.06*updateFreqDivisor,0]);
-                    this.translation = GLGE.addVec3(forward,this.translation);
+                    motionvec = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,+.06*updateFreqDivisor,0]);
+                    this.translation = GLGE.addVec3(motionvec,this.translation);
             }
             if(this.cycleName == 'run')
             {
-                    var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,-.140*updateFreqDivisor,0]);
-                    this.translation = GLGE.addVec3(forward,this.translation);
+                    motionvec = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,-.140*updateFreqDivisor,0]);
+                    this.translation = GLGE.addVec3(motionvec,this.translation);
             }
             if(this.cycleName == 'jump')
             {  
@@ -331,20 +333,20 @@ scripts:
         }
         
         
-        if(true)
-        {
-            if((GLGE.lengthVec3(this.originalvelocity) > .001 || this.inMotion('run') || this.inMotion('turnright') || this.inMotion('turnleft') || this.inMotion('walk') || this.inMotion('walkback')) && !this.inMotion('jump'))
+            //if the character is not completely still, and they're not jumpping, then check their motion vector 
+            //for intersetions, and prevent penetration through objects
+            if((GLGE.lengthVec3(this.originalvelocity) > .001 || motionvec) && !this.inMotion('jump') && this.activeCycle != this.cycles.stand)
             {
                 this.mesh.setPickable(false);
                 this.mesh.InvisibleToCPUPick = true;
-                var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,-1,0]);
-                
-                var intersectfront = findscene().CPUPick(GLGE.addVec3(this.translation,[0,0,1]),forward);
+                //var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,-1,0]);
+               
+                motionvec = GLGE.toUnitVec3(motionvec);
+                var testpos = GLGE.subVec3(this.translation,GLGE.scaleVec3(motionvec,-.15));
+                var intersectfront = findscene().CPUPick(GLGE.addVec3(testpos,[0,0,1]),motionvec);
                 if(intersectfront)
                 {
-                     
-                    
-                    if(intersectfront.distance < .15)
+                    if(intersectfront.distance < .3)
                     {
                       
                         var offset = GLGE.subVec3(originalpos,this.translation);
@@ -356,7 +358,7 @@ scripts:
                         if(Math.abs(norm[1]) < .05) norm[1] = 0;
                         if(Math.abs(norm[2]) < .05) norm[2] = 0;
                         
-                        var R = GLGE.scaleVec3(norm,.15 - intersectfront.distance); 
+                        var R = GLGE.scaleVec3(norm,.3 - intersectfront.distance); 
                         
                         this.translation = GLGE.addVec3(this.translation,R);
                     }
@@ -381,7 +383,9 @@ scripts:
                     }   
                     else if(zdiff > .33 )
                     {   
-                       this.translation = originalpos;
+                       //console.log("o:" + [originalpos2[0],originalpos2[1],originalpos2[2]]);
+                       this.translation = [originalpos2[0],originalpos2[1],originalpos2[2]];
+                       
                     }
                     else
                     {
@@ -391,6 +395,8 @@ scripts:
                 this.mesh.setPickable(true);
                 this.mesh.InvisibleToCPUPick = false;
             }
+            //if they are jumpping, and have been for more than a 10th of a second, start checking below them for intersections.
+            //10th of second is where they start falling?
             if(this.inMotion('jump') && this.jumpcounter > 10)
             {
                 this.mesh.setPickable(false);
@@ -401,6 +407,7 @@ scripts:
                     //console.log(zdiff);
                     var zdiff = standing - intersect.distance;
                    
+                    //in this case, they've jumpped onto something
                     if(zdiff > 0.17 )
                     {
                         
@@ -416,10 +423,11 @@ scripts:
                 this.mesh.InvisibleToCPUPick = false;
             }
             
-        }
+        
         this.originalvelocity[2] = 0;
-       // this.translation = GLGE.addVec3(this.translation,GLGE.scaleVec3(this.originalvelocity,.97));
+        // keep track of how fast they were moving at this frame, so we can accelerate properly
         this.originalvelocity = GLGE.subVec3(this.translation,originalpos);
+        //permenantly clamp to z=0 plane
         if(this.translation[2] < 0)
             this.translation = [this.translation[0],this.translation[1],0];
         //every 2 seconds, update the position and rotation that tend to run out of sync
@@ -581,8 +589,12 @@ scripts:
                 this.removeMotion('walkback');    
             if(!e.keysDown.D)
                 {this.removeMotion('straferight'); this.removeMotion('strafeleft');}
+            if(!e.keysDown.C)
+                {this.removeMotion('turnright'); this.removeMotion('turnleft');}    
             if(!e.keysDown.A)
                 {this.removeMotion('strafeleft');this.removeMotion('straferight');}
+            if(!e.keysDown.Z)
+                {this.removeMotion('turnleft'); this.removeMotion('turnright');}        
             if(!e.keysDown.W && this.inMotion('run'))
                 this.cancelRun();       
             
@@ -610,6 +622,15 @@ scripts:
                { this.addMotion('strafeleft');    this.activeCycle = this.cycles.strafeleft;   }
             if(e.keysDown.A && this.inMotion('walkback'))
                { this.addMotion('straferight');   this.activeCycle = this.cycles.straferight;   }
+               
+             if(e.keysDown.C && !this.inMotion('walkback'))
+               { this.addMotion('turnright');   }
+            if(e.keysDown.C && this.inMotion('walkback'))
+               { this.addMotion('turnleft');    }
+            if(e.keysDown.Z && !this.inMotion('walkback'))
+               { this.addMotion('turnleft');      }
+            if(e.keysDown.Z && this.inMotion('walkback'))
+               { this.addMotion('turnright');    }
             if(e.mods.shift && e.keysDown.W)
                 this.run();    
          }

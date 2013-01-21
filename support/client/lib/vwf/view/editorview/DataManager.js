@@ -116,7 +116,7 @@ function DataManager()
 	{
 		this.rawdata.profiles[profile.Username] = profile;
 		profile.inventory = this.getInventory(profile.Username);
-		$.post("http://10.100.21.71/VWFDataManager.svc/Profile?UID="+profile.Username, JSON.stringify(profile),function(){});
+		$.post(PersistanceServer + "/VWFDataManager.svc/Profile?UID="+profile.Username, JSON.stringify(profile),function(){});
 		this.saveData();
 	}
 	this.getInventory = function(name)

@@ -161,7 +161,7 @@ scripts:
              }
              while(currentMaterial.layers.length > newMaterial.layers.length)
                 currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
- 
+            this.mesh.batchDirty = true;   
     }
     function findviewnode(id)
     {
