@@ -16,5 +16,6 @@ require File.expand_path File.join File.dirname( __FILE__ ), "init"
 map "/" do
 # Uncomment and add your Google Analytics ID to inject website analytics into your VWF server pages.
 # use Rack::GoogleAnalytics, :tracker => 'UA-xxxxxx-x'
+use Rack::Deflater
   run VWF
 end

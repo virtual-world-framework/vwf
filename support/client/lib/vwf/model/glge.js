@@ -577,13 +577,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                             var translation = goog.vec.Vec3.create();
                             goog.vec.Mat4.getColumn( transform, 3, translation );
-                            glgeObject.setLoc( translation[0], translation[1], translation[2] );
+                            //glgeObject.setLoc( translation[0], translation[1], translation[2] );
 
                             // Set the full matrix.
 
                             glgeObject.setStaticMatrix(
                                 goog.vec.Mat4.transpose( transform, goog.vec.Mat4.create() )
                             );
+							glgeObject.parent.updateMatrix();
+							glgeObject.updateMatrix();
+							
 							if(glgeObject instanceof GLGE.Light)
 							{
 								var sceneNode = this.state.scenes[ this.state.sceneRootID ];

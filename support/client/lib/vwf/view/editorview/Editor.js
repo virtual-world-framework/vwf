@@ -260,6 +260,14 @@ function Editor()
 				}
 			}
 	}
+	this.mouseleave = function(e)
+	{
+		if(e.toElement != $('#ContextMenu')[0] && $(e.toElement).parent()[0] != $('#ContextMenu')[0] && !$(e.toElement).hasClass('glyph'))
+		{	
+			$('#ContextMenu').hide();
+			$('#ContextMenu').css('z-index','-1');
+		}
+	}
 	var mouseup = function(e){ 		
 		
 		
@@ -587,7 +595,7 @@ function Editor()
 		}
 		if(CoordSystem == LocalCoords)
 		{	
-			var childmat = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getRotMatrix();
+			var childmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getModelMatrix());
 			Axis = GLGE.mulMat4Vec3(GLGE.inverseMat4(childmat),Axis);
 		}
 		//Get a quaternion for the input matrix
@@ -599,24 +607,37 @@ function Editor()
 		
 		
 	}.bind(this);
+	var TransformOffset =function(gizoffset,id)
+	{
+			
+			//_Editor.findviewnode(id).parent.updateMatrix();
+			var parentmat = _Editor.findviewnode(id).parent.getModelMatrix();
+			parentmat = GLGE.inverseMat4(parentmat);
+			parentmat[3] = 0;
+			parentmat[7] = 0;
+			parentmat[11] = 0;
+		//return gizoffset;
+		return GLGE.mulMat4Vec3(parentmat,gizoffset);
+	}.bind(this)
 	var GetRotationTransform = function(RotationMatrix, Axis, Radians,rotationMatrix)
 	{
 		if(CoordSystem == WorldCoords)
 		{	
 		
-			var childmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getModelMatrix());
+			_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.updateMatrix();
 			var parentmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.getModelMatrix());
-			Axis = GLGE.mulMat4Vec3(GLGE.inverseMat4(parentmat),Axis);
+			Axis = GLGE.mulMat4Vec3(parentmat,Axis);
 			//Axis = GLGE.mulMat4Vec3(parentmat,Axis);
 		}
 		if(CoordSystem == LocalCoords)
 		{	
-			var childmat = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getRotMatrix();
+			_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).updateMatrix();
+			var childmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).staticMatrix);
 			Axis = GLGE.mulMat4Vec3(GLGE.inverseMat4(childmat),Axis);
 		}
 		//Get a quaternion for the input matrix
-		var OriginalQuat = goog.vec.Quaternion.fromRotationMatrix4( RotationMatrix,Quat());
 		var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
+		
 		var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
 		return NewMatrix;
 	}.bind(this);
@@ -656,17 +677,7 @@ function Editor()
 		SetLocation(MoveGizmo,pos);
 	
 	}
-	var TransformOffset =function(gizoffset,id)
-	{
-		
-			var childmat = _Editor.findviewnode(id).parent.getModelMatrix();
-			childmat = GLGE.inverseMat4(childmat);
-			childmat[3] = 0;
-			childmat[7] = 0;
-			childmat[11] = 0;
-		
-		return gizoffset;
-	}.bind(this)
+	
 	var GetLocation = function(object)
 	{
 		var vector =[0,0,0];
@@ -732,9 +743,10 @@ function Editor()
 		
 		return GLGE.transposeMat4(rmat);
 	}
+	this.waitingForSet = [];
 	var mousemove = function(e)
 	{
-		
+		if(this.waitingForSet.length > 0) return; 
 		MouseMoved = true;
 		
 		if(!MoveGizmo || MoveGizmo==null)
@@ -776,9 +788,7 @@ function Editor()
 			var ray = GetWorldPickRay(e);
 
 			
-			var IntersectPlaneNormalX = CurrentX;
-			var IntersectPlaneNormalY = CurrentY;
-			var IntersectPlaneNormalZ = CurrentZ;
+			
 			
 			var rotmat2 = GetRotationMatrix(findviewnode(SelectedVWFNodes[0].id).getLocalMatrix());//GLGE.angleAxis(aa[3] * 0.0174532925,[aa[0],aa[1],aa[2]]);
 			var invRot2 = GLGE.inverseMat4(rotmat2);
@@ -794,13 +804,13 @@ function Editor()
 			//}
 
 			
-			var dxy = intersectLinePlane(ray,campos,gizpos,IntersectPlaneNormalZ);
+			var dxy = intersectLinePlane(ray,campos,gizpos,CurrentZ);
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
 			
-			var dxz = intersectLinePlane(ray,campos,gizpos,IntersectPlaneNormalY);
+			var dxz = intersectLinePlane(ray,campos,gizpos,CurrentY);
 			var newintersectxz = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxz));
 			
-			var dyz = intersectLinePlane(ray,campos,gizpos,IntersectPlaneNormalX);
+			var dyz = intersectLinePlane(ray,campos,gizpos,CurrentX);
 			var newintersectyz = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dyz));
 			
 			var relintersectxy = GLGE.subVec3(newintersectxy,oldintersectxy);
@@ -894,23 +904,23 @@ function Editor()
 				var lenxy = GLGE.lengthVec3(relintersectxy);
 				if(lenxy)
 				{
-					relintersectxy = GLGE.scaleVec3(relintersectxy,1.0/lenxy);
-					relintersectxy = GLGE.mulMat4Vec3(mat,relintersectxy);
-					relintersectxy = GLGE.scaleVec3(relintersectxy,lenxy);
+			//		relintersectxy = GLGE.scaleVec3(relintersectxy,1.0/lenxy);
+			//		relintersectxy = GLGE.mulMat4Vec3(mat,relintersectxy);
+			//		relintersectxy = GLGE.scaleVec3(relintersectxy,lenxy);
 				}
 				
 				var lenxz = GLGE.lengthVec3(relintersectxz);
 				if(lenxz){
-					relintersectxz = GLGE.scaleVec3(relintersectxz,1.0/lenxz);
-					relintersectxz = GLGE.mulMat4Vec3(mat,relintersectxz);
-					relintersectxz = GLGE.scaleVec3(relintersectxz,lenxz);
+			//		relintersectxz = GLGE.scaleVec3(relintersectxz,1.0/lenxz);
+			//		relintersectxz = GLGE.mulMat4Vec3(mat,relintersectxz);
+			//		relintersectxz = GLGE.scaleVec3(relintersectxz,lenxz);
 				}
 				
 				var lenyz = GLGE.lengthVec3(relintersectyz);
 				if(lenyz){
-					relintersectyz = GLGE.scaleVec3(relintersectyz,1.0/lenyz);
-					relintersectyz = GLGE.mulMat4Vec3(mat,relintersectyz);
-					relintersectyz = GLGE.scaleVec3(relintersectyz,lenyz);
+			//		relintersectyz = GLGE.scaleVec3(relintersectyz,1.0/lenyz);
+			//		relintersectyz = GLGE.mulMat4Vec3(mat,relintersectyz);
+			//		relintersectyz = GLGE.scaleVec3(relintersectyz,lenyz);
 				}
 				
 			}
@@ -1051,31 +1061,38 @@ function Editor()
 					if(document.AxisSelected == 3 || document.AxisSelected == 16)
 					{
 						wasRotated = true;
-						findviewnode(SelectedVWFNodes[s].id).setRotMatrix(RotateAroundAxis(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldX,relrotx));
+						//findviewnode(SelectedVWFNodes[s].id).setRotMatrix(RotateAroundAxis(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldX,relrotx));
 						rotationTransform = GetRotationTransform(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldX,relrotx);
 					}
 					if(document.AxisSelected == 4 || document.AxisSelected == 17)
 					{
 						wasRotated = true;
-						findviewnode(SelectedVWFNodes[s].id).setRotMatrix(RotateAroundAxis(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldY,relroty));
+						//findviewnode(SelectedVWFNodes[s].id).setRotMatrix(RotateAroundAxis(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldY,relroty));
 						rotationTransform = GetRotationTransform(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldY,relroty);						
 					}
 					if(document.AxisSelected == 5 || document.AxisSelected == 18)
 					{
 						wasRotated = true;
-						findviewnode(SelectedVWFNodes[s].id).setRotMatrix(RotateAroundAxis(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldZ,relrotz));
+						//findviewnode(SelectedVWFNodes[s].id).setRotMatrix(RotateAroundAxis(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldZ,relrotz));
 						rotationTransform = GetRotationTransform(findviewnode(SelectedVWFNodes[s].id).getRotMatrix(),WorldZ,relrotz);
 					}
 					
 					if(wasMoved)
 					{
+						
 						var gizoffset = GLGE.subVec3([MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()],originalGizmoPos);
 						gizoffset = TransformOffset(gizoffset,SelectedVWFNodes[s].id);
 						
-						var targetLoc = lastpos[s];
-						var newloc = GLGE.addVec3(targetLoc,gizoffset);
+						
+						var newloc = GLGE.addVec3(lastpos[s],gizoffset);
 						lastpos[s] = newloc;
-						var success = this.setProperty(SelectedVWFNodes[s].id,'translation',newloc);	
+						var transform = vwf.getProperty(SelectedVWFNodes[s].id,'transform');
+						transform[12] += gizoffset[0];
+						transform[13] += gizoffset[1];
+						transform[14] += gizoffset[2];
+						
+						var success = this.setProperty(SelectedVWFNodes[s].id,'transform',transform);
+						if(success) this.waitingForSet.push(SelectedVWFNodes[s].id);
 						if(!success) SetLocation(MoveGizmo,originalGizmoPos);
 					}
 					
@@ -1101,7 +1118,9 @@ function Editor()
 							
 							var newloc = GLGE.addVec3(originalGizmoPos,gizoffset);
 							lastpos[s] = newloc;
-							var success = this.setProperty(SelectedVWFNodes[s].id,'translation',newloc);	
+							this.waitingForSet.push(SelectedVWFNodes[s].id);
+							var success = this.setProperty(SelectedVWFNodes[s].id,'translation',newloc);
+							if(success) this.waitingForSet.push(SelectedVWFNodes[s].id);							
 						}
 						lastscale[s] = tempscale;
 						//findviewnode(SelectedVWFNode.id).setScale(tempscale[0],tempscale[1],tempscale[2]);
@@ -1110,7 +1129,23 @@ function Editor()
 					{		
 						
 						var angleaxis = RotationToVWFAngleAxis(findviewnode(SelectedVWFNodes[s].id).getRotMatrix());
-						var success = this.setProperty(SelectedVWFNodes[s].id,'rotation',[angleaxis.axis[0],angleaxis.axis[1],angleaxis.axis[2],angleaxis.angle]);
+						var transform = vwf.getProperty(SelectedVWFNodes[s].id,'transform');
+						
+						var x = transform[12];
+						var y = transform[13];
+						var z = transform[14];
+						
+						transform[12] = 0;
+						transform[13] = 0;
+						transform[14] = 0;
+						
+						transform = GLGE.mulMat4(transform,rotationTransform);
+						
+						transform[12] = x;
+						transform[13] = y;
+						transform[14] = z;
+						var success = this.setProperty(SelectedVWFNodes[s].id,'transform',transform);
+						if(success) this.waitingForSet.push(SelectedVWFNodes[s].id);
 						if(SelectedVWFNodes.length > 1)
 						{
 							
@@ -1122,6 +1157,7 @@ function Editor()
 							var newloc = GLGE.addVec3(originalGizmoPos,gizoffset);
 							lastpos[s] = newloc;
 							var success = this.setProperty(SelectedVWFNodes[s].id,'translation',newloc);	
+							if(success) this.waitingForSet.push(SelectedVWFNodes[s].id);
 						}
 					}
 					//triggerSelectionTransformed(SelectedVWFNode);
@@ -1460,11 +1496,14 @@ function Editor()
 			
 			for(var s =1; s < SelectedVWFNodes.length; s++)
 			{
+				this.findviewnode(SelectedVWFNodes[s].id).updateMatrix();
 				var nextchildmat = this.findviewnode(SelectedVWFNodes[s].id).getModelMatrix();
 				gizpos[0] += nextchildmat[3];
 				gizpos[1] += nextchildmat[7];
 				gizpos[2] += nextchildmat[11];
-				lastpos[s] = [nextchildmat[3],nextchildmat[7],nextchildmat[11]];
+				
+				var trans = vwf.getProperty(SelectedVWFNodes[s].id,'transform');
+				lastpos[s] = [trans[12],trans[13],trans[14]];
 				lastscale[s] = vwf.getProperty(SelectedVWFNodes[s].id,'scale');
 			}
 			
@@ -1597,7 +1636,8 @@ function Editor()
 				if(findviewnode(SelectedVWFNodes[s].id))
 				{
 					findviewnode(SelectedVWFNodes[s].id).setTransformMode(GLGE.P_MATRIX);
-					findviewnode(SelectedVWFNodes[s].id).setRotMatrix(GetRotationMatrix(findviewnode(SelectedVWFNodes[s].id).getLocalMatrix()));
+					//findviewnode(SelectedVWFNodes[s].id).setRotMatrix(GetRotationMatrix(findviewnode(SelectedVWFNodes[s].id).getLocalMatrix()));
+					//findviewnode(SelectedVWFNodes[s].id).updateMatrix
 				}
 			}
 			updateBoundsAndGizmoLoc();
@@ -1624,7 +1664,7 @@ function Editor()
 			
 			_Editor.updateGizmoLocation();
 			_Editor.updateGizmoSize();
-			_Editor.updateGizmoOrientation(true);
+			_Editor.updateGizmoOrientation(false);
 			_Editor.updateBounds();
 			$('#StatusSelectedID').html(SelectedVWFNodes[0].id);
 			

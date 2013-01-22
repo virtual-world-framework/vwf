@@ -113,6 +113,7 @@ scripts:
     
       var newdiv = document.createElement('img');
       $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
+      $(newdiv).addClass('glyph');
       newdiv.style.position = 'fixed';
       newdiv.id = "Player " + this.name + 'icon';
       //newdiv.innerHTML = "" + this.name;
@@ -183,4 +184,3 @@ scripts:
       
          
     }   
-	  

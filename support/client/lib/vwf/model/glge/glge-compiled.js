@@ -3709,8 +3709,8 @@ GLGE.Placeable.prototype.updateMatrix=function(){
 		}
 	}
 	var o=obj=this;
-	obj.fireEvent("matrixUpdate",{obj:o});
-	if(obj=obj.parent) obj.fireEvent("childMatrixUpdate",{obj:o});
+	//obj.fireEvent("matrixUpdate",{obj:o});
+	//if(obj=obj.parent) obj.fireEvent("childMatrixUpdate",{obj:o});
 }
 /**
 * Gets the model matrix to transform the model within the world

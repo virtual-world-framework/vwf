@@ -307,7 +307,19 @@ scripts:
       
         $('#index-vwf').mousedown(function(e){this.localpointerDown(e);}.bind(this));
         $('#index-vwf').mouseup(function(e){this.localpointerUp(e);}.bind(this));
-        $('#index-vwf').mouseleave(function(e){this.localpointerUp(e);}.bind(this));
+        $('#index-vwf').mouseleave(function(e)
+        {
+            if($(e.toElement).hasClass('glyph'))
+            {
+            
+            }
+            else
+            {
+            
+                this.localpointerUp(e);
+            }
+            
+        }.bind(this));
         $(document).mousemove(function(e){this.localpointerMove(e);}.bind(this));
 
        this.updateCallbacks = [];
@@ -1092,6 +1104,7 @@ scripts:
     
       var newdiv = document.createElement('img');
       $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
+      $(newdiv).addClass('glyph');
       newdiv.style.position = 'fixed';
       newdiv.id = "Player " + this.name + 'icon';
       //newdiv.innerHTML = "" + this.name;

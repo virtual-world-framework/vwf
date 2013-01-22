@@ -92,6 +92,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			{
 				_Editor.updateBoundsAndGizmoLoc();
 			}
+			if(window._Editor && _Editor.isSelected(nodeID) && propertyName == 'transform')
+			{
+				_Editor.waitingForSet.splice(_Editor.waitingForSet.indexOf(nodeID),1);
+			}
         },
         
         createdMethod: function( nodeID, methodName, methodParameters, methodBody ){
@@ -130,7 +134,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		
 		$('#vwf-root').mouseup(function(e){_Editor.mouseup(e)});
 		$('#vwf-root').click(function(e){_Editor.click(e)});
-		//$('#vwf-root').mouseleave(function(e){e.mouseleave = true; _Editor.mouseup(e)});
+		$('#index-vwf').mouseleave(function(e){_Editor.mouseleave(e)});
 		$('#vwf-root').mousemove(function(e){_Editor.mousemove(e)});
 		$('#index-vwf').attr('tabindex',0);
 		$('#index-vwf').on('touchstart',function(e){
