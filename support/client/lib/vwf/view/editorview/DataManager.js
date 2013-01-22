@@ -223,10 +223,21 @@ function DataManager()
 	}
 	this.GetNode = function(id)
 	{
+	
 		var node = vwf.getNode(id);
+		if(node.properties)
+		{
+			
+			for(var i in node.properties)
+			{
+				node.properties[i] = vwf.getProperty(id,i);
+				console.log(i);
+			}
+		
+		}
 		if(node.children)
 		{
-			for(var i =0; i < node.children.length; i++)
+			for(var i in node.children)
 			{
 				node.children[i] = this.GetNode(node.children[i].id);
 			}
