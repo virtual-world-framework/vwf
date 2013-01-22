@@ -1980,20 +1980,17 @@ function Editor()
 		
 		
 		var childmat = this.findviewnode(this.GetSelectedVWFNode().id).getModelMatrix();
-		var childpos = [childmat[3],childmat[7],childmat[11]];
-		
 		var parentmat = this.findviewnode(parentnode.id).getModelMatrix();
-		var parentpos = [parentmat[3],parentmat[7],parentmat[11]];
+		var invparentmat = GLGE.inverseMat4(parentmat);
+		childmat = GLGE.mulMat4(invparentmat,childmat);
 		
-		var childoffset = GLGE.subVec3(childpos,parentpos);
-		node.properties.translation = childoffset;
-		if(node.properties.transform)
-		{
-			node.properties.transform[12] = childoffset[0];
-			node.properties.transform[13] = childoffset[1];
-			node.properties.transform[14] = childoffset[2];
-			
-		}
+		delete node.properties.translation;
+		delete node.properties.rotation;
+		delete node.properties.quaternion;
+		delete node.properties.scale;
+		
+		node.properties.transform = GLGE.transposeMat4(childmat);
+	
 		
 		this.DeleteSelection();
 		this.createChild(parentnode.id,GUID(),node);
@@ -2006,15 +2003,13 @@ function Editor()
 		var node = _DataManager.getCleanNodePrototype(this.GetSelectedVWFNode().id);
 
 		var childmat = this.findviewnode(this.GetSelectedVWFNode().id).getModelMatrix();
-		var childpos = [childmat[3],childmat[7],childmat[11]];
-		node.properties.translation = childpos;
-		if(node.properties.transform)
-		{
-			node.properties.transform[12] = childpos[0];
-			node.properties.transform[13] = childpos[1];
-			node.properties.transform[14] = childpos[2];
-			
-		}
+
+		delete node.properties.translation;
+		delete node.properties.rotation;
+		delete node.properties.quaternion;
+		delete node.properties.scale;
+		
+		node.properties.transform = GLGE.transposeMat4(childmat);
 		
 		this.DeleteSelection();
 		_Editor.SelectOnNextCreate();
