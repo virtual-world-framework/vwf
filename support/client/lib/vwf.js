@@ -228,8 +228,7 @@
                 application = args.shift();
             }
 
-            var modelInitializers = args.shift() || {};
-            var viewInitializers = args.shift() || {};
+            var userLibraries = args.shift() || {};
 
             var requireArray = [
                 { library: "domReady", active: true },
@@ -255,24 +254,26 @@
                 { library: "vwf/view/cesium", active: false }
             ];
 
-            var modelLibraries = [
-                { library: "vwf/model/javascript", active: true },
-                { library: "vwf/model/jiglib", active: false },
-                { library: "vwf/model/glge", active: false },
-                { library: "vwf/model/threejs", active: false },
-                { library: "vwf/model/object", active: true }
-            ];
-            var viewLibraries = [
-                { library: "vwf/view/glge", parameters: "#vwf-root", active: false },
-                { library: "vwf/view/threejs", parameters: "#vwf-root", active: false },
-                { library: "vwf/view/document", active: true },
-                { library: "vwf/view/editor", active: true },
-                { library: "vwf/view/google-earth", active: false },
-                { library: "vwf/view/cesium", active: false }
-            ];
+            var initializers = {
+                model: [
+                    { library: "vwf/model/javascript", active: true },
+                    { library: "vwf/model/jiglib", active: false },
+                    { library: "vwf/model/glge", active: false },
+                    { library: "vwf/model/threejs", active: false },
+                    { library: "vwf/model/object", active: true }
+                ],
+                view: [
+                    { library: "vwf/view/glge", parameters: "#vwf-root", active: false },
+                    { library: "vwf/view/threejs", parameters: "#vwf-root", active: false },
+                    { library: "vwf/view/document", active: true },
+                    { library: "vwf/view/editor", active: true },
+                    { library: "vwf/view/google-earth", active: false },
+                    { library: "vwf/view/cesium", active: false }
+                ]
+            };
             mapLibraryName(requireArray);
-            mapLibraryName(modelLibraries);
-            mapLibraryName(viewLibraries);
+            mapLibraryName(initializers["model"]);
+            mapLibraryName(initializers["view"]);
 
             function mapLibraryName(array) {
                 for(var i=0;i<array.length;i++) {
@@ -296,60 +297,61 @@
                 }
                 return activeLibraryList;
             }
-            // TODO Read config file
-            
-            Object.keys(modelInitializers).forEach(function(libraryName) {
-                if(requireArray[libraryName] && modelLibraries[libraryName]) {
-                    requireArray[libraryName].active = true;
-                    modelLibraries[libraryName].active = true;
-                    if(modelInitializers[libraryName] && modelInitializers[libraryName] != "") {
-                        modelLibraries[libraryName].parameters = modelInitializers[libraryName];
-                    }
-                    if(requireArray[libraryName].linkedLibraries) {
-                        for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
-                            requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
+
+            $.getJSON("admin/config", function(configLibraries) {
+                if(configLibraries && typeof configLibraries == "object") {
+                    Object.keys(configLibraries).forEach(function(libraryType) {
+                        if(!userLibraries[libraryType]) {
+                            userLibraries[libraryType] = {};
                         }
-                    }
+                        Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
+                            if(!userLibraries[libraryType][libraryName] || configLibraries[libraryType][libraryName]) {
+                                userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
+                            }
+                        });
+                    });
                 }
-            });
-            Object.keys(viewInitializers).forEach(function(libraryName) {
-                if(requireArray[libraryName] && viewLibraries[libraryName]) {
-                    requireArray[libraryName].active = true;
-                    viewLibraries[libraryName].active = true;
-                    if(viewInitializers[libraryName] && viewInitializers[libraryName] != "") {
-                        viewLibraries[libraryName].parameters = viewInitializers[libraryName];
+
+                Object.keys(userLibraries).forEach(function(libraryType) {
+                    if(initializers[libraryType]) {
+                        Object.keys(userLibraries[libraryType]).forEach(function(libraryName) {
+                            requireArray[libraryName].active = true;
+                            initializers[libraryType][libraryName].active = true;
+                            if(userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "") {
+                                initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
+                            }
+                            if(requireArray[libraryName].linkedLibraries) {
+                                for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
+                                    requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
+                                }
+                            }
+                        });
                     }
-                    if(requireArray[libraryName].linkedLibraries) {
-                        for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
-                            requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
-                        }
-                    }
+                });
+
+                // Load default renderer if no other librarys specified
+                if(Object.keys(userLibraries["model"]).length == 0 && Object.keys(userLibraries["view"]).length == 0) {
+                    requireArray["vwf/model/glge"].active = true;
+                    requireArray["vwf/view/glge"].active = true;
+                    requireArray["vwf/model/glge/glge-compiled"].active = true;
+                    initializers["model"]["vwf/model/glge"].active = true;
+                    initializers["view"]["vwf/view/glge"].active = true;
                 }
-            });
 
-            // Load default renderer if no other librarys specified
-            // TODO Add check if any librarys loaded from config file
-            if(Object.keys(modelInitializers).length == 0 && Object.keys(viewInitializers).length == 0) {
-                requireArray["vwf/model/glge"].active = true;
-                requireArray["vwf/view/glge"].active = true;
-                requireArray["vwf/model/glge/glge-compiled"].active = true;
-                modelLibraries["vwf/model/glge"].active = true;
-                viewLibraries["vwf/view/glge"].active = true;
-            }
+                require( getActiveLibraries(requireArray, false), function( ready ) {
 
-            require( getActiveLibraries(requireArray, false), function( ready ) {
+                    ready( function() {
 
-                ready( function() {
+                        // With the scripts loaded, we must initialize the framework. vwf.initialize()
+                        // accepts three parameters: a world specification, model configuration parameters,
+                        // and view configuration parameters.
 
-                    // With the scripts loaded, we must initialize the framework. vwf.initialize()
-                    // accepts three parameters: a world specification, model configuration parameters,
-                    // and view configuration parameters.
+                        vwf.initialize(getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true));
 
-                    vwf.initialize(getActiveLibraries(modelLibraries, true), getActiveLibraries(viewLibraries, true));
+                    } );
 
                 } );
-
-            } );
+            });
         }
 
         // -- initialize ---------------------------------------------------------------------------

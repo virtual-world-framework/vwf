@@ -72,8 +72,7 @@
         // Model libraries are specified as a query parameter and view libraries as a hash fragment.
         var queryString = window.location.search.substring(1);
         var hashString = window.location.hash.substring(2);
-        var modelLibraries = {};
-        var viewLibraries = {};
+        var userLibraries = {model:{}, view:{}};
         var googleEarth = false;
         var match;
         var application;
@@ -87,14 +86,14 @@
                 application = parameters;
             }
             else {
-                modelLibraries["vwf/model/" + key] = (parameters && parameters != "") ? parameters : undefined;
+                userLibraries["model"]["vwf/model/" + key] = (parameters && parameters != "") ? parameters : undefined;
             }
         }
 
         while(match = regex.exec(hashString)) {
             var key = $.encoder.canonicalize(match[1]);
             var parameters = $.encoder.canonicalize(match[2]);
-            viewLibraries["vwf/view/" + key] = (parameters && parameters != "") ? parameters : undefined;
+            userLibraries["view"]["vwf/view/" + key] = (parameters && parameters != "") ? parameters : undefined;
             if(key == "google-earth") {
                 googleEarth = true;
             }
@@ -105,7 +104,7 @@
     <script type="text/javascript">googleEarth && google.load( "earth", "1" )</script>
     
     <script type="text/javascript">
-        vwf.loadConfiguration(application, modelLibraries, viewLibraries);
+        vwf.loadConfiguration(application, userLibraries);
     </script>
 
     <!-- This is the common view implementation and an example view that summarizes the          -->
