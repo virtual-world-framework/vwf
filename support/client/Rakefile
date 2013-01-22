@@ -107,24 +107,37 @@ task :documentation do |task|
 
             # Convert /// comments to /** */ comments for jsdoc.
 
-            FileList.new( PATTERNS ).sort.each do |path|
+            sh "ruby", "-p", "-i.bak", "-e", <<-RUBY.strip.gsub( %r{ +}, " " ), * FileList.new( PATTERNS ).sort
 
-                sh <<-SH.strip.gsub %r{ +}, " "
-                    ruby -p -i.bak -e ' \
-                        case ( state ||= 0 ) + ( %r{^\s*///} ? 1 : 0 ) \
-                            when 1 ; \
-                                last = $_ ; sub %r{///}, "/**" ; \
-                                state = 2 \
-                            when 3 ; \
-                                last = $_ ; sub %r{///}, " * " \
-                            when 2 ;\
-                                puts last.sub %r{///.*}, " */" ; \
-                                state = 0 \
-                        end \
-                    ' '#{path}'
-                SH
+                if %r{^\\s*///\\s*(?:@([\\w]+)(?:\\s+(.*))?)?} ; \
+                    name = $2 if $1 == "name" ; \
+                    namespace = true if $1 == "namespace" ; \
+                end ; \
+                \
+                case ( state ||= 0 ) + ( %r{^\\s*///} ? 1 : 0 ) \
+                    when 1 ; \
+                        last = $_ ; \
+                        sub %r{///}, "/**" ; \
+                        name = namespace = nil ; \
+                        state = 2 \
+                    when 3 ; \
+                        last = $_ ; \
+                        sub %r{///}, " * " \
+                    when 2 ; \
+                        puts last.sub %r{///.*}, " */" ; \
+                        state = 0 \
+                end ; \
+                \
+                if state == 0 && namespace && name ; \
+                    if %r{(?:^\\s*define.*|\\(\\s*)function} ; \
+                        sub %r{function\s*}, "/** @namespace */ function \#{name}" ; \
+                    end ; \
+                    if ! %r{^\\s*(?://.*)?$} ; \
+                        name = namespace = nil \
+                    end \
+                end
 
-            end
+            RUBY
 
             # Run jsdoc on the translated source.
 

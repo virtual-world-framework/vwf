@@ -2876,7 +2876,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// A component may be specified as the URI of a resource containing a descriptor (string),
         /// a descriptor (object), or the ID of a previously-created node (primitive).
         /// 
-        /// @name vwf-componentIsURI
+        /// @name vwf-componentIsDescriptor
         /// @function
         /// 
         /// @param {String|Object} candidate
@@ -2892,7 +2892,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// A component may be specified as the URI of a resource containing a descriptor (string),
         /// a descriptor (object), or the ID of a previously-created node (primitive).
         /// 
-        /// @name vwf-componentIsURI
+        /// @name vwf-componentIsID
         /// @function
         /// 
         /// @param {String|Object} candidate

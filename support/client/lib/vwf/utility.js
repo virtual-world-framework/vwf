@@ -28,16 +28,13 @@ define( [ "module",
     coordinates
 ) {
 
-    return {
+    return /** @lends vwf.utility.prototype */ {
 
         // -- transform ----------------------------------------------------------------------------
 
         /// Recursively transform an arbitrary object using the provided transformation function.
         /// Containers are duplicated where necessary so that the original object and any contained
         /// objects are not modified. Unchanged objects will be referenced directly in the result.
-        /// 
-        /// @name vwf.utility.transform
-        /// @function
         /// 
         /// @param {Object} object
         ///   The object to transform. Object and Array contents are recursively transformed using
@@ -114,16 +111,13 @@ define( [ "module",
         /// @name vwf.utility.transforms
         /// @namespace
 
-        transforms: {
+        transforms: /** @lends vwf.utility.transforms.prototype */ {
 
             // -- transit --------------------------------------------------------------------------
 
             /// A vwf.utility.transform transformation function to convert an object for proper JSON
             /// serialization. Array-like objects are converted to actual Arrays. All other objects
             /// are unchanged. Invoke as: utility.transform( object, utility.transforms.transit ).
-            /// 
-            /// @name vwf.utility.transforms.transit
-            /// @function
             /// 
             /// @param {Object} object
             ///   The object being transformed or one of its descendants.
@@ -167,9 +161,6 @@ define( [ "module",
             /// that their keys are in alphabetic order. Other objects are unchanged. Invoke as:
             /// utility.transform( object, utility.transforms.hash ).
             /// 
-            /// @name vwf.utility.transforms.hash
-            /// @function
-            /// 
             /// @param {Object} object
             ///   The object being transformed or one of its descendants.
             /// 
@@ -210,9 +201,6 @@ define( [ "module",
 
         /// Format the stack trace for readability.
         /// 
-        /// @name vwf.utility.exceptionMessage
-        /// @function
-        /// 
         /// @param {Error} error
         ///   An Error object, generally provided by a catch statement.
         /// 
@@ -248,9 +236,6 @@ define( [ "module",
         // -- resolveURI ---------------------------------------------------------------------------
 
         /// Convert a relative URI to an absolute URI.
-        /// 
-        /// @name vwf.utility.resolveURI
-        /// @function
         /// 
         /// @param {String} uri
         ///   The URI to resolve. If uri is relative, it will be interpreted with respect to

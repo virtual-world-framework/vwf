@@ -20,14 +20,11 @@
 
 define( [ "module" ], function( module ) {
 
-    return {
+    return /** @lends vwf.utility.xpath.prototype */{
 
         // -- resolve --------------------------------------------------------------------------
 
         /// Resolve an XPath expression, using a callback function to interpret each step.
-        /// 
-        /// @name vwf.utility.xpath.resolve
-        /// @function
         /// 
         /// @param {String|String[]|Object[]} xpath
         /// @param {ID} rootID
@@ -90,9 +87,6 @@ define( [ "module" ], function( module ) {
 
         /// Parse an XPath expression into a series of steps.
         /// 
-        /// @name vwf.utility.xpath.parse
-        /// @function
-        /// 
         /// @param {String|String[]|Object[]} xpath
         /// 
         /// @returns {Object[]|undefined}
@@ -147,9 +141,6 @@ define( [ "module" ], function( module ) {
         // -- parseStep ------------------------------------------------------------------------
 
         /// Parse an XPath step expression.
-        /// 
-        /// @name vwf.utility.xpath.parseStep
-        /// @function
         /// 
         /// @param {String|Object} xpath
         /// 
@@ -307,9 +298,6 @@ define( [ "module" ], function( module ) {
 
         /// Parse an XPath step predicate.
         /// 
-        /// @name vwf.utility.xpath.parsePredicate
-        /// @function
-        /// 
         /// @param {String|Object} xpath
         /// 
         /// @returns {Object[]|undefined}
@@ -333,9 +321,6 @@ define( [ "module" ], function( module ) {
 
         /// Parse an XPath step separator.
         /// 
-        /// @name vwf.utility.xpath.parseSeparator
-        /// @function
-        /// 
         /// @param {String|Object} xpath
         /// 
         /// @returns {Boolean|undefined}
@@ -355,21 +340,50 @@ define( [ "module" ], function( module ) {
 
         },
 
+        // -- quoteName --------------------------------------------------------------------------
+
+        /// Apply quotation marks around a name and escape internal quotation marks and escape
+        /// characters.
+        /// 
+        /// @param {String} unquoted_name
+        /// 
+        /// @returns {String}
+
+        quoteName: function( unquoted_name ) {
+            return '"' + unquoted_name.replace( /(["\\])/g, "\\$1" ) + '"';
+        },
+
+        // -- unquoteName ------------------------------------------------------------------------
+
+        /// Remove the enclosing quotation marks and unescape internal quotation marks and escape
+        /// characters of a quoted name.
+        /// 
+        /// @param {String} quoted_name
+        /// 
+        /// @returns {String}
+
+        unquoteName: function( quoted_name ) {
+            if ( quoted_name[0] == "'" ) {
+              return quoted_name.slice( 1, -1 ).replace( /\\(['\\])/g, "$1" );
+            } else if ( quoted_name[0] == '"' ) {
+              return quoted_name.slice( 1, -1 ).replace( /\\(["\\])/g, "$1" );
+            }
+        },
+
         // -- regex ----------------------------------------------------------------------------
 
         /// Regexes to crack the XPath string.
         /// 
         /// @name vwf.utility.xpath.regex
-        /// @field
+        /// @namespace
 
-        regex: ( function() {
+        regex: ( function() /** @lends vwf.utility.xpath.regex.prototype */ {
 
             var name = "[A-Za-z_][A-Za-z_0-9.-]*",              // XPath QName: http://www.w3.org/TR/xpath20/#prod-xpath-QName
                 singleQuotedName = "'(?:[^'\\\\]|\\'|\\\\)+'",  // Single-quoted QName (VWF extension)
                 doubleQuotedName = '"(?:[^"\\\\]|\\"|\\\\)+"',  // Double-quoted QName (VWF extension)
                 wildcard = "\\*";                               // XPath Wildcard: http://www.w3.org/TR/xpath20/#prod-xpath-Wildcard
 
-            /// @name vwf.utility.xpath.regex.step
             /// @field
 
             var step =                                          // XPath StepExpr: http://www.w3.org/TR/xpath20/#prod-xpath-StepExpr
@@ -441,7 +455,6 @@ define( [ "module" ], function( module ) {
 
                 ")";
 
-            /// @name vwf.utility.xpath.regex.predicate
             /// @field
 
             var predicate =                                     // XPath Predicate: http://www.w3.org/TR/xpath20/#prod-xpath-Predicate
@@ -452,56 +465,29 @@ define( [ "module" ], function( module ) {
                     ")" +
                 "\\]";
 
-            /// @name vwf.utility.xpath.regex.separator
             /// @field
 
             var separator = "/";
 
             var regexes = {
+
+                /// @field
+
                 step: new RegExp( "^" + step ),
+
+                /// @field
+
                 predicate: new RegExp( "^" + predicate ),
+
+                /// @field
+
                 separator: new RegExp( "^" + separator ),
+
             };
 
             return regexes;
 
         } )(),
-
-        // -- quoteName --------------------------------------------------------------------------
-
-        /// Apply quotation marks around a name and escape internal quotation marks and escape
-        /// characters.
-        /// 
-        /// @name vwf.utility.xpath.quoteName
-        /// @function
-        /// 
-        /// @param {String} unquoted_name
-        /// 
-        /// @returns {String}
-
-        quoteName: function( unquoted_name ) {
-            return '"' + unquoted_name.replace( /(["\\])/g, "\\$1" ) + '"';
-        },
-
-        // -- unquoteName ------------------------------------------------------------------------
-
-        /// Remove the enclosing quotation marks and unescape internal quotation marks and escape
-        /// characters of a quoted name.
-        /// 
-        /// @name vwf.utility.xpath.unquoteName
-        /// @function
-        /// 
-        /// @param {String} quoted_name
-        /// 
-        /// @returns {String}
-
-        unquoteName: function( quoted_name ) {
-            if ( quoted_name[0] == "'" ) {
-              return quoted_name.slice( 1, -1 ).replace( /\\(['\\])/g, "$1" );
-            } else if ( quoted_name[0] == '"' ) {
-              return quoted_name.slice( 1, -1 ).replace( /\\(["\\])/g, "$1" );
-            }
-        },
 
     };
 

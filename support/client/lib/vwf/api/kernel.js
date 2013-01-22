@@ -23,24 +23,27 @@ define( {
     // TODO: hashState
 
     /// Create a node from a component specification. Construction may require loading data from
-    /// multiple remote documents. This function returns before construction is complete. A
-    /// callback is invoked once the node has fully loaded. 
-    /// A simple node consists of a set of properties, methods and events, but a node may
-    /// specialize a prototype component and may also contain multiple child nodes, any of which
-    /// may specialize a prototype component and contain child nodes, etc. So components cover a
-    /// vast range of complexity. The application definition for the overall simulation is a
-    /// single component instance.
-    /// A node is a component instance--a single, anonymous specialization of its component.
-    /// Nodes specialize components in the same way that any component may specialize a prototype
+    /// multiple remote documents. This function returns before construction is complete. A callback
+    /// is invoked once the node has fully loaded.
+    /// 
+    /// A simple node consists of a set of properties, methods and events, but a node may specialize
+    /// a prototype component and may also contain multiple child nodes, any of which may specialize
+    /// a prototype component and contain child nodes, etc. So components cover a vast range of
+    /// complexity. The application definition for the overall simulation is a single component
+    /// instance.
+    /// 
+    /// A node is a component instance--a single, anonymous specialization of its component. Nodes
+    /// specialize components in the same way that any component may specialize a prototype
     /// component. The prototype component is made available as a base, then new or modified
     /// properties, methods, events, child nodes and scripts are attached to modify the base
     /// implemenation.
+    /// 
     /// To create a node, we first make the prototoype available by loading it (if it has not
     /// already been loaded). This is a recursive call to createNode() with the prototype
     /// specification. Then we add new, and modify existing, properties, methods, and events
     /// according to the component specification. Then we load an add any children, again
-    /// recursively calling createNode() for each. Finally, we attach any new scripts and invoke
-    /// an initialization function.
+    /// recursively calling createNode() for each. Finally, we attach any new scripts and invoke an
+    /// initialization function.
     /// 
     /// @name vwf.api.kernel#createNode
     /// @function
@@ -52,7 +55,9 @@ define( {
 
     createNode: [ /* nodeComponent, callback( nodeID ) */ ],
 
-    /// Delete node will delete a node specified by the id given on each model and view.
+    /// Delete a node.
+    /// 
+    /// The node and all of its descendants will be removed from the application.
     /// 
     /// @name vwf.api.kernel#deleteNode
     /// @function

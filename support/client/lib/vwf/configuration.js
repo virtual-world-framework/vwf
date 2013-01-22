@@ -21,15 +21,14 @@
 
 define( function() {
 
-    var configuration = Object.create( Object.prototype, {
+    var configuration = Object.create( Object.prototype, /** @lends vwf.configuration.prototype */ {
 
-        // -- factory ------------------------------------------------------------------------------
-
-        /// Return the factory default settings. The factory settings are constant, and this
-        /// property returns a copy to prevent modifications. Factory settings are paritioned by
-        /// environment with default settings that apply to all environments and additional settings
-        /// for specific environments, typically "production", "development", and "testing". For
-        /// example:
+        /// The factory default settings.
+        /// 
+        /// The factory settings are constant, and this property returns a copy to prevent
+        /// modifications. Factory settings are paritioned by environment with default settings that
+        /// apply to all environments and additional settings for specific environments, typically
+        /// "production", "development", and "testing". For example:
         ///
         ///   {
         ///     default: { environment: "development", alpha: 1, beta: 2, gamma: 3 },
@@ -38,7 +37,6 @@ define( function() {
         ///     testing: { },
         ///   }
         /// 
-        /// @name vwf.configuration#factory
         /// @field
 
         factory: {
@@ -60,7 +58,6 @@ define( function() {
         ///     delta: false,
         ///   }
         /// 
-        /// @name vwf.configuration#instance
         /// @field
 
         instance: {
@@ -78,12 +75,12 @@ define( function() {
 
         // -- active -------------------------------------------------------------------------------
 
-        /// Get the computed configuration for the environment. The active configuration is the
-        /// result of a cascade of the factory default settings, factory settings for the active
-        /// environment, and the instance settings. Changes to the configuration update this object
-        /// in place without invalidating references to it.
+        /// The computed configuration for the environment.
         /// 
-        /// @name vwf.configuration#active
+        /// The active configuration is the result of a cascade of the factory default settings,
+        /// factory settings for the active environment, and the instance settings. Changes to the
+        /// configuration update this object in place without invalidating references to it.
+        /// 
         /// @field
 
         active: {
@@ -96,10 +93,10 @@ define( function() {
 
         // -- environment --------------------------------------------------------------------------
 
-        /// Get the name of the active envionment. environment returns the same value as
-        /// active.environment.
+        /// The name of the active envionment.
         /// 
-        /// @name vwf.configuration#environment
+        /// environment returns the same value as active.environment.
+        /// 
         /// @field
 
         environment: {
@@ -114,7 +111,6 @@ define( function() {
 
         /// Register a notification function to be called when the configuration in active changes.
         /// 
-        /// @name vwf.configuration#changed
         /// @function
         /// 
         /// @param {Function} callback
@@ -133,15 +129,9 @@ define( function() {
 
     } );
 
-    // == Private functions ========================================================================
-
-    // -- update -----------------------------------------------------------------------------------
+    // == Private ==================================================================================
 
     /// Update the cascade.
-    /// 
-    /// @name vwf.configuration#update
-    /// @function
-    /// @private
 
     function update() {
 
@@ -167,19 +157,13 @@ define( function() {
 
     }
 
-    // == Private variables ========================================================================
-
     // -- factory ----------------------------------------------------------------------------------
 
-    /// Factory default configuration.
-    /// 
-    /// @name vwf.configuration#factory
-    /// @field
-    /// @private
+    /// Factory default configurations.
 
-    var factory = {
+    var factory = /** @lends vwf.configuration-factory */ {
 
-        // Default configuration for all environments.
+        /// Default configuration for all environments.
 
         default: {
             "environment": require.toUrl( "dummy" ).indexOf( "../lib/" ) == 0 ? "testing" : "development",
@@ -189,12 +173,12 @@ define( function() {
             "humanize-ids": false,      // append recognizable strings to node IDs
         },
 
-        // Changes for production environments.
+        /// Changes for production environments.
 
         production: {
         },
 
-        // Changes for development environments.
+        /// Changes for development environments.
 
         development: {
             "log-level": "info",
@@ -202,7 +186,7 @@ define( function() {
             "humanize-ids": true,
         },
 
-        // Changes for testing environments.
+        /// Changes for testing environments.
 
         testing: {
             "random-seed": window.location, // make the random sequence repeatable
@@ -214,9 +198,7 @@ define( function() {
 
     /// Configuration overrides for the current instance.
     /// 
-    /// @name vwf.configuration#instance
     /// @field
-    /// @private
 
     var instance = {};
 
@@ -224,9 +206,7 @@ define( function() {
 
     /// The computed configuration.
     /// 
-    /// @name vwf.configuration#active
     /// @field
-    /// @private
 
     var active = {};
 
@@ -234,9 +214,7 @@ define( function() {
 
     /// Name of the active environment. Equivalent to active.environment.
     /// 
-    /// @name vwf.configuration#environment
     /// @field
-    /// @private
 
     var environment;
 
@@ -244,9 +222,7 @@ define( function() {
 
     /// Update callbacks.
     /// 
-    /// @name vwf.configuration#callbacks
     /// @field
-    /// @private
 
     var callbacks = [];
 
