@@ -1589,7 +1589,9 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             var root = path.substring(1, path.length - 18);
             var inst = path.substring(path.length-17, path.length-1);
 
-            if(filename == '') filename = inst ;
+            if(filename == '') filename = inst;
+
+            if(root.indexOf('.vwf') != -1) root = root.substring(0, root.lastIndexOf('/'));
 
             xhr.open("POST", "/"+root, true);
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -1610,10 +1612,11 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         // Redirect until setState ID conflict is resolved
         var path = window.location.pathname;
-        var root = path.substring(1, path.length - 17);
+        var root = path.substring(1, path.length - 18);
         var inst = path.substring(path.length-17, path.length-1);
 
-        window.location.pathname = root + filename.substring(0, filename.lastIndexOf('.')) + '/' + inst;
+        if(root.indexOf('.vwf') != -1) root = root.substring(0, root.lastIndexOf('/'));
+        window.location.pathname = root + '/' + filename.substring(0, filename.lastIndexOf('.')) + '/' + inst;
 
         // $.get(filename,function(data,status){
         //     vwf.setState(data);
