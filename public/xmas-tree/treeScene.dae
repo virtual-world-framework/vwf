@@ -7,7 +7,7 @@
         <created>2011-12-08T21:53:55Z</created>
         <modified>2011-12-08T21:53:55Z</modified>
         <unit meter="0.02539999969303608" name="inch" />
-        <up_axis>Y_UP</up_axis>
+        <up_axis>Z</up_axis>
     </asset>
     <library_visual_scenes>
         <visual_scene id="ID1">

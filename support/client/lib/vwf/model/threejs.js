@@ -212,6 +212,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 sceneNode.camera.threeJScameras[sceneNode.camera.defaultCamID] = cam;
                 sceneNode.camera.ID= sceneNode.camera.defaultCamID;
                 
+				var ambient = new THREE.AmbientLight();
+				ambient.color.r = .5;
+				ambient.color.g = .5;
+				ambient.color.b = .5;
+				sceneNode.threeScene.add(ambient);
                 sceneNode.threeScene.add(cam);
                 
                 ///////////////////////////////////////////////
@@ -672,6 +677,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                                 parent.remove(threeObject);
                                 var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
+								cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
                                 //CopyProperties(threeObject,cam);
                                 cam.far = threeObject.far;
                                 cam.near = threeObject.near;
@@ -1124,7 +1130,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
         cam.matrixAutoUpdate = false;
         cam.up = new THREE.Vector3(0,0,1);
-		cam.matrix.elements = transformMatrix([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+		cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
         cam.updateMatrixWorld(true);    
         return cam;
     }

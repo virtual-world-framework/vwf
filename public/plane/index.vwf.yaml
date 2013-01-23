@@ -58,7 +58,7 @@ children:
       lightType: "directional"
       distance: 2000
       intensity: 0.9
-      color: [255,255,255]
+      color: [ 255, 255, 255]
       translation: [ 0, -100, 0 ]
       rotation: [ 0, 0, 1, 90 ]
 scripts:
