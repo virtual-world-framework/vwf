@@ -17,7 +17,7 @@ var sceneNode = vwf.find("","/")[0];
 var canvas = $('#' + sceneNode).get(0);
 var keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 var buttonStates = {left: false, middle: false, right: false};
-var lastUpdateTime = (+new Date);
+var lastUpdateTime = 0;
 var input = { 
     futureActive: function() {
         return ( this.lookActive || this.moveActive || this.button1Down || this.button2Down || this.keysAreDown() ); 
@@ -50,18 +50,18 @@ var laserImages = ["images/blue_bolt.png", "images/green_bolt.png", "images/hunt
     "images/rabbit_bolt.png", "images/red_bolt.png", "images/rogue_bolt.png"];
 
 vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs,
-	childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
-	if(childName == playerName) {
-		playerNode = childID;
-	}
-	else if(childName == (playerName + "Camera")) {
-		var glgeCamera = vwf.views[0].state.nodes[ childID ].glgeObject;
-		glgeCamera.setAspect(canvas.width / canvas.height);
-		vwf.views[0].state.cameraInUse = glgeCamera;
-		vwf.views[0].state.cameraInUseID = childID;
-		vwf.views[0].state.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
-		vwf.views[0].state.scenes[sceneNode].camera.ID = childID;
-	}
+    childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+    if(childName == playerName) {
+        playerNode = childID;
+    }
+    else if(childName == (playerName + "Camera")) {
+        var glgeCamera = vwf.views[0].state.nodes[ childID ].glgeObject;
+        glgeCamera.setAspect(canvas.width / canvas.height);
+        vwf.views[0].state.cameraInUse = glgeCamera;
+        vwf.views[0].state.cameraInUseID = childID;
+        vwf.views[0].state.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
+        vwf.views[0].state.scenes[sceneNode].camera.ID = childID;
+    }
 }
 
 canvas.onmousedown = function(e) {
@@ -127,7 +127,7 @@ canvas.onmousemove = function(e) {
 canvas.onmousewheel = undefined;
 
 window.onkeydown = function(e) {
-	if(playerNode) {
+    if(playerNode) {
         var active = input.futureActive();
         var validKey = false;
         var keyAlreadyDown = false;
@@ -157,14 +157,14 @@ window.onkeydown = function(e) {
             input.keyInfo = keyStates;
             input.lastInputTime = vwf_view.kernel.time();
             if(!active) {
-                updateModel((+new Date));
+                updateModel();
             }
-		}
-	}
+        }
+    }
 }
 
 window.onkeyup = function(e) {
-	if(playerNode) {
+    if(playerNode) {
         var active = input.futureActive();
         var validKey = false;
         switch (e.keyCode) {
@@ -188,10 +188,10 @@ window.onkeyup = function(e) {
         input.keyInfo = keyStates;
         input.lastInputTime = vwf_view.kernel.time();
         if(!active) {
-            updateModel((+new Date));
+            updateModel();
         }
         delete keyStates.keysUp[e.keyCode];
-	}
+    }
 }
 
 $('#chatInput').keydown(function(e) {
@@ -263,6 +263,7 @@ vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
 }
 
 function updateModel(time) {
+    time = time || 0;
     if(time - lastUpdateTime > 100) {
         vwf_view.kernel.callMethod(playerNode, "update", [input]);
         input.lastInputTime = vwf_view.kernel.time();
