@@ -1547,6 +1547,9 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             var state = vwf.getState();
 
+            var timestamp = state["queue"].time;
+            timestamp = Math.round(timestamp * 1000);
+
             // Remove queue component of state
             delete state["queue"];
 
@@ -1585,6 +1588,8 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 )
             );
 
+            json = $.encoder.encodeForURL(json);
+
             var path = window.location.pathname;
             var root = path.substring(1, path.length - 18);
             var inst = path.substring(path.length-17, path.length-1);
@@ -1595,7 +1600,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
             xhr.open("POST", "/"+root, true);
             xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xhr.send("filename="+filename+"&root="+root+"&inst="+inst+"&jsonState="+json);
+            xhr.send("root="+root+"&filename="+filename+"&inst="+inst+"&timestamp="+timestamp+"&jsonState="+json);
         }
 
         else
