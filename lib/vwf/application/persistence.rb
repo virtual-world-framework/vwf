@@ -26,8 +26,13 @@ class VWF::Application::Persistence < Sinatra::Base
 
     pass unless settings.development? # only in development mode
 
-    File.open('public/'+params["root"]+'/'+params["filename"]+'.vwf.json', 'w') {|f| f.write(params["jsonState"]) }
-    File.open('public/'+params["root"]+'/'+params["filename"]+'_'+params["inst"]+'_'+params["timestamp"]+'.vwf.json', 'w') {|f| f.write(params["jsonState"]) }
+    f = File.open('public/'+params["root"]+'/'+params["filename"]+'.vwf.json', 'w')
+    f.puts params["jsonState"]
+    f.close
+
+    f = File.open('public/'+params["root"]+'/'+params["filename"]+'_'+params["inst"]+'_'+params["timestamp"]+'.vwf.json', 'w')
+    f.puts params["jsonState"]
+    f.close
 
   end
 
