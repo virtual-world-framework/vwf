@@ -1594,6 +1594,17 @@ function Editor()
 				return false;
 			return true;	
 	}.bind(this);
+	this.SelectObjectPublic = function(VWFNodeid)
+	{
+		if(SelectMode=='TempPick')
+		{
+				if(this.TempPickCallback)
+					this.TempPickCallback(vwf.getNode(VWFNodeid));
+		}else
+		{
+			this.SelectObject(VWFNodeid,this.PickMod);
+		}
+	}
 	var SelectObject = function(VWFNode,selectmod)
 	{
 		
@@ -1617,6 +1628,15 @@ function Editor()
 		if(VWFNode)
 		for(var i =0; i < VWFNode.length; i++)
 		{
+			try{
+				if(vwf.getProperty(vwf.parent(VWFNode[i].id),'type') == 'Group')
+				{
+					VWFNode[i] = vwf.getNode(vwf.parent(VWFNode[i].id));
+				}
+			}catch(e)
+			{
+			
+			}
 			if(!selectmod)
 			{
 				if(VWFNode[i])
@@ -2025,6 +2045,70 @@ function Editor()
 		}
 		SetSelectMode('TempPick');
 		this.TempPickCallback = this.PickParentCallback;
+	}
+	this.GroupSelection = function()
+	{
+		debugger;
+		var parentmat = GLGE.identMatrix();
+		
+		
+		var parent = this.findviewnode(this.GetSelectedVWFNode().id).parent;
+		var pos;
+		for(var i=0; i<this.getSelectionCount(); i++)
+		{
+			if(parent != this.findviewnode(this.GetSelectedVWFNode(i).id).parent)
+			{
+				_Notifier.alert('all objects must have the same parent to be grouped');
+				return;
+			}
+			var childmat = this.findviewnode(this.GetSelectedVWFNode(i).id).getModelMatrix();
+			if(!pos)
+				pos = [childmat[3],childmat[7],childmat[11]];
+			else
+				pos = GLGE.addVec3(pos,[childmat[3],childmat[7],childmat[11]]);
+		}
+		
+		pos = GLGE.scaleVec3(pos,1/this.getSelectionCount());
+		
+		parentmat[3] = pos[0];
+		parentmat[7] = pos[1];
+		parentmat[11] = pos[2];
+		
+		var proto = {
+			extends: 'sandboxGroup.vwf',
+			properties: {
+				type: 'Group',
+				owner: document.PlayerNumber,
+				transform : GLGE.transposeMat4(parentmat)
+			},
+			children:
+			{
+			
+			
+			}
+		};
+		
+		for(var i=0; i<this.getSelectionCount(); i++)
+		{
+			var node = _DataManager.getCleanNodePrototype(this.GetSelectedVWFNode(i).id);
+			var childmat = this.findviewnode(this.GetSelectedVWFNode(i).id).getModelMatrix();
+			var invparentmat = GLGE.inverseMat4(parentmat);
+			childmat = GLGE.mulMat4(invparentmat,childmat);
+			
+			delete node.properties.translation;
+			delete node.properties.rotation;
+			delete node.properties.quaternion;
+			delete node.properties.scale;
+			
+			node.properties.transform = GLGE.transposeMat4(childmat);
+			proto.children[GUID()]=node;
+		}
+		
+		this.DeleteSelection();
+		vwf_view.kernel.createChild('index-vwf',GUID(),proto);
+		_Editor.SelectOnNextCreate();
+		SetSelectMode('Pick');
+	
 	}
 	var findviewnode = function(id)
 	{

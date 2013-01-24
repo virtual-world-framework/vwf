@@ -378,15 +378,31 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     var parent = obj.parent;
                     if ( parent ) {
 						
+						var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+						
+								
 						//this node was created in whole by the VWF, so it can be deleted
 						if(! node.glgeObject.initializedFromAsset)
 						{
+							
+							if(node.glgeObject.getObjects)
+							{
+								var objs = node.glgeObject.getObjects();
+								
+								for(var i=0 ; i<objs.length;i++)
+								{
+									if(objs[i].isStatic == true)
+									{
+										
+										sceneNode.glgeScene.deBatch(objs[i]);
+									}
+								}
+							}
 							
 							if ( parent.removeChild ) parent.removeChild( obj );
 							node.glgeObject = undefined;
 							if(obj instanceof GLGE.Light)
 							{
-								var sceneNode = this.state.scenes[ this.state.sceneRootID ];
 								sceneNode.glgeScene.updateAllPrograms();
 							}
 							//delete obj;

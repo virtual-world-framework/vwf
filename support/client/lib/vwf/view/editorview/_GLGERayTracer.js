@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
 // add cpu side ray casting to GLGE. Faster then GPU based picking in many cases
-// espically where there are few polys. 
 
 //Max number of faces a octree node may have before subdivding
 var OCTMaxFaces = 30;

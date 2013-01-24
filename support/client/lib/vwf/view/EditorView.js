@@ -425,6 +425,14 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			}
 		});
 		
+		$('#MenuGroup').click(function(e){
+			_Editor.GroupSelection();
+		});
+		
+		$('#MenuUngroup').click(function(e){
+			_Editor.UngroupSelection();
+		});
+		
 		$('#MenuViewToggleAO').click(function(e){
 			if(_Editor.findscene().getFilter2d())
 			{

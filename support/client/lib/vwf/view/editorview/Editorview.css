@@ -84,8 +84,25 @@
 	}
 	.textureChoice
 	{
-		width:50px;
-		cursor:pointer;
+		width: 50px;
+		cursor: pointer;
+		height: 50px;
+		text-align: center;
+		vertical-align: middle;
+		line-height: 50px;
+		font-size: 0.85em;
+		font-weight: bold;
+		display: inline-block;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		background-image: url(../../../vwf/view/editorview/images/icons/grid.jpg);
+	}
+	.textureChoice:hover
+	{
+		background: #4040A0;
+		border: 1px inset blue;
+		width: 48px;
+		height: 48px;
 	}
 	.TransformEditorInput
 	{

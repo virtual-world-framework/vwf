@@ -231,7 +231,7 @@ function DataManager()
 			for(var i in node.properties)
 			{
 				node.properties[i] = vwf.getProperty(id,i);
-				console.log(i);
+				
 			}
 		
 		}

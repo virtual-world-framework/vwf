@@ -11,78 +11,15 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 ---
-extends: http://vwf.example.com/light.vwf
+extends: http://vwf.example.com/node3.vwf
 methods:
 properties:
-  lightType: "directional"
-  brightness: 1
-  constantAttenuation: 1
-  type: "Light"
-  EditorData:
-    brightness:
-      displayname: brightness
-      property: brightness
-      type: slider
-      min: 0
-      max: 5
-      step: .01
-    spotConeAngle:
-      displayname: "Spot Cone Angle"
-      property: spotCosCutOff
-      type: slider
-      min: 0
-      max: 3.14
-      step: .01 
-    constantAttenuation:
-      displayname: "constant Attenuation"
-      property: constantAttenuation
-      type: slider
-      min: 0
-      max: 300
-      step: .1
-    linearAttenuation:
-      displayname: "linear Attenuation"
-      property: linearAttenuation
-      type: slider
-      min: 0
-      max: 3
-      step: .0001 
-    quadraticAttenuation:
-      displayname: "quadratic Attenuation"
-      property: quadraticAttenuation
-      type: slider
-      min: .01
-      max: 3
-      step: .0001
-    spotExponent:
-      displayname: "Spot Exponent"
-      property: spotExponent
-      type: slider
-      min: 0
-      max: 30
-      step: .01       
-    color:
-      displayname: "Diffuse Color"
-      property: color
-      type: color
-    ZZZLightType:
-      displayname: "Light Type"
-      property: lightType
-      type: choice
-      labels: 
-        - Spot
-        - Point
-        - Directional
-      values:
-        - spot
-        - point
-        - directional       
-scripts:
--  |
+scripts: 
+- |  
     this.initialize = function()
     {
           
-          if(this.id == 'SandboxLight-vwf') return;
+          if(this.id == 'sandboxGroup-vwf') return;
           this.prerendercallback = this.placeNameTag.bind(this);
           $(document).bind('prerender',this.prerendercallback);
           this.createNameTag();
@@ -98,7 +35,7 @@ scripts:
       newdiv.style.position = 'fixed';
       newdiv.id = "Player " + this.name + 'icon';
       //newdiv.innerHTML = "" + this.name;
-      $(newdiv).attr('src','../vwf/view/editorview/images/icons/light_icon.png');
+      $(newdiv).attr('src','../vwf/view/editorview/images/icons/inventory.png');
       newdiv.style.left = '0px';
       newdiv.style.top = '0px';
       
@@ -107,7 +44,7 @@ scripts:
       //$(newdiv).mousedown(_Editor.mousedown);
       //$(newdiv).mouseup(_Editor.mouseup);
       //$(newdiv).mousemove(_Editor.mousemove);
-      $(newdiv).click(function(e){$('index-vwf').focus(); if(_Editor.GetSelectMode() != "None") _Editor.SelectObject(this.id)}.bind(this));
+      $(newdiv).click(function(e){$('index-vwf').focus(); if(_Editor.GetSelectMode() != "None") _Editor.SelectObjectPublic(this.id)}.bind(this));
       this.nametag = newdiv;
                  
     }
@@ -125,7 +62,8 @@ scripts:
       var wh = parseInt(h.substr(0,h.length-2));
       var ww = parseInt(w.substr(0,w.length-2));
       var div = this.nametag;
-      var pos = this.translation;
+      var trans = _Editor.findviewnode(this.id).getModelMatrix();
+      var pos = [trans[3],trans[7],trans[11]];
       pos = [pos[0],pos[1],pos[2],1];
          
       

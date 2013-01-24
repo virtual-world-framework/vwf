@@ -161,7 +161,7 @@ scripts:
              }
              while(currentMaterial.layers.length > newMaterial.layers.length)
                 currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
-            this.mesh.batchDirty = true;   
+            this.GetMesh().batchDirty = true;   
     }
     function findviewnode(id)
     {
@@ -266,7 +266,7 @@ scripts:
         {
             return vwf.callMethod(this.children[i].id,'updateStack');
         }
-        if(this.GetMesh().getMesh())
+        if(this.GetMesh() && this.GetMesh().getMesh())
             this.GetMesh().getMesh().dirtyMesh = true;
     }
     this.GetBounds = function()

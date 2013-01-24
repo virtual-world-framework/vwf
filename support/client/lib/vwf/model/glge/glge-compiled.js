@@ -8252,7 +8252,7 @@ GLGE.Texture.prototype.setSrc=function(url){
 	if(url.indexOf('@')!=-1)
 		this.image.crossOrigin = "use-credentials";
 	else
-		this.image.crossOrigin = 'anonymous';
+		this.image.crossOrigin = '';
 	var texture=this;
 	this.image.onload = function(){
 		texture.state=1;
@@ -9734,6 +9734,7 @@ GLGE.Object.prototype.meshBlendFactor=0;
 GLGE.Object.prototype.noCastShadows=null;
 GLGE.Object.prototype.noDepthMask=false;
 GLGE.Object.prototype.shadowAlpha=true;
+GLGE.Object.prototype.reBatchCount = 0;
 GLGE.Object.prototype.blending=[ "SRC_ALPHA","ONE_MINUS_SRC_ALPHA"];
 
 
@@ -13881,9 +13882,22 @@ GLGE.Scene.prototype.render=function(gl){
 	{
 		if(!this.isBatched(renderObjects[i].object))
 			nonBatched.push(renderObjects[i]);
+
+		renderObjects[i].object.reBatchCount = Math.max(0,renderObjects[i].object.reBatchCount -.1);	
 		if(renderObjects[i].object.batchDirty == true && this.staticBatchingEnabled && renderObjects[i].object.isStatic == true)	
 		{
-			this.batch(renderObjects[i].object);
+			renderObjects[i].object.reBatchCount = renderObjects[i].object.reBatchCount + 1;
+			
+			if(renderObjects[i].object.reBatchCount > 15.0)
+			{
+				console.log('Object ' + renderObjects[i].object.uid +' is changing frequently. It will be temporarily marked as non-static and removed from batching');
+				this.deBatch(renderObjects[i].object);
+				renderObjects[i].object.isStatic = false;
+			}else
+			{	
+				
+				this.batch(renderObjects[i].object);
+			}
 		}		
 	}
 	this.updateBatches();
@@ -14035,6 +14049,7 @@ GLGE.Statistics = function()
 	this.displayDiv = null;
 	this.FrameTimes = [];
 	this.cullTime = 0;
+	this.batchTime = 0;
 	this.startCull = function()
 	{	
 		this.cullTime = new Date();
@@ -14043,6 +14058,16 @@ GLGE.Statistics = function()
 	{
 		this.cullTime = (new Date()) - this.cullTime;
 	}
+	
+	this.startBatching = function()
+	{	
+		this.batchTime = new Date();
+	}
+	this.stopBatching = function()
+	{
+		this.batchTime = (new Date()) - this.batchTime;
+	}
+	
 	this.traverseTime = 0;
 	this.startTraverse = function()
 	{	
@@ -14062,6 +14087,7 @@ GLGE.Statistics = function()
 									'<tr><td>FPS</td>          <td id="GLGEStatFPS" >60</td></tr>'+
 									'<tr><td>FrameTime</td>    <td id="GLGEStatLastFrame">60</td></tr>'+
 									'<tr><td>TraverseTime</td>    <td id="GLGEStatTraverseTime">60</td></tr>'+
+									'<tr><td>Build Batches</td>    <td id="GLGEStatBatchTime">60</td></tr>'+
 									'<tr><td>CullTime</td>    <td id="GLGEStatCullTime">60</td></tr>'+
 									'<tr><td>DrawCalls</td>    <td id="GLGEStatDrawCalls">60</td></tr>'+
 									'<tr><td>MaterialCalls</td><td id="GLGEStatMaterialsCalls">60</td></tr>'+
@@ -14103,6 +14129,8 @@ GLGE.Statistics = function()
 		$('#GLGEStatVerticies').html(this.Verticies);
 		$('#GLGEStatTraverseTime').html(this.traverseTime + " ms");
 		$('#GLGEStatCullTime').html(this.cullTime + " ms");
+		$('#GLGEStatBatchTime').html(this.batchTime + " ms");
+		
 	}
 }
 GLGE.Stats = new GLGE.Statistics();
@@ -14327,13 +14355,14 @@ GLGE.Scene.prototype.deBatch = function(obj)
 			this.renderBatches.splice(index,1);
 		}else
 		{
-			oldbatch.buildRenderObject();
+			oldbatch.needsRebuild = true;
 		}
 	}
 	obj.batchDirty=false;
 }
 GLGE.Scene.prototype.updateBatches =function()
 {
+	GLGE.Stats.startBatching();
 	if(!this.renderBatches) return;
 		for(var j = 0; j < this.renderBatches.length; j++)
 		{
@@ -14344,6 +14373,7 @@ GLGE.Scene.prototype.updateBatches =function()
 			}
 			
 		}
+	GLGE.Stats.stopBatching();	
 }
 GLGE.Scene.prototype.batch = function(obj, force)
 {
