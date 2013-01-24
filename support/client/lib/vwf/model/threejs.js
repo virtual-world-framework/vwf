@@ -13,6 +13,29 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+    function rebuildAllMaterials(start)
+    {
+        
+        if(!start)
+        {
+            for(var i in this.state.scenes)
+            {
+                rebuildAllMaterials(this.state.scenes[i].threeScene);
+            }
+        }else
+        {
+            if(start && start.material)
+            {
+                start.material.needsUpdate = true;
+            }
+            if(start && start.children)
+            {
+               for(var i in start.children)
+                rebuildAllMaterials(start.children[i]);
+            }
+        }
+    }
+
 	function matCpy(mat)
 	{
 		var ret = [];
@@ -320,11 +343,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                node.threeMaterial = GetMaterial(node.threeObject);
+                //node.threeMaterial = GetMaterial(node.threeObject);
                 if(!node.threeMaterial)
                 {   
                     node.threeMaterial = new THREE.MeshPhongMaterial();
-                    SetMaterial(node.threeObject,node.threeMaterial)
+                    SetMaterial(node.threeObject,node.threeMaterial,childName)
                 }
             }
             else if ( protos && isParticleDefinition.call( this, protos ) ) {
@@ -742,7 +765,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {
                     if(propertyName == "texture")
                     {
-                        //debugger;
+                        
                         if(propertyValue !== "")
                         {
                             var img = new Image();
@@ -757,11 +780,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         
                     }
-                    if(propertyName == "color")
+                    if(propertyName == "color" || propertyName == "diffuse")
                     {
+						
                         // use utility to allow for colors, web colors....
+						//this breaks on array values for colors
                         var vwfColor = new utility.color( propertyValue );
-                        if ( vwfColor !== undefined ) {
+                        if ( !propertyValue.length ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         } else {
                             threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
@@ -1270,26 +1295,84 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }       
         return null;
     }
+	
+	function GetAllLeafMeshes(threeObject,list)
+	{
+		if(threeObject instanceof THREE.Mesh)
+		{
+			list.push(threeObject);
+		}
+		if(threeObject.children)
+        {
+            for(var i=0; i < threeObject.children.length; i++)
+            {
+                GetAllLeafMeshes(threeObject.children[i],list);
+            }               
+        }     
+	}
+	function fixMissingUVs(mesh)
+	{
+		 
+		 if(mesh.geometry.faceVertexUvs[0].length == 0)
+		 {
+			
+			
+			for(var i =0; i < mesh.geometry.faces.length; i++)
+			{
+				mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+			}
+		 }
+		 
+		
+		mesh.geometry.dynamic = true;
+		mesh.geometry.verticesNeedUpdate = true;
+		mesh.geometry.elementsNeedUpdate = true;
+		mesh.geometry.morphTargetsNeedUpdate = true;
+		mesh.geometry.uvsNeedUpdate = true;
+		mesh.geometry.normalsNeedUpdate = true;
+		mesh.geometry.colorsNeedUpdate = true;
+		mesh.geometry.tangentsNeedUpdate = true;
+		mesh.geometry.__dirtyVertices = true;
+		mesh.geometry.__dirtyMorphTargets = true;
+		mesh.geometry.__dirtyElements = true;
+		mesh.geometry.__dirtyUvs = true;
+		mesh.geometry.__dirtyNormals = true;
+		mesh.geometry.__dirtyTangents = true;
+		mesh.geometry.__dirtyColors = true;
+	}
     //set the material on all the sub meshes of an object.
     //This could cause some strangeness in cases where an asset has multiple sub materials
     //best to only specify the material sub-node where an asset is a mesh leaf
-    function SetMaterial(threeObject,material)
+    function SetMaterial(threeObject,material,materialname)
     {
+		
         //something must be pretty seriously wrong if no threeobject
         if(!threeObject)
             return null;
         
-        if(threeObject && threeObject instanceof THREE.Mesh)
-            threeObject.material = material; 
-        if(threeObject.children)
-        {
-            var ret = null;
-            for(var i=0; i < threeObject.children.length; i++)
-            {
-                SetMaterial(threeObject.children[i],material)
-            }               
-        }       
-        return null;
+		
+		var meshes =[];
+		GetAllLeafMeshes(threeObject,meshes);
+		//apply to all sub meshes
+		if(!materialname || materialname == 'material')
+		{
+			for(var i=0; i < meshes.length; i++)
+			{
+				
+				meshes[i].material = material;
+				meshes.needsUpdate = true;
+			}
+		}else
+		{
+			var index = parseInt(materialname.substr(8));
+			if(meshes[index])
+			{
+				
+				meshes[index].material = material;
+				meshes.needsUpdate = true;
+				window._dMesh =meshes[index];
+			}
+		}
     }
     function createMesh( node, meshDef ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
@@ -1337,6 +1420,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			//asset.rotation.z = Math.PI;
 			
             nodeCopy.threeObject.add(asset);
+			
+			var meshes =[];
+			GetAllLeafMeshes(asset,meshes);
+			for(var i =0; i < meshes.length; i++)
+			{
+				fixMissingUVs(meshes[i]);	
+				meshes[i].geometry.uvsNeedUpdate = true;
+			}
+			
             nodeCopy.threeObject.matrixAutoUpdate = false;
             //no idea what this is doing here
             if ( nodeCopy && nodeCopy.assetLoaded ) {
@@ -1554,28 +1646,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
         }
     }
-    function rebuildAllMaterials(start)
-    {
-        
-        if(!start)
-        {
-            for(var i in this.state.scenes)
-            {
-                rebuildAllMaterials(this.state.scenes[i].threeScene);
-            }
-        }else
-        {
-            if(start && start.material)
-            {
-                start.material.needsUpdate = true;
-            }
-            if(start && start.children)
-            {
-               for(var i in start.children)
-                rebuildAllMaterials(start.children[i]);
-            }
-        }
-    }
+
     function CopyProperties(from,to)
     {
         for(var i in from)

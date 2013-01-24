@@ -25,9 +25,9 @@ children:
     children:
       material:
         extends: http://vwf.example.com/material.vwf
-      properties:
-        texture:
-        diffuse:
+        properties:
+          texture:
+          diffuse: [ 255, 0, 0, 1]
     methods:
       update:    
     scripts:
@@ -40,7 +40,7 @@ children:
          }
          this.update = function()   
          {
-           
+           return;
             this.counter++;
             if(this.counter == 10)
                 vwf.setProperty(this.id,'material' , 'green');
