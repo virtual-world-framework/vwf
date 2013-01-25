@@ -1679,7 +1679,10 @@ function Editor()
 			if(!selectmod)
 			{
 				if(VWFNode[i])
-					SelectedVWFNodes.push(VWFNode[i]);
+				{
+					if(!this.isSelected(VWFNode[i].id) )
+						SelectedVWFNodes.push(VWFNode[i]);
+				}
 			}
 			
 			if(selectmod == Add)
