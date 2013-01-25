@@ -1108,12 +1108,13 @@ function Editor()
 						gizoffset = TransformOffset(gizoffset,SelectedVWFNodes[s].id);
 						
 						
-						var newloc = GLGE.addVec3(lastpos[s],gizoffset);
-						lastpos[s] = newloc;
+						
 						var transform = vwf.getProperty(SelectedVWFNodes[s].id,'transform');
 						transform[12] += gizoffset[0];
 						transform[13] += gizoffset[1];
 						transform[14] += gizoffset[2];
+						
+						lastpos[s] = [transform[12],transform[13],transform[14]];
 						
 						var success = this.setProperty(SelectedVWFNodes[s].id,'transform',transform);
 						if(success) this.waitingForSet.push(SelectedVWFNodes[s].id);
@@ -1174,19 +1175,26 @@ function Editor()
 						transform[12] = x;
 						transform[13] = y;
 						transform[14] = z;
+						
+						lastpos[s] = [x,y,z];
 						var success = this.setProperty(SelectedVWFNodes[s].id,'transform',transform);
 						if(success) this.waitingForSet.push(SelectedVWFNodes[s].id);
 						if(SelectedVWFNodes.length > 1)
 						{
 							
-							var gizoffset = GLGE.subVec3(lastpos[s],originalGizmoPos);
+							var parentmat = _Editor.findviewnode(SelectedVWFNodes[s].id).parent.getModelMatrix();
+							var parentmatinv = GLGE.inverseMat4(parentmat);
+							
+							var parentgizloc = GLGE.mulMat4Vec3(parentmatinv,originalGizmoPos);
+							var gizoffset = GLGE.subVec3(lastpos[s],parentgizloc);
 							var rotmat = GLGE.inverseMat4(rotationTransform);
 							gizoffset = GLGE.mulMat4Vec3(rotmat,gizoffset);
 							
 							
-							var newloc = GLGE.addVec3(originalGizmoPos,gizoffset);
+							var newloc = GLGE.addVec3(parentgizloc,gizoffset);
 							lastpos[s] = newloc;
 							var success = this.setProperty(SelectedVWFNodes[s].id,'translation',newloc);	
+							console.log(newloc);
 							if(success) this.waitingForSet.push(SelectedVWFNodes[s].id);
 						}
 					}
@@ -1563,6 +1571,11 @@ function Editor()
 				var color = [1,1,1,1];
 				if(findviewnode(SelectedVWFNodes[i].id).initializedFromAsset)
 					color = [1,0,0,1];
+				if(vwf.getProperty(SelectedVWFNodes[i].id,'type') == 'Group' && vwf.getProperty(SelectedVWFNodes[i].id,'open') == false)	
+					color = [.2,.5,.2,1];
+				if(vwf.getProperty(SelectedVWFNodes[i].id,'type') == 'Group' && vwf.getProperty(SelectedVWFNodes[i].id,'open') == true)	
+					color = [.5,1,.5,1];	
+					
 				SelectionBounds[i] = BuildBox([box.max[0] - box.min[0],box.max[1] - box.min[1],box.max[2] - box.min[2]],[box.min[0] + (box.max[0] - box.min[0])/2,box.min[1] + (box.max[1] - box.min[1])/2,box.min[2] + (box.max[2] - box.min[2])/2],color);
 				
 			
@@ -1594,6 +1607,28 @@ function Editor()
 				return false;
 			return true;	
 	}.bind(this);
+	this.OpenGroup = function()
+	{
+		for(var i =0; i < this.getSelectionCount(); i++)
+		{
+			if(vwf.getProperty(SelectedVWFNodes[i].id,'type') == 'Group')
+			{
+				vwf.setProperty(SelectedVWFNodes[i].id,'open',true);
+			}
+		}
+		this.updateBounds();
+	}
+	this.CloseGroup = function()
+	{
+		for(var i =0; i < this.getSelectionCount(); i++)
+		{
+			if(vwf.getProperty(SelectedVWFNodes[i].id,'type') == 'Group')
+			{
+				vwf.setProperty(SelectedVWFNodes[i].id,'open',false);
+			}
+		}
+		this.updateBounds();
+	}
 	this.SelectObjectPublic = function(VWFNodeid)
 	{
 		if(SelectMode=='TempPick')
@@ -1628,10 +1663,14 @@ function Editor()
 		if(VWFNode)
 		for(var i =0; i < VWFNode.length; i++)
 		{
+			//if you've selected a node that is grouped, but not selected a group directly, select the nearest open group head.
 			try{
-				if(vwf.getProperty(vwf.parent(VWFNode[i].id),'type') == 'Group')
+				if(vwf.getProperty(VWFNode[i].id,'type') != 'Group')
 				{
-					VWFNode[i] = vwf.getNode(vwf.parent(VWFNode[i].id));
+					while(vwf.getProperty(vwf.parent(VWFNode[i].id),'type') == 'Group' && vwf.getProperty(vwf.parent(VWFNode[i].id),'open') == false)
+					{
+						VWFNode[i] = vwf.getNode(vwf.parent(VWFNode[i].id));
+					}
 				}
 			}catch(e)
 			{
@@ -2046,9 +2085,45 @@ function Editor()
 		SetSelectMode('TempPick');
 		this.TempPickCallback = this.PickParentCallback;
 	}
+	this.UngroupSelection = function()
+	{
+	
+		for(var i=0; i<this.getSelectionCount(); i++)
+		{
+		
+			if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
+			{
+				_Notifier.alert('You must be the group owner to ungroup objects.');
+				continue;
+			}
+		
+			var vwfparent = vwf.parent(this.GetSelectedVWFNode(i).id);
+			var children = vwf.children(this.GetSelectedVWFNode(i).id);
+			for(var j = 0; j < children.length; j++)
+			{
+				
+				var node = _DataManager.getCleanNodePrototype(children[j]);
+				var childmat = this.findviewnode(children[j]).getModelMatrix();
+				var parentmat = this.findviewnode(vwfparent).getModelMatrix();
+				var invparentmat = GLGE.inverseMat4(parentmat);
+				childmat = GLGE.mulMat4(invparentmat,childmat);
+			
+				delete node.properties.translation;
+				delete node.properties.rotation;
+				delete node.properties.quaternion;
+				delete node.properties.scale;
+				
+				node.properties.transform = GLGE.transposeMat4(childmat);
+				vwf_view.kernel.deleteNode(children[j]);
+				vwf_view.kernel.createChild(vwfparent,GUID(),node);
+			}
+			vwf_view.kernel.deleteNode(this.GetSelectedVWFNode(i).id);
+		}
+		this.SelectObject();
+	}
 	this.GroupSelection = function()
 	{
-		debugger;
+		
 		var parentmat = GLGE.identMatrix();
 		
 		
@@ -2058,7 +2133,12 @@ function Editor()
 		{
 			if(parent != this.findviewnode(this.GetSelectedVWFNode(i).id).parent)
 			{
-				_Notifier.alert('all objects must have the same parent to be grouped');
+				_Notifier.alert('All objects must have the same parent to be grouped');
+				return;
+			}
+			if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
+			{
+				_Notifier.alert('You must be the owner of all objects to group them.');
 				return;
 			}
 			var childmat = this.findviewnode(this.GetSelectedVWFNode(i).id).getModelMatrix();

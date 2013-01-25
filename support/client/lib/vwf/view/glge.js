@@ -249,7 +249,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			}
 			
 			var vp = vwf.views[0].state.cameraInUse.getViewProjection();
-			$(document).trigger('prerender',[vp]);
+			var rootdiv = document.getElementById('index-vwf');
+			var h = rootdiv.style.height;
+			var w = rootdiv.style.width;
+			var wh = parseInt(h.substr(0,h.length-2));
+			var ww = parseInt(w.substr(0,w.length-2));
+			
+			$(document).trigger('prerender',[vp,wh,ww]);
             renderer.render();
         };
 

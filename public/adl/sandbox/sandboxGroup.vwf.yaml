@@ -14,6 +14,7 @@
 extends: http://vwf.example.com/node3.vwf
 methods:
 properties:
+  open: false
 scripts: 
 - |  
     this.initialize = function()
@@ -30,21 +31,21 @@ scripts:
     {
     
       var newdiv = document.createElement('img');
-      $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
+      
       $(newdiv).addClass('glyph');
-      newdiv.style.position = 'fixed';
+      newdiv.style.position = 'absolute';
       newdiv.id = "Player " + this.name + 'icon';
       //newdiv.innerHTML = "" + this.name;
       $(newdiv).attr('src','../vwf/view/editorview/images/icons/inventory.png');
       newdiv.style.left = '0px';
       newdiv.style.top = '0px';
       
-      $(document.body).append(newdiv);
+      $('#glyphOverlay').append(newdiv);
       $(newdiv).disableSelection();
-      //$(newdiv).mousedown(_Editor.mousedown);
-      //$(newdiv).mouseup(_Editor.mouseup);
-      //$(newdiv).mousemove(_Editor.mousemove);
-      $(newdiv).click(function(e){$('index-vwf').focus(); if(_Editor.GetSelectMode() != "None") _Editor.SelectObjectPublic(this.id)}.bind(this));
+      $(newdiv).mousedown(function(e){$('#index-vwf').focus(); if(_Editor.GetSelectMode() == "None" || e.which != 1) $('#index-vwf').trigger(e)});
+      $(newdiv).mouseup(function(e){$('#index-vwf').focus();$('#index-vwf').trigger(e)});
+      $(newdiv).mousemove(function(e){$('#index-vwf').trigger(e)});
+      $(newdiv).click(function(e){$('#index-vwf').focus(); if(_Editor.GetSelectMode() != "None") _Editor.SelectObjectPublic(this.id)}.bind(this));
       this.nametag = newdiv;
                  
     }
@@ -53,14 +54,10 @@ scripts:
        $(document).unbind('prerender',this.prerendercallback);
        $(this.nametag).remove();
     }
-    this.placeNameTag = function(e,viewprojection)
+    this.placeNameTag = function(e,viewprojection, wh, ww)
     {
       
-      var rootdiv = document.getElementById('index-vwf');
-      var h = rootdiv.style.height;
-      var w = rootdiv.style.width;
-      var wh = parseInt(h.substr(0,h.length-2));
-      var ww = parseInt(w.substr(0,w.length-2));
+      
       var div = this.nametag;
       var trans = _Editor.findviewnode(this.id).getModelMatrix();
       var pos = [trans[3],trans[7],trans[11]];

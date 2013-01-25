@@ -97,6 +97,12 @@
 		text-overflow: ellipsis;
 		background-image: url(../../../vwf/view/editorview/images/icons/grid.jpg);
 	}
+	.glyph
+	{
+		position:absolute;
+		left: 0px;
+		right: 0px;
+	}
 	.textureChoice:hover
 	{
 		background: #4040A0;

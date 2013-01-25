@@ -375,7 +375,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			window.open('../vwf/view/editorview/help/help.html','_blank');
 		});
 		$('#MenuHelpAbout').click(function(e){
-			_Notifier.alert('VWF Sandbox version 0.9 <br/> VWF 0.6 <br/>Rob Chadwick, ADL <br/> robert.chadwick.ctr@adlnet.gov');
+			_Notifier.alert('VWF Sandbox version 0.9 <br/> VWF 0.6 <br/>Rob Chadwick, ADL <br/> robert.chadwick.ctr@adlnet.gov<br/> texture attribution: <br/>http://opengameart.org/content/45-high-res-metal-and-rust-texture-photos CC-BY-3.0<br/>http://opengameart.org/content/golgotha-textures  public domain<br/>http://opengameart.org/content/p0sss-texture-pack-1  CC-BY-3.0<br/>http://opengameart.org/content/117-stone-wall-tilable-textures-in-8-themes    GPL2<br/>http://opengameart.org/content/wall-grass-rock-stone-wood-and-dirt-480 public domain<br/>http://opengameart.org/content/29-grounds-and-walls-and-water-1024x1024  CC-By-SA<br/>http://opengameart.org/content/filth-texture-set  GPL2');
 		});
 		
 		
@@ -401,6 +401,19 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 		});
 		
+		
+		
+		$('#MenuViewGlyphs').click(function(e){
+			if($('#glyphOverlay').is(':visible'))
+			{
+				$('#glyphOverlay').hide();
+				_Notifier.notify('Glyphs hidden');
+			}else
+			{
+				$('#glyphOverlay').show();
+				_Notifier.notify('Glyphs displayed');
+			}
+		});
 		
 		$('#MenuViewStats').click(function(e){
 			GLGE.Stats.showDisplay();
@@ -432,6 +445,16 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#MenuUngroup').click(function(e){
 			_Editor.UngroupSelection();
 		});
+		
+		$('#MenuOpenGroup').click(function(e){
+			_Editor.OpenGroup();
+		});
+		
+		$('#MenuCloseGroup').click(function(e){
+			_Editor.CloseGroup();
+		});
+		
+		
 		
 		$('#MenuViewToggleAO').click(function(e){
 			if(_Editor.findscene().getFilter2d())
@@ -567,57 +590,63 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		};
 		
 		$(window).resize(function(){
-		$('#smoothmenu1').css('top','0px');
-		$('#smoothmenu1').css('left','0px');
-		$('#toolbar').css('top',$('#smoothmenu1').height());
-		//$('#toolbar').css('height','35px');
-		$('#toolbar').css('left','0px');
-		$('#statusbar').css('left','0px');
-		if($('#sidepanel').offset().left + 5 < window.innerWidth)
-			$('#index-vwf').css('width',window.innerWidth - $('#sidepanel').width() + 'px');
-		else
-			$('#index-vwf').css('width',window.innerWidth + 'px');
-		
-		$('#ScriptEditor').css('top',$(window).height() - $('#ScriptEditor').height()-$('#statusbar').height());
-		//$('#ScriptEditor').css('height',	$(window).height() - $('#ScriptEditor').offset().top - $('#statusbar').height() + 'px');
-		
-		$('#ScriptEditor').css('width',$('#index-vwf').width());	
-		if($('#ScriptEditor').attr('maximized'))
-		{
-			$('#ScriptEditor').css('top',$('#toolbar').offset().top + $('#toolbar').height() +'px');
-			$('#ScriptEditor').css('height',$(window).height() - $('#toolbar').height()- $('#smoothmenu1').height()- $('#statusbar').height()+'px');
-		}
-		else
-		{
+			$('#smoothmenu1').css('top','0px');
+			$('#smoothmenu1').css('left','0px');
+			$('#toolbar').css('top',$('#smoothmenu1').height());
+			//$('#toolbar').css('height','35px');
+			$('#toolbar').css('left','0px');
+			$('#statusbar').css('left','0px');
+			if($('#sidepanel').offset().left + 5 < window.innerWidth)
+				$('#index-vwf').css('width',window.innerWidth - $('#sidepanel').width() + 'px');
+			else
+				$('#index-vwf').css('width',window.innerWidth + 'px');
 			
-			//$('#ScriptEditor').css('top',$('#ScriptEditor').attr('originaltop')+'px');
-			//$('#ScriptEditor').css('height',$(window).height() - $('#ScriptEditor').offset().top- $('#statusbar').height()+'px');
+			$('#ScriptEditor').css('top',$(window).height() - $('#ScriptEditor').height()-$('#statusbar').height());
+			//$('#ScriptEditor').css('height',	$(window).height() - $('#ScriptEditor').offset().top - $('#statusbar').height() + 'px');
 			
-		}
-		_ScriptEditor.resize();
-		$('#index-vwf').css('height',window.innerHeight + 'px' - $('#ScriptEditor').offset().top);
-		
-		$('#index-vwf').css('top',$('#toolbar').offset().top+$('#toolbar').height());
-		$('#index-vwf').css('position','absolute');
-		$('#vwf-root').css('overflow','visible');
-		$('#vwf-root').css('left','0px');
-		$('#vwf-root').css('top','0px');
-		var scripteditorheight = $('#ScriptEditor').offset().top;
-		if(scripteditorheight != 0)
-		   scripteditorheight = $(window).height() - scripteditorheight;
-		$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - (scripteditorheight-25) + 'px');
-		
-		$('#sidepanel').css('left',$('#index-vwf').width() + $('#index-vwf').offset().left);
-		//$('#sidepanel').css('width',320);
-		$('#sidepanel').css('top',$('#toolbar').offset().top+$('#toolbar').height());
-		$('#sidepanel').css('height',$(window).height());
-		$('#statusbar').css('top',($(window).height() - 25) + 'px');
-		
-		
-		
-		_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+			$('#ScriptEditor').css('width',$('#index-vwf').width());	
+			if($('#ScriptEditor').attr('maximized'))
+			{
+				$('#ScriptEditor').css('top',$('#toolbar').offset().top + $('#toolbar').height() +'px');
+				$('#ScriptEditor').css('height',$(window).height() - $('#toolbar').height()- $('#smoothmenu1').height()- $('#statusbar').height()+'px');
+			}
+			else
+			{
+				
+				//$('#ScriptEditor').css('top',$('#ScriptEditor').attr('originaltop')+'px');
+				//$('#ScriptEditor').css('height',$(window).height() - $('#ScriptEditor').offset().top- $('#statusbar').height()+'px');
+				
+			}
+			_ScriptEditor.resize();
+			
+			
+			$('#index-vwf').css('height',window.innerHeight + 'px' - $('#ScriptEditor').offset().top);
+			
+			$('#index-vwf').css('top',$('#toolbar').offset().top+$('#toolbar').height());
+			$('#index-vwf').css('position','absolute');
+			$('#vwf-root').css('overflow','visible');
+			$('#vwf-root').css('left','0px');
+			$('#vwf-root').css('top','0px');
+			var scripteditorheight = $('#ScriptEditor').offset().top;
+			if(scripteditorheight != 0)
+			   scripteditorheight = $(window).height() - scripteditorheight;
+			$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - (scripteditorheight-25) + 'px');
+			
+			$('#sidepanel').css('left',$('#index-vwf').width() + $('#index-vwf').offset().left);
+			//$('#sidepanel').css('width',320);
+			$('#sidepanel').css('top',$('#toolbar').offset().top+$('#toolbar').height());
+			$('#sidepanel').css('height',$(window).height());
+			$('#statusbar').css('top',($(window).height() - 25) + 'px');
+			
+			
+			
+			_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
 		});
 		$(window).resize();
+		
+		
+		
+		
 		
 		window.setTimeout(function(){$(window).resize();hideSidePanel();},500);
 		

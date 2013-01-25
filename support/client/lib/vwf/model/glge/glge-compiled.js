@@ -14129,7 +14129,7 @@ GLGE.Statistics = function()
 		$('#GLGEStatVerticies').html(this.Verticies);
 		$('#GLGEStatTraverseTime').html(this.traverseTime + " ms");
 		$('#GLGEStatCullTime').html(this.cullTime + " ms");
-		$('#GLGEStatBatchTime').html(this.batchTime + " ms");
+		$('#GLGEStatBatchTime').html(parseInt(this.batchTime+"") + " ms");
 		
 	}
 }
