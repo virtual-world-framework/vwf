@@ -10766,14 +10766,15 @@ GLGE.Object.prototype.GLUniforms=function(gl,renderType,pickindex){
 	if(this.material && (renderType==GLGE.RENDER_DEFAULT || renderType==GLGE.RENDER_EMIT || this.shadowAlpha))
 	{
 		
-		if(!GLGE.CompareMaterials(gl.scene.lastMaterial,this.material)){
-			this.material.textureUniforms(gl,program,lights,this,renderType);
+		//if(!GLGE.CompareMaterials(gl.scene.lastMaterial,this.material) || !this.material.initialized){
+			this.material.textureUniforms(gl,program,lights,this,renderType)
+			this.material.initialized = true;
 			GLGE.textureUniformsCalled++;
 			gl.scene.lastMaterial=this.material;
-		}else
-		{
-			GLGE.textureUniformsSkipped++;
-		}
+		//}else
+		//{
+		//	GLGE.textureUniformsSkipped++;
+		//}
 	}
 }
 GLGE.CompareVec=function(vec1, vec2)

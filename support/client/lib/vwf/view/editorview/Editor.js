@@ -1473,7 +1473,7 @@ function Editor()
 			t.properties.translation[0] += newintersectxy[0];
 			t.properties.translation[1] += newintersectxy[1];
 			t.properties.translation[2] += newintersectxy[2];
-			proto.properties.DisplayName = _Editor.GetUniqueName(proto.properties.DisplayName);
+			t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
 			_Editor.SelectOnNextCreate();
 			this.createChild('index-vwf',GUID(),t,null,null); 
 			t.properties.transform[12] -= newintersectxy[0];
