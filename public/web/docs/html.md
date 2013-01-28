@@ -27,7 +27,7 @@ The first step is to create the HTML content as you'd like it to appear on the s
 
 In order to attach the content as an overlay to the application, we've added an additonal script tag, that appends the *wrapper* div to *vwf-root*, or the main application view. 
 
-*Note* - The loader strips out header and body tages and inserts content directly into index.html. HTML5 formatting is helpful for testing as a standalone webpage, but not required for VWF. 
+*Note* - The loader strips out header and body tags and inserts content directly into index.html. HTML5 formatting is helpful for testing as a standalone webpage, but not required for VWF. 
 
 -------------------
 

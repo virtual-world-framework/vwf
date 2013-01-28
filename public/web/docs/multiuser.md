@@ -1,4 +1,4 @@
-# Create a multi-user application
+# Create a Multi-user Application
 
 All that is needed for a VWF app to become a multi-user app is for a second person to navigate to the same url.  By default, both users share the same view of the virtual world.
 

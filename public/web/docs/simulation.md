@@ -1,4 +1,4 @@
-# Create a simulation
+# Create a Simulation
 
 Let's define a *simulation* as any application that models a sequence of causes and effects.  Here's how to create one:
 
