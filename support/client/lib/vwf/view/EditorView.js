@@ -501,10 +501,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		
 		
 		
-		
-		$('#MenuViewBatching').click(function(e){
+		// click events for touching sub menus
+		$('#MenuViewBatching #MenuParticles #MenuLights #MenuModifiers #MenuGrouping #MenuPrimitives #MenuTransforms #MenuSnaps #MenuSelect').click(function(e){
 			
-			$('#MenuViewBatching').mouseenter();
+			$(this).mouseenter();
 		});
 		
 		$('#MenuCameraNavigate').click(function(e){
