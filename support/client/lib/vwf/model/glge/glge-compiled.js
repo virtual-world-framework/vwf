@@ -10515,7 +10515,7 @@ GLGE.Object.prototype.GLUniforms=function(gl,renderType,pickindex){
 			break;
 	}
     //set the line width
-    gl.lineWidth(this.lineWidth);
+    //gl.lineWidth(this.lineWidth);
     
     //set custom uinforms
     for(var key in this.uniforms){
@@ -10765,16 +10765,10 @@ GLGE.Object.prototype.GLUniforms=function(gl,renderType,pickindex){
 
 	if(this.material && (renderType==GLGE.RENDER_DEFAULT || renderType==GLGE.RENDER_EMIT || this.shadowAlpha))
 	{
-		
-		//if(!GLGE.CompareMaterials(gl.scene.lastMaterial,this.material) || !this.material.initialized){
+		if(gl.scene.lastMaterial != this.material){
 			this.material.textureUniforms(gl,program,lights,this,renderType)
-			this.material.initialized = true;
-			GLGE.textureUniformsCalled++;
 			gl.scene.lastMaterial=this.material;
-		//}else
-		//{
-		//	GLGE.textureUniformsSkipped++;
-		//}
+		}
 	}
 }
 GLGE.CompareVec=function(vec1, vec2)
@@ -10825,6 +10819,201 @@ GLGE.CompareMaterials=function(mat1, mat2)
 	}
 	return true;
 }
+
+GLGE.materialManager = function(){
+
+	
+	this.materials = [];
+	this.findMaterialRecord = function(newMaterial)
+	{
+		if(!newMaterial)
+			return null;
+		for(var i = 0; i < this.materials.length; i++)
+		{
+			if(GLGE.CompareMaterials(this.materials[i].material,newMaterial))
+			{
+				return this.materials[i];
+			}
+		}
+	}
+	this.findDupeRecord =function(newMaterial)
+	{
+		var newMaterialDef = this.findMaterialRecord(newMaterial);
+		if(newMaterialDef)
+		{
+			newMaterialDef.used++;
+			console.log('found dupe');
+			return newMaterialDef.material;
+		}
+		else
+		{
+			this.materials.push({material:newMaterial,used:1});
+			return newMaterial;
+		}
+	}
+	this.getMaterialByDef = function(newMaterialDef,oldMaterial)
+	{
+		
+		var newGLGEMat = this.translateDefToMat(newMaterialDef);
+		var newGLGEMatDef = this.findMaterialRecord(newGLGEMat);
+		var oldGLGEMatDef = this.findMaterialRecord(oldMaterial);
+		//this material was something else before, and that something else might not be used by anything.
+		//if it's not, forget about it.
+		if(oldGLGEMatDef)
+		{
+			oldGLGEMatDef.used--;
+			if(oldGLGEMatDef.used == 0)
+			{
+				this.materials.splice(this.materials.indexOf(oldGLGEMatDef),1);
+			}
+		}
+		//this material can be mapped to an existing material
+		if(newGLGEMatDef)
+		{
+			newGLGEMatDef.used++;
+			console.log('found dupe');
+			return newGLGEMatDef.material;
+		}
+		else
+		{
+			this.materials.push({material:newGLGEMat,used:1});
+			return newGLGEMat;
+		}
+	}
+	this.translateDefToMat = function(newMaterial)
+	{
+		
+		     var currentMaterial = new GLGE.Material();
+             if(!currentMaterial) return;
+             currentMaterial.setShininess(newMaterial.shininess);
+             currentMaterial.setAlpha(newMaterial.alpha);
+             currentMaterial.setAmbient(newMaterial.ambient);
+             currentMaterial.setColor(newMaterial.color);
+             currentMaterial.setEmit(newMaterial.emit);
+             currentMaterial.setReflectivity(newMaterial.reflect);
+             currentMaterial.setShadeless(newMaterial.shadeless);
+             currentMaterial.setShadow(newMaterial.shadow);
+
+             newMaterial.specularColor.r = newMaterial.specularColor.r || 0.01;
+             newMaterial.specularColor.g = newMaterial.specularColor.g || 0.01;
+             newMaterial.specularColor.b = newMaterial.specularColor.b || 0.01;
+             
+             var norm = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
+             newMaterial.specularColor.r /= norm;
+             newMaterial.specularColor.g /= norm;
+             newMaterial.specularColor.b /= norm;
+             
+             newMaterial.specularColor.r *= newMaterial.specularLevel;
+             newMaterial.specularColor.g *= newMaterial.specularLevel;
+             newMaterial.specularColor.b *= newMaterial.specularLevel;
+             currentMaterial.setSpecularColor(newMaterial.specularColor);
+             for(var i=0 ; i < newMaterial.layers.length; i++)
+             {
+                var layer = currentMaterial.layers[i];
+                var newLayer = newMaterial.layers[i];
+                if(!layer)
+                {
+                    layer = new GLGE.MaterialLayer();
+                    layer.setMapinput(GLGE.UV1);
+                    currentMaterial.addMaterialLayer(layer);
+                }
+                
+                layer.setMapto(newLayer.mapTo);
+                layer.setBlendMode(newLayer.blendMode);
+                layer.setAlpha(newLayer.alpha);
+                
+                layer.setScaleX(newLayer.scalex);
+                layer.setScaleY(newLayer.scaley);
+                layer.setOffsetX(newLayer.offsetx);
+                layer.setOffsetY(newLayer.offsety);
+                layer.setRotZ(newLayer.rot);
+                layer.setMapinput(newLayer.mapInput );
+                
+                var texture = layer.getTexture();
+                if(texture && texture.getSrc() != newMaterial.layers[i].src)
+                {
+                    //currentMaterial.removeTexture(texture);
+                    layer.setTexture(null);
+                    texture = null;
+                }
+                if(!texture)
+                {
+                    texture = new GLGE.Texture();
+                    layer.setTexture(texture);
+                    currentMaterial.addTexture(texture);
+                    texture.setSrc(newMaterial.layers[i].src);
+                }
+                
+             }
+             while(currentMaterial.layers.length > newMaterial.layers.length)
+                currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
+		
+		
+		return currentMaterial;
+	}
+	this.getDefForMaterial = function(currentMaterial)
+	{
+			var newMaterial = {};
+			newMaterial.shininess = currentMaterial.getShininess();
+            newMaterial.alpha = currentMaterial.getAlpha();
+            newMaterial.ambient = currentMaterial.getAmbient();
+            newMaterial.color = currentMaterial.getColor();
+            newMaterial.emit = currentMaterial.getEmit();
+            newMaterial.reflect = currentMaterial.getReflectivity();
+            newMaterial.shadeless = currentMaterial.getShadeless();
+            newMaterial.shadow = currentMaterial.getShadow();
+            
+            newMaterial.specularColor = currentMaterial.getSpecularColor();
+            newMaterial.specularLevel = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
+            newMaterial.specularColor.r = newMaterial.specularColor.r/newMaterial.specularLevel || 0.01;
+            newMaterial.specularColor.g = newMaterial.specularColor.g/newMaterial.specularLevel || 0.01;
+            newMaterial.specularColor.b = newMaterial.specularColor.b/newMaterial.specularLevel || 0.01;
+            newMaterial.layers = [];
+            for(var i = 0; i<currentMaterial.layers.length;i++)
+            {
+                var newLayer = {};
+                newMaterial.layers.push(newLayer);
+                newLayer.src = currentMaterial.layers[i].getTexture().getSrc();
+                newLayer.mapTo = currentMaterial.layers[i].getMapto();
+                newLayer.blendMode = currentMaterial.layers[i].getBlendMode();
+                newLayer.alpha = currentMaterial.layers[i].getAlpha();
+                
+                newLayer.scalex = currentMaterial.layers[i].getScaleX();
+                newLayer.scaley = currentMaterial.layers[i].getScaleY();
+                newLayer.offsetx = currentMaterial.layers[i].getOffsetX();
+                newLayer.offsety = currentMaterial.layers[i].getOffsetY();
+                newLayer.rot = currentMaterial.layers[i].getRotZ();
+                newLayer.mapInput = currentMaterial.layers[i].getMapinput();
+            }
+      
+            return newMaterial;
+	}
+}
+GLGE.MaterialManager = new GLGE.materialManager();
+
+GLGE.meshCache = function()
+{
+	this.meshes = {};
+	this.getMesh = function(url)
+	{
+		if(this.meshes[url])
+			return this.meshes[url];
+		return null;	
+	}
+	this.cacheMesh = function(url,mesh)
+	{
+		if(this.meshes[url])
+		{
+			console.log('already cached this mesh: ' + url);
+			return;
+		}
+		this.meshes[url] = mesh;
+	}
+}
+
+GLGE.MeshCache = new GLGE.meshCache();
+
+
 /**
 * Renders the object to the screen
 * @private
@@ -10860,7 +11049,7 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 	
 	
 
-	var pixelsize;
+	/* var pixelsize;
 	
 	if(multiMaterial==undefined){
 		var start=0;
@@ -10877,14 +11066,15 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 			var dist=GLGE.lengthVec3([camerapos.x-modelpos.x,camerapos.y-modelpos.y,camerapos.z-modelpos.z]);
 			dist=GLGE.mulMat4Vec4(gl.scene.camera.getProjectionMatrix(),[this.getBoundingVolume().getSphereRadius(),0,-dist,1]);
 			pixelsize=dist[0]/dist[3]*gl.scene.renderer.canvas.width;
-		}
+		} */
 	
-		var lod=this.multimaterials[i].getLOD(pixelsize);
+		//var lod=this.multimaterials[i].getLOD(pixelsize);
+		var lod=this.multimaterials[0].getLOD(0);
 
 		if(lod.mesh && lod.mesh.loaded){
 			if(renderType==GLGE.RENDER_NULL){
 				if(lod.material) lod.material.registerPasses(gl,this);
-				break;
+				//break;
 			}
 			if(!lod.GLShaderProgram){
 				this.createShaders(lod);
@@ -10957,7 +11147,7 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 			}
 			//render the object
 			this.GLUniforms(gl,renderType,pickindex);
-			switch (this.mesh.windingOrder) {
+			/* switch (this.mesh.windingOrder) {
 				case GLGE.Mesh.WINDING_ORDER_UNKNOWN:
 					if (gl.scene.renderer.cullFaces && this.mesh.cullFaces){
 						gl.cullFace(gl.scene.mirror ? gl.FRONT : gl.BACK);
@@ -10975,7 +11165,7 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 					gl.enable(gl.CULL_FACE);    
 				default:
 					break;
-			}
+			} */
 			if(renderType==GLGE.RENDER_PICK) gl.disable(gl.CULL_FACE); 
 			if(this.noDepthMask) gl.depthMask(false);
 			if(this.mesh.GLfaces){
@@ -10984,9 +11174,9 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 			}else{
 				gl.drawArrays(drawType, 0, this.mesh.positions.length/3);
 			}
-			gl.depthMask(true);
+			if(this.noDepthMask) gl.depthMask(true);
 			
-			switch (this.mesh.windingOrder) {
+			/* switch (this.mesh.windingOrder) {
 				case GLGE.Mesh.WINDING_ORDER_UNKNOWN:
 					if (gl.scene.renderer.cullFaces)
 						gl.enable(gl.CULL_FACE);    
@@ -10995,7 +11185,7 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 					gl.cullFace(gl.BACK);
 				default:
 					break;
-			}
+			} */
 			var matrix=this.matrix;
 			var caches=this.caches;
 			
@@ -11003,7 +11193,7 @@ GLGE.Object.prototype.GLRender=function(gl,renderType,pickindex,multiMaterial,di
 			this.matrix=matrix;
 			this.caches=caches;
 		}
-	}
+	//}
 }
 
 })(GLGE);/*
@@ -14027,7 +14217,7 @@ GLGE.Scene.prototype.render=function(gl){
 	//renderObjects=renderObjects.sort(this.stateSort);
 	renderObjects=renderObjects.sort(function(a,b){
 		if(a.object.getMaterial && b.object.getMaterial)
-			return (GLGE.CompareMaterials(a.object.getMaterial(),b.object.getMaterial()));
+			return (a.object.getMaterial()==b.object.getMaterial()?1:-1);
 		return 0;	
 	})
 	this.renderPass(gl,renderObjects,this.renderer.getViewportOffsetX(),this.renderer.getViewportOffsetY(),this.renderer.getViewportWidth(),this.renderer.getViewportHeight());	

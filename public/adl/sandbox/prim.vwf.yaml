@@ -40,44 +40,10 @@ scripts:
             if(this.materialDef) return this.materialDef;    
             if(!this.mesh)
                 return null;
-            var newMaterial = {};
             var currentMaterial = this.mesh.material;
             if(!currentMaterial)
                 return;
-            newMaterial.shininess = currentMaterial.getShininess();
-            newMaterial.alpha = currentMaterial.getAlpha();
-            newMaterial.ambient = currentMaterial.getAmbient();
-            newMaterial.color = currentMaterial.getColor();
-            newMaterial.emit = currentMaterial.getEmit();
-            newMaterial.reflect = currentMaterial.getReflectivity();
-            newMaterial.shadeless = currentMaterial.getShadeless();
-            newMaterial.shadow = currentMaterial.getShadow();
-            
-            newMaterial.specularColor = currentMaterial.getSpecularColor();
-            newMaterial.specularLevel = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
-            newMaterial.specularColor.r = newMaterial.specularColor.r/newMaterial.specularLevel || 0.01;
-            newMaterial.specularColor.g = newMaterial.specularColor.g/newMaterial.specularLevel || 0.01;
-            newMaterial.specularColor.b = newMaterial.specularColor.b/newMaterial.specularLevel || 0.01;
-            newMaterial.layers = [];
-            for(var i = 0; i<currentMaterial.layers.length;i++)
-            {
-                var newLayer = {};
-                newMaterial.layers.push(newLayer);
-                newLayer.src = currentMaterial.layers[i].getTexture().getSrc();
-                newLayer.mapTo = currentMaterial.layers[i].getMapto();
-                newLayer.blendMode = currentMaterial.layers[i].getBlendMode();
-                newLayer.alpha = currentMaterial.layers[i].getAlpha();
-                
-                newLayer.scalex = currentMaterial.layers[i].getScaleX();
-                newLayer.scaley = currentMaterial.layers[i].getScaleY();
-                newLayer.offsetx = currentMaterial.layers[i].getOffsetX();
-                newLayer.offsety = currentMaterial.layers[i].getOffsetY();
-                newLayer.rot = currentMaterial.layers[i].getRotZ();
-                newLayer.mapInput = currentMaterial.layers[i].getMapinput();
-            }
-
-                  
-            return newMaterial;
+            return GLGE.MaterialManager.getDefForMaterial(currentMaterial);
     
     }
     this.setupMaterial = function()
@@ -91,73 +57,7 @@ scripts:
              
              var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
              if(!newMaterial) return;
-             var currentMaterial = this.mesh.getMaterial();
-             if(!currentMaterial) return;
-             currentMaterial.setShininess(newMaterial.shininess);
-             currentMaterial.setAlpha(newMaterial.alpha);
-             currentMaterial.setAmbient(newMaterial.ambient);
-             currentMaterial.setColor(newMaterial.color);
-             currentMaterial.setEmit(newMaterial.emit);
-             currentMaterial.setReflectivity(newMaterial.reflect);
-             currentMaterial.setShadeless(newMaterial.shadeless);
-             currentMaterial.setShadow(newMaterial.shadow);
-            
-             
-             
-             
-             newMaterial.specularColor.r = newMaterial.specularColor.r || 0.01;
-             newMaterial.specularColor.g = newMaterial.specularColor.g || 0.01;
-             newMaterial.specularColor.b = newMaterial.specularColor.b || 0.01;
-             
-             var norm = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
-             newMaterial.specularColor.r /= norm;
-             newMaterial.specularColor.g /= norm;
-             newMaterial.specularColor.b /= norm;
-             
-             newMaterial.specularColor.r *= newMaterial.specularLevel;
-             newMaterial.specularColor.g *= newMaterial.specularLevel;
-             newMaterial.specularColor.b *= newMaterial.specularLevel;
-             currentMaterial.setSpecularColor(newMaterial.specularColor);
-             for(var i=0 ; i < newMaterial.layers.length; i++)
-             {
-                var layer = currentMaterial.layers[i];
-                var newLayer = newMaterial.layers[i];
-                if(!layer)
-                {
-                    layer = new GLGE.MaterialLayer();
-                    layer.setMapinput(GLGE.UV1);
-                    currentMaterial.addMaterialLayer(layer);
-                }
-                
-                layer.setMapto(newLayer.mapTo);
-                layer.setBlendMode(newLayer.blendMode);
-                layer.setAlpha(newLayer.alpha);
-                
-                layer.setScaleX(newLayer.scalex);
-                layer.setScaleY(newLayer.scaley);
-                layer.setOffsetX(newLayer.offsetx);
-                layer.setOffsetY(newLayer.offsety);
-                layer.setRotZ(newLayer.rot);
-                layer.setMapinput(newLayer.mapInput );
-                
-                var texture = layer.getTexture();
-                if(texture && texture.getSrc() != newMaterial.layers[i].src)
-                {
-                    //currentMaterial.removeTexture(texture);
-                    layer.setTexture(null);
-                    texture = null;
-                }
-                if(!texture)
-                {
-                    texture = new GLGE.Texture();
-                    layer.setTexture(texture);
-                    currentMaterial.addTexture(texture);
-                    texture.setSrc(newMaterial.layers[i].src);
-                }
-                
-             }
-             while(currentMaterial.layers.length > newMaterial.layers.length)
-                currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
+             this.mesh.setMaterial(GLGE.MaterialManager.getMaterialByDef(newMaterial,this.mesh.material));
             this.mesh.batchDirty = true;   
     }
     this.setTransparent = function(v)

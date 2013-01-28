@@ -736,11 +736,14 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		//           screenX, screenY, clientX, clientY, ctrlKey, 
 		//           altKey, shiftKey, metaKey, button, relatedTarget);
 		
+		var mousebutton = 0;
+		mousebutton = touches.length -1;
+			
 		var simulatedEvent = document.createEvent("MouseEvent");
 		simulatedEvent.initMouseEvent(type, true, true, window, 1, 
 								  first.screenX, first.screenY, 
 								  first.clientX, first.clientY, false, 
-								  false, false, false, 0/*left*/, null);
+								  false, false, false, mousebutton/*left*/, null);
 		
 		 first.target.dispatchEvent(simulatedEvent);
 		if(type == 'mouseup')
@@ -749,7 +752,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			simulatedEvent.initMouseEvent('click', true, true, window, 1, 
 									  first.screenX, first.screenY, 
 									  first.clientX, first.clientY, false, 
-									  false, false, false, 0/*left*/, null);
+									  false, false, false, mousebutton/*left*/, null);
 			
 			 first.target.dispatchEvent(simulatedEvent);
 		

@@ -2607,13 +2607,7 @@ var JSONNode = function(node,callback)
 	this.url = node.source;
 	this.callback = callback;
 	this.children=[];
-	
-	this.jsonLoaded = function(e)
-	{
-	    var test = 1+1;
-		
-		var jsonData = JSON.parse(decompress(e));
-		var texture_load_callback = function(texturename)
+	this.texture_load_callback = function(texturename)
 		{
 			if(!texturename)
 				return null;
@@ -2630,7 +2624,15 @@ var JSONNode = function(node,callback)
 			tex.setSrc(src);
 			return tex;
 		}
-		this.addChild(ParseSceneGraph(jsonData,texture_load_callback.bind(this)),null);
+	this.jsonLoaded = function(e)
+	{
+	    var test = 1+1;
+		
+		var jsonData = JSON.parse(decompress(e));
+		
+		var mesh = ParseSceneGraph(jsonData,this.texture_load_callback.bind(this));
+		this.addChild(mesh);
+		//GLGE.MeshCache.cacheMesh(this.url,jsonData);
 		if(this.callback)
 			this.callback(this);
 	}.bind(this);
@@ -2642,14 +2644,28 @@ var JSONNode = function(node,callback)
 			this.callback(this);
 	}.bind(this);
 	
-	$.ajax({
-        url: this.url,
-        data: {},
-        success: this.jsonLoaded,
-        error: this.error,
-		dataType:'text'
-    });
-	;
+	
+	// var cachedchild = GLGE.MeshCache.getMesh(this.url);
+	// if(cachedchild && false)
+	// {	
+		// var mesh = ParseSceneGraph(cachedchild,this.texture_load_callback.bind(this));
+		// this.addChild(mesh);
+		// if(this.callback)
+			// this.callback(this);
+	// }
+	// else
+	{
+		$.ajax({
+			url: this.url,
+			data: {},
+			success: this.jsonLoaded,
+			error: this.error,
+			dataType:'text',
+			async: true
+		});
+		
+	}
+	
 }
 
 GLGE.augment(GLGE.Group,JSONNode);
@@ -2829,6 +2845,11 @@ function ParseSceneGraph(node, texture_load_callback) {
 		}
     }
 	
+	var cachedMaterial = GLGE.MaterialManager.findDupeRecord(newmaterial);
+	if(cachedMaterial)
+	{
+		newmaterial = cachedMaterial;
+	}
 	if(newnode && newmaterial)
 		ApplyMaterial(newnode,newmaterial);
 	

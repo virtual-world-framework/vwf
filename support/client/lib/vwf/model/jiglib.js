@@ -40,6 +40,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
           childSource, childType, childURI, childName, callback /* ( ready ) */) {
 
+		  return;
+		  
           var kernel = this.kernel.kernel.kernel;
           //this.logger.enable = true;
           //this.logger.infoc( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
@@ -85,6 +87,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         initializingNode: function( nodeID, childID ) {
 
+		return;
             var scene = this.scenes[ childID ];
             var node = this.nodes[ childID ];
 
@@ -123,7 +126,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- deletingNode -------------------------------------------------------------------------
 
         deletingNode: function( nodeID ) {
-
+return;
             if ( this.active[ nodeID ] ) {
                 delete this.active[ nodeID ];
             } 
@@ -187,7 +190,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- initializingProperty -----------------------------------------------------------------
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
-
+return;
             var value = undefined;
             //this.logger.enabled = true;
             //this.logger.infoc( "creatingProperty", nodeID, propertyName, propertyValue );
@@ -247,7 +250,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-
+return;
             var value = undefined;
 //            this.logger.enabled = !this.updating;
 //            if ( nodeID != "http-vwf-example-com-camera-vwf-camera" )
@@ -398,7 +401,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             //if (!( ( nodeID == "http-vwf-example-com-camera-vwf" ) || ( nodeID == "http-vwf-example-com-camera-vwf-maincamera" ) ) )
             //    this.logger.infoc( "gettingProperty", nodeID, propertyName, propertyValue );
             //this.logger.enabled = false;
-          
+          return;
             propertyValue = undefined;
 
             if ( this.nodes[ nodeID ] ) {
@@ -503,7 +506,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // == ticking =============================================================================
 
         ticking: function( vwfTime ) {
-
+return;
             var elaspedTime = vwfTime - this.lastTime;
             this.lastTime = vwfTime;
             

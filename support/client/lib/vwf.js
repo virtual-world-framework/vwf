@@ -738,10 +738,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             // Call ticking() on each model.
 
-            this.models.forEach( function( model ) {
+			
+		
+             this.models.forEach( function( model ) {
                 model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
             }, this );
-
+			
             // Call ticked() on each view.
 
             this.views.forEach( function( view ) {
@@ -752,7 +754,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.tickable.nodeIDs.forEach( function( nodeID ) {
                 this.callMethod( nodeID, "tick", [ this.now ] );
-            }, this );
+            }, this ); 
 
         };
 
