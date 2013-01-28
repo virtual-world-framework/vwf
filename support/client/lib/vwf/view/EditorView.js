@@ -502,7 +502,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		
 		
 		// click events for touching sub menus
-		$('#MenuViewBatching #MenuParticles #MenuLights #MenuModifiers #MenuGrouping #MenuPrimitives #MenuTransforms #MenuSnaps #MenuSelect').click(function(e){
+		$('#MenuViewBatching,#MenuParticles,#MenuLights,#MenuModifiers,#MenuGrouping,#MenuPrimitives,#MenuTransforms,#MenuSnaps,#MenuSelect').click(function(e){
 			
 			$(this).mouseenter();
 		});
