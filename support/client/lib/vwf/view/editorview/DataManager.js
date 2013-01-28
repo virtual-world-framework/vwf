@@ -423,7 +423,7 @@ function DataManager()
 		{
 			
 			$(document.body).append('<div id="InstanceDialog" style="overflow:auto;overflow: auto;min-height: 61.40000009536743px;height: auto;box-shadow: -3px -3px 18px gray inset;width: 91%;border-radius: 10px;"/>');
-			$('#InstanceDialog').append('<div style="border-radius:10px;width:95%;" id="InstanceDialogList" />');
+			$('#InstanceDialog').append('<div style="border-radius:10px;width:95%;max-height: 215px;overflow-y: scroll;" id="InstanceDialogList" />');
 			$('#InstanceDialog').append('<div style="margin-top: 2em;color: grey;font-size: 0.8em;">Each instance is separate world. While these worlds share the same server,they exist independantly. Worlds are saved frequently by the server to prevent data loss. Select an instance and click "Load" to switch to it. You will have to log in each time you join a new instance. </div>'+
 			'</div>');
 			var instances = this.getInstances();
