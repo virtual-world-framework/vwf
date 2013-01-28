@@ -37,8 +37,8 @@ function UserManager()
 	});
 	$(document.body).append('<div id="Logon">'+
 	'	<form id="loginForm">'+
-	'      <input type="text" placeholder="username" id="profilenames" style="font-size: 1.6em;width: 90%;height: 22px;padding: 0px;margin-right: 16px;border-radius: 3px;" pop_up_selection="0"> </input>'+
-	'      <input type="password" placeholder="password" id="password" style="font-size: 1.6em;width:90%;padding:0px;border-radius: 3px;" pop_up_selection="0"> </input>'+
+	'      <input type="text" placeholder="username" tabindex="300" id="profilenames" style="font-size: 1.6em;width: 90%;height: 22px;padding: 0px;margin-right: 16px;border-radius: 3px;" pop_up_selection="0"> </input>'+
+	'      <input type="password" placeholder="password" tabindex="301"  id="password" style="font-size: 1.6em;width:90%;padding:0px;border-radius: 3px;" pop_up_selection="0"> </input>'+
 	//'			<input type="text" name="name" id="name" onKeyPress="return disableEnterKey(event)" class="text ui-widget-content ui-corner-all" />'+
 	//'			<div id="AvatarChoice">'+
 	//'				<input type="radio" id="radio1" name="radio" value="usmale.dae" checked="checked" /><label for="radio1">Human</label>'+
