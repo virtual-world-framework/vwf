@@ -544,33 +544,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
             }
         }
-		$(canvas).on('touchstart',function(e){
-			e.preventDefault();
-			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-			touch.button = 0;
-			if(e.originalEvent.touches.length == 2 || e.originalEvent.changedTouches.length == 2)
-			touch.button = 1;
-			canvas.onmousedown(touch)
-		});
-		$(canvas).on('touchmove',function(e){
-			e.preventDefault();
-			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-			var touches = Math.max(e.originalEvent.touches.length ,e.originalEvent.changedTouches.length );
-			if(touches != 3)
-				canvas.onmousemove(touch);
-			else
-			{
-
-			}			
-		});
-		$(canvas).on('touchend',function(e){
-			e.preventDefault();
-			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-			touch.button = 0;
-			if(e.originalEvent.touches.length == 2 || e.originalEvent.changedTouches.length == 2)
-			touch.button = 1;
-			canvas.onmouseup(touch)
-		});
+		
         canvas.onmousemove = function( e ) {
             var eData = getEventData( e, false );
             if ( eData ) {

@@ -500,6 +500,13 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		});
 		
 		
+		
+		
+		$('#MenuViewBatching').click(function(e){
+			
+			$('#MenuViewBatching').mouseenter();
+		});
+		
 		$('#MenuCameraNavigate').click(function(e){
 			clearCameraModeIcons();
 			$('#MenuCameraNavigateicon').css('background','#9999FF');
@@ -514,6 +521,41 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			vwf.models[0].model.nodes['index-vwf'].setCameraMode('Free');
 		});
 		
+		
+		var pfx = ["webkit", "moz", "ms", "o", ""];
+		function RunPrefixMethod(obj, method) {
+			
+			var p = 0, m, t;
+			while (p < pfx.length && !obj[m]) {
+				m = method;
+				if (pfx[p] == "") {
+					m = m.substr(0,1).toLowerCase() + m.substr(1);
+				}
+				m = pfx[p] + m;
+				t = typeof obj[m];
+				if (t != "undefined") {
+					pfx = [pfx[p]];
+					return (t == "function" ? obj[m]() : obj[m]);
+				}
+				p++;
+			}
+
+		}
+
+		$('#MenuViewFullscreen').click(function(e){
+			
+				if (RunPrefixMethod(document, "FullScreen") || RunPrefixMethod(document, "IsFullScreen")) {
+					RunPrefixMethod(document, "CancelFullScreen");
+				}
+				else {
+					RunPrefixMethod(document.body, "RequestFullScreen");
+				}
+		});		
+
+
+
+
+
 		$('#MenuCamera3RDPerson').click(function(e){
 			
 			if(_UserManager.GetCurrentUserName())
@@ -718,9 +760,21 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		document.addEventListener("touchcancel", touchHandler, true); 
 		$('* :not(input)').disableSelection();
 	}
-	
+	var lastbutton = -1;
+	var ongoingTouches = [];
+	function ongoingTouchIndexById(idToFind) {
+	  for (var i=0; i<ongoingTouches.length; i++) {
+			var id = ongoingTouches[i].identifier;
+			 
+			if (id == idToFind) {
+			  return i;
+			}
+		  }
+		  return -1;    // not found
+		}
 	function touchHandler(event)
 	{
+		try{
 		var touches = event.changedTouches,
 			first = touches[0],
 			type = "";
@@ -729,36 +783,71 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			case "touchstart": type = "mousedown"; break;
 			case "touchmove":  type="mousemove"; break;        
 			case "touchend":   type="mouseup"; break;
+			case "touchleave":   type="mouseup"; break;
+			case "touchcancel":   type="mouseup"; break;
 			default: return;
 		}
+		if(event.type == 'touchstart')
+		{
+			for (var i=0; i<touches.length; i++) {
+    				if(ongoingTouchIndexById(touches[i].identifier) == -1) ongoingTouches.push(touches[i]);
+			}
+			var simulatedEvent2 = document.createEvent("MouseEvent");
+			simulatedEvent2.initMouseEvent("mouseup", true, true, window, 1, 
+								  first.screenX, first.screenY, 
+								  first.clientX, first.clientY, false, 
+								  false, false, false, lastbutton/*left*/, null);
+			simulatedEvent2.currentTarget = first.target;
+			first.target.dispatchEvent(simulatedEvent2);
 
-				 //initMouseEvent(type, canBubble, cancelable, view, clickCount, 
+		}
+		if(event.type == 'touchend' || event.type == 'touchleave' || event.type == 'touchcancel')
+		{
+		     for (var i=0; i<touches.length; i++) {
+		   	 if(ongoingTouchIndexById(touches[i].identifier) != -1)  ongoingTouches.splice(ongoingTouchIndexById(touches[i].identifier), 1);  // remove it; we're done
+			}
+  
+		}
+		
+		
+
+		//initMouseEvent(type, canBubble, cancelable, view, clickCount, 
 		//           screenX, screenY, clientX, clientY, ctrlKey, 
 		//           altKey, shiftKey, metaKey, button, relatedTarget);
 		
 		var mousebutton = 0;
-		mousebutton = touches.length -1;
+		mousebutton = ongoingTouches.length -1;
+		lastbutton = mousebutton;
+                document.title =  ongoingTouches.length;
 			
+
+		if(type=="mouseup")
+		mousebutton++;			
+
 		var simulatedEvent = document.createEvent("MouseEvent");
 		simulatedEvent.initMouseEvent(type, true, true, window, 1, 
 								  first.screenX, first.screenY, 
 								  first.clientX, first.clientY, false, 
-								  false, false, false, mousebutton/*left*/, null);
-		
-		 first.target.dispatchEvent(simulatedEvent);
+								  false, false, false, mousebutton /*left*/, null);
+		simulatedEvent.currentTarget = first.target;
+		first.target.dispatchEvent(simulatedEvent);
 		if(type == 'mouseup')
 		{
 			var simulatedEvent = document.createEvent("MouseEvent");
 			simulatedEvent.initMouseEvent('click', true, true, window, 1, 
 									  first.screenX, first.screenY, 
 									  first.clientX, first.clientY, false, 
-									  false, false, false, mousebutton/*left*/, null);
+									  false, false, false, mousebutton /*left*/, null);
 			
 			 first.target.dispatchEvent(simulatedEvent);
 		
 		}
 		
 		event.preventDefault();
+		}catch(e)
+		{
+		document.title = e.message;
+		}
 	}
 
 	var sizeTimeoutHandle;
