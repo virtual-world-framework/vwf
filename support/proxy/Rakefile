@@ -31,11 +31,11 @@ end
 
 CLOBBER.include "#{DOCUMENTATION}"
 
-task :build => [ :comp_docs ]
+task :build => [ :documentation ]
 
 desc "Generate the jsdoc component documentation."
 
-task :comp_docs do |task|
+task :documentation do |task|
 
     Dir.mktmpdir nil, "." do |tmpdir| # not in /tmp since java can't see across /cygdrive/c/... on Cygwin
 
@@ -61,35 +61,14 @@ task :comp_docs do |task|
 
             # Convert ## comments to /** */ comments for jsdoc.
 
-            FileList.new( PATTERNS ).sort.each do |path|
-
-                sh <<-SH.strip.gsub %r{ +}, " "
-                    ruby -p -i.bak -e ' \
-                        case ( state ||= 0 ) + ( %r{^\s*##} ? 1 : 0 ) \
-                            when 1 ; \
-                                last = $_ ; sub %r{##}, "/**" ; \
-                                state = 2 \
-                            when 3 ; \
-                                last = $_ ; sub %r{##}, " * " \
-                            when 2 ;\
-                                puts last.sub %r{##.*}, " */" ; \
-                                state = 0 \
-                        end \
-                    ' '#{path}'
-                SH
-
-            end
+            sh "ruby", "-p", "-i", "#{build}/rb-to-jsdoc.rb", * FileList.new( PATTERNS ).sort
 
             # Run jsdoc on the translated source.
 
-            sh <<-SH.strip.gsub %r{ +}, " "
-
-                java -jar #{build}/jsdoc_toolkit-2.4.0/jsrun.jar #{build}/jsdoc_toolkit-2.4.0/app/run.js \
-                    -Djsdoc.dir=#{build}/jsdoc_toolkit-2.4.0 \
-                    --template=#{build}/jsdoc_toolkit-2.4.0/templates/jsdoc --ext=js,yaml --allfunctions --quiet --recurse=10 --directory=#{comp_docs} \
-                    #{ FileList.new( PATTERNS ).sort.map { |path| "'" + path + "'" } .join " " }
-
-            SH
+            sh "java", "-jar", "#{build}/jsdoc_toolkit-2.4.0/jsrun.jar", "#{build}/jsdoc_toolkit-2.4.0/app/run.js",
+                "-Djsdoc.dir=#{build}/jsdoc_toolkit-2.4.0", "--template=#{build}/jsdoc_toolkit-2.4.0/templates/jsdoc",
+                "--ext=js,yaml", "--allfunctions", "--quiet", "--recurse=10", "--directory=#{comp_docs}",
+                * FileList.new( PATTERNS ).sort
 
         end
 
