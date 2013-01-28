@@ -21,7 +21,7 @@ require "pathname"
 COMP_SRC = "vwf.example.com"
 DOCUMENTATION = "../../public/web/docs/jsdoc_cmp"
 
-PATTERNS = [ "*.yaml" ]
+PATTERNS = [ "*.vwf.yaml" ]
 
 chdir COMP_SRC do
     MODULES = FileList.new( PATTERNS ).sort.map do |file|
@@ -67,7 +67,7 @@ task :documentation do |task|
 
             sh "java", "-jar", "#{build}/jsdoc_toolkit-2.4.0/jsrun.jar", "#{build}/jsdoc_toolkit-2.4.0/app/run.js",
                 "-Djsdoc.dir=#{build}/jsdoc_toolkit-2.4.0", "--template=#{build}/jsdoc_toolkit-2.4.0/templates/jsdoc",
-                "--ext=js,yaml", "--allfunctions", "--quiet", "--recurse=10", "--directory=#{comp_docs}",
+                "--ext=yaml", "--allfunctions", "--quiet", "--directory=#{comp_docs}",
                 * FileList.new( PATTERNS ).sort
 
         end
