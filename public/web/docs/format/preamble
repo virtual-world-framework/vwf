@@ -69,13 +69,48 @@
 									</a>
 								</li>
 								<li><span style='position:relative;left:20px'>
-									<a href='simulation.html' title='Multiuser'>
+									<a href='simulation.html' title='Simulation'>
 										Simulation
 									</a>
 								</li>
 								<li><span style='position:relative;left:20px'>
-									<a href='2d-interface.html' title='Multiuser'>
+									<a href='2d-interface.html' title='2D-Interface'>
 										2D Interface
+									</a>
+								</li>
+								<li><span style='position:relative;left:20px'>
+									<a href='materials.html' title='Materials'>
+										Materials
+									</a>
+								</li>
+								<li><span style='position:relative;left:20px'>
+									<a href='chat.html' title='Chat'>
+										Chat
+									</a>
+								</li>
+								<li><span style='position:relative;left:20px'>
+									<a href='lesson.html' title='Lesson'>
+										Lesson
+									</a>
+								</li>
+								<li><span style='position:relative;left:20px'>
+									<a href='files.html' title='Files'>
+										Files I/O
+									</a>
+								</li>
+								<li><span style='position:relative;left:20px'>
+									<a href='latency.html' title='Latency'>
+										Reduce Latency
+									</a>
+								</li>
+								<li><span style='position:relative;left:20px'>
+									<a href='login.html' title='Login'>
+										Login
+									</a>
+								</li>
+								<li><span style='position:relative;left:20px'>
+									<a href='lod.html' title='LOD'>
+										LOD
 									</a>
 								</li>
 							<li><a href='introduction.html' title='Developers Guide'>Developer's Guide</a></li>
