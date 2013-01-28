@@ -1,0 +1,3 @@
+[submodule "support/build/jsdoc"]
+	path = support/build/jsdoc
+	url = https://github.com/jsdoc3/jsdoc.git
