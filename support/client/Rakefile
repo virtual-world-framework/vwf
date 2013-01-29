@@ -22,7 +22,7 @@ SOURCE = "lib"
 DESTINATION = "libz"
 DOCUMENTATION = "../../public/web/docs/jsdoc"
 
-PATTERNS = [ "vwf.js", "vwf/*.js", "vwf/*/*.js", "vwf/*/stage/*.js" ]
+PATTERNS = [ "vwf.js", "vwf/*.js", "vwf/*/*.js", "vwf/*/stage/*.js", "logger.js", "version.js" ]
 
 chdir SOURCE do
     MODULES = FileList.new( PATTERNS ).sort.map do |file|
