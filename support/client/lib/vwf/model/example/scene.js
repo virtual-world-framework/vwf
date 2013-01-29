@@ -11,9 +11,12 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+/// vwf/model/example/scene.js is a demonstration of a scene manager.
+/// 
+/// @module vwf/model/example/scene
+/// @requires vwf/model
 
-    // vwf/model/example/scene.js is a demonstration of a scene manager.
+define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {
 

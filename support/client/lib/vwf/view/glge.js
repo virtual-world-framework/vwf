@@ -13,6 +13,10 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+/// @module vwf/view/glge
+/// @requires vwf/view
+/// @requires vwf/utility
+
 define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
     return view.load( module, {

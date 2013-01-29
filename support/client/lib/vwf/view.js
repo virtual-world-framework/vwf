@@ -13,17 +13,22 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( module, logger, kernel_api, view_api ) {
+/// vwf/view.js is the common implementation of all Virtual World Framework views. Views
+/// interpret information from the simulation, present it to the user, and accept user input
+/// influencing the simulation.
+///
+/// Views are outside of the simulation. Unlike models, they may accept external input--such as
+/// pointer and key events from a user--but may only affect the simulation indirectly through the
+/// synchronization server.
+/// 
+/// vwf/view and all deriving views are loaded as RequireJS (http://requirejs.org) modules.
+/// 
+/// @module vwf/view
+/// @requires logger
+/// @requires vwf/api/kernel
+/// @requires vwf/api/view
 
-    // vwf/view.js is the common implementation of all Virtual World Framework views. Views
-    // interpret information from the simulation, present it to the user, and accept user input
-    // influencing the simulation.
-    //
-    // Views are outside of the simulation. Unlike models, they may accept external input--such as
-    // pointer and key events from a user--but may only affect the simulation indirectly through the
-    // synchronization server.
-    // 
-    // vwf/view and all deriving views are loaded as RequireJS (http://requirejs.org) modules.
+define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( module, logger, kernel_api, view_api ) {
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
@@ -31,7 +36,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
 
     logger.for( label ).debug( "loading" );
 
-    return {
+    var exports = {
 
         module: module,
 
@@ -157,5 +162,7 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
         },
         
     };
+
+    return exports;
 
 } );

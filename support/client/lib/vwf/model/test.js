@@ -11,9 +11,12 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+/// vwf/model/test.js is a dummy driver used for tests.
+/// 
+/// @module vwf/model/test
+/// @requires vwf/model
 
-    // vwf/model/test.js is a dummy driver used for tests.
+define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {
 

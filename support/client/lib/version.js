@@ -13,6 +13,8 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+/// @module version
+
 define( function() {
 	return [ 0, 6, 2, 0 ]; // major, minor, patch, build
 } );

@@ -13,9 +13,12 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model/stage" ], function( module, stage ) {
+/// vwf/model/stage/map.js translates between kernel-side nodeIDs and model-side objects or ids.
+/// 
+/// @module vwf/model/stage/map
+/// @requires vwf/model/stage
 
-    // vwf/model/stage/map.js translates between kernel-side nodeIDs and model-side objects or ids.
+define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
     return stage.load( module, {
 

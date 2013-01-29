@@ -13,6 +13,9 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+/// @module vwf/model/stage
+/// @requires vwf/model
+
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {

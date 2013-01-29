@@ -13,219 +13,175 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-/// @name vwf.api.model
-/// @namespace
+/// Model API.
+/// 
+/// @module vwf/api/model
 
-define( {
+define( function() {
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#creatingNode
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// @param {ID} childID
-    /// @param {String} childExtendsID
-    /// @param {String[]} childImplementsIDs
-    /// @param {String} childSource
-    /// @param {String} childType
-    /// @param {String} childURI
-    /// @param {String} childName
-    /// @param {Function} [callback]
-    /// 
-    /// @returns {}
+    var exports = {
 
-    creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback( ready ) */ ],
+        /// Description.
+        /// 
+        /// @param {ID} nodeID
+        /// @param {ID} childID
+        /// @param {String} childExtendsID
+        /// @param {String[]} childImplementsIDs
+        /// @param {String} childSource
+        /// @param {String} childType
+        /// @param {String} childURI
+        /// @param {String} childName
+        /// @param {Function} [callback]
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#initializingNode
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// @param {ID} childID
-    /// 
-    /// @returns {}
+        creatingNode: [ /* nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback( ready ) */ ],
 
-    initializingNode: [ /* nodeID, childID */ ],
+        /// Description.
+        /// 
+        /// @param {ID} nodeID
+        /// @param {ID} childID
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#deletingNode
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// 
-    /// @returns {}
+        initializingNode: [ /* nodeID, childID */ ],
 
-    deletingNode: [ /* nodeID */ ],
+        /// Description.
+        /// 
+        /// @param {ID} nodeID
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#addingChild
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        deletingNode: [ /* nodeID */ ],
 
-    addingChild: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#removingChild
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        addingChild: [],
 
-    removingChild: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#settingProperties
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        removingChild: [],
 
-    settingProperties: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#gettingProperties
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        settingProperties: [],
 
-    gettingProperties: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#creatingProperty
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        gettingProperties: [],
 
-    creatingProperty: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#initializingProperty
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        creatingProperty: [],
 
-    initializingProperty: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    // TODO: deletingProperty
-  
-    /// Description.
-    /// 
-    /// @name vwf.api.model#settingProperty
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        initializingProperty: [],
 
-    settingProperty: [],
+        // TODO: deletingProperty
+      
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#gettingProperty
-    /// @function
-    /// 
-    /// @param {}
-    /// 
-    /// @returns {}
+        settingProperty: [],
 
-    gettingProperty: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#creatingMethod
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// @param {String} methodName
-    /// @param {String[]} methodParameters
-    /// @param {String} methodBody
-    /// 
-    /// @returns {}
+        gettingProperty: [],
 
-    creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
+        /// Description.
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// @param {String[]} methodParameters
+        /// @param {String} methodBody
+        /// 
+        /// @returns {}
 
-    // TODO: deletingMethod
+        creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#callingMethod
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// @param {String} methodName
-    /// @param {String[]} methodParameters
-    /// @param {Value} methodValue
-    /// 
-    /// @returns {}
+        // TODO: deletingMethod
 
-    callingMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
+        /// Description.
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// @param {String[]} methodParameters
+        /// @param {Value} methodValue
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#creatingEvent
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// @param {String} eventName
-    /// @param {String[]} eventParameters
-    /// 
-    /// @returns {}
+        callingMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
 
-    creatingEvent: [ /* nodeID, eventName, eventParameters */ ],
+        /// Description.
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {String[]} eventParameters
+        /// 
+        /// @returns {}
 
-    // TODO: deletingEvent
+        creatingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#firingEvent
-    /// @function
-    /// 
-    /// @param {ID} nodeID
-    /// @param {String} eventName
-    /// @param {String[]} eventParameters
-    /// 
-    /// @returns {}
+        // TODO: deletingEvent
 
-    firingEvent: [ /* nodeID, eventName, eventParameters */ ],
+        /// Description.
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {String[]} eventParameters
+        /// 
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#executing
-    /// @function
-    /// 
-    /// @param {}
-    /// @returns {}
+        firingEvent: [ /* nodeID, eventName, eventParameters */ ],
 
-    executing: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// @returns {}
 
-    /// Description.
-    /// 
-    /// @name vwf.api.model#ticking
-    /// @function
-    /// 
-    /// @param {}
-    /// @returns {}
+        executing: [],
 
-    ticking: [],
+        /// Description.
+        /// 
+        /// @param {}
+        /// @returns {}
+
+        ticking: [],
+
+    };
+
+    return exports;
 
 } );

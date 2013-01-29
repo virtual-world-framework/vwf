@@ -13,9 +13,13 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model, configuration ) {
+/// vwf/model/object.js is a backstop property store.
+/// 
+/// @module vwf/model/object
+/// @requires vwf/model
+/// @requires vwf/configuration
 
-    // vwf/model/object.js is a backstop property store.
+define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model, configuration ) {
 
     return model.load( module, {
 

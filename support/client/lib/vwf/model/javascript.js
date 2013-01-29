@@ -13,10 +13,14 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+/// vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
+/// simulation.
+/// 
+/// @module vwf/model/javascript
+/// @requires vwf/model
+/// @requires vwf/utility
 
-    // vwf/model/javascript.js is a placeholder for the JavaScript object interface to the
-    // simulation.
+define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     return model.load( module, {
 

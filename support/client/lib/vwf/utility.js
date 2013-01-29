@@ -15,8 +15,7 @@
 
 /// Kernel utility functions.
 /// 
-/// @name vwf.utility
-/// @namespace
+/// @module vwf/utility
 
 define( [ "module",
     "vwf/utility/xpath",
@@ -28,7 +27,7 @@ define( [ "module",
     coordinates
 ) {
 
-    return /** @lends vwf.utility.prototype */ {
+    var exports = {
 
         // -- transform ----------------------------------------------------------------------------
 
@@ -107,11 +106,8 @@ define( [ "module",
         ///   utility.transform( object, utility.transforms.*transform* )
         ///
         /// to apply the transform utility.transforms.*transform* to object.
-        /// 
-        /// @name vwf.utility.transforms
-        /// @namespace
 
-        transforms: /** @lends vwf.utility.transforms.prototype */ {
+        transforms: {
 
             // -- transit --------------------------------------------------------------------------
 
@@ -279,30 +275,23 @@ define( [ "module",
         // -- xpath --------------------------------------------------------------------------------
 
         /// XPath resolution functions.
-        /// 
-        /// @name vwf.utility.xpath
-        /// @namespace
 
         xpath: xpath,
 
         // -- color --------------------------------------------------------------------------------
 
         /// HTML/CSS color conversion functions.
-        /// 
-        /// @name vwf.utility.color
-        /// @namespace
 
         color: color,
 
         // -- coordinates --------------------------------------------------------------------------
 
         /// DOM element coordinate conversion functions.
-        /// 
-        /// @name vwf.utility.coordinates
-        /// @namespace
 
         coordinates: coordinates,
 
     };
+
+    return exports;
 
 } );

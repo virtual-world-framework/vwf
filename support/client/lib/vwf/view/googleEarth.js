@@ -13,6 +13,9 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+/// @module vwf/view/googleEarth
+/// @requires vwf/view
+
 define( [ "module", "vwf/view" ], function( module, view ) {
 
     return view.load( module, {

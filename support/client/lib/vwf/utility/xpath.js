@@ -15,12 +15,11 @@
 
 /// XPath resolution functions.
 /// 
-/// @name vwf.utility.xpath
-/// @namespace
+/// @module vwf/utility/xpath
 
 define( [ "module" ], function( module ) {
 
-    return /** @lends vwf.utility.xpath.prototype */{
+    var exports = {
 
         // -- resolve --------------------------------------------------------------------------
 
@@ -373,11 +372,8 @@ define( [ "module" ], function( module ) {
         // -- regex ----------------------------------------------------------------------------
 
         /// Regexes to crack the XPath string.
-        /// 
-        /// @name vwf.utility.xpath.regex
-        /// @namespace
 
-        regex: ( function() /** @lends vwf.utility.xpath.regex.prototype */ {
+        regex: ( function() {
 
             var name = "[A-Za-z_][A-Za-z_0-9.-]*",              // XPath QName: http://www.w3.org/TR/xpath20/#prod-xpath-QName
                 singleQuotedName = "'(?:[^'\\\\]|\\'|\\\\)+'",  // Single-quoted QName (VWF extension)
@@ -490,5 +486,7 @@ define( [ "module" ], function( module ) {
         } )(),
 
     };
+
+    return exports;
 
 } );

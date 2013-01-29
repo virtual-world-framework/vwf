@@ -13,9 +13,13 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+/// vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
+/// 
+/// @module vwf/model/glge
+/// @requires vwf/model
+/// @requires vwf/utility
 
-    // vwf/model/glge.js is an interface to the GLGE WebGL scene manager.
+define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
     // For historical reasons yet to be resolved, the GLGE model code currently resides in
     // vwf-model.glge.js intermixed with the view code. This driver is a gross hack to delegate model

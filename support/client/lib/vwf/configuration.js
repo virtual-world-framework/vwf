@@ -16,12 +16,11 @@
 /// vwf/configuration maintains the runtime configuration settings. A set of fixed factory defaults
 /// cascade into instance settings and appear as the active configuration.
 /// 
-/// @name vwf.configuration
-/// @namespace
+/// @module vwf/configuration
 
 define( function() {
 
-    var configuration = Object.create( Object.prototype, /** @lends vwf.configuration.prototype */ {
+    var exports = Object.create( Object.prototype, {
 
         /// The factory default settings.
         /// 
@@ -36,8 +35,6 @@ define( function() {
         ///     development: { beta: 222, gamma: 3000 },
         ///     testing: { },
         ///   }
-        /// 
-        /// @field
 
         factory: {
 
@@ -57,8 +54,6 @@ define( function() {
         ///     gamma: 3000,
         ///     delta: false,
         ///   }
-        /// 
-        /// @field
 
         instance: {
 
@@ -80,8 +75,6 @@ define( function() {
         /// The active configuration is the result of a cascade of the factory default settings,
         /// factory settings for the active environment, and the instance settings. Changes to the
         /// configuration update this object in place without invalidating references to it.
-        /// 
-        /// @field
 
         active: {
 
@@ -96,8 +89,6 @@ define( function() {
         /// The name of the active envionment.
         /// 
         /// environment returns the same value as active.environment.
-        /// 
-        /// @field
 
         environment: {
 
@@ -110,8 +101,6 @@ define( function() {
         // -- changed ------------------------------------------------------------------------------
 
         /// Register a notification function to be called when the configuration in active changes.
-        /// 
-        /// @function
         /// 
         /// @param {Function} callback
         ///   The function to call, invoked as callback( active ).
@@ -161,7 +150,7 @@ define( function() {
 
     /// Factory default configurations.
 
-    var factory = /** @lends vwf.configuration-factory */ {
+    var factory = {
 
         /// Default configuration for all environments.
 
@@ -197,41 +186,33 @@ define( function() {
     // -- instance ---------------------------------------------------------------------------------
 
     /// Configuration overrides for the current instance.
-    /// 
-    /// @field
 
     var instance = {};
 
     // -- active -----------------------------------------------------------------------------------
 
     /// The computed configuration.
-    /// 
-    /// @field
 
     var active = {};
 
     // -- environment ------------------------------------------------------------------------------
 
     /// Name of the active environment. Equivalent to active.environment.
-    /// 
-    /// @field
 
     var environment;
 
     // -- callbacks --------------------------------------------------------------------------------
 
     /// Update callbacks.
-    /// 
-    /// @field
 
     var callbacks = [];
 
     // Force the first update.
 
-    configuration.instance = configuration.instance;
+    exports.instance = exports.instance;
 
     // Return the module.
 
-    return configuration;
+    return exports;
 
 } );

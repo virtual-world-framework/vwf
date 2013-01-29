@@ -13,21 +13,24 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+/// vwf/view/document extends a view interface up to the browser document. When vwf/view/document
+/// is active, scripts on the main page may make (reflected) kernel calls:
+/// 
+///     window.vwf_view.kernel.createChild( nodeID, childName, childComponent, childURI, function( childID ) {
+///         ...
+///     } );
+/// 
+/// And receive view calls:
+/// 
+///     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
+///         childSource, childType, childURI, childName, callback /- ( ready ) -/ ) {
+///         ...
+///     }
+/// 
+/// @module vwf/view/document
+/// @requires vwf/view
+
 define( [ "module", "vwf/view" ], function( module, view ) {
-
-    // vwf/view/document extends a view interface up to the browser document. When vwf/view/document
-    // is active, scripts on the main page may make (reflected) kernel calls:
-
-    //     window.vwf_view.kernel.createChild( nodeID, childName, childComponent, childURI, function( childID ) {
-    //         ...
-    //     } );
-
-    // And receive view calls:
-
-    //     window.vwf_view.createdNode = function( nodeID, childID, childExtendsID, childImplementsIDs,
-    //         childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
-    //         ...
-    //     }
 
     return view.load( module, {
 

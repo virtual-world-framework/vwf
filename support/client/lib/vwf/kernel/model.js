@@ -13,6 +13,9 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+/// @module vwf/kernel/model
+/// @requires vwf/model
+
 define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {
@@ -24,22 +27,22 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.state.blocked = false; // kernel reentry attempted?
         },
 
-        // Allow kernel reentry from the drivers.
+        /// Allow kernel reentry from the drivers.
 
         enable: function() {
             this.state.enabled = true;
             this.state.blocked = false;
         },
         
-        // Prevent kernel reentry from the drivers.
+        /// Prevent kernel reentry from the drivers.
 
         disable: function() {
             this.state.enabled = false;
             this.state.blocked = false;
         },
 
-        // Indicate if a driver attempted to call back into the kernel while reentry was disabled,
-        // and clear the *blocked* flag.
+        /// Indicate if a driver attempted to call back into the kernel while reentry was disabled,
+        /// and clear the *blocked* flag.
         
         blocked: function() {
             var blocked = this.state.blocked;

@@ -13,9 +13,12 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+/// vwf/model/scenejs.js is a placeholder for a 3-D scene manager.
+/// 
+/// @module vwf/model/scenejs
+/// @requires vwf/model
 
-    // vwf/model/scenejs.js is a placeholder for a 3-D scene manager.
+define( [ "module", "vwf/model" ], function( module, model ) {
 
     return model.load( module, {
 

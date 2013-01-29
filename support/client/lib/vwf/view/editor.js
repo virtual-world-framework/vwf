@@ -13,9 +13,14 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, version, view, utility ) {
+/// vwf/view/editor creates a view interface for editor functions. 
+/// 
+/// @module vwf/view/editor
+/// @requires version
+/// @requires vwf/view
+/// @requires vwf/utility
 
-    // vwf/view/editor creates a view interface for editor functions. 
+define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, version, view, utility ) {
 
     return view.load( module, {
 
