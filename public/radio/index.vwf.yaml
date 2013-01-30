@@ -71,7 +71,7 @@ children:
       lightType: "point"
       enable: true
       distance: 2000
-      intensity: 1.4
+      intensity: 0.4
       color: [ 255, 255, 255 ]
       glge-constantAttenuation: 0.3
       glge-linearAttenuation: 0.00000001
@@ -84,8 +84,8 @@ children:
     properties:
       lightType: "directional"
       distance: 2000
-      intensity: 0.9
-      color: [255,255,255]
+      intensity: 0.2
+      color: [ 255, 255, 255]
       glge-constantAttenuation: 1
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf

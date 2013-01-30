@@ -778,8 +778,8 @@ children:
     properties:
       lightType: "directional"
       distance: 2000
-      intensity: 0.9
-      color: [255,255,255]
+      intensity: 0.4
+      color: [ 255, 255, 255]
       #specular: false # the highlights are way too hot (materials or light?)
       rotation: [ 1, 0, 0, -10 ]
   dir2:
@@ -789,8 +789,8 @@ children:
     properties:
       lightType: "directional"
       distance: 2000
-      intensity: 0.9
-      color: [255,255,255]
+      intensity: 0.6
+      color: [ 255, 255, 255]
       #specular: false # the highlights are way too hot (materials or light?)
       rotation: [ -1, 0, 0, 200 ]
 scripts:
@@ -799,6 +799,7 @@ scripts:
     this.camera.translation = [ -320, -360, 164 ];
     this.camera.lookAt = this.humvee.id;
     this.camera.far = 3000;
+    this.camera.near = 1;
     this.humvee.interiorCamera.transform = [-0.31940966844558716, 0.9476123452186584, -5.816936266000994e-8, 0,
       -0.9332156777381897, -0.3145570456981659, -0.17364755272865295, 0,
       -0.1645519733428955, -0.05546514317393303, 0.9848077297210693, 0,

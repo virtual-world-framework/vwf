@@ -43,34 +43,6 @@
 			ret.push(mat[i]);
 		return ret.slice(0);	
 	}
-	function transformMatrix2(propertyValue,flip)
-	{
-	
-		var flipmat = new THREE.Matrix4(-1, 0,0,0,
-                                                            0, 0,1,0,
-                                                            0,1,0,0,
-                                                            0, 0,0,1);
-                            
-                                            
-        var matrix = new THREE.Matrix4();
-		matrix.elements = propertyValue;
-		matrix = matrix.multiply(flipmat,matrix);
-		return matrix.elements;
-	}
-	function unTransformMatrix2(propertyValue,flip)
-	{
-		
-		var flipmat = new THREE.Matrix4(-1, 0,0,0,
-                                                            0, 0,1,0,
-                                                            0,1,0,0,
-                                                            0, 0,0,1);
-                            
-        flipmat = flipmat.getInverse(flipmat)                               
-        var matrix = new THREE.Matrix4();
-		matrix.elements = propertyValue;
-		matrix = matrix.multiply(flipmat,matrix);
-		return matrix.elements;
-	}
 	function transformMatrix (propertyValue,flip,iscam)
 	{
 	 
@@ -894,6 +866,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if ( propertyName == 'intensity' ) {
                         threeObject.intensity = propertyValue;
+						threeObject.updateMatrix();
                     }                    
                     if ( propertyName == 'castShadows' ) {
                         threeObject.castShadow = propertyValue;
@@ -1312,33 +1285,30 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 	}
 	function fixMissingUVs(mesh)
 	{
-		 
-		 if(mesh.geometry.faceVertexUvs[0].length == 0)
-		 {
-			
-			
+		if(!mesh.geometry.faceVertexUvs[0] )
+			mesh.geometry.faceVertexUvs[0] = [];
+		if(mesh.geometry.faceVertexUvs[0].length == 0)
+		{
 			for(var i =0; i < mesh.geometry.faces.length; i++)
 			{
-				mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+				var face = mesh.geometry.faces[i];
+				if(face instanceof THREE.Face4)
+					mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+				if(face instanceof THREE.Face3)
+					mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
 			}
-		 }
-		 
+		}
 		
-		mesh.geometry.dynamic = true;
-		mesh.geometry.verticesNeedUpdate = true;
-		mesh.geometry.elementsNeedUpdate = true;
-		mesh.geometry.morphTargetsNeedUpdate = true;
+		 
+		mesh.geometry.computeCentroids();
+		mesh.geometry.computeFaceNormals();
+		mesh.geometry.computeVertexNormals();
+		
+		
+		
 		mesh.geometry.uvsNeedUpdate = true;
-		mesh.geometry.normalsNeedUpdate = true;
-		mesh.geometry.colorsNeedUpdate = true;
-		mesh.geometry.tangentsNeedUpdate = true;
-		mesh.geometry.__dirtyVertices = true;
-		mesh.geometry.__dirtyMorphTargets = true;
-		mesh.geometry.__dirtyElements = true;
-		mesh.geometry.__dirtyUvs = true;
-		mesh.geometry.__dirtyNormals = true;
-		mesh.geometry.__dirtyTangents = true;
-		mesh.geometry.__dirtyColors = true;
+
+		
 	}
     //set the material on all the sub meshes of an object.
     //This could cause some strangeness in cases where an asset has multiple sub materials
@@ -1419,15 +1389,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             SetMaterialAmbients.call(threeModel,asset);
 			//asset.rotation.z = Math.PI;
 			
-            nodeCopy.threeObject.add(asset);
+            
 			
 			var meshes =[];
 			GetAllLeafMeshes(asset,meshes);
+		
 			for(var i =0; i < meshes.length; i++)
 			{
 				fixMissingUVs(meshes[i]);	
-				meshes[i].geometry.uvsNeedUpdate = true;
 			}
+			
+		//	window.setTimeout(function(){
+			nodeCopy.threeObject.add(asset);
+			
+		//	},500);
 			
             nodeCopy.threeObject.matrixAutoUpdate = false;
             //no idea what this is doing here

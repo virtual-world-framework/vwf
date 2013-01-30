@@ -37,7 +37,7 @@ children:
       glge-linearAttenuation: 0.00000001
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-300,0]
+      translation: [ 0, -300, 0]
 methods:
   update:      
 scripts:
@@ -50,7 +50,7 @@ scripts:
       this.dir1.translation = [0,-100,0];
       this.duck.translation = [0,0,0];
       this.counter = 0;
-      this.future(0.2).update();
+      this.future(0.02).update();
     }
     this.update = function()
     {
@@ -71,7 +71,7 @@ scripts:
             });
             this.duck.translation = [0,0,0];
             this.duck.rotation = [0,0,1,0];
-        
+            this.counter = 0;
         }
-        this.future(0.2).update();
+        this.future(0.02).update();
     }

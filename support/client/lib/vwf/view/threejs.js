@@ -315,6 +315,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             var scenenode = sceneNode;
             window._dScene = scene;
             window._dRenderer = renderer;
+			window._dSceneNode = sceneNode;
             sceneNode.frameCount = 0; // needed for estimating when we're pick-safe
             
             initInputEvents.call(this,mycanvas);
