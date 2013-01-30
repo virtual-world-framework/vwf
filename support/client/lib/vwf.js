@@ -13,6 +13,9 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+/// @name vwf
+/// @namespace
+
 ( function( window ) {
 
     window.console && console.debug && console.debug( "loading vwf" );
@@ -1150,6 +1153,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
+
                     // delegates to the models and views as above.
 
                     nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
@@ -2392,7 +2396,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             this.logger.debuggx( "dispatchEvent", function() {
                 return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ),
-                    JSON.stringify( loggableValues( eventNodeParameters ) ) ];
+                    JSON.stringify( loggableIndexedValues( eventNodeParameters ) ) ];
             } );
 
             // Defaults for the parameter parameters.
@@ -2735,15 +2739,57 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         };
 
+        /// Determine if a node has a property with the given name, either directly on the node or
+        /// inherited from a prototype.
+        /// 
+        /// This function must run as a method of the kernel. Invoke as: nodeHasProperty.call(
+        ///   kernel, nodeID, propertyName ).
+        /// 
+        /// @name vwf-nodeHasProperty
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} propertyName
+        /// 
+        /// @returns {Boolean}
+
         var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
             return propertyName in node.properties;
         };
 
+        /// Determine if a node has a property with the given name. The node's prototypes are not
+        /// considered.
+        /// 
+        /// This function must run as a method of the kernel. Invoke as: nodeHasOwnProperty.call(
+        ///   kernel, nodeID, propertyName ).
+        /// 
+        /// @name vwf-nodeHasOwnProperty
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} propertyName
+        /// 
+        /// @returns {Boolean}
+
         var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
             return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
         };
+
+        /// Determine if a given property of a node has a setter function, either directly on the
+        /// node or inherited from a prototype.
+        /// 
+        /// This function must run as a method of the kernel. Invoke as: nodePropertyHasSetter.call(
+        ///   kernel, nodeID, propertyName ).
+        /// 
+        /// @name vwf-nodePropertyHasSetter
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} propertyName
+        /// 
+        /// @returns {Boolean}
 
         var nodePropertyHasSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
             var node = this.models.javascript.nodes[nodeID];
@@ -2751,41 +2797,124 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return typeof setter == "function" || setter instanceof Function;
         };
 
+        /// Determine if a given property of a node has a setter function. The node's prototypes are
+        /// not considered.
+        /// 
+        /// This function must run as a method of the kernel. Invoke as:
+        ///   nodePropertyHasOwnSetter.call( kernel, nodeID, propertyName ).
+        /// 
+        /// @name vwf-nodePropertyHasOwnSetter
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} propertyName
+        /// 
+        /// @returns {Boolean}
+
         var nodePropertyHasOwnSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
             var node = this.models.javascript.nodes[nodeID];
             var setter = node.private.setters && node.private.setters.hasOwnProperty( propertyName ) && node.private.setters[propertyName];
             return typeof setter == "function" || setter instanceof Function;
         };
 
+        /// Determine if a node has a child with the given name, either directly on the node or
+        /// inherited from a prototype.
+        /// 
+        /// This function must run as a method of the kernel. Invoke as: nodeHasChild.call(
+        ///   kernel, nodeID, childName ).
+        /// 
+        /// @name vwf-nodeHasChild
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} childName
+        /// 
+        /// @returns {Boolean}
+
         var nodeHasChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
             return childName in node.children;
         };
+
+        /// Determine if a node has a child with the given name. The node's prototypes are not
+        /// considered.
+        /// 
+        /// This function must run as a method of the kernel. Invoke as: nodeHasOwnChild.call(
+        ///   kernel, nodeID, childName ).
+        /// 
+        /// @name vwf-nodeHasOwnChild
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} childName
+        /// 
+        /// @returns {Boolean}
 
         var nodeHasOwnChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
             var node = this.models.javascript.nodes[nodeID];
             return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
         };
 
-        // Is a component specifier a URI?
+        /// Determine if a component specifier is a URI.
+        /// 
+        /// A component may be specified as the URI of a resource containing a descriptor (string),
+        /// a descriptor (object), or the ID of a previously-created node (primitive).
+        /// 
+        /// @name vwf-componentIsURI
+        /// @function
+        /// 
+        /// @param {String|Object} candidate
+        /// 
+        /// @returns {Boolean}
 
         var componentIsURI = function( candidate ) {
             return ( typeof candidate == "string" || candidate instanceof String ) && ! componentIsID( candidate );
         };
 
-        // Is a component specifier a descriptor?
+        /// Determine if a component specifier is a descriptor.
+        /// 
+        /// A component may be specified as the URI of a resource containing a descriptor (string),
+        /// a descriptor (object), or the ID of a previously-created node (primitive).
+        /// 
+        /// @name vwf-componentIsURI
+        /// @function
+        /// 
+        /// @param {String|Object} candidate
+        /// 
+        /// @returns {Boolean}
 
         var componentIsDescriptor = function( candidate ) {
             return typeof candidate == "object" && candidate != null && ! isPrimitive( candidate );
         };
 
-        // Is a component specifier an ID?
+        /// Determine if a component specifier is an ID.
+        /// 
+        /// A component may be specified as the URI of a resource containing a descriptor (string),
+        /// a descriptor (object), or the ID of a previously-created node (primitive).
+        /// 
+        /// @name vwf-componentIsURI
+        /// @function
+        /// 
+        /// @param {String|Object} candidate
+        /// 
+        /// @returns {Boolean}
 
         var componentIsID = function( candidate ) {
             return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
         };
 
-        // Is a primitive or a boxed primitive.
+        /// Determine if a value is a JavaScript primitive, or the boxed version of a JavaScript
+        /// primitive.
+        /// 
+        /// Node IDs are JavaScript primitives. This function may be used to determine if a value
+        /// has the correct type to be a node ID.
+        /// 
+        /// @name vwf-isPrimitive
+        /// @function
+        /// 
+        /// @param candidate
+        /// 
+        /// @returns {Boolean}
 
         var isPrimitive = function( candidate ) {
 
@@ -2807,10 +2936,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         };
 
-        // -- objectIsComponent --------------------------------------------------------------------
-
-        // Determine if a JavaScript object is a component specification by searching for component
-        // specification attributes in the candidate object.
+        /// Determine if an object is a component descriptor. Detect the type by searching for
+        /// descriptor keys in the candidate object.
+        /// 
+        /// @name vwf-objectIsComponent
+        /// @function
+        /// 
+        /// @param {Object} candidate
+        /// 
+        /// @returns {Boolean}
 
         var objectIsComponent = function( candidate ) {
 
@@ -2830,8 +2964,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             if ( typeof candidate == "object" && candidate != null ) {
 
-                componentAttributes.forEach( function( attributeName ) {
-                    isComponent = isComponent || candidate.hasOwnProperty( attributeName );
+                isComponent = componentAttributes.some( function( attributeName ) {
+                    return candidate.hasOwnProperty( attributeName );
                 } );
 
             }
@@ -2839,11 +2973,16 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return isComponent; 
         };
 
-        // -- valueHasAccessors --------------------------------------------------------------------
-
-        // Determine if a property initializer is a detailed initializer containing explicit
-        // accessor and value parameters (rather than being a simple value specification) by
-        // searching for accessor attributes in the candidate object.
+        /// Determine if a property initializer is a detailed initializer containing explicit
+        /// accessor and value parameters (rather than a simple value specification). Detect the
+        /// type by searching for property initializer keys in the candidate object.
+        /// 
+        /// @name vwf-valueHasAccessors
+        /// @function
+        /// 
+        /// @param {Object} candidate
+        /// 
+        /// @returns {Boolean}
 
         var valueHasAccessors = function( candidate ) {
 
@@ -2857,8 +2996,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             if ( typeof candidate == "object" && candidate != null ) {
 
-                accessorAttributes.forEach( function( attributeName ) {
-                    hasAccessors = hasAccessors || candidate.hasOwnProperty( attributeName );
+                hasAccessors = accessorAttributes.some( function( attributeName ) {
+                    return candidate.hasOwnProperty( attributeName );
                 } );
 
             }
@@ -2866,11 +3005,16 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return hasAccessors; 
         };
 
-        // -- valueHasBody -------------------------------------------------------------------------
-
-        // Determine if a method or event initializer is a detailed initializer containing a
-        // parameter list along with the body text (method initializers only) by searching for the
-        // parameter and body attributes in the candidate object.
+        /// Determine if a method or event initializer is a detailed initializer containing a
+        /// parameter list along with the body text (method initializers only). Detect the type by
+        /// searching for method and event initializer keys in the candidate object.
+        /// 
+        /// @name vwf-valueHasBody
+        /// @function
+        /// 
+        /// @param {Object} candidate
+        /// 
+        /// @returns {Boolean}
 
         var valueHasBody = function( candidate ) {  // TODO: refactor and share with valueHasAccessors and possibly objectIsComponent  // TODO: unlike a property initializer, we really only care if it's an object vs. text; text == use as body; object == presume o.parameters and o.body  // TODO: except that a script in the unnamed-list format would appear as an object but should be used as the body
 
@@ -2883,8 +3027,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             if ( typeof candidate == "object" && candidate != null ) {
 
-                bodyAttributes.forEach( function( attributeName ) {
-                    hasBody = hasBody || candidate.hasOwnProperty( attributeName );
+                hasBody = bodyAttributes.some( function( attributeName ) {
+                    return candidate.hasOwnProperty( attributeName );
                 } );
 
             }
@@ -2892,11 +3036,16 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return hasBody; 
         };
 
-        // -- valueHasType -------------------------------------------------------------------------
-
-        // Determine if a script initializer is a detailed initializer containing explicit text and
-        // type parameters (rather than being a simple text specification) by searching for the
-        // attributes in the candidate object.
+        /// Determine if a script initializer is a detailed initializer containing explicit text and
+        /// type parameters (rather than being a simple text specification). Detect the type by
+        /// searching for the script initializer keys in the candidate object.
+        /// 
+        /// @name vwf-valueHasType
+        /// @function
+        /// 
+        /// @param {Object} candidate
+        /// 
+        /// @returns {Boolean}
 
         var valueHasType = function( candidate ) {  // TODO: refactor and share with valueHasBody, valueHasAccessors and possibly objectIsComponent
 
@@ -2909,8 +3058,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             if ( typeof candidate == "object" && candidate != null ) {
 
-                typeAttributes.forEach( function( attributeName ) {
-                    hasType = hasType || candidate.hasOwnProperty( attributeName );
+                hasType = typeAttributes.some( function( attributeName ) {
+                    return candidate.hasOwnProperty( attributeName );
                 } );
 
             }
@@ -2918,7 +3067,31 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return hasType; 
         };
 
-        // -- normalizedComponent ------------------------------------------------------------------
+        /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by
+        /// vwf.createChild. The following forms are accepted:
+        /// 
+        ///   - Descriptor: { extends: component, source: ..., type: ..., ... }
+        ///   - Component URI: http://host/path/to/component.vwf
+        ///   - Asset URI: http://host/ath/to/asset.type
+        ///   - Node ID
+        /// 
+        /// They are converted as follows:
+        /// 
+        ///   - Descriptor: unchanged [1]
+        ///   - Component URI: a component that extends the component identified by the URI
+        ///   - Asset URI: a component having the asset identified by the URI as its source
+        ///   - Node ID: a component that extends the previously-created node identified by the ID
+        /// 
+        /// [1] As a special case, missing MIME types are filled in for assets matcching the
+        /// patterns *.unity3d and *.dae, and components having assets of those types but no
+        /// prototype declared will be upgraded to extend scene.vwf and navscene.vwf, respectively.
+        /// 
+        /// @name vwf-normalizedComponent
+        /// @function
+        /// 
+        /// @param {String|Object} component
+        /// 
+        /// @returns {Object}
 
         var normalizedComponent = function( component ) {
 
@@ -2975,19 +3148,41 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             return component;
         };
 
-        // -- loggableFields -----------------------------------------------------------------------
+        /// Convert a fields object as passed between the client and reflector, and stored in the
+        /// message queue, into a form suitable for writing to a log.
+        /// 
+        /// @name vwf-loggableFields
+        /// @function
+        /// 
+        /// @param {Object} fields
+        /// 
+        /// @returns {Object}
 
         var loggableFields = function( fields ) {
             return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
         };
 
-        // -- loggableComponent --------------------------------------------------------------------
+        /// Convert a component URI, descriptor or ID into a form suitable for writing to a log.
+        /// 
+        /// @name vwf-loggableComponent
+        /// @function
+        /// 
+        /// @param {String|Object} component
+        /// 
+        /// @returns {String|Object}
 
         var loggableComponent = function( component ) {
             return require( "vwf/utility" ).transform( component, loggableComponentTransformation );
         };
 
-        // -- loggableValue ------------------------------------------------------------------------
+        /// Convert an arbitrary JavaScript value into a form suitable for writing to a log.
+        /// 
+        /// @name vwf-loggableValue
+        /// @function
+        /// 
+        /// @param {Object} component
+        /// 
+        /// @returns {Object}
 
         var loggableValue = function( value ) {
             return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
@@ -2996,9 +3191,31 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
         };
 
-        // -- loggableValues -----------------------------------------------------------------------
+        /// Convert an array of arbitrary JavaScript values into a form suitable for writing to a
+        /// log.
+        /// 
+        /// @name vwf-loggableValues
+        /// @function
+        /// 
+        /// @param {Array|undefined} component
+        /// 
+        /// @returns {Array|undefined}
 
         var loggableValues = function( values ) {
+            return loggableValue( values );
+        };
+
+        /// Convert an object indexing arrays of arbitrary JavaScript values into a form suitable
+        /// for writing to a log.
+        /// 
+        /// @name vwf-loggableIndexedValues
+        /// @function
+        /// 
+        /// @param {Object|undefined} component
+        /// 
+        /// @returns {Object|undefined}
+
+        var loggableIndexedValues = function( values ) {
             return loggableValue( values );
         };
 

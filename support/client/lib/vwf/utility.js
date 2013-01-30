@@ -36,7 +36,7 @@ define( [ "module",
         /// Containers are duplicated where necessary so that the original object and any contained
         /// objects are not modified. Unchanged objects will be referenced directly in the result.
         /// 
-        /// @name vwf.utility#transform
+        /// @name vwf.utility.transform
         /// @function
         /// 
         /// @param {Object} object
@@ -105,24 +105,24 @@ define( [ "module",
 
         // -- transforms ---------------------------------------------------------------------------
 
-        /// Transformation functions for vwf.utility#transform. Invoke these as:
+        /// Transformation functions for vwf.utility.transform. Invoke these as:
         /// 
         ///   utility.transform( object, utility.transforms.*transform* )
         ///
         /// to apply the transform utility.transforms.*transform* to object.
         /// 
-        /// @name vwf.utility#transforms
+        /// @name vwf.utility.transforms
         /// @namespace
 
         transforms: {
 
             // -- transit --------------------------------------------------------------------------
 
-            /// A vwf.utility#transform transformation function to convert an object for proper JSON
+            /// A vwf.utility.transform transformation function to convert an object for proper JSON
             /// serialization. Array-like objects are converted to actual Arrays. All other objects
             /// are unchanged. Invoke as: utility.transform( object, utility.transforms.transit ).
             /// 
-            /// @name vwf.utility.transforms#transit
+            /// @name vwf.utility.transforms.transit
             /// @function
             /// 
             /// @param {Object} object
@@ -161,13 +161,13 @@ define( [ "module",
 
             // -- hash -----------------------------------------------------------------------------
 
-            /// A vwf.utility#transform transformation function to normalize an object so that it
+            /// A vwf.utility.transform transformation function to normalize an object so that it
             /// can be serialized and hashed with consistent results. Numeric precision is reduced
             /// to match the precision retained by the reflector. Non-Array objects are reordered so
             /// that their keys are in alphabetic order. Other objects are unchanged. Invoke as:
             /// utility.transform( object, utility.transforms.hash ).
             /// 
-            /// @name vwf.utility.transforms#hash
+            /// @name vwf.utility.transforms.hash
             /// @function
             /// 
             /// @param {Object} object
@@ -210,7 +210,7 @@ define( [ "module",
 
         /// Format the stack trace for readability.
         /// 
-        /// @name vwf.utility#exceptionMessage
+        /// @name vwf.utility.exceptionMessage
         /// @function
         /// 
         /// @param {Error} error
@@ -249,7 +249,7 @@ define( [ "module",
 
         /// Convert a relative URI to an absolute URI.
         /// 
-        /// @name vwf.utility#resolveURI
+        /// @name vwf.utility.resolveURI
         /// @function
         /// 
         /// @param {String} uri

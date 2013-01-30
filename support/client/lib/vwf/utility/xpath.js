@@ -26,7 +26,7 @@ define( [ "module" ], function( module ) {
 
         /// Resolve an XPath expression, using a callback function to interpret each step.
         /// 
-        /// @name vwf.utility.xpath#resolve
+        /// @name vwf.utility.xpath.resolve
         /// @function
         /// 
         /// @param {String|String[]|Object[]} xpath
@@ -90,7 +90,7 @@ define( [ "module" ], function( module ) {
 
         /// Parse an XPath expression into a series of steps.
         /// 
-        /// @name vwf.utility.xpath#parse
+        /// @name vwf.utility.xpath.parse
         /// @function
         /// 
         /// @param {String|String[]|Object[]} xpath
@@ -148,7 +148,7 @@ define( [ "module" ], function( module ) {
 
         /// Parse an XPath step expression.
         /// 
-        /// @name vwf.utility.xpath#parseStep
+        /// @name vwf.utility.xpath.parseStep
         /// @function
         /// 
         /// @param {String|Object} xpath
@@ -307,7 +307,7 @@ define( [ "module" ], function( module ) {
 
         /// Parse an XPath step predicate.
         /// 
-        /// @name vwf.utility.xpath#parsePredicate
+        /// @name vwf.utility.xpath.parsePredicate
         /// @function
         /// 
         /// @param {String|Object} xpath
@@ -333,7 +333,7 @@ define( [ "module" ], function( module ) {
 
         /// Parse an XPath step separator.
         /// 
-        /// @name vwf.utility.xpath#parseSeparator
+        /// @name vwf.utility.xpath.parseSeparator
         /// @function
         /// 
         /// @param {String|Object} xpath
@@ -359,7 +359,7 @@ define( [ "module" ], function( module ) {
 
         /// Regexes to crack the XPath string.
         /// 
-        /// @name vwf.utility.xpath#regex
+        /// @name vwf.utility.xpath.regex
         /// @field
 
         regex: ( function() {
@@ -368,6 +368,9 @@ define( [ "module" ], function( module ) {
                 singleQuotedName = "'(?:[^'\\\\]|\\'|\\\\)+'",  // Single-quoted QName (VWF extension)
                 doubleQuotedName = '"(?:[^"\\\\]|\\"|\\\\)+"',  // Double-quoted QName (VWF extension)
                 wildcard = "\\*";                               // XPath Wildcard: http://www.w3.org/TR/xpath20/#prod-xpath-Wildcard
+
+            /// @name vwf.utility.xpath.regex.step
+            /// @field
 
             var step =                                          // XPath StepExpr: http://www.w3.org/TR/xpath20/#prod-xpath-StepExpr
 
@@ -438,6 +441,9 @@ define( [ "module" ], function( module ) {
 
                 ")";
 
+            /// @name vwf.utility.xpath.regex.predicate
+            /// @field
+
             var predicate =                                     // XPath Predicate: http://www.w3.org/TR/xpath20/#prod-xpath-Predicate
 
                 "\\[" +
@@ -445,6 +451,9 @@ define( [ "module" ], function( module ) {
                         step + // "[^\\]]*" +
                     ")" +
                 "\\]";
+
+            /// @name vwf.utility.xpath.regex.separator
+            /// @field
 
             var separator = "/";
 
@@ -463,7 +472,7 @@ define( [ "module" ], function( module ) {
         /// Apply quotation marks around a name and escape internal quotation marks and escape
         /// characters.
         /// 
-        /// @name vwf.utility.xpath#quoteName
+        /// @name vwf.utility.xpath.quoteName
         /// @function
         /// 
         /// @param {String} unquoted_name
@@ -479,7 +488,7 @@ define( [ "module" ], function( module ) {
         /// Remove the enclosing quotation marks and unescape internal quotation marks and escape
         /// characters of a quoted name.
         /// 
-        /// @name vwf.utility.xpath#unquoteName
+        /// @name vwf.utility.xpath.unquoteName
         /// @function
         /// 
         /// @param {String} quoted_name
