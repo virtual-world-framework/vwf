@@ -584,7 +584,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             goog.vec.Mat4.transpose( transform, transform );
                             glgeObject.setRotMatrix( transform );
                             glgeObject.setLoc( translation[0], translation[1], translation[2] );
-
                         } else {
 
                             // Set loc[XYZ] so that GLGE.Placeable.getPosition() will return correct
@@ -610,6 +609,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							}
                         }
 						
+						glgeObject.matrixDirty = true;
+						
 						if(glgeObject.getObjects)
 						{
 							var objs = glgeObject.getObjects();
@@ -621,9 +622,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 							}
 						}
                         break;
-					case "static":{
-					
-						
+					case "isStatic":{
+						glgeObject.isStatic = propertyValue;
 						if(glgeObject.getObjects)
 						{
 							var objs = glgeObject.getObjects();
@@ -807,7 +807,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
 
                         break;
-                
+					case "isStatic":{
+					
+						value = glgeObject.isStatic;
+						if(value === undefined) value = false;
+						break;
+					}
                     case "boundingbox":
                         var bbox = getLocalBoundingBox.call( this, glgeObject );
                         var scale = this.kernel.getProperty( nodeID, "scale", undefined );
@@ -2542,6 +2547,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
         }
     }
+	
+	
 } );
 
 
@@ -2940,3 +2947,4 @@ function decompress(dataencoded)
 	data = decompressJsonStrings(data);
 	return data;
 }
+$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_GLGERayTracer.js"></script>');

@@ -303,7 +303,8 @@ scripts:
        this.last_x = 0;
        this.last_y = 0;
        this.navmode = 'none';
-       
+       this.PickOptions = new GLGE.CPUPickOptions();
+       this.PickOptions.UserRenderBatches = true;
       
         $('#index-vwf').mousedown(function(e){this.localpointerDown(e);}.bind(this));
         $('#index-vwf').mouseup(function(e){this.localpointerUp(e);}.bind(this));
@@ -630,7 +631,7 @@ scripts:
            var dxy = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
            var oldintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
            
-           oldintersectxy = findscene().CPUPick(campos,ray).point;
+           oldintersectxy = findscene().CPUPick(campos,ray,this.PickOptions).point;
            
            this.navpoint =  oldintersectxy;
       }
@@ -811,7 +812,7 @@ scripts:
             
             var oldpickstate = findviewnode(this.objectFollowed.id).InvisibleToCPUPick;
             findviewnode(this.objectFollowed.id).InvisibleToCPUPick = true;
-            var hit = findscene().CPUPick(start,GLGE.scaleVec3(offset,1));
+            var hit = findscene().CPUPick(start,GLGE.scaleVec3(offset,1),this.PickOptions);
             if(hit)
             {
                 finaldist = Math.min(finaldist,hit.distance-.2);
@@ -825,6 +826,7 @@ scripts:
             
         }
         this.callUpdateCallbacks();
+        
       }
       function findscene()
       {

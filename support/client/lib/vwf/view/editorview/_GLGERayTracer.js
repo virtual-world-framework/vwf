@@ -6,29 +6,48 @@ var OCTMaxFaces = 30;
 //max depth of the octree
 var OCTMaxDepth = 4;
 
+GLGE.CPUPickOptions = function()
+{
+	this.UserRenderBatches = false;
+}
 // Return the nearsest, highest priority hit 
-GLGE.Scene.prototype.CPUPick = function(origin,direction,maxdist)
+GLGE.Scene.prototype.CPUPick = function(origin,direction,options)
 {
 	   //not currently using the max dist, but could make for some good optimizations	
-	  if(!maxdist)
-	   maxdist = Infinity;
+	  
+	   if(!options) options = new GLGE.CPUPickOptions();
 	   
 	  
 	  //concat all hits from children	  
       var hitlist = [];
+	  var count = 0;
 	  for(var i=0; i <  this.children.length; i++)
 	  {
 	     if(this.children[i].CPUPick)
 		 {
-			 var hit = this.children[i].CPUPick(origin,direction,maxdist);
-			 if(hit)
-			 {
-				for(var j =0; j<hit.length; j++)
-					hitlist.push(hit[j]);
-			 }
+				 var hit = this.children[i].CPUPick(origin,direction,options);
+				 if(hit)
+				 {
+					for(var j =0; j<hit.length; j++)
+						hitlist.push(hit[j]);
+				 }
 		 }
 	  }
-	
+	if(options.UserRenderBatches && this.renderBatches)
+	{
+		for(var i = 0; i < this.renderBatches.length; i++)
+		{
+			if(this.renderBatches[i].renderObject)
+			{
+				 var hit = this.renderBatches[i].renderObject.CPUPick(origin,direction,options);
+				 if(hit)
+				 {
+					for(var j =0; j<hit.length; j++)
+						hitlist.push(hit[j]);
+				 }
+			}
+		}
+	}
 	//sort the hits by priority and distance
 	hitlist = hitlist.sort(function(a,b){
 		var ret = b.priority - a.priority;
@@ -59,7 +78,7 @@ GLGE.Group.prototype.GetBoundingBox = function(local)
 	return box;
 }
 
-GLGE.Group.prototype.CPUPick = function(origin,direction,maxdist)
+GLGE.Group.prototype.CPUPick = function(origin,direction,options)
 {
 
 	  if(this.InvisibleToCPUPick)
@@ -106,7 +125,7 @@ GLGE.Group.prototype.CPUPick = function(origin,direction,maxdist)
 	  {
 		 if(this.children[i].CPUPick)
 		 {
-			 var hit = this.children[i].CPUPick(origin,direction,maxdist);
+			 var hit = this.children[i].CPUPick(origin,direction,options);
 			 if(hit)
 			 {
 				for(var j =0; j<hit.length; j++)
@@ -856,7 +875,7 @@ GLGE.Mesh.prototype.setPickMesh = function(pickmesh)
 	  this.PickMesh = pickmesh;
 }
 //Do the actuall intersection with the mesh;
-GLGE.Mesh.prototype.CPUPick = function(origin,direction,maxdist)
+GLGE.Mesh.prototype.CPUPick = function(origin,direction,options)
 {
 
 	  
@@ -865,7 +884,7 @@ GLGE.Mesh.prototype.CPUPick = function(origin,direction,maxdist)
 	  
 	  //allow a picking mesh that differs from the visible mesh
 	  if(this.PickMesh)
-		return this.PickMesh.CPUPick(origin,direction,maxdist);
+		return this.PickMesh.CPUPick(origin,direction,options);
 		
       //if for some reason dont have good bounds, generate	 
 	  if(!this.BoundingSphere || !this.BoundingBox || this.dirtyMesh)
@@ -885,9 +904,10 @@ GLGE.Mesh.prototype.CPUPick = function(origin,direction,maxdist)
 		 
 		 //try to reject based on bounding box.
 		 var bbhit = this.BoundingBox.intersect(origin,direction); 
-		
+		 
 		 if(bbhit.length > 0)
 		 {
+			
 			 //build the octree or the facelist
 			 if(!this.RayTraceAccelerationStructure || this.dirtyMesh)
 			 {
@@ -941,9 +961,9 @@ GLGE.Mesh.prototype.FrustrumCast = function(frustrum)
 //Gets it in this groups local space!
 GLGE.Object.prototype.GetBoundingBox = function(local)
 {
-	if(this.mesh)
+	if(this.getMesh())
 		{
-			var box = this.mesh.GetBoundingBox();
+			var box = this.getMesh().GetBoundingBox();
 			if(!local)
 				box = box.transformBy(this.getLocalMatrix());	
 			return box;
@@ -953,8 +973,11 @@ GLGE.Object.prototype.GetBoundingBox = function(local)
 
 //no need to test bounding box here. Can only contain one mesh, and the mesh will check its own
 //boudning box.
-GLGE.Object.prototype.CPUPick = function(origin,direction,maxdist)
+GLGE.Object.prototype.CPUPick = function(origin,direction,options)
 {
+
+	  if(options.UserRenderBatches && this.isBatched)
+		return null;
 	  if(this.InvisibleToCPUPick || this.getVisible() == false)
 		return null;
 
@@ -962,7 +985,7 @@ GLGE.Object.prototype.CPUPick = function(origin,direction,maxdist)
 	  var mat = this.getModelMatrix().slice(0);
 	  mat = GLGE.inverseMat4(mat);
 	  var newo = GLGE.mulMat4Vec3(mat,origin);
-	  var nmaxdist = maxdist;// * Math.abs(mat[0]);
+	  
 	  mat = this.getModelMatrix().slice(0);
 	  mat[3] = 0;
 	  mat[7] = 0;
@@ -973,26 +996,28 @@ GLGE.Object.prototype.CPUPick = function(origin,direction,maxdist)
 	  
 	  
 	  var ret = [];
-      if(this.mesh)
-	  {
-			//collide with the mesh
-			ret = this.mesh.CPUPick(newo,newd,nmaxdist);
-			
-			for(var i = 0; i < ret.length; i++)
-			{	
-				//move the normal and hit point into worldspace
-				var mat2 = this.getModelMatrix().slice(0);
-				ret[i].point = GLGE.mulMat4Vec3(mat2,ret[i].point);
-				mat2[3] = 0;
-				mat2[7] = 0;
-				mat2[11] = 0;
-				ret[i].norm = GLGE.mulMat4Vec3(mat2,ret[i].norm);
-				ret[i].norm = GLGE.scaleVec3(ret[i].norm,1.0/GLGE.lengthVec3(ret[i].norm));
-				ret[i].distance = GLGE.distanceVec3(origin,ret[i].point);
-				ret[i].object = this;
-				ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
-			}
-	  }
+	  
+		  if(this.getMesh())
+		  {
+				//collide with the mesh
+				ret = this.getMesh().CPUPick(newo,newd,options);
+				
+				for(var i = 0; i < ret.length; i++)
+				{	
+					//move the normal and hit point into worldspace
+					var mat2 = this.getModelMatrix().slice(0);
+					ret[i].point = GLGE.mulMat4Vec3(mat2,ret[i].point);
+					mat2[3] = 0;
+					mat2[7] = 0;
+					mat2[11] = 0;
+					ret[i].norm = GLGE.mulMat4Vec3(mat2,ret[i].norm);
+					ret[i].norm = GLGE.scaleVec3(ret[i].norm,1.0/GLGE.lengthVec3(ret[i].norm));
+					ret[i].distance = GLGE.distanceVec3(origin,ret[i].point);
+					ret[i].object = this;
+					ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+				}
+		  }
+	  
 	  return ret;
 }
 
@@ -1083,10 +1108,10 @@ GLGE.Object.prototype.FrustrumCast = function(frustrum)
 	  
 	  
 	  var ret = [];
-      if(this.mesh)
+      if(this.getMesh())
 	  {
 			//collide with the mesh
-			ret = this.mesh.FrustrumCast(tfrustrum);
+			ret = this.getMesh().FrustrumCast(tfrustrum);
 			
 			for(var i = 0; i < ret.length; i++)
 			{	

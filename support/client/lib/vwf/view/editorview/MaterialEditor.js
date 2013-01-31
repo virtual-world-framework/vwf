@@ -87,14 +87,17 @@ function MaterialEditor()
 			return;
 		}
 		
-		if(!_Editor.isOwner(_Editor.GetSelectedVWFNode().id,document.PlayerNumber))
+		for(var i =0; i < _Editor.getSelectionCount(); i++)
 		{
-			_Notifier.notify('You do not have permission to edit this material');
-			return;
+			if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(i).id,document.PlayerNumber))
+			{
+				_Notifier.notify('You do not have permission to edit this material');
+				continue;
+			}
+			
+			var id = _Editor.GetSelectedVWFNode(i).id;
+			vwf_view.kernel.setProperty(id,'materialDef',_MaterialEditor.currentMaterial);
 		}
-		
-		var id = _Editor.GetSelectedVWFNode().id;
-		vwf_view.kernel.setProperty(id,'materialDef',_MaterialEditor.currentMaterial);
 		
 	}
 	this.BuildGUI = function()

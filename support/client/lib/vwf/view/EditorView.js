@@ -29,7 +29,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 					var data = $.ajax('vwf/view/editorview/menus.html',{async:false,dataType:'html'}).responseText;
 					$(document.body).append(data);
 				    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ddsmoothmenu.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_GLGERayTracer.js"></script>');
+					
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Editor.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/MaterialEditor.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PrimitiveEditor.js"></script>');
@@ -88,13 +88,18 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         },
 
         satProperty: function (nodeID, propertyName, propertyValue) {
-			if(window._Editor && _Editor.isSelected(nodeID) && _Editor.getSelectionCount() == 1 && propertyName == 'transform')
-			{
-				_Editor.updateBoundsAndGizmoLoc();
-			}
 			if(window._Editor && _Editor.isSelected(nodeID) && propertyName == 'transform')
 			{
+				
+				_Editor.updateBoundsTransform(nodeID);
+			
 				_Editor.waitingForSet.splice(_Editor.waitingForSet.indexOf(nodeID),1);
+				if(_Editor.waitingForSet.length == 0)
+				{
+					_Editor.updateGizmoLocation();
+					_Editor.updateGizmoSize();
+					_Editor.updateGizmoOrientation(false);
+				}
 			}
         },
         

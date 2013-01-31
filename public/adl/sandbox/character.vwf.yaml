@@ -35,6 +35,9 @@ scripts:
          this.motionStack= [];
          this.jumpcounter = 0;
         
+        this.PickOptions = new GLGE.CPUPickOptions();
+        this.PickOptions.UserRenderBatches = true;
+        
         if(this.hasOwnProperty('PlayerNumber') == false) return;
         var PlayerNumber = vwf.getProperty(this.id,'PlayerNumber');
         
@@ -343,7 +346,7 @@ scripts:
                
                 motionvec = GLGE.toUnitVec3(motionvec);
                 var testpos = GLGE.subVec3(this.translation,GLGE.scaleVec3(motionvec,-.15));
-                var intersectfront = findscene().CPUPick(GLGE.addVec3(testpos,[0,0,1]),motionvec);
+                var intersectfront = findscene().CPUPick(GLGE.addVec3(testpos,[0,0,1]),motionvec,this.PickOptions);
                 if(intersectfront)
                 {
                     if(intersectfront.distance < .3)
@@ -365,7 +368,7 @@ scripts:
                 }
                 var falldist = 1000;
                
-                var intersect = findscene().CPUPick(GLGE.addVec3(this.translation,[0,0,1.7]),[0,0,-1]);
+                var intersect = findscene().CPUPick(GLGE.addVec3(this.translation,[0,0,1.7]),[0,0,-1],this.PickOptions);
                 //console.log(intersect);
                
                 falldist = intersect?intersect.distance:falldist;

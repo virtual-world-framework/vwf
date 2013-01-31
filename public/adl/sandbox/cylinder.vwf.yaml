@@ -113,8 +113,8 @@ scripts:
        
       
        this._initialized = true;
-       window.setTimeout(this.dirtyStack.bind(this),500);
-       window.setTimeout(this.setupMaterial.bind(this),500);        
+       this.dirtyStack();
+       this.setupMaterial();        
     }
     this.Build = function()
     {

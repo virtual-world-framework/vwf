@@ -1205,7 +1205,7 @@ function Editor()
 				
 				
 			}
-			if(wasScaled || wasRotated|| wasMoved && _Editor.getSelectionCount() > 1) _Editor.updateBounds();
+			//if(wasScaled || wasRotated|| wasMoved && _Editor.getSelectionCount() > 1) _Editor.updateBounds();
 		}
 		else
 		{
@@ -1588,8 +1588,22 @@ function Editor()
 				SelectionBounds[i].setCull(GLGE.NONE);
 				SelectionBounds[i].setPickable(false);
 				SelectionBounds[i].RenderPriority = 999;
+				SelectionBounds[i].vwfid = SelectedVWFNodes[i].id;
+				
+				SelectionBounds[i].setMaterial(GLGE.MaterialManager.findMaterialRecord(SelectionBounds[i].getMaterial()).material);
 				this.SelectionBoundsContainer.addChild(SelectionBounds[i]);
 			}
+	}
+	this.updateBoundsTransform = function(id)
+	{
+		for(var i =0; i < SelectionBounds.length; i++)
+		{
+			if(SelectionBounds[i].vwfid == id)
+			{
+				var mat = _Editor.findviewnode(id).getModelMatrix().slice(0);
+				SelectionBounds[i].setStaticMatrix(mat);
+			}
+		}
 	}
 	this.getSelectionCount =function()
 	{
@@ -2277,12 +2291,19 @@ function Editor()
 	{
 		if(!count)
 			count = 1;
-		var c = count;	
+		this.toSelect = count;	
+		this.tempSelect = [];
 		this.SetCreateNodeCallback(function(e){
 				
-				_Editor.SelectObject(e,Add);
-				if(_Editor.getSelectionCount() == c)
+				_Editor.tempSelect.push(e);
+				_Editor.toSelect--;
+				
+				
+				if(_Editor.toSelect == 0 )
+				{
 					_Editor.createNodeCallback = null;
+					_Editor.SelectObject(_Editor.tempSelect,Add);
+				}
 		});
 	}
 	var GetSelectedVWFNode = function(idx)

@@ -23,6 +23,7 @@ methods:
   setupMaterial:
   setTransparent:
 properties:
+  isStatic:
   materialDef:
     get: |
             return this.getTexture();
@@ -49,7 +50,7 @@ scripts:
     this.setupMaterial = function()
     {
         
-        this.mesh.setMaterial(new GLGE.Material());
+        //this.mesh.setMaterial(new GLGE.Material());
         this.initTexture();
     }
     this.initTexture = function(value)
@@ -57,7 +58,7 @@ scripts:
              
              var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
              if(!newMaterial) return;
-             this.mesh.setMaterial(GLGE.MaterialManager.getMaterialByDef(newMaterial,this.mesh.material));
+             this.mesh.setMaterial(GLGE.MaterialManager.getMaterialByDef(newMaterial,this.mesh.getMaterial()));
             this.mesh.batchDirty = true;   
     }
     this.setTransparent = function(v)
@@ -73,7 +74,7 @@ scripts:
     {
         
         this.mesh.setMesh(this.Build());
-        this.mesh.isStatic = vwf.getProperty(this.id,'static');
+        this.mesh.isStatic = vwf.getProperty(this.id,'isStatic');
         this.mesh.batchDirty = true;
         if(this.mesh.mesh)
             this.mesh.mesh.dirtyMesh = true;		

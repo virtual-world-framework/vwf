@@ -58,6 +58,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 var canvas = this.canvasQuery.get(0);
                 window.onkeydown = function (event) {
+				
+				if(!GLGE.keysdown) GLGE.keysdown = [];
+				if(GLGE.keysdown.indexOf(event.keyCode) > -1)
+				{
+					return;
+				}
+				GLGE.keysdown.push(event.keyCode);
+				
                     var key = undefined;
                     var validKey = false;
                     switch (event.keyCode) {
@@ -88,6 +96,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 };
 
                 window.onkeyup = function (event) {
+				
+				if(!GLGE.keysdown) GLGE.keysdown = [];
+				if(GLGE.keysdown.indexOf(event.keyCode) > -1)
+				{
+					GLGE.keysdown.splice(GLGE.keysdown.indexOf(event.keyCode),1);
+				}
+				
+				
                     var key = undefined;
                     var validKey = false;
                     switch (event.keyCode) {

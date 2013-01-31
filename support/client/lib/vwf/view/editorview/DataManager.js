@@ -1,4 +1,4 @@
-var PersistanceServer = 'http://10.100.21.71';
+var PersistanceServer = 'http://localhost';
 function DataManager()
 {
 	
