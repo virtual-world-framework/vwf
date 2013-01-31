@@ -6,13 +6,14 @@ Often, you will want your users to be different "characters" in the scene.  For 
 
 ## What needs to be created
 
-- A camera that the user's point of view will be rendered from -<br/>&nbsp;&nbsp;This will go in the model (.yaml) so other users can assume your viewpoint, if desirable
-- A 3D model for the user's avatar (optional if you don't want other users to be able to see them) -<br/>&nbsp;&nbsp;This will also go in the model (.yaml) so everyone will see it
-- A reference that tells the user that this camera and 3D model is "theirs" -<br/>&nbsp;&nbsp;This will go in the view (.html) so every user's can be different
+- A user object that consists of:
+	- A camera from which the user's point of view will be rendered -<br/>&nbsp;&nbsp;This will go in the model (.yaml) so other users can assume this user's viewpoint, if desirable
+	- A 3D model for the user's avatar (optional if you don't want other users to be able to see them) -<br/>&nbsp;&nbsp;This will also go in the model (.yaml) so everyone will see it
+- A reference that tells the user that this camera and 3D model is "his" -<br/>&nbsp;&nbsp;This will go in the view (.html) so every user's can be different
 
-## How to create them
+## Create the user object
 
-You will need a method in your model (index.vwf.yaml) that we can call each time a user joins.  This one will do nicely:
+We need a method in the model (index.vwf.yaml) that we can call each time a user joins.  This one will do nicely:
 
 	var count = 0;
 	
@@ -22,18 +23,18 @@ You will need a method in your model (index.vwf.yaml) that we can call each time
 	  // Step 1: Make the user name unique
 	  var userName += count++;
 	
-	  // Step 2: Create the definition of an object that will groups a camera w/ an avatar 3D model
+	  // Step 2: Create the definition of an object that will group a camera w/ an avatar 3D model
 	  var userDef = { 
 	    "extends": "http://vwf.example.com/node3.vwf",       
 	  };
 	  var cameraDef = {
 	    "extends": "http://vwf.example.com/camera.vwf", 
-	  }
+	  };
 	  var avatarDef = {
 	    "extends": "http://vwf.example.com/node3.vwf",
 	    "source": "BlueCube.dae",
 	    "type": "model/vnd.collada+xml"
-	  }
+	  };
 	  userDef.children[ "camera" ] = cameraDef;
 	  userDef.children[ "avatar" ] = avatarDef;
 	
@@ -41,16 +42,17 @@ You will need a method in your model (index.vwf.yaml) that we can call each time
 	  this.children.create( userName, userDef, callbackWhenUserIsCreated );
 	}
 
-## When to create them
+## When to create the user object
 
-The new user's view needs to tell the model when to create the new user object (once the user has joined).  This means that the view must *know* when the user has joined.  In future versions of VWF, when the new user has joined, the kernel will call a callback function in the view.  For now, we can learn when the user has joined by showing him a login screen.  By the time the user can click the *Login* button, he has already joined the session.  Therefore, we can call the necessary functions in the model when the user clicks the *Login* button.  (This method has the added benefit of being able to grab a name, etc, by which you can identify the new user - note, though, that this is not a secure login ... the app has already loaded by the time you ask the user to log in ... info on secure logins is in progress).
+The new user's view needs to tell the model when to create the new user object (once the user has joined).  This means that the view must *know* when the user has joined.  In future versions of VWF, when the new user has joined, the kernel will call a callback function in the view.  For now, we can learn when the user has joined by presenting a login screen.  By the time the user can click the *Login* button, he has already joined the session.  Therefore, we can call the necessary functions in the model when the user clicks the *Login* button.  (This method has the added benefit of being able to grab a name, etc, by which we can identify the new user - note, though, that this is not a secure login ... the app has already loaded by the time you ask the user to log in ... info on secure logins is in progress).
 
-So, the next step is to add the Login screen to your app.  Here is one that you can add directly, if you would like: (link here - then remove what is below) - show html, css
+So, the next step is to add the Login screen to your app.  Here is one that you can add directly, if you would like:
 
 ### A sample login screen
 
 In your index.vwf.html file you could have a login dialog like so:
 
+	<link rel="stylesheet" type="text/css" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
 	<div id="loginDialog">
 	  <div>
 	    <h3>Login</h3>
@@ -88,9 +90,11 @@ And then connect a script to the login button that will call your createUser fun
 	  }
 	});
 
-## Setting the user's camera
+Note: The jquery API is loaded by default by all VWF applications.
 
-The callback after the user has been created is important because it will save the reference to the user object so the user knows which object is his.  It will also tell the renderer to render from the point of view of this user's camera.  It is important to do this from the view (.html), since this behavior is specific to this user.  That *function() { ... }* above should be replaced with something like:
+## Save the user reference and set the user's camera
+
+In the callback after the user has been created, we will save the reference to the user object so the user can control it.  We will also tell the renderer to render from the point of view of this user's camera.  These two steps are done from the view (.html), since this behavior is specific to this user.  That *function() { ... }* above should be replaced with something like:
 
 	function() {
 	  view.myUserObject = this;
