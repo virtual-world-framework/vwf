@@ -111,7 +111,7 @@ task :documentation do |task|
 
             # Run jsdoc on the translated source.
 
-            sh "#{build}/jsdoc/jsdoc", "--destination", "#{documentation}",
+            sh "#{build}/jsdoc/jsdoc", "--configure", "#{build}/jsdoc.conf", "--destination", "#{documentation}",
                 * FileList.new( PATTERNS ).sort
 
         end
