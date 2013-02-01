@@ -107,7 +107,7 @@ task :documentation do |task|
 
             # Convert /// comments to /** */ comments for jsdoc.
 
-            sh "ruby", "-p", "-i", "#{build}/js-to-jsdoc.rb", * FileList.new( PATTERNS ).sort
+            sh "ruby", "-p", "-i.bak", "#{build}/js-to-jsdoc.rb", * FileList.new( PATTERNS ).sort
 
             # Run jsdoc on the translated source.
 
