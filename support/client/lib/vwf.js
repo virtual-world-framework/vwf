@@ -21,96 +21,58 @@
 /// attaches to the global window object as window.vwf. Nothing else should affect the global
 /// environment.
 
-( function( window ) {
+define( [ "module", "logger", "vwf/configuration" ], function( module, logger, configuration ) {
 
-    window.console && console.debug && console.debug( "loading vwf" );
+    logger.for( module.id ).debug( "loading" );
 
-    window.vwf = new function() {
+    var exports = {
 
-        window.console && console.debug && console.debug( "creating vwf" );
-
-        // == Public variables =====================================================================
+        module: module,
 
         /// The runtime environment (production, development, testing) and other configuration
         /// settings appear here.
-        /// 
-        /// @name module:vwf.configuration
-        /// 
-        /// @private
 
-        this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/configuration" as a dependency
+        configuration: configuration.active, // "active" updates in place and changes don't invalidate the reference
 
         /// The kernel logger.
-        /// 
-        /// @name module:vwf.logger
-        /// 
-        /// @private
 
-        this.logger = undefined; // require( "logger" ).for( undefined, this );  // TODO: for( "vwf", ... ), and update existing calls  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/logger" as a dependency
+        logger: logger.for( module.id ),
 
         /// Each model and view module loaded by the main page registers itself here.
-        /// 
-        /// @name module:vwf.modules
-        /// 
-        /// @private
 
-        this.modules = [];
+        modules: [],
 
         /// vwf.initialize() creates an instance of each model and view module configured on the main
         /// page and attaches them here.
-        /// 
-        /// @name module:vwf.models
-        /// 
-        /// @private
 
-        this.models = [];
+        models: [],
 
         /// vwf.initialize() creates an instance of each model and view module configured on the main
         /// page and attaches them here.
-        /// 
-        /// @name module:vwf.views
-        /// 
-        /// @private
 
-        this.views = [];
+        views: [],
 
         /// This is the simulation clock, which contains the current time in milliseconds. Time is
         /// controlled by the reflector and updates here as we receive control messages.
-        /// 
-        /// @name module:vwf.now
-        /// 
-        /// @private
 
-        this.now = 0;
+        now: 0,
 
         /// The moniker of the client responsible for an action. Will be falsy for actions
         /// originating in the server, such as time ticks.
-        /// 
-        /// @name module:vwf.client_
-        /// 
-        /// @private
 
-        this.client_ = undefined;
+        client_: undefined,
 
         /// The identifer assigned to the client by the server.
-        /// 
-        /// @name module:vwf.moniker_
-        /// 
-        /// @private
 
-        this.moniker_ = undefined;
+        moniker_: undefined,
 
         /// Nodes that are receiving ticks.
-        /// 
-        /// @name module:vwf.tickable
-        /// 
-        /// @private
 
-        this.tickable = {
+        tickable: {
             // models: [],
             // views: [],
             nodeIDs: [],
-        };
+        },
 
         // == Public functions =====================================================================
 
@@ -143,10 +105,8 @@
         ///     [4] vwf.initialize( ..., [ "vwf/model/javascript" ], [ ... ] )
         ///     [5] vwf.initialize( ..., [ { "vwf/model/glge": [ "#scene, "second param" ] } ], [ ... ] )
         ///     [6] vwf.initialize( ..., [ { "vwf/model/glge": "#scene" } ], [ ... ] )
-        /// 
-        /// @name module:vwf.initialize
 
-        this.initialize = function( /* [ componentURI|componentObject ] [ modelInitializers ]
+        initialize: function( /* [ componentURI|componentObject ] [ modelInitializers ]
             [ viewInitializers ] */ ) {
 
             var args = Array.prototype.slice.call( arguments );
@@ -281,13 +241,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.ready( application );
 
-        };
+        },
 
         // -- ready --------------------------------------------------------------------------------
 
-        /// @name module:vwf.ready
+        /// ready.
 
-        this.ready = function( component_uri_or_json_or_object ) {
+        ready: function( component_uri_or_json_or_object ) {
 
             // Connect to the reflector. This implementation uses the socket.io library, which
             // communicates using a channel back to the server that provided the client documents.
@@ -440,13 +400,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             }
 
-        };
+        },
 
         // -- plan ---------------------------------------------------------------------------------
 
-        /// @name module:vwf.plan
+        /// plan.
 
-        this.plan = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
+        plan: function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
             this.logger.debuggx( "plan", nodeID, actionName, memberName,
                 parameters && parameters.length, when, callback_async && "callback" );
@@ -469,16 +429,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             queue.insert( fields );
 
             this.logger.debugu();
-        };
+        },
 
         // -- send ---------------------------------------------------------------------------------
 
         /// Send a message to the reflector. The message will be reflected back to all participants
         /// in the instance.
-        /// 
-        /// @name module:vwf.send
 
-        this.send = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
+        send: function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
             this.logger.debuggx( "send", nodeID, actionName, memberName,
                 parameters && parameters.length, when, callback_async && "callback" );  // TODO: loggableParameters()
@@ -517,15 +475,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             }
 
             this.logger.debugu();
-        };
+        },
 
         // -- respond ------------------------------------------------------------------------------
 
         /// Return a result for a function invoked by the server.
-        /// 
-        /// @name module:vwf.respond
 
-        this.respond = function( nodeID, actionName, memberName, parameters, result ) {
+        respond: function( nodeID, actionName, memberName, parameters, result ) {
 
             this.logger.debuggx( "respond", nodeID, actionName, memberName,
                 parameters && parameters.length, "..." );  // TODO: loggableParameters(), loggableResult()
@@ -556,15 +512,13 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             }
 
             this.logger.debugu();
-        };
+        },
 
         // -- receive ------------------------------------------------------------------------------
 
         /// Handle receipt of a message. Unpack the arguments and call the appropriate handler.
-        /// 
-        /// @name module:vwf.receive
 
-        this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
+        receive: function( nodeID, actionName, memberName, parameters, respond, origin ) {
 
             origin == "reflector" ?
                 this.logger.infogx( "receive", nodeID, actionName, memberName,
@@ -596,17 +550,15 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             origin == "reflector" ?
                 this.logger.infou() : this.logger.debugu();
-        };
+        },
 
         // -- dispatch -----------------------------------------------------------------------------
 
         /// Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
         /// simulation time that we should advance to and was taken from the time stamp of the last
         /// message received from the reflector.
-        /// 
-        /// @name module:vwf.dispatch
 
-        this.dispatch = function() {
+        dispatch: function() {
 
             var fields;
 
@@ -641,31 +593,27 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 this.tick();
             }
             
-        };
+        },
 
         // -- log ----------------------------------------------------------------------------------
 
         /// Send a log message to the reflector.
-        /// 
-        /// @name module:vwf.log
 
-        this.log = function() {
+        log: function() {
 
             this.respond( undefined, "log", undefined, undefined,
                 require( "vwf/utility" ).transform( arguments, require( "vwf/utility" ).transforms.transit ) );
 
-        }
+        },
 
         // -- tick ---------------------------------------------------------------------------------
 
         /// Tick each tickable model, view, and node. Ticks are sent on each time change.
-        /// 
-        /// @name module:vwf.tick
 
         // TODO: remove, in favor of drivers and nodes exclusively using future scheduling;
         // TODO: otherwise, all clients must receive exactly the same ticks at the same times.
 
-        this.tick = function() {
+        tick: function() {
 
             // Call ticking() on each model.
 
@@ -685,7 +633,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 this.callMethod( nodeID, "tick", [ this.now ] );
             }, this );
 
-        };
+        },
 
         // -- setState -----------------------------------------------------------------------------
 
@@ -694,11 +642,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         /// in progress. createNode suspends the queue when necessary, but additional calls to
         /// suspend and resume the queue may be needed if other async operations are added.
         /// 
-        /// @name module:vwf.setState
-        /// 
         /// @see {@link module:vwf/api/kernel.setState}
 
-        this.setState = function( applicationState, callback_async /* () */ ) {
+        setState: function( applicationState, callback_async /* () */ ) {
 
             this.logger.debuggx( "setState" );  // TODO: loggableState
 
@@ -794,15 +740,15 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- getState -----------------------------------------------------------------------------
 
-        /// @name module:vwf.getState
+        /// getState.
         /// 
         /// @see {@link module:vwf/api/kernel.getState}
 
-        this.getState = function( full, normalize ) {
+        getState: function( full, normalize ) {
 
             this.logger.debuggx( "getState", full, normalize );
 
@@ -846,15 +792,15 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             this.logger.debugu();
 
             return applicationState;
-        };
+        },
 
         // -- hashState ----------------------------------------------------------------------------
 
-        /// @name module:vwf.hashState
+        /// hashState.
         /// 
         /// @see {@link module:vwf/api/kernel.hashState}
 
-        this.hashState = function() {
+        hashState: function() {
 
             this.logger.debuggx( "hashState" );
 
@@ -877,7 +823,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Generate the combined hash.
 
             return hashn + ":" + hashq + ":" + hashk;
-        }
+        },
 
         // -- createNode ---------------------------------------------------------------------------
 
@@ -910,11 +856,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         /// the queue when necessary, but additional calls to suspend and resume the queue may be
         /// needed if other async operations are added.
         /// 
-        /// @name module:vwf.createNode
-        /// 
         /// @see {@link module:vwf/api/kernel.createNode}
 
-        this.createNode = function( nodeComponent, callback_async /* ( nodeID ) */ ) {
+        createNode: function( nodeComponent, callback_async /* ( nodeID ) */ ) {
 
             this.logger.debuggx( "createNode", function() {
                 return [ JSON.stringify( loggableComponent( nodeComponent ) ) ];
@@ -1064,15 +1008,15 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- deleteNode ---------------------------------------------------------------------------
 
-        /// @name module:vwf.deleteNode
+        /// deleteNode.
         /// 
         /// @see {@link module:vwf/api/kernel.deleteNode}
 
-        this.deleteNode = function( nodeID ) {
+        deleteNode: function( nodeID ) {
 
             this.logger.debuggx( "deleteNode", nodeID );
 
@@ -1101,7 +1045,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- setNode ------------------------------------------------------------------------------
 
@@ -1110,11 +1054,9 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         /// in progress. createChild suspends the queue when necessary, but additional calls to
         /// suspend and resume the queue may be needed if other async operations are added.
         /// 
-        /// @name module:vwf.setNode
-        /// 
         /// @see {@link module:vwf/api/kernel.setNode}
 
-        this.setNode = function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
+        setNode: function( nodeID, nodeComponent, callback_async /* ( nodeID ) */ ) {  // TODO: merge with createChild?
 
             this.logger.debuggx( "setNode", function() {
                 return [ nodeID, JSON.stringify( loggableComponent( nodeComponent ) ) ];
@@ -1227,15 +1169,15 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             this.logger.debugu();
 
             return nodeComponent;
-        };
+        },
 
         // -- getNode ------------------------------------------------------------------------------
 
-        /// @name module:vwf.getNode
+        /// getNode.
         /// 
         /// @see {@link module:vwf/api/kernel.getNode}
 
-        this.getNode = function( nodeID, full, normalize ) {  // TODO: options to include/exclude children, prototypes
+        getNode: function( nodeID, full, normalize ) {  // TODO: options to include/exclude children, prototypes
 
             this.logger.debuggx( "getNode", nodeID, full );
 
@@ -1391,15 +1333,15 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                 return undefined;
             }
 
-        };
+        },
 
         // -- hashNode -----------------------------------------------------------------------------
 
-        /// @name module:vwf.hashNode
+        /// hashNode.
         /// 
         /// @see {@link module:vwf/api/kernel.hashNode}
 
-        this.hashNode = function( nodeID ) {  // TODO: works with patches?  // TODO: only for nodes from getNode( , , true )
+        hashNode: function( nodeID ) {  // TODO: works with patches?  // TODO: only for nodes from getNode( , , true )
 
             this.logger.debuggx( "hashNode", typeof nodeID == "object" ? nodeID.id : nodeID );
 
@@ -1433,7 +1375,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Generate the combined hash.
 
             return hashi + ( hashp ? "." + hashp : "" ) + ( hashc ? "/" + hashc : "" );
-        };
+        },
 
         // -- createChild --------------------------------------------------------------------------
 
@@ -1454,11 +1396,9 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
         /// and the driver callbacks suspend the queue when necessary, but additional calls to
         /// suspend and resume the queue may be needed if other async operations are added.
         /// 
-        /// @name module:vwf.createChild
-        /// 
         /// @see {@link module:vwf/api/kernel.createChild}
 
-        this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
+        createChild: function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
 
             this.logger.debuggx( "createChild", function() {
                 return [ nodeID, childName, JSON.stringify( loggableComponent( childComponent ) ), childURI ];
@@ -1855,15 +1795,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- addChild -----------------------------------------------------------------------------
 
-        /// @name module:vwf.addChild
+        /// addChild.
         /// 
         /// @see {@link module:vwf/api/kernel.addChild}
 
-        this.addChild = function( nodeID, childID, childName ) {
+        addChild: function( nodeID, childID, childName ) {
 
             this.logger.debuggx( "addChild", nodeID, childID, childName );
 
@@ -1882,15 +1822,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- removeChild --------------------------------------------------------------------------
 
-        /// @name module:vwf.removeChild
+        /// removeChild.
         /// 
         /// @see {@link module:vwf/api/kernel.removeChild}
 
-        this.removeChild = function( nodeID, childID ) {
+        removeChild: function( nodeID, childID ) {
 
             this.logger.debuggx( "removeChild", nodeID, childID );
 
@@ -1909,17 +1849,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- setProperties ------------------------------------------------------------------------
 
         /// Set all of the properties for a node.
         /// 
-        /// @name module:vwf.setProperties
-        /// 
         /// @see {@link module:vwf/api/kernel.setProperties}
 
-        this.setProperties = function( nodeID, properties ) {  // TODO: rework as a cover for setProperty(), or remove; passing all properties to each driver is impractical since initializing and setting are different, and reentry can't be controlled when multiple sets are in progress.
+        setProperties: function( nodeID, properties ) {  // TODO: rework as a cover for setProperty(), or remove; passing all properties to each driver is impractical since initializing and setting are different, and reentry can't be controlled when multiple sets are in progress.
 
             this.logger.debuggx( "setProperties", nodeID, properties );
 
@@ -1970,17 +1908,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return properties;
-        };
+        },
 
         // -- getProperties ------------------------------------------------------------------------
 
         /// Get all of the properties for a node.
         /// 
-        /// @name module:vwf.getProperties
-        /// 
         /// @see {@link module:vwf/api/kernel.getProperties}
 
-        this.getProperties = function( nodeID ) {  // TODO: rework as a cover for getProperty(), or remove; passing all properties to each driver is impractical since reentry can't be controlled when multiple gets are in progress.
+        getProperties: function( nodeID ) {  // TODO: rework as a cover for getProperty(), or remove; passing all properties to each driver is impractical since reentry can't be controlled when multiple gets are in progress.
 
             this.logger.debuggx( "getProperties", nodeID );
 
@@ -2031,17 +1967,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return properties;
-        };
+        },
 
         // -- createProperty -----------------------------------------------------------------------
 
         /// Create a property on a node and assign an initial value.
         /// 
-        /// @name module:vwf.createProperty
-        /// 
         /// @see {@link module:vwf/api/kernel.createProperty}
 
-        this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
+        createProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
             this.logger.debuggx( "createProperty", function() {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
@@ -2064,17 +1998,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return propertyValue;
-        };
+        },
 
         // -- setProperty --------------------------------------------------------------------------
 
         /// Set a property value on a node.
         /// 
-        /// @name module:vwf.setProperty
-        /// 
         /// @see {@link module:vwf/api/kernel.setProperty}
 
-        this.setProperty = function( nodeID, propertyName, propertyValue ) {
+        setProperty: function( nodeID, propertyName, propertyValue ) {
 
             this.logger.debuggx( "setProperty", function() {
                 return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];
@@ -2180,17 +2112,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return propertyValue;
-        };
+        },
 
         // -- getProperty --------------------------------------------------------------------------
 
         /// Get a property value for a node.
         /// 
-        /// @name module:vwf.getProperty
-        /// 
         /// @see {@link module:vwf/api/kernel.getProperty}
 
-        this.getProperty = function( nodeID, propertyName, ignorePrototype ) {
+        getProperty: function( nodeID, propertyName, ignorePrototype ) {
 
             this.logger.debuggx( "getProperty", nodeID, propertyName );
 
@@ -2303,15 +2233,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return propertyValue;
-        };
+        },
 
         // -- createMethod -------------------------------------------------------------------------
 
-        /// @name module:vwf.createMethod
+        /// createMethod.
         /// 
         /// @see {@link module:vwf/api/kernel.createMethod}
 
-        this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
+        createMethod: function( nodeID, methodName, methodParameters, methodBody ) {
 
             this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
 
@@ -2330,15 +2260,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- callMethod ---------------------------------------------------------------------------
 
-        /// @name module:vwf.callMethod
+        /// callMethod.
         /// 
         /// @see {@link module:vwf/api/kernel.callMethod}
 
-        this.callMethod = function( nodeID, methodName, methodParameters ) {
+        callMethod: function( nodeID, methodName, methodParameters ) {
 
             this.logger.debuggx( "callMethod", function() {
                 return [ nodeID, methodName, JSON.stringify( loggableValues( methodParameters ) ) ];
@@ -2363,15 +2293,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return methodValue;
-        };
+        },
 
         // -- createEvent --------------------------------------------------------------------------
 
-        /// @name module:vwf.creatEvent
+        /// creatEvent.
         /// 
         /// @see {@link module:vwf/api/kernel.createEvent}
 
-        this.createEvent = function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
+        createEvent: function( nodeID, eventName, eventParameters ) {  // TODO: parameters (used? or just for annotation?)  // TODO: allow a handler body here and treat as this.*event* = function() {} (a self-targeted handler); will help with ui event handlers
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
@@ -2390,15 +2320,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             } );
 
             this.logger.debugu();
-        };
+        },
 
         // -- fireEvent ----------------------------------------------------------------------------
 
-        /// @name module:vwf.fireEvent
+        /// fireEvent.
         /// 
         /// @see {@link module:vwf/api/kernel.fireEvent}
 
-        this.fireEvent = function( nodeID, eventName, eventParameters ) {
+        fireEvent: function( nodeID, eventName, eventParameters ) {
 
             this.logger.debuggx( "fireEvent", function() {
                 return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ) ];
@@ -2419,7 +2349,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return handled;
-        };
+        },
 
         // -- dispatchEvent ------------------------------------------------------------------------
 
@@ -2427,11 +2357,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// the path from the global root to the node. Cancel when one of the handlers returns a
         /// truthy value to indicate that it has handled the event.
         /// 
-        /// @name module:vwf.dispatchEvent
-        /// 
         /// @see {@link module:vwf/api/kernel.dispatchEvent}
 
-        this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
+        dispatchEvent: function( nodeID, eventName, eventParameters, eventNodeParameters ) {
 
             this.logger.debuggx( "dispatchEvent", function() {
                 return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ),
@@ -2510,15 +2438,15 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }, this );
 
             this.logger.debugu();
-        };
+        },
 
         // -- execute ------------------------------------------------------------------------------
 
-        /// @name module:vwf.execute
+        /// execute.
         /// 
         /// @see {@link module:vwf/api/kernel.execute}
 
-        this.execute = function( nodeID, scriptText, scriptType ) {
+        execute: function( nodeID, scriptText, scriptType ) {
 
             this.logger.debuggx( "execute", function() {
                 return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
@@ -2550,112 +2478,106 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             this.logger.debugu();
 
             return scriptValue;
-        };
+        },
 
         // -- random -------------------------------------------------------------------------------
 
-        /// @name module:vwf.random
+        /// random.
         /// 
         /// @see {@link module:vwf/api/kernel.random}
 
-        this.random = function( nodeID ) {
+        random: function( nodeID ) {
             return this.models.object.random( nodeID );
-        };
+        },
 
         // -- seed ---------------------------------------------------------------------------------
 
-        /// @name module:vwf.seed
+        /// seed.
         /// 
         /// @see {@link module:vwf/api/kernel.seed}
 
-        this.seed = function( nodeID, seed ) {
+        seed: function( nodeID, seed ) {
             return this.models.object.seed( nodeID, seed );
-        };
+        },
 
         // -- time ---------------------------------------------------------------------------------
 
         /// The current simulation time.
         /// 
-        /// @name module:vwf.time
-        /// 
         /// @see {@link module:vwf/api/kernel.time}
 
-        this.time = function() {
+        time: function() {
             return this.now;
-        };
+        },
 
         // -- client -------------------------------------------------------------------------------
 
         /// The moniker of the client responsible for the current action. Will be falsy for actions
         /// originating in the server, such as time ticks.
         /// 
-        /// @name module:vwf.client
-        /// 
         /// @see {@link module:vwf/api/kernel.client}
 
-        this.client = function() {
+        client: function() {
             return this.client_;
-        };
+        },
 
         // -- moniker ------------------------------------------------------------------------------
 
         /// The identifer the server assigned to this client.
         /// 
-        /// @name module:vwf.moniker
-        /// 
         /// @see {@link module:vwf/api/kernel.moniker}
 
-        this.moniker = function() {
+        moniker: function() {
             return this.moniker_;
-        };
+        },
 
         // -- intrinsics ---------------------------------------------------------------------------
 
-        /// @name module:vwf.intrinsics
+        /// intrinsics.
         /// 
         /// @see {@link module:vwf/api/kernel.intrinsics}
 
-        this.intrinsics = function( nodeID, result ) {
+        intrinsics: function( nodeID, result ) {
             return this.models.object.intrinsics( nodeID, result );
-        };
+        },
 
         // -- uri ----------------------------------------------------------------------------------
 
-        /// @name module:vwf.uri
+        /// uri.
         /// 
         /// @see {@link module:vwf/api/kernel.uri}
 
-        this.uri = function( nodeID ) {
+        uri: function( nodeID ) {
             return this.models.object.uri( nodeID );
-        };
+        },
 
         // -- name ---------------------------------------------------------------------------------
 
-        /// @name module:vwf.name
+        /// name.
         /// 
         /// @see {@link module:vwf/api/kernel.name}
 
-        this.name = function( nodeID ) {
+        name: function( nodeID ) {
             return this.models.object.name( nodeID );
-        };
+        },
 
         // -- prototype ----------------------------------------------------------------------------
 
-        /// @name module:vwf.prototype
+        /// prototype.
         /// 
         /// @see {@link module:vwf/api/kernel.prototype}
 
-        this.prototype = function( nodeID ) {
+        prototype: function( nodeID ) {
             return this.models.object.prototype( nodeID );
-        };
+        },
 
         // -- prototypes ---------------------------------------------------------------------------
 
-        /// @name module:vwf.prototypes
+        /// prototypes.
         /// 
         /// @see {@link module:vwf/api/kernel.prototypes}
 
-        this.prototypes = function( nodeID ) {
+        prototypes: function( nodeID ) {
 
             var prototypes = [];
 
@@ -2667,25 +2589,25 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
             return prototypes;
-        };
+        },
 
         // -- behaviors ----------------------------------------------------------------------------
 
-        /// @name module:vwf.behaviors
+        /// behaviors.
         /// 
         /// @see {@link module:vwf/api/kernel.behaviors}
 
-        this.behaviors = function( nodeID ) {
+        behaviors: function( nodeID ) {
             return this.models.object.behaviors( nodeID );
-        };
+        },
 
         // -- ancestors ----------------------------------------------------------------------------
 
-        /// @name module:vwf.ancestors
+        /// ancestors.
         /// 
         /// @see {@link module:vwf/api/kernel.ancestors}
 
-        this.ancestors = function( nodeID ) {
+        ancestors: function( nodeID ) {
 
             var ancestors = [];
 
@@ -2697,35 +2619,35 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
             return ancestors;
-        };
+        },
 
         // -- parent -------------------------------------------------------------------------------
 
-        /// @name module:vwf.parent
+        /// parent.
         /// 
         /// @see {@link module:vwf/api/kernel.parent}
 
-        this.parent = function( nodeID ) {
+        parent: function( nodeID ) {
             return this.models.object.parent( nodeID );
-        };
+        },
 
         // -- children -----------------------------------------------------------------------------
 
-        /// @name module:vwf.children
+        /// children.
         /// 
         /// @see {@link module:vwf/api/kernel.children}
 
-        this.children = function( nodeID ) {
+        children: function( nodeID ) {
             return this.models.object.children( nodeID );
-        };
+        },
 
         // -- descendants --------------------------------------------------------------------------
 
-        /// @name module:vwf.descendants
+        /// descendants.
         /// 
         /// @see {@link module:vwf/api/kernel.descendants}
 
-        this.descendants = function( nodeID ) {
+        descendants: function( nodeID ) {
 
             var descendants = [];
 
@@ -2735,22 +2657,20 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }, this );             
 
             return descendants;
-        };
+        },
 
         // -- sequence -----------------------------------------------------------------------------
 
-        /// @name module:vwf.sequence
+        /// sequence.
         /// 
         /// @see {@link module:vwf/api/kernel.sequence}
 
-        this.sequence = function( nodeID ) {
+        sequence: function( nodeID ) {
             return this.models.object.sequence( nodeID );
-        };
+        },
 
         /// Locate nodes matching a search pattern. See vwf.api.kernel#find for details.
         /// 
-        /// @name module:vwf.find
-        ///
         /// @param {ID} nodeID
         ///   The reference node. Relative patterns are resolved with respect to this node.
         /// @param {String} matchPattern
@@ -2764,7 +2684,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.find}
 
-        this.find = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
+        find: function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
             var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
 
@@ -2780,11 +2700,9 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             }
 
-        };
+        },
 
         /// Test a node against a search pattern. See vwf.api.kernel#test for details.
-        /// 
-        /// @name module:vwf.test
         /// 
         /// @param {ID} nodeID
         ///   The reference node. Relative patterns are resolved with respect to this node.
@@ -2798,7 +2716,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.createNode}
 
-        this.test = function( nodeID, matchPattern, testID ) {
+        test: function( nodeID, matchPattern, testID ) {
 
             var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
 
@@ -2806,1151 +2724,1067 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 return matchID == testID;
             } );
 
-        };
-
-        // == Private functions ====================================================================
-
-        // -- loadComponent ------------------------------------------------------------------------
-
-        /// @name module:vwf~loadComponent
-
-        var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
-
-            if ( nodeURI == nodeTypeURI ) {
-
-                callback_async( nodeTypeDescriptor );
-
-            } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
-
-                // Primarly for testing, parse one specific form of data URIs. We need to parse
-                // these ourselves since Chrome can't load data URIs (with a cross origin error).
-
-                callback_async( JSON.parse( atob( nodeURI.substring( 29 ) ) ) );  // TODO: support all data URIs
-
-            } else {
-
-                queue.suspend( "while loading " + nodeURI ); // suspend the queue
-
-                jQuery.ajax( {
-
-                    url: remappedURI( nodeURI ),
-                    dataType: "jsonp",
-
-                    success: function( nodeDescriptor ) /* async */ {
-                        callback_async( nodeDescriptor );
-                        queue.resume( "after loading " + nodeURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
-                    },
-
-                    // error: function() {  // TODO
-                    // },
-
-                } );
-
-            }
-
-        };
-
-        /// Determine if a node has a property with the given name, either directly on the node or
-        /// inherited from a prototype.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasProperty.call(
-        ///   kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodeHasProperty
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return propertyName in node.properties;
-        };
-
-        /// Determine if a node has a property with the given name. The node's prototypes are not
-        /// considered.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasOwnProperty.call(
-        ///   kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodeHasOwnProperty
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
-        };
-
-        /// Determine if a given property of a node has a setter function, either directly on the
-        /// node or inherited from a prototype.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodePropertyHasSetter.call(
-        ///   kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodePropertyHasSetter
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodePropertyHasSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-            var node = this.models.javascript.nodes[nodeID];
-            var setter = node.private.setters && node.private.setters[propertyName];
-            return typeof setter == "function" || setter instanceof Function;
-        };
-
-        /// Determine if a given property of a node has a setter function. The node's prototypes are
-        /// not considered.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as:
-        ///   nodePropertyHasOwnSetter.call( kernel, nodeID, propertyName ).
-        /// 
-        /// @name module:vwf~nodePropertyHasOwnSetter
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} propertyName
-        /// 
-        /// @returns {Boolean}
-
-        var nodePropertyHasOwnSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-            var node = this.models.javascript.nodes[nodeID];
-            var setter = node.private.setters && node.private.setters.hasOwnProperty( propertyName ) && node.private.setters[propertyName];
-            return typeof setter == "function" || setter instanceof Function;
-        };
-
-        /// Determine if a node has a child with the given name, either directly on the node or
-        /// inherited from a prototype.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasChild.call(
-        ///   kernel, nodeID, childName ).
-        /// 
-        /// @name module:vwf~nodeHasChild
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} childName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return childName in node.children;
-        };
-
-        /// Determine if a node has a child with the given name. The node's prototypes are not
-        /// considered.
-        /// 
-        /// This function must run as a method of the kernel. Invoke as: nodeHasOwnChild.call(
-        ///   kernel, nodeID, childName ).
-        /// 
-        /// @name module:vwf~nodeHasOwnChild
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} childName
-        /// 
-        /// @returns {Boolean}
-
-        var nodeHasOwnChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-            var node = this.models.javascript.nodes[nodeID];
-            return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
-        };
-
-        /// Determine if a component specifier is a URI.
-        /// 
-        /// A component may be specified as the URI of a resource containing a descriptor (string),
-        /// a descriptor (object), or the ID of a previously-created node (primitive).
-        /// 
-        /// @name module:vwf~componentIsURI
-        /// 
-        /// @param {String|Object} candidate
-        /// 
-        /// @returns {Boolean}
-
-        var componentIsURI = function( candidate ) {
-            return ( typeof candidate == "string" || candidate instanceof String ) && ! componentIsID( candidate );
-        };
-
-        /// Determine if a component specifier is a descriptor.
-        /// 
-        /// A component may be specified as the URI of a resource containing a descriptor (string),
-        /// a descriptor (object), or the ID of a previously-created node (primitive).
-        /// 
-        /// @name module:vwf~componentIsDescriptor
-        /// 
-        /// @param {String|Object} candidate
-        /// 
-        /// @returns {Boolean}
-
-        var componentIsDescriptor = function( candidate ) {
-            return typeof candidate == "object" && candidate != null && ! isPrimitive( candidate );
-        };
-
-        /// Determine if a component specifier is an ID.
-        /// 
-        /// A component may be specified as the URI of a resource containing a descriptor (string),
-        /// a descriptor (object), or the ID of a previously-created node (primitive).
-        /// 
-        /// @name module:vwf~componentIsID
-        /// 
-        /// @param {String|Object} candidate
-        /// 
-        /// @returns {Boolean}
-
-        var componentIsID = function( candidate ) {
-            return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
-        };
-
-        /// Determine if a value is a JavaScript primitive, or the boxed version of a JavaScript
-        /// primitive.
-        /// 
-        /// Node IDs are JavaScript primitives. This function may be used to determine if a value
-        /// has the correct type to be a node ID.
-        /// 
-        /// @name module:vwf~isPrimitive
-        /// 
-        /// @param candidate
-        /// 
-        /// @returns {Boolean}
-
-        var isPrimitive = function( candidate ) {
-
-            switch ( typeof candidate ) {
-
-                case "string":
-                case "number":
-                case "boolean":
-                    return true;
-
-                case "object":
-                    return candidate instanceof String || candidate instanceof Number ||
-                        candidate instanceof Boolean;
-
-                default:
-                    return false;
-
-            }
-
-        };
-
-        /// Determine if an object is a component descriptor. Detect the type by searching for
-        /// descriptor keys in the candidate object.
-        /// 
-        /// @name module:vwf~objectIsComponent
-        /// 
-        /// @param {Object} candidate
-        /// 
-        /// @returns {Boolean}
-
-        var objectIsComponent = function( candidate ) {
-
-            var componentAttributes = [
-                "extends",
-                "implements",
-                "source",
-                "type",
-                "properties",
-                "methods",
-                "events",
-                "children",
-                "scripts",
-            ];
-
-            var isComponent = false;
-
-            if ( typeof candidate == "object" && candidate != null ) {
-
-                isComponent = componentAttributes.some( function( attributeName ) {
-                    return candidate.hasOwnProperty( attributeName );
-                } );
-
-            }
-            
-            return isComponent; 
-        };
-
-        /// Determine if a property initializer is a detailed initializer containing explicit
-        /// accessor and value parameters (rather than a simple value specification). Detect the
-        /// type by searching for property initializer keys in the candidate object.
-        /// 
-        /// @name module:vwf~valueHasAccessors
-        /// 
-        /// @param {Object} candidate
-        /// 
-        /// @returns {Boolean}
-
-        var valueHasAccessors = function( candidate ) {
-
-            var accessorAttributes = [
-                "get",
-                "set",
-                "value",
-            ];
-
-            var hasAccessors = false;
-
-            if ( typeof candidate == "object" && candidate != null ) {
-
-                hasAccessors = accessorAttributes.some( function( attributeName ) {
-                    return candidate.hasOwnProperty( attributeName );
-                } );
-
-            }
-            
-            return hasAccessors; 
-        };
-
-        /// Determine if a method or event initializer is a detailed initializer containing a
-        /// parameter list along with the body text (method initializers only). Detect the type by
-        /// searching for method and event initializer keys in the candidate object.
-        /// 
-        /// @name module:vwf~valueHasBody
-        /// 
-        /// @param {Object} candidate
-        /// 
-        /// @returns {Boolean}
-
-        var valueHasBody = function( candidate ) {  // TODO: refactor and share with valueHasAccessors and possibly objectIsComponent  // TODO: unlike a property initializer, we really only care if it's an object vs. text; text == use as body; object == presume o.parameters and o.body  // TODO: except that a script in the unnamed-list format would appear as an object but should be used as the body
-
-            var bodyAttributes = [
-                "parameters",
-                "body",
-            ];
-
-            var hasBody = false;  // TODO: "body" term is confusing, but that's the current terminology used in vwf/model/javascript
-
-            if ( typeof candidate == "object" && candidate != null ) {
-
-                hasBody = bodyAttributes.some( function( attributeName ) {
-                    return candidate.hasOwnProperty( attributeName );
-                } );
-
-            }
-            
-            return hasBody; 
-        };
-
-        /// Determine if a script initializer is a detailed initializer containing explicit text and
-        /// type parameters (rather than being a simple text specification). Detect the type by
-        /// searching for the script initializer keys in the candidate object.
-        /// 
-        /// @name module:vwf~valueHasType
-        /// 
-        /// @param {Object} candidate
-        /// 
-        /// @returns {Boolean}
-
-        var valueHasType = function( candidate ) {  // TODO: refactor and share with valueHasBody, valueHasAccessors and possibly objectIsComponent
-
-            var typeAttributes = [
-                "text",
-                "type",
-            ];
-
-            var hasType = false;
-
-            if ( typeof candidate == "object" && candidate != null ) {
-
-                hasType = typeAttributes.some( function( attributeName ) {
-                    return candidate.hasOwnProperty( attributeName );
-                } );
-
-            }
-            
-            return hasType; 
-        };
-
-        /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by
-        /// vwf.createChild. The following forms are accepted:
-        /// 
-        ///   - Descriptor: { extends: component, source: ..., type: ..., ... }
-        ///   - Component URI: http://host/path/to/component.vwf
-        ///   - Asset URI: http://host/ath/to/asset.type
-        ///   - Node ID
-        /// 
-        /// They are converted as follows:
-        /// 
-        ///   - Descriptor: unchanged [1]
-        ///   - Component URI: a component that extends the component identified by the URI
-        ///   - Asset URI: a component having the asset identified by the URI as its source
-        ///   - Node ID: a component that extends the previously-created node identified by the ID
-        /// 
-        /// [1] As a special case, missing MIME types are filled in for assets matcching the
-        /// patterns *.unity3d and *.dae, and components having assets of those types but no
-        /// prototype declared will be upgraded to extend scene.vwf and navscene.vwf, respectively.
-        /// 
-        /// @name module:vwf~normalizedComponent
-        /// 
-        /// @param {String|Object} component
-        /// 
-        /// @returns {Object}
-
-        var normalizedComponent = function( component ) {
-
-            // Convert a component URI to an instance of that type or an asset reference to an
-            // untyped reference to that asset. Convert a component ID to an instance of that
-            // prototype.
-
-            if ( componentIsURI( component ) ) {
-                if ( component.match( /\.vwf$/ ) ) {  // TODO: detect component from mime-type instead of extension?
-                    component = { extends: component };
-                } else {
-                    component = { source: component };
-                }
-            } else if ( componentIsID( component ) ) {
-                component = { extends: component };
-            }
-
-            // Fill in the mime type from the source specification if not provided.
-
-            if ( component.source && ! component.type ) {  // TODO: validate component
-
-                var match = component.source.match( /\.([^.]*)$/ ); // TODO: get type from mime-type (from server if remote, from os if local, or (?) from this internal table otherwise)
-
-                if ( match ) {
-
-                    switch ( match[1] ) {
-                        case "unity3d":
-                            component.type = "application/vnd.unity";
-                            break;
-                        case "dae":
-                            component.type = "model/vnd.collada+xml";
-                            break;
-                    }
-
-                }
-
-            }
-
-            // Fill in the component type from the mime type if not provided.
-
-            if ( component.type && ! component.extends ) {  // TODO: load from a server configuration file
-
-                switch ( component.type ) {
-                    case "application/vnd.unity":
-                        component.extends = "http://vwf.example.com/scene.vwf";
-                        break;
-                    case "model/vnd.collada+xml":
-                        component.extends = "http://vwf.example.com/navscene.vwf";
-                        break;
-                }
-
-            }
-
-            return component;
-        };
-
-        /// Convert a fields object as passed between the client and reflector, and stored in the
-        /// message queue, into a form suitable for writing to a log.
-        /// 
-        /// @name module:vwf~loggableFields
-        /// 
-        /// @param {Object} fields
-        /// 
-        /// @returns {Object}
-
-        var loggableFields = function( fields ) {
-            return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
-        };
-
-        /// Convert a component URI, descriptor or ID into a form suitable for writing to a log.
-        /// 
-        /// @name module:vwf~loggableComponent
-        /// 
-        /// @param {String|Object} component
-        /// 
-        /// @returns {String|Object}
-
-        var loggableComponent = function( component ) {
-            return require( "vwf/utility" ).transform( component, loggableComponentTransformation );
-        };
-
-        /// Convert an arbitrary JavaScript value into a form suitable for writing to a log.
-        /// 
-        /// @name module:vwf~loggableValue
-        /// 
-        /// @param {Object} component
-        /// 
-        /// @returns {Object}
-
-        var loggableValue = function( value ) {
-            return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
-                object = require( "vwf/utility" ).transforms.transit( object, names, depth );
-                return typeof object == "number" ? Number( object.toPrecision(5) ) : object; // reduce numeric precision to remove visual noise
-            } );
-        };
-
-        /// Convert an array of arbitrary JavaScript values into a form suitable for writing to a
-        /// log.
-        /// 
-        /// @name module:vwf~loggableValues
-        /// 
-        /// @param {Array|undefined} component
-        /// 
-        /// @returns {Array|undefined}
-
-        var loggableValues = function( values ) {
-            return loggableValue( values );
-        };
-
-        /// Convert an object indexing arrays of arbitrary JavaScript values into a form suitable
-        /// for writing to a log.
-        /// 
-        /// @name module:vwf~loggableIndexedValues
-        /// 
-        /// @param {Object|undefined} component
-        /// 
-        /// @returns {Object|undefined}
-
-        var loggableIndexedValues = function( values ) {
-            return loggableValue( values );
-        };
-
-        // -- remappedURI --------------------------------------------------------------------------
-
-        /// Remap a component URI to its location in a local cache.
-        /// 
-        /// http://vwf.example.com/component.vwf => http://localhost/proxy/vwf.example.com/component.vwf
-        /// 
-        /// @name module:vwf~remappedURI
-
-        var remappedURI = function( uri ) {
-
-            var match = uri.match( RegExp( "http://(vwf.example.com)/(.*)" ) );
-
-            if ( match ) {
-                uri = window.location.protocol + "//" + window.location.host +
-                    "/proxy/" + match[1] + "/" + match[2];
-            }
-
-            return uri;
-
-        };
-
-        // -- queueTransitTransformation -----------------------------------------------------------
-
-        /// vwf/utility/transform() transformation function to convert the message queue for proper
-        /// JSON serialization.
-        /// 
-        /// queue: [ { ..., parameters: [ [ arguments ] ], ... }, { ... }, ... ]
-        /// 
-        /// @name module:vwf~queueTransitTransformation
-
-        var queueTransitTransformation = function( object, names, depth ) {
-
-            if ( depth == 0 ) {
-
-                // Omit private direct messages to this client.
-
-                return object.filter( function( fields ) {
-                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
-                } );
-
-            } else if ( depth == 1 ) {
-
-                // Remove the sequence fields since they're just local annotations (to stabilize the sort).
-
-                var filtered = {};
-
-                Object.keys( object ).filter( function( key ) {
-                    return key != "sequence";
-                } ).forEach( function( key ) {
-                    filtered[key] = object[key];
-                } );
-
-                return filtered;
-
-            } else {
-
-                return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
-
-            }
-
-        };
-
-        // -- loggableComponentTransformation ------------------------------------------------------
-
-        /// vwf/utility/transform() transformation function to truncate the verbose bits of a
-        /// component so that it may be written to a log.
-        /// 
-        /// @name module:vwf~loggableComponentTransformation
-
-        var loggableComponentTransformation = function( object, names, depth ) {
-
-            // Find the index of the lowest nested component in the names list.
-
-            var componentIndex = names.length;
-
-            while ( componentIndex > 2 && names[componentIndex-1] == "children" ) {
-                componentIndex -= 2;
-            }
-
-            // depth                                                  names  notes
-            // -----                                                  -----  -----
-            // 0:                                                        []  the component
-            // 1:                                          [ "properties" ]  its properties object
-            // 2:                          [ "propertyName", "properties" ]  one property
-            // 1:                                            [ "children" ]  the children object
-            // 2:                               [ "childName", "children" ]  one child
-            // 3:                 [ "properties", "childName", "children" ]  the child's properties
-            // 4: [ "propertyName", "properties", "childName", "children" ]  one child property
-
-            if ( componentIndex > 0 ) {
-
-                // Locate the container ("properties", "methods", "events", etc.) below the
-                // component in the names list.
-
-                var containerIndex = componentIndex - 1;
-                var containerName = names[containerIndex];
-
-                // Locate the member as appropriate for the container.
-
-                if ( containerName == "extends" ) {
-
-                    var memberIndex = containerIndex;
-                    var memberName = names[memberIndex];
-
-                } else if ( containerName == "implements" ) {
-
-                    if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
-                    }
-
-                } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
-                        containerName == "children" ) {
-
-                    if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
-                    }
-    
-                } else if ( containerName == "scripts" ) {
-
-                    if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
-                    }
-
-                } else {
-
-                    containerIndex = undefined;
-                    containerName = undefined;
-
-                }
-
-            }
-
-            // Transform the object at the current recusion level.
-
-            switch ( containerName ) {
-
-                case "extends":
-
-                    // Omit a component descriptor for the prototype.
-
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
-                        return {};
-                    }
-
-                    break;
-
-                case "implements":
-
-                    // Omit component descriptors for the behaviors.
-
-                    if ( memberIndex == 1 && componentIsDescriptor( object ) ) {
-                        return {};
-                    }
-
-                    break;
-
-                case "properties":
-
-                    // Convert property values to a loggable version, and omit getter and setter
-                    // text.
-
-                    if ( memberIndex == 0 && ! valueHasAccessors( object ) ||
-                            memberIndex == 1 && names[0] == "value" ) {
-                        return loggableValue( object );
-                    } else if ( memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
-                        return "...";
-                    }
-
-                    break;
-
-                case "methods":
-
-                    // Omit method body text.
-
-                    if ( memberIndex == 0 && ! valueHasBody( object ) || 
-                            memberIndex == 1 && names[0] == "body" ) {
-                        return "...";
-                    }
-
-                    break;
-
-                case "events":
-
-                    // Nothing for events.
-
-                    break;
-
-                case "children":
-
-                    // Omit child component descriptors.
-
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
-                        return {};
-                    }
-
-                    break;
-
-                case "scripts":
-
-                    // Shorten script text.
-
-                    if ( memberIndex == 0 && ! valueHasType( object ) || 
-                            memberIndex == 1 && names[0] == "text" ) {
-                        return "...";
-                    }
-
-                    break;
-
-            }
-
-            return object;
-        };
-
-        // -- xpathResolver ------------------------------------------------------------------------
-
-        /// Interpret the steps of an XPath expression being resolved. Use with
-        /// vwf.utility.xpath#resolve.
-        ///
-        /// @name module:vwf~xpathResolver
-        /// 
-        /// @param {Object} step
-        /// @param {ID} contextID
-        /// @param {Boolean} [resolveAttributes]
-        /// 
-        /// @returns {ID[]}
-
-        var xpathResolver = function( step, contextID, resolveAttributes ) {
-
-            var resultIDs = [];
-
-            switch ( step.axis ) {
-
-                // case "preceding":  // TODO
-                // case "preceding-sibling":  // TODO
-
-                case "ancestor-or-self":
-                    resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
-                    break;
-
-                case "ancestor":
-                    Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
-                    break;
-
-                case "parent":
-                    var parentID = this.parent( contextID );
-                    parentID && resultIDs.push( parentID );
-                    break;
-
-                case "self":
-                    resultIDs.push( contextID );
-                    break;
-
-                case "child":
-                    Array.prototype.push.apply( resultIDs, this.children( contextID ) );
-                    break;
-
-                case "descendant":
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
-                    break;
-
-                case "descendant-or-self":
-                    resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
-                    break;
-
-                // case "following-sibling":  // TODO
-                // case "following":  // TODO
-
-                case "attribute":
-                    if ( resolveAttributes ) {
-                        resultIDs.push( "@" + contextID );  // TODO: @?
-                    }
-                    break;
-
-                // n/a: case "namespace":
-                // n/a:   break;
-
-            }
-
-            switch ( step.kind ) {
-
-                // Name test.
-
-                case undefined:
-
-                    resultIDs = resultIDs.filter( function( resultID ) {
-                        if ( resultID[0] != "@" ) {  // TODO: @?
-                            return xpathNodeMatchesStep.call( this, resultID, step.name );
-                        } else {
-                            return xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
-                        }
-                    }, this );
-
-                    break;
-
-                // Element test.
-
-                case "element":
-
-                    // Cases: kind(node,type)
-
-                    // element()
-                    // element(name)
-                    // element(,type)
-                    // element(name,type)
-
-                    resultIDs = resultIDs.filter( function( resultID ) {
-                        return resultID[0] != "@" && xpathNodeMatchesStep.call( this, resultID, step.name, step.type );  // TODO: @?
-                    }, this );
-
-                    break;
-
-                case "attribute":
-
-                    resultIDs = resultIDs.filter( function( resultID ) {
-                        return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
-                    }, this );
-
-                    break;
-
-                // Any-kind test.
-
-                case "node":
-
-                    break;
-
-                // Unimplemented test.
-
-                default:
-
-                    resultIDs = [];
-
-                    break;
-
-            }
-
-            return resultIDs;
-        }
-
-        // -- xpathNodeMatchesStep -----------------------------------------------------------------
-
-        /// Determine if a node matches a step of an XPath expression being resolved.
-        ///
-        /// @name module:vwf~xpathNodeMatchesStep
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} [name]
-        /// @param {String} [type]
-        /// 
-        /// @returns {Boolean}
-
-        var xpathNodeMatchesStep = function( nodeID, name, type ) {
-
-            if ( name && this.name( nodeID ) != name ) {
-                return false;
-            }
-
-            var matches_type = ! type || this.uri( nodeID ) == type ||
-                this.prototypes( nodeID ).some( function( prototypeID ) {
-                    return this.uri( prototypeID ) == type;
-            }, this );
-
-            return matches_type;
-        }
-
-        // -- xpathPropertyMatchesStep -------------------------------------------------------------
-
-        /// Determine if a property matches a step of an XPath expression being resolved.
-        ///
-        /// @name module:vwf~xpathPropertyMatchesStep
-        /// 
-        /// @param {ID} nodeID
-        /// @param {String} [name]
-        /// 
-        /// @returns {Boolean}
-
-        var xpathPropertyMatchesStep = function( nodeID, name ) {
-
-            var properties = this.models.object.properties( nodeID );
-
-            if ( name ) {
-                return properties[name];
-            } else {
-                return Object.keys( properties ).some( function( propertyName ) {
-                    return properties[propertyName];
-                }, this );
-            }
-
-        }
-
-        // -- getQueryString -----------------------------------------------------------------------
-
-        /// Retrieve parameters from the page's query string.
-        /// 
-        /// From http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/2880929#2880929
-        /// and http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/3867610#3867610.
-        /// 
-        /// @name module:vwf~getQueryString
-
-        var getQueryString = function( name ) {
-
-            function parseParams() {
-                var params = {},
-                    e,
-                    a = /\+/g, // regex for replacing addition symbol with a space
-                    r = /([^&;=]+)=?([^&;]*)/g,
-                    d = function( s ) { return decodeURIComponent( s.replace(a, " ") ); },
-                    q = window.location.search.substring(1);
-
-                while ( e = r.exec(q) )
-                    params[ d(e[1]) ] = d(e[2]);
-
-                return params;
-            }
-
-            if ( ! queryStringParams )
-                queryStringParams = parseParams();
-
-            return queryStringParams[name];
-        };
-
-        // == Private variables ====================================================================
-
-        /// Components describe the objects that make up the simulation. They may also serve as
-        /// prototype objects for further derived components. External components are identified by
-        /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
-        /// that we can find it if it is reused. Components specified internally as object literals
-        /// are anonymous and are not indexed here.
-        /// 
-        /// @name module:vwf~components
-
-        var components = {}; // maps component node ID => component specification
-
-        /// The proto-prototype of all nodes is "node", identified by this URI. This type is
-        /// intrinsic to the system and nothing is loaded from the URI.
-        /// 
-        /// @name module:vwf~nodeTypeURI
-
-        var nodeTypeURI = "http://vwf.example.com/node.vwf";
-
-        /// The "node" component descriptor.
-        /// 
-        /// @name module:vwf~nodeTypeDescriptor
-
-        var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
-
-        /// This is the connection to the reflector. In this sample implementation, "socket" is a
-        /// socket.io client that communicates over a channel provided by the server hosting the
-        /// client documents.
-        /// 
-        /// @name module:vwf~socket
-
-        var socket = undefined;
-
-        /// Cached version of window.location.search query parameters generated by getQueryString().
-        /// 
-        /// @name module:vwf~queryStringParams
-
-        var queryStringParams = undefined;
-
-        /// `setProperty` records sets in progress in `setPropertyEntrants` to prevent infinite
-        /// recursion in the case that a driver calls back into the kernel (directly or indirectly)
-        /// to set a property while the kernel is in the process of setting that same property.
-        /// 
-        /// `index` identifies the active driver, and `value` provides a path for deeper calls to
-        /// return values to shallower calls.
-
-        var setPropertyEntrants = {};
-
-        /// `getProperty` records gets in progress in `getPropertyEntrants` to prevent infinite
-        /// recursion in the case that a driver calls back into the kernel (directly or indirectly)
-        /// to get a property while the kernel is in the process of getting that same property.
-        /// 
-        /// `index` identifies the active driver, and `value` provides a path for deeper calls to
-        /// return values to shallower calls.
-
-        var getPropertyEntrants = {};
-
-        /// Callback functions defined in this scope use this local "vwf" to locate the manager.
-        /// 
-        /// @name module:vwf~vwf
-
-        var vwf = this;
-
-        /// Control messages from the reflector are stored here in a priority queue, ordered by
-        /// execution time.
-        /// 
-        /// @name module:vwf~queue
-
-        var queue = {
-
-            /// Insert a message or messages into the queue. Optionally execute the simulation
-            /// through the time marked on the message.
-            /// 
-            /// When chronic (chron-ic) is set, vwf#dispatch is called to execute the simulation up
-            /// through the indicated time. To prevent actions from executing out of order, insert
-            /// should be the caller's last operation before returning to the host when invoked with
-            /// chronic.
-            /// 
-            /// @name module:vwf~queue.insert
-            /// 
-            /// @param {Object|Object[]} fields
-            /// @param {Boolean} [chronic]
-
-            insert: function( fields, chronic ) {
-
-                var messages = fields instanceof Array ? fields : [ fields ];
-
-                messages.forEach( function( fields ) {
-
-                    // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
-
-                        fields.sequence = ++this.sequence; // to stabilize the sort
-                        this.queue.push( fields );
-
-                    // }
-
-                    if ( chronic ) {
-                        this.time = Math.max( this.time, fields.time ); // save the latest allowed time for suspend/resume
-                    }
-
-                }, this );
-
-                // Sort by time, then by sequence.  // TODO: we probably want a priority queue here for better performance
-
-                this.queue.sort( function( a, b ) {
-
-                    return a.time != b.time ?
-                        a.time - b.time :
-                        a.sequence - b.sequence;
-
-                } );
-
-                // Execute the simulation through the new time.
-
-                // To prevent actions from executing out of order, callers should immediately return
-                // to the host after invoking insert with chronic set.
-
-                if ( chronic ) {
-                    vwf.dispatch();
-                }
-
-            },
-
-            /// Pull the next message from the queue.
-            /// 
-            /// @name module:vwf~queue.pull
-            /// 
-            /// @returns {Object|undefined} The next message if available, otherwise undefined.
-
-            pull: function() {
-
-                if ( this.suspension == 0 && this.queue.length > 0 && this.queue[0].time <= this.time ) {
-                    return this.queue.shift();                
-                }
-
-            },
-
-            /// Suspend message execution.
-            /// 
-            /// @name module:vwf~queue.suspend
-            /// 
-            /// @returns {Boolean} true if the queue was suspended by this call.
-
-            suspend: function( why ) {
-
-                if ( this.suspension++ == 0 ) {
-                    vwf.logger.infox( "-queue#suspend", "suspending queue at time", vwf.now, why ? why : "" );
-                    return true;
-                } else {
-                    vwf.logger.debugx( "-queue#suspend", "further suspending queue at time", vwf.now, why ? why : "" );
-                    return false;
-                }
-
-            },
-
-            /// Resume message execution.
-            ///
-            /// vwf#dispatch may be called to continue the simulation. To prevent actions from
-            /// executing out of order, resume should be the caller's last operation before
-            /// returning to the host.
-            /// 
-            /// @name module:vwf~queue.resume
-            /// 
-            /// @returns {Boolean} true if the queue was resumed by this call.
-
-            resume: function( why ) {
-
-                if ( --this.suspension == 0 ) {
-                    vwf.logger.infox( "-queue#resume", "resuming queue at time", vwf.now, why ? why : "" );
-                    vwf.dispatch();
-                    return true;
-                } else {
-                    vwf.logger.debugx( "-queue#resume", "partially resuming queue at time", vwf.now, why ? why : "" );
-                    return false;
-                }
-
-            },
-
-            /// Return the ready state of the queue.
-            /// 
-            /// @name module:vwf~queue.ready
-            /// 
-            /// @returns {Boolean}
-
-            ready: function() {
-                return this.suspension == 0;
-            },
-
-            /// Current time as provided by the reflector. Messages to be executed at this time or
-            /// earlier are available from #pull.
-            /// 
-            /// @name module:vwf~queue.time
-
-            time: 0,
-
-            /// Suspension count. Queue processing is suspended when suspension is greater than 0.
-            /// 
-            /// @name module:vwf~queue.suspension
-
-            suspension: 0,
-
-            /// Sequence counter for tagging messages by arrival order. Messages are sorted by time,
-            /// then by order of arrival.
-            /// 
-            /// @name module:vwf~queue.sequence
-
-            sequence: 0,
-
-            /// Array containing the messages in the queue.
-            /// 
-            /// @name module:vwf~queue.queue
-
-            queue: [],
-
-        };
+        },
 
     };
 
-} ) ( window );
+    // == Private functions ========================================================================
+
+    // -- loadComponent ----------------------------------------------------------------------------
+
+    /// loadComponent.
+
+    var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
+
+        if ( nodeURI == nodeTypeURI ) {
+
+            callback_async( nodeTypeDescriptor );
+
+        } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
+
+            // Primarly for testing, parse one specific form of data URIs. We need to parse
+            // these ourselves since Chrome can't load data URIs (with a cross origin error).
+
+            callback_async( JSON.parse( atob( nodeURI.substring( 29 ) ) ) );  // TODO: support all data URIs
+
+        } else {
+
+            queue.suspend( "while loading " + nodeURI ); // suspend the queue
+
+            jQuery.ajax( {
+
+                url: remappedURI( nodeURI ),
+                dataType: "jsonp",
+
+                success: function( nodeDescriptor ) /* async */ {
+                    callback_async( nodeDescriptor );
+                    queue.resume( "after loading " + nodeURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                },
+
+                // error: function() {  // TODO
+                // },
+
+            } );
+
+        }
+
+    };
+
+    /// Determine if a node has a property with the given name, either directly on the node or
+    /// inherited from a prototype.
+    /// 
+    /// This function must run as a method of the kernel. Invoke as: nodeHasProperty.call(
+    ///   kernel, nodeID, propertyName ).
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} propertyName
+    /// 
+    /// @returns {Boolean}
+
+    var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
+        var node = this.models.javascript.nodes[nodeID];
+        return propertyName in node.properties;
+    };
+
+    /// Determine if a node has a property with the given name. The node's prototypes are not
+    /// considered.
+    /// 
+    /// This function must run as a method of the kernel. Invoke as: nodeHasOwnProperty.call(
+    ///   kernel, nodeID, propertyName ).
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} propertyName
+    /// 
+    /// @returns {Boolean}
+
+    var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
+        var node = this.models.javascript.nodes[nodeID];
+        return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
+    };
+
+    /// Determine if a given property of a node has a setter function, either directly on the
+    /// node or inherited from a prototype.
+    /// 
+    /// This function must run as a method of the kernel. Invoke as: nodePropertyHasSetter.call(
+    ///   kernel, nodeID, propertyName ).
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} propertyName
+    /// 
+    /// @returns {Boolean}
+
+    var nodePropertyHasSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
+        var node = this.models.javascript.nodes[nodeID];
+        var setter = node.private.setters && node.private.setters[propertyName];
+        return typeof setter == "function" || setter instanceof Function;
+    };
+
+    /// Determine if a given property of a node has a setter function. The node's prototypes are
+    /// not considered.
+    /// 
+    /// This function must run as a method of the kernel. Invoke as:
+    ///   nodePropertyHasOwnSetter.call( kernel, nodeID, propertyName ).
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} propertyName
+    /// 
+    /// @returns {Boolean}
+
+    var nodePropertyHasOwnSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
+        var node = this.models.javascript.nodes[nodeID];
+        var setter = node.private.setters && node.private.setters.hasOwnProperty( propertyName ) && node.private.setters[propertyName];
+        return typeof setter == "function" || setter instanceof Function;
+    };
+
+    /// Determine if a node has a child with the given name, either directly on the node or
+    /// inherited from a prototype.
+    /// 
+    /// This function must run as a method of the kernel. Invoke as: nodeHasChild.call(
+    ///   kernel, nodeID, childName ).
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} childName
+    /// 
+    /// @returns {Boolean}
+
+    var nodeHasChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
+        var node = this.models.javascript.nodes[nodeID];
+        return childName in node.children;
+    };
+
+    /// Determine if a node has a child with the given name. The node's prototypes are not
+    /// considered.
+    /// 
+    /// This function must run as a method of the kernel. Invoke as: nodeHasOwnChild.call(
+    ///   kernel, nodeID, childName ).
+    /// 
+    /// @param {ID} nodeID
+    /// @param {String} childName
+    /// 
+    /// @returns {Boolean}
+
+    var nodeHasOwnChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
+        var node = this.models.javascript.nodes[nodeID];
+        return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
+    };
+
+    /// Determine if a component specifier is a URI.
+    /// 
+    /// A component may be specified as the URI of a resource containing a descriptor (string),
+    /// a descriptor (object), or the ID of a previously-created node (primitive).
+    /// 
+    /// @param {String|Object} candidate
+    /// 
+    /// @returns {Boolean}
+
+    var componentIsURI = function( candidate ) {
+        return ( typeof candidate == "string" || candidate instanceof String ) && ! componentIsID( candidate );
+    };
+
+    /// Determine if a component specifier is a descriptor.
+    /// 
+    /// A component may be specified as the URI of a resource containing a descriptor (string),
+    /// a descriptor (object), or the ID of a previously-created node (primitive).
+    /// 
+    /// @param {String|Object} candidate
+    /// 
+    /// @returns {Boolean}
+
+    var componentIsDescriptor = function( candidate ) {
+        return typeof candidate == "object" && candidate != null && ! isPrimitive( candidate );
+    };
+
+    /// Determine if a component specifier is an ID.
+    /// 
+    /// A component may be specified as the URI of a resource containing a descriptor (string),
+    /// a descriptor (object), or the ID of a previously-created node (primitive).
+    /// 
+    /// @param {String|Object} candidate
+    /// 
+    /// @returns {Boolean}
+
+    var componentIsID = function( candidate ) {
+        return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
+    };
+
+    /// Determine if a value is a JavaScript primitive, or the boxed version of a JavaScript
+    /// primitive.
+    /// 
+    /// Node IDs are JavaScript primitives. This function may be used to determine if a value
+    /// has the correct type to be a node ID.
+    /// 
+    /// @param candidate
+    /// 
+    /// @returns {Boolean}
+
+    var isPrimitive = function( candidate ) {
+
+        switch ( typeof candidate ) {
+
+            case "string":
+            case "number":
+            case "boolean":
+                return true;
+
+            case "object":
+                return candidate instanceof String || candidate instanceof Number ||
+                    candidate instanceof Boolean;
+
+            default:
+                return false;
+
+        }
+
+    };
+
+    /// Determine if an object is a component descriptor. Detect the type by searching for
+    /// descriptor keys in the candidate object.
+    /// 
+    /// @param {Object} candidate
+    /// 
+    /// @returns {Boolean}
+
+    var objectIsComponent = function( candidate ) {
+
+        var componentAttributes = [
+            "extends",
+            "implements",
+            "source",
+            "type",
+            "properties",
+            "methods",
+            "events",
+            "children",
+            "scripts",
+        ];
+
+        var isComponent = false;
+
+        if ( typeof candidate == "object" && candidate != null ) {
+
+            isComponent = componentAttributes.some( function( attributeName ) {
+                return candidate.hasOwnProperty( attributeName );
+            } );
+
+        }
+        
+        return isComponent; 
+    };
+
+    /// Determine if a property initializer is a detailed initializer containing explicit
+    /// accessor and value parameters (rather than a simple value specification). Detect the
+    /// type by searching for property initializer keys in the candidate object.
+    /// 
+    /// @param {Object} candidate
+    /// 
+    /// @returns {Boolean}
+
+    var valueHasAccessors = function( candidate ) {
+
+        var accessorAttributes = [
+            "get",
+            "set",
+            "value",
+        ];
+
+        var hasAccessors = false;
+
+        if ( typeof candidate == "object" && candidate != null ) {
+
+            hasAccessors = accessorAttributes.some( function( attributeName ) {
+                return candidate.hasOwnProperty( attributeName );
+            } );
+
+        }
+        
+        return hasAccessors; 
+    };
+
+    /// Determine if a method or event initializer is a detailed initializer containing a
+    /// parameter list along with the body text (method initializers only). Detect the type by
+    /// searching for method and event initializer keys in the candidate object.
+    /// 
+    /// @param {Object} candidate
+    /// 
+    /// @returns {Boolean}
+
+    var valueHasBody = function( candidate ) {  // TODO: refactor and share with valueHasAccessors and possibly objectIsComponent  // TODO: unlike a property initializer, we really only care if it's an object vs. text; text == use as body; object == presume o.parameters and o.body  // TODO: except that a script in the unnamed-list format would appear as an object but should be used as the body
+
+        var bodyAttributes = [
+            "parameters",
+            "body",
+        ];
+
+        var hasBody = false;  // TODO: "body" term is confusing, but that's the current terminology used in vwf/model/javascript
+
+        if ( typeof candidate == "object" && candidate != null ) {
+
+            hasBody = bodyAttributes.some( function( attributeName ) {
+                return candidate.hasOwnProperty( attributeName );
+            } );
+
+        }
+        
+        return hasBody; 
+    };
+
+    /// Determine if a script initializer is a detailed initializer containing explicit text and
+    /// type parameters (rather than being a simple text specification). Detect the type by
+    /// searching for the script initializer keys in the candidate object.
+    /// 
+    /// @param {Object} candidate
+    /// 
+    /// @returns {Boolean}
+
+    var valueHasType = function( candidate ) {  // TODO: refactor and share with valueHasBody, valueHasAccessors and possibly objectIsComponent
+
+        var typeAttributes = [
+            "text",
+            "type",
+        ];
+
+        var hasType = false;
+
+        if ( typeof candidate == "object" && candidate != null ) {
+
+            hasType = typeAttributes.some( function( attributeName ) {
+                return candidate.hasOwnProperty( attributeName );
+            } );
+
+        }
+        
+        return hasType; 
+    };
+
+    /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by
+    /// vwf.createChild. The following forms are accepted:
+    /// 
+    ///   - Descriptor: { extends: component, source: ..., type: ..., ... }
+    ///   - Component URI: http://host/path/to/component.vwf
+    ///   - Asset URI: http://host/ath/to/asset.type
+    ///   - Node ID
+    /// 
+    /// They are converted as follows:
+    /// 
+    ///   - Descriptor: unchanged [1]
+    ///   - Component URI: a component that extends the component identified by the URI
+    ///   - Asset URI: a component having the asset identified by the URI as its source
+    ///   - Node ID: a component that extends the previously-created node identified by the ID
+    /// 
+    /// [1] As a special case, missing MIME types are filled in for assets matcching the
+    /// patterns *.unity3d and *.dae, and components having assets of those types but no
+    /// prototype declared will be upgraded to extend scene.vwf and navscene.vwf, respectively.
+    /// 
+    /// @param {String|Object} component
+    /// 
+    /// @returns {Object}
+
+    var normalizedComponent = function( component ) {
+
+        // Convert a component URI to an instance of that type or an asset reference to an
+        // untyped reference to that asset. Convert a component ID to an instance of that
+        // prototype.
+
+        if ( componentIsURI( component ) ) {
+            if ( component.match( /\.vwf$/ ) ) {  // TODO: detect component from mime-type instead of extension?
+                component = { extends: component };
+            } else {
+                component = { source: component };
+            }
+        } else if ( componentIsID( component ) ) {
+            component = { extends: component };
+        }
+
+        // Fill in the mime type from the source specification if not provided.
+
+        if ( component.source && ! component.type ) {  // TODO: validate component
+
+            var match = component.source.match( /\.([^.]*)$/ ); // TODO: get type from mime-type (from server if remote, from os if local, or (?) from this internal table otherwise)
+
+            if ( match ) {
+
+                switch ( match[1] ) {
+                    case "unity3d":
+                        component.type = "application/vnd.unity";
+                        break;
+                    case "dae":
+                        component.type = "model/vnd.collada+xml";
+                        break;
+                }
+
+            }
+
+        }
+
+        // Fill in the component type from the mime type if not provided.
+
+        if ( component.type && ! component.extends ) {  // TODO: load from a server configuration file
+
+            switch ( component.type ) {
+                case "application/vnd.unity":
+                    component.extends = "http://vwf.example.com/scene.vwf";
+                    break;
+                case "model/vnd.collada+xml":
+                    component.extends = "http://vwf.example.com/navscene.vwf";
+                    break;
+            }
+
+        }
+
+        return component;
+    };
+
+    /// Convert a fields object as passed between the client and reflector, and stored in the
+    /// message queue, into a form suitable for writing to a log.
+    /// 
+    /// @param {Object} fields
+    /// 
+    /// @returns {Object}
+
+    var loggableFields = function( fields ) {
+        return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
+    };
+
+    /// Convert a component URI, descriptor or ID into a form suitable for writing to a log.
+    /// 
+    /// @param {String|Object} component
+    /// 
+    /// @returns {String|Object}
+
+    var loggableComponent = function( component ) {
+        return require( "vwf/utility" ).transform( component, loggableComponentTransformation );
+    };
+
+    /// Convert an arbitrary JavaScript value into a form suitable for writing to a log.
+    /// 
+    /// @param {Object} component
+    /// 
+    /// @returns {Object}
+
+    var loggableValue = function( value ) {
+        return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
+            object = require( "vwf/utility" ).transforms.transit( object, names, depth );
+            return typeof object == "number" ? Number( object.toPrecision(5) ) : object; // reduce numeric precision to remove visual noise
+        } );
+    };
+
+    /// Convert an array of arbitrary JavaScript values into a form suitable for writing to a
+    /// log.
+    /// 
+    /// @param {Array|undefined} component
+    /// 
+    /// @returns {Array|undefined}
+
+    var loggableValues = function( values ) {
+        return loggableValue( values );
+    };
+
+    /// Convert an object indexing arrays of arbitrary JavaScript values into a form suitable
+    /// for writing to a log.
+    /// 
+    /// @param {Object|undefined} component
+    /// 
+    /// @returns {Object|undefined}
+
+    var loggableIndexedValues = function( values ) {
+        return loggableValue( values );
+    };
+
+    // -- remappedURI ------------------------------------------------------------------------------
+
+    /// Remap a component URI to its location in a local cache.
+    /// 
+    /// http://vwf.example.com/component.vwf => http://localhost/proxy/vwf.example.com/component.vwf
+
+    var remappedURI = function( uri ) {
+
+        var match = uri.match( RegExp( "http://(vwf.example.com)/(.*)" ) );
+
+        if ( match ) {
+            uri = window.location.protocol + "//" + window.location.host +
+                "/proxy/" + match[1] + "/" + match[2];
+        }
+
+        return uri;
+
+    };
+
+    // -- queueTransitTransformation ---------------------------------------------------------------
+
+    /// vwf/utility/transform() transformation function to convert the message queue for proper
+    /// JSON serialization.
+    /// 
+    /// queue: [ { ..., parameters: [ [ arguments ] ], ... }, { ... }, ... ]
+
+    var queueTransitTransformation = function( object, names, depth ) {
+
+        if ( depth == 0 ) {
+
+            // Omit private direct messages to this client.
+
+            return object.filter( function( fields ) {
+                return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+            } );
+
+        } else if ( depth == 1 ) {
+
+            // Remove the sequence fields since they're just local annotations (to stabilize the sort).
+
+            var filtered = {};
+
+            Object.keys( object ).filter( function( key ) {
+                return key != "sequence";
+            } ).forEach( function( key ) {
+                filtered[key] = object[key];
+            } );
+
+            return filtered;
+
+        } else {
+
+            return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
+
+        }
+
+    };
+
+    // -- loggableComponentTransformation ----------------------------------------------------------
+
+    /// vwf/utility/transform() transformation function to truncate the verbose bits of a
+    /// component so that it may be written to a log.
+
+    var loggableComponentTransformation = function( object, names, depth ) {
+
+        // Find the index of the lowest nested component in the names list.
+
+        var componentIndex = names.length;
+
+        while ( componentIndex > 2 && names[componentIndex-1] == "children" ) {
+            componentIndex -= 2;
+        }
+
+        // depth                                                  names  notes
+        // -----                                                  -----  -----
+        // 0:                                                        []  the component
+        // 1:                                          [ "properties" ]  its properties object
+        // 2:                          [ "propertyName", "properties" ]  one property
+        // 1:                                            [ "children" ]  the children object
+        // 2:                               [ "childName", "children" ]  one child
+        // 3:                 [ "properties", "childName", "children" ]  the child's properties
+        // 4: [ "propertyName", "properties", "childName", "children" ]  one child property
+
+        if ( componentIndex > 0 ) {
+
+            // Locate the container ("properties", "methods", "events", etc.) below the
+            // component in the names list.
+
+            var containerIndex = componentIndex - 1;
+            var containerName = names[containerIndex];
+
+            // Locate the member as appropriate for the container.
+
+            if ( containerName == "extends" ) {
+
+                var memberIndex = containerIndex;
+                var memberName = names[memberIndex];
+
+            } else if ( containerName == "implements" ) {
+
+                if ( containerIndex > 0 ) {
+                    var memberIndex = containerIndex - 1;
+                    var memberName = names[memberIndex];
+                }
+
+            } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
+                    containerName == "children" ) {
+
+                if ( containerIndex > 0 ) {
+                    var memberIndex = containerIndex - 1;
+                    var memberName = names[memberIndex];
+                }
+
+            } else if ( containerName == "scripts" ) {
+
+                if ( containerIndex > 0 ) {
+                    var memberIndex = containerIndex - 1;
+                    var memberName = names[memberIndex];
+                }
+
+            } else {
+
+                containerIndex = undefined;
+                containerName = undefined;
+
+            }
+
+        }
+
+        // Transform the object at the current recusion level.
+
+        switch ( containerName ) {
+
+            case "extends":
+
+                // Omit a component descriptor for the prototype.
+
+                if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                    return {};
+                }
+
+                break;
+
+            case "implements":
+
+                // Omit component descriptors for the behaviors.
+
+                if ( memberIndex == 1 && componentIsDescriptor( object ) ) {
+                    return {};
+                }
+
+                break;
+
+            case "properties":
+
+                // Convert property values to a loggable version, and omit getter and setter
+                // text.
+
+                if ( memberIndex == 0 && ! valueHasAccessors( object ) ||
+                        memberIndex == 1 && names[0] == "value" ) {
+                    return loggableValue( object );
+                } else if ( memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
+                    return "...";
+                }
+
+                break;
+
+            case "methods":
+
+                // Omit method body text.
+
+                if ( memberIndex == 0 && ! valueHasBody( object ) || 
+                        memberIndex == 1 && names[0] == "body" ) {
+                    return "...";
+                }
+
+                break;
+
+            case "events":
+
+                // Nothing for events.
+
+                break;
+
+            case "children":
+
+                // Omit child component descriptors.
+
+                if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                    return {};
+                }
+
+                break;
+
+            case "scripts":
+
+                // Shorten script text.
+
+                if ( memberIndex == 0 && ! valueHasType( object ) || 
+                        memberIndex == 1 && names[0] == "text" ) {
+                    return "...";
+                }
+
+                break;
+
+        }
+
+        return object;
+    };
+
+    // -- xpathResolver ----------------------------------------------------------------------------
+
+    /// Interpret the steps of an XPath expression being resolved. Use with
+    /// vwf.utility.xpath#resolve.
+    ///
+    /// @param {Object} step
+    /// @param {ID} contextID
+    /// @param {Boolean} [resolveAttributes]
+    /// 
+    /// @returns {ID[]}
+
+    var xpathResolver = function( step, contextID, resolveAttributes ) {
+
+        var resultIDs = [];
+
+        switch ( step.axis ) {
+
+            // case "preceding":  // TODO
+            // case "preceding-sibling":  // TODO
+
+            case "ancestor-or-self":
+                resultIDs.push( contextID );
+                Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                break;
+
+            case "ancestor":
+                Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                break;
+
+            case "parent":
+                var parentID = this.parent( contextID );
+                parentID && resultIDs.push( parentID );
+                break;
+
+            case "self":
+                resultIDs.push( contextID );
+                break;
+
+            case "child":
+                Array.prototype.push.apply( resultIDs, this.children( contextID ) );
+                break;
+
+            case "descendant":
+                Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                break;
+
+            case "descendant-or-self":
+                resultIDs.push( contextID );
+                Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                break;
+
+            // case "following-sibling":  // TODO
+            // case "following":  // TODO
+
+            case "attribute":
+                if ( resolveAttributes ) {
+                    resultIDs.push( "@" + contextID );  // TODO: @?
+                }
+                break;
+
+            // n/a: case "namespace":
+            // n/a:   break;
+
+        }
+
+        switch ( step.kind ) {
+
+            // Name test.
+
+            case undefined:
+
+                resultIDs = resultIDs.filter( function( resultID ) {
+                    if ( resultID[0] != "@" ) {  // TODO: @?
+                        return xpathNodeMatchesStep.call( this, resultID, step.name );
+                    } else {
+                        return xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
+                    }
+                }, this );
+
+                break;
+
+            // Element test.
+
+            case "element":
+
+                // Cases: kind(node,type)
+
+                // element()
+                // element(name)
+                // element(,type)
+                // element(name,type)
+
+                resultIDs = resultIDs.filter( function( resultID ) {
+                    return resultID[0] != "@" && xpathNodeMatchesStep.call( this, resultID, step.name, step.type );  // TODO: @?
+                }, this );
+
+                break;
+
+            case "attribute":
+
+                resultIDs = resultIDs.filter( function( resultID ) {
+                    return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
+                }, this );
+
+                break;
+
+            // Any-kind test.
+
+            case "node":
+
+                break;
+
+            // Unimplemented test.
+
+            default:
+
+                resultIDs = [];
+
+                break;
+
+        }
+
+        return resultIDs;
+    }
+
+    // -- xpathNodeMatchesStep ---------------------------------------------------------------------
+
+    /// Determine if a node matches a step of an XPath expression being resolved.
+    ///
+    /// @param {ID} nodeID
+    /// @param {String} [name]
+    /// @param {String} [type]
+    /// 
+    /// @returns {Boolean}
+
+    var xpathNodeMatchesStep = function( nodeID, name, type ) {
+
+        if ( name && this.name( nodeID ) != name ) {
+            return false;
+        }
+
+        var matches_type = ! type || this.uri( nodeID ) == type ||
+            this.prototypes( nodeID ).some( function( prototypeID ) {
+                return this.uri( prototypeID ) == type;
+        }, this );
+
+        return matches_type;
+    }
+
+    // -- xpathPropertyMatchesStep -----------------------------------------------------------------
+
+    /// Determine if a property matches a step of an XPath expression being resolved.
+    ///
+    /// @param {ID} nodeID
+    /// @param {String} [name]
+    /// 
+    /// @returns {Boolean}
+
+    var xpathPropertyMatchesStep = function( nodeID, name ) {
+
+        var properties = this.models.object.properties( nodeID );
+
+        if ( name ) {
+            return properties[name];
+        } else {
+            return Object.keys( properties ).some( function( propertyName ) {
+                return properties[propertyName];
+            }, this );
+        }
+
+    }
+
+    // -- getQueryString ---------------------------------------------------------------------------
+
+    /// Retrieve parameters from the page's query string.
+    /// 
+    /// From http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/2880929#2880929
+    /// and http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/3867610#3867610.
+
+    var getQueryString = function( name ) {
+
+        function parseParams() {
+            var params = {},
+                e,
+                a = /\+/g, // regex for replacing addition symbol with a space
+                r = /([^&;=]+)=?([^&;]*)/g,
+                d = function( s ) { return decodeURIComponent( s.replace(a, " ") ); },
+                q = window.location.search.substring(1);
+
+            while ( e = r.exec(q) )
+                params[ d(e[1]) ] = d(e[2]);
+
+            return params;
+        }
+
+        if ( ! queryStringParams )
+            queryStringParams = parseParams();
+
+        return queryStringParams[name];
+    };
+
+    // == Private variables ========================================================================
+
+    /// Components describe the objects that make up the simulation. They may also serve as
+    /// prototype objects for further derived components. External components are identified by
+    /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
+    /// that we can find it if it is reused. Components specified internally as object literals
+    /// are anonymous and are not indexed here.
+
+    var components = {}; // maps component node ID => component specification
+
+    /// The proto-prototype of all nodes is "node", identified by this URI. This type is
+    /// intrinsic to the system and nothing is loaded from the URI.
+
+    var nodeTypeURI = "http://vwf.example.com/node.vwf";
+
+    /// The "node" component descriptor.
+
+    var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
+
+    /// This is the connection to the reflector. In this sample implementation, "socket" is a
+    /// socket.io client that communicates over a channel provided by the server hosting the
+    /// client documents.
+
+    var socket = undefined;
+
+    /// Cached version of window.location.search query parameters generated by getQueryString().
+
+    var queryStringParams = undefined;
+
+    /// `setProperty` records sets in progress in `setPropertyEntrants` to prevent infinite
+    /// recursion in the case that a driver calls back into the kernel (directly or indirectly)
+    /// to set a property while the kernel is in the process of setting that same property.
+    /// 
+    /// `index` identifies the active driver, and `value` provides a path for deeper calls to
+    /// return values to shallower calls.
+
+    var setPropertyEntrants = {};
+
+    /// `getProperty` records gets in progress in `getPropertyEntrants` to prevent infinite
+    /// recursion in the case that a driver calls back into the kernel (directly or indirectly)
+    /// to get a property while the kernel is in the process of getting that same property.
+    /// 
+    /// `index` identifies the active driver, and `value` provides a path for deeper calls to
+    /// return values to shallower calls.
+
+    var getPropertyEntrants = {};
+
+    /// Callback functions defined in this scope use this local "vwf" to locate the manager.
+
+    var vwf = window.vwf = exports;
+
+    /// Control messages from the reflector are stored here in a priority queue, ordered by
+    /// execution time.
+
+    var queue = {
+
+        /// Insert a message or messages into the queue. Optionally execute the simulation
+        /// through the time marked on the message.
+        /// 
+        /// When chronic (chron-ic) is set, vwf#dispatch is called to execute the simulation up
+        /// through the indicated time. To prevent actions from executing out of order, insert
+        /// should be the caller's last operation before returning to the host when invoked with
+        /// chronic.
+        /// 
+        /// @param {Object|Object[]} fields
+        /// @param {Boolean} [chronic]
+
+        insert: function( fields, chronic ) {
+
+            var messages = fields instanceof Array ? fields : [ fields ];
+
+            messages.forEach( function( fields ) {
+
+                // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+
+                    fields.sequence = ++this.sequence; // to stabilize the sort
+                    this.queue.push( fields );
+
+                // }
+
+                if ( chronic ) {
+                    this.time = Math.max( this.time, fields.time ); // save the latest allowed time for suspend/resume
+                }
+
+            }, this );
+
+            // Sort by time, then by sequence.  // TODO: we probably want a priority queue here for better performance
+
+            this.queue.sort( function( a, b ) {
+
+                return a.time != b.time ?
+                    a.time - b.time :
+                    a.sequence - b.sequence;
+
+            } );
+
+            // Execute the simulation through the new time.
+
+            // To prevent actions from executing out of order, callers should immediately return
+            // to the host after invoking insert with chronic set.
+
+            if ( chronic ) {
+                vwf.dispatch();
+            }
+
+        },
+
+        /// Pull the next message from the queue.
+        /// 
+        /// @returns {Object|undefined} The next message if available, otherwise undefined.
+
+        pull: function() {
+
+            if ( this.suspension == 0 && this.queue.length > 0 && this.queue[0].time <= this.time ) {
+                return this.queue.shift();                
+            }
+
+        },
+
+        /// Suspend message execution.
+        /// 
+        /// @returns {Boolean} true if the queue was suspended by this call.
+
+        suspend: function( why ) {
+
+            if ( this.suspension++ == 0 ) {
+                vwf.logger.infox( "-queue#suspend", "suspending queue at time", vwf.now, why ? why : "" );
+                return true;
+            } else {
+                vwf.logger.debugx( "-queue#suspend", "further suspending queue at time", vwf.now, why ? why : "" );
+                return false;
+            }
+
+        },
+
+        /// Resume message execution.
+        ///
+        /// vwf#dispatch may be called to continue the simulation. To prevent actions from
+        /// executing out of order, resume should be the caller's last operation before
+        /// returning to the host.
+        /// 
+        /// @returns {Boolean} true if the queue was resumed by this call.
+
+        resume: function( why ) {
+
+            if ( --this.suspension == 0 ) {
+                vwf.logger.infox( "-queue#resume", "resuming queue at time", vwf.now, why ? why : "" );
+                vwf.dispatch();
+                return true;
+            } else {
+                vwf.logger.debugx( "-queue#resume", "partially resuming queue at time", vwf.now, why ? why : "" );
+                return false;
+            }
+
+        },
+
+        /// Return the ready state of the queue.
+        /// 
+        /// @returns {Boolean}
+
+        ready: function() {
+            return this.suspension == 0;
+        },
+
+        /// Current time as provided by the reflector. Messages to be executed at this time or
+        /// earlier are available from #pull.
+
+        time: 0,
+
+        /// Suspension count. Queue processing is suspended when suspension is greater than 0.
+
+        suspension: 0,
+
+        /// Sequence counter for tagging messages by arrival order. Messages are sorted by time,
+        /// then by order of arrival.
+
+        sequence: 0,
+
+        /// Array containing the messages in the queue.
+
+        queue: [],
+
+    };
+
+    return exports;
+
+} );

@@ -51,12 +51,6 @@
     <script type="text/javascript" src="jquery-encoder-0.1.0.js"></script>
     <script type="text/javascript" src="rAF.js"></script>
 
-    <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
-    <!-- the global window object as window.vwf. All access to the framework is through that     -->
-    <!-- reference, and no other objects are globally visible.                                   -->
-
-    <script type="text/javascript" src="vwf.js"></script>
-
     <!-- The core framework manages the simulation and synchronizes it across worlds shared by   -->
     <!-- multiple users. But, the manner in which the simulation is expressed is controlled by   -->
     <!-- extension modules. There are two flavors. Models directly control the simulation but    -->
@@ -75,6 +69,8 @@
         require( [
 
             "domReady",
+
+            "vwf",
 
             // This is the common model implementation and an example model that connects the
             // simulation to a WebGL scene manager.
@@ -95,7 +91,7 @@
             connected && "vwf/view/googleEarth",
             cesium && "vwf/view/cesium"
 			
-        ], function( ready ) {
+        ], function( ready, vwf ) {
 
             ready( function() {
 

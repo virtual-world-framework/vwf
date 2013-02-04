@@ -17,8 +17,6 @@
     <script type="text/javascript" src="../lib/alea.js"></script>
     <script type="text/javascript" src="../lib/mash.js"></script>
 
-    <script type="text/javascript" src="../lib/vwf.js"></script>
-
     <script type="text/javascript" src="../lib/require.js"></script>
 
     <script type="text/javascript">
@@ -31,6 +29,8 @@
 
         "domReady",
 
+        "vwf",
+
         "vwf/configuration",
         "vwf/kernel/model",
         "vwf/model/javascript",
@@ -40,7 +40,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, vwf ) {
 
         // Test dispatching events.
 

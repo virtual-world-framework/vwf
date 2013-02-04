@@ -17,8 +17,6 @@
     <script type="text/javascript" src="../lib/alea.js"></script>
     <script type="text/javascript" src="../lib/mash.js"></script>
 
-    <script type="text/javascript" src="../lib/vwf.js"></script>
-
     <script type="text/javascript" src="../lib/require.js"></script>
 
     <script type="text/javascript">
@@ -30,6 +28,8 @@
       }, [
 
         "domReady",
+
+        "vwf",
 
         // This is the common model implementation and an example model that connects the
         // simulation to a WebGL scene manager.
@@ -43,7 +43,7 @@
         "vwf/utility",
         "logger",
 
-      ], function( ready ) {
+      ], function( ready, vwf ) {
 
         ready( function() {
 
