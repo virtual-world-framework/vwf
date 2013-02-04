@@ -39,22 +39,20 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/model" ], function( mod
 
     // TODO: most of this is the same between vwf/model.js and vwf/view.js. Find a way to share.
 
-    var label = module.id.replace( /\//g, "." );
-
-    logger.for( label ).debug( "loading" );
+    logger.for( module.id ).debug( "loading" );
 
     var exports = {
 
         module: module,
 
-        logger: logger.for( label ),
+        logger: logger.for( module.id ),
 
         load: function( module, initializer, modelGenerator, kernelGenerator ) {
 
             var instance = Object.create( this );
 
             instance.module = module;
-            instance.logger = logger.for( instance.module.id.replace( /\//g, "." ), instance );
+            instance.logger = logger.for( instance.module.id, instance );
             
             instance.logger.debug( "loading" );
 
