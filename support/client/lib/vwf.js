@@ -81,7 +81,7 @@
         /// 
         /// @name module:vwf.models.actual
 
-        Object.defineProperty( this.models, "actual", {  // TODO: for this.views too once that's converted to use the RequireJS loader
+        Object.defineProperty( this.models, "actual", {
 
             get: function() {
 
@@ -104,6 +104,36 @@
                 function last( model ) {
                     while ( model.model ) model = model.model;
                     return model;
+                }
+
+                return actual;
+            }
+
+        } );
+
+        Object.defineProperty( this.views, "actual", {
+
+            get: function() {
+
+                // Map the array to the result.
+
+                var actual = this.map( function( view ) {
+                    return last( view );
+                } );
+
+                // Map the non-integer properties too.
+
+                for ( var propertyName in this ) {
+                    if ( isNaN( Number( propertyName ) ) ) {
+                        actual[propertyName] = last( this[propertyName] );
+                    }
+                }
+
+                // Follow a pipeline to the last stage.
+
+                function last( view ) {
+                    while ( view.view ) view = view.view;
+                    return view;
                 }
 
                 return actual;
@@ -296,34 +326,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         var viewArguments = undefined;
                     }
 
-                    if ( ! viewName.match( "^vwf/view/" ) ) { // old way
+                    var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
 
-                        var view = this.modules[viewName];
+                    var view = require( viewName ).create(
+                        this.views.kernel,                          // view's kernel access
+                        [],                                         // stages between the kernel and view
+                        modelPeer && modelPeer.state || {},         // state shared with a paired model
+                        [].concat( viewArguments || [] )            // arguments for initialize()
+                    );
 
-                        if ( view ) {
-                            var instance = new view();
-                            instance.state = this.models.actual["vwf/model/"+viewName] && this.models.actual["vwf/model/"+viewName].state || {}; // state shared with a paired model
-                            view.apply( instance, [ vwf ].concat( viewArguments || [] ) );
-                            this.views.push( instance );
-                            this.views[viewName] = instance; // also index by id  // TODO: this won't work if multiple view instances are allowed
-                        }
-
-                    } else { // new way
-
-                        var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
-
-                        var view = require( viewName ).create(
-                            this.views.kernel,                          // view's kernel access
-                            [],                                         // stages between the kernel and view
-                            modelPeer && modelPeer.state || {},         // state shared with a paired model
-                            [].concat( viewArguments || [] )            // arguments for initialize()
-                        );
-
-                        if ( view ) {
-                            this.views.push( view );
-                            this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
-                        }
-
+                    if ( view ) {
+                        this.views.push( view );
+                        this.views[viewName] = view; // also index by id  // TODO: this won't work if multiple view instances are allowed
                     }
 
                 }
