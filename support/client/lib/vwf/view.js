@@ -158,7 +158,11 @@ define( [ "module", "logger", "vwf/api/kernel", "vwf/api/view" ], function( modu
         kernelize: function( kernel, kernel_api ) {
             this.kernel = kernel;
         },
-        
+
+        tail: function() {
+            return this;
+        },
+
     };
 
     return exports;

@@ -88,29 +88,29 @@
 
           test( "Models", function() {
 
-            equal( vwf.models.actual[0].module.id, "vwf/model/glge", "GLGE Model by number" );
-            equal( vwf.models.actual["vwf/model/glge"].module.id, "vwf/model/glge", "GLGE Model by name" );
-            equal( vwf.models.actual[0].module.id, vwf.models.actual["vwf/model/glge"].module.id, "GLGE Model by number and name" );
+            equal( vwf.models[0].tail().module.id, "vwf/model/glge", "GLGE Model by number" );
+            equal( vwf.models["vwf/model/glge"].tail().module.id, "vwf/model/glge", "GLGE Model by name" );
+            equal( vwf.models[0].tail().module.id, vwf.models["vwf/model/glge"].tail().module.id, "GLGE Model by number and name" );
 
-            equal( vwf.models.actual[1].module.id, "vwf/model/object", "Object Model by number" );
-            equal( vwf.models.actual["vwf/model/object"].module.id, "vwf/model/object", "Object Model by name" );
-            equal( vwf.models.actual[1].module.id, vwf.models.actual["vwf/model/object"].module.id, "Object Model by number and name" );
+            equal( vwf.models[1].tail().module.id, "vwf/model/object", "Object Model by number" );
+            equal( vwf.models["vwf/model/object"].tail().module.id, "vwf/model/object", "Object Model by name" );
+            equal( vwf.models[1].tail().module.id, vwf.models["vwf/model/object"].tail().module.id, "Object Model by number and name" );
 
           } );
 
           test ( "Model parameters", function() {
 
-            deepEqual( vwf.models.actual[2].arguments, [], "No arguments" );
-            deepEqual( vwf.models.actual[3].arguments, [], "No arguments, explict undefined " );
-            deepEqual( vwf.models.actual[4].arguments, [], "No arguments, explict null" );
-            deepEqual( vwf.models.actual[5].arguments, [ "single" ], "Single argument as a value" );
-            deepEqual( vwf.models.actual[6].arguments, [ "first", "second" ], "Multiple arguments as an array" );
-            deepEqual( vwf.models.actual[7].arguments, [ [ "array" ] ], "Array as an argument" );
+            deepEqual( vwf.models[2].tail().arguments, [], "No arguments" );
+            deepEqual( vwf.models[3].tail().arguments, [], "No arguments, explict undefined " );
+            deepEqual( vwf.models[4].tail().arguments, [], "No arguments, explict null" );
+            deepEqual( vwf.models[5].tail().arguments, [ "single" ], "Single argument as a value" );
+            deepEqual( vwf.models[6].tail().arguments, [ "first", "second" ], "Multiple arguments as an array" );
+            deepEqual( vwf.models[7].tail().arguments, [ [ "array" ] ], "Array as an argument" );
 
           } );
 
           test( "Views", function() {
-            equal( vwf.views.actual[0].module.id, "vwf/view/glge", "GLGE View" );
+            equal( vwf.views[0].tail().module.id, "vwf/view/glge", "GLGE View" );
           } );
 
           test ( "View parameters", function() {
@@ -126,8 +126,8 @@
 
           test( "Shared state", function() {
 
-            var model_glge = vwf.models.actual["vwf/model/glge"];
-            var view_glge = vwf.views.actual["vwf/view/glge"];
+            var model_glge = vwf.models["vwf/model/glge"].tail();
+            var view_glge = vwf.views["vwf/view/glge"].tail();
 
             // The GLGE model and view share state.
 

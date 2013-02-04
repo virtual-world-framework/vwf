@@ -74,73 +74,6 @@
 
         this.views = [];
 
-        /// this.models and this.views are lists of references to the head of each driver pipeline.
-        /// Define an "actual" property on each that evaluates to a list of references to the
-        /// pipeline tails. This is a list of the actual drivers after any intermediate stages and is
-        /// useful for debugging.
-        /// 
-        /// @name module:vwf.models.actual
-
-        Object.defineProperty( this.models, "actual", {
-
-            get: function() {
-
-                // Map the array to the result.
-
-                var actual = this.map( function( model ) {
-                    return last( model );
-                } );
-
-                // Map the non-integer properties too.
-
-                for ( var propertyName in this ) {
-                    if ( isNaN( Number( propertyName ) ) ) {
-                        actual[propertyName] = last( this[propertyName] );
-                    }
-                }
-
-                // Follow a pipeline to the last stage.
-
-                function last( model ) {
-                    while ( model.model ) model = model.model;
-                    return model;
-                }
-
-                return actual;
-            }
-
-        } );
-
-        Object.defineProperty( this.views, "actual", {
-
-            get: function() {
-
-                // Map the array to the result.
-
-                var actual = this.map( function( view ) {
-                    return last( view );
-                } );
-
-                // Map the non-integer properties too.
-
-                for ( var propertyName in this ) {
-                    if ( isNaN( Number( propertyName ) ) ) {
-                        actual[propertyName] = last( this[propertyName] );
-                    }
-                }
-
-                // Follow a pipeline to the last stage.
-
-                function last( view ) {
-                    while ( view.view ) view = view.view;
-                    return view;
-                }
-
-                return actual;
-            }
-
-        } );
-
         /// This is the simulation clock, which contains the current time in milliseconds. Time is
         /// controlled by the reflector and updates here as we receive control messages.
         /// 
@@ -326,12 +259,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         var viewArguments = undefined;
                     }
 
-                    var modelPeer = this.models.actual[ viewName.replace( "vwf/view/", "vwf/model/" ) ];  // TODO: this.model.actual() is kind of heavy, but it's probably OK to use just a few times here at start-up
+                    var modelPeer = this.models[ viewName.replace( "vwf/view/", "vwf/model/" ) ];
 
                     var view = require( viewName ).create(
                         this.views.kernel,                          // view's kernel access
                         [],                                         // stages between the kernel and view
-                        modelPeer && modelPeer.state || {},         // state shared with a paired model
+                        modelPeer && modelPeer.tail().state || {},  // state shared with a paired model
                         [].concat( viewArguments || [] )            // arguments for initialize()
                     );
 

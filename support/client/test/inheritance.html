@@ -55,8 +55,8 @@
           );
 
           test( "Models", function() {
-            equal( vwf.models.actual[0].module.id, "vwf/model/javascript", "JavaScript Model" );
-            equal( vwf.models.actual[1].module.id, "vwf/model/object", "Object Model" );
+            equal( vwf.models[0].tail().module.id, "vwf/model/javascript", "JavaScript Model" );
+            equal( vwf.models[1].tail().module.id, "vwf/model/object", "Object Model" );
           } );
 
           test( "Views", function() {

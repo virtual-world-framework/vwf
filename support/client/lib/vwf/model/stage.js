@@ -35,6 +35,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }, this );
 
         },
+
+        tail: function() {
+            return this.model.tail();
+        },
         
     }, function( modelFunctionName ) {
         
