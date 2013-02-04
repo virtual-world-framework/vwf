@@ -2152,10 +2152,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
 
-            var entrants = this.setProperty.entrants;
-
-            var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
-            var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
+            var entry = setPropertyEntrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
+            var reentry = setPropertyEntrants[nodeID+'-'+propertyName] = {}; // this call
 
             // Call settingProperty() on each model. The first model to return a non-undefined value
             // has performed the set and dictates the return value. The property is considered set
@@ -2213,7 +2211,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // For a reentrant call, restore the previous state, move the index forward to cover
                 // the models we called, and record the current result.
 
-                entrants[nodeID+'-'+propertyName] = entry;
+                setPropertyEntrants[nodeID+'-'+propertyName] = entry;
                 entry.value = propertyValue;
 
             } else {
@@ -2221,7 +2219,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // Delete the call record if this is the first, non-reentrant call here (the normal
                 // case).
 
-                delete entrants[nodeID+'-'+propertyName];
+                delete setPropertyEntrants[nodeID+'-'+propertyName];
 
                 // Call satProperty() on each view. The view is being notified that a property has
                 // been set.  TODO: only want to call when actually set and with final value
@@ -2236,8 +2234,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             return propertyValue;
         };
-
-        this.setProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
 
         // -- getProperty --------------------------------------------------------------------------
 
@@ -2260,10 +2256,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // back here (directly or indirectly) to delegate responses further down the chain
             // without causing infinite recursion.
 
-            var entrants = this.getProperty.entrants;
-
-            var entry = entrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
-            var reentry = entrants[nodeID+'-'+propertyName] = {}; // this call
+            var entry = getPropertyEntrants[nodeID+'-'+propertyName] || {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
+            var reentry = getPropertyEntrants[nodeID+'-'+propertyName] = {}; // this call
 
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
@@ -2317,7 +2311,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // For a reentrant call, restore the previous state, move the index forward to cover
                 // the models we called, and record the current result.
 
-                entrants[nodeID+'-'+propertyName] = entry;
+                getPropertyEntrants[nodeID+'-'+propertyName] = entry;
                 entry.value = propertyValue;
 
             } else {
@@ -2325,7 +2319,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // Delete the call record if this is the first, non-reentrant call here (the normal
                 // case).
 
-                delete entrants[nodeID+'-'+propertyName];
+                delete getPropertyEntrants[nodeID+'-'+propertyName];
 
                 // Delegate to the behaviors and prototype if we didn't get a result from the
                 // current node.
@@ -2363,8 +2357,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
             return propertyValue;
         };
-
-        this.getProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
 
         // -- createMethod -------------------------------------------------------------------------
 
@@ -3834,6 +3826,24 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// @name module:vwf~queryStringParams
 
         var queryStringParams = undefined;
+
+        /// `setProperty` records sets in progress in `setPropertyEntrants` to prevent infinite
+        /// recursion in the case that a driver calls back into the kernel (directly or indirectly)
+        /// to set a property while the kernel is in the process of setting that same property.
+        /// 
+        /// `index` identifies the active driver, and `value` provides a path for deeper calls to
+        /// return values to shallower calls.
+
+        var setPropertyEntrants = {};
+
+        /// `getProperty` records gets in progress in `getPropertyEntrants` to prevent infinite
+        /// recursion in the case that a driver calls back into the kernel (directly or indirectly)
+        /// to get a property while the kernel is in the process of getting that same property.
+        /// 
+        /// `index` identifies the active driver, and `value` provides a path for deeper calls to
+        /// return values to shallower calls.
+
+        var getPropertyEntrants = {};
 
         /// Callback functions defined in this scope use this local "vwf" to locate the manager.
         /// 
