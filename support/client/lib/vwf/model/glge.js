@@ -2082,14 +2082,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function vwfColor( color ) {
-        var vwfColor;
-        color['r'] = color['r']*255;
-        color['g'] = color['g']*255;
-        color['b'] = color['b']*255;                                
+        var vwfColor = {};
+        vwfColor['r'] = color['r']*255;
+        vwfColor['g'] = color['g']*255;
+        vwfColor['b'] = color['b']*255;                                
         if ( color['a'] !== undefined && color['a'] != 1 ) {
-            vwfColor = new utility.color( "rgba("+color['r']+","+color['g']+","+color['b']+","+color['a']+")" );
+            vwfColor = new utility.color( "rgba("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+","+vwfColor['a']+")" );
         } else {
-            vwfColor = new utility.color( "rgb("+color['r']+","+color['g']+","+color['b']+")" );
+            vwfColor = new utility.color( "rgb("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+")" );
         }
         return vwfColor;        
     }
