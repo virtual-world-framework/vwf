@@ -1094,7 +1094,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                         // Create a new property if the property is not defined on a prototype.
                         // Otherwise, initialize the property.
 
-                        var creating = ! nodeHasProperty.call( kernel, nodeID, propertyName ); // not defined on node or prototype
+                        var creating = ! nodeHasProperty( nodeID, propertyName ); // not defined on node or prototype
 
                         // Create or initialize the property.
 
@@ -1123,7 +1123,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
 
-                        var creating = ! nodeHasOwnChild.call( kernel, nodeID, childName );
+                        var creating = ! nodeHasOwnChild( nodeID, childName );
 
                         if ( creating ) {
                             kernel.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
@@ -1646,13 +1646,13 @@ if ( ! childComponent.source ) {
 
                         var creating = create || // explicit create directive, or
                             get !== undefined || set !== undefined || // explicit accessor, or
-                            ! nodeHasProperty.call( kernel, childID, propertyName ); // not defined on prototype
+                            ! nodeHasProperty( childID, propertyName ); // not defined on prototype
 
                         // Are we assigning the value here, or deferring assignment until the node
                         // is constructed because setters will run?
 
                         var assigning = value === undefined || // no value, or
-                            set === undefined && ( creating || ! nodePropertyHasSetter.call( kernel, childID, propertyName ) ) || // no setter, or
+                            set === undefined && ( creating || ! nodePropertyHasSetter( childID, propertyName ) ) || // no setter, or
                             replicating; // replicating previously-saved state (setters never run during replication)
 
                         if ( ! assigning ) {
@@ -2016,10 +2016,10 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
             // or its prototypes. Initialize it if it exists on a prototype but not on this node.
             // Set it if it already exists on this node.
 
-            if ( ! nodeHasProperty.call( this, nodeID, propertyName ) ) {
+            if ( ! nodeHasProperty( nodeID, propertyName ) ) {
                 var settingPropertyEtc = "creatingProperty";
                 var satPropertyEtc = "createdProperty";
-            } else if ( ! nodeHasOwnProperty.call( this, nodeID, propertyName ) ) {
+            } else if ( ! nodeHasOwnProperty( nodeID, propertyName ) ) {
                 var settingPropertyEtc = "initializingProperty";
                 var satPropertyEtc = "initializedProperty";
             } else {
@@ -2773,48 +2773,39 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// Determine if a node has a property with the given name, either directly on the node or
     /// inherited from a prototype.
     /// 
-    /// This function must run as a method of the kernel. Invoke as: nodeHasProperty.call(
-    ///   kernel, nodeID, propertyName ).
-    /// 
     /// @param {ID} nodeID
     /// @param {String} propertyName
     /// 
     /// @returns {Boolean}
 
-    var nodeHasProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-        var node = this.models.javascript.nodes[nodeID];
+    var nodeHasProperty = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript
+        var node = kernel.models.javascript.nodes[nodeID];
         return propertyName in node.properties;
     };
 
     /// Determine if a node has a property with the given name. The node's prototypes are not
     /// considered.
     /// 
-    /// This function must run as a method of the kernel. Invoke as: nodeHasOwnProperty.call(
-    ///   kernel, nodeID, propertyName ).
-    /// 
     /// @param {ID} nodeID
     /// @param {String} propertyName
     /// 
     /// @returns {Boolean}
 
-    var nodeHasOwnProperty = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-        var node = this.models.javascript.nodes[nodeID];
+    var nodeHasOwnProperty = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript
+        var node = kernel.models.javascript.nodes[nodeID];
         return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
     };
 
     /// Determine if a given property of a node has a setter function, either directly on the
     /// node or inherited from a prototype.
     /// 
-    /// This function must run as a method of the kernel. Invoke as: nodePropertyHasSetter.call(
-    ///   kernel, nodeID, propertyName ).
-    /// 
     /// @param {ID} nodeID
     /// @param {String} propertyName
     /// 
     /// @returns {Boolean}
 
-    var nodePropertyHasSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-        var node = this.models.javascript.nodes[nodeID];
+    var nodePropertyHasSetter = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
+        var node = kernel.models.javascript.nodes[nodeID];
         var setter = node.private.setters && node.private.setters[propertyName];
         return typeof setter == "function" || setter instanceof Function;
     };
@@ -2822,16 +2813,13 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// Determine if a given property of a node has a setter function. The node's prototypes are
     /// not considered.
     /// 
-    /// This function must run as a method of the kernel. Invoke as:
-    ///   nodePropertyHasOwnSetter.call( kernel, nodeID, propertyName ).
-    /// 
     /// @param {ID} nodeID
     /// @param {String} propertyName
     /// 
     /// @returns {Boolean}
 
-    var nodePropertyHasOwnSetter = function( nodeID, propertyName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-        var node = this.models.javascript.nodes[nodeID];
+    var nodePropertyHasOwnSetter = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
+        var node = kernel.models.javascript.nodes[nodeID];
         var setter = node.private.setters && node.private.setters.hasOwnProperty( propertyName ) && node.private.setters[propertyName];
         return typeof setter == "function" || setter instanceof Function;
     };
@@ -2839,32 +2827,26 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// Determine if a node has a child with the given name, either directly on the node or
     /// inherited from a prototype.
     /// 
-    /// This function must run as a method of the kernel. Invoke as: nodeHasChild.call(
-    ///   kernel, nodeID, childName ).
-    /// 
     /// @param {ID} nodeID
     /// @param {String} childName
     /// 
     /// @returns {Boolean}
 
-    var nodeHasChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-        var node = this.models.javascript.nodes[nodeID];
+    var nodeHasChild = function( nodeID, childName ) {  // TODO: this is peeking inside of vwf-model-javascript
+        var node = kernel.models.javascript.nodes[nodeID];
         return childName in node.children;
     };
 
     /// Determine if a node has a child with the given name. The node's prototypes are not
     /// considered.
     /// 
-    /// This function must run as a method of the kernel. Invoke as: nodeHasOwnChild.call(
-    ///   kernel, nodeID, childName ).
-    /// 
     /// @param {ID} nodeID
     /// @param {String} childName
     /// 
     /// @returns {Boolean}
 
-    var nodeHasOwnChild = function( nodeID, childName ) { // invoke with the kernel as "this"  // TODO: this is peeking inside of vwf-model-javascript
-        var node = this.models.javascript.nodes[nodeID];
+    var nodeHasOwnChild = function( nodeID, childName ) {  // TODO: this is peeking inside of vwf-model-javascript
+        var node = kernel.models.javascript.nodes[nodeID];
         return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
     };
 
@@ -3422,15 +3404,15 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
 
             case "ancestor-or-self":
                 resultIDs.push( contextID );
-                Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                Array.prototype.push.apply( resultIDs, kernel.ancestors( contextID ) );
                 break;
 
             case "ancestor":
-                Array.prototype.push.apply( resultIDs, this.ancestors( contextID ) );
+                Array.prototype.push.apply( resultIDs, kernel.ancestors( contextID ) );
                 break;
 
             case "parent":
-                var parentID = this.parent( contextID );
+                var parentID = kernel.parent( contextID );
                 parentID && resultIDs.push( parentID );
                 break;
 
@@ -3439,16 +3421,16 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
                 break;
 
             case "child":
-                Array.prototype.push.apply( resultIDs, this.children( contextID ) );
+                Array.prototype.push.apply( resultIDs, kernel.children( contextID ) );
                 break;
 
             case "descendant":
-                Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                Array.prototype.push.apply( resultIDs, kernel.descendants( contextID ) );
                 break;
 
             case "descendant-or-self":
                 resultIDs.push( contextID );
-                Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                Array.prototype.push.apply( resultIDs, kernel.descendants( contextID ) );
                 break;
 
             // case "following-sibling":  // TODO
@@ -3473,11 +3455,11 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
 
                 resultIDs = resultIDs.filter( function( resultID ) {
                     if ( resultID[0] != "@" ) {  // TODO: @?
-                        return xpathNodeMatchesStep.call( this, resultID, step.name );
+                        return xpathNodeMatchesStep( resultID, step.name );
                     } else {
-                        return xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
+                        return xpathPropertyMatchesStep( resultID.slice( 1 ), step.name );  // TODO: @?
                     }
-                }, this );
+                } );
 
                 break;
 
@@ -3493,16 +3475,16 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
                 // element(name,type)
 
                 resultIDs = resultIDs.filter( function( resultID ) {
-                    return resultID[0] != "@" && xpathNodeMatchesStep.call( this, resultID, step.name, step.type );  // TODO: @?
-                }, this );
+                    return resultID[0] != "@" && xpathNodeMatchesStep( resultID, step.name, step.type );  // TODO: @?
+                } );
 
                 break;
 
             case "attribute":
 
                 resultIDs = resultIDs.filter( function( resultID ) {
-                    return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
-                }, this );
+                    return resultID[0] == "@" && xpathPropertyMatchesStep( resultID.slice( 1 ), step.name );  // TODO: @?
+                } );
 
                 break;
 
@@ -3537,14 +3519,14 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
 
     var xpathNodeMatchesStep = function( nodeID, name, type ) {
 
-        if ( name && this.name( nodeID ) != name ) {
+        if ( name && kernel.name( nodeID ) != name ) {
             return false;
         }
 
-        var matches_type = ! type || this.uri( nodeID ) == type ||
-            this.prototypes( nodeID ).some( function( prototypeID ) {
-                return this.uri( prototypeID ) == type;
-        }, this );
+        var matches_type = ! type || kernel.uri( nodeID ) == type ||
+            kernel.prototypes( nodeID ).some( function( prototypeID ) {
+                return kernel.uri( prototypeID ) == type;
+        } );
 
         return matches_type;
     }
@@ -3560,14 +3542,14 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
 
     var xpathPropertyMatchesStep = function( nodeID, name ) {
 
-        var properties = this.models.object.properties( nodeID );
+        var properties = kernel.models.object.properties( nodeID );
 
         if ( name ) {
             return properties[name];
         } else {
             return Object.keys( properties ).some( function( propertyName ) {
                 return properties[propertyName];
-            }, this );
+            } );
         }
 
     }
