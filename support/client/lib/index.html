@@ -29,8 +29,10 @@
     <script type="text/javascript" src="require.js"></script>
 
     <script type="text/javascript" src="jquery-1.7.1.js"></script>
+	<script type="text/javascript" src="bootstrap.min.js"></script>
     <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
     <script type="text/javascript" src="async.js"></script>
+
 
     <script type="text/javascript" src="closure/base.js"></script>
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
@@ -154,7 +156,7 @@
     <!-- simulation state in HTML on the main page.                                              -->
     <script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
     <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
-
+ 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
     <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.16.custom.css" />
@@ -170,24 +172,35 @@
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
     <div id="vwf-root"></div>
+	
+<!-- Overlay div to display loading information> -->
+<div id="loadVWFModal" class="modal">
+  <div class="modal-header">
+        <img src="images/logo.png" style="width:100%;"/>
+  </div>
+  <div class="modal-body">
+		<div>
+			<table style="width:100%;">
+				<tr>
+					<td><span id='WGL' class='req'></span></td>
+					<td><span id='ES5' class='req'></span></td>
+					<td><span id='WS' class='req'></span></td>
+				</tr>
+			</table>
+			<div class="progress progress-striped active">
+				<div class="bar" id="loadVWFProgressBar" style="width:0%;"></div>
+			</div>
+		</div>
+  </div>
+  <div class="modal-footer">
 
-    <!-- Overlay div to display loading information -->
-    <div id='loadstatus' class='overlay'>
-      <div class='loading'>
-        <div class='requirements'>
-          <p><span>Checking Compatibility</span></p>
-          <p><span id='WGL' class='req'>WebGL</span></p>
-          <p><span id='ES5' class='req'>ECMAScript5</span></p>
-          <p><span id='WS' class='req'>WebSockets</span></p>
-        </div>
-        <div id='loadText'>    
-          <span class='loadText'>LOADING</span>
-          <img class='loadImg' src='images/loading.gif' alt=' '/>
-        </div>
-      </div>
-    </div>
+		<div id='loadText' style="font-family: 'Droid Sans',sans-serif;font-size: 14px;line-height: 20px;color: #999;text-alignment:left;width:100%"> </div>
+  </div>
+</div>
+	
 
     <script type="text/javascript" src="compatibility.js"></script>
+	<script type="text/javascript" src="centerinclient.js"></script>
     <script type="text/javascript">
         updateOverlay();
     </script>

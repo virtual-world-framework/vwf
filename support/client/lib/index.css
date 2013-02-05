@@ -1,9 +1,5 @@
 body {
-  background-color: #AAA;
-  -ms-user-select: none;
-  -o-user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
+  background-color: #000;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -237,12 +233,11 @@ input {
 }
 
 .loading {
-  margin:auto;
+  margin:auto auto;
   color:#FFF;
-  width:300px;
-  height:200px;
-  background:#222;
-  opacity:0.9;
+  width:600px;
+  height:400px;
+  background:#050505;
   -moz-border-radius: 20px;
   -webkit-border-radius: 20px;
   -khtml-border-radius: 20px;
@@ -252,23 +247,11 @@ input {
 }
 
 .loadText {
- position:relative;
- left:90px;
- top:10px;
 }
 
-.loadImg {
-  position:relative;
-  left:82px;
-  top:35px;
-  width:64px;
-  height:64px;
-}
 
 .requirements {
-  position:relative;
-  left:60px;
-  top:20px;
+	margin-left: 100px;
 }
 
 .req {
@@ -277,10 +260,7 @@ input {
   left:20px;
 }
 
-.loadError {
-  font-size:14px;
-  pointer-events:all;
-  position:relative;
-  left:20px;
-  top:30px;
+
+h1, h2, h3, h4, h5, h6, body, legend, label {
+text-shadow: 0px 0px 0 rgba(0, 0, 0, 0.3);
 }

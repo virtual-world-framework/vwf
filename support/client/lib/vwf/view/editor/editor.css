@@ -1,5 +1,6 @@
 .relClass {
 	position:relative;
+	z-index: 64;
 }
 
 .uiContainer {
@@ -87,6 +88,7 @@ textarea:focus, input:focus{
 	padding-right:10px;
 	padding-top:5px;
 	padding-bottom:10px;
+	margin-bottom:5px;
 	background:#153255;
 	overflow:hidden;
 }

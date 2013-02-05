@@ -34,57 +34,51 @@ function testES5()
     return !this;
 }
 
-function testWS()
-{
-    // var ws = 'ws' + document.URL.substring(4) + 'websocket';
-    // var websocket = new WebSocket(ws);
-    // websocket.onerror = function(evt) 
-    // { 
-    //     // For single user mode
-    //     //$('#WS').html("<img src='images/warning.png' alt=' ' width='20px'/>WebSockets");
-    //     $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/>WebSockets");
-    //     $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review <a href='/web/docs/reqs.html'>documentation</a> for specific <br/>requirements. </span>");
-    //     return;
-    // };
-    if(! io.Transport.websocket.check() )
-    {
-        $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/>WebSockets");
-        $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review <a href='/web/docs/reqs.html'>documentation</a> for specific <br/>requirements. </span>");
-    }
-}
-
 function updateOverlay()
 {
+	$("#loadVWFModal").centerInClient();
+	$('#loadVWFModal').modal('show');
+
+	
     // Test for WebGL
     if(testWGL())
     {
-        $('#WGL').prepend("<img src='images/check.png' alt=' ' width='20px'/>");
+        //$('#WGL').prepend("<img src='images/check.png' alt=' ' width='20px'/>");
+		$('#loadVWFProgressBar').width("33%");
     }
     else
     {
-        $('#WGL').prepend("<img src='images/x.png' alt=' ' width='20px'/>");
+        $('#WGL').prepend("<img src='images/x.png' alt=' ' width='20px'/> WebGL");
+		$('#loadVWFProgressBar').width("0%");
+		$('#loadText').html("This browser is not compatible. Please review <a href='/web/docs/reqs.html'>documentation</a>.");
     }
 
     // Test for ECMAScript5
     if(testES5())
     {
-        $('#ES5').prepend("<img src='images/check.png' alt=' ' width='20px'/>");
+        //$('#ES5').prepend("<img src='images/check.png' alt=' ' width='20px'/>");
+		$('#loadVWFProgressBar').width("67%");
     }
     else
     {
-        $('#ES5').prepend("<img src='images/x.png' alt=' ' width='20px'/>");
+        $('#ES5').prepend("<img src='images/x.png' alt=' ' width='20px'/> ECMAScript5");
+		$('#loadVWFProgressBar').width("33%");
+		$('#loadText').html("This browser is not compatible. Please review <a href='/web/docs/reqs.html'>documentation</a>.");
     }
 
-    testWS();
+	// Test for WebSockets
+    if( io.Transport.websocket.check() )
+	{
+		//$('#WS').prepend("<img src='images/check.png' alt=' ' width='20px'/>"); 
+		$('#loadVWFProgressBar').width("90%");
+		setTimeout("$('#loadVWFProgressBar').width('100%')",100);
+		setTimeout("$('#loadVWFModal').modal('hide')",2000);
 
-    if($('#WS img').length == 0)
+	}
+	else
     {
-        $('#WS').prepend("<img src='images/check.png' alt=' ' width='20px'/>"); 
+        $('#WS').html("<img src='images/x.png' alt=' ' width='20px'/> WebSockets");
+        $('#loadText').html("This browser is not compatible. Please review <a href='/web/docs/reqs.html'>documentation</a>.");
     }
 
-    // Test to to see if VWF can run
-    if(! (testWGL() && testES5()) )
-    {
-        $('#loadText').html("<span class='loadError'>This browser is not compatible. <br/>Please review <a href='/web/docs/reqs.html'>documentation</a> for specific <br/>requirements. </span>");
-    }
 }
