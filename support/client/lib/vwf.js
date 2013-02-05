@@ -3787,7 +3787,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
 
     /// Internal reference to the kernel for use by callbacks and other internal functions.
 
-    var kernel = window.vwf = exports;
+    var kernel = window.vwf_deprecated_global = exports;
 
     return exports;
 
