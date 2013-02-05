@@ -560,7 +560,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
 
                     default:
-                        prototypes = getPrototypes.call( this, this.kernel.kernel.kernel, node["type"] );
+                        prototypes = getPrototypes.call( this, this.kernel, node["type"] );
                         if ( isGlgeMaterialDefinition.call( this, prototypes ) ){
                             value = setMaterialProperty.call( this, nodeID, propertyName, propertyValue );
                         } else if ( isGlgeCameraDefinition.call( this, prototypes ) ) {
@@ -710,7 +710,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                     default:
                         // handle all of the other types
-                        prototypes = getPrototypes.call( this, this.kernel.kernel.kernel, node["type"] );
+                        prototypes = getPrototypes.call( this, this.kernel, node["type"] );
                         if ( isGlgeMaterialDefinition.call( this, prototypes ) ){
                             value = getMaterialProperty.call( this, nodeID, propertyName, propertyValue );
                         } else if ( isGlgeCameraDefinition.call( this, prototypes ) ) {

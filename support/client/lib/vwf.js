@@ -151,6 +151,12 @@ define( [ "module",
 
             this.models.kernel = kernel_model.create( this );
 
+            // Load pipeline stages to place in front of the models.
+
+            var model_stages = ( configuration.active["model-stages"] || [] ).map( function( model_stage_path ) {
+                return require( model_stage_path );
+            } );
+
             // Create and attach each configured model.
 
             modelInitializers.forEach( function( modelInitializer ) {
@@ -170,12 +176,16 @@ define( [ "module",
                         var modelArguments = undefined;
                     }
 
+                    // Create the model.
+
                     var model = require( modelName ).create(
                         this.models.kernel,                         // model's kernel access
-                        [ model_stage_log ],                        // stages between the kernel and model
+                        model_stages,                               // stages between the kernel and model
                         {},                                         // state shared with a paired view
                         [].concat( modelArguments || [] )           // arguments for initialize()
                     );
+
+                    // Register it with the kernel.
 
                     if ( model ) {
                         this.models.push( model );
@@ -202,6 +212,12 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             this.views.kernel = kernel_view.create( this );
 
+            // Load pipeline stages to place in front of the views.
+
+            var view_stages = ( configuration.active["view-stages"] || [] ).map( function( view_stage_path ) {
+                return require( view_stage_path );
+            } );
+
             // Create and attach each configured view.
 
             viewInitializers.forEach( function( viewInitializer ) {
@@ -221,14 +237,20 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         var viewArguments = undefined;
                     }
 
+                    // Locate a possible matching model to share state with.
+
                     var modelPeer = this.models[ viewName.replace( "vwf/view/", "vwf/model/" ) ];
+
+                    // Create the view.
 
                     var view = require( viewName ).create(
                         this.views.kernel,                          // view's kernel access
-                        [],                                         // stages between the kernel and view
+                        view_stages,                                // stages between the kernel and view
                         modelPeer && modelPeer.tail().state || {},  // state shared with a paired model
                         [].concat( viewArguments || [] )            // arguments for initialize()
                     );
+
+                    // Register it with the kernel.
 
                     if ( view ) {
                         this.views.push( view );

@@ -160,6 +160,8 @@ define( function() {
             "random-seed": +new Date,   // pseudorandom number generator seed
             "randomize-ids": false,     // randomize IDs to discourage assumptions about ID allocation
             "humanize-ids": false,      // append recognizable strings to node IDs
+            "model-stages": undefined,  // modules to insert in model pipelines
+            "view-stages": undefined,   // modules to insert in view pipelines
         },
 
         /// Changes for production environments.
@@ -173,6 +175,7 @@ define( function() {
             "log-level": "info",
             "randomize-ids": true,
             "humanize-ids": true,
+            "model-stages": [ "vwf/model/stage/log" ], // logger.trace() all API calls
         },
 
         /// Changes for testing environments.
