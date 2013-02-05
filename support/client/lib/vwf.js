@@ -125,14 +125,12 @@ define( [ "module",
 
             var args = Array.prototype.slice.call( arguments );
 
+            this.logger.debug( "creating" );
+
             // Load the runtime configuration. We start with the factory defaults. The reflector may
             // provide additional settings when we connect.
 
             this.configuration = configuration.active; // "active" updates in place and changes don't invalidate the reference
-
-            // Create the logger.
-
-            this.logger = logger.for( "vwf", this );  // TODO: for( "vwf", ... ), and update existing calls
 
             // Get the application specification if one is provided in the query string. Parse it
             // into an application specification object if it's valid JSON, otherwise keep the query
