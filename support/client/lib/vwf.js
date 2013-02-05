@@ -43,11 +43,6 @@ define( [ "module",
 
         module: module,
 
-        /// The runtime environment (production, development, testing) and other configuration
-        /// settings appear here.
-
-        configuration: configuration.active, // "active" updates in place and changes don't invalidate the reference
-
         /// The kernel logger.
 
         logger: logger.for( module.id ),
@@ -126,11 +121,6 @@ define( [ "module",
             var args = Array.prototype.slice.call( arguments );
 
             this.logger.debug( "creating" );
-
-            // Load the runtime configuration. We start with the factory defaults. The reflector may
-            // provide additional settings when we connect.
-
-            this.configuration = configuration.active; // "active" updates in place and changes don't invalidate the reference
 
             // Get the application specification if one is provided in the query string. Parse it
             // into an application specification object if it's valid JSON, otherwise keep the query
@@ -1479,8 +1469,8 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
 } else {    
                 var childID = nodeID + ":" + this.sequence( nodeID ) +
-                    ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
-                    ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+                    ( configuration.active["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
+                    ( configuration.active["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 }
             }
 
