@@ -15,18 +15,14 @@
 
 /// DOM element coordinate conversion functions.
 /// 
-/// @name vwf.utility.coordinates
-/// @namespace
+/// @module vwf/utility/coordinates
 
 define( function() {
 
-    return {
+    var exports = {
 
         /// Convert a coordinate from an element's content area to its internal coordinate system.
         /// The content box is the area within the element's padding.
-        /// 
-        /// @name vwf.utility.coordinates#canvasFromContent
-        /// @function
         /// 
         /// @param {HTMLElement} element
         ///   The reference element.
@@ -60,9 +56,6 @@ define( function() {
         /// is the area within the element's padding. The padding box is the area within the
         /// element's border.
         /// 
-        /// @name vwf.utility.coordinates#contentFromPadding
-        /// @function
-        /// 
         /// @param {HTMLElement} element
         ///   The reference element.
         /// @param {Object} xyPadding
@@ -86,9 +79,6 @@ define( function() {
         /// Convert a coordinate from an element's border area to its padding area. The padding box
         /// is the area within the element's border. The border box encloses the overall element,
         /// including its content, padding and border.
-        /// 
-        /// @name vwf.utility.coordinates#paddingFromBorder
-        /// @function
         /// 
         /// @param {HTMLElement} element
         ///   The reference element.
@@ -114,9 +104,6 @@ define( function() {
         /// box encloses the overall element, including its content, padding and border. The window
         /// coordinates are the location of the border box in the browser window.
         /// 
-        /// @name vwf.utility.coordinates#borderFromWindow
-        /// @function
-        /// 
         /// @param {HTMLElement} element
         ///   The reference element.
         /// @param {Object} xyWindow
@@ -139,9 +126,6 @@ define( function() {
 
         /// Convert a coordinate from an element's window coordinates to its content area.
         /// 
-        /// @name vwf.utility.coordinates#contentFromWindow
-        /// @function
-        /// 
         /// @param {HTMLElement} element
         ///   The reference element.
         /// @param {Object} xyWindow
@@ -159,5 +143,7 @@ define( function() {
         },
 
     };
+
+    return exports;
 
 } );
