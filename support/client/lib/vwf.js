@@ -21,7 +21,21 @@
 /// attaches to the global window object as window.vwf. Nothing else should affect the global
 /// environment.
 
-define( [ "module", "logger", "vwf/configuration" ], function( module, logger, configuration ) {
+define( [ "module",
+    "logger",
+    "vwf/configuration",
+    "vwf/kernel/model",
+    "vwf/kernel/view",
+    "vwf/model/stage/log",
+    "vwf/utility"
+], function( module,
+    logger,
+    configuration,
+    kernel_model,
+    kernel_view,
+    model_stage_log,
+    utility
+) {
 
     logger.for( module.id ).debug( "loading" );
 
@@ -114,11 +128,11 @@ define( [ "module", "logger", "vwf/configuration" ], function( module, logger, c
             // Load the runtime configuration. We start with the factory defaults. The reflector may
             // provide additional settings when we connect.
 
-            this.configuration = require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+            this.configuration = configuration.active; // "active" updates in place and changes don't invalidate the reference
 
             // Create the logger.
 
-            this.logger = require( "logger" ).for( "vwf", this );  // TODO: for( "vwf", ... ), and update existing calls
+            this.logger = logger.for( "vwf", this );  // TODO: for( "vwf", ... ), and update existing calls
 
             // Get the application specification if one is provided in the query string. Parse it
             // into an application specification object if it's valid JSON, otherwise keep the query
@@ -147,7 +161,7 @@ define( [ "module", "logger", "vwf/configuration" ], function( module, logger, c
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
 
-            this.models.kernel = require( "vwf/kernel/model" ).create( vwf );
+            this.models.kernel = kernel_model.create( vwf );
 
             // Create and attach each configured model.
 
@@ -170,7 +184,7 @@ define( [ "module", "logger", "vwf/configuration" ], function( module, logger, c
 
                     var model = require( modelName ).create(
                         this.models.kernel,                         // model's kernel access
-                        [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
+                        [ model_stage_log ],                        // stages between the kernel and model
                         {},                                         // state shared with a paired view
                         [].concat( modelArguments || [] )           // arguments for initialize()
                     );
@@ -198,7 +212,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // bounce off the reflection server, are placed on the queue when received, and executed
             // when removed.
 
-            this.views.kernel = require( "vwf/kernel/view" ).create( vwf );
+            this.views.kernel = kernel_view.create( vwf );
 
             // Create and attach each configured view.
 
@@ -359,7 +373,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     } catch ( e ) {
 
                         vwf.logger.warn( fields.action, fields.node, fields.member, fields.parameters,
-                            "exception performing action:", require( "vwf/utility" ).exceptionMessage( e ) );
+                            "exception performing action:", utility.exceptionMessage( e ) );
 
                     }
 
@@ -546,7 +560,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Return the result.
 
             respond && this.respond( nodeID, actionName, memberName, parameters,
-                require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ) );
+                utility.transform( result, utility.transforms.transit ) );
 
             origin == "reflector" ?
                 this.logger.infou() : this.logger.debugu();
@@ -602,7 +616,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         log: function() {
 
             this.respond( undefined, "log", undefined, undefined,
-                require( "vwf/utility" ).transform( arguments, require( "vwf/utility" ).transforms.transit ) );
+                utility.transform( arguments, utility.transforms.transit ) );
 
         },
 
@@ -655,7 +669,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 function( series_callback /* ( err, results ) */ ) {
 
                     if ( applicationState.configuration ) {
-                        require( "vwf/configuration" ).instance = applicationState.configuration;
+                        configuration.instance = applicationState.configuration;
                     }
 
                     series_callback( undefined, undefined );
@@ -759,7 +773,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Runtime configuration.
 
                 configuration:
-                    require( "vwf/configuration" ).active,
+                    configuration.active,
 
                 // Internal kernel state.
 
@@ -770,14 +784,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    require( "vwf/utility" ).transform( this.getNode( this.find("", "/")[0], full ), require( "vwf/utility" ).transforms.transit ),
+                    utility.transform( this.getNode( this.find("", "/")[0], full ), utility.transforms.transit ),
                 ],
 
                 // Message queue.
 
                 queue: {  // TODO: move to the queue object
                     time: queue.time,
-                    queue: require( "vwf/utility" ).transform( queue.queue, queueTransitTransformation ),
+                    queue: utility.transform( queue.queue, queueTransitTransformation ),
                 },
 
             };
@@ -785,8 +799,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Normalize for consistency.
 
             if ( normalize ) {
-                applicationState = require( "vwf/utility" ).transform(
-                    applicationState, require( "vwf/utility" ).transforms.hash );
+                applicationState = utility.transform( applicationState, utility.transforms.hash );
             }
     
             this.logger.debugu();
@@ -1316,8 +1329,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Normalize for consistency.
 
             if ( normalize ) {
-                nodeComponent = require( "vwf/utility" ).transform(
-                    nodeComponent, require( "vwf/utility" ).transforms.hash );
+                nodeComponent = utility.transform( nodeComponent, utility.transforms.hash );
             }
 
             this.logger.debugu();
@@ -1499,7 +1511,7 @@ if ( ! childComponent.source ) {
     if ( prototype_intrinsics.source ) {
         var prototype_uri = vwf.uri( prototypeID );
         var prototype_properties = vwf.getProperties( prototypeID );
-        childComponent.source = require( "vwf/utility" ).resolveURI( prototype_intrinsics.source, prototype_uri );
+        childComponent.source = utility.resolveURI( prototype_intrinsics.source, prototype_uri );
         childComponent.type = prototype_intrinsics.type;
         childComponent.properties = childComponent.properties || {};
         Object.keys( prototype_properties ).forEach( function( prototype_property_name ) {
@@ -2686,7 +2698,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         find: function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            var matchIDs = utility.xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
 
             if ( callback ) {
 
@@ -2718,7 +2730,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         test: function( nodeID, matchPattern, testID ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
+            var matchIDs = utility.xpath.resolve( matchPattern, "index-vwf", nodeID, xpathResolver, this );  // TODO: application root id instead of "index-vwf"
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
@@ -3142,7 +3154,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
     /// @returns {Object}
 
     var loggableFields = function( fields ) {
-        return require( "vwf/utility" ).transform( fields, require( "vwf/utility" ).transforms.transit );
+        return utility.transform( fields, utility.transforms.transit );
     };
 
     /// Convert a component URI, descriptor or ID into a form suitable for writing to a log.
@@ -3152,7 +3164,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
     /// @returns {String|Object}
 
     var loggableComponent = function( component ) {
-        return require( "vwf/utility" ).transform( component, loggableComponentTransformation );
+        return utility.transform( component, loggableComponentTransformation );
     };
 
     /// Convert an arbitrary JavaScript value into a form suitable for writing to a log.
@@ -3162,8 +3174,8 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
     /// @returns {Object}
 
     var loggableValue = function( value ) {
-        return require( "vwf/utility" ).transform( value, function( object, names, depth ) {
-            object = require( "vwf/utility" ).transforms.transit( object, names, depth );
+        return utility.transform( value, function( object, names, depth ) {
+            object = utility.transforms.transit( object, names, depth );
             return typeof object == "number" ? Number( object.toPrecision(5) ) : object; // reduce numeric precision to remove visual noise
         } );
     };
@@ -3242,7 +3254,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         } else {
 
-            return require( "vwf/utility" ).transform( object, require( "vwf/utility" ).transforms.transit );
+            return utility.transform( object, utility.transforms.transit );
 
         }
 
