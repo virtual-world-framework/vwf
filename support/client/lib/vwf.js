@@ -149,7 +149,7 @@ define( [ "module",
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
 
-            this.models.kernel = kernel_model.create( vwf );
+            this.models.kernel = kernel_model.create( this );
 
             // Create and attach each configured model.
 
@@ -200,7 +200,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // bounce off the reflection server, are placed on the queue when received, and executed
             // when removed.
 
-            this.views.kernel = kernel_view.create( vwf );
+            this.views.kernel = kernel_view.create( this );
 
             // Create and attach each configured view.
 
@@ -301,7 +301,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 setInterval( function() {
 
                     var fields = {
-                        time: vwf.now + 0.010, // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
+                        time: kernel.now + 0.010, // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
                         origin: "reflector",
                     };
 
@@ -315,9 +315,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "connect", function() {
 
-                    vwf.logger.infox( "-socket", "connected" );
+                    kernel.logger.infox( "-socket", "connected" );
 
-                    vwf.moniker_ = this.transport.sessionid;
+                    kernel.moniker_ = this.transport.sessionid;
 
                 } );
 
@@ -331,7 +331,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "message", function( message ) {
 
-                    // vwf.logger.debugx( "-socket", "message", message );
+                    // kernel.logger.debugx( "-socket", "message", message );
 
                     try {
 
@@ -360,7 +360,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                     } catch ( e ) {
 
-                        vwf.logger.warn( fields.action, fields.node, fields.member, fields.parameters,
+                        kernel.logger.warn( fields.action, fields.node, fields.member, fields.parameters,
                             "exception performing action:", utility.exceptionMessage( e ) );
 
                     }
@@ -369,7 +369,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "disconnect", function() {
 
-                    vwf.logger.infox( "-socket", "disconnected" );
+                    kernel.logger.infox( "-socket", "disconnected" );
 
                 } );
 
@@ -668,7 +668,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 function( series_callback /* ( err, results ) */ ) {
 
                     if ( applicationState.kernel ) {
-                        if ( applicationState.kernel.time !== undefined ) vwf.now = applicationState.kernel.time;
+                        if ( applicationState.kernel.time !== undefined ) kernel.now = applicationState.kernel.time;
                     }
  
                     series_callback( undefined, undefined );
@@ -680,7 +680,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                     async.forEach( applicationState.nodes || [], function( nodeComponent, each_callback_async /* ( err ) */ ) {
 
-                        vwf.createNode( nodeComponent, function( nodeID ) /* async */ {
+                        kernel.createNode( nodeComponent, function( nodeID ) /* async */ {
                             each_callback_async( undefined );
                         } );
 
@@ -705,7 +705,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = queue.queue.shift();
 
-                            vwf.logger.debugx( "setState", function() {
+                            kernel.logger.debugx( "setState", function() {
                                 return [ "removing", JSON.stringify( loggableFields( fields ) ), "from queue" ];
                             } );
 
@@ -717,7 +717,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                             fields = private_queue.shift();
 
-                            vwf.logger.debugx( "setState", function() {
+                            kernel.logger.debugx( "setState", function() {
                                 return [ "returning", JSON.stringify( loggableFields( fields ) ), "to queue" ];
                             } );
 
@@ -766,7 +766,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 // Internal kernel state.
 
                 kernel: {
-                    time: vwf.now,
+                    time: this.now,
                 },
 
                 // Global node and descendant deltas.
@@ -913,7 +913,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         } else { // uri is loaded
 
                             if ( nodePatch ) {
-                                vwf.setNode( components[nodeURI], nodePatch, function( nodeID ) /* async */ {
+                                kernel.setNode( components[nodeURI], nodePatch, function( nodeID ) /* async */ {
                                     callback_async && callback_async( components[nodeURI] );  // TODO: is this leaving a series callback hanging if we don't call series_callback_async?
                                 } );
                             } else {
@@ -938,7 +938,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                         // Create the node as an unnamed child global object.
 
-                        vwf.createChild( 0, undefined, nodeDescriptor, nodeURI, function( nodeID ) /* async */ {
+                        kernel.createChild( 0, undefined, nodeDescriptor, nodeURI, function( nodeID ) /* async */ {
                             nodeComponent = nodeID;
                             series_callback_async( undefined, undefined );
                         } );
@@ -965,7 +965,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( nodePatch ) {
-                        vwf.setNode( nodeID, nodePatch, function( nodeID ) /* async */ {
+                        kernel.setNode( nodeID, nodePatch, function( nodeID ) /* async */ {
                             series_callback_async( undefined, undefined );
                         } );
                     } else {
@@ -1069,7 +1069,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     // Set the internal state.
 
-                    vwf.models.object.internals( nodeID, nodeComponent );
+                    kernel.models.object.internals( nodeID, nodeComponent );
 
                     series_callback( undefined, undefined );
                 },
@@ -1079,7 +1079,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                     // Suppress kernel reentry so that we can write the state without coloring from
                     // any scripts.
 
-                    vwf.models.kernel.disable();
+                    kernel.models.kernel.disable();
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
@@ -1094,14 +1094,14 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                         // Create a new property if the property is not defined on a prototype.
                         // Otherwise, initialize the property.
 
-                        var creating = ! nodeHasProperty.call( vwf, nodeID, propertyName ); // not defined on node or prototype
+                        var creating = ! nodeHasProperty.call( kernel, nodeID, propertyName ); // not defined on node or prototype
 
                         // Create or initialize the property.
 
                         if ( creating ) {
-                            vwf.createProperty( nodeID, propertyName, propertyValue );
+                            kernel.createProperty( nodeID, propertyName, propertyValue );
                         } else {
-                            vwf.setProperty( nodeID, propertyName, propertyValue );
+                            kernel.setProperty( nodeID, propertyName, propertyValue );
                         }  // TODO: delete when propertyValue === null in patch
 
                     } );
@@ -1110,7 +1110,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     // Restore kernel reentry.
 
-                    vwf.models.kernel.enable();
+                    kernel.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1123,14 +1123,14 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
 
-                        var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
+                        var creating = ! nodeHasOwnChild.call( kernel, nodeID, childName );
 
                         if ( creating ) {
-                            vwf.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
+                            kernel.createChild( nodeID, childName, nodeComponent.children[childName], undefined, function( childID ) /* async */ {  // TODO: add in original order from nodeComponent.children  // TODO: ensure id matches nodeComponent.children[childName].id  // TODO: propagate childURI + fragment identifier to children of a URI component?
                                 each_callback_async( undefined );
                             } );
                         } else {
-                            vwf.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
+                            kernel.setNode( nodeComponent.children[childName].id || nodeComponent.children[childName].patches,
                                     nodeComponent.children[childName], function( childID ) /* async */ {
                                 each_callback_async( undefined );
                             } );
@@ -1152,9 +1152,9 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     nodeComponent.scripts && nodeComponent.scripts.forEach( function( script ) {
                         if ( valueHasType( script ) ) {
-                            script.text && vwf.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                            script.text && kernel.execute( nodeID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                         } else {
-                            script && vwf.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
+                            script && kernel.execute( nodeID, script, undefined ); // TODO: external scripts too // TODO: callback
                         }
                     } );
 
@@ -1240,7 +1240,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Suppress kernel reentry so that we can read the state without coloring from any
             // scripts.
 
-            vwf.models.kernel.disable();
+            this.models.kernel.disable();
 
             // Properties.
 
@@ -1288,7 +1288,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Restore kernel reentry.
 
-            vwf.models.kernel.enable();
+            this.models.kernel.enable();
 
             // Children.
 
@@ -1490,15 +1490,15 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                             // Create or find the prototype and save the ID in childPrototypeID.
 
                             if ( childComponent["extends"] !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) /* async */ {
+                                kernel.createNode( childComponent["extends"] || nodeTypeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
 if ( ! childComponent.source ) {
-    var prototype_intrinsics = vwf.intrinsics( prototypeID );
+    var prototype_intrinsics = kernel.intrinsics( prototypeID );
     if ( prototype_intrinsics.source ) {
-        var prototype_uri = vwf.uri( prototypeID );
-        var prototype_properties = vwf.getProperties( prototypeID );
+        var prototype_uri = kernel.uri( prototypeID );
+        var prototype_properties = kernel.getProperties( prototypeID );
         childComponent.source = utility.resolveURI( prototype_intrinsics.source, prototype_uri );
         childComponent.type = prototype_intrinsics.type;
         childComponent.properties = childComponent.properties || {};
@@ -1523,7 +1523,7 @@ if ( ! childComponent.source ) {
                             // Create or find the behaviors and save the IDs in childBehaviorIDs.
 
                             async.map( childComponent["implements"] || [], function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
-                                vwf.createNode( behaviorComponent, function( behaviorID ) /* async */ {
+                                kernel.createNode( behaviorComponent, function( behaviorID ) /* async */ {
                                     map_callback_async( undefined, behaviorID );
                                 } );
                             }, function( err, behaviorIDs ) /* async */ {
@@ -1544,7 +1544,7 @@ if ( ! childComponent.source ) {
                     // Call creatingNode() on each model. The node is considered to be constructed after
                     // each model has run.
 
-                    async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
+                    async.forEachSeries( kernel.models, function( model, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
 
@@ -1579,7 +1579,7 @@ if ( ! childComponent.source ) {
                     // Call createdNode() on each view. The view is being notified of a node that has
                     // been constructed.
 
-                    async.forEach( vwf.views, function( view, each_callback_async /* ( err ) */ ) {
+                    async.forEach( kernel.views, function( view, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
 
@@ -1609,7 +1609,7 @@ if ( ! childComponent.source ) {
 
                     // Set the internal state.
 
-                    vwf.models.object.internals( childID, childComponent );
+                    kernel.models.object.internals( childID, childComponent );
 
                     series_callback( undefined, undefined );
                 },
@@ -1619,7 +1619,7 @@ if ( ! childComponent.source ) {
                     // Suppress kernel reentry so that we can read the state without coloring from
                     // any scripts.
 
-                    replicating && vwf.models.kernel.disable();
+                    replicating && kernel.models.kernel.disable();
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
@@ -1646,13 +1646,13 @@ if ( ! childComponent.source ) {
 
                         var creating = create || // explicit create directive, or
                             get !== undefined || set !== undefined || // explicit accessor, or
-                            ! nodeHasProperty.call( vwf, childID, propertyName ); // not defined on prototype
+                            ! nodeHasProperty.call( kernel, childID, propertyName ); // not defined on prototype
 
                         // Are we assigning the value here, or deferring assignment until the node
                         // is constructed because setters will run?
 
                         var assigning = value === undefined || // no value, or
-                            set === undefined && ( creating || ! nodePropertyHasSetter.call( vwf, childID, propertyName ) ) || // no setter, or
+                            set === undefined && ( creating || ! nodePropertyHasSetter.call( kernel, childID, propertyName ) ) || // no setter, or
                             replicating; // replicating previously-saved state (setters never run during replication)
 
                         if ( ! assigning ) {
@@ -1663,9 +1663,9 @@ if ( ! childComponent.source ) {
                         // Create or initialize the property.
 
                         if ( creating ) {
-                            vwf.createProperty( childID, propertyName, value, get, set );
+                            kernel.createProperty( childID, propertyName, value, get, set );
                         } else {
-                            vwf.setProperty( childID, propertyName, value );
+                            kernel.setProperty( childID, propertyName, value );
                         }
 
                     } );
@@ -1673,9 +1673,9 @@ if ( ! childComponent.source ) {
                     childComponent.methods && jQuery.each( childComponent.methods, function( methodName, methodValue ) {
 
                         if ( valueHasBody( methodValue ) ) {
-                            vwf.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
+                            kernel.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
                         } else {
-                            vwf.createMethod( childID, methodName, undefined, methodValue );
+                            kernel.createMethod( childID, methodName, undefined, methodValue );
                         }
 
                     } );
@@ -1683,16 +1683,16 @@ if ( ! childComponent.source ) {
                     childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
 
                         if ( valueHasBody( eventValue ) ) {
-                            vwf.createEvent( childID, eventName, eventValue.parameters );
+                            kernel.createEvent( childID, eventName, eventValue.parameters );
                         } else {
-                            vwf.createEvent( childID, eventName, undefined );
+                            kernel.createEvent( childID, eventName, undefined );
                         }
 
                     } );
 
                     // Restore kernel reentry.
 
-                    replicating && vwf.models.kernel.enable();
+                    replicating && kernel.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1706,7 +1706,7 @@ if ( ! childComponent.source ) {
                     async.forEach( Object.keys( childComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
                         var childValue = childComponent.children[childName];
 
-                        vwf.createChild( childID, childName, childValue, undefined, function( childID ) /* async */ {  // TODO: add in original order from childComponent.children  // TODO: propagate childURI + fragment identifier to children of a URI component?
+                        kernel.createChild( childID, childName, childValue, undefined, function( childID ) /* async */ {  // TODO: add in original order from childComponent.children  // TODO: propagate childURI + fragment identifier to children of a URI component?
                             each_callback_async( undefined );
                         } );
 
@@ -1721,7 +1721,7 @@ if ( ! childComponent.source ) {
                     // Suppress kernel reentry so that initialization functions don't make any
                     // changes during replication.
 
-                    replicating && vwf.models.kernel.disable();
+                    replicating && kernel.models.kernel.disable();
 
                     // Attach the scripts. For each script, load the network resource if the script is
                     // specified as a URI, then once loaded, call execute() to direct any model that
@@ -1731,15 +1731,15 @@ if ( ! childComponent.source ) {
 
                     childComponent.scripts && childComponent.scripts.forEach( function( script ) {
                         if ( valueHasType( script ) ) {
-                            script.text && vwf.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
+                            script.text && kernel.execute( childID, script.text, script.type ); // TODO: external scripts too // TODO: callback
                         } else {
-                            script && vwf.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
+                            script && kernel.execute( childID, script, undefined ); // TODO: external scripts too // TODO: callback
                         }
                     } );
 
                     // Restore kernel reentry.
 
-                    replicating && vwf.models.kernel.enable();
+                    replicating && kernel.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1750,34 +1750,34 @@ if ( ! childComponent.source ) {
                     // assigned here so that the setters run on a fully-constructed node.
 
                     Object.keys( deferredInitializations ).forEach( function( propertyName ) {
-                        vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
+                        kernel.setProperty( childID, propertyName, deferredInitializations[propertyName] );
                     } );
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
-if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
-    vwf.tickable.nodeIDs.push( childID );
+if ( kernel.execute( childID, "Boolean( this.tick )" ) ) {
+    kernel.tickable.nodeIDs.push( childID );
 }
 
                     // Suppress kernel reentry so that initialization functions don't make any
                     // changes during replication.
 
-                    replicating && vwf.models.kernel.disable();
+                    replicating && kernel.models.kernel.disable();
 
                     // Call initializingNode() on each model and initializedNode() on each view to
                     // indicate that the node is fully constructed.
 
-                    vwf.models.forEach( function( model ) {
+                    kernel.models.forEach( function( model ) {
                         model.initializingNode && model.initializingNode( nodeID, childID );
                     } );
 
-                    vwf.views.forEach( function( view ) {
+                    kernel.views.forEach( function( view ) {
                         view.initializedNode && view.initializedNode( nodeID, childID );
                     } );
 
                     // Restore kernel reentry.
 
-                    replicating && vwf.models.kernel.enable();
+                    replicating && kernel.models.kernel.enable();
 
                     series_callback( undefined, undefined );
                 },
@@ -1785,7 +1785,7 @@ if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
             ], function( err, results ) /* async */ {
 
 if ( nodeID != 0 ) // TODO: do this for 0 too (global root)? removes this.creatingNode( 0 ) in vwf/model/javascript and vwf/model/object? what about in getType()?
-vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) implicit in createChild( parent-id, child-name, child-component ); remove this
+kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) implicit in createChild( parent-id, child-name, child-component ); remove this
 
                 // The node is complete. Invoke the callback method and pass the new node ID and the
                 // ID of its prototype. If this was the root node for the application, the
@@ -1873,7 +1873,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     for ( var propertyName in properties ) {
                         model_properties[propertyName] =
                             model.settingProperty( nodeID, propertyName, properties[propertyName] );
-                        if ( vwf.models.kernel.blocked() ) {
+                        if ( kernel.models.kernel.blocked() ) {
                             model_properties[propertyName] = undefined; // ignore result from a blocked setter
                         }
                     }
@@ -1932,7 +1932,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                     for ( var propertyName in intermediate_properties ) {
                         model_properties[propertyName] =
                             model.gettingProperty( nodeID, propertyName, intermediate_properties[propertyName] );
-                        if ( vwf.models.kernel.blocked() ) {
+                        if ( kernel.models.kernel.blocked() ) {
                             model_properties[propertyName] = undefined; // ignore result from a blocked getter
                         }
                     }
@@ -2904,7 +2904,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
     /// @returns {Boolean}
 
     var componentIsID = function( candidate ) {
-        return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
+        return isPrimitive( candidate ) && kernel.models.object.exists( candidate );
     };
 
     /// Determine if a value is a JavaScript primitive, or the boxed version of a JavaScript
@@ -3648,10 +3648,6 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
     var getPropertyEntrants = {};
 
-    /// Callback functions defined in this scope use this local "vwf" to locate the manager.
-
-    var vwf = window.vwf = exports;
-
     /// Control messages from the reflector are stored here in a priority queue, ordered by
     /// execution time.
 
@@ -3703,7 +3699,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             // to the host after invoking insert with chronic set.
 
             if ( chronic ) {
-                vwf.dispatch();
+                kernel.dispatch();
             }
 
         },
@@ -3727,10 +3723,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         suspend: function( why ) {
 
             if ( this.suspension++ == 0 ) {
-                vwf.logger.infox( "-queue#suspend", "suspending queue at time", vwf.now, why ? why : "" );
+                kernel.logger.infox( "-queue#suspend", "suspending queue at time", kernel.now, why ? why : "" );
                 return true;
             } else {
-                vwf.logger.debugx( "-queue#suspend", "further suspending queue at time", vwf.now, why ? why : "" );
+                kernel.logger.debugx( "-queue#suspend", "further suspending queue at time", kernel.now, why ? why : "" );
                 return false;
             }
 
@@ -3747,11 +3743,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         resume: function( why ) {
 
             if ( --this.suspension == 0 ) {
-                vwf.logger.infox( "-queue#resume", "resuming queue at time", vwf.now, why ? why : "" );
-                vwf.dispatch();
+                kernel.logger.infox( "-queue#resume", "resuming queue at time", kernel.now, why ? why : "" );
+                kernel.dispatch();
                 return true;
             } else {
-                vwf.logger.debugx( "-queue#resume", "partially resuming queue at time", vwf.now, why ? why : "" );
+                kernel.logger.debugx( "-queue#resume", "partially resuming queue at time", kernel.now, why ? why : "" );
                 return false;
             }
 
@@ -3784,6 +3780,10 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         queue: [],
 
     };
+
+    /// Internal reference to the kernel for use by callbacks and other internal functions.
+
+    var kernel = window.vwf = exports;
 
     return exports;
 
