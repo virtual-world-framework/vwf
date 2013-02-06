@@ -191,14 +191,12 @@ define( [ "module",
                         this.models.push( model );
                         this.models[modelName] = model; // also index by id  // TODO: this won't work if multiple model instances are allowed
 
-if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf-model-javascript
-    this.models.javascript = model;
-    while ( this.models.javascript.model ) this.models.javascript = this.models.javascript.model;
+if ( modelName == "vwf/model/javascript" ) {  // TODO: need a formal way to follow prototype chain from vwf.js; this is peeking inside of vwf/model/javascript
+    this.models.javascript = model.tail();
 }
 
-if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf-model-object
-    this.models.object = model;
-    while ( this.models.object.model ) this.models.object = this.models.object.model;
+if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf/model/object
+    this.models.object = model.tail();
 }
                     }
 
