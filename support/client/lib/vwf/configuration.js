@@ -20,7 +20,7 @@
 
 define( function() {
 
-    var exports = Object.create( Object.prototype, {
+    var exports = Object.create( Object.prototype, /** @lends module:vwf/configuration */ {
 
         /// The factory default settings.
         /// 

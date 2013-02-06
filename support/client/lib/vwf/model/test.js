@@ -18,7 +18,7 @@
 
 define( [ "module", "vwf/model" ], function( module, model ) {
 
-    return model.load( module, {
+    return model.load( module, /** @lends module:vwf/model/test */ {
 
         // == Module Definition ====================================================================
 

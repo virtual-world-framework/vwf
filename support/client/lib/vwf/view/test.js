@@ -18,7 +18,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     // vwf/view/test.js is a dummy driver used for tests.
 
-    return view.load( module, {
+    return view.load( module, /** @lends module:vwf/view/test */ {
 
         // == Module Definition ====================================================================
 

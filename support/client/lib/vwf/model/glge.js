@@ -25,7 +25,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     // vwf-model.glge.js intermixed with the view code. This driver is a gross hack to delegate model
     // calls to the appropriate parts of the GLGE view.
 
-    return model.load( module, {
+    return model.load( module, /** @lends module:vwf/model/glge */ {
 
         // == Module Definition ====================================================================
 

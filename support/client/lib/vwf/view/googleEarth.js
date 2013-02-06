@@ -18,7 +18,7 @@
 
 define( [ "module", "vwf/view" ], function( module, view ) {
 
-    return view.load( module, {
+    return view.load( module, /** @lends module:vwf/view/googleEarth */ {
 
         // == Module Definition ====================================================================
 

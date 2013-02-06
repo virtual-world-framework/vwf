@@ -22,7 +22,7 @@
 
 define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
 
-    return model.load( module, {
+    return model.load( module, /** @lends module:vwf/model/javascript */ {
 
         // This is a placeholder for providing a natural integration between simulation and the
         // browser's JavaScript environment.

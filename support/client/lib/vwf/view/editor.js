@@ -22,7 +22,7 @@
 
 define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, version, view, utility ) {
 
-    return view.load( module, {
+    return view.load( module, /** @lends module:vwf/view/editor */ {
 
         // == Module Definition ====================================================================
 
