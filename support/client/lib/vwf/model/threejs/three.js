@@ -36273,7 +36273,7 @@ THREE.ColladaLoader = function () {
 
 		subdivideFaces: true,
 
-		upAxis: 'Y',
+		upAxis: 'Z',
 
 		// For reflective or refractive materials we'll use this cubemap
 		defaultEnvMap: null

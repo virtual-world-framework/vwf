@@ -55,5 +55,5 @@ scripts:
     {
       this.counter++;
       this.camera.rotation = [0,0,1,this.counter];
-      this.future(0.2).update();
+      this.future(0.02).update();
     }
