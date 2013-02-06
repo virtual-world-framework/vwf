@@ -1,6 +1,6 @@
-# Convert "///" comment blocks to JSDoc-style /** ... */ blocks. Invoke as:
+# Convert "##" comment blocks to JSDoc-style /** ... */ blocks. Invoke as:
 # 
-#   ruby -p -i.bak js-to-jsdoc.rb file ...
+#   ruby -p -i.bak rb-to-jsdoc.rb file ...
 # 
 # to convert a set of files in place.
 
