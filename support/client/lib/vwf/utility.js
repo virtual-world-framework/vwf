@@ -16,6 +16,9 @@
 /// Kernel utility functions.
 /// 
 /// @module vwf/utility
+/// @requires vwf/utility/xpath
+/// @requires vwf/utility/color
+/// @requires vwf/utility/coordinates
 
 define( [ "module",
     "vwf/utility/xpath",

@@ -14,6 +14,12 @@
 // the License.
 
 /// @module vwf
+/// @requires logger
+/// @requires vwf/configuration
+/// @requires vwf/kernel/model
+/// @requires vwf/kernel/view
+/// @requires vwf/model/stage/log
+/// @requires vwf/utility
 
 /// vwf.js is the main Virtual World Framework manager. It is constructed as a JavaScript module
 /// (http://www.yuiblog.com/blog/2007/06/12/module-pattern) to isolate it from the rest of the
