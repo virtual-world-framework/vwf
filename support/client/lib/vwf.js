@@ -3069,7 +3069,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// 
     ///   - Descriptor: { extends: component, source: ..., type: ..., ... }
     ///   - Component URI: http://host/path/to/component.vwf
-    ///   - Asset URI: http://host/ath/to/asset.type
+    ///   - Asset URI: http://host/path/to/asset.type
     ///   - Node ID
     /// 
     /// They are converted as follows:
@@ -3664,10 +3664,10 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
         /// Insert a message or messages into the queue. Optionally execute the simulation
         /// through the time marked on the message.
         /// 
-        /// When chronic (chron-ic) is set, vwf#dispatch is called to execute the simulation up
-        /// through the indicated time. To prevent actions from executing out of order, insert
-        /// should be the caller's last operation before returning to the host when invoked with
-        /// chronic.
+        /// When chronic (chron-ic, time-authoritative) is set, vwf#dispatch is called to execute
+        /// the simulation up through the indicated time. To prevent actions from executing out of
+        /// order, insert should be the caller's last operation before returning to the host when
+        /// invoked with chronic.
         /// 
         /// @param {Object|Object[]} fields
         /// @param {Boolean} [chronic]
