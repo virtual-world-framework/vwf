@@ -310,7 +310,8 @@ node.uri = childURI; // TODO: move to vwf/model/object
             var scriptText = "this.initialize && this.initialize()";
 
             try {
-                return ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+                return ( Function( "scriptText", "return eval( scriptText )" ) ).
+                    call( child, scriptText );
             } catch ( e ) {
                 this.logger.warnx( "initializingNode", childID,
                     "exception in initialize:", utility.exceptionMessage( e ) );
@@ -379,7 +380,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
+                    node.private.getters[propertyName] = Function( propertyGet );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", utility.exceptionMessage( e ) );
@@ -390,7 +391,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.setters[propertyName] = eval( setterScript( propertySet ) );
+                    node.private.setters[propertyName] = Function( "value", propertySet );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", utility.exceptionMessage( e ) );
@@ -508,7 +509,8 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             } );
 
             try {
-                node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
+                node.private.bodies[methodName] = Function.apply( undefined,
+                    ( methodParameters || [] ).concat( methodBody || "" ) );
             } catch ( e ) {
                 this.logger.warnx( "creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", utility.exceptionMessage( e ) );
@@ -659,10 +661,12 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             if ( scriptType == "application/javascript" ) {
                 try {
-                    return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText );
+                    return ( Function( "scriptText", "return eval( scriptText )" ) ).
+                        call( node, scriptText );
                 } catch ( e ) {
                     this.logger.warnx( "executing", nodeID,
-                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );
+                        ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType,
+                        "exception:", utility.exceptionMessage( e ) );
                 }
             }
 
@@ -1035,38 +1039,6 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         }
 
         return future;
-    }
-
-    // -- getterScript -----------------------------------------------------------------------------
-
-    function getterScript( body ) {
-        return accessorScript( "( function() {", body, "} )" );
-    }
-
-    // -- setterScript -----------------------------------------------------------------------------
-
-    function setterScript( body ) {
-        return accessorScript( "( function( value ) {", body, "} )" );
-    }
-
-    // -- bodyScript -------------------------------------------------------------------------------
-
-    function bodyScript( parameters, body ) {
-        var parameterString = ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  );
-        return accessorScript( "( function(" + parameterString + ") {", body, "} )" );
-        // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
-    }
-
-    // -- accessorScript ---------------------------------------------------------------------------
-
-    function accessorScript( prefix, body, suffix ) {  // TODO: sanitize script, limit access
-        if ( body.length && body.charAt( body.length-1 ) == "\n" ) {
-            var bodyString = body.replace( /^./gm, "  $&" );
-            return prefix + "\n" + bodyString + suffix + "\n";
-        } else {
-            var bodyString = body.length ? " " + body + " " : "";
-            return prefix + bodyString + suffix;
-        }
     }
 
     // -- findListeners ----------------------------------------------------------------------------
