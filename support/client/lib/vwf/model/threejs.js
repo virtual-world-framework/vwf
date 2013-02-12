@@ -823,52 +823,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
 					if(propertyName =='localMatrix')
                     {
-                        
-                        var flip = false;
-                            if(threeObject.parent instanceof THREE.Scene)
-                            {                           
-								flip = true;
-                            }
                         var elements = matCpy(threeObject.matrix.elements); 
-						
-						
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
+						var ret =  elements;
 						return ret;
-                        
-                    
-                    }
-					if(propertyName =='parentLocalMatrix')
-                    {
-                        
-                        var flip = false;
-                            if(threeObject.parent.parent instanceof THREE.Scene)
-                            {                           
-								flip = true;
-                            }
-                        var elements = matCpy(threeObject.parent.matrix.elements); 
-						
-						
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
-						return ret;
-                        
-                    
                     }
 					if(propertyName == 'worldMatrix')
 					{
-						var flip = !(threeObject instanceof THREE.Scene);
 						threeObject.updateMatrixWorld(true);
                         var elements = matCpy(threeObject.matrixWorld.elements); 
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
+						var ret =  elements;	
 						return ret;
 					}
-					if(propertyName == 'parentWorldMatrix')
-					{
-						var flip = !(threeObject.parent instanceof THREE.Scene);
-						threeObject.parent.updateMatrixWorld(true);
-                        var elements = matCpy(threeObject.parent.matrixWorld.elements); 
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
-						return ret;
-					}						
+										
                     if(propertyName ==  "boundingbox")
                     {
                         value = getBoundingBox.call( this, threeObject, true );
