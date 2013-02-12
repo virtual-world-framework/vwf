@@ -234,6 +234,25 @@
 
           } );
 
+          asyncTest( "Method and event updates on behavior proxy", function() {
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              vwf.execute( derivedBaseBehaviorID, "Object.getPrototypeOf( this ).methods.baseBehavior = function() { this.properties.baseBehavior = 'baseBehaviorMethod' }" );
+              vwf.execute( baseBehaviorID, "this.methods.baseBehavior()" );
+              equal( vwf.execute( baseBehaviorID, "this.properties.baseBehavior" ), "baseBehaviorMethod", "method set on proxy updated the behavior" );
+
+              vwf.execute( baseBehaviorID, "this.events.baseBehavior = this.events.flush( this )" );
+              vwf.execute( derivedBaseBehaviorID, "Object.getPrototypeOf( this ).events.baseBehavior = function() { this.properties.baseBehavior = 'baseBehaviorEvent' }" );
+              vwf.execute( baseBehaviorID, "this.events.baseBehavior()" );
+              equal( vwf.execute( baseBehaviorID, "this.properties.baseBehavior" ), "baseBehaviorEvent", "event add on proxy updated the behavior" );
+
+              start();
+            } );
+
+          } );
+
           // == Helper functions =====================================================================
 
           // Create nodes in this arrangement:

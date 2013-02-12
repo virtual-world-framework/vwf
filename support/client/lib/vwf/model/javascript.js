@@ -766,7 +766,7 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
                         set: function( value ) {
                             this.node.methods.hasOwnProperty( methodName ) ||
                                 self.kernel.createMethod( this.node.id, methodName );
-                            this.node.private.bodies[methodName] = value;
+                            self.nodes[this.node.id].private.bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                         },
                         enumerable: true,
                     } );
@@ -781,7 +781,7 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                         set: function( value ) {
                             this.methods.hasOwnProperty( methodName ) ||
                                 self.kernel.createMethod( this.id, methodName );
-                            this.private.bodies[methodName] = value;
+                            self.nodes[this.id].private.bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                         },
                         enumerable: true,
                     } );
@@ -815,7 +815,7 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                             };
                         },
                         set: function( value ) {
-                            var listeners = this.node.private.listeners[eventName] ||
+                            var listeners = self.nodes[this.node.id].private.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
                                 ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                             if ( typeof value == "function" || value instanceof Function ) {
                                 listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
@@ -846,7 +846,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                             };
                         },
                         set: function( value ) {
-                            var listeners = this.private.listeners[eventName] ||
+                            var listeners = self.nodes[this.id].private.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
                                 ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                             if ( typeof value == "function" || value instanceof Function ) {
                                 listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
