@@ -689,8 +689,6 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             value: {}
         } );
 
-        proxy.private.origin = behavior; // the node we're the proxy for
-
 proxy.id = behavior.id; // TODO: move to vwf/model/object
 
         proxy.name = behavior.name;
@@ -877,10 +875,29 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
         }
 
-        for ( var eventName in behavior.private.listeners ) { // outside of the behavior.events loop as with getters, setters, and bodies; listeners may appear above the event definition
+        // Copy listeners to the proxy. Remap self-targeted listeners to switch the context to the
+        // proxy from the behavior.
+        // 
+        // Unlike with getters, setters, and bodies, this occurs outside the behavior.events loop
+        // since listeners may be attached to a more derived node that the one that defines the
+        // event.
+
+        for ( var eventName in behavior.private.listeners ) {
+
             if ( behavior.private.listeners.hasOwnProperty( eventName ) ) {
-                proxy.private.listeners[eventName] = behavior.private.listeners[eventName];
+
+                proxy.private.listeners[eventName] =
+                        behavior.private.listeners[eventName].map( function( listener ) {
+                    return {
+                        handler: listener.handler,
+                        context: listener.context == behavior ?
+                            proxy : listener.context,
+                        phases: listener.phases,
+                    };
+                } );
+
             }
+
         }
 
         proxy.private.future = Object.create( prototype.private ?
@@ -1054,7 +1071,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
         if ( targetOnly ) {
             return prototypeListeners.concat( nodeListeners.filter( function( listener ) {
-                return listener.context == node || listener.context == node.private.origin; // in the prototypes, select self-targeted listeners only
+                return listener.context == node; // in the prototypes, select self-targeted listeners only
             } ) );
         } else {
             return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node

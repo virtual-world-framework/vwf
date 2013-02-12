@@ -213,21 +213,42 @@
 
           } );
 
+          asyncTest( "Self-targeted event listeners on behaviors", function() {
+
+            createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
+                derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
+
+              vwf.fireEvent( derivedBaseBehaviorID, "derivedBaseBehavior" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "derivedBaseBehaviorEvent", "derived listener invoked on derived" );
+
+              vwf.fireEvent( derivedBaseBehaviorID, "baseBehavior" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "baseBehaviorEvent", "base behavior listener invoked on derived" );
+              equal( vwf.execute( baseBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior listener not invoked on base behavior" );
+
+              vwf.fireEvent( derivedBaseBehaviorID, "base" );
+              equal( vwf.execute( derivedBaseBehaviorID, "this.base" ), "baseEvent", "base listener invoked on derived" );
+              equal( vwf.execute( baseID, "this.base" ), "base", "base listener not invoked on base" );
+
+              start();
+            } );
+
+          } );
+
           // == Helper functions =====================================================================
 
           // Create nodes in this arrangement:
           // 
-          //   DerivedBaseBehavior implements BaseBehavior extends Base
-          //   DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
-          //   DerivedDerivedBehavior implements DerivedBehavior extends Base
+          //   - DerivedBaseBehavior implements BaseBehavior extends Base
+          //   - DerivedBaseBehaviorOtherBehavior implements BaseBehavior, OtherBehavior extends Base
+          //   - DerivedDerivedBehavior implements DerivedBehavior extends Base
           //   
-          //   Derived extends Base
-          //   Base
+          //   - Derived extends Base
+          //   - Base
           //   
-          //   DerivedBehavior extends BaseBehavior
-          //   BaseBehavior
+          //   - DerivedBehavior extends BaseBehavior
+          //   - BaseBehavior
           //   
-          //   OtherBehavior
+          //   - OtherBehavior
 
           function createFixture( callback ) {
 
@@ -259,7 +280,10 @@
           function createNode( which, behaviors, prototype, callback /* nodeID */ ) {
 
             var descriptor = {
-              properties: {}
+              properties: {},
+              methods: {},
+              events: {},
+              scripts: [],
             };
 
             descriptor.extends = prototype;
@@ -271,6 +295,15 @@
               get: "return this." + which + ".toUpperCase()",
               set: "this." + which + " = value.toLowerCase()",
             };
+
+            descriptor.methods[which] = null;
+            descriptor.events[which] = null;
+
+            descriptor.scripts.push(
+              "this.initialize = function() { " +
+                "this.events." + which + " = function() { this.properties." + which + " = '" + which + "Event' } " +
+              "}"
+            );
 
             vwf.createNode( descriptor, callback );
           }
