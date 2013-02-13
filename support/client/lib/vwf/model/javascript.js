@@ -246,9 +246,11 @@ node.uri = childURI; // TODO: move to vwf/model/object
                             callback.call( node, self.nodes[matchID] );
                         } );
                     } else {  // TODO: future iterator proxy
-                        return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
-                            return self.nodes[matchID];
-                        } );
+                        var findResults = self.kernel.find( this.id, matchPattern );
+                        if ( findResults )
+                            return findResults.map( function( matchID ) {
+                                return self.nodes[matchID];
+                            } );
                     }
                 }
             } );
