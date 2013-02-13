@@ -17,88 +17,85 @@
 ## @namespace
 
 --- 
-extends: http://vwf.example.com/instruction.vwf
+extends: http://vwf.example.com/node.vwf
 properties: 
-
-  ## The active instruction
-  ## 
-  ## @name lesson.vwf#activeInstruction
-  ## @property
-
-  activeInstruction:
-    set: |
-      this.activeInstruction = value;
-    value: false
 
   ## Index value for the instruction
   ## 
   ## @name lesson.vwf#instructionIndex
   ## @property
 
-  instructionIndex:
-    set: |
-      this.instructionIndex = value;
-    value: 0
+  instructionIndex: 0
 
 methods:
 
-  ## On entry function
+  ## Method to start the lesson
   ## 
-  ## @name lesson.vwf#onEntry
+  ## @name lesson.vwf#begin
   ## @function
   ##
   ## @returns undefined
 
-  onEntry:
+  begin:
 
-  ## Next instruction
+events:
+
+  ## The event that is fired when the user has completed the lesson
   ## 
-  ## @name lesson.vwf#nextInstruction
-  ## @function
-  ##
-  ## @returns undefined
+  ## @name instruction.vwf#completed
+  ## @event
 
-  nextInstruction:
-
-  ## Activate next
-  ## 
-  ## @name lesson.vwf#activateNext
-  ## @function
-  ##
-  ## @returns undefined
-
-  activateNext:
-
-  ## Instruction success
-  ## 
-  ## @name lesson.vwf#instructionSuccess
-  ## @function
-  ##
-  ## @returns undefined
-
-  instructionSuccess:
+  completed:
 
 scripts:
 - |
-    this.onEntry = function() {
-      if ( this.instructions && this.instructions.length ) {
+    var self = this;
+    var instructions = [];
+    var activeInstruction;
+
+    this.initialize = function() {
+      
+      // If this lesson has no children (no instructions), warn the user and return
+      if ( !this.children ) {
+        console.warn( "This lesson has no instructions - add some as children to be able to use it");
+        return;
+      }
+
+      // Build an array of instructions out of this lesson's children which are of type "instruction" 
+      for ( var i = 0; i < this.children.length; i++ ) {
+        var potentialInstruction = this.children[ i ];
+
+        // TODO: Does the following work?
+
+        if ( potentialInstruction.type == "http://vwf.example.com/instruction.vwf" )
+          instructions.push( potentialInstruction );
+      }
+
+      // Now that we have run through all the children, check to see if any of them were instructions.  If not,
+      // warn the user
+      if ( instructions.length == 0 )
+        console.warn( "This lesson has no instructions - add some as children to be able to use it");
+    }
+
+    this.begin = function() {
+      if ( instructions && instructions.length ) {
         this.instructionIndex = 0;
-        this.activeInstruction = this.instructions[this.instructionIndex];
+        this.activateInstruction();
       }
     }
-    this.nextInstruction(){
-      this.instructionIndex = this.instructionIndex + 1;
+
+    this.activateInstruction = function() {
+      if ( activeInstruction )
+        activeInstruction.exited = undefined;
+      activeInstruction = this.instructions[ this.instructionIndex ];
+      activeInstruction.exited = this.activateNext;
+      activeInstruction.begin();
     }
+
     this.activateNext = function() {
-      this.activeInstruction = this.instructions[this.instructionIndex];
-      this.activeInstruction.onEntry();
-    }
-    this.instructionSuccess = function() {
-      this.activeInstruction.success = true;
-      this.nextInstruction();
-      if ( this.instructionIndex >= this.instructions.length ) {
-        this.success = true;
-      } else {
-        activateNext();
-      }
-    }
+      self.instructionIndex++;
+      if ( self.instructionIndex < self.instructions.length )
+        self.activateInstruction();
+      else
+        self.completed();
+    } //@ sourceURL=lesson.vwf
