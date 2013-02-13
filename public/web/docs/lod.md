@@ -4,8 +4,8 @@
 
  **Coming soon!**
 
- Check back on Mar. 10
+ Check back on May 5
 
- (It will be our Daylight Saving Time gift to you)
+ (It will be our Cinco de Mayo gift to you)
 
 --------------
