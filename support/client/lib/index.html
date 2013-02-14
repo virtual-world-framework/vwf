@@ -33,6 +33,8 @@
     <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
     <script type="text/javascript" src="async.js"></script>
 
+    <script src="vwf/view/hammer.js/hammer.js"></script>
+    <script src="vwf/view/hammer.js/jquery.specialevent.hammer.js"></script>
 
     <script type="text/javascript" src="closure/base.js"></script>
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
@@ -91,6 +93,7 @@
             "vwf/view/document",
             "vwf/view/editor",
             "vwf/view/glge",
+            "vwf/view/touch",
             "vwf/utility",
             connected && "vwf/view/googleEarth",
             cesium && "vwf/view/cesium"
@@ -140,6 +143,7 @@
 						{ "vwf/view/glge": "#vwf-root" },
                         "vwf/view/document",
                         "vwf/view/editor",
+                        "vwf/view/touch",
 						connected && "vwf/view/googleEarth",
 						cesium && "vwf/view/cesium"
                     ]

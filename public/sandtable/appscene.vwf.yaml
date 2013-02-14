@@ -12,7 +12,7 @@
 # the License.
 
 ---
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/navtouch.vwf
 properties:
   lineWidth: 32
   lineColor: [ 0, 0, 0 ]

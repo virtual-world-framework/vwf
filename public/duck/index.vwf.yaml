@@ -12,9 +12,10 @@
 # the License.
 
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/navtouch.vwf
 properties:
-  navmode: none
+  navmode: orbit
+  rotationSpeed: 10
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
