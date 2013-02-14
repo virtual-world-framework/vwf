@@ -47,7 +47,77 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
-            this.nodes = {}; // maps id => new type()
+
+            // visible to sandbox (*, x: shouldn't be), allocated in sandbox (*)
+
+            //  - - nodes:
+            //  - *   id: # node:proto
+            //  * *     vwf$id: *id*
+            //  * *     uri/name/parent/source/type/...: etc.
+            //  * *     properties/methods/events/children:
+            //  * *       vwf$node: *node*
+            //  * *       name: *property*/*method*/*event*/*node*
+            //  * *       ...
+            //          future: *future*
+            //  x -     vwf$private:
+            //  x -       setters/getters/bodies:
+            //  x *         name: function() { ... }
+            //  x *         ...
+            //  x -       listeners:
+            //  x ?         name:
+            //              - handler: function() { ... }
+            //                context: *node*
+            //                phases: [ ... ]
+            //              - ...
+            //  x ?         ...
+            //  x *       future: *node*  # future proxy
+            //              properties/methods/events/children:
+            //                vwf$node: *node*  # future proxy
+            //                name: *property*/*method*/*event*/*node*
+            //                ...
+            //              vwf$private:
+            //                when: 
+            //                callback: 
+            //                change: 
+            //  x -       change: *sequence*
+
+
+            //  - - nodeishes:
+
+            //  - -   id:  # nodeish  # nodeish : protoish
+
+            //  - *     node:  # node : proto
+            //  * *       vwf$id: *id*
+            //  * *       uri/name/parent/source/type/...: etc.
+            //  * *       properties/methods/events/children:  # node collection : proto collection
+            //  * *         vwf$node: *node*
+            //  * *         name: *property*/*method*/*event*/*node*
+            //  * *         ...
+            //            future: *future*
+            //  - -     setters/getters/bodies:  # node collection : proto collection
+            //  - *       name: function() { ... }
+            //  - *       ...
+            //  - -     listeners:  # node collection ?:? proto collection (non-__proto__)
+            //  - ?       name:
+            //              - handler: function() { ... }
+            //                context: *node*
+            //                phases: [ ... ]
+            //              - ...
+            //  - ?       ...
+            //  - -     change: *sequence*
+
+            //  - -     future:  # node futureish : proto futureish
+            //  - *       node: *proxy*  # node proxy : proto proxy
+            //              properties/methods/events/children:  # node proxy collection : proto proxy collection
+            //                vwf$node: *node*  # future proxy
+            //                name: *property*/*method*/*event*/*node*
+            //                ...
+            //            when: 
+            //            callback: 
+            //            change: 
+
+
+            this.nodes = {}; // maps id => node data
             this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
@@ -60,48 +130,60 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             var self = this;
 
-            // Get the prototype node.
+            // Get the prototype node. These may be undefined if there is no prototype.
 
-            var prototype = this.nodes[childExtendsID] || Object.prototype;
+            var prototypeData = this.nodes[childExtendsID];
+            var prototype = prototypeData && prototypeData.node;
 
             // Get the behavior nodes.
 
-            var behaviors = ( childImplementsIDs || [] ).map( function( childImplementsID ) {
+            var behaviorDatas = ( childImplementsIDs || [] ).map( function( childImplementsID ) {
                 return self.nodes[childImplementsID];
             } );
 
             // For each behavior, create a proxy for this node to the behavior and attach it above
             // the prototype, or above the most recently-attached behavior.
 
-            behaviors.forEach( function( behavior ) {
-                prototype = proxiedBehavior.call( self, prototype, behavior );
+            behaviorDatas.forEach( function( behaviorData ) {
+                prototypeData = proxiedBehavior.call( self, behaviorData, prototypeData );
+                prototype = prototypeData && prototypeData.node;
             } );
 
-            // Create the node. It's prototype is the most recently-attached behavior, or the
+            // Create the node. Its prototype is the most recently-attached behavior, or the
             // specific prototype if no behaviors are attached.
 
-            var node = this.nodes[childID] = Object.create( prototype );
+            //  {
 
-            Object.defineProperty( node, "private", {
-                value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
-            } );
+            //    node: undefined,
+            //    setters: undefined, // {}, delegated to prototype
+            //    getters: undefined, // {}, delegated to prototype
+            //    bodies: undefined, // {}, delegated to prototype
+            //    listeners: undefined, // {}, not delegated to prototype
+            //    change: undefined,
+
+            //    future: undefined, // node / when/callback/change
+
+            //  }
+
+            var nodeData = this.nodes[childID] = Object.create( prototypeData || Object.prototype );
+            var node = nodeData.node = Object.create( prototype || Object.prototype );
 
 node.id = childID; // TODO: move to vwf/model/object
-node.uri = childURI; // TODO: move to vwf/model/object
+node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to kernel
 
-            node.name = childName;
+            node.name = childName;  // TODO: delegate to kernel
 
-            node.parent = undefined;
+            node.parent = undefined;  // TODO: delegate to kernel
 
-            node.source = childSource;
-            node.type = childType;
+            node.source = childSource;  // TODO: delegate to kernel
+            node.type = childType;  // TODO: delegate to kernel
 
             Object.defineProperty( node, "logger", {
                 value: this.logger.for( "#" + ( childName || childURI || childID ), node ),
                 enumerable: true,
             } );
 
-            node.properties = Object.create( prototype.properties || Object.prototype, {
+            node.properties = Object.create( prototype ? prototype.properties : Object.prototype, {
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -111,15 +193,15 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 }
             } );
 
-            node.private.getters = Object.create( prototype.private ?
-                prototype.private.getters : Object.prototype
+            nodeData.getters = Object.create( prototypeData ?
+                prototypeData.getters : Object.prototype
             );
 
-            node.private.setters = Object.create( prototype.private ?
-                prototype.private.setters : Object.prototype
+            nodeData.setters = Object.create( prototypeData ?
+                prototypeData.setters : Object.prototype
             );
 
-            node.methods = Object.create( prototype.methods || Object.prototype, {
+            node.methods = Object.create( prototype ? prototype.methods : Object.prototype, {
                 node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -129,11 +211,11 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 }
             } );
 
-            node.private.bodies = Object.create( prototype.private ?
-                prototype.private.bodies : Object.prototype
+            nodeData.bodies = Object.create( prototypeData ?
+                prototypeData.bodies : Object.prototype
             );
 
-            node.events = Object.create( prototype.events || Object.prototype, {
+            node.events = Object.create( prototype ? prototype.events : Object.prototype, {
                 node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -176,7 +258,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 }
             } );
 
-            node.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
+            nodeData.listeners = Object(); // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
             node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
@@ -188,7 +270,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
                     if ( callback ) {
                         self.kernel.createChild( this.node.id, name, component, undefined, undefined, function( childID ) {
-                            callback.call( node, self.nodes[childID] );
+                            callback.call( node, self.nodes[childID].node );
                         } );
                     } else { 
                         return self.kernel.createChild( this.node.id, name, component );
@@ -243,11 +325,11 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
                     if ( callback ) {
                         self.kernel.find( this.id, matchPattern, function( matchID ) {
-                            callback.call( node, self.nodes[matchID] );
+                            callback.call( node, self.nodes[matchID].node );
                         } );
                     } else {  // TODO: future iterator proxy
                         return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
-                            return self.nodes[matchID];
+                            return self.nodes[matchID].node;
                         } );
                     }
                 }
@@ -265,14 +347,14 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
             Object.defineProperty( node, "in", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, -( when || 0 ), callback ); // relative time
+                    return futureProxy.call( self, self.nodes[this.id], -( when || 0 ), callback ).node; // relative time
                 },
                 enumerable: true,
             } );
 
             Object.defineProperty( node, "at", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, when || 0, callback ); // absolute time
+                    return futureProxy.call( self, self.nodes[this.id], when || 0, callback ).node; // absolute time
                 },
                 enumerable: true,
             } );
@@ -284,19 +366,10 @@ node.uri = childURI; // TODO: move to vwf/model/object
                 enumerable: true,
             } );
 
-            node.private.future = Object.create( prototype.private ?
-                prototype.private.future : Object.prototype
-            );
+            // Define a counter to be incremented whenever "future"-related changes occur. Creating
+            // the node is the first change.
 
-            Object.defineProperty( node.private.future, "private", {
-                value: {
-                    when: 0,
-                    callback: undefined,
-                    change: 0,
-                }
-            } );
-
-            node.private.change = 1; // incremented whenever "future"-related changes occur
+            nodeData.change = 1;
 
         },
 
@@ -306,7 +379,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
         initializingNode: function( nodeID, childID ) {
 
-            var child = this.nodes[childID];
+            var child = this.nodes[childID].node;
             var scriptText = "this.initialize && this.initialize()";
 
             try {
@@ -324,7 +397,7 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
         deletingNode: function( nodeID ) {
 
-            var child = this.nodes[nodeID];
+            var child = this.nodes[nodeID].node;
             var node = child.parent;
 
             if ( node ) {
@@ -353,8 +426,8 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
         addingChild: function( nodeID, childID, childName ) {
 
-            var node = this.nodes[nodeID];
-            var child = this.nodes[childID];
+            var node = this.nodes[nodeID].node;
+            var child = this.nodes[childID].node;
 
             child.parent = node;
 
@@ -376,28 +449,28 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
         creatingProperty: function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
-            var node = this.nodes[nodeID];
+            var nodeData = this.nodes[nodeID];
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.getters[propertyName] = Function( propertyGet );
+                    nodeData.getters[propertyName] = Function( propertyGet );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", utility.exceptionMessage( e ) );
                 }
             } else {
-                node.private.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
+                nodeData.getters[propertyName] = true; // set a guard value so that we don't call prototype getters on value properties
             }
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.setters[propertyName] = Function( "value", propertySet );
+                    nodeData.setters[propertyName] = Function( "value", propertySet );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", utility.exceptionMessage( e ) );
                 }
             } else {
-                node.private.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
+                nodeData.setters[propertyName] = true; // set a guard value so that we don't call prototype setters on value properties
             }
 
             return this.initializingProperty( nodeID, propertyName, propertyValue );
@@ -407,7 +480,9 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            var node = this.nodes[nodeID];
+            var nodeData = this.nodes[nodeID];
+            var node = nodeData.node;
+
             var self = this;
 
             Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
@@ -423,7 +498,7 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
                 enumerable: true
             } );
 
-            node.private.change++; // invalidate the "future" cache
+            nodeData.change++; // invalidate the "future" cache
 
             return propertyValue !== undefined ?
                 this.settingProperty( nodeID, propertyName, propertyValue ) : undefined;
@@ -435,11 +510,12 @@ node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, meth
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            var node = this.nodes[nodeID];
+            var nodeData = this.nodes[nodeID];
+            var node = nodeData.node;
 
 if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 
-            var setter = node.private.setters && node.private.setters[propertyName];
+            var setter = nodeData.setters[propertyName];
 
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
@@ -457,8 +533,10 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            var node = this.nodes[nodeID];
-            var getter = node.private.getters && node.private.getters[propertyName];
+            var nodeData = this.nodes[nodeID];
+            var node = nodeData.node;
+
+            var getter = nodeData.getters[propertyName];
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {
@@ -476,7 +554,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
         creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
 
-            var node = this.nodes[nodeID];
+            var nodeData = this.nodes[nodeID];
+            var node = nodeData.node;
+
             var self = this;
 
             Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
@@ -488,7 +568,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
                 set: function( value ) {
                     this.node.methods.hasOwnProperty( methodName ) ||
                         self.kernel.createMethod( this.node.id, methodName );
-                    this.node.private.bodies[methodName] = value;
+                    self.nodes[this.node.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                 },
                 enumerable: true,
             } );
@@ -503,20 +583,20 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 set: function( value ) {
                     this.methods.hasOwnProperty( methodName ) ||
                         self.kernel.createMethod( this.id, methodName );
-                    this.private.bodies[methodName] = value;
+                    self.nodes[this.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                 },
                 enumerable: true,
             } );
 
             try {
-                node.private.bodies[methodName] = Function.apply( undefined,
+                nodeData.bodies[methodName] = Function.apply( undefined,
                     ( methodParameters || [] ).concat( methodBody || "" ) );
             } catch ( e ) {
                 this.logger.warnx( "creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", utility.exceptionMessage( e ) );
             }
         
-            node.private.change++; // invalidate the "future" cache
+            nodeData.change++; // invalidate the "future" cache
 
         },
 
@@ -526,8 +606,10 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
 
-            var node = this.nodes[nodeID];
-            var body = node.private.bodies && node.private.bodies[methodName];
+            var nodeData = this.nodes[nodeID];
+            var node = nodeData.node;
+
+            var body = nodeData.bodies[methodName];
 
             if ( body ) {
                 try {
@@ -545,7 +627,9 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
         creatingEvent: function( nodeID, eventName, eventParameters ) {
 
-            var node = this.nodes[nodeID];
+            var nodeData = this.nodes[nodeID];
+            var node = nodeData.node;
+
             var self = this;
 
             Object.defineProperty( node.events, eventName, { // "this" is node.events in get/set
@@ -555,8 +639,9 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     };
                 },
                 set: function( value ) {
-                    var listeners = this.node.private.listeners[eventName] ||
-                        ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                    var nodeData = self.nodes[this.node.id];
+                    var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
+                        ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof Function ) {
                         listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
                     } else if ( value.add ) {
@@ -566,11 +651,11 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                             listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
                         }
                     } else if ( value.remove ) {
-                        this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                        nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                             return listener.handler !== value.handler;
                         } );
                     } else if ( value.flush ) {
-                        this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                        nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                             return listener.context !== value.context;
                         } );
                     }
@@ -586,8 +671,9 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                     };
                 },
                 set: function( value ) {
-                    var listeners = this.private.listeners[eventName] ||
-                        ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                    var nodeData = self.nodes[this.id];
+                    var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
+                        ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof Function ) {
                         listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
                     } else if ( value.add ) {
@@ -597,11 +683,11 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                             listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
                         }
                     } else if ( value.remove ) {
-                        this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                        nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                             return listener.handler !== value.handler;
                         } );
                     } else if ( value.flush ) {
-                        this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                        nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                             return listener.context !== value.context;
                         } );
                     }
@@ -609,9 +695,9 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 enumerable: true,
             } );
 
-            node.private.listeners[eventName] = [];
+            nodeData.listeners[eventName] = [];
 
-            node.private.change++; // invalidate the "future" cache
+            nodeData.change++; // invalidate the "future" cache
 
         },
 
@@ -621,8 +707,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             var phase = eventParameters && eventParameters.phase; // the phase is smuggled across on the parameters array  // TODO: add "phase" as a fireEvent() parameter? it isn't currently needed in the kernel public API (not queueable, not called by the drivers), so avoid if possible
 
-            var node = this.nodes[nodeID];
-            var listeners = findListeners( node, eventName );
+            var nodeData = this.nodes[nodeID];
+            var listeners = findListeners( nodeData, eventName );
 
             var self = this;
 
@@ -638,7 +724,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
                 try {
                     if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
-                        var result = listener.handler.apply( listener.context || self.nodes[0], eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var result = listener.handler.apply( listener.context || self.nodes[0].node, eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
                 } catch ( e ) {
@@ -657,7 +743,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
         executing: function( nodeID, scriptText, scriptType ) {
 
-            var node = this.nodes[nodeID];
+            var nodeData = this.nodes[nodeID];
+            var node = nodeData.node;
 
             if ( scriptType == "application/javascript" ) {
                 try {
@@ -675,39 +762,49 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
     } );
 
-    // == Private functions ========================================================================
+    /// Create a proxy node for a behavior to be placed in another node's prototype chain. Since
+    /// behaviors are inserted between a node and its prototype, and since they may be used for
+    /// multiple nodes, they can't be placed directly in the prototype chain.
+    ///
+    /// @param {Object} behaviorData
+    ///   The behavior node to create the proxy for.
+    /// @param {Object} [prototypeData]
+    ///   The prototype node to attach below the proxy.
+    /// 
+    /// @returns {Object}
+    ///   A proxy node that delegates to `behaviorData` and has `prototypeData` as its prototype.
 
-    // -- proxiedBehavior --------------------------------------------------------------------------
-
-    function proxiedBehavior( prototype, behavior ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.  // TODO: nodes need to keep a list of proxies on them and callback here to refresh after changes
+    function proxiedBehavior( behaviorData, prototypeData ) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and futureProxy(). Find a way to merge.  // TODO: nodes need to keep a list of proxies on them and callback here to refresh after changes
 
         var self = this;
 
-        var proxy = Object.create( prototype );
+        var prototype = prototypeData && prototypeData.node;
 
-        Object.defineProperty( proxy, "private", {
-            value: {}
-        } );
+        var proxyData = Object.create( prototypeData || Object.prototype );
+        var proxy = proxyData.node = Object.create( prototype || Object.prototype );
+
+        var behavior = behaviorData && behaviorData.node;
 
 proxy.id = behavior.id; // TODO: move to vwf/model/object
+proxy.uri = behavior.uri; // TODO: move to vwf/model/object  // TODO: delegate to kernel
 
-        proxy.name = behavior.name;
+        proxy.name = behavior.name;  // TODO: delegate to kernel
 
-        proxy.parent = behavior.parent;
+        proxy.parent = behavior.parent;  // TODO: delegate to kernel  // TODO: wrong?
 
-        proxy.source = behavior.source;
-        proxy.type = behavior.type;
+        proxy.source = behavior.source;  // TODO: delegate to kernel
+        proxy.type = behavior.type;  // TODO: delegate to kernel
 
-        proxy.properties = Object.create( prototype.properties || Object.prototype, {
+        proxy.properties = Object.create( prototype ? prototype.properties : Object.prototype, {
             node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
         } );
 
-        proxy.private.getters = Object.create( prototype.private ?
-            prototype.private.getters : Object.prototype
+        proxyData.getters = Object.create( prototypeData ?
+            prototypeData.getters : Object.prototype
         );
 
-        proxy.private.setters = Object.create( prototype.private ?
-            prototype.private.setters : Object.prototype
+        proxyData.setters = Object.create( prototypeData ?
+            prototypeData.setters : Object.prototype
         );
 
         for ( var propertyName in behavior.properties ) {
@@ -731,24 +828,24 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
 
                 } )( propertyName );
             
-                if ( behavior.private.getters.hasOwnProperty( propertyName ) ) {
-                    proxy.private.getters[propertyName] = behavior.private.getters[propertyName];
+                if ( behaviorData.getters.hasOwnProperty( propertyName ) ) {
+                    proxyData.getters[propertyName] = behaviorData.getters[propertyName];
                 }
 
-                if ( behavior.private.setters.hasOwnProperty( propertyName ) ) {
-                    proxy.private.setters[propertyName] = behavior.private.setters[propertyName];
+                if ( behaviorData.setters.hasOwnProperty( propertyName ) ) {
+                    proxyData.setters[propertyName] = behaviorData.setters[propertyName];
                 }
 
             }
 
         }
 
-        proxy.methods = Object.create( prototype.methods || Object.prototype, {
+        proxy.methods = Object.create( prototype ? prototype.methods : Object.prototype, {
             node: { value: proxy } // for proxy.methods accessors (non-enumerable)  // TODO: hide this better
         } );
 
-        proxy.private.bodies = Object.create( prototype.private ?
-            prototype.private.bodies : Object.prototype
+        proxyData.bodies = Object.create( prototypeData ?
+            prototypeData.bodies : Object.prototype
         );
 
         for ( var methodName in behavior.methods ) {
@@ -766,7 +863,7 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
                         set: function( value ) {
                             this.node.methods.hasOwnProperty( methodName ) ||
                                 self.kernel.createMethod( this.node.id, methodName );
-                            self.nodes[this.node.id].private.bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
+                            self.nodes[this.node.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                         },
                         enumerable: true,
                     } );
@@ -781,26 +878,26 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                         set: function( value ) {
                             this.methods.hasOwnProperty( methodName ) ||
                                 self.kernel.createMethod( this.id, methodName );
-                            self.nodes[this.id].private.bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
+                            self.nodes[this.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                         },
                         enumerable: true,
                     } );
 
                 } )( methodName );
             
-                if ( behavior.private.bodies.hasOwnProperty( methodName ) ) {
-                    proxy.private.bodies[methodName] = behavior.private.bodies[methodName];
+                if ( behaviorData.bodies.hasOwnProperty( methodName ) ) {
+                    proxyData.bodies[methodName] = behaviorData.bodies[methodName];
                 }
 
             }
 
         }
 
-        proxy.events = Object.create( prototype.events || Object.prototype, {
+        proxy.events = Object.create( prototype ? prototype.events : Object.prototype, {
             node: { value: proxy } // for proxy.events accessors (non-enumerable)  // TODO: hide this better
         } );
 
-        proxy.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
+        proxyData.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
         for ( var eventName in behavior.events ) {
 
@@ -815,8 +912,9 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                             };
                         },
                         set: function( value ) {
-                            var listeners = self.nodes[this.node.id].private.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
-                                ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                            var nodeData = self.nodes[this.node.id];
+                            var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
+                                ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                             if ( typeof value == "function" || value instanceof Function ) {
                                 listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
                             } else if ( value.add ) {
@@ -826,11 +924,11 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                                     listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
                                 }
                             } else if ( value.remove ) {
-                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                                     return listener.handler !== value.handler;
                                 } );
                             } else if ( value.flush ) {
-                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                                     return listener.context !== value.context;
                                 } );
                             }
@@ -846,8 +944,9 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                             };
                         },
                         set: function( value ) {
-                            var listeners = self.nodes[this.id].private.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
-                                ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                            var nodeData = self.nodes[this.id];
+                            var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
+                                ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                             if ( typeof value == "function" || value instanceof Function ) {
                                 listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
                             } else if ( value.add ) {
@@ -857,11 +956,11 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                                     listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
                                 }
                             } else if ( value.remove ) {
-                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                                     return listener.handler !== value.handler;
                                 } );
                             } else if ( value.flush ) {
-                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
+                                nodeData.listeners[eventName] = listeners.filter( function( listener ) {
                                     return listener.context !== value.context;
                                 } );
                             }
@@ -882,12 +981,12 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
         // since listeners may be attached to a more derived node that the one that defines the
         // event.
 
-        for ( var eventName in behavior.private.listeners ) {
+        for ( var eventName in behaviorData.listeners ) {
 
-            if ( behavior.private.listeners.hasOwnProperty( eventName ) ) {
+            if ( behaviorData.listeners.hasOwnProperty( eventName ) ) {
 
-                proxy.private.listeners[eventName] =
-                        behavior.private.listeners[eventName].map( function( listener ) {
+                proxyData.listeners[eventName] =
+                        behaviorData.listeners[eventName].map( function( listener ) {
                     return {
                         handler: listener.handler,
                         context: listener.context == behavior ?
@@ -900,43 +999,58 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
         }
 
-        proxy.private.future = Object.create( prototype.private ?
-            prototype.private.future : Object.prototype
-        );
+        // Copy the behavior's change counter.
 
-        Object.defineProperty( proxy.private.future, "private", {
-            value: {
-                when: 0,
-                callback: undefined,
-                change: 0,
-            }
-        } );
+        proxyData.change = behaviorData.change;
 
-        proxy.private.change = behavior.private.change;
-
-        return proxy;
+        return proxyData;
     }
 
-    // -- refreshedFuture --------------------------------------------------------------------------
+    /// Create a proxy node that interprets all references as actions to be placed on the message
+    /// queue to be performed at some point in the future. The proxy node is cached and will only be
+    /// generated if it doesn't exist or if the node has changed.
+    /// 
+    /// @param {Object} nodeData
+    ///   The node to create the proxy for.
+    /// @param {Object} [when]
+    ///   The time to execute actions scheduled by the proxy. Positive values indicate absolute
+    ///   times. A negative value represents the negative of a relative time. Actions scheduled for
+    ///   the past are still placed on the queue but they will be executed immediately. Times are
+    ///   specified in seconds. `when` defaults to 0.
+    /// @param {Object} [callback]
+    ///   A function to be called with the result when the action executes. (Not yet implemented.)
+    /// 
+    /// @returns {Object}
+    ///   A future proxy for `nodeData`.
 
-    function refreshedFuture( node, when, callback ) { // invoke with the model as "this"
+    function futureProxy( nodeData, when, callback ) { // invoke with the model as "this"
 
         var self = this;
 
-        if ( Object.getPrototypeOf( node ).private ) {
-            refreshedFuture.call( this, Object.getPrototypeOf( node ) );
-        }
+        var futureData = nodeData.futureData;
 
-        var future = node.private.future;
+        if ( ! futureData || futureData.change < nodeData.change ) { // only if missing or out of date
 
-        future.private.when = when;
-        future.private.callback = callback;  // TODO: would like to be able to remove this reference after the future call has completed
+            var prototypeData = Object.getPrototypeOf( nodeData ) !== Object.prototype ?
+                futureProxy.call( this, Object.getPrototypeOf( nodeData ) ) : undefined;
 
-        if ( future.private.change < node.private.change ) { // only if out of date
+            var prototype = prototypeData && prototypeData.node;
+
+            //  {
+            //    node: undefined,
+            //    when: undefined,
+            //    callback: undefined,
+            //    change: undefined,
+            //  }
+
+            futureData = nodeData.futureData = Object.create( prototypeData || Object.prototype ); // TODO: breaks deriving reference if exists
+            var future = futureData.node = Object.create( prototype || Object.prototype );
+
+            var node = nodeData.node;
 
             future.id = node.id;
 
-            future.properties = Object.create( Object.getPrototypeOf( future ).properties || Object.prototype, {
+            future.properties = Object.create( prototype ? prototype.properties : Object.prototype, {
                 node: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -947,23 +1061,33 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                     ( function( propertyName ) {
 
                         Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                            get: function() { return self.kernel.getProperty( this.node.id,
-                                propertyName, this.node.private.when, this.node.private.callback
-                            ) },
-                            set: function( value ) { self.kernel.setProperty( this.node.id,
-                                propertyName, value, this.node.private.when, this.node.private.callback
-                            ) },
+                            get: function() {
+                                var nodeData = self.nodes[this.node.id];
+                                return self.kernel.getProperty( this.node.id, propertyName,
+                                    nodeData.futureData.when, nodeData.futureData.callback
+                                );
+                            },
+                            set: function( value ) {
+                                var nodeData = self.nodes[this.node.id];
+                                self.kernel.setProperty( this.node.id, propertyName, value,
+                                    nodeData.futureData.when, nodeData.futureData.callback
+                                );
+                            },
                             enumerable: true
                         } );
 
 future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, propertyName, { // "this" is future in get/set
-                            get: function() { return self.kernel.getProperty( this.id,
-                                propertyName, this.private.when, this.private.callback
-                            ) },
-                            set: function( value ) { self.kernel.setProperty( this.id,
-                                propertyName, value, this.private.when, this.private.callback
-                            ) },
+                            get: function() {
+                                var nodeData = self.nodes[this.id];
+                                return self.kernel.getProperty( this.id, propertyName,
+                                    nodeData.futureData.when, nodeData.futureData.callback );
+                            },
+                            set: function( value ) {
+                                var nodeData = self.nodes[this.id];
+                                self.kernel.setProperty( this.id, propertyName, value,
+                                    nodeData.futureData.when, nodeData.futureData.callback );
+                            },
                             enumerable: true
                         } );
 
@@ -973,7 +1097,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
     
             }
 
-            future.methods = Object.create( Object.getPrototypeOf( future ).methods || Object.prototype, {
+            future.methods = Object.create( prototype ? prototype.methods : Object.prototype, {
                 node: { value: future } // for future.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -985,9 +1109,10 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
 
                         Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
                             get: function() {
+                                var nodeData = self.nodes[this.node.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
-                                    return self.kernel.callMethod( this.node.id,
-                                        methodName, arguments, this.node.private.when, this.node.private.callback
+                                    return self.kernel.callMethod( this.node.id, methodName, arguments,
+                                        nodeData.futureData.when, nodeData.futureData.callback
                                     );
                                 }
                             },
@@ -997,9 +1122,10 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
 future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, methodName, { // "this" is future in get/set
                             get: function() {
+                                var nodeData = self.nodes[this.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.callMethod( this.id,
-                                        methodName, arguments, this.private.when, this.private.callback
+                                    return self.kernel.callMethod( this.id, methodName, arguments,
+                                        nodeData.futureData.when, nodeData.futureData.callback
                                     );
                                 }
                             },
@@ -1012,7 +1138,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
 
             }
 
-            future.events = Object.create( Object.getPrototypeOf( future ).events || Object.prototype, {
+            future.events = Object.create( prototype ? prototype.events : Object.prototype, {
                 node: { value: future } // for future.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -1024,9 +1150,10 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
 
                         Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
                             get: function() {
+                                var nodeData = self.nodes[this.node.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    return self.kernel.fireEvent( this.node.id,
-                                        eventName, arguments, this.node.private.when, this.node.private.callback
+                                    return self.kernel.fireEvent( this.node.id, eventName, arguments,
+                                        nodeData.futureData.when, nodeData.futureData.callback
                                     );
                                 };
                             },
@@ -1036,9 +1163,10 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
 future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
                         Object.defineProperty( future, eventName, { // "this" is future in get/set
                             get: function() {
+                                var nodeData = self.nodes[this.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.fireEvent( this.id,
-                                        eventName, arguments, this.private.when, this.private.callback
+                                    return self.kernel.fireEvent( this.id, eventName, arguments,
+                                        nodeData.futureData.when, nodeData.futureData.callback
                                     );
                                 };
                             },
@@ -1051,31 +1179,48 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
             }
 
-            future.private.change = node.private.change;
+            // Record the node's change counter. We can reuse this proxy until the node changes
+            // again.
+
+            futureData.change = nodeData.change;
 
         }
 
-        return future;
+        // Record the time and callback parameters. Actions scheduled by this proxy will pass these
+        // values to the kernel's scheduler.
+
+        futureData.when = when || 0;
+        futureData.callback = callback;  // TODO: would like to be able to remove this reference after the future call has completed
+
+        // Return the updated proxy.
+
+        return futureData;
     }
 
-    // -- findListeners ----------------------------------------------------------------------------
+    /// findListeners.
+    /// 
+    /// @param {Object} nodeData
+    /// @param {Object} eventName
+    /// @param {Boolean} targetOnly
+    /// 
+    /// @returns {Array}
 
 // TODO: this walks the full prototype chain and is probably horribly inefficient.
 
-    function findListeners( node, eventName, targetOnly ) {
+    function findListeners( nodeData, eventName, targetOnly ) {
 
-        var prototypeListeners = Object.getPrototypeOf( node ).private ? // get any self-targeted listeners from the prototypes
-            findListeners( Object.getPrototypeOf( node ), eventName, true ) : [];
+        var prototypeListeners = Object.getPrototypeOf( nodeData ) != Object.prototype ? // get any self-targeted listeners from the prototypes
+            findListeners( Object.getPrototypeOf( nodeData ), eventName, true ) : [];
 
-        var nodeListeners = node.private.listeners && node.private.listeners[eventName] || [];
+        var nodeListeners = nodeData.listeners && nodeData.listeners[eventName] || [];
 
         if ( targetOnly ) {
             return prototypeListeners.concat( nodeListeners.filter( function( listener ) {
-                return listener.context == node; // in the prototypes, select self-targeted listeners only
+                return listener.context == nodeData.node; // in the prototypes, select self-targeted listeners only
             } ) );
         } else {
             return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node
-                return { handler: listener.handler, context: node, phases: listener.phases };
+                return { handler: listener.handler, context: nodeData.node, phases: listener.phases };
             } ).concat( nodeListeners );
         }
 

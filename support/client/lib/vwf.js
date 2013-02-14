@@ -2805,7 +2805,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// @returns {Boolean}
 
     var nodeHasProperty = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript
-        var node = kernel.models.javascript.nodes[nodeID];
+        var node = kernel.models.javascript.nodes[nodeID].node;
         return propertyName in node.properties;
     };
 
@@ -2818,7 +2818,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// @returns {Boolean}
 
     var nodeHasOwnProperty = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript
-        var node = kernel.models.javascript.nodes[nodeID];
+        var node = kernel.models.javascript.nodes[nodeID].node;
         return node.properties.hasOwnProperty( propertyName );  // TODO: this is peeking inside of vwf-model-javascript
     };
 
@@ -2831,8 +2831,8 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// @returns {Boolean}
 
     var nodePropertyHasSetter = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-        var node = kernel.models.javascript.nodes[nodeID];
-        var setter = node.private.setters && node.private.setters[propertyName];
+        var nodeData = kernel.models.javascript.nodes[nodeID];
+        var setter = nodeData.setters[propertyName];
         return typeof setter == "function" || setter instanceof Function;
     };
 
@@ -2845,8 +2845,8 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// @returns {Boolean}
 
     var nodePropertyHasOwnSetter = function( nodeID, propertyName ) {  // TODO: this is peeking inside of vwf-model-javascript; need to delegate to all script drivers
-        var node = kernel.models.javascript.nodes[nodeID];
-        var setter = node.private.setters && node.private.setters.hasOwnProperty( propertyName ) && node.private.setters[propertyName];
+        var nodeData = kernel.models.javascript.nodes[nodeID];
+        var setter = nodeData.setters.hasOwnProperty( propertyName ) && nodeData.setters[propertyName];
         return typeof setter == "function" || setter instanceof Function;
     };
 
@@ -2859,7 +2859,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// @returns {Boolean}
 
     var nodeHasChild = function( nodeID, childName ) {  // TODO: this is peeking inside of vwf-model-javascript
-        var node = kernel.models.javascript.nodes[nodeID];
+        var node = kernel.models.javascript.nodes[nodeID].node;
         return childName in node.children;
     };
 
@@ -2872,7 +2872,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// @returns {Boolean}
 
     var nodeHasOwnChild = function( nodeID, childName ) {  // TODO: this is peeking inside of vwf-model-javascript
-        var node = kernel.models.javascript.nodes[nodeID];
+        var node = kernel.models.javascript.nodes[nodeID].node;
         return node.children.hasOwnProperty( childName );  // TODO: this is peeking inside of vwf-model-javascript
     };
 
