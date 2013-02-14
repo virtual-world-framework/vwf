@@ -142,11 +142,29 @@
               var time2 = fixed3( time0 + 0.012 );
               var time3 = fixed3( time0 + 0.013 );
 
+              vwf.execute( fixtureID, "this.in().property = 'in undefined'" );
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "relative undefined queued" );
+
+              vwf.execute( fixtureID, "this.in( 0 ).property = 'in 0'" );
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "relative 0 queued" );
+
+              vwf.execute( fixtureID, "this.at().property = 'at undefined'" );
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "absolute undefined queued" );
+
+              vwf.execute( fixtureID, "this.at( 0 ).property = 'at 0'" );
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "absolute 0 queued" );
+
+              vwf.execute( fixtureID, "this.future().property = 'queued'" );
+              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
+
               vwf.execute( fixtureID, "this.in( " + "0.011" + " ).property = 'in'" );
               vwf.execute( fixtureID, "this.at( " + time2 + " ).property = 'at'" );
               vwf.execute( fixtureID, "this.future( " + "0.013" + " ).property = 'future'" );
 
               runFutureAssertions( [
+
+                { relative: 0, assertion: function() {
+                    equal( vwf.getProperty( fixtureID, "property" ), "queued", "immediate" ) } },
 
                 { absolute: time1, assertion: function() {
                     equal( vwf.getProperty( fixtureID, "property" ), "in", "relative" ) } },
@@ -450,8 +468,8 @@
 
             function ready( assertion, time ) {
 
-              return assertion.absolute && time > assertion.absolute ||
-                assertion.relative && time > reference + assertions[next].relative;
+              return assertion.absolute !== undefined && time > assertion.absolute ||
+                assertion.relative !== undefined && time > reference + assertions[next].relative;
               
             }
             

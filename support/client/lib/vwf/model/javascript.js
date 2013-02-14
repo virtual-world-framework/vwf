@@ -265,14 +265,14 @@ node.uri = childURI; // TODO: move to vwf/model/object
 
             Object.defineProperty( node, "in", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, -when, callback ); // relative time
+                    return refreshedFuture.call( self, this, -( when || 0 ), callback ); // relative time
                 },
                 enumerable: true,
             } );
 
             Object.defineProperty( node, "at", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
-                    return refreshedFuture.call( self, this, when, callback ); // absolute time
+                    return refreshedFuture.call( self, this, when || 0, callback ); // absolute time
                 },
                 enumerable: true,
             } );
