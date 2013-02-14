@@ -97,7 +97,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     modelInited: false,
                     pendingLoads: 0,
                 };
-				//debugger;
+				
 				sceneNode.glgeScene.addChild(BuildAxis());
 				
                 if ( sceneNode.glgeScene.camera ) {
