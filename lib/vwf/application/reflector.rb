@@ -51,7 +51,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       if( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
 
         contents = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json")
-        json = JSON.parse("#{ contents }")
+        json = JSON.parse("#{ contents }", :max_nesting => 100)
 
         send "time" => session[:transport].time,
           "action" => "setState",
