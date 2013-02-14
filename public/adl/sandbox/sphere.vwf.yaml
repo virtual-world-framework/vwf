@@ -106,8 +106,9 @@ scripts:
             {
                 for(z_rot = 0; z_rot <= 360; z_rot += zinc)
                 {
-                    uvs.push(((y_rot + 90)/180)*2);
                     uvs.push(((z_rot)/360)*2);
+                    uvs.push(((y_rot + 90)/180)*2);
+                    
                     var ymatrix = GLGE.angleAxis(y_rot*0.0174532925,[0,1,0]);
                     var offset = GLGE.mulMat4Vec3(ymatrix,rv);
                     var zmatrix = GLGE.angleAxis(z_rot*0.0174532925,[0,0,1]);

@@ -33,7 +33,7 @@ function InventoryManager()
 		
 		if(!_Editor.GetSelectedVWFNode() && _InventoryManager.selectedType == 'script')
 		{
-			$('#InventoryManagerMessage').html('You must select an object before createing a script from inventory');
+			_Notifier.alert('You must select an object before createing a script from inventory');
 			//$('#InventoryManagerMessage').dialog('open');
 		}	
 		if(_Editor.GetSelectedVWFNode() && _InventoryManager.selectedType == 'script')
@@ -59,18 +59,32 @@ function InventoryManager()
 			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
 			
-			t.properties.transform[12] = newintersectxy[0];
-			t.properties.transform[13] = newintersectxy[1];
-			t.properties.transform[14] = newintersectxy[2];
-			t.properties.translation[0] = newintersectxy[0];
-			t.properties.translation[1] = newintersectxy[1];
-			t.properties.translation[2] = newintersectxy[2];
-			t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
-			
-			t = _DataManager.getCleanNodePrototype(t);
-			_InventoryManager.setOwner(t,_UserManager.GetCurrentUserName());
-			_Editor.SelectOnNextCreate();
-			_InventoryManager.createChild('index-vwf',GUID(),t,null,null); 
+			if(t.properties.type != 'modifier' && t.properties.type != 'behavior')
+			{
+				t.properties.transform[12] = newintersectxy[0];
+				t.properties.transform[13] = newintersectxy[1];
+				t.properties.transform[14] = newintersectxy[2];
+				t.properties.translation[0] = newintersectxy[0];
+				t.properties.translation[1] = newintersectxy[1];
+				t.properties.translation[2] = newintersectxy[2];
+				t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
+				
+				t = _DataManager.getCleanNodePrototype(t);
+				_InventoryManager.setOwner(t,_UserManager.GetCurrentUserName());
+				_Editor.SelectOnNextCreate();
+				_InventoryManager.createChild('index-vwf',GUID(),t,null,null);
+			}
+			else{
+				
+				if(!_Editor.GetSelectedVWFNode())
+				{
+					_Notifier.alert('You must select an object before createing a script from inventory');
+					return;
+				}
+				t = _DataManager.getCleanNodePrototype(t);
+				_InventoryManager.setOwner(t,_UserManager.GetCurrentUserName());
+				_InventoryManager.createChild(_Editor.GetSelectedVWFID(),GUID(),t,null,null);
+			}
 		}		
 	}
 	this.setOwner = function(t,owner)
@@ -200,11 +214,13 @@ function InventoryManager()
 			}
 		}
 	}
-	this.Take = function()
+	this.Take = function(id)
 	{
 		
-		var t = _DataManager.getCleanNodePrototype(_Editor.GetSelectedVWFNode().id);
-		var name = GUID();
+		if(!id)
+			id = _Editor.GetSelectedVWFNode().id
+		var t = _DataManager.getCleanNodePrototype(id);
+		var name = t.properties.DisplayName || GUID();
 		_DataManager.addInventoryItem(document.PlayerNumber,t,name,'object');
 		_InventoryManager.BuildGUI();
 		showSidePanel();
@@ -344,14 +360,14 @@ function InventoryManager()
 		
 		$('#InventoryRename').focus(function() { $(this).select(); } );
 		
-		$('#InventoryDisplay').append("<div id='InventoryObjects'><div>Objects</div></div>");
-		$('#InventoryDisplay').append("<div id='InventoryScripts'><div>Scripts</div></div>");
+		$('#InventoryDisplay').append("<div id='InventoryObjects'><div style='font-weight:bold;border-bottom: 1px solid black;'>Objects</div></div>");
+		$('#InventoryDisplay').append("<div id='InventoryScripts'><div style='font-weight:bold;border-bottom: 1px solid black;'>Scripts</div></div>");
 		var inventory = _DataManager.getInventory(document.PlayerNumber);
 		if(!inventory) return;
 		for(var i in inventory.objects)
 		{
 			$('#InventoryObjects').append('<div class="inventoryItem" style="background:#FFFFF8;padding-left: 10px;" id="inventoryObject'+ToSafeID(i)+'" />');
-			$('#inventoryObject'+ToSafeID(i)).html(i);
+			$('#inventoryObject'+ToSafeID(i)).html("<div style='font-weight:bold;display:inline'>"+i+"</div>" + " : " + (inventory.objects[i].properties.type || ""));
 			$('#inventoryObject'+ToSafeID(i)).attr('name',i);
 			$('#inventoryObject'+ToSafeID(i)).attr('type','object');
 			$('#inventoryObject'+ToSafeID(i)).click(_InventoryManager.itemClicked);

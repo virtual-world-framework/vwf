@@ -678,15 +678,28 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 var fields = queue.shift();
 
                 // Advance the time.
-
+				var framerate = 1/30;
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
                     var time = fields.time - this.lastTick;
-					while(time > 0)
+					var ticks = 0;
+					
+					while(time > framerate)
 					{	
+						var lt = window.performance.now();
 						this.tick();
-						time -= .053;
+						var at = window.performance.now();
+						var took = (at - lt)/1000;
+						if(took > time/framerate)
+						{
+							console.log('cant compute fast enough. Bailing....');
+							break;
+						}
+						time -= framerate;
+						ticks++;
 					}
+					//console.log(ticks);
+					
 					//save the leftovers
 					this.lastTick = fields.time - time;
                 }

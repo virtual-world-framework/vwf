@@ -282,23 +282,22 @@ node.id = childID; // TODO: move to vwf/model/object
             var child = this.nodes[nodeID];
             var node = child.parent;
 
-			var scriptText = "this.deinitialize && this.deinitialize()";
-
-            try {
-                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
-            } catch ( e ) {
-                this.logger.warnc( "deinitializingNode", childID,
-                    "exception in deinitialize:", utility.exceptionMessage( e ) );
-            }
+			
 			
             if ( node ) {
-
+				
+				if(child.children)
+					for(var i = 0; i < child.children.length; i++)
+					{
+						this.deletingNode(child.children[i].id);
+					}
+				
                 var index = node.children.indexOf( child );
 
                 if ( index >= 0 ) {
                     node.children.splice( index, 1 );
                 }
-
+				
                 delete node.children[child.name];  // TODO: conflict if childName is parseable as a number
 
                 if ( node[child.name] === child ) {
@@ -309,6 +308,15 @@ node.id = childID; // TODO: move to vwf/model/object
 
             }
 
+			var scriptText = "this.deinitialize && this.deinitialize()";
+
+            try {
+                ( function( scriptText ) { return eval( scriptText ) } ).call( child, scriptText );
+            } catch ( e ) {
+                this.logger.warnc( "deinitializingNode", childID,
+                    "exception in deinitialize:", utility.exceptionMessage( e ) );
+            }
+			
             delete this.nodes[nodeID];
 
         },

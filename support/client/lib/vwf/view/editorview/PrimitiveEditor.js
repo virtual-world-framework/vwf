@@ -31,7 +31,7 @@ function PrimitiveEditor()
 	}}});
 	
 	$('#sidepanel').append("<div id='PrimitiveEditor'>" +
-	"<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>"+
+	"<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-ObjectProperties'>Object Properties</span></div>"+
 					'<div id="accordion" style="height:100%;overflow:hidden">'+
 						'<h3><a href="#">Flags</a></h3>'+
 						'<div>'+
@@ -187,6 +187,7 @@ function PrimitiveEditor()
 				if(!node.properties)
 					return;
 				
+				$('#ui-dialog-title-ObjectProperties').html(vwf.getProperty(node.id,'DisplayName') + " Properties");
 				$('#dispName').val(vwf.getProperty(node.id,'DisplayName'));
 				if($('#dispName').val() == "")
 				{
@@ -214,7 +215,7 @@ function PrimitiveEditor()
 				this.SelectionTransformed(null,node);
 				this.setupEditorData(node,true);
 				this.recursevlyAddModifiers(node);
-				
+				this.addBehaviors(node);
 				$( "#accordion" ).accordion({fillSpace: true});
 				$( ".ui-accordion-content").css('height','auto');	
 				this.updateOtherWindows();
@@ -253,6 +254,26 @@ function PrimitiveEditor()
 			{
 				this.setupEditorData(node.children[i],false);
 				this.recursevlyAddModifiers(node.children[i]);
+			}
+		}
+	}
+	this.addBehaviors = function(node)
+	{
+		for(var i in node.children)
+		{
+		/*	section = '<h3 class="modifiersection" ><a href="#">'+node.children[i].properties.type+'</a></h3>'+
+			'<div class="modifiersection">'+
+			'<div class="EditorLabel">Amount</div>' +
+					'<div id="'+node.children[i].id+'Amount" nodename="'+node.children[i].id+'">'
+			'</div>';
+			$( "#accordion" ).append(section);
+			//$("#Radius").slider({min:0,max:10,step:.10,slide:this.updateSize.bind(this)});
+			$("#"+node.children[i].id+"Amount").slider({min:-1,max:1,step:.10,slide:this.modifierAmountUpdate,stop:this.modifierAmountUpdate});
+			//$("#"+node.children[i].id+"Amount").slider('value',vwf.getProperty(node.children[i].id,'amount'));
+			*/
+			if(vwf.getProperty(node.children[i].id,'type') == 'behavior')
+			{
+				this.setupEditorData(node.children[i],false);
 			}
 		}
 	}
@@ -299,7 +320,7 @@ function PrimitiveEditor()
 	{
 		
 		var nodeid = node.id;
-	 	if(wholeselection)
+	 	if(wholeselection && _Editor.getSelectionCount() > 1)
 			nodeid = 'selection';
 		
 		var editordata = vwf.getProperty(node.id,'EditorData');
@@ -310,7 +331,7 @@ function PrimitiveEditor()
 		}
 		editordatanames.sort();
 		
-		section = '<h3 class="modifiersection" ><a href="#">'+node.properties.type+'</a></h3>'+
+		section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">'+node.properties.type+": </div>" + node.properties.DisplayName + '</a></h3>'+
 			'<div class="modifiersection" id="basicSettings'+nodeid+'">'+
 			'</div>';
 			$( "#accordion" ).append(section);
@@ -451,6 +472,46 @@ function PrimitiveEditor()
 				$('#'+baseid+'Y').change(vecvalchanged);
 				$('#'+baseid+'Z').change(vecvalchanged);
 			}
+			if(editordata[i].type == 'vector')
+			{
+				var vecvalchanged = function(e)
+				{
+					
+					var propname = $(this).attr('propname');
+					var component = $(this).attr('component');
+					var nodeid = $(this).attr('nodename');
+					var thisid = $(this).attr('id');
+					thisid = thisid.substr(0,thisid.length - 1);
+					var x = $('#'+thisid+'X').val();
+					var y = $('#'+thisid+'Y').val();
+					var z = $('#'+thisid+'Z').val();
+								
+					_PrimitiveEditor.setProperty(nodeid,propname,[parseFloat(x),parseFloat(y),parseFloat(z)]);
+				}
+			
+				//$('#basicSettings'+nodeid).append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">'+editordata[i].displayname+': </div>');
+				
+				var baseid = 'basicSettings'+nodeid+i+'min';
+				
+				$('#basicSettings'+nodeid).append('<div style="text-align: left;margin-top: 4px;"><div style="display:inline" >'+editordata[i].displayname+':</div> <div style="display:inline-block;float:right">'+
+															  '<input id="'+baseid+'X'+'" component="X" nodename="'+nodeid+'" propname="'+editordata[i].property+'" type="number" step="'+editordata[i].step+'" class="vectorinputfront"/>'+
+															  '<input id="'+baseid+'Y'+'" component="Y" nodename="'+nodeid+'" propname="'+editordata[i].property+'" type="number" step="'+editordata[i].step+'" class="vectorinput"/>'+
+															  '<input id="'+baseid+'Z'+'" component="Z" nodename="'+nodeid+'" propname="'+editordata[i].property+'" type="number" step="'+editordata[i].step+'" class="vectorinput"/>' +
+													'</div><div style="clear:both"/></div>');
+				
+				var propmin = vwf.getProperty(node.id, editordata[i].property);
+				if(propmin)
+				{
+					$('#'+baseid+'X').val(propmin[0]);
+					$('#'+baseid+'Y').val(propmin[1]);
+					$('#'+baseid+'Z').val(propmin[2]);
+				}
+				$('#'+baseid+'X').change(vecvalchanged);
+				$('#'+baseid+'Y').change(vecvalchanged);
+				$('#'+baseid+'Z').change(vecvalchanged);
+				
+			
+			}
 			if(editordata[i].type == 'map')
 			{
 				$('#basicSettings'+nodeid).append('<div style="display: block;margin: 5px;" id="'+nodeid+i+'" nodename="'+nodeid+'" propname="'+editordata[i].property+'"/>');
@@ -471,14 +532,27 @@ function PrimitiveEditor()
 					_MapBrowser.show();
 				});
 			}
+			if(editordata[i].type == 'text')
+			{
+				$('#basicSettings'+nodeid).append('<div style="">'+editordata[i].displayname+'</div><input type="text" style="display: block;width: 100%;padding: 2px;border-radius: 5px;font-weight: bold;" id="'+nodeid+i+'" nodename="'+nodeid+'" propname="'+editordata[i].property+'"/>');
+				$('#'+nodeid+i).val(vwf.getProperty(node.id,editordata[i].property));
+				$('#'+nodeid+i).keyup(function()
+				{
+						var propname = $(this).attr('propname');
+						var nodename = $(this).attr('nodename');
+						_PrimitiveEditor.setProperty(nodename,propname,$(this).val());
+				});
+			}
 			if(editordata[i].type == 'color')
 			{
 				var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
 				$('#basicSettings'+nodeid).append('<div style="margin-bottom:10px" id="'+nodeid+i+'" />');
 				$('#'+nodeid+i+'').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 15px;">'+editordata[i].displayname+': </div>');
 				$('#'+nodeid+i+'').append('<div id="'+nodeid+i+'ColorPicker" style="'+colorswatchstyle+'"></div>')
-				var spec = [0,1,0];
-				$('#'+nodeid+i+'ColorPicker').css('background-color','rgb('+Math.floor(spec[0]*255)+','+Math.floor(spec[0]*255)+','+Math.floor(spec[0]*255)+')');
+				var colorval = vwf.getProperty(node.id,editordata[i].property);
+				colorval = 'rgb('+parseInt(colorval[0]*255)+','+parseInt(colorval[1]*255)+','+parseInt(colorval[2]*255)+')';
+				
+				$('#'+nodeid+i+'ColorPicker').css('background-color',colorval);
 				
 				var parentid = nodeid+i+'ColorPicker';
 				
@@ -508,9 +582,21 @@ function PrimitiveEditor()
 			}
 		}
 		
-		$('#basicSettings'+nodeid).append('<div style="width: 100%;margin-top: 1em;" nodename="'+nodeid+'" id="'+nodeid+'deletebutton"/>');
+		$('#basicSettings'+nodeid).append('<div style="margin-top: 1em;" nodename="'+node.id+'" id="'+nodeid+'deletebutton"/>');
 		$('#'+nodeid+'deletebutton').button({label:'Delete'});	
 		$('#'+nodeid+'deletebutton').click(this.deleteButtonClicked);	
+		
+		$('#basicSettings'+nodeid).append('<div style="margin-top: 1em;" nodename="'+node.id+'" id="'+nodeid+'selectbutton"/>');
+		$('#'+nodeid+'selectbutton').button({label:'Select'});	
+		$('#'+nodeid+'selectbutton').click(this.selectButtonClicked);	
+		
+		$('#basicSettings'+nodeid).append('<div style="margin-top: 1em;" nodename="'+node.id+'" id="'+nodeid+'savebutton"/>');
+		$('#'+nodeid+'savebutton').button({label:'Save'});	
+		$('#'+nodeid+'savebutton').click(this.saveButtonClicked);
+
+		$('#basicSettings'+nodeid).append('<div style="margin-top: 1em;" nodename="'+node.id+'" id="'+nodeid+'copybutton"/>');
+		$('#'+nodeid+'copybutton').button({label:'Copy'});	
+		$('#'+nodeid+'copybutton').click(this.copyButtonClicked);			
 		
 	}
 	this.deleteButtonClicked = function()
@@ -537,6 +623,21 @@ function PrimitiveEditor()
 			window.setTimeout(function(){_PrimitiveEditor.SelectionChanged(null,_Editor.GetSelectedVWFNode());},500);
 		}
 
+	}
+	this.selectButtonClicked = function()
+	{
+		var id = $(this).attr('nodename');
+		_Editor.SelectObject(id);
+	}
+	this.copyButtonClicked = function()
+	{
+		var id = $(this).attr('nodename');
+		_Editor.Copy([id]);
+	}
+	this.saveButtonClicked = function()
+	{
+		var id = $(this).attr('nodename');
+		_InventoryManager.Take(id);
 	}
 	this.modifierAmountUpdate = function(e,ui)
 	{
@@ -641,9 +742,6 @@ function PrimitiveEditor()
 	$(document).bind('selectionChanged',this.SelectionChanged.bind(this));
 	$(document).bind('modifierCreated',this.SelectionChanged.bind(this));
 	$(document).bind('selectionTransformedLocal',this.SelectionTransformed.bind(this));
-//	$("#Radius").slider({min:0,max:10,step:.10,slide:this.updateSize.bind(this),stop:this.updateSize.bind(this)});
-//	$("#Width").slider({min:0,max:10,step:.10,slide:this.updateSize.bind(this),stop:this.updateSize.bind(this)});
-//	$("#Height").slider({min:0,max:10,step:.10,slide:this.updateSize.bind(this),stop:this.updateSize.bind(this)});
 	$('#PositionX').change(this.positionChanged.bind(this));
 	$('#PositionY').change(this.positionChanged.bind(this));
 	$('#PositionZ').change(this.positionChanged.bind(this));

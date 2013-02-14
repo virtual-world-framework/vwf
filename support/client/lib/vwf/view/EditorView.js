@@ -39,6 +39,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ScriptEditor.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_3DRIntegration.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/InventoryManager.js"></script>');
+					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/GlobalInventoryManager.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/HeirarchyManager.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Help.js"></script>');
 					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
@@ -297,6 +298,9 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#MenuDelete').click(function(e){
 			_Editor.DeleteSelection();
 		});
+		$('#MenuPublish').click(function(e){
+			_GlobalInventoryManager.Take();
+		});
 		$('#MenuChat').click(function(e){
 			$('#ChatWindow').dialog('open');
 		});
@@ -336,6 +340,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#MenuObjectProperties').click(function(e){
 			_PrimitiveEditor.show();
 		});
+		$('#MenuGlobalInventory').click(function(e){
+			_GlobalInventoryManager.show();
+		});
+		
 		
 		$('#MenuLatencyTest').click(function(e){
 			var e = {};
@@ -406,6 +414,10 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 		});
 		
+		
+		$('#MenuCreateBlankBehavior').click(function(e){
+			_Editor.AddBlankBehavior();
+		});
 		
 		
 		$('#MenuViewGlyphs').click(function(e){

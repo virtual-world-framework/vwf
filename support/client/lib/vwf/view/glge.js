@@ -758,7 +758,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     }
 
     function mouseXPos(e) {
-        return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
+        return e.clientX - e.currentTarget.offsetLeft + window.scrollX;
     }
 
     function mouseYPos(e) {

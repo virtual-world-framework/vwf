@@ -1292,7 +1292,7 @@ function Editor()
 					  rotation: [ 1, 0, 0, 0 ],
 					  translation: pos,
 					  owner:owner,
-					  type:'Light',
+					  type:'light',
 					  lightType:type,
 					  DisplayName: _Editor.GetUniqueName('Light')
 					  }
@@ -1308,7 +1308,7 @@ function Editor()
 					  rotation: [ 1, 0, 0, 0 ],
 					  translation: pos,
 					  owner:owner,
-					  type:'ParticleSystem',
+					  type:'particlesystem',
 					  DisplayName: _Editor.GetUniqueName('ParticleSystem')
 					  }
                     };
@@ -1335,13 +1335,46 @@ function Editor()
 			proto.properties.rotation = [0,0,1,0];
 			proto.properties.owner = owner;
 			proto.properties.texture = texture;
-			proto.properties.type = type;
+			proto.properties.type = 'primitive';
 			proto.properties.tempid = id;
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			
 			this.createChild('index-vwf',GUID(),proto,null,null); 
 		
 	}.bind(this);
+	this.AddBlankBehavior = function()
+	{
+		
+		if(GetSelectedVWFNode() == null)
+		{
+			_Notifier.notify('no object selected');
+			return;
+		}
+		
+		
+		var ModProto = { 
+				
+			extends: 'http://vwf.example.com/node.vwf',
+			properties: {
+			NotProto: ""
+				}
+			};
+			var proto = ModProto;
+			proto.properties.type = 'behavior';
+			proto.properties.DisplayName = _Editor.GetUniqueName('behavior');
+			proto.properties.owner = document.PlayerNumber;
+			var id = GetSelectedVWFNode().id;
+			
+			var owner = vwf.getProperty(id,'owner');
+			if(!_Editor.isOwner(id,document.PlayerNumber))
+			{
+				_Notifier.notify('You do not have permission to edit this object');
+				return;
+			}
+		
+			this.createChild(id,GUID(),proto,null,null); 
+	
+	}
 	var CreateModifier = function(type,owner)
 	{       
 		if(GetSelectedVWFNode() == null)
@@ -1364,7 +1397,7 @@ function Editor()
 			proto.properties.scale = [1,1,1];
 			proto.properties.rotation = [0,0,1,0];
 			proto.properties.owner = owner;
-			proto.properties.type = type;
+			proto.properties.type = 'modifier';
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			
 			var id = GetFirstChildLeaf(GetSelectedVWFNode()).id;
@@ -1429,14 +1462,17 @@ function Editor()
 			}
 		}
 	}
-	var Copy = function()
+	var Copy = function(nodes)
 	{
 		_CoppiedNodes = [];
-		for(var i = 0; i < SelectedVWFNodes.length; i++)
+		var tocopy = SelectedVWFNodes;
+		if(nodes)
+		tocopy = nodes;
+		for(var i = 0; i < tocopy.length; i++)
 		{
-			var t = _DataManager.getCleanNodePrototype(SelectedVWFNodes[i].id);
+			var t = _DataManager.getCleanNodePrototype(tocopy[i].id);
 			var originalGizmoPos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
-			var gizoffset = GLGE.subVec3(vwf.getProperty(SelectedVWFNodes[i].id,'translation'),originalGizmoPos);
+			var gizoffset = GLGE.subVec3(vwf.getProperty(tocopy[i].id,'translation'),originalGizmoPos);
 			t.properties.transform[12] = gizoffset[0];
 			t.properties.transform[13] = gizoffset[1];
 			t.properties.transform[14] = gizoffset[2];

@@ -22,6 +22,10 @@ methods:
   getTexture:
   setupMaterial:
   setTransparent:
+events:
+  pointerOver:  
+  pointerOut:
+  pointerClick:
 properties:
   isStatic:
   materialDef:
@@ -98,4 +102,28 @@ scripts:
     this.GetBounds = function()
     {
         return this.boundingbox;
-    }                
+    }
+    this.pointerOver = function(e,ed)
+    {   
+        for(var i=0; i < this.children.length; i++)
+        {
+            if(this.children[i].pointerOver)
+                this.children[i].pointerOver(e,ed);
+        }
+    }
+    this.pointerOut = function(e,ed)
+    {   
+        for(var i=0; i < this.children.length; i++)
+        {
+            if(this.children[i].pointerOut)
+                this.children[i].pointerOut(e,ed);
+        }
+    }
+    this.pointerClick = function(e,ed)
+    {   
+        for(var i=0; i < this.children.length; i++)
+        {
+            if(this.children[i].pointerClick)
+                this.children[i].pointerClick(e,ed);
+        }
+    }

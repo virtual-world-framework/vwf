@@ -76,7 +76,7 @@ function DataManager()
 			data = JSON.parse(JSON.parse(data.responseText).GetProfilesResult);
 			return data;
 	}
-	this.GetProfileForUser = function(username)
+	this.GetProfileForUser = function(username,reload)
 	{
 		var profile = null;
 		for(var i in this.rawdata.profiles)
@@ -84,7 +84,7 @@ function DataManager()
 			if(this.rawdata.profiles[i].Username == username)
 				profile = this.rawdata.profiles[i];
 		}
-		if(!profile)
+		if(!profile || reload)
 		{
 		
 			var UID  = this.getCurrentSession();
