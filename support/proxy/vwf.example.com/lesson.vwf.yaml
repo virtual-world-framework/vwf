@@ -40,7 +40,14 @@ methods:
 
 events:
 
-  ## The event that is fired when the user has completed the lesson
+  ## The event that is fired (usually from the view) when the user has clicked the Next button
+  ## 
+  ## @name instruction.vwf#nextButtonClicked
+  ## @event
+
+  nextButtonClicked:
+
+  ## The event that is fired when the lesson has been completed
   ## 
   ## @name instruction.vwf#completed
   ## @event
@@ -50,44 +57,30 @@ events:
 scripts:
 - |
     var self = this;
-    var instructions = [];
+    var instructions;
     var activeInstruction;
 
-    this.initialize = function() {
-      
-      // If this lesson has no children (no instructions), warn the user and return
-      if ( !this.children ) {
-        console.warn( "This lesson has no instructions - add some as children to be able to use it");
-        return;
-      }
-
-      // Build an array of instructions out of this lesson's children which are of type "instruction" 
-      for ( var i = 0; i < this.children.length; i++ ) {
-        var potentialInstruction = this.children[ i ];
-
-        // TODO: Does the following work?
-
-        if ( potentialInstruction.type == "http://vwf.example.com/instruction.vwf" )
-          instructions.push( potentialInstruction );
-      }
-
-      // Now that we have run through all the children, check to see if any of them were instructions.  If not,
-      // warn the user
-      if ( instructions.length == 0 )
-        console.warn( "This lesson has no instructions - add some as children to be able to use it");
-    }
-
     this.begin = function() {
+
+      // Find lesson's children which are of type "instruction"
+      instructions = this.find( ".//element(*,'http://vwf.example.com/instruction.vwf')" )
+
       if ( instructions && instructions.length ) {
         this.instructionIndex = 0;
         this.activateInstruction();
       }
+      else
+        console.warn( "This lesson has no instructions - add some as children to use it");
     }
 
     this.activateInstruction = function() {
+      
+      // Remove event handlers from the instruction that just completed
       if ( activeInstruction )
-        activeInstruction.exited = undefined;
-      activeInstruction = this.instructions[ this.instructionIndex ];
+        activeInstruction.events.flush();
+
+      // Set up the new instruction
+      activeInstruction = instructions[ this.instructionIndex ];
       activeInstruction.exited = this.activateNext;
       activeInstruction.begin();
     }
