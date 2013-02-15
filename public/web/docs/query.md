@@ -62,7 +62,7 @@ To test whether a node with certain criteria exist, use *test()* with the same p
 The driver-level syntax is very similar, with three exceptions:
 
 1. *find()* or *test()* is called on the view object instead of a node in the scene.
-2. An extra parameter is added to the beginning for the id of the node from which you are searching.
+2. An extra parameter is added to the beginning for the id of the node from which you are searching - this can be *undefined* for absolute path searches (those that begin with a slash).
 3. *find()* returns an array of ids corresponding to the matched nodes, rather than a reference to the node itself (since at the driver level all access to nodes is done through their ids).
 
 For example:
