@@ -58,16 +58,16 @@
             createFixture( function( nodeID ) {
 
               vwf.fireEvent( nodeID, "empty" );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "empty", result: [] }, "no parameters declared, no parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "empty", result: [] }, "no parameters declared, no parameters passed" );
 
               vwf.fireEvent( nodeID, "empty", [ true, 1 ] );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "empty", result: [ true, 1 ] }, "no parameters declared, parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "empty", result: [ true, 1 ] }, "no parameters declared, parameters passed" );
 
               vwf.fireEvent( nodeID, "parameters" );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "parameters", result: [] }, "parameters declared, no parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "parameters", result: [] }, "parameters declared, no parameters passed" );
 
               vwf.fireEvent( nodeID, "parameters", [ 'abc', false, 2 ] );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "parameters", result: [ 'abc', false, 2 ] }, "parameters declared, parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "parameters", result: [ 'abc', false, 2 ] }, "parameters declared, parameters passed" );
 
               start();
             } );
@@ -81,16 +81,16 @@
             createFixture( function( nodeID ) {
 
               vwf.execute( nodeID, "this.empty()" );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "empty", result: [] }, "no parameters declared, no parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "empty", result: [] }, "no parameters declared, no parameters passed" );
 
               vwf.execute( nodeID, "this.empty( true, 1 )" );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "empty", result: [ true, 1 ] }, "no parameters declared, parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "empty", result: [ true, 1 ] }, "no parameters declared, parameters passed" );
 
               vwf.execute( nodeID, "this.parameters()" );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "parameters", result: [] }, "parameters declared, no parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "parameters", result: [] }, "parameters declared, no parameters passed" );
 
               vwf.execute( nodeID, "this.parameters( 'abc', false, 2 )" );
-              deepEqual( vwf.execute( nodeID, "this.result" ), { event: "parameters", result: [ 'abc', false, 2 ] }, "parameters declared, parameters passed" );
+              deepEqual( patriate( vwf.execute( nodeID, "this.result" ) ), { event: "parameters", result: [ 'abc', false, 2 ] }, "parameters declared, parameters passed" );
 
               start();
             } );
@@ -330,8 +330,14 @@
 
               scripts: [
                 "this.result = {}",
-                "this.empty = this.events.add( function() { this.result.event = 'empty'; this.result.result = Array.prototype.slice.call( arguments ) }, this )",
-                "this.parameters = this.events.add( function() { this.result.event = 'parameters'; this.result.result = Array.prototype.slice.call( arguments ) }, this )",
+                "this.empty = this.events.add( function() { " +
+                  "this.result.event = 'empty'; " +
+                  "this.result.result = Array.prototype.slice.call( arguments ); " +
+                "}, this )",
+                "this.parameters = this.events.add( function() { " +
+                  "this.result.event = 'parameters'; " +
+                  "this.result.result = Array.prototype.slice.call( arguments ); " +
+                "}, this )",
               ],
 
             }, undefined, function( nodeID ) {
@@ -417,7 +423,50 @@
             return base + "-" + ( ++sequence );
           }
 
-       } );
+          /// Convert an object created using `Object`s and `Array`s in one global context into the
+          /// equivalent object in the current context. If `object` is an `Object` or `Array`, it
+          /// will be recreated and its elements copied by recursively applying this function.
+          /// Primitives are copied without change. Types other than `Object` or `Array` will not
+          /// retain their type.
+          ///
+          /// @param {Object} object
+          ///   An object to convert.
+          /// 
+          /// @returns {Object}
+          ///   The equivalent object with `Object`s and `Array`s created in the current global
+          ///   context.
+
+          function patriate( object ) {
+
+            var result = object;
+
+            if ( typeof object == "object" && object != null ) {
+
+                if ( Object.prototype.toString.call( object ) == "[object Array]" ) {
+
+                    result = []; // new Array
+
+                    for ( var index = 0; index < object.length; index++ ) {
+                      result[index] = patriate( object[index] );
+                    }
+
+                } else {
+
+                    result = {}; // new Object
+
+                    Object.keys( object ).forEach( function( key ) {
+                      result[key] = patriate( object[key] );
+                    } );
+
+                }
+
+            }
+
+            return result;
+
+          }
+
+        } );
 
       } );
 

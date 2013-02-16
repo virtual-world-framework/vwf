@@ -118,7 +118,42 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
 
             this.nodes = {}; // maps id => node data
+
+
+
+            var body = document.getElementsByTagName("body")[0];
+            var sandbox = document.createElement( "iframe" );
+            body.appendChild( sandbox );
+            this.sandbox = SB = sandbox.contentWindow;
+
+            SB.document.write( "<script type='text/javascript' src='closure/base.js'></script>" );
+            SB.document.write( "<script type='text/javascript'>goog.require('goog.vec.Mat4')</script>" );
+            SB.document.write( "<script type='text/javascript'>goog.require('goog.vec.Quaternion')</script>" );
+
+SB.document.write( "<script type='text/javascript' src='jquery-1.7.1.js'></script>" );
+
+
+window.$sandbox = "kernel-window";
+// Object.prototype.$sandbox = "kernel-prototype";
+
+SB.$sandbox = "sandbox-window";
+// SB.Object.prototype.$sandbox = "sandbox-prototype";
+
+  this.proto = ( new Object ).__proto__;
+this.sbproto = ( new SB.Object ).__proto__;
+
+this.issb = function( obj ) {
+    while ( obj.__proto__ ) obj = obj.__proto__;
+    return obj === this.sbproto;
+}
+
+
+
+
+
+
             this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+
         },
 
         // == Model API ============================================================================
@@ -166,7 +201,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             //  }
 
             var nodeData = this.nodes[childID] = Object.create( prototypeData || Object.prototype );
-            var node = nodeData.node = Object.create( prototype || Object.prototype );
+            var node = nodeData.node = SB.Object.create( prototype || SB.Object.prototype );
 
 node.id = childID; // TODO: move to vwf/model/object
 node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to kernel
@@ -178,16 +213,16 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             node.source = childSource;  // TODO: delegate to kernel
             node.type = childType;  // TODO: delegate to kernel
 
-            Object.defineProperty( node, "logger", {
+            SB.Object.defineProperty( node, "logger", {
                 value: this.logger.for( "#" + ( childName || childURI || childID ), node ),
                 enumerable: true,
             } );
 
-            node.properties = Object.create( prototype ? prototype.properties : Object.prototype, {
+            node.properties = SB.Object.create( prototype ? prototype.properties : SB.Object.prototype, {
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            Object.defineProperty( node.properties, "create", {
+            SB.Object.defineProperty( node.properties, "create", {
                 value: function( name, value, get, set ) { // "this" is node.properties
                     return self.kernel.createProperty( this.node.id, name, value, get, set );
                 }
@@ -201,11 +236,11 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 prototypeData.setters : Object.prototype
             );
 
-            node.methods = Object.create( prototype ? prototype.methods : Object.prototype, {
+            node.methods = SB.Object.create( prototype ? prototype.methods : SB.Object.prototype, {
                 node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            Object.defineProperty( node.methods, "create", {
+            SB.Object.defineProperty( node.methods, "create", {
                 value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
                     return self.kernel.createMethod( this.node.id, name, parameters, body );
                 }
@@ -215,13 +250,13 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 prototypeData.bodies : Object.prototype
             );
 
-            node.events = Object.create( prototype ? prototype.events : Object.prototype, {
+            node.events = SB.Object.create( prototype ? prototype.events : SB.Object.prototype, {
                 node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
             // TODO: these only need to be on the base node's events object
 
-            Object.defineProperty( node.events, "create", {
+            SB.Object.defineProperty( node.events, "create", {
                 value: function( name, parameters ) { // "this" is node.events
                     return self.kernel.createEvent( this.node.id, name, parameters );
                 }
@@ -232,9 +267,9 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             // Add: node.events.*eventName* = node.events.add( *handler* [, *phases* ] [, *context* ] )
 
-            Object.defineProperty( node.events, "add", {
+            SB.Object.defineProperty( node.events, "add", {
                 value: function( handler, phases, context ) {
-                    if ( arguments.length != 2 || typeof phases == "string" || phases instanceof String || phases instanceof Array ) {
+                    if ( arguments.length != 2 || typeof phases == "string" || phases instanceof SB.String || phases instanceof SB.Array ) {
                         return { add: true, handler: handler, phases: phases, context: context };
                     } else { // interpret add( handler, context ) as add( handler, undefined, context )
                         return { add: true, handler: handler, context: phases };
@@ -244,7 +279,7 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             // Remove: node.events.*eventName* = node.events.remove( *handler* )
 
-            Object.defineProperty( node.events, "remove", {
+            SB.Object.defineProperty( node.events, "remove", {
                 value: function( handler ) {
                     return { remove: true, handler: handler };
                 }
@@ -252,7 +287,7 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             // Flush: node.events.*eventName* = node.events.flush( *context* )
 
-            Object.defineProperty( node.events, "flush", {
+            SB.Object.defineProperty( node.events, "flush", {
                 value: function( context ) {
                     return { flush: true, context: context };
                 }
@@ -260,13 +295,13 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             nodeData.listeners = Object(); // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
-            node.children = Array();  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
+            node.children = SB.Array();  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
-            Object.defineProperty( node.children, "node", {
+            SB.Object.defineProperty( node.children, "node", {
                 value: node // for node.children accessors (non-enumerable)  // TODO: hide this better
             } );
 
-            Object.defineProperty( node.children, "create", {
+            SB.Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
                     if ( callback ) {
                         self.kernel.createChild( this.node.id, name, component, undefined, undefined, function( childID ) {
@@ -278,7 +313,7 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 }
             } );
 
-            Object.defineProperty( node.children, "delete", {
+            SB.Object.defineProperty( node.children, "delete", {
                 value: function( child ) {
                     return self.kernel.deleteNode( child.id );
                 }
@@ -286,13 +321,13 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             // Define the "random" and "seed" functions.
 
-            Object.defineProperty( node, "random", { // "this" is node
+            SB.Object.defineProperty( node, "random", { // "this" is node
                 value: function() {
                     return self.kernel.random( this.id );
                 }
             } );
 
-            Object.defineProperty( node, "seed", { // "this" is node
+            SB.Object.defineProperty( node, "seed", { // "this" is node
                 value: function( seed ) {
                     return self.kernel.seed( this.id, seed );
                 }
@@ -300,28 +335,28 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             // Define the "time", "client", and "moniker" properties.
 
-            Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
+            SB.Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return self.kernel.time();
                 },
                 enumerable: true,
             } );
 
-            Object.defineProperty( node, "client", {  // TODO: only define on shared "node" prototype?
+            SB.Object.defineProperty( node, "client", {  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return self.kernel.client();
                 },
                 enumerable: true,
             } );
 
-            Object.defineProperty( node, "moniker", {  // TODO: only define on shared "node" prototype?
+            SB.Object.defineProperty( node, "moniker", {  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return self.kernel.moniker();
                 },
                 enumerable: true,
             } );
 
-            Object.defineProperty( node, "find", {
+            SB.Object.defineProperty( node, "find", {
                 value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
                     if ( callback ) {
                         self.kernel.find( this.id, matchPattern, function( matchID ) {
@@ -335,7 +370,7 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 }
             } );
 
-            Object.defineProperty( node, "test", {
+            SB.Object.defineProperty( node, "test", {
                 value: function( matchPattern, testNode ) { // "this" is node
                     return self.kernel.test( this.id, matchPattern, testNode.id );
                 }
@@ -345,21 +380,21 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.
 
-            Object.defineProperty( node, "in", {  // TODO: only define on shared "node" prototype?
+            SB.Object.defineProperty( node, "in", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
                     return futureProxy.call( self, self.nodes[this.id], -( when || 0 ), callback ).node; // relative time
                 },
                 enumerable: true,
             } );
 
-            Object.defineProperty( node, "at", {  // TODO: only define on shared "node" prototype?
+            SB.Object.defineProperty( node, "at", {  // TODO: only define on shared "node" prototype?
                 value: function( when, callback ) { // "this" is node
                     return futureProxy.call( self, self.nodes[this.id], when || 0, callback ).node; // absolute time
                 },
                 enumerable: true,
             } );
 
-            Object.defineProperty( node, "future", { // same as "in"  // TODO: only define on shared "node" prototype?
+            SB.Object.defineProperty( node, "future", { // same as "in"  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return this.in;
                 },
@@ -383,7 +418,7 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             var scriptText = "this.initialize && this.initialize()";
 
             try {
-                return ( Function( "scriptText", "return eval( scriptText )" ) ).
+                return ( SB.Function( "scriptText", "return eval( scriptText )" ) ).
                     call( child, scriptText );
             } catch ( e ) {
                 this.logger.warnx( "initializingNode", childID,
@@ -453,7 +488,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    nodeData.getters[propertyName] = Function( propertyGet );
+                    nodeData.getters[propertyName] = SB.Function( propertyGet );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", utility.exceptionMessage( e ) );
@@ -464,7 +499,7 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    nodeData.setters[propertyName] = Function( "value", propertySet );
+                    nodeData.setters[propertyName] = SB.Function( "value", propertySet );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", utility.exceptionMessage( e ) );
@@ -485,14 +520,14 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
             var self = this;
 
-            Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
+            SB.Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
                 get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
                 set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
                 enumerable: true
             } );
 
 node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, propertyName, { // "this" is node in get/set
+            SB.Object.defineProperty( node, propertyName, { // "this" is node in get/set
                 get: function() { return self.kernel.getProperty( this.id, propertyName ) },
                 set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
                 enumerable: true
@@ -559,7 +594,7 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             var self = this;
 
-            Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
+            SB.Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
                         return self.kernel.callMethod( this.node.id, methodName, arguments );
@@ -589,7 +624,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             } );
 
             try {
-                nodeData.bodies[methodName] = Function.apply( undefined,
+                nodeData.bodies[methodName] = SB.Function.apply( undefined,
                     ( methodParameters || [] ).concat( methodBody || "" ) );
             } catch ( e ) {
                 this.logger.warnx( "creatingMethod", nodeID, methodName, methodParameters,
@@ -632,7 +667,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
             var self = this;
 
-            Object.defineProperty( node.events, eventName, { // "this" is node.events in get/set
+            SB.Object.defineProperty( node.events, eventName, { // "this" is node.events in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
                         return self.kernel.fireEvent( this.node.id, eventName, arguments );
@@ -641,11 +676,11 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                 set: function( value ) {
                     var nodeData = self.nodes[this.node.id];
                     var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
-                        ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                    if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
+                        ( nodeData.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                    if ( typeof value == "function" || value instanceof SB.Function ) {
+                        listeners.push( { handler: value, context: this.node } );  // for node.events.*event* = function() { ... }, context is the target node
                     } else if ( value.add ) {
-                        if ( ! value.phases || value.phases instanceof Array ) {
+                        if ( ! value.phases || value.phases instanceof SB.Array ) {
                             listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
                         } else {
                             listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
@@ -673,9 +708,9 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 set: function( value ) {
                     var nodeData = self.nodes[this.id];
                     var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
-                        ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
+                        ( nodeData.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
+                        listeners.push( { handler: value, context: this } );  // for node.*event* = function() { ... }, context is the target node
                     } else if ( value.add ) {
                         if ( ! value.phases || value.phases instanceof Array ) {
                             listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
@@ -748,7 +783,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             if ( scriptType == "application/javascript" ) {
                 try {
-                    return ( Function( "scriptText", "return eval( scriptText )" ) ).
+                    return ( SB.Function( "scriptText", "return eval( scriptText )" ) ).
                         call( node, scriptText );
                 } catch ( e ) {
                     this.logger.warnx( "executing", nodeID,
@@ -781,7 +816,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
         var prototype = prototypeData && prototypeData.node;
 
         var proxyData = Object.create( prototypeData || Object.prototype );
-        var proxy = proxyData.node = Object.create( prototype || Object.prototype );
+        var proxy = proxyData.node = SB.Object.create( prototype || SB.Object.prototype );
 
         var behavior = behaviorData && behaviorData.node;
 
@@ -795,7 +830,7 @@ proxy.uri = behavior.uri; // TODO: move to vwf/model/object  // TODO: delegate t
         proxy.source = behavior.source;  // TODO: delegate to kernel
         proxy.type = behavior.type;  // TODO: delegate to kernel
 
-        proxy.properties = Object.create( prototype ? prototype.properties : Object.prototype, {
+        proxy.properties = SB.Object.create( prototype ? prototype.properties : SB.Object.prototype, {
             node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
         } );
 
@@ -813,14 +848,14 @@ proxy.uri = behavior.uri; // TODO: move to vwf/model/object  // TODO: delegate t
 
                 ( function( propertyName ) {
 
-                    Object.defineProperty( proxy.properties, propertyName, { // "this" is proxy.properties in get/set
+                    SB.Object.defineProperty( proxy.properties, propertyName, { // "this" is proxy.properties in get/set
                         get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
                         set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
                         enumerable: true
                     } );
 
 proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, propertyName, { // "this" is proxy in get/set
+                    SB.Object.defineProperty( proxy, propertyName, { // "this" is proxy in get/set
                         get: function() { return self.kernel.getProperty( this.id, propertyName ) },
                         set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
                         enumerable: true
@@ -840,7 +875,7 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
 
         }
 
-        proxy.methods = Object.create( prototype ? prototype.methods : Object.prototype, {
+        proxy.methods = SB.Object.create( prototype ? prototype.methods : SB.Object.prototype, {
             node: { value: proxy } // for proxy.methods accessors (non-enumerable)  // TODO: hide this better
         } );
 
@@ -854,7 +889,7 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
 
                 ( function( methodName ) {
 
-                    Object.defineProperty( proxy.methods, methodName, { // "this" is proxy.methods in get/set
+                    SB.Object.defineProperty( proxy.methods, methodName, { // "this" is proxy.methods in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
                                 return self.kernel.callMethod( this.node.id, methodName, arguments );
@@ -869,7 +904,7 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
                     } );
 
 proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, methodName, { // "this" is proxy in get/set
+                    SB.Object.defineProperty( proxy, methodName, { // "this" is proxy in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
                                 return self.kernel.callMethod( this.id, methodName, arguments );
@@ -893,7 +928,7 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
 
         }
 
-        proxy.events = Object.create( prototype ? prototype.events : Object.prototype, {
+        proxy.events = SB.Object.create( prototype ? prototype.events : SB.Object.prototype, {
             node: { value: proxy } // for proxy.events accessors (non-enumerable)  // TODO: hide this better
         } );
 
@@ -905,7 +940,7 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
 
                 ( function( eventName ) {
 
-                    Object.defineProperty( proxy.events, eventName, { // "this" is proxy.events in get/set
+                    SB.Object.defineProperty( proxy.events, eventName, { // "this" is proxy.events in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.events
                                 return self.kernel.fireEvent( this.node.id, eventName, arguments );
@@ -915,10 +950,10 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                             var nodeData = self.nodes[this.node.id];
                             var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
                                 ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if ( typeof value == "function" || value instanceof Function ) {
+                            if ( typeof value == "function" || value instanceof SB.Function ) {
                                 listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
                             } else if ( value.add ) {
-                                if ( ! value.phases || value.phases instanceof Array ) {
+                                if ( ! value.phases || value.phases instanceof SB.Array ) {
                                     listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
                                 } else {
                                     listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
@@ -937,7 +972,7 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                     } );
 
 proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, eventName, { // "this" is proxy in get/set
+                    SB.Object.defineProperty( proxy, eventName, { // "this" is proxy in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
                                 return self.kernel.fireEvent( this.id, eventName, arguments );
@@ -947,10 +982,10 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                             var nodeData = self.nodes[this.id];
                             var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
                                 ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if ( typeof value == "function" || value instanceof Function ) {
+                            if ( typeof value == "function" || value instanceof SB.Function ) {
                                 listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
                             } else if ( value.add ) {
-                                if ( ! value.phases || value.phases instanceof Array ) {
+                                if ( ! value.phases || value.phases instanceof SB.Array ) {
                                     listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
                                 } else {
                                     listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
@@ -1032,7 +1067,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
         var prototype = prototypeData && prototypeData.node;
 
-        var futureData = nodeData.futureData;
+        var futureData = nodeData.hasOwnProperty( "futureData" ) && nodeData.futureData;
 
         if ( ! futureData || futureData.change < nodeData.change ) { // only if missing or out of date
 
@@ -1044,13 +1079,13 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
             //  }
 
             futureData = nodeData.futureData = Object.create( prototypeData || Object.prototype ); // TODO: breaks deriving reference if exists
-            var future = futureData.node = Object.create( prototype || Object.prototype );
+            var future = futureData.node = SB.Object.create( prototype || SB.Object.prototype );
 
             var node = nodeData.node;
 
             future.id = node.id;
 
-            future.properties = Object.create( prototype ? prototype.properties : Object.prototype, {
+            future.properties = SB.Object.create( prototype ? prototype.properties : SB.Object.prototype, {
                 node: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -1060,7 +1095,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
                     ( function( propertyName ) {
 
-                        Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
+                        SB.Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
                             get: function() {
                                 var nodeData = self.nodes[this.node.id];
                                 return self.kernel.getProperty( this.node.id, propertyName,
@@ -1077,7 +1112,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                         } );
 
 future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, propertyName, { // "this" is future in get/set
+                        SB.Object.defineProperty( future, propertyName, { // "this" is future in get/set
                             get: function() {
                                 var nodeData = self.nodes[this.id];
                                 return self.kernel.getProperty( this.id, propertyName,
@@ -1097,7 +1132,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
     
             }
 
-            future.methods = Object.create( prototype ? prototype.methods : Object.prototype, {
+            future.methods = SB.Object.create( prototype ? prototype.methods : SB.Object.prototype, {
                 node: { value: future } // for future.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -1107,10 +1142,10 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
 
                     ( function( methodName ) {
 
-                        Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
+                        SB.Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
                             get: function() {
-                                var nodeData = self.nodes[this.node.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
+                                    var nodeData = self.nodes[this.node.id];
                                     return self.kernel.callMethod( this.node.id, methodName, arguments,
                                         nodeData.futureData.when, nodeData.futureData.callback
                                     );
@@ -1120,10 +1155,10 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
                         } );
 
 future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, methodName, { // "this" is future in get/set
+                        SB.Object.defineProperty( future, methodName, { // "this" is future in get/set
                             get: function() {
-                                var nodeData = self.nodes[this.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future
+                                    var nodeData = self.nodes[this.id];
                                     return self.kernel.callMethod( this.id, methodName, arguments,
                                         nodeData.futureData.when, nodeData.futureData.callback
                                     );
@@ -1138,7 +1173,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
 
             }
 
-            future.events = Object.create( prototype ? prototype.events : Object.prototype, {
+            future.events = SB.Object.create( prototype ? prototype.events : SB.Object.prototype, {
                 node: { value: future } // for future.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
@@ -1148,10 +1183,10 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
 
                     ( function( eventName ) {
 
-                        Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
+                        SB.Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
                             get: function() {
-                                var nodeData = self.nodes[this.node.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
+                                    var nodeData = self.nodes[this.node.id];
                                     return self.kernel.fireEvent( this.node.id, eventName, arguments,
                                         nodeData.futureData.when, nodeData.futureData.callback
                                     );
@@ -1161,10 +1196,10 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                         } );
 
 future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, eventName, { // "this" is future in get/set
+                        SB.Object.defineProperty( future, eventName, { // "this" is future in get/set
                             get: function() {
-                                var nodeData = self.nodes[this.id];
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future
+                                    var nodeData = self.nodes[this.id];
                                     return self.kernel.fireEvent( this.id, eventName, arguments,
                                         nodeData.futureData.when, nodeData.futureData.callback
                                     );
@@ -1225,5 +1260,9 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         }
 
     }
+
+    /// Sandbox iframe.
+
+    var SB = undefined;
 
 } );
