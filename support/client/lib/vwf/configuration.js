@@ -157,6 +157,7 @@ define( function() {
         default: {
             "environment": require.toUrl( "dummy" ).indexOf( "../lib/" ) == 0 ? "testing" : "development",
             "log-level": "warn",        // logger threshold
+            "content-warnings": false,  // check for potential content errors and warn
             "random-seed": +new Date,   // pseudorandom number generator seed
             "randomize-ids": false,     // randomize IDs to discourage assumptions about ID allocation
             "humanize-ids": false,      // append recognizable strings to node IDs
@@ -173,6 +174,7 @@ define( function() {
 
         development: {
             "log-level": "info",
+            "content-warnings": true,
             "randomize-ids": true,
             "humanize-ids": true,
             "model-stages": [ "vwf/model/stage/log" ], // logger.trace() all API calls
