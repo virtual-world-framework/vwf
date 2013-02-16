@@ -260,7 +260,7 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             nodeData.listeners = Object(); // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
-            node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
+            node.children = Array();  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
             Object.defineProperty( node.children, "node", {
                 value: node // for node.children accessors (non-enumerable)  // TODO: hide this better
