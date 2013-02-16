@@ -1027,14 +1027,14 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
         var self = this;
 
+        var prototypeData = Object.getPrototypeOf( nodeData ) !== Object.prototype ?
+            futureProxy.call( this, Object.getPrototypeOf( nodeData ) ) : undefined;
+
+        var prototype = prototypeData && prototypeData.node;
+
         var futureData = nodeData.futureData;
 
         if ( ! futureData || futureData.change < nodeData.change ) { // only if missing or out of date
-
-            var prototypeData = Object.getPrototypeOf( nodeData ) !== Object.prototype ?
-                futureProxy.call( this, Object.getPrototypeOf( nodeData ) ) : undefined;
-
-            var prototype = prototypeData && prototypeData.node;
 
             //  {
             //    node: undefined,
