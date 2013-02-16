@@ -219,12 +219,12 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             } );
 
             node.properties = SB.Object.create( prototype ? prototype.properties : SB.Object.prototype, {
-                node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
+                vwf$node: { value: node } // for node.properties accessors (non-enumerable)
             } );
 
             SB.Object.defineProperty( node.properties, "create", {
                 value: function( name, value, get, set ) { // "this" is node.properties
-                    return self.kernel.createProperty( this.node.id, name, value, get, set );
+                    return self.kernel.createProperty( this.vwf$node.id, name, value, get, set );
                 }
             } );
 
@@ -237,12 +237,12 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             );
 
             node.methods = SB.Object.create( prototype ? prototype.methods : SB.Object.prototype, {
-                node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
+                vwf$node: { value: node } // for node.methods accessors (non-enumerable)
             } );
 
             SB.Object.defineProperty( node.methods, "create", {
                 value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
-                    return self.kernel.createMethod( this.node.id, name, parameters, body );
+                    return self.kernel.createMethod( this.vwf$node.id, name, parameters, body );
                 }
             } );
 
@@ -251,14 +251,14 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             );
 
             node.events = SB.Object.create( prototype ? prototype.events : SB.Object.prototype, {
-                node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
+                vwf$node: { value: node }, // for node.events accessors (non-enumerable)
             } );
 
             // TODO: these only need to be on the base node's events object
 
             SB.Object.defineProperty( node.events, "create", {
                 value: function( name, parameters ) { // "this" is node.events
-                    return self.kernel.createEvent( this.node.id, name, parameters );
+                    return self.kernel.createEvent( this.vwf$node.id, name, parameters );
                 }
             } );
 
@@ -297,18 +297,18 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
 
             node.children = SB.Array();  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
-            SB.Object.defineProperty( node.children, "node", {
-                value: node // for node.children accessors (non-enumerable)  // TODO: hide this better
+            SB.Object.defineProperty( node.children, "vwf$node", {
+                value: node // for node.children accessors (non-enumerable)
             } );
 
             SB.Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
                     if ( callback ) {
-                        self.kernel.createChild( this.node.id, name, component, undefined, undefined, function( childID ) {
+                        self.kernel.createChild( this.vwf$node.id, name, component, undefined, undefined, function( childID ) {
                             callback.call( node, self.nodes[childID].node );
                         } );
                     } else { 
-                        return self.kernel.createChild( this.node.id, name, component );
+                        return self.kernel.createChild( this.vwf$node.id, name, component );
                     }
                 }
             } );
@@ -521,8 +521,8 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
             var self = this;
 
             SB.Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
-                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
+                get: function() { return self.kernel.getProperty( this.vwf$node.id, propertyName ) },
+                set: function( value ) { self.kernel.setProperty( this.vwf$node.id, propertyName, value ) },
                 enumerable: true
             } );
 
@@ -597,13 +597,13 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
             SB.Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
-                        return self.kernel.callMethod( this.node.id, methodName, arguments );
+                        return self.kernel.callMethod( this.vwf$node.id, methodName, arguments );
                     };
                 },
                 set: function( value ) {
-                    this.node.methods.hasOwnProperty( methodName ) ||
-                        self.kernel.createMethod( this.node.id, methodName );
-                    self.nodes[this.node.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
+                    this.vwf$node.methods.hasOwnProperty( methodName ) ||
+                        self.kernel.createMethod( this.vwf$node.id, methodName );
+                    self.nodes[this.vwf$node.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                 },
                 enumerable: true,
             } );
@@ -670,15 +670,15 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
             SB.Object.defineProperty( node.events, eventName, { // "this" is node.events in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
-                        return self.kernel.fireEvent( this.node.id, eventName, arguments );
+                        return self.kernel.fireEvent( this.vwf$node.id, eventName, arguments );
                     };
                 },
                 set: function( value ) {
-                    var nodeData = self.nodes[this.node.id];
+                    var nodeData = self.nodes[this.vwf$node.id];
                     var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
                         ( nodeData.listeners[eventName] = [] );  // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if ( typeof value == "function" || value instanceof SB.Function ) {
-                        listeners.push( { handler: value, context: this.node } );  // for node.events.*event* = function() { ... }, context is the target node
+                        listeners.push( { handler: value, context: this.vwf$node } );  // for node.events.*event* = function() { ... }, context is the target node
                     } else if ( value.add ) {
                         if ( ! value.phases || value.phases instanceof SB.Array ) {
                             listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
@@ -831,7 +831,7 @@ proxy.uri = behavior.uri; // TODO: move to vwf/model/object  // TODO: delegate t
         proxy.type = behavior.type;  // TODO: delegate to kernel
 
         proxy.properties = SB.Object.create( prototype ? prototype.properties : SB.Object.prototype, {
-            node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
+            vwf$node: { value: proxy } // for proxy.properties accessors (non-enumerable)
         } );
 
         proxyData.getters = Object.create( prototypeData ?
@@ -849,8 +849,8 @@ proxy.uri = behavior.uri; // TODO: move to vwf/model/object  // TODO: delegate t
                 ( function( propertyName ) {
 
                     SB.Object.defineProperty( proxy.properties, propertyName, { // "this" is proxy.properties in get/set
-                        get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                        set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
+                        get: function() { return self.kernel.getProperty( this.vwf$node.id, propertyName ) },
+                        set: function( value ) { self.kernel.setProperty( this.vwf$node.id, propertyName, value ) },
                         enumerable: true
                     } );
 
@@ -876,7 +876,7 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
         }
 
         proxy.methods = SB.Object.create( prototype ? prototype.methods : SB.Object.prototype, {
-            node: { value: proxy } // for proxy.methods accessors (non-enumerable)  // TODO: hide this better
+            vwf$node: { value: proxy } // for proxy.methods accessors (non-enumerable)
         } );
 
         proxyData.bodies = Object.create( prototypeData ?
@@ -892,13 +892,13 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
                     SB.Object.defineProperty( proxy.methods, methodName, { // "this" is proxy.methods in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
-                                return self.kernel.callMethod( this.node.id, methodName, arguments );
+                                return self.kernel.callMethod( this.vwf$node.id, methodName, arguments );
                             };
                         },
                         set: function( value ) {
-                            this.node.methods.hasOwnProperty( methodName ) ||
-                                self.kernel.createMethod( this.node.id, methodName );
-                            self.nodes[this.node.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
+                            this.vwf$node.methods.hasOwnProperty( methodName ) ||
+                                self.kernel.createMethod( this.vwf$node.id, methodName );
+                            self.nodes[this.vwf$node.id].bodies[methodName] = value;  // TODO: invalidates behavior proxy but not future proxy
                         },
                         enumerable: true,
                     } );
@@ -929,7 +929,7 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
         }
 
         proxy.events = SB.Object.create( prototype ? prototype.events : SB.Object.prototype, {
-            node: { value: proxy } // for proxy.events accessors (non-enumerable)  // TODO: hide this better
+            vwf$node: { value: proxy } // for proxy.events accessors (non-enumerable)
         } );
 
         proxyData.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
@@ -943,15 +943,15 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
                     SB.Object.defineProperty( proxy.events, eventName, { // "this" is proxy.events in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.events
-                                return self.kernel.fireEvent( this.node.id, eventName, arguments );
+                                return self.kernel.fireEvent( this.vwf$node.id, eventName, arguments );
                             };
                         },
                         set: function( value ) {
-                            var nodeData = self.nodes[this.node.id];
+                            var nodeData = self.nodes[this.vwf$node.id];
                             var listeners = nodeData.listeners[eventName] ||  // TODO: invalidates behavior proxy but not future proxy
                                 ( nodeData.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                             if ( typeof value == "function" || value instanceof SB.Function ) {
-                                listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
+                                listeners.push( { handler: value, context: this.vwf$node } ); // for node.events.*event* = function() { ... }, context is the target node
                             } else if ( value.add ) {
                                 if ( ! value.phases || value.phases instanceof SB.Array ) {
                                     listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
@@ -1086,7 +1086,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
             future.id = node.id;
 
             future.properties = SB.Object.create( prototype ? prototype.properties : SB.Object.prototype, {
-                node: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
+                vwf$node: { value: future } // for future.properties accessors (non-enumerable)
             } );
 
             for ( var propertyName in node.properties ) {
@@ -1097,14 +1097,14 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
 
                         SB.Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
                             get: function() {
-                                var nodeData = self.nodes[this.node.id];
-                                return self.kernel.getProperty( this.node.id, propertyName,
+                                var nodeData = self.nodes[this.vwf$node.id];
+                                return self.kernel.getProperty( this.vwf$node.id, propertyName,
                                     nodeData.futureData.when, nodeData.futureData.callback
                                 );
                             },
                             set: function( value ) {
-                                var nodeData = self.nodes[this.node.id];
-                                self.kernel.setProperty( this.node.id, propertyName, value,
+                                var nodeData = self.nodes[this.vwf$node.id];
+                                self.kernel.setProperty( this.vwf$node.id, propertyName, value,
                                     nodeData.futureData.when, nodeData.futureData.callback
                                 );
                             },
@@ -1133,7 +1133,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
             }
 
             future.methods = SB.Object.create( prototype ? prototype.methods : SB.Object.prototype, {
-                node: { value: future } // for future.methods accessors (non-enumerable)  // TODO: hide this better
+                vwf$node: { value: future } // for future.methods accessors (non-enumerable)
             } );
 
             for ( var methodName in node.methods ) {
@@ -1145,8 +1145,8 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
                         SB.Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
-                                    var nodeData = self.nodes[this.node.id];
-                                    return self.kernel.callMethod( this.node.id, methodName, arguments,
+                                    var nodeData = self.nodes[this.vwf$node.id];
+                                    return self.kernel.callMethod( this.vwf$node.id, methodName, arguments,
                                         nodeData.futureData.when, nodeData.futureData.callback
                                     );
                                 }
@@ -1174,7 +1174,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
             }
 
             future.events = SB.Object.create( prototype ? prototype.events : SB.Object.prototype, {
-                node: { value: future } // for future.events accessors (non-enumerable)  // TODO: hide this better
+                vwf$node: { value: future } // for future.events accessors (non-enumerable)
             } );
 
             for ( var eventName in node.events ) {
@@ -1186,8 +1186,8 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                         SB.Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
                             get: function() {
                                 return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    var nodeData = self.nodes[this.node.id];
-                                    return self.kernel.fireEvent( this.node.id, eventName, arguments,
+                                    var nodeData = self.nodes[this.vwf$node.id];
+                                    return self.kernel.fireEvent( this.vwf$node.id, eventName, arguments,
                                         nodeData.futureData.when, nodeData.futureData.callback
                                     );
                                 };
