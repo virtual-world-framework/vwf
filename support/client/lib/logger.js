@@ -218,6 +218,47 @@ define( [ "vwf/configuration" ], function( configuration ) {
             log.call( this, arguments, console && console.log, console, true );
         },
 
+        /// Log a message if it hasn't been shown before if the log threshold is "trace" or below.
+
+        trace1: function( /* ... */ ) {
+            TRACE >= this.level.number &&
+                log1.call( this, arguments, console && console.debug, console ); // not console.trace(), which would log the stack
+        },
+
+        /// Log a message if it hasn't been shown before if the log threshold is "debug" or below.
+
+        debug1: function( /* ... */ ) {
+            DEBUG >= this.level.number &&
+                log1.call( this, arguments, console && console.debug, console );
+        },
+
+        /// Log a message if it hasn't been shown before if the log threshold is "info" or below.
+
+        info1: function( /* ... */ ) {
+            INFO >= this.level.number &&
+                log1.call( this, arguments, console && console.info, console );
+        },
+
+        /// Log a message if it hasn't been shown before if the log threshold is "warn" or below.
+
+        warn1: function( /* ... */ ) {
+            WARN >= this.level.number &&
+                log1.call( this, arguments, console && console.warn, console );
+        },
+
+        /// Log a message if it hasn't been shown before if the log threshold is "error" or below.
+
+        error1: function( /* ... */ ) {
+            ERROR >= this.level.number &&
+                log1.call( this, arguments, console && console.error, console );
+        },
+
+        /// Log a message if it hasn't been shown before.
+
+        log1: function( /* ... */ ) {
+            log1.call( this, arguments, console && console.log, console );
+        },
+
     };
 
     /// Log a message to the console. Normalize the arguments list and invoke the appender function.
@@ -242,6 +283,39 @@ define( [ "vwf/configuration" ], function( configuration ) {
         }
 
     }
+
+    /// Log a message like `log`, but suppress identical messages once a message has been shown for
+    /// the first time.
+    /// 
+    /// @param {Array} args
+    ///   An Array-like list of arguments passed to a log function. normalize describes the formats
+    ///   supported.
+    /// @param {Function} appender
+    ///   A Firebug-like log function that logs its arguments, such as window.console.log.
+    /// @param {Object} context
+    ///   The *this* object for the appender, such as window.console.
+
+    function log1( args, appender, context ) {  // invoke with *this* as the logger module
+
+        // Normalize the arguments and log the message. Don't log a message if normalize() returned
+        // undefined (because a generator function didn't return a result).
+
+        if ( args = /* assignment! */ normalize.call( this, args ) ) {
+
+            var key = args.join();
+            var allow = ! loggedOnce[key];
+            loggedOnce[key] = true;
+
+            allow && appender && appender.apply( context, args );
+
+        }
+
+    }
+
+    /// Index of messages already logged. `log1` will suppress these messages if called to log them
+    /// again.
+
+    var loggedOnce = {};
 
     /// Normalize the arguments provided to a log function. The arguments may take one of the
     /// following forms:
