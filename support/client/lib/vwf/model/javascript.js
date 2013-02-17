@@ -222,12 +222,6 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 vwf$node: { value: node } // for node.properties accessors (non-enumerable)
             } );
 
-            SB.Object.defineProperty( node.properties, "create", {
-                value: function( name, value, get, set ) { // "this" is node.properties
-                    return self.kernel.createProperty( this.vwf$node.id, name, value, get, set );
-                }
-            } );
-
             nodeData.getters = Object.create( prototypeData ?
                 prototypeData.getters : Object.prototype
             );
@@ -240,18 +234,50 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 vwf$node: { value: node } // for node.methods accessors (non-enumerable)
             } );
 
-            SB.Object.defineProperty( node.methods, "create", {
-                value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
-                    return self.kernel.createMethod( this.vwf$node.id, name, parameters, body );
-                }
-            } );
-
             nodeData.bodies = Object.create( prototypeData ?
                 prototypeData.bodies : Object.prototype
             );
 
             node.events = SB.Object.create( prototype ? prototype.events : SB.Object.prototype, {
                 vwf$node: { value: node }, // for node.events accessors (non-enumerable)
+            } );
+
+            nodeData.listeners = Object(); // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
+
+            node.children = SB.Array();  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
+
+            SB.Object.defineProperty( node.children, "vwf$node", {
+                value: node // for node.children accessors (non-enumerable)
+            } );
+
+            SB.Object.defineProperty( node.children, "create", {
+                value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
+                    if ( callback ) {
+                        self.kernel.createChild( this.vwf$node.id, name, component, undefined, undefined, function( childID ) {
+                            callback.call( node, self.nodes[childID].node );
+                        } );
+                    } else { 
+                        return self.kernel.createChild( this.vwf$node.id, name, component );
+                    }
+                }
+            } );
+
+            SB.Object.defineProperty( node.children, "delete", {
+                value: function( child ) {
+                    return self.kernel.deleteNode( child.id );
+                }
+            } );
+
+            SB.Object.defineProperty( node.properties, "create", {
+                value: function( name, value, get, set ) { // "this" is node.properties
+                    return self.kernel.createProperty( this.vwf$node.id, name, value, get, set );
+                }
+            } );
+
+            SB.Object.defineProperty( node.methods, "create", {
+                value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
+                    return self.kernel.createMethod( this.vwf$node.id, name, parameters, body );
+                }
             } );
 
             // TODO: these only need to be on the base node's events object
@@ -293,32 +319,6 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 }
             } );
 
-            nodeData.listeners = Object(); // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
-
-            node.children = SB.Array();  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
-
-            SB.Object.defineProperty( node.children, "vwf$node", {
-                value: node // for node.children accessors (non-enumerable)
-            } );
-
-            SB.Object.defineProperty( node.children, "create", {
-                value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
-                    if ( callback ) {
-                        self.kernel.createChild( this.vwf$node.id, name, component, undefined, undefined, function( childID ) {
-                            callback.call( node, self.nodes[childID].node );
-                        } );
-                    } else { 
-                        return self.kernel.createChild( this.vwf$node.id, name, component );
-                    }
-                }
-            } );
-
-            SB.Object.defineProperty( node.children, "delete", {
-                value: function( child ) {
-                    return self.kernel.deleteNode( child.id );
-                }
-            } );
-
             // Define the "random" and "seed" functions.
 
             SB.Object.defineProperty( node, "random", { // "this" is node
@@ -331,29 +331,6 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 value: function( seed ) {
                     return self.kernel.seed( this.id, seed );
                 }
-            } );
-
-            // Define the "time", "client", and "moniker" properties.
-
-            SB.Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return self.kernel.time();
-                },
-                enumerable: true,
-            } );
-
-            SB.Object.defineProperty( node, "client", {  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return self.kernel.client();
-                },
-                enumerable: true,
-            } );
-
-            SB.Object.defineProperty( node, "moniker", {  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return self.kernel.moniker();
-                },
-                enumerable: true,
             } );
 
             SB.Object.defineProperty( node, "find", {
@@ -397,6 +374,29 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             SB.Object.defineProperty( node, "future", { // same as "in"  // TODO: only define on shared "node" prototype?
                 get: function() {
                     return this.in;
+                },
+                enumerable: true,
+            } );
+
+            // Define the "time", "client", and "moniker" properties.
+
+            SB.Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
+                get: function() {
+                    return self.kernel.time();
+                },
+                enumerable: true,
+            } );
+
+            SB.Object.defineProperty( node, "client", {  // TODO: only define on shared "node" prototype?
+                get: function() {
+                    return self.kernel.client();
+                },
+                enumerable: true,
+            } );
+
+            SB.Object.defineProperty( node, "moniker", {  // TODO: only define on shared "node" prototype?
+                get: function() {
+                    return self.kernel.moniker();
                 },
                 enumerable: true,
             } );
