@@ -20,7 +20,7 @@
 /// @requires vwf/model
 /// @requires vwf/utility
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+define( [ "module", "vwf/model", "vwf/configuration", "vwf/utility" ], function( module, model, configuration, utility ) {
 
     return model.load( module, /** @lends module:vwf/model/javascript */ {
 
@@ -47,6 +47,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
+
+            var self = this;
 
             // visible to sandbox (*, x: shouldn't be), allocated in sandbox (*)
 
@@ -148,8 +150,21 @@ this.issb = function( obj ) {
 }
 
 
+            // Define the "time" and "client" global properties.
 
+            SB.Object.defineProperty( SB, "time", {
+                get: function() {
+                    return self.kernel.time();
+                },
+                enumerable: true,
+            } );
 
+            SB.Object.defineProperty( SB, "client", {
+                get: function() {
+                    return self.kernel.client();
+                },
+                enumerable: true,
+            } );
 
 
             this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
@@ -382,30 +397,36 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                     enumerable: true,
                 } );
 
+                // Define the "time", "client", and "moniker" properties.
+
+                SB.Object.defineProperty( node, "time", {
+                    get: function() {
+                        configuration.active["deprecation-warnings"] &&
+                            this.logger.warn1( "`node.time` is deprecated; use the global `time` instead" );
+                        return SB.time;
+                    },
+                    enumerable: true,
+                } );
+
+                SB.Object.defineProperty( node, "client", {
+                    get: function() {
+                        configuration.active["deprecation-warnings"] &&
+                            this.logger.warn1( "`node.client` is deprecated; use the global `client` instead" );
+                        return SB.client;
+                    },
+                    enumerable: true,
+                } );
+
+                SB.Object.defineProperty( node, "moniker", {
+                    get: function() {
+                        configuration.active["deprecation-warnings"] &&
+                            this.logger.warn1( "`node.moniker` is deprecated" );
+                        return self.kernel.moniker();
+                    },
+                    enumerable: true,
+                } );
+
             }
-
-            // Define the "time", "client", and "moniker" properties.
-
-            SB.Object.defineProperty( node, "time", {  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return self.kernel.time();
-                },
-                enumerable: true,
-            } );
-
-            SB.Object.defineProperty( node, "client", {  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return self.kernel.client();
-                },
-                enumerable: true,
-            } );
-
-            SB.Object.defineProperty( node, "moniker", {  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return self.kernel.moniker();
-                },
-                enumerable: true,
-            } );
 
             // Define a counter to be incremented whenever "future"-related changes occur. Creating
             // the node is the first change.
