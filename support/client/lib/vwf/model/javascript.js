@@ -253,8 +253,9 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
             SB.Object.defineProperty( node.children, "create", {
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
                     if ( callback ) {
+                        var nodeData = self.nodes[this.vwf$node.id];
                         self.kernel.createChild( this.vwf$node.id, name, component, undefined, undefined, function( childID ) {
-                            callback.call( node, self.nodes[childID].node );
+                            callback.call( nodeData.node, self.nodes[childID].node );
                         } );
                     } else { 
                         return self.kernel.createChild( this.vwf$node.id, name, component );
@@ -268,115 +269,120 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 }
             } );
 
-            SB.Object.defineProperty( node.properties, "create", {
-                value: function( name, value, get, set ) { // "this" is node.properties
-                    return self.kernel.createProperty( this.vwf$node.id, name, value, get, set );
-                }
-            } );
+            // Define functions on `node.vwf` that all nodes inherit.
 
-            SB.Object.defineProperty( node.methods, "create", {
-                value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
-                    return self.kernel.createMethod( this.vwf$node.id, name, parameters, body );
-                }
-            } );
+            if ( ! prototype ) {
 
-            // TODO: these only need to be on the base node's events object
-
-            SB.Object.defineProperty( node.events, "create", {
-                value: function( name, parameters ) { // "this" is node.events
-                    return self.kernel.createEvent( this.vwf$node.id, name, parameters );
-                }
-            } );
-
-            // Provide helper functions to create the directives for adding, removing and flushing
-            // event handlers.
-
-            // Add: node.events.*eventName* = node.events.add( *handler* [, *phases* ] [, *context* ] )
-
-            SB.Object.defineProperty( node.events, "add", {
-                value: function( handler, phases, context ) {
-                    if ( arguments.length != 2 || typeof phases == "string" || phases instanceof SB.String || phases instanceof SB.Array ) {
-                        return { add: true, handler: handler, phases: phases, context: context };
-                    } else { // interpret add( handler, context ) as add( handler, undefined, context )
-                        return { add: true, handler: handler, context: phases };
+                SB.Object.defineProperty( node.properties, "create", {
+                    value: function( name, value, get, set ) { // "this" is node.properties
+                        return self.kernel.createProperty( this.vwf$node.id, name, value, get, set );
                     }
-                }
-            } );
+                } );
 
-            // Remove: node.events.*eventName* = node.events.remove( *handler* )
-
-            SB.Object.defineProperty( node.events, "remove", {
-                value: function( handler ) {
-                    return { remove: true, handler: handler };
-                }
-            } );
-
-            // Flush: node.events.*eventName* = node.events.flush( *context* )
-
-            SB.Object.defineProperty( node.events, "flush", {
-                value: function( context ) {
-                    return { flush: true, context: context };
-                }
-            } );
-
-            // Define the "random" and "seed" functions.
-
-            SB.Object.defineProperty( node, "random", { // "this" is node
-                value: function() {
-                    return self.kernel.random( this.id );
-                }
-            } );
-
-            SB.Object.defineProperty( node, "seed", { // "this" is node
-                value: function( seed ) {
-                    return self.kernel.seed( this.id, seed );
-                }
-            } );
-
-            SB.Object.defineProperty( node, "find", {
-                value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
-                    if ( callback ) {
-                        self.kernel.find( this.id, matchPattern, function( matchID ) {
-                            callback.call( node, self.nodes[matchID].node );
-                        } );
-                    } else {  // TODO: future iterator proxy
-                        return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
-                            return self.nodes[matchID].node;
-                        } );
+                SB.Object.defineProperty( node.methods, "create", {
+                    value: function( name, parameters, body ) { // "this" is node.methods  // TODO: also accept create( name, body )
+                        return self.kernel.createMethod( this.vwf$node.id, name, parameters, body );
                     }
-                }
-            } );
+                } );
 
-            SB.Object.defineProperty( node, "test", {
-                value: function( matchPattern, testNode ) { // "this" is node
-                    return self.kernel.test( this.id, matchPattern, testNode.id );
-                }
-            } );
+                SB.Object.defineProperty( node.events, "create", {
+                    value: function( name, parameters ) { // "this" is node.events
+                        return self.kernel.createEvent( this.vwf$node.id, name, parameters );
+                    }
+                } );
 
-            // Define a "future" proxy so that for any this.property, this.method, or this.event, we
-            // can reference this.future( when, callback ).property/method/event and have the
-            // expression evaluated at the future time.
+                // Provide helper functions to create the directives for adding, removing and flushing
+                // event handlers.
 
-            SB.Object.defineProperty( node, "in", {  // TODO: only define on shared "node" prototype?
-                value: function( when, callback ) { // "this" is node
-                    return futureProxy.call( self, self.nodes[this.id], -( when || 0 ), callback ).node; // relative time
-                },
-                enumerable: true,
-            } );
+                // Add: node.events.*eventName* = node.events.add( *handler* [, *phases* ] [, *context* ] )
 
-            SB.Object.defineProperty( node, "at", {  // TODO: only define on shared "node" prototype?
-                value: function( when, callback ) { // "this" is node
-                    return futureProxy.call( self, self.nodes[this.id], when || 0, callback ).node; // absolute time
-                },
-                enumerable: true,
-            } );
+                SB.Object.defineProperty( node.events, "add", {
+                    value: function( handler, phases, context ) {
+                        if ( arguments.length != 2 || typeof phases == "string" || phases instanceof SB.String || phases instanceof SB.Array ) {
+                            return { add: true, handler: handler, phases: phases, context: context };
+                        } else { // interpret add( handler, context ) as add( handler, undefined, context )
+                            return { add: true, handler: handler, context: phases };
+                        }
+                    }
+                } );
 
-            SB.Object.defineProperty( node, "future", { // same as "in"  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return this.in;
-                },
-                enumerable: true,
-            } );
+                // Remove: node.events.*eventName* = node.events.remove( *handler* )
+
+                SB.Object.defineProperty( node.events, "remove", {
+                    value: function( handler ) {
+                        return { remove: true, handler: handler };
+                    }
+                } );
+
+                // Flush: node.events.*eventName* = node.events.flush( *context* )
+
+                SB.Object.defineProperty( node.events, "flush", {
+                    value: function( context ) {
+                        return { flush: true, context: context };
+                    }
+                } );
+
+                // Define the "random" and "seed" functions.
+
+                SB.Object.defineProperty( node, "random", { // "this" is node
+                    value: function() {
+                        return self.kernel.random( this.id );
+                    }
+                } );
+
+                SB.Object.defineProperty( node, "seed", { // "this" is node
+                    value: function( seed ) {
+                        return self.kernel.seed( this.id, seed );
+                    }
+                } );
+
+                SB.Object.defineProperty( node, "find", {
+                    value: function( matchPattern, callback /* ( match ) */ ) { // "this" is node
+                        if ( callback ) {
+                            var nodeData = self.nodes[this.id];
+                            self.kernel.find( this.id, matchPattern, function( matchID ) {
+                                callback.call( nodeData.node, self.nodes[matchID].node );
+                            } );
+                        } else {  // TODO: future iterator proxy
+                            return self.kernel.find( this.id, matchPattern ).map( function( matchID ) {
+                                return self.nodes[matchID].node;
+                            } );
+                        }
+                    }
+                } );
+
+                SB.Object.defineProperty( node, "test", {
+                    value: function( matchPattern, testNode ) { // "this" is node
+                        return self.kernel.test( this.id, matchPattern, testNode.id );
+                    }
+                } );
+
+                // Define a "future" proxy so that for any this.property, this.method, or
+                // this.event, we can reference this.future( when, callback ).property/method/event
+                // and have the expression evaluated at the future time.
+
+                SB.Object.defineProperty( node, "in", {
+                    value: function( when, callback ) { // "this" is node
+                        return futureProxy.call( self, self.nodes[this.id], -( when || 0 ), callback ).node; // relative time
+                    },
+                    enumerable: true,
+                } );
+
+                SB.Object.defineProperty( node, "at", {
+                    value: function( when, callback ) { // "this" is node
+                        return futureProxy.call( self, self.nodes[this.id], when || 0, callback ).node; // absolute time
+                    },
+                    enumerable: true,
+                } );
+
+                SB.Object.defineProperty( node, "future", { // same as "in"
+                    get: function() {
+                        return this.in;
+                    },
+                    enumerable: true,
+                } );
+
+            }
 
             // Define the "time", "client", and "moniker" properties.
 
