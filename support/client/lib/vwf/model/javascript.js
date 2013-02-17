@@ -269,7 +269,7 @@ node.uri = childURI; // TODO: move to vwf/model/object  // TODO: delegate to ker
                 }
             } );
 
-            // Define functions on `node.vwf` that all nodes inherit.
+            // On `node.vwf` only, define functions that all nodes will inherit.
 
             if ( ! prototype ) {
 
