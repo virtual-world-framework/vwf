@@ -3141,31 +3141,25 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
 
         // Warn about reserved names.
 
-        if ( configuration.active["content-warnings"] && contentWarnings.reserved ) {
+        if ( configuration.active["content-warnings"] ) {
 
             var message = "member names beginning with \"vwf$\" are reserved for system use";
 
-            contentWarnings.reserved && component.properties && Object.keys( component.properties ).every( function( propertyName ) {
-                propertyName.match( /^vwf\$/ ) && contentWarnings.reserved-- && kernel.logger.warn( propertyName + ":", message );
-                return contentWarnings.reserved;
+            component.properties && Object.keys( component.properties ).forEach( function( propertyName ) {
+                propertyName.match( /^vwf\$/ ) && kernel.logger.warn( propertyName + ":", message );
             } );
 
-            contentWarnings.reserved && component.methods && Object.keys( component.methods ).every( function( methodName ) {
-                methodName.match( /^vwf\$/ ) && contentWarnings.reserved-- && kernel.logger.warn( methodName + ":", message );
-                return contentWarnings.reserved;
+            component.methods && Object.keys( component.methods ).forEach( function( methodName ) {
+                methodName.match( /^vwf\$/ ) && kernel.logger.warn( methodName + ":", message );
             } );
 
-            contentWarnings.reserved && component.events && Object.keys( component.events ).every( function( eventName ) {
-                eventName.match( /^vwf\$/ ) && contentWarnings.reserved-- && kernel.logger.warn( eventName + ":", message );
-                return contentWarnings.reserved;
+            component.events && Object.keys( component.events ).forEach( function( eventName ) {
+                eventName.match( /^vwf\$/ ) && kernel.logger.warn( eventName + ":", message );
             } );
 
-            contentWarnings.reserved && component.children && Object.keys( component.children ).every( function( childName ) {
-                childName.match( /^vwf\$/ ) && contentWarnings.reserved-- && kernel.logger.warn( childName + ":", message );
-                return contentWarnings.reserved;
+            component.children && Object.keys( component.children ).forEach( function( childName ) {
+                childName.match( /^vwf\$/ ) && kernel.logger.warn( childName + ":", message );
             } );
-
-            contentWarnings.reserved == 0 && kernel.logger.warn( "further reserved name warnings suppressed" );
 
         }
 
@@ -3685,12 +3679,6 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
     /// return values to shallower calls.
 
     var getPropertyEntrants = {};
-
-    /// Number of content warnings emitted before suppressing further warnings.
-
-    var contentWarnings = {
-        reserved: 5, // member name reserved
-    };
 
     /// Control messages from the reflector are stored here in a priority queue, ordered by
     /// execution time.
