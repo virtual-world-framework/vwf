@@ -7,7 +7,7 @@ var libpath = require('path'),
 	YAML = require('js-yaml');
 	
 
-
+// pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
 {
 		
@@ -27,6 +27,8 @@ function findAppName(uri)
 			return current;
 		return null;	
 }
+
+//Generate a random ID for a session
 var ValidIDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 function makeid()
 {
@@ -48,6 +50,8 @@ function Session(inid)
 	this.state = WaitingForConnection;
 	this.clients = 0;
 }
+
+//Redirect the user to a new instance
 function GenerateNewInstance(request,response,appname,newid)
 {
 	if(newid === undefined)
@@ -70,15 +74,21 @@ function GenerateNewInstance(request,response,appname,newid)
 				response.end();
 				return;
 }
+
+//Find the instance(session) ID in a URL
 function FindSession(uri)
 {
+	//find the application name
 	var app = findAppName(uri);
 	if(!app)
 		return null;
+	//remove the application name	
 	var minusapp = uri.substr(app.length-2);
 	var parts = minusapp.split('\\');
 	var testapp = parts[0];
 	
+	//Really, any slash delimited string after the app name should work
+	//sticking with 16 characters for now 
 	if(testapp.length == 16)
 	{
 		for(var i = 0; i < 16; i++)
@@ -91,11 +101,12 @@ function FindSession(uri)
 	}
 	return null;
 }
+//Remove the session identifer from the URL
 function filterSession(uri,session)
 {
 	return uri.replace(session +'\\','').replace(session,'\\');
 }
-
+//Just serve a simple file
 function ServeFile(filename,response,URL)
 {
 			fs.readFile(filename, "binary", function (err, file) {
@@ -117,6 +128,7 @@ function ServeFile(filename,response,URL)
 			
 		});
 }
+//Return a 404 not found coude
 function _404(response)
 {
 			response.writeHead(404, {
@@ -126,6 +138,7 @@ function _404(response)
 				response.write("404 Not Found\n");
 				response.end();
 }
+//Parse and serve a YAML file
 function ServeYAML(filename,response, URL)
 {
 
@@ -139,9 +152,6 @@ function ServeYAML(filename,response, URL)
 				return;
 			}
  
-			
-			
-			
 			var deYAML = JSON.stringify(YAML.load(file));
 			var type = "text/json";
 			
@@ -161,7 +171,7 @@ function ServeYAML(filename,response, URL)
 		});
 
 }
-
+//Serve a JSON object
 function ServeJSON(jsonobject,response,URL)
 {
 		    
@@ -172,7 +182,7 @@ function ServeJSON(jsonobject,response,URL)
 			response.end();
 			
 }
-
+//Get the session ID from the handshake headers for a socket
 function getNamespace(socket)
 {
 
@@ -187,6 +197,7 @@ function getNamespace(socket)
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
 }
+//Start the VWF server
 function startVWF(){
 
 	global.activesessions = [];
@@ -208,7 +219,8 @@ function startVWF(){
 	//file is also not a yaml document
     if(!libpath.existsSync(filename) && !libpath.existsSync(filename+".yaml"))
 	{
-
+			
+		 //try to find the correct support file	
 		 var appname = findAppName(filename);
 		 if(!appname)
 		 {
@@ -234,42 +246,46 @@ function startVWF(){
 	if(libpath.existsSync(filename))
 	{
 		//if requesting directory, setup instance
+		//also, redirect to current instnace name of does not end in slash
 		if (fs.statSync(filename).isDirectory()) 
 		{
 			var appname = findAppName(filename);
 			if(!appname)
 				appname = findAppName(filename+"\\");
 			
+			//no session id is given, new instance
 			if(appname && session == null)
 			{			
 				GenerateNewInstance(request,response,appname);
 				return;
 			}
-			//session needs to end in a slash, so redirect
+			//session needs to end in a slash, so redirect but keep session id
 			if(appname && strEndsWith(URL.pathname,session))
 			{
 				GenerateNewInstance(request,response,appname,"");
 				return;
 			}
+			//no app name but is directory. Not listing directories, so 404
 			if(!appname)
 			{
 				_404(response);
 				
 				return;
 			}
+			//should never reach here.
 			filename = './support/client/lib/index.html';
 		}
-		
+		//just serve the file
 		ServeFile(filename,response,URL);
 		
 	}
 	else if(libpath.existsSync(filename +".yaml"))
 	{
-		
+		//was not found, but found if appending .yaml. Serve as yaml
 		ServeYAML(filename +".yaml",response,URL);
 
 	}
-	// is an admin call
+	// is an admin call, currently only serving instances
 	else if(uri.indexOf('\\admin\\') != -1)
 	{
 		if(uri.indexOf('\\admin\\instances'))
@@ -294,29 +310,32 @@ function startVWF(){
 		return;
 	}
 	
-}
+	} // close onRequest
 	
+	//create the server
 	var srv = http.createServer(OnRequest).listen(3000);
 	console.log('Serving on port 3000');
 	
-	
-	
+	//create socket server
 	sio = sio.listen(srv,{log:false});
 	sio.set('transports', ['websocket']);
 	sio.sockets.on('connection', function (socket) {
 	  
 	  
-	  
+	  //get session for new connection
 	  var namespace = getNamespace(socket);
 	  
+	  //create or setup session data
 	  if(!global.sessions)
 	    global.sessions = {};
 	   
+	  //if it's a new session, setup record 
 	  if(!global.sessions[namespace])
 	  {
 		global.sessions[namespace] = {};
 		global.sessions[namespace].clients = {};
 		global.sessions[namespace].time = 0.0;
+		//keep track of the timer for this session
 		global.sessions[namespace].timerID = setInterval(function(){
 		
 			global.sessions[namespace].time += 33.3333333;
@@ -330,6 +349,7 @@ function startVWF(){
 		
 	  }
 	 
+	  //add the new client to the session data
       global.sessions[namespace].clients[socket.id] = socket;	 
 	  
 	  socket.pending = true;
@@ -354,12 +374,15 @@ function startVWF(){
 	  
 	  socket.on('message', function (msg) {
 		
+			//need to add the client identifier to all outgoing messages
 		    var message = JSON.parse(msg);
 			message.client = socket.id;
+			//distribute message to all clients on given session
 			for(var i in global.sessions[namespace].clients)
 			{
 				var client = global.sessions[namespace].clients[i];
 				
+				//if the message was get state, then fire all the pending messages after firing the setState
 				if(message.action == "getState")
 				{
 					console.log('Got State');
@@ -372,7 +395,7 @@ function startVWF(){
 				}
 				else
 				{
-					
+					//just a regular message, so push if the client is pending a load, otherwise just send it.
 					if(client.pending === true)
 					{
 						client.pendingList.push(message);
@@ -385,10 +408,12 @@ function startVWF(){
 			
 	  });
 	  
+	  //When a client disconnects, go ahead and remove the session data
 	  socket.on('disconnect', function () {
 		  
 		  global.sessions[namespace].clients[socket.id] = null;	 
 		  delete global.sessions[namespace].clients[socket.id];
+		  //if it's the last client, delete the data and the timer
 		  if(Object.keys(global.sessions[namespace].clients).length == 0)
 		  {
 			clearInterval(global.sessions[namespace].timerID);
@@ -400,10 +425,5 @@ function startVWF(){
 	});
 
 }
-
-
-
-
-
 
 exports.startVWF = startVWF;
