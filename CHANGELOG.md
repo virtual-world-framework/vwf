@@ -3,7 +3,29 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 
 ----------------------------------
 
+0.6.3
+----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
+
+- CHG: Add note that driver-level queries w/ an absolute path do not require a nodeId as the first parameter - undefined may be passed instead.
+- NEW: Rename hammer.js directory to touch to match driver name.
+- NEW: Add hammer.js library, touch component, and view driver.
+- NEW: Update navscene applications to use touch interface as well.
+- CHG: Increase max nesting in json parse for bzflag persistence.
+- NEW: Lesson and Instruction components for a simple linear lesson
+- CHG: Fix errors in query documentation - there are still more to be fixed
+- CHG: Revert lesson recipe that inadvertently got checked in mid-progress
+- CHG: Add error check for case when "find()" returns no results. Previously, this had errored out because find() tried to call map() directly on the results
+- NEW: First draft of lesson cookbook recipe (not fully functional, yet)
+- CHG: Change lesson and instruction components
+- CHG: Added a lesson application to test
+- NEW: Updated information for VWF branches, and provided link to VWF Forum topic posting on branching.
+- NEW: Updated expected dates for cookbook recipes
+- NEW: Add Pitfalls link to the left side of doc web pages
+- NEW: Add pitfalls.md for documentation of best practices and pitfalls to avoid
+- CHG: Fix google earth bug to use cameraData from model on application load if available.
+- CHG: Update module declaration and comment style for JSDoc 3.
+
 0.6.2
 ----------------------------------------------------------------------------------------------------
 - BUG: Fix bug that overrides the glge color with vwf color.
