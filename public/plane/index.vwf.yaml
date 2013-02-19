@@ -17,7 +17,7 @@ properties:
   navmode: orbit
   rotationSpeed: 10
 children:
-  plane:
+  planeRoot:
     extends: http://vwf.example.com/node3.vwf
     implements:
     - http://vwf.example.com/sway-on-click.vwf
@@ -28,24 +28,27 @@ children:
       # sway-on-click configuration parameters
       sway-axis: [ 1, 0, 0 ]
     children:
-      prop:
-        extends: http://vwf.example.com/node3.vwf
-        # # 1: Uncomment to apply the spin-on-click behavior to the prop
-        # # ... located in public/types/spin-on-click.vwf.yaml
-        properties:
-          spin-rate: 23
-        implements:
-        - http://vwf.example.com/spin-on-click.vwf
-    # # 2: Uncomment to enable/disable sway and rotate the prop on click
+      plane: 
+        extends: http://vwf.example.com/node3.vwf 
+        children: 
+          prop:
+            extends: http://vwf.example.com/node3.vwf
+            # # 1: Uncomment to apply the spin-on-click behavior to the prop
+            # # ... located in public/types/spin-on-click.vwf.yaml
+            properties:
+              spin-rate: 23
+            implements:
+            - http://vwf.example.com/spin-on-click.vwf
+            # # 2: Uncomment to enable/disable sway and rotate the prop on click
     scripts:
     - |
       this.pointerClick = function() {
         if ( this["sway-swaying"] ) {
           this["sway-swaying"] = false;
-          this.prop["spin-spinning"] = false;
+          this.plane.prop["spin-spinning"] = false;
         } else {
           this["sway-swaying"] = true;
-          this.prop["spin-spinning"] = true;
+          this.plane.prop["spin-spinning"] = true;
         }
       }
   sceneCenter:
@@ -61,6 +64,9 @@ children:
       color: [ 255, 255, 255]
       translation: [ 0, -100, 0 ]
       rotation: [ 0, 0, 1, 90 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
 scripts:
 - |
     this.initialize = function(){

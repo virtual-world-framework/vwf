@@ -71,7 +71,7 @@ children:
       lightType: "point"
       enable: true
       distance: 2000
-      intensity: 0.4
+      intensity: 0.3
       color: [ 255, 255, 255 ]
       glge-constantAttenuation: 0.3
       glge-linearAttenuation: 0.00000001
@@ -86,7 +86,9 @@ children:
       distance: 2000
       intensity: 0.2
       color: [ 255, 255, 255]
-      glge-constantAttenuation: 1
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001 
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
   radio: 
@@ -429,50 +431,41 @@ children:
           if ( radio.keysLocked ) return;
         }
     children:
-              EnvironmentAmbientLight:
-                extends: http://vwf.example.com/node3.vwf
-              Radio:
-                extends: http://vwf.example.com/node3.vwf
-                properties: 
-                  playing: false
-                  looping: false
-                  speed: 1
-                children:
-                  ic40_MicrophonePort:
-                    extends: http://vwf.example.com/node3.vwf
-                    children:
-                      bone6:
-                        extends: http://vwf.example.com/node3.vwf
-                        children:
-                          glgeObj1:
-                            extends: http://vwf.example.com/mesh.vwf
-                  ic40_SpeakerPort:
-                    extends: http://vwf.example.com/node3.vwf
-                    children:
-                      bone8:
-                        extends: http://vwf.example.com/node3.vwf
-                        children:
-                          glgeObj2:
-                            extends: http://vwf.example.com/mesh.vwf
-                  ic40Channel:
-                    extends: http://vwf.example.com/node3.vwf
-                    implements:
-                    - http://vwf.example.com/control.vwf
-                    properties: 
-                      controlType: rotate
-                      controlMode: continuous
-                      transformIncrement: -18
-                      transformAxis: [0, 1, 0]
-                      maxValue: 15
-                      dragSpeed: 20
-                    scripts:
-                    - |
-                        this.pointerUp = function( pointerInfo, pickInfo ) {
-                          this.parent.parent.channel = this.controlValue;
-                        }
-                        this.pointerMove = function( pointerInfo, pickInfo ) {
-                          this.parent.parent.channel = this.controlValue;
-                        }
+      EnvironmentAmbientLight:
+        extends: http://vwf.example.com/node3.vwf
+      Radio:
+        extends: http://vwf.example.com/node3.vwf
+        properties: 
+          playing: false
+          looping: false
+          speed: 1
+        children:
+          ic40_MicrophonePort:
+            extends: http://vwf.example.com/node3.vwf
+          ic40_SpeakerPort:
+            extends: http://vwf.example.com/node3.vwf
+          ic40Channel:
+            extends: http://vwf.example.com/node3.vwf
+            implements:
+            - http://vwf.example.com/control.vwf
+            properties: 
+              controlType: rotate
+              controlMode: continuous
+              transformIncrement: -18
+              transformAxis: [0, 1, 0]
+              maxValue: 15
+              dragSpeed: 20
+            scripts:
+            - |
+                this.pointerUp = function( pointerInfo, pickInfo ) {
+                  this.parent.parent.channel = this.controlValue;
+                }
+                this.pointerMove = function( pointerInfo, pickInfo ) {
+                  this.parent.parent.channel = this.controlValue;
+                }
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40Down:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -486,11 +479,14 @@ children:
                         this.pointerUp = function() {
                           this.parent.parent.down();
                         }
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40Monitor:
                     extends: http://vwf.example.com/node3.vwf
                     children:
-                      glgeObj5:
-                        extends: http://vwf.example.com/mesh.vwf
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40P0:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -504,6 +500,9 @@ children:
                         this.pointerUp = function() {
                           this.parent.parent.p0();
                         }                
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40P1:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -517,6 +516,9 @@ children:
                         this.pointerUp = function() {
                           this.parent.parent.p1();
                         }                  
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40P2:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -530,6 +532,9 @@ children:
                         this.pointerUp = function() {
                           this.parent.parent.p2();
                         }                  
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40P3:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -543,6 +548,9 @@ children:
                         this.pointerUp = function() {
                           this.parent.parent.p3();
                         }                  
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40PTT:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -569,6 +577,9 @@ children:
                         this.pointerUp = function() {
                           this.parent.parent.red();
                         }                 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40Up:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -582,6 +593,9 @@ children:
                         this.pointerUp = function() {
                           this.parent.parent.up();
                         }
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   ic40Volume:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
@@ -601,6 +615,9 @@ children:
                             this.parent.parent.volume = 0;
                           }                            
                         }
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   LCD:
                     extends: http://vwf.example.com/node3.vwf
                     children:
@@ -611,8 +628,8 @@ children:
                   LCD_Back:
                     extends: http://vwf.example.com/node3.vwf
                     children:
-                      glgeObj15:
-                        extends: http://vwf.example.com/mesh.vwf
+              material: 
+                extends: http://vwf.example.com/material.vwf 
                   BeltClip_1:
                     extends: http://vwf.example.com/node3.vwf
                     properties: 
@@ -627,20 +644,8 @@ children:
                     children:
                       BeltClip:
                         extends: http://vwf.example.com/node3.vwf
-                        children:
-                          bone25:
-                            extends: http://vwf.example.com/node3.vwf
-                            children:
-                              glgeObj16:
-                                extends: http://vwf.example.com/mesh.vwf
                       BeltClipBase:
                         extends: http://vwf.example.com/node3.vwf
-                        children:
-                          bone27:
-                            extends: http://vwf.example.com/node3.vwf
-                            children:
-                              glgeObj17:
-                                extends: http://vwf.example.com/mesh.vwf
                       BeltClip_Latch:
                         extends: http://vwf.example.com/node3.vwf
                         properties: 
@@ -655,12 +660,6 @@ children:
                         children:
                           BeltClipTab:
                             extends: http://vwf.example.com/node3.vwf
-                            children:
-                              bone30:
-                                extends: http://vwf.example.com/node3.vwf
-                                children:
-                                  glgeObj18:
-                                    extends: http://vwf.example.com/mesh.vwf
                   Battery:
                     extends: http://vwf.example.com/node3.vwf
                     properties: 
@@ -675,12 +674,6 @@ children:
                     children:
                       ic40Battery:
                         extends: http://vwf.example.com/node3.vwf
-                        children:
-                          bone33:
-                            extends: http://vwf.example.com/node3.vwf
-                            children:
-                              glgeObj19:
-                                extends: http://vwf.example.com/mesh.vwf
                   BatteryLatch:
                     extends: http://vwf.example.com/node3.vwf
                     properties: 
@@ -695,17 +688,8 @@ children:
                     children:
                       ic40BatteryLatch:
                         extends: http://vwf.example.com/node3.vwf
-                        children:
-                          glgeObj20:
-                            extends: http://vwf.example.com/mesh.vwf
                   ic40Radio:
                     extends: http://vwf.example.com/node3.vwf
-                    children:
-                      bone37:
-                        extends: http://vwf.example.com/node3.vwf
-                        children:
-                          glgeObj21:
-                            extends: http://vwf.example.com/mesh.vwf
               ic40Antennae:
                 extends: http://vwf.example.com/node3.vwf
                 scripts:

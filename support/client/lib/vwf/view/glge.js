@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -461,8 +461,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         canvas.onmouseup = function( e ) {
             var ctrlDown = e.ctrlKey;
-            var atlDown = e.altKey;
-            var ctrlAndAltDown = ctrlDown && atlDown;
+            var altDown = e.altKey;
+            var ctrlAndAltDown = ctrlDown && altDown;
 
             switch( e.button ) {
                 case 2: 
@@ -484,8 +484,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
                     var glgeObj = sceneView.state.nodes[mouseUpObjectID].glgeObject;
                     if ( glgeObj ) {
-                        if( ctrlDown && !atlDown ) {
-                            if ( sceneView.state.nodes[mouseUpObjectID] ) {
+                        if ( ctrlDown || altDown ) {
                                 var colladaObj;
                                 var currentObj = glgeObj;
                                 while ( !colladaObj && currentObj ) {
@@ -494,12 +493,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                                     else
                                         currentObj = currentObj.parent;
                                 } 
+                            if( ctrlDown && !altDown ) {
+                                if ( sceneView.state.nodes[mouseUpObjectID] ) {
+
                                 if ( colladaObj ) {
                                     recurseGroup.call( sceneView, colladaObj, 0 );
                                 }
                             }                
-                        } else if ( atlDown && !ctrlDown ) {
+                            } else if ( altDown && !ctrlDown ) {
                             recurseGroup.call( sceneView, glgeObj, 0 ); 
+                                consoleScene.call( sceneView, sceneNode.glgeScene, 0 );
+                            }
                         }
                     }
                 }
@@ -776,31 +780,64 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         return undefined;
     }
 
-    function recurseGroup( grp, iDepth ) {
+    function getObjectType( obj ) {
+        // var type = "Group";
+        // if ( object3 instanceof GLGE.Camera ) {
+        //     type = "camera"
+        // } else if ( object3 instanceof GLGE.Light ) {
+        //     type = "light"
+        // } else if ( object3 instanceof GLGE.Mesh ) {
+        //     type = "mesh"        
+        // } else if ( object3 instanceof GLGE.Object ) {
+        //     type = "object"
+        // } else if ( object3 instanceof GLGE.Scene ) {
+        //     type = "scene";
+        // }
+        return obj.className;        
+    }
+
+    function consoleOut( msg ) {
+        console.info( msg );
+    }
+
+    function consoleObject( object3, depth ) {
+        consoleOut.call( this, indent2.call( this, depth ) + name.call( this, object3 )+ " -> " + "        type = " + getObjectType.call( this, object3 ) );
+    }
+
+    function consoleScene( parent, depth ) {
+        consoleObject.call( this, parent, depth );
+        if ( parent.children !== undefined ) {
+            for ( var i = 0; i < parent.children.length; i++ ) {
+                consoleScene.call( this, parent.children[i], depth+1 );
+            }
+        }
+    }
+
+    function recurseGroup( grp, depth ) {
         if ( grp && grp.getChildren ) {
             var grpChildren = grp.getChildren();
-            var sOut = indent.call( this,iDepth);
+            var sOut = indent.call( this,depth);
             var name = "";
 
             for (var i = 0; i < grpChildren.length; i++) {
                 if (grpChildren[i].constructor == GLGE.Collada) {
-                    iDepth++;
-                    outputCollada.call( this, grpChildren[i], iDepth, true);
-                    recurseGroup.call( this, grpChildren[i], iDepth + 1);
-                    outputCollada.call( this, grpChildren[i], iDepth, false);
-                    iDepth--;
+                    depth++;
+                    outputCollada.call( this, grpChildren[i], depth, true);
+                    recurseGroup.call( this, grpChildren[i], depth + 1);
+                    outputCollada.call( this, grpChildren[i], depth, false);
+                    depth--;
                 } else if (grpChildren[i].constructor == GLGE.Group) {
-                    iDepth++;
-                    outputGroup.call( this, grpChildren[i], iDepth, true);
-                    recurseGroup.call( this, grpChildren[i], iDepth + 1);
-                    outputGroup.call( this, grpChildren[i], iDepth, false);
-                    iDepth--;
+                    depth++;
+                    outputGroup.call( this, grpChildren[i], depth, true);
+                    recurseGroup.call( this, grpChildren[i], depth + 1);
+                    outputGroup.call( this, grpChildren[i], depth, false);
+                    depth--;
                 } else if ( grpChildren[i].constructor == GLGE.Object ) {
-                    outputObject.call( this, grpChildren[i], iDepth);
+                    outputObject.call( this, grpChildren[i], depth);
                 }
             }
         } else if ( grp.constructor == GLGE.Object ) {
-            outputObject.call( this, grp, iDepth );
+            outputObject.call( this, grp, depth );
         }
     }
 
@@ -828,6 +865,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         for (var j = 0; j < iIndent; j++) { sOut = sOut + indentStr.call( this ); }
         return sOut;
     }
+
+    function indent2(iIndent) {
+        var sOut = "";
+        var idt = indentStr.call( this )
+        for ( var j = 0; j < iIndent; j++ ) { 
+            sOut = sOut + idt + idt; 
+        }
+        return sOut;
+    }  
 
     function outputCollada(collada, iIndent, open) {
         var sOut = indent.call(this,iIndent);
