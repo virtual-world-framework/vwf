@@ -50,3 +50,15 @@ As mentioned in [*Do not access the html document from the model*](#noAccessHtml
 ## Be aware of asynchronicity
 
 When programming in the [view](architecture.html), calls to get/set [model](architecture.html) properties and call [model](architecture.html) methods do not execute immediately (the are sent to the [reflector](architecture.html) and queued in proper time order).  Therefore, you must wait until the [model](architecture.html) throws the appropriate event to indicate that your operation is complete.  For more information on accessing the [model](architecture.html) from the [view](architecture.html), read the [*Create a 2D Interface*](2d-interface.html) cookbook recipe.
+
+## Be careful assigning named functions to event handlers
+
+If you assign something like:
+
+	node1.event = node2.method;
+
+VWF will try to call *method* from node1, not node2.  Instead, set the event handler like so:
+
+	node1.event = function() {
+	  node2.method();
+	}
