@@ -111,7 +111,10 @@ task :documentation do |task|
 
             # Run jsdoc on the translated source.
 
-            sh "#{build}/jsdoc/jsdoc", "--configure", "#{build}/jsdoc.conf", "--destination", "#{documentation}",
+            env = RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/ ?
+                { "SHELLOPTS" => "igncr" } : {}  # allow bash scripts with CRLF terminators on Cygwin
+
+            sh env, "#{build}/jsdoc/jsdoc", "--configure", "#{build}/jsdoc.conf", "--destination", "#{documentation}",
                 * FileList.new( PATTERNS ).sort
 
         end
