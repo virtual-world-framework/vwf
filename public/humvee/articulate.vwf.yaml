@@ -16,7 +16,7 @@ extends:
   http://vwf.example.com/node3.vwf
 methods:
   articulate: |
-    switch( Math.round( this.time / 2 ) % 12 ) {
+    switch( Math.round( time / 2 ) % 12 ) {
       case 0:
         this.logger.info( "-X" );
         this["articulate-axes"] && this["articulate-axes"].x && this.rotateBy( [ 1, 0, 0, -45 ], 1, "scaled" );

@@ -44,7 +44,7 @@ scripts:
     }
   }
   this.initialize = function() {
-    this.lastUpdateTime = this.time;
+    this.lastUpdateTime = time;
     this.future(0.1).fire();
   }
   this.getCameraVec = function( x, y, z ) {
@@ -57,7 +57,7 @@ scripts:
       return camAt;      
   }
   this.timeElapsed = function() {
-    var timeElapsed = this.time - this.lastUpdateTime;
+    var timeElapsed = time - this.lastUpdateTime;
     if ( !this.lastUpdateTime || timeElapsed > 1 ) {
       timeElapsed = 1;  
     }
@@ -68,7 +68,7 @@ scripts:
     if(this.timeElapsed() > 0) {
       dist = dist * this.timeElapsed();
     }
-    this.lastUpdateTime = this.time;
+    this.lastUpdateTime = time;
     return dist;
   }
   this.fire = function() {

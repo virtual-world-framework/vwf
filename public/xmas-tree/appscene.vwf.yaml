@@ -89,11 +89,11 @@ scripts:
     }, this );   
     this.pointerDown = function( pointerInfo, pickInfo ) {
       mouseIsDown = true;
-      mouseDownTime = this.time;
+      mouseDownTime = time;
     }
     this.pointerUp = function( pointerInfo, pickInfo ) {
       mouseIsDown = false;
-      var now =  this.time;
+      var now =  time;
       //if ( now - mouseDownTime < 700 ) {
       //  this.createObject();
       //}

@@ -25,7 +25,7 @@ scripts:
 - |
     this.touchDrag = function( position ){
       console.info('touchDrag');
-      this.input.pointerEventTime = this.time;
+      this.input.pointerEventTime = time;
 
       var active = this.input.futureActive();
       var delta = this.input.pointerDelta();
@@ -33,11 +33,11 @@ scripts:
       if ( valid && !active ) {
         this.future( 0.1 ).update();
       }
-      this.input.lastInputTime = this.time;   
+      this.input.lastInputTime = time;
     }
     this.touchZoom = function( scale, external ) {
-      this.input.pointerEventTime = this.time;
-      this.input.lastInputTime = this.time;
+      this.input.pointerEventTime = time;
+      this.input.lastInputTime = time;
 
       if (!this.activeCameraComp) {
         this.getActiveCamera();

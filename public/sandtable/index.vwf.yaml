@@ -87,14 +87,13 @@ children:
               this.path.push( { translation: pos, time: 1 } );
             }
             this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
-            this.timeSinceLast = this.time;
+            this.timeSinceLast = time;
             this.planeGroup1.translation = this.path[ this.lastPathIndex || 0 ].translation;
             this.goal1.translation = this.path[ this.nextPathIndex || 0 ].translation;
 
             this.animating = true;
           }
           this.animate = function() {
-            var time = this.time;
             var len = this.path.length;
             var timeElasped = time - this.timeSinceLast;
             var lastPathPoint = this.path[ this.lastPathIndex ];
@@ -254,14 +253,13 @@ children:
           }            
          
           this.nextPathIndex = ( this.lastPathIndex || 0 ) + 1;
-          this.timeSinceLast = this.time;
+          this.timeSinceLast = time;
           this.planeGroup2.translation = this.path[ this.lastPathIndex || 0 ].translation;
           this.goal2.translation = this.path[ this.nextPathIndex || 0 ].translation;
           
           this.animating = true;
         }
         this.animate = function() {
-          var time = this.time;
           var len = this.path.length;
           var timeElasped = time - this.timeSinceLast;
           var lastPathPoint = this.path[ this.lastPathIndex ];

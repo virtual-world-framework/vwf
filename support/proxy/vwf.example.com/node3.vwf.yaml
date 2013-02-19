@@ -328,8 +328,8 @@ methods:
       this.translationWorker(
         startTranslation,
         stopTranslation,
-        this.time,
-        this.time + ( duration || 0 )
+        time,
+        time + ( duration || 0 )
       ); //@ sourceURL=node3.translateBy.vwf
 
   ## Translate to given translation over duration.
@@ -352,8 +352,8 @@ methods:
       this.translationWorker(
         startTranslation,
         stopTranslation,
-        this.time,
-        this.time + ( duration || 0 )
+        time,
+        time + ( duration || 0 )
       ); //@ sourceURL=node3.translateTo.vwf
 
   ## Perform a translation animation.
@@ -378,10 +378,10 @@ methods:
       this.playing = true;
       this.translation = goog.vec.Vec3.lerp(
         startTranslation, stopTranslation,
-        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
+        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Vec3.create()
       );
-      if ( this.time < stopTime ) {
+      if ( time < stopTime ) {
         this.in( 0.04 ).translationWorker(
           startTranslation,
           stopTranslation,
@@ -476,8 +476,8 @@ methods:
       this.quaternionWorker(
         startQuaternion,
         stopQuaternion,
-        this.time,
-        this.time + ( duration || 0 )
+        time,
+        time + ( duration || 0 )
       ); //@ sourceURL=node3.quaterniateBy.vwf
 
   ## Rotate to given quaternion over duration.
@@ -500,8 +500,8 @@ methods:
       this.quaternionWorker(
         startQuaternion,
         stopQuaternion,
-        this.time,
-        this.time + ( duration || 0 )
+        time,
+        time + ( duration || 0 )
       ); //@ sourceURL=node3.quaterniateTo.vwf
 
   ## Perform a quaternion animation.
@@ -526,10 +526,10 @@ methods:
       this.playing = true;
       this.quaternion = goog.vec.Quaternion.slerp(
         startQuaternion, stopQuaternion,
-        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
+        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Quaternion.create()
       );
-      if ( this.time < stopTime ) {
+      if ( time < stopTime ) {
         this.in( 0.04 ).quaternionWorker(
           startQuaternion,
           stopQuaternion,
@@ -566,8 +566,8 @@ methods:
       this.scaleWorker(
         startScale,
         stopScale,
-        this.time,
-        this.time + ( duration || 0 )
+        time,
+        time + ( duration || 0 )
       );
 
   ## Scale to given scale over duration.
@@ -590,8 +590,8 @@ methods:
       this.scaleWorker(
         startScale,
         stopScale,
-        this.time,
-        this.time + ( duration || 0 )
+        time,
+        time + ( duration || 0 )
       );
 
   ## Perform a scale animation.
@@ -616,10 +616,10 @@ methods:
       this.playing = true;
       this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
         startScale, stopScale,
-        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( this.time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
+        startTime >= stopTime ? 1 : ( Math.max( startTime, Math.min( time, stopTime ) ) - startTime ) / ( stopTime - startTime ),
         goog.vec.Vec3.create()
       );
-      if ( this.time < stopTime ) {
+      if ( time < stopTime ) {
         this.in( 0.04 ).scaleWorker(
           startScale,
           stopScale,

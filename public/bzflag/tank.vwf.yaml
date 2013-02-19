@@ -47,7 +47,7 @@ scripts:
     } 
   }
   this.timeElapsed = function(input) {
-    var timeElapsed = this.time - input.lastInputTime;
+    var timeElapsed = time - input.lastInputTime;
     if ( !input.lastInputTime || timeElapsed > 1 ) {
       timeElapsed = 1;  
     }

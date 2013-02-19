@@ -275,9 +275,9 @@ scripts:
         }
         this.updateSpeed();
         this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
-        this.timeAtLastPoint = this.time;
+        this.timeAtLastPoint = time;
       } else {
-        var elapsedTime = this.time - this.timeAtLastPoint; 
+        var elapsedTime = time - this.timeAtLastPoint;
         var currentPoint = this.points[ this["fly-pointIndex"] ].point;
         var nextPoint = this.points[ this["fly-pointIndex"]+1 ].point;
         var percent = elapsedTime / this.timeToNext;
@@ -296,7 +296,7 @@ scripts:
 
           this.updateSpeed();
           this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
-          this.timeAtLastPoint = this.time;          
+          this.timeAtLastPoint = time;
         }
       }
       this.future( 0.05 ).fly();  // schedule the next step

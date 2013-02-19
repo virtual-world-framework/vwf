@@ -29,7 +29,7 @@ properties:
   sway-swaying:
     set: |
       if ( value && ! this["sway-start"] ) {
-        this["sway-start"] = this.time;
+        this["sway-start"] = time;
         this.sway();
       } else if ( ! value && this["sway-start"] ) {
         this["sway-start"] = null;
@@ -77,7 +77,7 @@ scripts:
     this.sway = function() {
       var start = this["sway-start"];
       if ( start ) {
-        this.rotateBy( [ this["sway-axis"][0], this["sway-axis"][1], this["sway-axis"][2],  Math.cos( this.time - start ) * Math.PI / 2 ], 0 );
+        this.rotateBy( [ this["sway-axis"][0], this["sway-axis"][1], this["sway-axis"][2],  Math.cos( time - start ) * Math.PI / 2 ], 0 );
         this.future( 0.05 ).sway();
       }      
     } //@ sourceURL=sway-on-click.vwf
