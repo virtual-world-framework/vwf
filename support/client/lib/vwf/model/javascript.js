@@ -125,6 +125,7 @@ define( [ "module", "vwf/model", "vwf/configuration", "vwf/utility" ], function(
 
             var body = document.getElementsByTagName("body")[0];
             var sandbox = document.createElement( "iframe" );
+            sandbox.setAttribute( "style", "display: none" );
             body.appendChild( sandbox );
             this.sandbox = SB = sandbox.contentWindow;
 
