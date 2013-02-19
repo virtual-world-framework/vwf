@@ -13,7 +13,7 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
 
     return view.load( module, {
 
@@ -188,7 +188,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 sceneNode.frameCount == 0
             
                 
-                var newPick = ThreeJSPick.call(self,sceneNode);
+                var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
                 
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
                 if(self.lastPickId != newPickId && self.lastEventData)
@@ -416,6 +416,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     break;
             };
 
+            var mousePos = utility.coordinates.contentFromWindow( e.target, { x: e.clientX, y: e.clientY } ); // canvas coordinates from window coordinates
+
             returnData.eventData = [ {
                 /*client: "123456789ABCDEFG", */
                 button: mouseButton,
@@ -431,8 +433,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         shift: e.shiftKey,
                         meta: e.metaKey,
                     },
-                position: [ mouseXPos.call( this,e)/sceneView.width, mouseYPos.call( this,e)/sceneView.height ],
-                screenPosition: [mouseXPos.call(this,e), mouseYPos.call(this,e)]
+                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
+                screenPosition: [ mousePos.x, mousePos.y ]
             } ];
 
 
@@ -567,18 +569,38 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             };
            
             var eData = getEventData( e, ctrlAndAltDown );
-            if ( eData ) {
+            if ( eData !== undefined ) {
                 var mouseUpObjectID = pointerPickID;
                 if ( mouseUpObjectID && pointerDownID && mouseUpObjectID == pointerDownID ) {
                     sceneView.kernel.dispatchEvent( mouseUpObjectID, "pointerClick", eData.eventData, eData.eventNodeData );
 
                     // TODO: hierarchy output, helpful for setting up applications
-                    //var obj3js = sceneView.state.nodes[mouseUpObjectID].threeObject;
-                    //if ( obj3js ) {
-                    //    if ( atlDown && !ctrlDown ) {
-                    //        recurseGroup.call( sceneView, obj3js, 0 ); 
-                    //    }
-                    //}
+                    var objNode = sceneView.state.nodes[mouseUpObjectID];
+                    var obj3js = objNode.threeObject;
+                    if ( obj3js ) {
+                        if ( atlDown && !ctrlDown ) {
+                            var colladaParent = obj3js;
+                            while ( colladaParent.parent ) {
+                                if ( colladaParent.loadedColladaNode ) {
+                                    break;
+                                } else {
+                                    colladaParent = colladaParent.parent;
+                                }
+                            }
+                            if ( colladaParent === undefined ) {
+                                colladaParent = obj3js;
+                            }
+                            recurseObject3D.call( sceneView, colladaParent, "", 0 );
+
+                            consoleScene.call( this, sceneNode.threeScene, 0 ); 
+                        }
+                    }
+                } else {
+                    if ( atlDown && !ctrlDown ) {
+                        recurseObject3D.call( sceneView, sceneNode.threeScene, "", 0 );
+
+                        consoleScene.call( this, sceneNode.threeScene, 0 ); 
+                    }                    
                 }
                 sceneView.kernel.dispatchEvent( pointerDownID, "pointerUp", eData.eventData, eData.eventNodeData );
             }
@@ -832,14 +854,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         };
          
     };
-    function mouseXPos(e) {
-        return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
-    }
+    // function mouseXPos(e) {
+    //     return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
+    // }
 
-    function mouseYPos(e) {
-        return e.clientY - e.currentTarget.offsetTop + window.scrollY;
-    }
-    function ThreeJSPick(sceneNode)
+    // function mouseYPos(e) {
+    //     return e.clientY - e.currentTarget.offsetTop + window.scrollY;
+    // }
+    function ThreeJSPick( canvas, sceneNode )
     {
         if(!this.lastEventData) return;
         
@@ -850,11 +872,13 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         
         var SCREEN_HEIGHT = window.innerHeight;
         var SCREEN_WIDTH = window.innerWidth;
-        var x = ( this.lastEventData.eventData[0].screenPosition[0] / SCREEN_WIDTH ) * 2 - 1;
-        var y = -( this.lastEventData.eventData[0].screenPosition[1] / SCREEN_HEIGHT ) * 2 + 1;
+
+        var mousepos = { x: this.lastEventData.eventData[0].screenPosition[0], y: this.lastEventData.eventData[0].screenPosition[1] }; // window coordinates
+        mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
+
         var directionVector = new THREE.Vector3();
         
-        directionVector.set(x, y, .5);
+        directionVector.set( mousepos.x, mousepos.y, 0.5 );
         
         this.projector.unprojectVector(directionVector, threeCam);
         var pos = new THREE.Vector3();
@@ -887,6 +911,130 @@ define( [ "module", "vwf/view" ], function( module, view ) {
          return getPickObjectID(threeObject.parent);
         return null;    
     }
+
+    function indentStr() {
+        return "  ";
+    }
+
+    function indent(iIndent) {
+        var sOut = "";
+        for ( var j = 0; j < iIndent; j++ ) { 
+            sOut = sOut + indentStr.call( this ); 
+        }
+        return sOut;
+    }
+
+    function indent2(iIndent) {
+        var sOut = "";
+        var idt = indentStr.call( this )
+        for ( var j = 0; j < iIndent; j++ ) { 
+            sOut = sOut + idt + idt; 
+        }
+        return sOut;
+    }    
+
+    function getObjectType( object3 ) {
+        var type = "object3D";
+        if ( object3 instanceof THREE.Camera ) {
+            type = "camera"
+        } else if ( object3 instanceof THREE.Light ) {
+            type = "light"
+        } else if ( object3 instanceof THREE.Mesh ) {
+            type = "mesh"
+        } else if ( object3 instanceof THREE.Scene ) {
+            type = "scene";
+        }
+        return type;
+    }
+
+    function getExtendType( object3 ) {
+        var exts = "extends: http://vwf.example.com/node3.vwf";
+        if ( object3 instanceof THREE.Camera ) {
+            exts = "extends: http://vwf.example.com/camera.vwf"
+        } else if ( object3 instanceof THREE.Light ) {
+            exts = "extends: http://vwf.example.com/light.vwf"
+        }
+        return exts;
+    }
+
+    function consoleOut( msg ) {
+        console.info( msg );
+        //this.logger.info( msg );
+    }
+
+    function getBindableCount( object3 ) {
+        var count = 0, tp ;
+        if ( object3 instanceof THREE.Mesh ){
+            count++;
+        }
+        for ( var i = 0; i < object3.children.length; i++ ) {
+            tp = getObjectType.call( this, object3.children[i] );
+            if ( object3.children[i].name != "" ) { 
+                count++; 
+            }
+         }
+         //consoleOut.call( this, count + " = getBindableCount( "+object3.name+" )");
+         return count;
+    }
+
+
+    function outputObject3D( object3, parentName, iIndent ) {
+        var sOut = indent.call( this, iIndent + 1);
+        var tp = getObjectType.call( this, object3 );
+        var bindCount = ( object3.children !== undefined ) ? getBindableCount.call( this, object3 ) : 0;
+
+        if ( object3.name != "" ) {
+            //consoleOut.call( this, indent.call( this, iIndent ) + objName + ":");
+            consoleOut.call( this, indent.call( this, iIndent ) + object3.name + ":");
+            consoleOut.call( this, sOut + getExtendType.call( this, object3 ) );
+
+            if ( bindCount > 0 ) {
+                consoleOut.call( this, sOut + "children:" );
+                if ( tp == "mesh" ) {
+                    // need to check the multimaterial list here
+                    outputMaterial.call( this, iIndent + 2, 0  )
+                }
+            }
+        }
+    }
+
+    function recurseObject3D( object3, parentName, depth ) {
+ 
+        var tp = getObjectType.call( this, object3 );
+        if ( object3 ) {
+            var sOut = indent.call( this, depth );
+            outputObject3D.call( this, object3, parentName, depth );
+            if ( getBindableCount.call( this, object3 ) > 0 ) {
+                for ( var i = 0; i < object3.children.length; i++ ) {
+                    depth++;
+                    recurseObject3D.call( this, object3.children[i], object3.name, depth + 1 );
+                    depth--;
+                }
+            }
+        }
+
+    }
+
+    function outputMaterial( iIndent, index  ) {
+
+        var sOut = indent.call( this, iIndent + 1 );
+        consoleOut.call( this, indent.call( this, iIndent) + "material" + ( index > 0 ? index : "" ) + ":" );
+        consoleOut.call( this, sOut + "extends: http://vwf.example.com/material.vwf" );
+
+    }    
+
+    function consoleObject( object3, depth ) {
+        //console.info( "consoleObject( "+object3.name+", "+depth+" )" );
+        consoleOut.call( this, indent2.call( this, depth ) + object3.name + " -> " + "        type = " + getObjectType.call( this, object3 ) );
+    }
+
+    function consoleScene( parent, depth ) {
+        consoleObject.call( this, parent, depth );
+        for ( var i = 0; i < parent.children.length; i++ ) {
+            consoleScene.call( this, parent.children[i], depth+1 );
+        }
+    }
+
         function getKeyValue( keyCode ) {
         var key = { key: undefined, code: keyCode, char: undefined };
         switch ( keyCode ) {
