@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -2095,6 +2095,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         vwfColor['g'] = color['g']*255;
         vwfColor['b'] = color['b']*255;                                
         if ( color['a'] !== undefined && color['a'] != 1 ) {
+            vwfColor['a'] = color['a'];
             vwfColor = new utility.color( "rgba("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+","+vwfColor['a']+")" );
         } else {
             vwfColor = new utility.color( "rgb("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+")" );
