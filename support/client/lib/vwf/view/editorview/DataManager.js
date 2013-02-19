@@ -495,7 +495,7 @@ function DataManager()
 		
 		for( var i in instances)
 		{
-			if(i.substr(i.lastIndexOf('/')+1) == this.getCurrentSession())
+			if(i == window.location.pathname)
 			{
 			    clients = instances[i].clients;
 			}

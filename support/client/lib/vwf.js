@@ -326,16 +326,18 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // communicates using a channel back to the server that provided the client documents.
 
             try {
-
-                socket = new io.Socket( undefined, {
+				
+             /*   socket = new io.Socket( {
 
                     // The socket is relative to the application path.
 
                     resource: window.location.pathname.slice( 1,
                         window.location.pathname.lastIndexOf("/") ),
-
+					
+					port:3000,
                     // The ruby socket.io server only supports WebSockets. Don't try the others.
-
+					rememberTransport: false,
+					tryTransportsOnConnectTimeout: false,
                     transports: [
                         'websocket',
                         // 'flashsocket',
@@ -359,7 +361,20 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     }
 
                 } );
-
+				
+				socket.transports =  [
+                        'websocket',
+                        // 'flashsocket',
+                        // 'htmlfile',
+                        // 'xhr-multipart',
+                        // 'xhr-polling',
+                        // 'jsonp-polling',
+                    ];
+				*/
+				
+				var space = window.location.pathname.slice( 1,
+                        window.location.pathname.lastIndexOf("/") );
+				socket = io.connect("ws://"+window.location.host);
             } catch ( e ) {
 
                 // If a connection to the reflector is not available, then run in single-user mode.
@@ -380,8 +395,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 socket.on( "connect", function() {
 
                     vwf.logger.info( "vwf.socket connected" );
-
-                    vwf.moniker_ = this.transport.sessionid;
+					console.log("vwf.socket connected");
+                    vwf.moniker_ = this.json.namespace.socket.sessionid;
 
                 } );
 
@@ -400,8 +415,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     try {
 
                         // Unpack the arguments.
-
-                        var fields = JSON.parse( message );
+						var fields = message;
+						if(typeof message == "string")
+							fields = JSON.parse( message );
 
                         fields.time = Number( fields.time );
                         // TODO: other message validation (check node id, others?)
@@ -437,8 +453,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 } );
 
-                socket.on( "error", function() { 
-
+                socket.on( "error", function(e) { 
+					
+					console.log("Socket IO error");
                     //Overcome by compatibility.js websockets check
                     //jQuery('body').html("<div class='vwf-err'>WebSockets connections are currently being blocked. Please check your proxy server settings.</div>"); 
 
@@ -446,7 +463,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 // Start communication with the reflector. 
 
-                socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
+                //socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
 
             } else if ( component_uri_or_json_or_object ) {
 
@@ -678,34 +695,22 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 var fields = queue.shift();
 
                 // Advance the time.
-				var framerate = 1/30;
+
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
                     var time = fields.time - this.lastTick;
-					var ticks = 0;
-					
-					while(time > framerate)
+					while(time > 0 && time < 1)
 					{	
-						var lt = window.performance.now();
 						this.tick();
-						var at = window.performance.now();
-						var took = (at - lt)/1000;
-						if(took > time/framerate)
-						{
-							console.log('cant compute fast enough. Bailing....');
-							break;
-						}
-						time -= framerate;
-						ticks++;
+						time -= .033333333;
+						
 					}
-					//console.log(ticks);
-					
 					//save the leftovers
 					this.lastTick = fields.time - time;
                 }
 
                 // Record the originating client.
-
+				debugger;
                 this.client_ = fields.client;
 
                 // Perform the action.

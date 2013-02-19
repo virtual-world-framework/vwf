@@ -1,0 +1,1 @@
+cmd /k "npm install node-inspector&&copy paperboy.js node_modules\node-inspector\node_modules\paperboy\lib"
