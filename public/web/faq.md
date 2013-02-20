@@ -192,7 +192,7 @@ Safari, Opera, Google Chrome, and Mozilla Firefox are all currently available an
 
 ###[26. Who will control the WebGL standard?](#)
 <div markdown="1">
-The WebGL standard is affected by the Khronos Group, Mozilla, Apple and Google currently along with influence from United Sates Computer Emergency Readiness Team which raises security concerns to which the WebGL consortium (headed by the Khronos Group) react.
+The WebGL standard is affected by the Khronos Group, Mozilla, Apple and Google currently along with influence from United States Computer Emergency Readiness Team which raises security concerns to which the WebGL consortium (headed by the Khronos Group) react.
 </div>
 
 ###[27. Is WebGL fast enough to support the VWF?](#)
