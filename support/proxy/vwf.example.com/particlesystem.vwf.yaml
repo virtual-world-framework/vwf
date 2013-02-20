@@ -81,28 +81,14 @@ properties:
   ## @name particlesystem.vwf#maxStartAcceleration
   ## @property
 
-  maxStartAcceleration:
+  maxAcceleration:
 
   ## Minimum start acceleration
   ## 
   ## @name particlesystem.vwf#minStartAcceleration
   ## @property
 
-  minStartAcceleration:
-
-  ## Maximum end acceleration
-  ## 
-  ## @name particlesystem.vwf#maxEndAcceleration
-  ## @property
-
-  maxEndAcceleration:
-
-  ## Minimum end acceleration
-  ## 
-  ## @name particlesystem.vwf#minEndAcceleration
-  ## @property
-
-  minEndAcceleration:
+  minAcceleration:
 
   ## Start color
   ## 

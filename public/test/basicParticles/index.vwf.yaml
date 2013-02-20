@@ -18,6 +18,14 @@ properties:
 children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
+    properties:
+      minVelocity: [ -1, -1, 4]
+      maxVelocity: [ 1, 1, 4.5]
+      maxAcceleration: [ 0, 0, -0.09]
+      minAcceleration: [ 0, 0, -0.1]
+      size: 3
+      maxLifeTime: 120
+      minLifeTime: 30
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:

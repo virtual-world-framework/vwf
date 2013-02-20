@@ -509,6 +509,53 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         material.ambient.setRGB( material.color.r,material.color.g,material.color.b);
                     }
                 }
+				if(threeObject instanceof THREE.ParticleSystem)
+				{
+					var ps = threeObject;
+					var particles = ps.geometry;
+					ps[propertyName] = propertyValue;
+					
+					if(propertyName == 'size')
+					{
+						ps.material.size = propertyValue;
+					
+					}
+					if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
+					{
+						if(!ps.minAcceleration) ps.minAcceleration = [0,0,0];
+						if(!ps.maxAcceleration) ps.maxAcceleration = [0,0,0];
+						
+						for(var i = 0; i < particles.vertices.length; i++)
+						{
+							particles.vertices[i].acceleration.x = ps.minAcceleration[0] + (ps.maxAcceleration[0] - ps.minAcceleration[0]) * Math.random();
+							particles.vertices[i].acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
+							particles.vertices[i].acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
+						}
+					}
+					if(propertyName == "minVelocity" || propertyName == "maxVelocity")
+                    {
+						if(!ps.minVelocity) ps.minVelocity = [0,0,0];
+						if(!ps.maxVelocity) ps.maxVelocity = [0,0,0];
+						
+						for(var i = 0; i < particles.vertices.length; i++)
+						{
+							
+							particles.vertices[i].velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
+							particles.vertices[i].velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
+							particles.vertices[i].velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
+						}
+					}
+					if(propertyName == "minLifeTime" || propertyName == "maxLifeTime")
+                    {
+						if(ps.minLifeTime === undefined) ps.minLifeTime = 0;
+						if(ps.maxLifeTime === undefined) ps.maxLifeTime = 1;
+						
+						for(var i = 0; i < particles.vertices.length; i++)
+						{	
+							particles.vertices[i].lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
+						}
+					}
+				}
                 if(threeObject instanceof THREE.Camera)
                 {
                     if(propertyName == "fovy")
@@ -902,28 +949,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if(threeObject instanceof THREE.ParticleSystem)
                 {   
                     
-                      var pCount = 1800;
+                      var pCount = threeObject.geometry.vertices.length;
+					  var ps = threeObject;
                       var particles = threeObject.geometry;
                       while(pCount--) {
 
                         // get the particle
                         var particle =
                           particles.vertices[pCount];
+						
+						if(particle.age === undefined) particle.age = 0;
+						particle.age++;
+                        if(particle.age > particle.lifespan)
+						{
+							particle.x = 0;
+							particle.y = 0;
+							particle.z = 0;
+							particle.age = 0;
+							
+							particle.velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
+							particle.velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
+							particle.velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
+							particle.acceleration.x = ps.minAcceleration[0] + (ps.maxAcceleration[0] - ps.minAcceleration[0]) * Math.random();
+							particle.acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
+							particle.acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
+							particle.lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
+						}
 
-                        // check if we need to reset
-                        if(particle.z < -200) {
-                          particle.z = 200;
-                          particle.velocity.z = 0;
-                        }
-
-                        // update the velocity with
-                        // a splat of randomniz
-                        particle.velocity.z -=
-                          Math.random() * .1;
+                       
 
                         // and the position
                         particle.addSelf(
                           particle.velocity);
+						particle.velocity.addSelf(  particle.acceleration);
                         //particle.z -= 10;
                       }
 
@@ -1532,22 +1590,33 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
               // create a particle with random
               // position values, -250 -> 250
-              var pX = Math.random() * 500 - 250,
-                  pY = Math.random() * 500 - 250,
-                  pZ = Math.random() * 500 - 250,
+              var pX = 0,//Math.random() * 500 - 250,
+                  pY = 0,//Math.random() * 500 - 250,
+                  pZ = 0,//Math.random() * 500 - 250,
                   particle = new THREE.Vertex(
                     new THREE.Vector3(pX, pY, pZ)
                   );
                 particle.velocity = new THREE.Vector3(
                   0,              // x
                   0, // y: random vel
-                  -Math.random()*10);
+                  0);
+				particle.acceleration = new THREE.Vector3(
+                  0,              // x
+                  0, // y: random vel
+                  0);  
+				particle.lifespan = 1;  
               // add it to the geometry
               particles.vertices.push(particle);
             }
 
             // create the particle system
             var particleSystem = new THREE.ParticleSystem(particles,pMaterial);
+			particleSystem.minVelocity = [0,0,0];
+			particleSystem.maxVelocity = [0,0,0];
+			particleSystem.maxAcceleration = [0,0,0];
+			particleSystem.minAcceleration = [0,0,0];
+			particleSystem.minLifeTime = 0;
+			particleSystem.maxLifeTime = 1;
             child.threeObject = particleSystem;
             
         
