@@ -1,4 +1,4 @@
-var PersistanceServer = 'http://localhost';
+var PersistanceServer = '';
 function DataManager()
 {
 	

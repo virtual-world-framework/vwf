@@ -710,7 +710,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 }
 
                 // Record the originating client.
-				debugger;
+				
                 this.client_ = fields.client;
 
                 // Perform the action.

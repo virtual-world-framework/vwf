@@ -5,7 +5,7 @@ var libpath = require('path'),
     mime = require('mime'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml');
-	
+	SandboxAPI = require('./sandboxAPI');
 
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
@@ -208,6 +208,12 @@ function startVWF(){
     var uri = URL.pathname;
 	uri = uri.replace(/\//g,'\\');
 	
+	if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
+	{
+		//Route to DataServer
+		SandboxAPI.serve(request,response);
+		return;
+	}
 	
 	var filename = libpath.join(path, uri);
 	var session = FindSession(filename);
@@ -217,18 +223,25 @@ function startVWF(){
     
 	//file is not found - serve index or map to support files
 	//file is also not a yaml document
-    if(!libpath.existsSync(filename) && !libpath.existsSync(filename+".yaml"))
+	var c1;
+	var c2;
+	
+	
+	
+	c1 = libpath.existsSync(filename);
+	c2 = libpath.existsSync(filename+".yaml");
+    if(!c1 && !c2)
 	{
 			
 		 //try to find the correct support file	
 		 var appname = findAppName(filename);
 		 if(!appname)
 		 {
-				console.log(filename);
+			
 				filename = filename.substr(13);
 				filename = ".\\support\\" + filename;
 				filename = filename.replace('vwf.example.com','proxy\\vwf.example.com');
-				console.log(filename);
+				
 				
 		 }
 		 else
@@ -242,8 +255,9 @@ function startVWF(){
 
 	}
 	//file does exist, serve normally 
-	
-	if(libpath.existsSync(filename))
+	var c3 = libpath.existsSync(filename);
+	var c4 = libpath.existsSync(filename +".yaml");
+	if(c3)
 	{
 		//if requesting directory, setup instance
 		//also, redirect to current instnace name of does not end in slash
@@ -279,7 +293,7 @@ function startVWF(){
 		ServeFile(filename,response,URL);
 		
 	}
-	else if(libpath.existsSync(filename +".yaml"))
+	else if(c4)
 	{
 		//was not found, but found if appending .yaml. Serve as yaml
 		ServeYAML(filename +".yaml",response,URL);
