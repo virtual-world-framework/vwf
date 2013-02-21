@@ -171,12 +171,29 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             }
         }());
         
-        
+        function GetParticleSystems(node,list)
+		{
+			if(!list)
+				list = [];
+			for(var i =0; i<node.children.length; i++)
+			{
+				if(node.children[i] instanceof THREE.ParticleSystem)
+					list.push(node.children[i]);
+				list = 	GetParticleSystems(node.children[i],list);
+			}			
+				return list;
+		}
         function renderScene(time) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
+			var timepassed = new Date() - sceneNode.lastTime;
 			
-			
+			var pss = GetParticleSystems(sceneNode.threeScene);
+			for(var i in pss)
+			{
+					if(pss[i].update)
+						pss[i].update(timepassed);
+			}
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
 			sceneNode.axes.position = pos;
@@ -216,6 +233,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
             }
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
+			sceneNode.lastTime = new Date();
         };
 
         var mycanvas = this.canvasQuery.get( 0 );

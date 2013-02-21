@@ -981,7 +981,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if(threeObject instanceof THREE.ParticleSystem)
                 {   
                     
-                      threeObject.update();
+                      //threeObject.update();
                 
                 }
             }
@@ -1639,7 +1639,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.color.b = this.startColor[2];
 			}
 			
-			particleSystem.update = function(notick)
+			particleSystem.update = function(time)
 			{
 			
 			    var pCount = this.geometry.vertices.length;
@@ -1651,21 +1651,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			    while(pCount--) 
 			    {
 					var particle =particles.vertices[pCount];					
-					this.updateParticle(particle,this.matrix,inv,notick);
+					this.updateParticle(particle,this.matrix,inv,time);
 			    }
 
 			    this.geometry.verticesNeedUpdate  = true;
 				this.geometry.colorsNeedUpdate  = true;
 			
 			}
-			particleSystem.updateParticle = function(particle,mat,inv,notick)
+			particleSystem.updateParticle = function(particle,mat,inv,time)
 			{
 				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
 				//we don't actuall want to move to system forward in time.
-				if(!notick)
+				
+				var time_in_ticks = time/33.33333;
+				
+				if(time > 0)
 				{
 					if(particle.age === undefined) particle.age = 0;
-					particle.age++;
+					particle.age += time_in_ticks;
 					if(particle.age > particle.lifespan)
 					{
 						this.setupParticle(particle,mat,inv)
@@ -1674,8 +1677,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					
 					// and the position
 					particle.world.addSelf(
-					  particle.velocity);
-					particle.velocity.addSelf(  particle.acceleration);
+					  particle.velocity.clone().multiplyScalar(time_in_ticks));
+					particle.velocity.addSelf(  particle.acceleration.clone().multiplyScalar(time_in_ticks));
 				}
 				else
 				{
