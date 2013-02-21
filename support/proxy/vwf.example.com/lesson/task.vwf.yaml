@@ -32,12 +32,26 @@ properties:
 
 methods:
 
-  # ## Method to step to the next task
-  # ## 
-  # ## @name task.vwf#next
-  # ## @function
+  ## Method to begin the task
+  ## 
+  ## @name task.vwf#enter
+  ## @function
 
-  # next:
+  enter:
+
+  ## Method to step to the next task
+  ## 
+  ## @name task.vwf#next
+  ## @function
+
+  next:
+
+  ## Method to exit the task
+  ## 
+  ## @name task.vwf#exit
+  ## @function
+
+  exit:
 
   # ## Method to step to the previous task
   # ## 
@@ -48,14 +62,7 @@ methods:
 
 events:
 
-  ## Event fired on the task to let it know that it is beginning
-  ## 
-  ## @name task.vwf#enter
-  ## @function
-
-  enter:
-
-  ## Event fired from the task to let others know that it is beginning
+  ## Event fired on the task to let itself and others know that it is beginning
   ## 
   ## @name task.vwf#entering
   ## @event
@@ -79,13 +86,9 @@ events:
 scripts:
 - |
   this.subtasks;
-  this.taskIndex;
+  this.taskIndex = null;
 
   this.enter = function() {
-    this.in(0).entering();
-  }
-
-  this.entering = function() {
 
     // If a camera pose has been specified for this task, move the camera to it
     if ( this.cameraPoseRef ) {
@@ -100,8 +103,8 @@ scripts:
             camera.transformTo( newCameraPose.transform, duration);
           }
           else
-            console.error( "Could not find camera - make sure the scene derives from navScene.vwf or another " +
-                           "component that defines a valid camera" );
+            console.error( "Could not find camera - to move the 3D camera using cameraPose, make sure the scene " +
+                           "derives from navScene.vwf or another component that defines a valid camera" );
         }
         else
           console.error( "Camera pose '" + this.cameraPoseRef + "' is not a valid node3" );
@@ -110,34 +113,39 @@ scripts:
         console.error( "Could not find camera pose: " + this.cameraPoseRef + " - will not move camera" );
     }
 
-    // Find children that are tasks
-    this.subtasks = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" )
+    // Fire the entering event
+    this.entering( this.text );
 
-    if ( this.subtasks && this.subtasks.length ) {
-      this.taskIndex = 0;
-      this.dispatchSubtask();
-    }
+    // Activate subtasks
+    this.subtasks = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" )
+    if ( this.subtasks && this.subtasks.length )
+      this.next();
   }
 
-  this.dispatchSubtask = function() {
-    var self = this;
-    var subtask = this.subtasks[ this.taskIndex ];
-    subtask.enter();
-    subtask.completed = subtask.events.add( function() {
+  this.next = function() {
+    if ( this.taskIndex == null )
+      this.taskIndex = 0;
+    else {
+      var oldSubtask = this.subtasks[ this.taskIndex ];
+      oldSubtask.completed = oldSubtask.events.flush( this );
+      oldSubtask.exit();
+      this.taskIndex++;
+    }
+    if ( this.taskIndex < this.subtasks.length ) {
+      var newSubtask = this.subtasks[ this.taskIndex ];
+      newSubtask.enter();
+      newSubtask.completed = newSubtask.events.add( function() { this.in(0).next(); }, this );
+    }
+    else
+      this.completed();
+  } 
 
-      // TODO: Do deferred complete here
+  this.exit = function() {
 
-      // Remove event handlers from the subtask that just completed
-      subtask.completed = subtask.events.flush( self );
+    // TODO: Find the scene node properly to make this possible
+    // this.scene.events.flush( this );
 
-      // Notify the subtask (and others) that it is exiting
-      subtask.exiting();
+    this.taskIndex = null;
+    this.exiting();
 
-      // Dispatch the next subtask or complete
-      self.taskIndex++;
-      if ( self.taskIndex < self.subtasks.length )
-        self.dispatchSubtask();
-      else
-        self.completed();
-    }, this );
   } //@ sourceURL=task.vwf
