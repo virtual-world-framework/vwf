@@ -515,6 +515,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					var particles = ps.geometry;
 					ps[propertyName] = propertyValue;
 					
+					if(propertyName == 'transform')
+					{
+						ps.update(true);
+					}
 					if(propertyName == 'size')
 					{
 						ps.material.size = propertyValue;
@@ -1601,12 +1605,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				return particle;
 			}
 			
-            particleSystem.setupParticle = function(particle)
+            particleSystem.setupParticle = function(particle,mat,inv)
 			{
+				
 				particle.x = 0;
 				particle.y = 0;
 				particle.z = 0;
-				particle.z = 0;
+				
+				particle.world = mat.multiplyVector3(new THREE.Vector3(0,0,0));
+				
 				particle.age = 0;
 				particle.velocity = new THREE.Vector3(0,0,0);
 			    particle.acceleration = new THREE.Vector3( 0,0,0);  
@@ -1615,6 +1622,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
 				particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
 				particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+				
+				mat = mat.clone();
+				mat.elements[12] = 0;
+				mat.elements[13] = 0;
+				mat.elements[14] = 0;
+				particle.velocity = mat.multiplyVector3(particle.velocity.clone());
+				
+				
 				particle.acceleration.x = this.minAcceleration[0] + (this.maxAcceleration[0] - this.minAcceleration[0]) * Math.random();
 				particle.acceleration.y = this.minAcceleration[1] + (this.maxAcceleration[1] - this.minAcceleration[1]) * Math.random();
 				particle.acceleration.z = this.minAcceleration[2] + (this.maxAcceleration[2] - this.minAcceleration[2]) * Math.random();
@@ -1624,38 +1639,53 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.color.b = this.startColor[2];
 			}
 			
-			particleSystem.update = function()
+			particleSystem.update = function(notick)
 			{
 			
 			    var pCount = this.geometry.vertices.length;
-				  
+				
+				var inv = this.matrix.clone();
+				inv = inv.getInverse(inv);
+				
 			    var particles = this.geometry;
 			    while(pCount--) 
 			    {
 					var particle =particles.vertices[pCount];					
-					this.updateParticle(particle);
+					this.updateParticle(particle,this.matrix,inv,notick);
 			    }
 
 			    this.geometry.verticesNeedUpdate  = true;
 				this.geometry.colorsNeedUpdate  = true;
 			
 			}
-			particleSystem.updateParticle = function(particle)
+			particleSystem.updateParticle = function(particle,mat,inv,notick)
 			{
-			
-				if(particle.age === undefined) particle.age = 0;
-				particle.age++;
-				if(particle.age > particle.lifespan)
+				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
+				//we don't actuall want to move to system forward in time.
+				if(!notick)
 				{
-					this.setupParticle(particle)
+					if(particle.age === undefined) particle.age = 0;
+					particle.age++;
+					if(particle.age > particle.lifespan)
+					{
+						this.setupParticle(particle,mat,inv)
+					}
+					
+					
+					// and the position
+					particle.world.addSelf(
+					  particle.velocity);
+					particle.velocity.addSelf(  particle.acceleration);
 				}
-
-				// and the position
-				particle.addSelf(
-				  particle.velocity);
-				particle.velocity.addSelf(  particle.acceleration);
+				else
+				{
+					
+				}
 				//particle.z -= 10;
-				
+				var local = inv.multiplyVector3(particle.world.clone());
+				particle.x = local.x;
+				particle.y = local.y;
+				particle.z = local.z;
 				var percent = particle.age/particle.lifespan;
 				
 				particle.color.r = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
@@ -1664,10 +1694,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
 			}
 			
+			var inv = particleSystem.matrix.clone();
+			inv = inv.getInverse(inv);
             for(var p = 0; p < particleCount; p++) {
 
               var particle = particleSystem.createParticle(p);
-			  particleSystem.setupParticle(particle);
+			  particleSystem.setupParticle(particle,particleSystem.matrix,inv);
               
 			  
             }

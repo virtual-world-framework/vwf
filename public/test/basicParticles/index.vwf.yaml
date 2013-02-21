@@ -50,6 +50,8 @@ children:
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
+methods:
+  update:
 scripts:
 - | 
     this.initialize = function()
@@ -58,4 +60,13 @@ scripts:
         this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,-100,0];
         this.system.translation = [0,0,0];
+        this.counter = 0;
+        this.future(.05).update();
     } //@ sourceURL=index.vwf
+    this.update = function()
+    {
+        this.counter++;
+        this.system.translation = [Math.sin(this.counter/100)*300 - 150,0,0];
+        this.system.rotation = [0,1,0,this.counter*4];
+        this.future(.05).update();
+    }
