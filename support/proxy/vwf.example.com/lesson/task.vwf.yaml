@@ -113,16 +113,19 @@ scripts:
         console.error( "Could not find camera pose: " + this.cameraPoseRef + " - will not move camera" );
     }
 
-    // Fire the entering event
+    // Fire the entering event which runs lesson-specific code
     this.entering( this.text );
 
-    // Activate subtasks
+    // Activate subtasks if they exist
     this.subtasks = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" )
     if ( this.subtasks && this.subtasks.length )
       this.next();
   }
 
   this.next = function() {
+
+    // If the first subtask has not been run yet (so taskIndex is null), initialize it
+    // Else, exit the current subtask and increment taskIndex
     if ( this.taskIndex == null )
       this.taskIndex = 0;
     else {
@@ -131,6 +134,9 @@ scripts:
       oldSubtask.exit();
       this.taskIndex++;
     }
+
+    // If there are subtasks still to run, enter the next one
+    // Else, mark this task as complete
     if ( this.taskIndex < this.subtasks.length ) {
       var newSubtask = this.subtasks[ this.taskIndex ];
       newSubtask.enter();
@@ -145,7 +151,10 @@ scripts:
     // TODO: Find the scene node properly to make this possible
     // this.scene.events.flush( this );
 
+    // Set taskIndex back to null so it is ready to be entered again
     this.taskIndex = null;
+
+    // Fire the exiting event
     this.exiting();
 
   } //@ sourceURL=task.vwf
