@@ -116,6 +116,28 @@ properties:
   ## @name camera.vwf#worldBoundingBox
   ## @property
 
+  ## true for additive blending, false for normal blending
+  ##
+  ## @name particlesystem.vwf#additive
+  ## @property
+  
+  additive:
+  
+  ## alpha value for particles
+  ##
+  ## @name particlesystem.vwf#opacity
+  ## @property
+  
+  opacity:
+  
+  ## depthTest value for particles
+  ##
+  ## @name particlesystem.vwf#depthTest
+  ## @property
+  
+  depthTest:
+
+  
   worldBoundingBox:
     get: |
       return null;

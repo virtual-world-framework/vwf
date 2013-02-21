@@ -23,9 +23,15 @@ children:
       maxVelocity: [ 1, 1, 4.5]
       maxAcceleration: [ 0, 0, -0.09]
       minAcceleration: [ 0, 0, -0.1]
-      size: 3
+      size: 30
       maxLifeTime: 120
       minLifeTime: 30
+      startColor: [ 1, 1, 1]
+      endColor: [ 0, 0, 0]
+      image: fire.png
+      additive: true
+      opacity: .5
+      depthTest: false
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:

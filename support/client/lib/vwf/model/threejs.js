@@ -520,6 +520,34 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						ps.material.size = propertyValue;
 					
 					}
+					if(propertyName == 'image')
+					{
+						ps.material.map = THREE.ImageUtils.loadTexture(propertyValue);
+					}
+					if(propertyName == 'additive')
+					{
+						if(propertyValue)
+						{
+							ps.material.blending = THREE.AdditiveBlending;
+							ps.material.transparent = true;
+						}
+						else
+						{
+							ps.material.blending = THREE.NormalBlending;	
+							ps.material.transparent = false;
+						}
+
+						ps.material.needsUpdate = true;							
+					}
+					if(propertyName == 'opacity')
+					{
+						ps.material.opacity = propertyValue;	
+					}
+					if(propertyName == 'depthTest')
+					{
+						ps.material.depthTest = propertyValue;	
+						ps.material.depthWrite = propertyValue;
+					}
 					if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
 					{
 						if(!ps.minAcceleration) ps.minAcceleration = [0,0,0];
@@ -949,45 +977,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if(threeObject instanceof THREE.ParticleSystem)
                 {   
                     
-                      var pCount = threeObject.geometry.vertices.length;
-					  var ps = threeObject;
-                      var particles = threeObject.geometry;
-                      while(pCount--) {
-
-                        // get the particle
-                        var particle =
-                          particles.vertices[pCount];
-						
-						if(particle.age === undefined) particle.age = 0;
-						particle.age++;
-                        if(particle.age > particle.lifespan)
-						{
-							particle.x = 0;
-							particle.y = 0;
-							particle.z = 0;
-							particle.age = 0;
-							
-							particle.velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
-							particle.velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
-							particle.velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
-							particle.acceleration.x = ps.minAcceleration[0] + (ps.maxAcceleration[0] - ps.minAcceleration[0]) * Math.random();
-							particle.acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
-							particle.acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
-							particle.lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
-						}
-
-                       
-
-                        // and the position
-                        particle.addSelf(
-                          particle.velocity);
-						particle.velocity.addSelf(  particle.acceleration);
-                        //particle.z -= 10;
-                      }
-
-                      // flag to the particle system
-                      // that we've changed its vertices.
-                      threeObject.geometry.verticesNeedUpdate  = true;
+                      threeObject.update();
                 
                 }
             }
@@ -1576,40 +1566,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( child ) 
         {
         
+			
+			
             // create the particle variables
             var particleCount = 1800;
             var particles = new THREE.Geometry();
             var pMaterial =
                   new THREE.ParticleBasicMaterial({
                     color: 0xFFFFFF,
-                    size: 20
+                    size: 20,
+					vertexColors:true
                   });
-
-            // now create the individual particles
-            for(var p = 0; p < particleCount; p++) {
-
-              // create a particle with random
-              // position values, -250 -> 250
-              var pX = 0,//Math.random() * 500 - 250,
-                  pY = 0,//Math.random() * 500 - 250,
-                  pZ = 0,//Math.random() * 500 - 250,
-                  particle = new THREE.Vertex(
-                    new THREE.Vector3(pX, pY, pZ)
-                  );
-                particle.velocity = new THREE.Vector3(
-                  0,              // x
-                  0, // y: random vel
-                  0);
-				particle.acceleration = new THREE.Vector3(
-                  0,              // x
-                  0, // y: random vel
-                  0);  
-				particle.lifespan = 1;  
-              // add it to the geometry
-              particles.vertices.push(particle);
-            }
-
-            // create the particle system
+			// create the particle system
             var particleSystem = new THREE.ParticleSystem(particles,pMaterial);
 			particleSystem.minVelocity = [0,0,0];
 			particleSystem.maxVelocity = [0,0,0];
@@ -1617,6 +1585,96 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			particleSystem.minAcceleration = [0,0,0];
 			particleSystem.minLifeTime = 0;
 			particleSystem.maxLifeTime = 1;
+			
+			particleSystem.startColor = [1,1,1];
+			particleSystem.endColor = [0,0,0];
+			
+			particleSystem.createParticle = function(i)
+			{
+				var particle = new THREE.Vector3(0,0,0);
+				this.geometry.vertices.push(particle);
+				var color = new THREE.Color();
+				color.setRGB( 1.0, 1.0, 1.0 );
+				particles.colors.push(color);
+				particle.i = i;
+				particle.color = color;
+				return particle;
+			}
+			
+            particleSystem.setupParticle = function(particle)
+			{
+				particle.x = 0;
+				particle.y = 0;
+				particle.z = 0;
+				particle.z = 0;
+				particle.age = 0;
+				particle.velocity = new THREE.Vector3(0,0,0);
+			    particle.acceleration = new THREE.Vector3( 0,0,0);  
+			    particle.lifespan = 1;  
+				
+				particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
+				particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
+				particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+				particle.acceleration.x = this.minAcceleration[0] + (this.maxAcceleration[0] - this.minAcceleration[0]) * Math.random();
+				particle.acceleration.y = this.minAcceleration[1] + (this.maxAcceleration[1] - this.minAcceleration[1]) * Math.random();
+				particle.acceleration.z = this.minAcceleration[2] + (this.maxAcceleration[2] - this.minAcceleration[2]) * Math.random();
+				particle.lifespan = this.minLifeTime + (this.maxLifeTime - this.minLifeTime) * Math.random();
+				particle.color.r = this.startColor[0];
+				particle.color.g = this.startColor[1];
+				particle.color.b = this.startColor[2];
+			}
+			
+			particleSystem.update = function()
+			{
+			
+			    var pCount = this.geometry.vertices.length;
+				  
+			    var particles = this.geometry;
+			    while(pCount--) 
+			    {
+					var particle =particles.vertices[pCount];					
+					this.updateParticle(particle);
+			    }
+
+			    this.geometry.verticesNeedUpdate  = true;
+				this.geometry.colorsNeedUpdate  = true;
+			
+			}
+			particleSystem.updateParticle = function(particle)
+			{
+			
+				if(particle.age === undefined) particle.age = 0;
+				particle.age++;
+				if(particle.age > particle.lifespan)
+				{
+					this.setupParticle(particle)
+				}
+
+				// and the position
+				particle.addSelf(
+				  particle.velocity);
+				particle.velocity.addSelf(  particle.acceleration);
+				//particle.z -= 10;
+				
+				var percent = particle.age/particle.lifespan;
+				
+				particle.color.r = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+				particle.color.g = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+				particle.color.b = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+			
+			}
+			
+            for(var p = 0; p < particleCount; p++) {
+
+              var particle = particleSystem.createParticle(p);
+			  particleSystem.setupParticle(particle);
+              
+			  
+            }
+
+			
+			
+           
             child.threeObject = particleSystem;
             
         
