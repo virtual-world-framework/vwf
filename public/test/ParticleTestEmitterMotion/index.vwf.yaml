@@ -19,17 +19,18 @@ children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -1, -1, -1]
-      maxVelocity: [ 1, 1, 1]
-      maxAcceleration: [ 0, 0, 0]
-      minAcceleration: [ 0, 0, 0]
-      size: 3
+      minVelocity: [ -1, -1, 4]
+      maxVelocity: [ 1, 1, 4.5]
+      maxAcceleration: [ 0, 0, -0.09]
+      minAcceleration: [ 0, 0, -0.1]
+      size: 30
       maxLifeTime: 120
       minLifeTime: 30
       startColor: [ 1, 1, 1]
       endColor: [ 0, 0, 0]
-      additive: false
-      opacity: 1
+      image: fire.png
+      additive: true
+      opacity: .5
       depthTest: false
   camera:
     extends: http://vwf.example.com/camera.vwf
@@ -56,7 +57,7 @@ scripts:
     this.initialize = function()
     {
         this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
+        this.camera.translation = [0,-600,0];
         this.dir1.translation = [0,-100,0];
         this.system.translation = [0,0,0];
         this.counter = 0;
@@ -65,5 +66,7 @@ scripts:
     this.update = function()
     {
         this.counter++;
+        this.system.translation = [Math.sin(this.counter/50)*100 - 50,0,Math.cos(this.counter/50)*100 - 50];
+        this.system.rotation = [0,1,0,this.counter*4];
         this.future(.05).update();
     }

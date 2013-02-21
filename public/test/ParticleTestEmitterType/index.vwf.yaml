@@ -19,18 +19,22 @@ children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -1, -1, -1]
-      maxVelocity: [ 1, 1, 1]
-      maxAcceleration: [ 0, 0, 0]
-      minAcceleration: [ 0, 0, 0]
-      size: 3
+      minVelocity: [ -0.1, -0.1, -0.1]
+      maxVelocity: [ 0.1, 0.1, -0.1]
+      maxAcceleration: [ 0, 0, -0.1]
+      minAcceleration: [ 0, 0, -0.3]
+      size: 50
       maxLifeTime: 120
       minLifeTime: 30
       startColor: [ 1, 1, 1]
       endColor: [ 0, 0, 0]
+      image: smoke.png
       additive: false
-      opacity: 1
+      opacity: .5
       depthTest: false
+      emitterType: box
+      emitterSize: [ 400, 100, 0]
+      translation: [ 0, 0, 200]
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:
@@ -57,13 +61,15 @@ scripts:
     {
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
-        this.dir1.translation = [0,-100,0];
-        this.system.translation = [0,0,0];
+        this.dir1.translation = [0,100,0];
+        
         this.counter = 0;
         this.future(.05).update();
     } //@ sourceURL=index.vwf
     this.update = function()
     {
         this.counter++;
+     //   this.system.translation = [Math.sin(this.counter/100)*300 - 150,0,0];
+     //   this.system.rotation = [0,1,0,this.counter*4];
         this.future(.05).update();
     }

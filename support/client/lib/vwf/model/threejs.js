@@ -1589,7 +1589,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			particleSystem.minAcceleration = [0,0,0];
 			particleSystem.minLifeTime = 0;
 			particleSystem.maxLifeTime = 1;
-			
+			particleSystem.emitterType = 'point';
+			particleSystem.emitterSize = [0,0,0];
 			particleSystem.startColor = [1,1,1];
 			particleSystem.endColor = [0,0,0];
 			
@@ -1605,6 +1606,33 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				return particle;
 			}
 			
+			particleSystem.generatePoint = function()
+			{
+				if(this.emitterType.toLowerCase() == 'point')
+				{
+					return new THREE.Vector3(0,0,0);
+				}
+				if(this.emitterType.toLowerCase() == 'box')
+				{
+					var x = this.emitterSize[0] * Math.random() - this.emitterSize[0]/2;
+					var y = this.emitterSize[1] * Math.random() - this.emitterSize[1]/2;
+					var z = this.emitterSize[2] * Math.random() - this.emitterSize[2]/2;
+					
+					return new THREE.Vector3(x,y,z);
+				}
+				if(this.emitterType.toLowerCase() == 'sphere')
+				{
+					var r = this.emitterSize[0] * Math.random() - this.emitterSize[0]/2;
+					var t = Math.random() * Math.PI*2;
+					var w = Math.random() * Math.PI - Math.PI/2;
+					var x = r * Math.sin(t)*Math.cos(w);
+					var y = r * Math.sin(t)*Math.sin(w);
+					var z = r * Math.cos(t);
+					
+					return new THREE.Vector3(x,y,z);
+				}
+			
+			}
             particleSystem.setupParticle = function(particle,mat,inv)
 			{
 				
@@ -1612,7 +1640,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.y = 0;
 				particle.z = 0;
 				
-				particle.world = mat.multiplyVector3(new THREE.Vector3(0,0,0));
+				particle.world = mat.multiplyVector3(this.generatePoint());
 				
 				particle.age = 0;
 				particle.velocity = new THREE.Vector3(0,0,0);
@@ -1667,7 +1695,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				
 				if(time > 0)
 				{
-					if(particle.age === undefined) particle.age = 0;
+					
 					particle.age += time_in_ticks;
 					if(particle.age > particle.lifespan)
 					{
@@ -1676,15 +1704,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					
 					
 					// and the position
-					particle.world.addSelf(
-					  particle.velocity.clone().multiplyScalar(time_in_ticks));
-					particle.velocity.addSelf(  particle.acceleration.clone().multiplyScalar(time_in_ticks));
+					particle.world.x += particle.velocity.x * time_in_ticks;
+					particle.world.y += particle.velocity.y * time_in_ticks;
+					particle.world.z += particle.velocity.z * time_in_ticks;
+					  
+					particle.velocity.x += particle.acceleration.x * time_in_ticks;
+					particle.velocity.y += particle.acceleration.y * time_in_ticks;
+					particle.velocity.z += particle.acceleration.z * time_in_ticks;
 				}
-				else
-				{
-					
-				}
-				//particle.z -= 10;
+				
 				var local = inv.multiplyVector3(particle.world.clone());
 				particle.x = local.x;
 				particle.y = local.y;

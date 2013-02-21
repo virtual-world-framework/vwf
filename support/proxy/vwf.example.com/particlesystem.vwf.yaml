@@ -137,6 +137,19 @@ properties:
   
   depthTest:
 
+  ## emitterType value for particles
+  ## 'point','sphere','box'
+  ## @name particlesystem.vwf#depthTest
+  ## @property
+  
+  emitterType:
+  
+  ## emitterSize value for particles
+  ## ignored by point emitter, emitterSize[0] is radius for sphere, emitterSize[x,y,z] is bounds for box emitter
+  ## @name particlesystem.vwf#depthTest
+  ## @property
+  
+  emitterSize:
   
   worldBoundingBox:
     get: |
