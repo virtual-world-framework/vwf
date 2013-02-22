@@ -78,8 +78,8 @@ children:
     properties:
       lightType: "directional"
       distance: 2000
-      intensity: 0.9
-      color: [255,255,255]
+      intensity: 0.3
+      color: [ 255, 255, 255 ]
       glge-constantAttenuation: 1
 # Camera fix
 scripts:

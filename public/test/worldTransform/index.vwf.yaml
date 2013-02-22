@@ -44,7 +44,7 @@ children:
       lightType: "directional"
       distance: 2000
       intensity: 0.9
-      color: [255,255,255]
+      color: [ 255, 255, 255 ]
       glge-constantAttenuation: 1
       rotation: [ 1, 0, 0, -45 ]
   dir2:
@@ -55,7 +55,7 @@ children:
       lightType: "directional"
       distance: 2000
       intensity: 0.9
-      color: [255,255,255]
+      color: [ 255, 255, 255 ]
       glge-constantAttenuation: 1
       rotation: [ -1, 0, 0, 225 ]
 events: 

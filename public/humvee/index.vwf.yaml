@@ -57,7 +57,7 @@ children:
                   controlType: translate
                   controlMode: continuous
                   transformIncrement: -0.5
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 0.5
                   maxValue: 2
                   dragSpeed: 5
@@ -75,7 +75,7 @@ children:
                   controlType: translate
                   controlMode: continuous
                   transformIncrement: 2
-                  transformAxis: [1, 0, 0]
+                  transformAxis: [ 1, 0, 0 ]
                   transformDuration: 0.5
                   minValue: -2
                   maxValue: 2
@@ -94,7 +94,7 @@ children:
                   controlType: translate
                   controlMode: continuous
                   transformIncrement: 3
-                  transformAxis: [1, 0, 0]
+                  transformAxis: [ 1, 0, 0 ]
                   transformDuration: 0.5
                   minValue: -1
                   maxValue: 1
@@ -113,7 +113,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: 45
-                  transformAxis: [0, 1, 0]
+                  transformAxis: [ 0, 1, 0 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -131,7 +131,7 @@ children:
                   controlType: rotate
                   controlMode: momentary
                   transformIncrement: 10
-                  transformAxis: [0, 1, 0]
+                  transformAxis: [ 0, 1, 0 ]
                   transformDuration: 0.2
                   maxValue: 1
                 children: 
@@ -148,7 +148,7 @@ children:
                   controlType: rotate
                   controlMode: momentary
                   transformIncrement: 10
-                  transformAxis: [0, 1, 0]
+                  transformAxis: [ 0, 1, 0 ]
                   transformDuration: 0.2
                   maxValue: 1
                 children: 
@@ -165,7 +165,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -30
-                  transformAxis: [0.942, 0, 0.335]
+                  transformAxis: [ 0.942, 0, 0.335 ]
                   transformDuration: 0.2
                   minValue: -12
                   maxValue: 12
@@ -210,7 +210,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: 30
-                  transformAxis: [0.942, 0, 0.335]
+                  transformAxis: [ 0.942, 0, 0.335 ]
                   transformDuration: 0.2
                   minValue: -1
                   maxValue: 1
@@ -229,7 +229,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -35
-                  transformAxis: [1, 0, 0]
+                  transformAxis: [ 1, 0, 0 ]
                   transformDuration: 0.5
                   maxValue: 2
                   dragSpeed: 5
@@ -271,7 +271,7 @@ children:
                   controlType: translate
                   controlMode: continuous
                   transformIncrement: 0.5
-                  transformAxis: [0, 1, 0]
+                  transformAxis: [ 0, 1, 0 ]
                   transformDuration: 0.5
                   minValue: -2
                   maxValue: 2
@@ -290,7 +290,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -20
-                  transformAxis: [0.986, 0, 0.164]
+                  transformAxis: [ 0.986, 0, 0.164 ]
                   transformDuration: 0.2
                   maxValue: 12
                   dragSpeed: 10
@@ -308,7 +308,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -18
-                  transformAxis: [0.986, 0, 0.164]
+                  transformAxis: [ 0.986, 0, 0.164 ]
                   transformDuration: 0.2
                   minValue: -2
                   maxValue: 2
@@ -327,7 +327,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -12
-                  transformAxis: [0.986, 0, 0.164]
+                  transformAxis: [ 0.986, 0, 0.164 ]
                   transformDuration: 0.2
                   minValue: -3
                   maxValue: 3
@@ -346,7 +346,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -25
-                  transformAxis: [0.986, 0, 0.164]
+                  transformAxis: [ 0.986, 0, 0.164 ]
                   transformDuration: 0.2
                   minValue: -2
                   maxValue: 2
@@ -365,7 +365,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -20
-                  transformAxis: [0.986, 0, 0.164]
+                  transformAxis: [ 0.986, 0, 0.164 ]
                   transformDuration: 0.2
                   minValue: -2
                   maxValue: 2
@@ -384,7 +384,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: 45
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -402,7 +402,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: 45
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -422,7 +422,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -45
-                  transformAxis: [1, 0, 0]
+                  transformAxis: [ 1, 0, 0 ]
                   transformDuration: 0.5
                   minValue: -1
                   maxValue: 3
@@ -453,7 +453,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -45
-                  transformAxis: [1, 0, 0]
+                  transformAxis: [ 1, 0, 0 ]
                   transformDuration: 0.5
                   minValue: -1
                   maxValue: 3
@@ -484,7 +484,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: 45
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 0.2
                   maxValue: 8
                   dragSpeed: 10
@@ -497,7 +497,7 @@ children:
                       controlType: rotate
                       controlMode: continuous
                       transformIncrement: 60
-                      transformAxis: [1, 0, 0]
+                      transformAxis: [ 1, 0, 0 ]
                       transformDuration: 0.5
                       maxValue: 3
                       dragSpeed: 5
@@ -510,7 +510,7 @@ children:
                           controlType: rotate
                           controlMode: continuous
                           transformIncrement: 58
-                          transformAxis: [0, 1, 0]
+                          transformAxis: [ 0, 1, 0 ]
                           transformDuration: 0.5
                           maxValue: 3
                           dragSpeed: 5
@@ -538,7 +538,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -45
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -556,7 +556,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -45
-                  transformAxis: [0, 1, 0]
+                  transformAxis: [ 0, 1, 0 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -574,7 +574,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: 45
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -597,7 +597,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -45
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -625,7 +625,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -10
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 0.2
                   maxValue: 3
                   minValue: -3
@@ -659,7 +659,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -10
-                  transformAxis: [0, 0, 1]
+                  transformAxis: [ 0, 0, 1 ]
                   transformDuration: 0.2
                   maxValue: 3
                   minValue: -3
@@ -698,7 +698,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -45
-                  transformAxis: [1, 0, 0]
+                  transformAxis: [ 1, 0, 0 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5 
@@ -716,7 +716,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: 45
-                  transformAxis: [1, 0, 0]
+                  transformAxis: [ 1, 0, 0 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -734,7 +734,7 @@ children:
                   controlType: rotate
                   controlMode: continuous
                   transformIncrement: -45
-                  transformAxis: [0, 1, 0]
+                  transformAxis: [ 0, 1, 0 ]
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
@@ -779,7 +779,7 @@ children:
       lightType: "directional"
       distance: 2000
       intensity: 0.4
-      color: [ 255, 255, 255]
+      color: [ 255, 255, 255 ]
       #specular: false # the highlights are way too hot (materials or light?)
       rotation: [ 1, 0, 0, -10 ]
   dir2:
@@ -790,7 +790,7 @@ children:
       lightType: "directional"
       distance: 2000
       intensity: 0.6
-      color: [ 255, 255, 255]
+      color: [ 255, 255, 255 ]
       #specular: false # the highlights are way too hot (materials or light?)
       rotation: [ -1, 0, 0, 200 ]
 scripts:

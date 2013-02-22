@@ -16,7 +16,7 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
   counter: 0
-  ambientColor: [183,183,183]
+  ambientColor: [ 183, 183, 183 ]
 methods:
   update:  
 children:
@@ -41,7 +41,7 @@ children:
       glge-linearAttenuation: 0.00000001
       glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-300,0]
+      translation: [ 0,-300,0 ]
 scripts:
 - | 
     this.initialize = function()
