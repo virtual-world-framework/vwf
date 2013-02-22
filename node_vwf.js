@@ -141,7 +141,7 @@ function _404(response)
 //Parse and serve a YAML file
 function ServeYAML(filename,response, URL)
 {
-
+		var tf = filename;
 		fs.readFile(filename, "utf8", function (err, file) {
 			if (err) {
 				response.writeHead(500, {
@@ -151,8 +151,15 @@ function ServeYAML(filename,response, URL)
 				response.end();
 				return;
 			}
- 
+			console.log(tf);
+			try{
 			var deYAML = JSON.stringify(YAML.load(file));
+			}catch(e)
+			{
+				console.log(file);
+				_404(response);
+				return;
+			}
 			var type = "text/json";
 			
 			var callback = URL.query.callback;
