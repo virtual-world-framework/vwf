@@ -894,8 +894,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var SCREEN_HEIGHT = window.innerHeight;
         var SCREEN_WIDTH = window.innerWidth;
 
-        var mousepos = { x: this.lastEventData.eventData[0].screenPosition[0], y: this.lastEventData.eventData[0].screenPosition[1] }; // window coordinates
-        mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
+        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
+        //mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
+
+        var x = ( mousepos.x ) * 2 - 1;
+        var y = -( mousepos.y ) * 2 + 1;
 
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
