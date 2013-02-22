@@ -37,6 +37,10 @@ properties:
 methods:
   startGame:
   setupGame:
+events:
+  startedGame:
+  wonGame:
+  lostGame:
 children: 
   tileGroup1:
     extends: http://vwf.example.com/node3.vwf
@@ -547,12 +551,10 @@ scripts:
           tile.children.delete(flipTile);
         }
       }
-      // Disable button
-      $("#startButton").button("option", "disabled", true);
-      $("#winMessage").dialog("close");
-      $("#loseMessage").dialog("close");
+
       // Start game
       this.gameInProgress = true;
+      this.startedGame();
     }
     
     this.flipTile = function(obj) {
@@ -563,13 +565,7 @@ scripts:
           var name = "flippedTile" + obj.properties.position;
           obj.children.create(name, tempTile);
           this.gameInProgress = false;
-          $("#loseMessage").dialog({
-            resizable: false,
-            draggable: false,
-            height: 110,
-            width: 230
-          });
-          $("#startButton").button("option", "disabled", false);
+          this.lostGame();
         }
         else {
           var tempTile = this.getNumberedTile(obj.properties.position);
@@ -642,12 +638,6 @@ scripts:
       }
       if(!unflippedEmptyTiles) {
         this.gameInProgress = false;
-        $("#winMessage").dialog({
-          resizable: false,
-          draggable: false,
-          height: 110,
-          width: 230
-        });
-        $("#startButton").button("option", "disabled", false);
+        this.wonGame();
       }
     }

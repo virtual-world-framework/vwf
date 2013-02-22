@@ -23,6 +23,36 @@
 				$("a", ".toolstyle").button();
 				$("a", ".toolstyle").button("option", "disabled", gameInProgress);
 			});
+
+			vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
+				if (nodeId == vwf.find("", "/")[0] ) {
+					switch (eventName) {
+						case "startedGame":
+							$("#startButton").button("option", "disabled", true);
+							$("#winMessage").dialog("close");
+							$("#loseMessage").dialog("close");
+							break;
+						case "wonGame":
+							$("#winMessage").dialog({
+							resizable: false,
+							draggable: false,
+							height: 110,
+							width: 230
+							});
+							$("#startButton").button("option", "disabled", false);
+							break;
+						case "lostGame":
+							$("#loseMessage").dialog({
+							resizable: false,
+							draggable: false,
+							height: 110,
+							width: 230
+							});
+							$("#startButton").button("option", "disabled", false);
+							break;
+					}
+				}
+			}
 			
 			function startGame() {
 				vwf_view.kernel.callMethod(vwf.find("", "/")[0], "startGame");
