@@ -90,6 +90,11 @@
 								</li>
 								<li>
 									<span style='position:relative;left:20px'>
+										<a href='sound.html' title='Sound'>Sound</a>
+									</span>
+								</li>
+								<li>
+									<span style='position:relative;left:20px'>
 										<a href='transforms.html' title='Transforms'>Transforms</a>
 									</span>
 								</li>
@@ -105,15 +110,15 @@
 								</li>
 								<li>
 									<span style='position:relative;left:20px'>
-										<a href='files.html' title='Files'>Files I/O</a>
-									</span>
-								</li>
-								<li>
-									<span style='position:relative;left:20px'>
 										<a href='latency.html' title='Latency'>Reduce Latency</a>
 									</span>
 								</li>
 								<!-- 
+								<li>
+									<span style='position:relative;left:20px'>
+										<a href='files.html' title='Files'>Files I/O</a>
+									</span>
+								</li>
 								<li>
 									<span style='position:relative;left:20px'>
 										<a href='login.html' title='Login'>Login</a>
