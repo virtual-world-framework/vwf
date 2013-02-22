@@ -894,9 +894,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var mousepos = { x: this.lastEventData.eventData[0].screenPosition[0], y: this.lastEventData.eventData[0].screenPosition[1] }; // window coordinates
         mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
 
+        var x = ( mousepos.x ) * 2 - 1;
+        var y = -( mousepos.y ) * 2 + 1;
+
         var directionVector = new THREE.Vector3();
         
-        directionVector.set( mousepos.x, mousepos.y, 0.5 );
+        //console.info( "mousepos = " + x + ", " + y );
+        directionVector.set( x, y, 0.5 );
         
         this.projector.unprojectVector(directionVector, threeCam);
         var pos = new THREE.Vector3();
