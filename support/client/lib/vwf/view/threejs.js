@@ -297,7 +297,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 if ((origWidth != self.width) || (origHeight != self.height)) {
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
-                    
+                    sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
                     //var cam = self.state.cameraInUse;
                     //if ( cam ) {
                     //    cam.aspect = mycanvas.width / mycanvas.height;

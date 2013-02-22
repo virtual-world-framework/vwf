@@ -70,6 +70,6 @@ scripts:
     {
         this.counter++;
      //   this.system.translation = [Math.sin(this.counter/100)*300 - 150,0,0];
-     //   this.system.rotation = [0,1,0,this.counter*4];
+        this.system.rotation = [0,1,0,this.counter*4];
         this.future(.05).update();
     }
