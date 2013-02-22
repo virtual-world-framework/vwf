@@ -151,6 +151,34 @@ properties:
   
   emitterSize:
   
+  ## the maximum number of particles that will be regenerated per frame. Useful to distrubte particles over time, and avoid
+  ## issues where min and max life are the same
+  ## @name particlesystem.vwf#depthTest
+  ## @property
+  
+  maxRate:
+  
+  ## The total number of particles in the system
+  ## @name particlesystem.vwf#depthTest
+  ## @property
+  
+  particleCount:
+  
+  ## The total number of particles in the system
+  ## @name particlesystem.vwf#depthTest
+  ## @property
+  
+  damping:
+  
+  ## 'cartesian' or 'spherical' in cartesian, velocity min and max are box coords, as in min and max local space vectors. 
+  ## in spherical, they are treated as roe theta and magnitude for vectors, still in local space. in this mode, the range for the first two 
+  ## components is 0 - 1
+  ## this helps set the direction to be random, but the magnitute can be constant
+  ## @name particlesystem.vwf#depthTest
+  ## @property
+  
+  velocityMode:
+  
   worldBoundingBox:
     get: |
       return null;

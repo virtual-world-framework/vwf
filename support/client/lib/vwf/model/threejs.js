@@ -524,6 +524,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						ps.material.size = propertyValue;
 					
 					}
+					if(propertyName == 'particleCount')
+					{
+						ps.setParticleCount(propertyValue);
+					}
 					if(propertyName == 'image')
 					{
 						ps.material.map = THREE.ImageUtils.loadTexture(propertyValue);
@@ -1573,7 +1577,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
 			
             // create the particle variables
-            var particleCount = 1800;
+           
             var particles = new THREE.Geometry();
             var pMaterial =
                   new THREE.ParticleBasicMaterial({
@@ -1593,7 +1597,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			particleSystem.emitterSize = [0,0,0];
 			particleSystem.startColor = [1,1,1];
 			particleSystem.endColor = [0,0,0];
-			
+			particleSystem.regenParticles = [];
+			particleSystem.maxRate = 1000;
+			particleSystem.particleCount = 1000;
+			particleSystem.damping = 0;
+			particleSystem.velocityMode = 'cartesian';
 			particleSystem.createParticle = function(i)
 			{
 				var particle = new THREE.Vector3(0,0,0);
@@ -1622,14 +1630,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				}
 				if(this.emitterType.toLowerCase() == 'sphere')
 				{
-					var r = this.emitterSize[0] * Math.random() - this.emitterSize[0]/2;
-					var t = Math.random() * Math.PI*2;
-					var w = Math.random() * Math.PI - Math.PI/2;
-					var x = r * Math.sin(t)*Math.cos(w);
-					var y = r * Math.sin(t)*Math.sin(w);
-					var z = r * Math.cos(t);
+					var o = this.emitterSize[0] * Math.random() * Math.PI*2;
+					var u = this.emitterSize[1] * Math.random() * 2 - 1;
+					var r = this.emitterSize[2]  * Math.random();
+					var x = Math.cos(o)*Math.sqrt(1-(u*u));
+					var y = Math.sin(o)*Math.sqrt(1-(u*u));
+					var z = u;
 					
-					return new THREE.Vector3(x,y,z);
+					
+					return new THREE.Vector3(x,y,z).setLength(r);
 				}
 			
 			}
@@ -1647,9 +1656,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			    particle.acceleration = new THREE.Vector3( 0,0,0);  
 			    particle.lifespan = 1;  
 				
-				particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
-				particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
-				particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+				if(this.velocityMode == 'cartesian')
+				{
+					particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
+					particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
+					particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+				}
+				if(this.velocityMode == 'spherical')
+				{
+				
+					//random sphercial points concentrate at poles
+					/* var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+					var t = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * Math.PI*2;
+					var w = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI - Math.PI/2;
+					particle.velocity.x = r * Math.sin(t)*Math.cos(w);
+					particle.velocity.y = r * Math.sin(t)*Math.sin(w);
+					particle.velocity.z = r * Math.cos(t); */
+					
+					var o = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI*2;
+					var u = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * 2 - 1;
+					var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+					particle.velocity.x = Math.cos(o)*Math.sqrt(1-(u*u));
+					particle.velocity.y = Math.sin(o)*Math.sqrt(1-(u*u));
+					particle.velocity.z = u;
+					particle.velocity.setLength(r);
+				}
 				
 				mat = mat.clone();
 				mat.elements[12] = 0;
@@ -1665,6 +1696,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.color.r = this.startColor[0];
 				particle.color.g = this.startColor[1];
 				particle.color.b = this.startColor[2];
+				//randomly move the particle up to one step in time
+				this.updateParticle(particle,mat,inv,Math.random());
 			}
 			
 			particleSystem.update = function(time)
@@ -1676,65 +1709,111 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				inv = inv.getInverse(inv);
 				
 			    var particles = this.geometry;
+				var t2 = time/33.33333;
 			    while(pCount--) 
 			    {
 					var particle =particles.vertices[pCount];					
-					this.updateParticle(particle,this.matrix,inv,time);
+					this.updateParticle(particle,this.matrix,inv,t2);
 			    }
-
+				
+				
+				var len = Math.min(this.regenParticles.length,this.maxRate);
+				for(var i =0; i < len; i++)
+				{
+					
+					var particle = this.regenParticles.shift();
+					this.setupParticle(particle,this.matrix,inv);
+					particle.waitForRegen = false;
+				}
 			    this.geometry.verticesNeedUpdate  = true;
 				this.geometry.colorsNeedUpdate  = true;
 			
 			}
-			particleSystem.updateParticle = function(particle,mat,inv,time)
+			particleSystem.temp = new THREE.Vector3();
+			particleSystem.updateParticle = function(particle,mat,inv,time_in_ticks)
 			{
 				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
 				//we don't actuall want to move to system forward in time.
 				
-				var time_in_ticks = time/33.33333;
+				//var time_in_ticks = time/33.33333;
 				
-				if(time > 0)
+				if(time_in_ticks > 0)
 				{
 					
 					particle.age += time_in_ticks;
-					if(particle.age > particle.lifespan)
+					if(particle.age > particle.lifespan && !particle.waitForRegen)
 					{
-						this.setupParticle(particle,mat,inv)
+						
+						this.regenParticles.push(particle);
+						particle.waitForRegen = true;
+						particle.x = 0;
+						particle.y = 0;
+						particle.z = 0;
+					}else
+					{
+					
+					
+						// and the position
+						particle.world.x += particle.velocity.x * time_in_ticks;
+						particle.world.y += particle.velocity.y * time_in_ticks;
+						particle.world.z += particle.velocity.z * time_in_ticks;
+						  
+						particle.velocity.x += particle.acceleration.x * time_in_ticks;
+						particle.velocity.y += particle.acceleration.y * time_in_ticks;
+						particle.velocity.z += particle.acceleration.z * time_in_ticks;
+						
+						var damping = 1-(this.damping*time_in_ticks);
+						particle.velocity.x *= damping;
+						particle.velocity.y *= damping;
+						particle.velocity.z *= damping;
+						var percent = particle.age/particle.lifespan;
+				
+						particle.color.r = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+						particle.color.g = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+						particle.color.b = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
 					}
-					
-					
-					// and the position
-					particle.world.x += particle.velocity.x * time_in_ticks;
-					particle.world.y += particle.velocity.y * time_in_ticks;
-					particle.world.z += particle.velocity.z * time_in_ticks;
-					  
-					particle.velocity.x += particle.acceleration.x * time_in_ticks;
-					particle.velocity.y += particle.acceleration.y * time_in_ticks;
-					particle.velocity.z += particle.acceleration.z * time_in_ticks;
 				}
 				
-				var local = inv.multiplyVector3(particle.world.clone());
-				particle.x = local.x;
-				particle.y = local.y;
-				particle.z = local.z;
-				var percent = particle.age/particle.lifespan;
+				this.temp.x = particle.world.x;
+				this.temp.y = particle.world.y;
+				this.temp.z = particle.world.z;
+				inv.multiplyVector3(this.temp);
+				particle.x = this.temp.x;
+				particle.y = this.temp.y;
+				particle.z = this.temp.z;
 				
-				particle.color.r = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
-				particle.color.g = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
-				particle.color.b = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
 			
 			}
 			
-			var inv = particleSystem.matrix.clone();
-			inv = inv.getInverse(inv);
-            for(var p = 0; p < particleCount; p++) {
-
-              var particle = particleSystem.createParticle(p);
-			  particleSystem.setupParticle(particle,particleSystem.matrix,inv);
-              
-			  
-            }
-
+			particleSystem.setParticleCount = function(newcount)
+			{
+				
+				
+				var inv = this.matrix.clone();
+				inv = inv.getInverse(inv);
+				
+			    var particles = this.geometry;
+			    while(this.geometry.vertices.length > newcount) 
+			    {
+					this.geometry.vertices.pop();
+			    }
+				while(this.geometry.vertices.length < newcount) 
+			    {
+					
+					var particle = particleSystem.createParticle(this.geometry.vertices.length);
+					particleSystem.setupParticle(particle,particleSystem.matrix,inv);
+					particle.age = Infinity;
+					this.regenParticles.push(particle);
+					particle.waitForRegen = true;
+			    }
+			    this.geometry.verticesNeedUpdate  = true;
+				this.geometry.colorsNeedUpdate  = true;
+				this.particleCount = newcount;
+			}
+			
+			
+			particleSystem.setParticleCount(1000);
+			particleSystem.update(1);
 			
 			
            

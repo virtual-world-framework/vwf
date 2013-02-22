@@ -1,0 +1,127 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  navmode: none
+children:
+  system2:
+    extends: http://vwf.example.com/particlesystem.vwf
+    properties:
+      minVelocity: [ 0.0, 0.0, 10]
+      maxVelocity: [ 1, 1, 10]
+      velocityMode: 'spherical'
+      maxAcceleration: [ .03, 0, -0.10]
+      minAcceleration: [ 0, 0, -0.16]
+      size: 50
+      maxLifeTime: 120
+      minLifeTime: 120
+      startColor: [ 1, 1, 1]
+      endColor: [ 0, 0, 0]
+      additive: true
+      opacity: .5
+      depthTest: false
+      maxRate: 1000
+      particleCount: 1200
+      damping: .12
+      translation: [ 0, 0, 150]
+      emitterType: 'point'
+      emitterSize: [ 1 , 1 , 100]
+      image: spark.jpg
+  system3:
+    extends: http://vwf.example.com/particlesystem.vwf
+    properties:
+      minVelocity: [ 0.0, 0.0, 8]
+      maxVelocity: [ 1, 1, 8]
+      velocityMode: 'spherical'
+      maxAcceleration: [ .03, 0, -0.10]
+      minAcceleration: [ 0, 0, -0.16]
+      size: 50
+      maxLifeTime: 100
+      minLifeTime: 100
+      startColor: [ 1, 2, 1]
+      endColor: [ 0, 0, 0]
+      additive: true
+      opacity: .5
+      depthTest: false
+      maxRate: 1000
+      particleCount: 1200
+      damping: .12
+      translation: [ 100, 0, 15]
+      emitterType: 'point'
+      emitterSize: [ 1 , 1 , 100]
+      image: spark.jpg
+  system4:
+    extends: http://vwf.example.com/particlesystem.vwf
+    properties:
+      minVelocity: [ 0.0, 0.0, 16]
+      maxVelocity: [ 1, 1, 16]
+      velocityMode: 'spherical'
+      maxAcceleration: [ .03, 0, -0.10]
+      minAcceleration: [ 0, 0, -0.16]
+      size: 50
+      maxLifeTime: 150
+      minLifeTime: 150
+      startColor: [ 2, 1, 1]
+      endColor: [ 0, 0, 0]
+      additive: true
+      opacity: .5
+      depthTest: false
+      maxRate: 1000
+      particleCount: 1200
+      damping: .12
+      translation: [ -100, 0, -15]
+      emitterType: 'point'
+      emitterSize: [ 1 , 1 , 100]
+      image: spark.jpg       
+  camera:
+    extends: http://vwf.example.com/camera.vwf
+    properties:
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    implements:
+    - http://vwf.example.com/glgeLight.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 1.2
+      color: [ 255, 255, 255 ]
+      glge-constantAttenuation: 0.3
+      glge-linearAttenuation: 0.00000001
+      glge-quadraticAttenuation: 0.0000001  
+      rotation: [ 1, 0, 0, -45 ]
+      translation: [0,-100,0]
+methods:
+  update:
+scripts:
+- | 
+    this.initialize = function()
+    {
+        this.camera.rotation = [0,1,0,0];
+        this.camera.translation = [0,-600,50];
+        this.dir1.translation = [0,-100,0];
+       
+        this.counter = 0;
+        this.future(.05).update();
+    } //@ sourceURL=index.vwf
+    this.update = function()
+    {
+        this.counter++;
+        console.log(this.system2.translation)
+        this.system2.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
+        this.system3.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
+        this.system4.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
+        this.future(2).update();
+    }
