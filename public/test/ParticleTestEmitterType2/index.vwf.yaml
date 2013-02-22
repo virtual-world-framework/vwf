@@ -19,10 +19,10 @@ children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -0.2, -0.2, -10.3]
-      maxVelocity: [ 0.2, 0.2, -13.3]
-      maxAcceleration: [ 0, 0, -0.1]
-      minAcceleration: [ 0, 0, -0.1]
+      minVelocity: [ -0.2, -0.2, -1.3]
+      maxVelocity: [ 0.2, 0.2, -3.3]
+      maxAcceleration: [ 0, 0, -0.4]
+      minAcceleration: [ 0, 0, -0.5]
       size: 80
       maxLifeTime: 30
       minLifeTime: 30
@@ -32,8 +32,8 @@ children:
       additive: true
       opacity: 1
       depthTest: false
-      emitterType: box
-      emitterSize: [ 400, 100, 0]
+      emitterType: sphere
+      emitterSize: [ 1, 1, 50]
       translation: [ 0, 0, 200]
       particleCount: 1200
       maxRate: 2
@@ -66,12 +66,12 @@ scripts:
         this.dir1.translation = [0,100,0];
         
         this.counter = 0;
-      //  this.future(.05).update();
+        this.future(.05).update();
     } //@ sourceURL=index.vwf
     this.update = function()
     {
         this.counter++;
-     //   this.system.translation = [Math.sin(this.counter/100)*300 - 150,0,0];
+        this.system.translation = [Math.sin(this.counter/100)*100 + 50,0,200];
      //   this.system.rotation = [0,1,0,this.counter*4];
         this.future(.05).update();
     }

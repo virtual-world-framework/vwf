@@ -1630,9 +1630,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				}
 				if(this.emitterType.toLowerCase() == 'sphere')
 				{
+					var u2 = Math.random();
+					u2 = Math.pow(u2,1/3);
 					var o = this.emitterSize[0] * Math.random() * Math.PI*2;
 					var u = this.emitterSize[1] * Math.random() * 2 - 1;
-					var r = this.emitterSize[2]  * Math.random();
+					var r = this.emitterSize[2]  * u2;
 					var x = Math.cos(o)*Math.sqrt(1-(u*u));
 					var y = Math.sin(o)*Math.sqrt(1-(u*u));
 					var z = u;
@@ -1675,7 +1677,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					
 					var o = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI*2;
 					var u = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * 2 - 1;
-					var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+					var u2 = Math.random();
+					u2 = Math.pow(u2,1/3);
+					var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * u2;
 					particle.velocity.x = Math.cos(o)*Math.sqrt(1-(u*u));
 					particle.velocity.y = Math.sin(o)*Math.sqrt(1-(u*u));
 					particle.velocity.z = u;
@@ -1717,7 +1721,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			    }
 				
 				
-				var len = Math.min(this.regenParticles.length,this.maxRate);
+				var len = Math.min(this.regenParticles.length,this.maxRate * time/3);
 				for(var i =0; i < len; i++)
 				{
 					
