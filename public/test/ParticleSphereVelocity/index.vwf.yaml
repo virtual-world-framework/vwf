@@ -19,11 +19,11 @@ children:
   system2:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ 0.0, 0.0, 10]
-      maxVelocity: [ 1, 1, 10]
+      minVelocity: [ 0.0, 0.0, 20]
+      maxVelocity: [ 1, 1, 20]
       velocityMode: 'spherical'
-      maxAcceleration: [ .03, 0, -0.10]
-      minAcceleration: [ 0, 0, -0.16]
+      maxAcceleration: [ .03, 0, -0.20]
+      minAcceleration: [ 0, 0, -0.32]
       size: 50
       maxLifeTime: 120
       minLifeTime: 120
@@ -34,7 +34,7 @@ children:
       depthTest: false
       maxRate: 1000
       particleCount: 1200
-      damping: .12
+      damping: .22
       translation: [ 0, 0, 150]
       emitterType: 'point'
       emitterSize: [ 1 , 1 , 100]
@@ -42,11 +42,11 @@ children:
   system3:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ 0.0, 0.0, 8]
-      maxVelocity: [ 1, 1, 8]
+      minVelocity: [ 0.0, 0.0, 16]
+      maxVelocity: [ 1, 1, 16]
       velocityMode: 'spherical'
-      maxAcceleration: [ .03, 0, -0.10]
-      minAcceleration: [ 0, 0, -0.16]
+      maxAcceleration: [ .03, 0, -0.20]
+      minAcceleration: [ 0, 0, -0.32]
       size: 50
       maxLifeTime: 100
       minLifeTime: 100
@@ -57,7 +57,7 @@ children:
       depthTest: false
       maxRate: 1000
       particleCount: 1200
-      damping: .12
+      damping: .22
       translation: [ 100, 0, 15]
       emitterType: 'point'
       emitterSize: [ 1 , 1 , 100]
@@ -65,11 +65,11 @@ children:
   system4:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ 0.0, 0.0, 16]
-      maxVelocity: [ 1, 1, 16]
+      minVelocity: [ 0.0, 0.0, 32]
+      maxVelocity: [ 1, 1, 32]
       velocityMode: 'spherical'
-      maxAcceleration: [ .03, 0, -0.10]
-      minAcceleration: [ 0, 0, -0.16]
+      maxAcceleration: [ .03, 0, -0.20]
+      minAcceleration: [ 0, 0, -0.32]
       size: 50
       maxLifeTime: 150
       minLifeTime: 150
@@ -80,7 +80,7 @@ children:
       depthTest: false
       maxRate: 1000
       particleCount: 1200
-      damping: .12
+      damping: .22
       translation: [ -100, 0, -15]
       emitterType: 'point'
       emitterSize: [ 1 , 1 , 100]

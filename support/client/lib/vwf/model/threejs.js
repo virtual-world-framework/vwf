@@ -1706,7 +1706,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
 			particleSystem.update = function(time)
 			{
-			
+				//var timer = performance.now();
 			    var pCount = this.geometry.vertices.length;
 				
 				var inv = this.matrix.clone();
@@ -1721,7 +1721,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			    }
 				
 				
-				var len = Math.min(this.regenParticles.length,this.maxRate * time/3);
+				var len = Math.min(this.regenParticles.length,this.maxRate * time/3 );
 				for(var i =0; i < len; i++)
 				{
 					
@@ -1731,7 +1731,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				}
 			    this.geometry.verticesNeedUpdate  = true;
 				this.geometry.colorsNeedUpdate  = true;
-			
+				//console.log(performance.now() - timer);
 			}
 			particleSystem.temp = new THREE.Vector3();
 			particleSystem.updateParticle = function(particle,mat,inv,time_in_ticks)
@@ -1740,7 +1740,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				//we don't actuall want to move to system forward in time.
 				
 				//var time_in_ticks = time/33.33333;
-				
+				//time_in_ticks = .3;
+				//time_in_ticks *= 8;
 				if(time_in_ticks > 0)
 				{
 					

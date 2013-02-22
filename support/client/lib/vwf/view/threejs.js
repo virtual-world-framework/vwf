@@ -287,7 +287,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var oldMouseX = 0;
             var oldMouseY = 0;
             var hovering = false;
-            
+            var view = this;
             window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
@@ -298,6 +298,9 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
                     sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
+					
+					view.state.cameraInUse.aspect =  mycanvas.width / mycanvas.height;
+					view.state.cameraInUse.updateProjectionMatrix()
                     //var cam = self.state.cameraInUse;
                     //if ( cam ) {
                     //    cam.aspect = mycanvas.width / mycanvas.height;
@@ -321,13 +324,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             rebuildAllMaterials.call(this);
             if(sceneNode.renderer.setFaceCulling)
                 sceneNode.renderer.setFaceCulling(false);
-            this.state.cameraInUse = sceneNode.threeScene.children[0];
+            this.state.cameraInUse = sceneNode.threeScene.children[1];
            // this.state.cameraInUse.setAspect( ( mycanvas.width / mycanvas.height) /*/ 1.333 */ );
 
             
             // Schedule the renderer.
 
-            var view = this;
+            
             var scene = sceneNode.threeScene;
             var renderer = sceneNode.renderer;
             var scenenode = sceneNode;
