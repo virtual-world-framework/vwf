@@ -17,9 +17,9 @@ You will know if your .yaml format is incorrect because you will get a 500 (Serv
 
 The *vwf* object gives a coder direct access to manipulate the [model](architecture.html) from the [view](architecture.html).  This may seem convenient, but it side-steps VWF's mechanisms to ensure that state stays synchronized between users.  In the future this variable will be hidden from us coders for our safety, but in the mean time, steer clear of it!  (though while it is available, it can be useful to investigate the properties of the vwf object from the browser console for debugging purposes).  To see an example of how to properly manipulate the model from the view, read the [*Create a 2D Interface*](2d-interface.html) cookbook recipe. 
 
-## Do not set a field on a [model](architecture.html) property from the [view](architecture.html)
+## When setting a field on a [model](architecture.html) property, set the whole property
 
-When changing a property, the property's setter must be called to trigger VWF's synchronization mechanism.  If one sets only a field of a property (for example, the *x* field on a vector property), the setter will not be called, and that change will not be replicated to other users.  Instead (using the vector example again), a new vector must be created that has the updated properties and the entire vector must be assigned to the property (to call the property's setter).
+When changing a property, the property's setter must be called to trigger VWF's synchronization mechanism.  If one sets only a field of a property (for example, the *x* field on a vector property), the setter will not be called, and that change will not be replicated to other users.  Instead (using the vector example again), create a new vector that has the updated properties and assign the entire vector to the property (to call the property's setter).
 
 In cases like above when a property (let's call it *containerProperty*) has properties of its own, it is often better to make containerProperty a child of the object it is on, rather than a property.  That way its sub-properties can automatically be synchronized when set.  Beware of doing this on components, though.  See [*Do not add children to components*](#childrenOfComponents) for more details.
 
