@@ -1769,7 +1769,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				
 				
 				
-					 
+					particle.prevage = particle.age;
 					particle.age += step_dist;
 					if(particle.age >= particle.lifespan && !particle.waitForRegen)
 					{
@@ -1800,11 +1800,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						particle.velocity.x *= damping;
 						particle.velocity.y *= damping;
 						particle.velocity.z *= damping;
-						var percent = particle.age/particle.lifespan;
-				
-						particle.color.r = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
-						particle.color.g = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
-						particle.color.b = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+						
 					}
 				
 				
@@ -1824,6 +1820,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.x = this.temp.x;
 				particle.y = this.temp.y;
 				particle.z = this.temp.z;
+				
+				var percent = (particle.prevage + (particle.age - particle.prevage) * frac_time)/particle.lifespan;
+				
+				particle.color.r = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+				particle.color.g = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+				particle.color.b = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
 			
 			}
 			
