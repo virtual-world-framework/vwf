@@ -1611,6 +1611,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particles.colors.push(color);
 				particle.i = i;
 				particle.color = color;
+				particle.world = new THREE.Vector3();
+				particle.prevworld = new THREE.Vector3();
 				return particle;
 			}
 			
@@ -1701,52 +1703,75 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.color.g = this.startColor[1];
 				particle.color.b = this.startColor[2];
 				//randomly move the particle up to one step in time
-				this.updateParticle(particle,mat,inv,Math.random());
+				
 			}
 			
 			particleSystem.update = function(time)
 			{
 				//var timer = performance.now();
-			    var pCount = this.geometry.vertices.length;
+				var time_in_ticks = time/100.0;
 				
+				if(!this.lastTime) this.lastTime = 0;
+				var ticks = this.lastTime + time_in_ticks;
+				this.lastTime = ticks - Math.floor(ticks);
+				ticks = Math.floor(ticks);
+				document.title = ticks;
+				
+					
 				var inv = this.matrix.clone();
 				inv = inv.getInverse(inv);
-				
-			    var particles = this.geometry;
-				var t2 = time/33.33333;
-			    while(pCount--) 
-			    {
-					var particle =particles.vertices[pCount];					
-					this.updateParticle(particle,this.matrix,inv,t2);
-			    }
-				
-				
-				var len = Math.min(this.regenParticles.length,this.maxRate * time/3 );
-				for(var i =0; i < len; i++)
-				{
 					
-					var particle = this.regenParticles.shift();
-					this.setupParticle(particle,this.matrix,inv);
-					particle.waitForRegen = false;
+				var particles = this.geometry;
+				
+				//timesliced tick	 give up after 5 steps - just cant go fast enougth				
+				for(var i=0; i < ticks && i<5; i++)
+				{
+					var pCount = this.geometry.vertices.length;
+					while(pCount--) 
+					{
+						var particle =particles.vertices[pCount];					
+						this.updateParticle(particle,this.matrix,inv,3.333);
+					}
+					
+					//examples developed with faster tick - maxrate *33 is scale to make work 
+					//with new timing
+					var len = Math.min(this.regenParticles.length,this.maxRate*33);
+					for(var i =0; i < len; i++)
+					{
+						
+						var particle = this.regenParticles.shift();
+						this.setupParticle(particle,this.matrix,inv);
+						this.updateParticle(particle,this.matrix,inv,Math.random()*3.33);
+						particle.waitForRegen = false;
+					}
+					
 				}
+				
+				//reset pCount counter and do display interpolation
+				var pCount = this.geometry.vertices.length;
+				while(pCount--) 
+				{
+					var particle =particles.vertices[pCount];					
+					this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
+				
+				}
+				
 			    this.geometry.verticesNeedUpdate  = true;
 				this.geometry.colorsNeedUpdate  = true;
 				//console.log(performance.now() - timer);
 			}
 			particleSystem.temp = new THREE.Vector3();
-			particleSystem.updateParticle = function(particle,mat,inv,time_in_ticks)
+			particleSystem.updateParticle = function(particle,mat,inv,step_dist)
 			{
 				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
 				//we don't actuall want to move to system forward in time.
 				
-				//var time_in_ticks = time/33.33333;
-				//time_in_ticks = .3;
-				//time_in_ticks *= 8;
-				if(time_in_ticks > 0)
-				{
-					
-					particle.age += time_in_ticks;
-					if(particle.age > particle.lifespan && !particle.waitForRegen)
+				
+				
+				
+					 
+					particle.age += step_dist;
+					if(particle.age >= particle.lifespan && !particle.waitForRegen)
 					{
 						
 						this.regenParticles.push(particle);
@@ -1759,15 +1784,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					
 					
 						// and the position
-						particle.world.x += particle.velocity.x * time_in_ticks;
-						particle.world.y += particle.velocity.y * time_in_ticks;
-						particle.world.z += particle.velocity.z * time_in_ticks;
-						  
-						particle.velocity.x += particle.acceleration.x * time_in_ticks;
-						particle.velocity.y += particle.acceleration.y * time_in_ticks;
-						particle.velocity.z += particle.acceleration.z * time_in_ticks;
+						particle.prevworld.x = particle.world.x;
+						particle.prevworld.y = particle.world.y;
+						particle.prevworld.z = particle.world.z;
 						
-						var damping = 1-(this.damping*time_in_ticks);
+						particle.world.x += particle.velocity.x * step_dist;
+						particle.world.y += particle.velocity.y * step_dist ;
+						particle.world.z += particle.velocity.z * step_dist ;
+						  
+						particle.velocity.x += particle.acceleration.x * step_dist ;
+						particle.velocity.y += particle.acceleration.y * step_dist ;
+						particle.velocity.z += particle.acceleration.z * step_dist ;
+						
+						var damping = 1-(this.damping * step_dist);
 						particle.velocity.x *= damping;
 						particle.velocity.y *= damping;
 						particle.velocity.z *= damping;
@@ -1777,16 +1806,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						particle.color.g = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
 						particle.color.b = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
 					}
-				}
 				
-				this.temp.x = particle.world.x;
-				this.temp.y = particle.world.y;
-				this.temp.z = particle.world.z;
+				
+				
+				
+			
+			}
+			//interpolate current and prev tick for smooth motion when dispaly rate is faster than
+			//simulation tick
+			particleSystem.interpolateDisplay = function(particle,mat,inv,frac_time)
+			{
+				
+				this.temp.x = particle.prevworld.x + (particle.world.x - particle.prevworld.x) * frac_time;
+				this.temp.y = particle.prevworld.y + (particle.world.y - particle.prevworld.y) * frac_time;
+				this.temp.z = particle.prevworld.z + (particle.world.z - particle.prevworld.z) * frac_time;
 				inv.multiplyVector3(this.temp);
 				particle.x = this.temp.x;
 				particle.y = this.temp.y;
 				particle.z = this.temp.z;
-				
 			
 			}
 			

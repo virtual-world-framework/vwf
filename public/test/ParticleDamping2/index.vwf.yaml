@@ -16,22 +16,28 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   navmode: none
 children:
-  system:
+  system2:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -1, -1, -1]
-      maxVelocity: [ 1, 1, 1]
+      minVelocity: [ -0.25, -0.25, -0.25]
+      maxVelocity: [ 0.25, 0.25, 0.25]
+      velocityMode: 'cartesian'
       maxAcceleration: [ 0, 0, 0]
       minAcceleration: [ 0, 0, 0]
       size: 3
-      maxLifeTime: 120
-      minLifeTime: 30
+      maxLifeTime: 40
+      minLifeTime: 40
       startColor: [ 1, 1, 1]
       endColor: [ 0, 0, 0]
       additive: false
       opacity: 1
       depthTest: false
-      particleCount: 1500
+      maxRate: 5000
+      particleCount: 2200
+      damping: -.22
+      translation: [ 0, 0, 0]
+      emitterType: 'sphere'
+      emitterSize: [ 1 , 1 , 100]
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:
@@ -59,12 +65,14 @@ scripts:
         this.camera.rotation = [0,1,0,0];
         this.camera.translation = [0,-600,50];
         this.dir1.translation = [0,-100,0];
-        this.system.translation = [0,0,0];
+        //this.system.translation = [0,0,0];
         this.counter = 0;
-        this.future(.05).update();
+        this.future(4).update();
     } //@ sourceURL=index.vwf
     this.update = function()
     {
         this.counter++;
-        this.future(.05).update();
+        this.system2.translation = [Math.random() * 300,Math.random() * 300,Math.random() * 300];
+        console.log(this.system2.translation);
+        this.future(4).update();
     }

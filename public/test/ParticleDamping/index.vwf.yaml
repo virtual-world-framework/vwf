@@ -19,8 +19,8 @@ children:
   system2:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -5, -5, -5]
-      maxVelocity: [ 5, 5, 5]
+      minVelocity: [ -25, -25, -25]
+      maxVelocity: [ 25, 25, 25]
       velocityMode: 'cartesian'
       maxAcceleration: [ 0, 0, -.1]
       minAcceleration: [ 0, 0, -.1]
@@ -34,7 +34,7 @@ children:
       depthTest: false
       maxRate: 1000
       particleCount: 1200
-      damping: .12
+      damping: .22
       translation: [ 0, 0, 0]
       emitterType: 'point'
       emitterSize: [ 110 , 0 , 0]
