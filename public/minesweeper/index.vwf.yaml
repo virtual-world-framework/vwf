@@ -548,9 +548,9 @@ scripts:
         }
       }
       // Disable button
-      $("#startButton").button("option", "disabled", true);
-      $("#winMessage").dialog("close");
-      $("#loseMessage").dialog("close");
+      top.$("#startButton").button("option", "disabled", true);
+      top.$("#winMessage").dialog("close");
+      top.$("#loseMessage").dialog("close");
       // Start game
       this.gameInProgress = true;
     }
@@ -563,13 +563,13 @@ scripts:
           var name = "flippedTile" + obj.properties.position;
           obj.children.create(name, tempTile);
           this.gameInProgress = false;
-          $("#loseMessage").dialog({
+          top.$("#loseMessage").dialog({
             resizable: false,
             draggable: false,
             height: 110,
             width: 230
           });
-          $("#startButton").button("option", "disabled", false);
+          top.$("#startButton").button("option", "disabled", false);
         }
         else {
           var tempTile = this.getNumberedTile(obj.properties.position);
@@ -642,12 +642,12 @@ scripts:
       }
       if(!unflippedEmptyTiles) {
         this.gameInProgress = false;
-        $("#winMessage").dialog({
+        top.$("#winMessage").dialog({
           resizable: false,
           draggable: false,
           height: 110,
           width: 230
         });
-        $("#startButton").button("option", "disabled", false);
+        top.$("#startButton").button("option", "disabled", false);
       }
     }

@@ -35,6 +35,7 @@ properties:
   tilePosition16: [ -16.5,   0, 0 ]
   openTilePosition: [ -16.5, 0, 0 ]
   tileDistance: 12 
+  tilePositions: 
 methods:
   setPositions:
 children: 
@@ -456,18 +457,23 @@ scripts:
       this.tile14.translation = this.tilePosition14;
       this.tile15.translation = this.tilePosition15;
       this.openTilePosition = this.tilePosition16;
-      
+      this.tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
+        this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
+        this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
+        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
       this.camera.transform = [ -0.9999961853027344,0.0027521769516170025,0,0,-0.0013765898765996099,-0.5001803040504456,-0.8659201860427856,0,-0.0023831655271351337,-0.865916907787323,0.5001822113990784,0,0.088880255818367,32.294410705566406,69.99520874023438,1 ];
     }
     
     this.shuffle = function() {
-      var tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
-                       this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
-                       this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
-                       this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
-      tilePositions.sort( function(){ return (Math.round( Math.random() )-0.5); } ); 
-      // this.setPositions(tilePositions);
-      vwf.send(this.id, "callMethod", "setPositions", [[tilePositions]], 0);
+      var tmp, current, top = this.tilePositions.length;
+
+      if(top) while(--top) {
+        current = Math.floor(this.random() * (top + 1));
+        tmp = this.tilePositions[current];
+        this.tilePositions[current] = this.tilePositions[top];
+        this.tilePositions[top] = tmp;
+      }
+      this.setPositions();
     }
     
     this.solve = function() {
@@ -489,26 +495,23 @@ scripts:
       this.openTilePosition = this.tilePosition16;
     }
     
-    this.setPositions = function(tilePositions) {
-      if (this.time >= (this.lastSetPositionTime || 0) + 0.1) {
-        this.lastSetPositionTime = this.time
-        this.tile1.translation = tilePositions[0];
-        this.tile2.translation = tilePositions[1];
-        this.tile3.translation = tilePositions[2];
-        this.tile4.translation = tilePositions[3];
-        this.tile5.translation = tilePositions[4];
-        this.tile6.translation = tilePositions[5];
-        this.tile7.translation = tilePositions[6];
-        this.tile8.translation = tilePositions[7];
-        this.tile9.translation = tilePositions[8];
-        this.tile10.translation = tilePositions[9];
-        this.tile11.translation = tilePositions[10];
-        this.tile12.translation = tilePositions[11];
-        this.tile13.translation = tilePositions[12];
-        this.tile14.translation = tilePositions[13];
-        this.tile15.translation = tilePositions[14];
-        this.openTilePosition = tilePositions[15];
-      }
+    this.setPositions = function() {
+      this.tile1.translation = this.tilePositions[0];
+      this.tile2.translation = this.tilePositions[1];
+      this.tile3.translation = this.tilePositions[2];
+      this.tile4.translation = this.tilePositions[3];
+      this.tile5.translation = this.tilePositions[4];
+      this.tile6.translation = this.tilePositions[5];
+      this.tile7.translation = this.tilePositions[6];
+      this.tile8.translation = this.tilePositions[7];
+      this.tile9.translation = this.tilePositions[8];
+      this.tile10.translation = this.tilePositions[9];
+      this.tile11.translation = this.tilePositions[10];
+      this.tile12.translation = this.tilePositions[11];
+      this.tile13.translation = this.tilePositions[12];
+      this.tile14.translation = this.tilePositions[13];
+      this.tile15.translation = this.tilePositions[14];
+      this.openTilePosition = this.tilePositions[15];
     }
 
     this.moveTile = function(obj) {
