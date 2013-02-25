@@ -560,7 +560,7 @@ scripts:
     this.flipTile = function(obj) {
       if(!obj.isFlipped && this.gameInProgress) {
         if(obj.isMine) {
-          var tempTile = $.extend(true, {}, mineTile);
+          var tempTile = Object.clone(mineTile, true);
           tempTile.properties.rotation = [1, 0, 0, 0];
           var name = "flippedTile" + obj.properties.position;
           obj.children.create(name, tempTile);
@@ -600,16 +600,16 @@ scripts:
         mineCount++;
       switch(mineCount) {
         case 1:
-          return $.extend(true, {}, tile1);
+          return Object.clone(tile1, true);
           break;
         case 2:
-          return $.extend(true, {}, tile2);
+          return Object.clone(tile2, true);
           break;
         case 3:
-          return $.extend(true, {}, tile3);
+          return Object.clone(tile3, true);
           break;
         default:
-          return $.extend(true, {}, tile0);
+          return Object.clone(tile0, true);
       }
     }
     

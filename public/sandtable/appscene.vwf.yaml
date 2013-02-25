@@ -190,7 +190,7 @@ scripts:
           
           faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
           
-          var newLine = $.extend(true, {}, line);
+          var newLine = Object.clone(line, true);
           newLine.properties.meshDefinition.positions = pos;
           newLine.properties.meshDefinition.faces = faces;
           newLine.properties.meshDefinition.color = this.lineColor;

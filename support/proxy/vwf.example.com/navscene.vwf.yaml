@@ -328,7 +328,7 @@ scripts:
       if ( this.activeCameraComp ) {
 
         var deltaZ = 0;
-        var kd = $.extend(true, {}, this.input.keyInfo.keysDown, this.input.keyInfo.keysUp);
+        var kd = Object.extended().merge(this.input.keyInfo.keysDown, true).merge(this.input.keyInfo.keysUp, true);
 
         this.input.look = [ 0, 0 ];
         this.input.move = [ 0, 0 ];

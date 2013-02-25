@@ -179,7 +179,7 @@ scripts:
       }
     }
     else if(this.colorIndex < tankMaterials.length) {
-      var newPlayer = $.extend(true, {}, playerTank);
+      var newPlayer = Object.clone(playerTank, true);
       var tankTexture = tankMaterials[this.colorIndex];
       newPlayer.children[playerName + "Camera"] = playerCamera;
       newPlayer.children['playerModel'].children['material'].properties['texture'] = tankTexture;
@@ -195,7 +195,7 @@ scripts:
   this.fireLaser = function(playerName) {
     var player = this.players.children[playerName];
     if(player && player.active) {
-      var newBolt = $.extend(true, {}, bolt);
+      var newBolt = Object.clone(bolt, true);
       newBolt.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
       newBolt.children.laserParticle.properties.translation = [player.translation[0], player.translation[1], player.translation[2] + 100];
       newBolt.children.laserParticle.properties.image = player.laserMaterial;
