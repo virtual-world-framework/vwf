@@ -717,11 +717,11 @@ scripts:
     return scale;
   };
   this.state = function( test ) {
-    vwf.logger.info( test, "x", Array.prototype.slice.apply( this.transform || goog.vec.Mat4.createIdentity() ) );
-    vwf.logger.info( test, "t", Array.prototype.slice.apply( this.translation || goog.vec.Vec3.create() ) );
-    vwf.logger.info( test, "o", Array.prototype.slice.apply( this.rotation || goog.vec.Vec4.createFromValues( 1, 0, 0, 0 ) ) );
-    vwf.logger.info( test, "s", Array.prototype.slice.apply( this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 ) ) );
-    vwf.logger.info( test, "q", Array.prototype.slice.apply( this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 ) ) );
+    this.logger.info( test, "x", Array.prototype.slice.apply( this.transform || goog.vec.Mat4.createIdentity() ) );
+    this.logger.info( test, "t", Array.prototype.slice.apply( this.translation || goog.vec.Vec3.create() ) );
+    this.logger.info( test, "o", Array.prototype.slice.apply( this.rotation || goog.vec.Vec4.createFromValues( 1, 0, 0, 0 ) ) );
+    this.logger.info( test, "s", Array.prototype.slice.apply( this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 ) ) );
+    this.logger.info( test, "q", Array.prototype.slice.apply( this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 ) ) );
   };
   this.test1 = function() {
     this.transform = [];
