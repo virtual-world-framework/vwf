@@ -186,7 +186,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         function renderScene(time) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-			var timepassed = performance.now() - sceneNode.lastTime;
+			var now = performance.now();
+			var timepassed = now - sceneNode.lastTime;
 			
 			var pss = GetParticleSystems(sceneNode.threeScene);
 			for(var i in pss)
@@ -233,7 +234,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 
             }
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
-			sceneNode.lastTime = performance.now();
+			sceneNode.lastTime = now;
         };
 
         var mycanvas = this.canvasQuery.get( 0 );

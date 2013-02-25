@@ -23,11 +23,12 @@ children:
       maxVelocity: [ 1, 1, 4.5]
       maxAcceleration: [ 0, 0, -0.09]
       minAcceleration: [ 0, 0, -0.1]
-      size: 30
+      startSize: 30
+      endSize: 160
       maxLifeTime: 120
       minLifeTime: 30
-      startColor: [ 1, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 1, 1, 0.5]
+      endColor: [ 0, 0, 0, 0]
       image: fire.png
       additive: true
       opacity: .5

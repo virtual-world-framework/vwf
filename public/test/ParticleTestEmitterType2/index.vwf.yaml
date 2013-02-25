@@ -23,11 +23,12 @@ children:
       maxVelocity: [ 0.2, 0.2, -3.3]
       maxAcceleration: [ 0, 0, -0.4]
       minAcceleration: [ 0, 0, -0.5]
-      size: 80
+      startSize: 80
+      endSize: 80
       maxLifeTime: 30
       minLifeTime: 30
-      startColor: [ 2, 2, 2]
-      endColor: [ 1, 1, 1]
+      startColor: [ 2, 2, 2, 1]
+      endColor: [ 1, 1, 1, 1]
       image: rain.png
       additive: true
       opacity: 1

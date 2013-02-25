@@ -26,8 +26,8 @@ children:
       size: 3
       maxLifeTime: 120
       minLifeTime: 30
-      startColor: [ 1, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 1, 1, 1]
+      endColor: [ 0, 0, 0, 0]
       additive: false
       opacity: 1
       depthTest: false

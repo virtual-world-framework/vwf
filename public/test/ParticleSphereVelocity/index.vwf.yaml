@@ -24,21 +24,22 @@ children:
       velocityMode: 'spherical'
       maxAcceleration: [ .03, 0, -0.20]
       minAcceleration: [ 0, 0, -0.32]
-      size: 50
+      startSize: 50
+      endSize: 10
       maxLifeTime: 120
       minLifeTime: 120
-      startColor: [ 1, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 1, 1, .5]
+      endColor: [ 0, 0, 0, 0.5]
       additive: true
-      opacity: .5
       depthTest: false
-      maxRate: 1000
+      maxRate: 10000
       particleCount: 1200
       damping: .22
       translation: [ 0, 0, 150]
       emitterType: 'point'
       emitterSize: [ 1 , 1 , 100]
       image: spark.jpg
+      solver: 'Euler'
   system3:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
@@ -47,21 +48,23 @@ children:
       velocityMode: 'spherical'
       maxAcceleration: [ .03, 0, -0.20]
       minAcceleration: [ 0, 0, -0.32]
-      size: 50
+      startSize: 50
+      endSize: 10
       maxLifeTime: 100
       minLifeTime: 100
-      startColor: [ 1, 2, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 2, 1, 0.5]
+      endColor: [ 0, 0, 0, 0.5]
       additive: true
       opacity: .5
       depthTest: false
-      maxRate: 1000
+      maxRate: 10000
       particleCount: 1200
       damping: .22
       translation: [ 100, 0, 15]
       emitterType: 'point'
       emitterSize: [ 1 , 1 , 100]
       image: spark.jpg
+      solver: 'Euler'
   system4:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
@@ -70,21 +73,23 @@ children:
       velocityMode: 'spherical'
       maxAcceleration: [ .03, 0, -0.20]
       minAcceleration: [ 0, 0, -0.32]
-      size: 50
+      startSize: 50
+      endSize: 10
       maxLifeTime: 150
       minLifeTime: 150
-      startColor: [ 2, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 2, 1, 1, 0.5]
+      endColor: [ 0, 0, 0, 0.5]
       additive: true
       opacity: .5
       depthTest: false
-      maxRate: 1000
+      maxRate: 10000
       particleCount: 1200
       damping: .22
       translation: [ -100, 0, -15]
       emitterType: 'point'
       emitterSize: [ 1 , 1 , 100]
-      image: spark.jpg       
+      image: spark.jpg     
+      solver: 'Euler'      
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:
@@ -119,9 +124,9 @@ scripts:
     this.update = function()
     {
         this.counter++;
-        console.log(this.system2.translation)
-        this.system2.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
-        this.system3.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
-        this.system4.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
-        this.future(2).update();
+      //  console.log(this.system2.translation)
+      //  this.system2.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
+      //  this.system3.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
+      //  this.system4.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
+      //  this.future(2).update();
     }

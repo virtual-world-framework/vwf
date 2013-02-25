@@ -24,11 +24,12 @@ children:
       velocityMode: 'cartesian'
       maxAcceleration: [ 0, 0, 0]
       minAcceleration: [ 0, 0, 0]
-      size: 3
+      startSize: 3
+      endSize: 3
       maxLifeTime: 40
       minLifeTime: 40
-      startColor: [ 1, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 1, 1, 1]
+      endColor: [ 0, 0, 0, 0]
       additive: false
       opacity: 1
       depthTest: false
@@ -38,6 +39,7 @@ children:
       translation: [ 0, 0, 0]
       emitterType: 'sphere'
       emitterSize: [ 1 , 1 , 100]
+      solver: 'Euler'
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:
