@@ -132,8 +132,7 @@ define( [ "module", "vwf/model", "vwf/configuration", "vwf/utility" ], function(
             SB.document.write( "<script type='text/javascript' src='closure/base.js'></script>" );
             SB.document.write( "<script type='text/javascript'>goog.require('goog.vec.Mat4')</script>" );
             SB.document.write( "<script type='text/javascript'>goog.require('goog.vec.Quaternion')</script>" );
-
-SB.document.write( "<script type='text/javascript' src='jquery-1.7.1.js'></script>" );
+            SB.document.write( "<script type='text/javascript' src='sugar-1.3.9-custom.min.js'></script>" );
 
 
 window.$sandbox = "kernel-window";
