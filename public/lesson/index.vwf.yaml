@@ -23,6 +23,8 @@ children:
       rotation: [ 0, 0, 1, 180 ]
   lesson:
     extends: http://vwf.example.com/lesson/task.vwf
+    properties:
+      scenePath: /
     children:
       step1:
         extends: http://vwf.example.com/lesson/task.vwf
@@ -100,7 +102,6 @@ scripts:
 - |
   this.initialize = function() {
     var self = this;
-    this.lesson.scene = this;
     this.lesson.enter();
     this.lesson.completed = function() {
       console.info( "Lesson completed");

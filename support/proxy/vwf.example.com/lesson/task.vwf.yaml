@@ -30,39 +30,12 @@ properties:
 
   cameraPoseRef:
 
-  ## The scene that the lesson listens to for task completion events
-  ##   If the user has set the property, it returns what the user set
-  ##   Else, if it has a parent task, it returns the value for its scene property
-  ##   Else, if it has a sibling node named "scene" it returns that
-  ##   Else, it returns undefined
+  ## The xpath reference to the top node of the scene that the lesson listens to for task completion events
   ## 
-  ## @name task.vwf#scene
+  ## @name task.vwf#scenePath
   ## @property
 
-  scene:
-    get: |
-      if ( this.scene )
-        return this.scene;
-      else {
-        var parentTaskArray = this.find( "parent::element(*,'http://vwf.example.com/lesson/task.vwf')" );
-        if ( parentTaskArray.length ) {
-          var parentTask = parentTaskArray[ 0 ];
-          this.scene = parentTask.scene;
-          return this.scene;
-        }
-        else {
-          var sceneArray = this.find( "../scene" );
-          if ( sceneArray.length ) {
-            this.scene = sceneArray[ 0 ];
-            return this.scene;
-          }
-        }
-      } //@ sourceURL=task.scene.get
-    set: |
-      this.scene = value;
-      var subtasks = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" );
-      if ( subtasks.length )
-        for ( var i = 0; i < subtasks.length; subtasks[ i++ ].scene = this.scene ); //@ sourceURL=task.scene.set
+  scenePath:
 
 methods:
 
@@ -119,10 +92,26 @@ events:
 
 scripts:
 - |
+  this.scene;
   this.subtasks;
   this.taskIndex = null;
 
   this.enter = function() {
+
+    // Get the scene node
+    var parentTaskArray = this.find( "parent::element(*,'http://vwf.example.com/lesson/task.vwf')" );
+    if ( parentTaskArray.length ) {
+      var parentTask = parentTaskArray[ 0 ];
+      this.scene = parentTask.scene;
+    }
+    else {
+      var searchResults = this.find( this.scenePath );
+      if ( searchResults.length )
+        this.scene = searchResults[ 0 ];
+      else
+        console.error( "Could not find scene node '" + this.scenePath + "' - please set the scenePath property on" +
+                       " the top-level task" );
+    }
 
     // If a camera pose has been specified for this task, move the camera to it
     if ( this.cameraPoseRef ) {
