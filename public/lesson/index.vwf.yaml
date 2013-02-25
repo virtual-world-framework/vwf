@@ -100,6 +100,7 @@ scripts:
 - |
   this.initialize = function() {
     var self = this;
+    this.lesson.scene = this;
     this.lesson.enter();
     this.lesson.completed = function() {
       console.info( "Lesson completed");
