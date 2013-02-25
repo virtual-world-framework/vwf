@@ -38,9 +38,9 @@ children:
             var self = this;
             var duck = this.find( "/duck" )[ 0 ];
             duck.pointerClick = duck.events.add( function() {
-              duck.pointerClick = duck.events.flush( self );
+              duck.pointerClick = duck.events.flush( this );
               console.info( "Step 1 completed" );
-              self.completed();
+              this.completed();
               console.info( "Step 1 after completed");
             }, this );
             this.exiting = function() {
@@ -59,9 +59,9 @@ children:
             var self = this;
             var duck = this.find( "/duck" )[ 0 ];
             duck.pointerClick = duck.events.add( function() {
-              duck.pointerClick = duck.events.flush( self );
+              duck.pointerClick = duck.events.flush( this );
               console.info( "Step 2 completed" );
-              self.completed();
+              this.completed();
               console.info( "Step 2 after completed");
             }, this );
             this.exiting = function() {

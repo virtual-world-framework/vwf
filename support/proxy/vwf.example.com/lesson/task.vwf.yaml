@@ -22,7 +22,7 @@ properties:
 
   text:
 
-  ## The search string used to find a node3 that represents the transform that the camera will move to at the 
+  ## Search string used to find a node3 that represents the transform that the camera will move to at the 
   ## beginning of this task
   ## 
   ## @name task.vwf#cameraPoseRef
@@ -30,12 +30,19 @@ properties:
 
   cameraPoseRef:
 
-  ## The xpath reference to the top node of the scene that the lesson listens to for task completion events
+  ## xpath reference to the top node of the scene that the lesson listens to for task completion events
   ## 
   ## @name task.vwf#scenePath
   ## @property
 
   scenePath:
+
+  ## Index of the currently active subtask
+  ## 
+  ## @name task.vwf#taskIndex
+  ## @property
+
+  taskIndex:
 
 methods:
 
@@ -94,11 +101,11 @@ scripts:
 - |
   this.scene;
   this.subtasks;
-  this.taskIndex = null;
 
   this.enter = function() {
 
-    // Get the scene node
+    // If this task has a parent task, get the scene node from the parent
+    // Else, search for it via the scenePath
     var parentTaskArray = this.find( "parent::element(*,'http://vwf.example.com/lesson/task.vwf')" );
     if ( parentTaskArray.length ) {
       var parentTask = parentTaskArray[ 0 ];
@@ -106,11 +113,14 @@ scripts:
     }
     else {
       var searchResults = this.find( this.scenePath );
+
+      // If the search returned the scene node, set it for later use
+      // Else, print an error to the console
       if ( searchResults.length )
         this.scene = searchResults[ 0 ];
       else
-        console.error( "Could not find scene node '" + this.scenePath + "' - please set the scenePath property on" +
-                       " the top-level task" );
+        console.error( "Could not find scene node '" + this.scenePath + "' - please set the scenePath property " +
+                       "on the top-level task" );
     }
 
     // If a camera pose has been specified for this task, move the camera to it
@@ -126,8 +136,8 @@ scripts:
               camera.transformTo( newCameraPose.transform, duration);
             }
             else
-              console.error( "Could not find camera - to move the 3D camera using cameraPose, make sure the scene " +
-                             "derives from navScene.vwf or another component that defines a valid camera" );
+              console.error( "Could not find camera - to move the 3D camera using cameraPose, make sure the " +
+                             "scene derives from navScene.vwf or another component that defines a valid camera" );
           }
           else
             console.error( "Scene property is not set - must be set for task to find camera to move" );
@@ -143,6 +153,7 @@ scripts:
     this.entering( this.text );
 
     // Activate subtasks if they exist
+    this.taskIndex = null;
     this.subtasks = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" );
     if ( this.subtasks && this.subtasks.length )
       this.next();
@@ -176,9 +187,6 @@ scripts:
 
     // TODO: Find the scene node properly to make this possible
     // this.scene.events.flush( this );
-
-    // Set taskIndex back to null so it is ready to be entered again
-    this.taskIndex = null;
 
     // Fire the exiting event
     this.exiting();
