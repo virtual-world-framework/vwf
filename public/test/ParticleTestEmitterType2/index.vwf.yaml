@@ -19,24 +19,24 @@ children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -0.2, -0.2, -1.3]
-      maxVelocity: [ 0.2, 0.2, -3.3]
-      maxAcceleration: [ 0, 0, -0.4]
-      minAcceleration: [ 0, 0, -0.5]
+      minVelocity: [ -0.2, -0.2, -0.13]
+      maxVelocity: [ 0.2, 0.2, -0.33]
+      maxAcceleration: [ 0, 0, -0.04]
+      minAcceleration: [ 0, 0, -0.05]
       startSize: 80
       endSize: 80
-      maxLifeTime: 30
+      maxLifeTime: 130
       minLifeTime: 30
       startColor: [ 2, 2, 2, 1]
       endColor: [ 1, 1, 1, 1]
       image: rain.png
-      additive: true
+      additive: false
       opacity: 1
       depthTest: false
       emitterType: sphere
       emitterSize: [ 1, 1, 50]
-      translation: [ 0, 0, 200]
-      particleCount: 1200
+      translation: [ 0, 0, 100]
+      particleCount: 3200
       maxRate: 2
   camera:
     extends: http://vwf.example.com/camera.vwf

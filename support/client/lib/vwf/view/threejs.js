@@ -211,7 +211,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
                 if(self.lastPickId != newPickId && self.lastEventData)
                 {
-                    
                     view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                     view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
                 }

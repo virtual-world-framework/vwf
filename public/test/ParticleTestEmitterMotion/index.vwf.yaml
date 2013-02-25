@@ -33,6 +33,7 @@ children:
       additive: true
       opacity: .5
       depthTest: false
+      solver: 'Analytic'
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:

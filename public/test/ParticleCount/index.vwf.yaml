@@ -23,13 +23,12 @@ children:
       maxVelocity: [ 1, 1, 1]
       maxAcceleration: [ 0, 0, 0]
       minAcceleration: [ 0, 0, 0]
-      size: 3
+      startSize: 3
       maxLifeTime: 120
       minLifeTime: 30
-      startColor: [ 1, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 1, 1, 1]
+      endColor: [ 0, 0, 0, 0]
       additive: false
-      opacity: 1
       depthTest: false
       maxRate: 1000
       particleCount: 50
@@ -43,10 +42,9 @@ children:
       size: 3
       maxLifeTime: 120
       minLifeTime: 30
-      startColor: [ 1, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 1, 1, 1]
+      endColor: [ 0, 0, 0, 0]
       additive: false
-      opacity: 1
       depthTest: false
       maxRate: 1000
       particleCount: 2500    

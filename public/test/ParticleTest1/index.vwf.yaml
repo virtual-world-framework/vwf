@@ -19,18 +19,19 @@ children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -1, -1, 4]
-      maxVelocity: [ 1, 1, 4.5]
-      maxAcceleration: [ 0, 0, -0.09]
-      minAcceleration: [ 0, 0, -0.1]
+      minVelocity: [ -1, -1, 8]
+      maxVelocity: [ 1, 1, 8.5]
+      maxAcceleration: [ 0, 0, -0.29]
+      minAcceleration: [ 0, 0, -0.21]
       startSize: 30
       endSize: 10
-      maxLifeTime: 75
-      minLifeTime: 30
+      maxLifeTime: 40
+      minLifeTime: 40
       startColor: [ 0.5, 0.5, 1, 1]
       endColor: [ 1, 1, 1 , .5]
       image: smoke.png
       additive: false
+      maxRate: 1
       depthTest: false
   camera:
     extends: http://vwf.example.com/camera.vwf

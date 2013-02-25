@@ -23,12 +23,12 @@ children:
       maxVelocity: [ 1, 1, 18]
       maxAcceleration: [ 0, 0, 0]
       minAcceleration: [ 0, 0, 0]
-      size: 3
+      startSize: 3
       maxLifeTime: 20
       minLifeTime: 20
       maxRate: 3
-      startColor: [ 1, 1, 1]
-      endColor: [ 0, 0, 0]
+      startColor: [ 1, 1, 1, 1]
+      endColor: [ 0, 0, 0, 0]
       additive: false
       opacity: 1
       depthTest: false

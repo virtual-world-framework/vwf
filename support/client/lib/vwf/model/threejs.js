@@ -519,6 +519,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					{
 						ps.updateTransform();
 					}
+					if(propertyName == 'maxVelocity'||
+						propertyName == 'minVelocity'||
+						propertyName == 'maxAcceleration'||
+						propertyName == 'minAcceleration'||
+						propertyName == 'emitterType'
+					)
+					{
+						if(ps.material == ps.shaderMaterial_analytic)
+						{
+							ps.rebuildParticles();
+						}
+					}
+					
 					if(propertyName == 'size')
 					{
 						//ps.material.size = propertyValue;
@@ -533,34 +546,67 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					{
 						ps.setParticleCount(propertyValue);
 					}
+					if(propertyName == 'startSize')
+					{
+						ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
+					}
+					if(propertyName == 'endSize')
+					{
+						ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
+					}
+					if(propertyName == 'startColor')
+					{
+						ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
+						ps.shaderMaterial_analytic.uniforms.startColor.value.y = propertyValue[1];
+						ps.shaderMaterial_analytic.uniforms.startColor.value.z = propertyValue[2];
+						ps.shaderMaterial_analytic.uniforms.startColor.value.w = propertyValue[3];
+					}
+					if(propertyName == 'endColor')
+					{
+						ps.shaderMaterial_analytic.uniforms.endColor.value.x = propertyValue[0];
+						ps.shaderMaterial_analytic.uniforms.endColor.value.y = propertyValue[1];
+						ps.shaderMaterial_analytic.uniforms.endColor.value.z = propertyValue[2];
+						ps.shaderMaterial_analytic.uniforms.endColor.value.w = propertyValue[3];
+					}
+					
+			
 					if(propertyName == 'solver')
 					{
 						ps.setSolverType(propertyValue)
 					}
 					if(propertyName == 'image')
 					{
-						ps.material.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
-						ps.material.uniforms.useTexture.value = 1.0;
+						ps.shaderMaterial_default.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+						ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
+						ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+						ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
 					}
 					if(propertyName == 'additive')
 					{
 						if(propertyValue)
 						{
-							ps.material.blending = THREE.AdditiveBlending;
-							ps.material.transparent = true;
+							ps.shaderMaterial_default.blending = THREE.AdditiveBlending;
+							ps.shaderMaterial_default.transparent = true;
+							ps.shaderMaterial_analytic.blending = THREE.AdditiveBlending;
+							ps.shaderMaterial_analytic.transparent = true;
 						}
 						else
 						{
-							ps.material.blending = THREE.NormalBlending;	
-							ps.material.transparent = false;
+							ps.shaderMaterial_default.blending = THREE.NormalBlending;	
+							ps.shaderMaterial_default.transparent = false;
+							ps.shaderMaterial_analytic.blending = THREE.NormalBlending;	
+							ps.shaderMaterial_analytic.transparent = false;
 						}
 
-						ps.material.needsUpdate = true;							
+						ps.shaderMaterial_default.needsUpdate = true;	
+						ps.shaderMaterial_analytic.needsUpdate = true;						
 					}
 					if(propertyName == 'depthTest')
 					{
-						ps.material.depthTest = propertyValue;	
-						ps.material.depthWrite = propertyValue;
+						ps.shaderMaterial_default.depthTest = propertyValue;	
+						ps.shaderMaterial_default.depthWrite = propertyValue;
+						ps.shaderMaterial_analytic.depthTest = propertyValue;	
+						ps.shaderMaterial_analytic.depthWrite = propertyValue;
 					}
 					if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
 					{
@@ -1591,7 +1637,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     size: 20,
 					vertexColors:true
                   });
-			var vertShader = 
+				  
+				
+
+			//default material expects all computation done cpu side, just renders		
+			var vertShader_default = 
 			"attribute float size; \n"+
 			"attribute vec4 vertexColor;\n"+
 			"varying vec4 vColor;\n"+
@@ -1601,8 +1651,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			"	gl_PointSize = size * ( 1000.0/ length( mvPosition.xyz ) );\n"+
 			"	gl_Position = projectionMatrix * mvPosition;\n"+
 			"}	  \n";
-			
-			var fragShader = 
+			var fragShader_default = 
 			"uniform float useTexture;\n"+
 			"uniform sampler2D texture;\n"+
 			"varying vec4 vColor;\n"+
@@ -1611,35 +1660,97 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
 			"	gl_FragColor = outColor;\n"+
 			"}\n";
-
-			var attributes = {
-
+			var attributes_default = {
 				size: {	type: 'f', value: [] },
 				vertexColor:   {	type: 'v4', value: [] }
-
 			};
-
-			var uniforms = {
-
+			var uniforms_default = {
 				amplitude: { type: "f", value: 1.0 },
 				texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
-				useTexture: { type: "f", value: 0.0 },
+				useTexture: { type: "f", value: 0.0 }
 			};
-
-			uniforms.texture.value.wrapS = uniforms.texture.value.wrapT = THREE.RepeatWrapping;
-
-			var shaderMaterial = new THREE.ShaderMaterial( {
-
-				uniforms: 		uniforms,
-				attributes:     attributes,
-				vertexShader:   vertShader,
-				fragmentShader: fragShader,
-				vertexColors: true
+			uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
+			var shaderMaterial_default = new THREE.ShaderMaterial( {
+				uniforms: 		uniforms_default,
+				attributes:     attributes_default,
+				vertexShader:   vertShader_default,
+				fragmentShader: fragShader_default
 
 			});
 			
+			
+			
+			
+			
+			//analytic shader does entire simulation on GPU
+			var vertShader_analytic = 
+			"attribute float size; \n"+
+			"attribute vec4 vertexColor;\n"+
+			"attribute vec3 acceleration;\n"+
+			"attribute vec3 velocity;\n"+
+			"attribute float lifespan;\n"+
+			"attribute float random;\n"+
+			"uniform float time;\n"+
+			"uniform float startSize;\n"+
+			"uniform float endSize;\n"+
+			"uniform vec4 startColor;\n"+
+			"uniform vec4 endColor;\n"+
+			"varying vec4 vColor;\n"+
+			"void main() {\n"+
+			"   float lifetime = fract(random+(time))*lifespan*1.33;"+
+			"   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;"+ // ;
+			"	vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n"+
+			"	gl_PointSize = mix(startSize,endSize,lifetime/lifespan) * ( 1000.0/ length( mvPosition.xyz ) );\n"+
+			"	gl_Position = projectionMatrix * mvPosition;\n"+
+			"	vColor = mix(startColor,endColor,lifetime/lifespan);\n"+
+			"}	  \n";
+			var fragShader_analytic = 
+			"uniform float useTexture;\n"+
+			"uniform sampler2D texture;\n"+
+			"varying vec4 vColor;\n"+
+			"void main() {\n"+
+			"	vec4 outColor = (vColor * texture2D( texture, gl_PointCoord )) *useTexture + vColor * (1.0-useTexture);\n"+
+			
+			"	gl_FragColor = outColor;\n"+
+			"}\n";
+			var attributes_analytic = {
+
+				
+				acceleration:   {	type: 'v3', value: [] },
+				velocity:   {	type: 'v3', value: [] },
+				lifespan:   {	type: 'f', value: [] },
+				random:   {	type: 'f', value: [] },
+				vertexColor : attributes_default.vertexColor,
+				size: attributes_default.size
+			};
+			var uniforms_analytic = {
+				startColor:{type: "v4", value:new THREE.Vector4()},
+				endColor:{type: "v4", value:new THREE.Vector4()},
+				startSize:{type:"f", value:1},
+				endSize:{type:"f", value:1},
+				texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
+				useTexture: { type: "f", value: 0.0 },
+				time: { type: "f", value: 0.0 }
+			};
+			uniforms_analytic.texture.value.wrapS = uniforms_analytic.texture.value.wrapT = THREE.RepeatWrapping;
+			var shaderMaterial_analytic = new THREE.ShaderMaterial( {
+				uniforms: 		uniforms_analytic,
+				attributes:     attributes_analytic,
+				vertexShader:   vertShader_analytic,
+				fragmentShader: fragShader_analytic
+			});
+			
+			
+			
+			
+			
+			
 			// create the particle system
-            var particleSystem = new THREE.ParticleSystem(particles,shaderMaterial);
+            var particleSystem = new THREE.ParticleSystem(particles,shaderMaterial_default);
+			
+			particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;
+			particleSystem.shaderMaterial_default = shaderMaterial_default;
+			
 			particleSystem.minVelocity = [0,0,0];
 			particleSystem.maxVelocity = [0,0,0];
 			particleSystem.maxAcceleration = [0,0,0];
@@ -1675,6 +1786,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				{
 					self.material.attributes.size.value[this.i] = s;
 				}
+				
+				shaderMaterial_analytic.attributes.acceleration.value.push(new THREE.Vector3());
+				shaderMaterial_analytic.attributes.velocity.value.push(new THREE.Vector3());
+				shaderMaterial_analytic.attributes.lifespan.value.push(1);
+				shaderMaterial_analytic.attributes.random.value.push(Math.random());
 				return particle;
 			}
 			
@@ -1708,6 +1824,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				}
 			
 			}
+			particleSystem.rebuildParticles = function()
+			{
+				for(var i = 0; i < this.geometry.vertices.length; i++)
+				{
+					this.setupParticle(this.geometry.vertices[i],this.matrix);
+				}
+			}
             particleSystem.setupParticle = function(particle,mat,inv)
 			{
 				
@@ -1720,6 +1843,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.initialx = particle.world.x;
 				particle.initialy = particle.world.y;
 				particle.initialz = particle.world.z;
+				
+				particle.x = particle.initialx;
+				particle.y = particle.initialy;
+				particle.z = particle.initialz;
+				
+				
 				
 				particle.age = 0;
 				particle.velocity = new THREE.Vector3(0,0,0);
@@ -1769,8 +1898,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.color.y = this.startColor[1];
 				particle.color.z = this.startColor[2];
 				particle.color.w = this.startColor[3];
+				
+				shaderMaterial_analytic.attributes.acceleration.value[particle.i] = (particle.acceleration);
+				shaderMaterial_analytic.attributes.velocity.value[particle.i] = (particle.velocity);
+				shaderMaterial_analytic.attributes.lifespan.value[particle.i] = (particle.lifespan);
+				
+				
+				shaderMaterial_analytic.attributes.acceleration.needsUpdate = true;
+				shaderMaterial_analytic.attributes.velocity.needsUpdate = true;
+				shaderMaterial_analytic.attributes.lifespan.needsUpdate = true;
+				this.geometry.verticesNeedUpdate = true;
 				//randomly move the particle up to one step in time
 				
+			}
+			
+			particleSystem.updateAnalyticShader = function(time)
+			{	
+				particleSystem.material.uniforms.time.value += time/3333.0;
+			
 			}
 			
 			//analytic solver. 
@@ -1825,25 +1970,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
 				   
 				this.lastTime += time_in_ticks;//ticks - Math.floor(ticks);
-				
-				
-				
-				
+
 				var inv = this.matrix.clone();
 				inv = inv.getInverse(inv);
 					
 				var particles = this.geometry;
 				
-				
 				//timesliced tick	 give up after 5 steps - just cant go fast enougth				
-				for(var i=0; i < Math.floor(this.lastTime) ; i++)
+				for(var i=0; i < Math.floor(this.lastTime) && i<5 ; i++)
 				{
 					this.lastTime--;
-					var now = performance.now();
-					this.counter++;
-					this.totaltime += now - this.testtime;
-					console.log(this.totaltime/this.counter, now - this.testtime);
-					this.testtime = now;
+					
 					var pCount = this.geometry.vertices.length;
 					while(pCount--) 
 					{
@@ -1896,7 +2033,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						particle.color.w = 0.0;
 					}else
 					{
-				
+				var percent = particle.age/particle.lifespan;
 				particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
 				particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
 				particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
@@ -1909,7 +2046,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.y = this.temp.y;
 				particle.z = this.temp.z;
 				
-				var percent = particle.age/particle.lifespan;
+				
 				
 				particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
 				particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
@@ -1992,15 +2129,30 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
 			
 			}
+			
 			particleSystem.setSolverType =function(type)
 			{
 				if(type == 'Euler')
+				{
 					particleSystem.update = particleSystem.updateEuler;
+					particleSystem.material = particleSystem.shaderMaterial_default;
+					particleSystem.rebuildParticles();
+				}
 				if(type == 'Analytic')
+				{
 					particleSystem.update = particleSystem.updateAnalytic;
+					particleSystem.material = particleSystem.shaderMaterial_default;
+					particleSystem.rebuildParticles();
+				}
+				if(type == 'AnalyticShader')
+				{
+					particleSystem.update = particleSystem.updateAnalyticShader	;		
+					particleSystem.material = particleSystem.shaderMaterial_analytic;
+					particleSystem.rebuildParticles();
+				}
 				
 			}
-			particleSystem.setSolverType('Analytic');
+			
 
 			particleSystem.updateTransform = function()
 			{
@@ -2035,6 +2187,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
 			
 			particleSystem.setParticleCount(1000);
+			particleSystem.setSolverType('AnalyticShader');
 			particleSystem.update(1);
 			
 			

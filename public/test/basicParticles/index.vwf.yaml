@@ -19,19 +19,21 @@ children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -1, -1, -1]
-      maxVelocity: [ 1, 1, 1]
+      minVelocity: [ -1, 0, -1]
+      maxVelocity: [ 1, 0, 1]
       maxAcceleration: [ 0, 0, 0]
       minAcceleration: [ 0, 0, 0]
-      size: 3
+      startSize: 3
+      endSize: 1
       maxLifeTime: 120
       minLifeTime: 30
       startColor: [ 1, 1, 1, 1]
-      endColor: [ 0, 0, 0, 0]
+      endColor: [ 1, 0, 0, 1]
       additive: false
       opacity: 1
       depthTest: false
-      particleCount: 1500
+      particleCount: 4500
+      solver: 'AnalyticShader'
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:
