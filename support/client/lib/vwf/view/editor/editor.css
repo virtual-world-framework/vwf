@@ -219,7 +219,7 @@ textarea:focus, input:focus{
 }
 
 /* TIMELINE */
-.rate.slider {
+.rate.slider, .time.slider {
 	display: inline-block;
 	width: 10em;
 }

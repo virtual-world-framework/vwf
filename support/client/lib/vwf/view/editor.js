@@ -58,7 +58,16 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             this.highlightedChild = '';
             
             jQuery('body').append(
-                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Application.png' alt='application' /><img id='userlist' src='images/tab_Users.png' alt='users' /><img id='timeline' src='images/tab_Time.png' alt='time' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
+
+                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'>" +
+                    "<img id='x' style='display:none' src='images/tab_X.png' alt='x' />" +
+                    "<img id='hierarchy' src='images/tab_Application.png' alt='application' />" +
+                    "<img id='userlist' src='images/tab_Users.png' alt='users' />" +
+                    "<img id='timeline' src='images/tab_Time.png' alt='time' />" +
+                    "<img id='models' src='images/tab_Models.png' alt='models' />" +
+                    "<img id='about' src='images/tab_About.png' alt='about' />" +
+                "</div></div></div>" +
+
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
@@ -66,6 +75,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='about_tab'></div></div></div>" +
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_a'></div></div></div>" +
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='model_b'></div></div></div>"
+
             );
             
             $('#tabs').stop().animate({ opacity:0.0 }, 0);
@@ -237,7 +247,19 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             $('#input-' + nodeIDAttribute + '-' + propertyNameAttribute).val(node.properties[ propertyName ].value);
         },
         
-        //gotProperty: [ /* nodeID, propertyName, propertyValue */ ],
+        gotProperty: function( nodeID, propertyName, propertyValue ) {
+
+            var duckID = vwf.find( undefined, "/duck" );
+            duckID = duckID && duckID[0];
+
+            if ( nodeID == duckID && propertyName == "time" ) {
+// console.info( "got", propertyValue );
+                jQuery( ".time.slider" ).slider(
+                     "value", propertyValue
+                );
+            }
+
+        },
         
         createdMethod: function( nodeID, methodName, methodParameters, methodBody ){
             var node = this.nodes[ nodeID ];
@@ -1261,6 +1283,11 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 "<span><span class='rate slider'></span>&nbsp;" + 
                 "<span class='rate vwf-label' style='display: inline-block; width:8ex'></span></span></div>");
 
+            jQuery('#time_control').append("<div class='header'>Timeline</div>" + 
+                "<div style='text-align:center;padding-top:10px'>" +
+                "<span><span class='time slider'></span>&nbsp;" + 
+                "</span></div>");
+
             var options = {};
 
             [ "play", "pause", "stop" ].forEach( function( state ) {
@@ -1298,6 +1325,9 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                     }
 
                     jQuery( ".rate.vwf-label" ).html( label );
+
+                    jQuery( ".time.slider" ).slider( "value", Math.log( state.rate ) / Math.LN10 );
+
                 }, 
                 "json" 
             );
@@ -1368,6 +1398,21 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                     "json"
                 );
             } );
+
+
+
+            var self = this;
+
+            jQuery( ".time.slider" ).slider(
+                { value: 0, min: 0, max: 1, step: 0.01 }
+            ). bind( "slide", function( event, ui ) {
+                var duckID = vwf.find( undefined, "/duck" );
+                duckID = duckID && duckID[0];
+// console.info( "time", ui.value, duckID );
+                self.kernel.setProperty( duckID, "animationTime", ui.value );
+            } );
+
+            jQuery( ".time.slider" ).slider( "value", 0 );
 
             this.timelineInit = true;
         }
