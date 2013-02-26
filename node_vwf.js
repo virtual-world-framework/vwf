@@ -213,6 +213,7 @@ function startVWF(){
 	
 	var URL = url.parse(request.url,true);
     var uri = URL.pathname;
+	console.log(uri);
 	uri = uri.replace(/\//g,'\\');
 	
 	if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)

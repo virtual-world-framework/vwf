@@ -698,15 +698,25 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
-                    var time = fields.time - this.lastTick;
-					while(time > 0 && time < 1)
-					{	
-						this.tick();
-						time -= .033333333;
+					queue.time = this.now;
+                    var time = this.now - this.lastTick;
+					if(time < 1)
+					{
+						while(time > .033333333)
+						{	
+							this.tick();
+							time -= .03333333;
+							console.log('tick');
+						}
+						//save the leftovers
+						this.lastTick = this.now  - time;
 						
+					}else
+					{
+						//giving up, cant go fast enough
+						this.lastTick = fields.time;
 					}
-					//save the leftovers
-					this.lastTick = fields.time - time;
+					
                 }
 
                 // Record the originating client.
