@@ -11,122 +11,179 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## The component representation of a 3D node
-## 
-## @name node3.vwf
+## @name animation.vwf
 ## @namespace
 
 ---
 
 properties:
 
-  animation-time:
+  ## xxx  TOOD: animationPlaying && animationEnabled && enabled
+
+  animationEnabled:
     set: |
-      if ( this["animation-playing"] ) {
-        this["animation-private"].start_time = this.time - value / this["animation-rate"];  // TODO: range limit
-      } else if ( this["animation-paused"] ) {
-        this["animation-private"].start_time  = this["animation-private"].pause_time - value / this["animation-rate"];  // TODO: range limit
-      } else if ( this["animation-stopped"] ) {  // TODO?
-        this["animation-private"].start_time = this.time - value / this["animation-rate"];  // TODO: range limit
-        this["animation-private"].pause_time = this.time;
+      this.paused = value;
+    get: |
+      return this.paused;
+
+  ## xxx
+
+  animationTime:
+
+    set: |
+      // console.warn( this.id, "time 1", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
+      if ( this.animationRate >= 0 ) {
+        value = Math.min( Math.max( 0, value ), this.animationDuration );
+      } else {
+        value = Math.min( Math.max( 0, value ), this.animationDuration ) - this.animationDuration;
       }
+      var originalStartTime = this.animationStartTime;
+      if ( this.animationStartTime ) {
+        if ( ! this.animationPauseTime ) {
+          this.animationStartTime = this.time - value / this.animationRate;
+        } else {
+          this.animationStartTime = this.animationPauseTime - value / this.animationRate;
+        }
+      } else {
+        this.animationPauseTime = this.time;
+        this.animationStartTime = this.time - value / this.animationRate;
+      }
+      if ( this.animationStartTime != originalStartTime ) {
+        this.animationUpdate();
+        this.animationTimeChanged();
+      }
+      // console.warn( this.id, "time 2", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
+      //@ sourceURL=animation.vwf#time.set
+
     get: |
-      if ( this["animation-playing"] ) {
-        return ( this.time - this["animation-private"].start_time ) * this["animation-rate"];
-      } else if ( this["animation-paused"] ) {
-        return ( this["animation-private"].pause_time - this["animation-private"].start_time ) * this["animation-rate"];
-      } else if ( this["animation-stopped"] ) {
-        return 0;
+      if ( this.animationStartTime ) {
+        if ( ! this.animationPauseTime ) {
+          var value = ( this.time - this.animationStartTime ) * this.animationRate;
+        } else {
+          var value = ( this.animationPauseTime - this.animationStartTime ) * this.animationRate;
+        }
+      } else {
+          var value = 0;
+      }
+      if ( this.animationRate >= 0 ) {
+        return value;
+      } else {
+        return value + duration;
       }
 
-  animation-duration: 1
+  ## xxx
 
-  animation-rate: 1  # TODO: set/get
-  animation-loop: false
+  animationDuration: 1
 
-  animation-playing:
-    set: |
-    get: |
-      return !! this["animation-private"].start_time && ! this["animation-private"].pause_time;
-  animation-paused: 
-    set: |
-    get: |
-      return !! this["animation-private"].start_time && !! this["animation-private"].pause_time;
-  animation-stopped: 
-    set: |
-    get: |
-      return ! this["animation-private"].start_time;
+  ## xxx
 
-  animation-private:  # TODO: record as changed on update
-    start_time: null
-    pause_time: null
+  animationRate: 1  # TODO: set/get
+
+  ## xxx
+
+  animationLoop: false
+
+
+  ## xxx
+
+  animationPlaying:
+
+    set: |
+      // console.warn( this.id, "playing 1", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
+      if ( this.animationStartTime ) {
+        if ( ! this.animationPauseTime ) {
+          if ( ! value ) {
+            this.animationPauseTime = this.time;
+          }
+        } else {
+          if ( value ) {
+            this.animationStartTime +=
+              this.time - this.animationPauseTime;
+            this.animationPauseTime = null;
+            this.animationTick();
+          }
+        }
+      } else {
+        if ( value ) {
+          this.animationStartTime = this.time;
+          this.animationTick();
+          this.animationStarted();
+        }
+      }
+      // console.warn( this.id, "playing 2", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
+    get: |
+      return !! this.animationStartTime &&
+        ! this.animationPauseTime;
+
+  ## xxx
+
+  animationStartTime: null
+
+  ## xxx
+
+  animationPauseTime: null
 
 methods:
 
-  animation-play: |
+  # play from beginning
 
-    // this.time = 0;
-    // this.playing = true;
+  animationPlay: |
+    this.animationTime = 0;
+    this.animationPlaying = true;
 
-    if ( ! this["animation-private"].start_time ) {
-      this["animation-private"].start_time = this.time;
-      this["animation-private"].pause_time = null;
+  # stop at current
+
+  animationPause: |
+    this.animationPlaying = false;
+
+  # play from current
+
+  animationResume: |
+    this.animationPlaying = true;
+
+  # stop and reset
+
+  animationStop: |
+    this.animationPlaying = false;
+    this.animationTime = 0;
+    //@ sourceURL=animation.vwf#stop
+
+  animationTick: |
+    // console.warn( this.id, "tick 1", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
+    if ( ! this.animationTicking ) {
+      this.logger.info( "animation: scheduling tick" );
     }
-
-  animation-pause: |
-
-    // this.playing = false;
-
-    if ( this["animation-private"].start_time && ! this["animation-private"].pause_time ) {
-      this["animation-private"].pause_time = this.time;
+    if ( this.animationTime >= this.animationDuration ) {
+      var animationTime = this.animationTime;
+      this.animationTime = this.animationDuration;
+      if ( this.animationLoop ) {
+        while ( animationTime >= this.animationDuration ) {
+          animationTime -= this.animationDuration;
+          this.animationLooped();
+        }
+        this.animationTime = animationTime;
+      } else {
+        this.animationStopped();
+        this.animationStop();
+      }
     }
-
-  animation-resume: |
-
-    // this.playing = true;
-
-    if ( this["animation-private"].start_time && this["animation-private"].pause_time ) {
-      this["animation-private"].start_time += this.time - this["animation-private"].pause_time;
-      this["animation-private"].pause_time = null;
+    if ( this.animationPlaying ) {
+      this.animationTicking = true;
+      this.animationUpdate();
+      this.animationTimeChanged();
+      this.future( 0.04 ).animationTick();
+    } else {
+      this.animationTicking = false;
+      this.logger.info( "animation: canceling tick" );
     }
+    // console.warn( this.id, "tick 2", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
+    //@ sourceURL=animation.vwf#tick
 
-  animation-stop: |
-
-    // this.playing = false;
-    // this.time = 0;
-
-    if ( this["animation-private"].start_time ) {
-        this["animation-private"].start_time = null;
-        this["animation-private"].pause_time = null;
-    }
-
-  animation-update: |
+  animationUpdate: |
     // TODO
 
 events:
-  animation-started:
-  animation-stopped:
-  animation-looped:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  animationStarted:
+  animationStopped:
+  animationLooped:
+  animationTimeChanged:

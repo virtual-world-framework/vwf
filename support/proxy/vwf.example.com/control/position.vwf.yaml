@@ -1,0 +1,65 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## `control/position.vwf` defines a key value for a control.
+
+
+
+
+## Key value for a control.
+## Builds on animation
+## Time cross-references animation.
+## Value specifies control value for this position. Node's name is name for that value/position/time.
+## Attraction is stabiliby for this position. Think of time as a cursor at or between positions.
+##   - Is attracted to some positions, valleys, detents
+##   - Is repelled from some positions, hills, springs
+##   - Is neutral with other positions, free range
+
+---
+
+properties:
+
+  ## This position's location on the animation timeline. Valid values are in the range from `0` to
+  ## the animation's duration.
+  ## 
+  ## Positions that don't provide `time` will be automatically distributed along the range between
+  ## the siblings that do. If none of a control's positions provide `time`, then the positions will
+  ## be distributed evenly throughout the animation--in the range [`0`, *duration*].
+
+  animationTime:
+
+  ## The control's value at this position. The control will report this value, along with the
+  ## position's name, when it reaches this position.
+  ## 
+  ## Values for intermediate positions and for positions that don't define `value` will be
+  ## interpolated from adjacent positions that do. If none of a control's positions define `value`,
+  ## then the control will use the position's `time`.
+
+  controlValue:
+
+  ## The attraction or repulsion between the time cursor and this position. Positive values indicate
+  ## attraction, negative values indicate repulsion, and `0` is netural. The strings `detent`,
+  ## `spring` and `neutral` may be used to mean `1`, `-1` and `0`, respectively.
+
+  ## Attracting positions define a detent--a location that the control will tend to snap to.
+  ## Repelling positions define a spring-loaded location--one that the control will avoid except
+  ## when held there.
+
+  # TODO: held by how?
+
+  controlType: 0
+
+
+  # animation positions and control positions are not necessarily coincident, although they typically are
+  # animation data may be missing from control positions if no transform is necessary
+  # control data may be missing from animation positions if value/time == 1, attraction does not change
