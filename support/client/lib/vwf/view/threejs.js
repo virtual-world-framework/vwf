@@ -325,12 +325,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if(sceneNode.renderer.setFaceCulling)
                 sceneNode.renderer.setFaceCulling(false);
             this.state.cameraInUse = sceneNode.threeScene.children[1];
-           // this.state.cameraInUse.setAspect( ( mycanvas.width / mycanvas.height) /*/ 1.333 */ );
 
-            
             // Schedule the renderer.
-
-            
             var scene = sceneNode.threeScene;
             var renderer = sceneNode.renderer;
             var scenenode = sceneNode;
@@ -875,13 +871,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         };
          
     };
-    // function mouseXPos(e) {
-    //     return e.clientX - e.currentTarget.offsetLeft + window.scrollX + window.slideOffset;
-    // }
 
-    // function mouseYPos(e) {
-    //     return e.clientY - e.currentTarget.offsetTop + window.scrollY;
-    // }
     function ThreeJSPick( canvas, sceneNode )
     {
         if(!this.lastEventData) return;
@@ -896,9 +886,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
         //mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
-
-        var x = ( mousepos.x ) * 2 - 1;
-        var y = -( mousepos.y ) * 2 + 1;
 
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
@@ -1063,7 +1050,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         }
     }
 
-        function getKeyValue( keyCode ) {
+    function getKeyValue( keyCode ) {
         var key = { key: undefined, code: keyCode, char: undefined };
         switch ( keyCode ) {
             case 8:

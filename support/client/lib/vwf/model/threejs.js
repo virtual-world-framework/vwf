@@ -36,15 +36,15 @@
         }
     }
 
-	function matCpy(mat)
-	{
-		var ret = [];
-		for(var i =0; i < 16; i++)
-			ret.push(mat[i]);
-		return ret.slice(0);	
-	}
-	
-	
+    function matCpy(mat)
+    {
+        var ret = [];
+        for(var i =0; i < 16; i++)
+            ret.push(mat[i]);
+        return ret.slice(0);    
+    }
+    
+    
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
 
 
@@ -110,7 +110,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 
                 sceneNode.axes = createAxis.call( this, sceneNode.threeScene );
                 
-				cam.name = 'camera';
+                cam.name = 'camera';
                 this.state.cameraInUse = cam;
                 var camType = "http://vwf.example.com/camera.vwf";
                 
@@ -358,35 +358,35 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
         
-          //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
-          var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
-          if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
-          var value = undefined;
-          
-          //this driver has no representation of this node, so there is nothing to do.
-          if(!node) return;
-          
-          var threeObject = node.threeObject;
-          if(!threeObject)
+            //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
+            var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            var value = undefined;
+
+            //this driver has no representation of this node, so there is nothing to do.
+            if(!node) return;
+
+            var threeObject = node.threeObject;
+            if(!threeObject)
             threeObject = node.threeScene;
-          
-          //if it's a material node, we'll work with the threeMaterial
-          //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
-          //in case we later need access to the object the material is on.
-          if(node.threeMaterial)
+
+            //if it's a material node, we'll work with the threeMaterial
+            //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
+            //in case we later need access to the object the material is on.
+            if(node.threeMaterial)
             threeObject = node.threeMaterial;
-            
-          //There is not three object for this node, so there is nothing this driver can do. return
-          if(!threeObject) return value;    
+
+            //There is not three object for this node, so there is nothing this driver can do. return
+            if(!threeObject) return value;    
           
 
-              if ( propertyValue !== undefined ) 
-              {
+            if ( propertyValue !== undefined ) 
+            {
                 if(threeObject instanceof THREE.Object3D)
                 {
                     if(propertyName == 'transform' || propertyName == 'localMatrix')
                     {
-			//console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
+                        //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
 
                         // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
@@ -398,10 +398,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             goog.vec.Mat4.setColumn( transform, 1, columnz );
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
                         }
-						
-                            threeObject.matrixAutoUpdate = false;
-                            threeObject.matrix.elements = matCpy(transform);
-                            threeObject.updateMatrixWorld(true);                        
+                        
+                        threeObject.matrixAutoUpdate = false;
+                        threeObject.matrix.elements = matCpy(transform);
+                        threeObject.updateMatrixWorld(true);                        
                     }
                     if(propertyName == 'lookAt')
                     {
@@ -418,65 +418,65 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             
                             if(lookatObject)
                             {
-								
-									var lookatPosition = new THREE.Vector3();
-									var thisPosition = new THREE.Vector3();
-									var thisMatrix = new THREE.Matrix4();
-									thisMatrix.elements = matCpy(threeObject.matrix.elements);
-									
-									var flipmat = new THREE.Matrix4(-1, 0,0,0,
-																0, 1,0,0,
-																0,0,1,0,
-																0, 0,0,1);
-								
-									var up = new THREE.Vector3();
-									up.set(0,0,1);
-									lookatPosition.copy(lookatObject.matrix.getPosition());
-									thisPosition.copy(thisMatrix.getPosition());
-									
-									
-									threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
-									
-									threeObject.updateMatrixWorld(true); 
-															
-                            }
-                        
-                    } 
-                    else if (propertyValue instanceof Array)
-                        {
+                                
                                 var lookatPosition = new THREE.Vector3();
                                 var thisPosition = new THREE.Vector3();
-                                var up = new THREE.Vector();
-                                up.set(0,0,1);
-                                lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
-                                thisPosition.copy(threeObject.matrix.getPosition());
-                                threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
+                                var thisMatrix = new THREE.Matrix4();
+                                thisMatrix.elements = matCpy(threeObject.matrix.elements);
+                                
                                 var flipmat = new THREE.Matrix4(-1, 0,0,0,
                                                             0, 1,0,0,
                                                             0,0,1,0,
                                                             0, 0,0,1);
-                                var matrix = new THREE.Matrix4();
-                                matrix.copy(threeObject.matrix);                        
-                                matrix = matrix.multiply(flipmat,matrix);
-                                threeObject.matrix.copy(matrix);
-                                threeObject.updateMatrixWorld(true);    
+                            
+                                var up = new THREE.Vector3();
+                                up.set(0,0,1);
+                                lookatPosition.copy(lookatObject.matrix.getPosition());
+                                thisPosition.copy(thisMatrix.getPosition());
+                                
+                                
+                                threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
+                                
+                                threeObject.updateMatrixWorld(true); 
+                                                            
+                            }
+                        
+                        } else if (propertyValue instanceof Array)  {
+                            var lookatPosition = new THREE.Vector3();
+                            var thisPosition = new THREE.Vector3();
+                            var up = new THREE.Vector();
+                            up.set(0,0,1);
+                            lookatPosition.set(propertyValue[0],propertyValue[1],propertyValue[2]);
+                            thisPosition.copy(threeObject.matrix.getPosition());
+                            threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
+                            var flipmat = new THREE.Matrix4(-1, 0,0,0,
+                                                        0, 1,0,0,
+                                                        0,0,1,0,
+                                                        0, 0,0,1);
+                            var matrix = new THREE.Matrix4();
+                            matrix.copy(threeObject.matrix);                        
+                            matrix = matrix.multiply(flipmat,matrix);
+                            threeObject.matrix.copy(matrix);
+                            threeObject.updateMatrixWorld(true);    
                         }
                     
                     }
                     if(propertyName == 'visible')
                     {
                         //need to walk the tree and hide all sub nodes as well
-                        SetVisible(threeObject,propertyValue);
+                        value = Boolean( propertyValue );
+                        SetVisible( threeObject, value );
                     }
                     if(propertyName == 'castShadows')
                     {
                         //debugger;
-                        threeObject.castShadow = true;
+                        value = Boolean( propertyValue );
+                        threeObject.castShadow = value;
                     }
                     if(propertyName == 'receiveShadows')
                     {
-                        //debugger;
-                        threeObject.receiveShadow = true;
+                        value = Boolean( propertyValue );
+                        threeObject.receiveShadow = value;
                     }
                     //This can be a bit confusing, as the node has a material property, and a material child node. 
                     //setting the property does this, but the code in the component is ambigious
@@ -509,149 +509,149 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         material.ambient.setRGB( material.color.r,material.color.g,material.color.b);
                     }
                 }
-				if(threeObject instanceof THREE.ParticleSystem)
-				{
-					var ps = threeObject;
-					var particles = ps.geometry;
-					ps[propertyName] = propertyValue;
-					
-					if(propertyName == 'transform')
-					{
-						ps.updateTransform();
-					}
-					if(propertyName == 'maxVelocity'||
-						propertyName == 'minVelocity'||
-						propertyName == 'maxAcceleration'||
-						propertyName == 'minAcceleration'||
-						propertyName == 'emitterType'
-					)
-					{
-						if(ps.material == ps.shaderMaterial_analytic)
-						{
-							ps.rebuildParticles();
-						}
-					}
-					
-					if(propertyName == 'size')
-					{
-						//ps.material.size = propertyValue;
-						
-						for(var i = 0; i < ps.material.attributes.size.value.length; i++)
-						{
-							ps.material.attributes.size.value[i] = propertyValue;
-						}
-						ps.material.attributes.size.needsUpdate = true;
-					}
-					if(propertyName == 'particleCount')
-					{
-						ps.setParticleCount(propertyValue);
-					}
-					if(propertyName == 'startSize')
-					{
-						ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
-					}
-					if(propertyName == 'endSize')
-					{
-						ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
-					}
-					if(propertyName == 'maxSpin')
-					{
-						ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
-					}
-					if(propertyName == 'minSpin')
-					{
-						ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
-					}
-					if(propertyName == 'startColor')
-					{
-						ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
-						ps.shaderMaterial_analytic.uniforms.startColor.value.y = propertyValue[1];
-						ps.shaderMaterial_analytic.uniforms.startColor.value.z = propertyValue[2];
-						ps.shaderMaterial_analytic.uniforms.startColor.value.w = propertyValue[3];
-					}
-					if(propertyName == 'endColor')
-					{
-						ps.shaderMaterial_analytic.uniforms.endColor.value.x = propertyValue[0];
-						ps.shaderMaterial_analytic.uniforms.endColor.value.y = propertyValue[1];
-						ps.shaderMaterial_analytic.uniforms.endColor.value.z = propertyValue[2];
-						ps.shaderMaterial_analytic.uniforms.endColor.value.w = propertyValue[3];
-					}
-					
-			
-					if(propertyName == 'solver')
-					{
-						ps.setSolverType(propertyValue)
-					}
-					if(propertyName == 'image')
-					{
-						ps.shaderMaterial_default.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
-						ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
-						ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
-						ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
-					}
-					if(propertyName == 'additive')
-					{
-						if(propertyValue)
-						{
-							ps.shaderMaterial_default.blending = THREE.AdditiveBlending;
-							ps.shaderMaterial_default.transparent = true;
-							ps.shaderMaterial_analytic.blending = THREE.AdditiveBlending;
-							ps.shaderMaterial_analytic.transparent = true;
-						}
-						else
-						{
-							ps.shaderMaterial_default.blending = THREE.NormalBlending;	
-							ps.shaderMaterial_default.transparent = false;
-							ps.shaderMaterial_analytic.blending = THREE.NormalBlending;	
-							ps.shaderMaterial_analytic.transparent = false;
-						}
+                if(threeObject instanceof THREE.ParticleSystem)
+                {
+                    var ps = threeObject;
+                    var particles = ps.geometry;
+                    ps[propertyName] = propertyValue;
+                    
+                    if(propertyName == 'transform')
+                    {
+                        ps.updateTransform();
+                    }
+                    if(propertyName == 'maxVelocity'||
+                        propertyName == 'minVelocity'||
+                        propertyName == 'maxAcceleration'||
+                        propertyName == 'minAcceleration'||
+                        propertyName == 'emitterType'
+                    )
+                    {
+                        if(ps.material == ps.shaderMaterial_analytic)
+                        {
+                            ps.rebuildParticles();
+                        }
+                    }
+                    
+                    if(propertyName == 'size')
+                    {
+                        //ps.material.size = propertyValue;
+                        
+                        for(var i = 0; i < ps.material.attributes.size.value.length; i++)
+                        {
+                            ps.material.attributes.size.value[i] = propertyValue;
+                        }
+                        ps.material.attributes.size.needsUpdate = true;
+                    }
+                    if(propertyName == 'particleCount')
+                    {
+                        ps.setParticleCount(propertyValue);
+                    }
+                    if(propertyName == 'startSize')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
+                    }
+                    if(propertyName == 'endSize')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
+                    }
+                    if(propertyName == 'maxSpin')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
+                    }
+                    if(propertyName == 'minSpin')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
+                    }
+                    if(propertyName == 'startColor')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
+                        ps.shaderMaterial_analytic.uniforms.startColor.value.y = propertyValue[1];
+                        ps.shaderMaterial_analytic.uniforms.startColor.value.z = propertyValue[2];
+                        ps.shaderMaterial_analytic.uniforms.startColor.value.w = propertyValue[3];
+                    }
+                    if(propertyName == 'endColor')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.endColor.value.x = propertyValue[0];
+                        ps.shaderMaterial_analytic.uniforms.endColor.value.y = propertyValue[1];
+                        ps.shaderMaterial_analytic.uniforms.endColor.value.z = propertyValue[2];
+                        ps.shaderMaterial_analytic.uniforms.endColor.value.w = propertyValue[3];
+                    }
+                    
+            
+                    if(propertyName == 'solver')
+                    {
+                        ps.setSolverType(propertyValue)
+                    }
+                    if(propertyName == 'image')
+                    {
+                        ps.shaderMaterial_default.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+                        ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
+                        ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+                        ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
+                    }
+                    if(propertyName == 'additive')
+                    {
+                        if(propertyValue)
+                        {
+                            ps.shaderMaterial_default.blending = THREE.AdditiveBlending;
+                            ps.shaderMaterial_default.transparent = true;
+                            ps.shaderMaterial_analytic.blending = THREE.AdditiveBlending;
+                            ps.shaderMaterial_analytic.transparent = true;
+                        }
+                        else
+                        {
+                            ps.shaderMaterial_default.blending = THREE.NormalBlending;  
+                            ps.shaderMaterial_default.transparent = false;
+                            ps.shaderMaterial_analytic.blending = THREE.NormalBlending; 
+                            ps.shaderMaterial_analytic.transparent = false;
+                        }
 
-						ps.shaderMaterial_default.needsUpdate = true;	
-						ps.shaderMaterial_analytic.needsUpdate = true;						
-					}
-					if(propertyName == 'depthTest')
-					{
-						ps.shaderMaterial_default.depthTest = propertyValue;	
-						ps.shaderMaterial_default.depthWrite = propertyValue;
-						ps.shaderMaterial_analytic.depthTest = propertyValue;	
-						ps.shaderMaterial_analytic.depthWrite = propertyValue;
-					}
-					if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
-					{
-						if(!ps.minAcceleration) ps.minAcceleration = [0,0,0];
-						if(!ps.maxAcceleration) ps.maxAcceleration = [0,0,0];
-						
-						for(var i = 0; i < particles.vertices.length; i++)
-						{
-							particles.vertices[i].acceleration.x = ps.minAcceleration[0] + (ps.maxAcceleration[0] - ps.minAcceleration[0]) * Math.random();
-							particles.vertices[i].acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
-							particles.vertices[i].acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
-						}
-					}
-					if(propertyName == "minVelocity" || propertyName == "maxVelocity")
+                        ps.shaderMaterial_default.needsUpdate = true;   
+                        ps.shaderMaterial_analytic.needsUpdate = true;                      
+                    }
+                    if(propertyName == 'depthTest')
                     {
-						if(!ps.minVelocity) ps.minVelocity = [0,0,0];
-						if(!ps.maxVelocity) ps.maxVelocity = [0,0,0];
-						
-						for(var i = 0; i < particles.vertices.length; i++)
-						{
-							
-							particles.vertices[i].velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
-							particles.vertices[i].velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
-							particles.vertices[i].velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
-						}
-					}
-					if(propertyName == "minLifeTime" || propertyName == "maxLifeTime")
+                        ps.shaderMaterial_default.depthTest = propertyValue;    
+                        ps.shaderMaterial_default.depthWrite = propertyValue;
+                        ps.shaderMaterial_analytic.depthTest = propertyValue;   
+                        ps.shaderMaterial_analytic.depthWrite = propertyValue;
+                    }
+                    if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
                     {
-						if(ps.minLifeTime === undefined) ps.minLifeTime = 0;
-						if(ps.maxLifeTime === undefined) ps.maxLifeTime = 1;
-						
-						for(var i = 0; i < particles.vertices.length; i++)
-						{	
-							particles.vertices[i].lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
-						}
-					}
-				}
+                        if(!ps.minAcceleration) ps.minAcceleration = [0,0,0];
+                        if(!ps.maxAcceleration) ps.maxAcceleration = [0,0,0];
+                        
+                        for(var i = 0; i < particles.vertices.length; i++)
+                        {
+                            particles.vertices[i].acceleration.x = ps.minAcceleration[0] + (ps.maxAcceleration[0] - ps.minAcceleration[0]) * Math.random();
+                            particles.vertices[i].acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
+                            particles.vertices[i].acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
+                        }
+                    }
+                    if(propertyName == "minVelocity" || propertyName == "maxVelocity")
+                    {
+                        if(!ps.minVelocity) ps.minVelocity = [0,0,0];
+                        if(!ps.maxVelocity) ps.maxVelocity = [0,0,0];
+                        
+                        for(var i = 0; i < particles.vertices.length; i++)
+                        {
+                            
+                            particles.vertices[i].velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
+                            particles.vertices[i].velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
+                            particles.vertices[i].velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
+                        }
+                    }
+                    if(propertyName == "minLifeTime" || propertyName == "maxLifeTime")
+                    {
+                        if(ps.minLifeTime === undefined) ps.minLifeTime = 0;
+                        if(ps.maxLifeTime === undefined) ps.maxLifeTime = 1;
+                        
+                        for(var i = 0; i < particles.vertices.length; i++)
+                        {   
+                            particles.vertices[i].lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
+                        }
+                    }
+                }
                 if(threeObject instanceof THREE.Camera)
                 {
                     if(propertyName == "fovy")
@@ -697,7 +697,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                                 parent.remove(threeObject);
                                 var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
-								//cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
+                                //cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
                                 //CopyProperties(threeObject,cam);
                                 cam.far = threeObject.far;
                                 cam.near = threeObject.near;
@@ -766,9 +766,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == "color" || propertyName == "diffuse")
                     {
-						
+                        
                         // use utility to allow for colors, web colors....
-						//this breaks on array values for colors
+                        //this breaks on array values for colors
                         var vwfColor = new utility.color( propertyValue );
                         if ( !propertyValue.length ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
@@ -779,7 +779,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeObject.needsUpdate = true;
                         if ( threeObject.ambient !== undefined ) {
                             threeObject.ambient.setRGB( threeObject.color.r, threeObject.color.g, threeObject.color.b );                    }
-                        }
+                    }
                 }
                 if(threeObject instanceof THREE.Scene)
                 {
@@ -832,8 +832,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                      case 4:
                                          node.renderer.setClearColor( { r:propertyValue[0], g:propertyValue[1], b:propertyValue[2] }, propertyValue[3] );    
                                          break;          
-                                 }
-                             }
+                                }
+                            }
                         }
                     }
                 }   
@@ -843,7 +843,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         var newlight;
                         var parent = threeObject.parent;
-                        console.info( "LOL = " + JSON.stringify( threeObject.color ) );
                         var currProps = {
                             "name": threeObject.name,
                             "distance": threeObject.distance,
@@ -904,7 +903,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if ( propertyName == 'intensity' ) {
                         threeObject.intensity = propertyValue;
-						threeObject.updateMatrix();
+                        threeObject.updateMatrix();
                     }                    
                     if ( propertyName == 'castShadows' ) {
                         threeObject.castShadow = propertyValue;
@@ -918,102 +917,102 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         gettingProperty: function( nodeID, propertyName ) {
 
-          //console.log([nodeID,propertyName,propertyValue]);
-          var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
-          if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
-          var value = undefined;
-          
-          //this driver has no representation of this node, so there is nothing to do.
-          if(!node) return;
-          
-          var threeObject = node.threeObject;
-          if( !threeObject )
-            threeObject = node.threeScene;
-          
-          //if it's a material node, we'll work with the threeMaterial
-          //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
-          //in case we later need access to the object the material is on.
-          if( node.threeMaterial )
-            threeObject = node.threeMaterial;
-            
-          //There is not three object for this node, so there is nothing this driver can do. return
-          if(!threeObject) return value;    
-          
-                if(threeObject instanceof THREE.Object3D)
-                {
-                    if(propertyName == 'transform')
-                    {
-                        var value = matCpy(threeObject.matrix.elements); 
-						
-						if ( threeObject instanceof THREE.Camera ) {
-                            var columny = goog.vec.Vec4.create();
-                            goog.vec.Mat4.getColumn( value, 1, columny );
-                            var columnz = goog.vec.Vec4.create();
-                            goog.vec.Mat4.getColumn( value, 2, columnz );
-                            goog.vec.Mat4.setColumn( value, 2, columny );
-                            goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                        }
-						
-						var ret =  value;
-						return ret;
-                    }
-					if(propertyName =='localMatrix')
-                    {
-                        var elements = matCpy(threeObject.matrix.elements); 
-						var ret =  elements;
-						return ret;
-                    }
-					if(propertyName == 'worldMatrix')
-					{
-						threeObject.updateMatrixWorld(true);
-                        var elements = matCpy(threeObject.matrixWorld.elements); 
-						var ret =  elements;	
-						return ret;
-					}
-										
-                    if(propertyName ==  "boundingbox")
-                    {
-                        value = getBoundingBox.call( this, threeObject, true );
-                        return value;
-                    }
-                    if ( propertyName == "centerOffset" )
-                    {
-                        value = getCenterOffset.call( this, threeObject );
-                        return value;
-                    }
+            //console.log([nodeID,propertyName,propertyValue]);
+            var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            var value = undefined;
 
-                    if(propertyName ==  "meshData")
-                    {
-                        var threeObject = node.threeObject;
-                        value = [];
-                        var scale = this.gettingProperty( nodeID, "scale", [] ); 
-                        scale = [1,1,1];
-                        var meshList = findAllMeshes.call( this, threeObject );
-                        for ( var i = 0; i < meshList.length; i++ ) {
-                            value.push( {  "vertices": getMeshVertices.call( this, meshList[i],threeObject ),
-                                           "vertexIndices": getMeshVertexIndices.call( this, meshList[i] ),
-                                           "scale": scale 
-                                        } );
-                        }
-                        return value;
+            //this driver has no representation of this node, so there is nothing to do.
+            if(!node) return;
+
+            var threeObject = node.threeObject;
+            if( !threeObject )
+            threeObject = node.threeScene;
+
+            //if it's a material node, we'll work with the threeMaterial
+            //might be more elegant to simply make the node.threeObject the material, but keeping it seperate
+            //in case we later need access to the object the material is on.
+            if( node.threeMaterial )
+            threeObject = node.threeMaterial;
+
+            //There is not three object for this node, so there is nothing this driver can do. return
+            if(!threeObject) return value;    
+          
+            if(threeObject instanceof THREE.Object3D)
+            {
+                if(propertyName == 'transform')
+                {
+                    var value = matCpy(threeObject.matrix.elements); 
+                    
+                    if ( threeObject instanceof THREE.Camera ) {
+                        var columny = goog.vec.Vec4.create();
+                        goog.vec.Mat4.getColumn( value, 1, columny );
+                        var columnz = goog.vec.Vec4.create();
+                        goog.vec.Mat4.getColumn( value, 2, columnz );
+                        goog.vec.Mat4.setColumn( value, 2, columny );
+                        goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
                     }
                     
+                    var ret =  value;
+                    return ret;
                 }
-                if(threeObject instanceof THREE.Material)
+                if(propertyName =='localMatrix')
                 {
-                    if(propertyName == "texture")
-                    {
-                        //debugger;
-                        if( threeObject.map && threeObject.map.image )
-                            return threeObject.map.image.src;
-                            
-                    }
-                    if(propertyName == "color")
-                    {
-                        
-                            
-                    }
+                    var elements = matCpy(threeObject.matrix.elements); 
+                    var ret =  elements;
+                    return ret;
                 }
+                if(propertyName == 'worldMatrix')
+                {
+                    threeObject.updateMatrixWorld(true);
+                    var elements = matCpy(threeObject.matrixWorld.elements); 
+                    var ret =  elements;    
+                    return ret;
+                }
+                                    
+                if(propertyName ==  "boundingbox")
+                {
+                    value = getBoundingBox.call( this, threeObject, true );
+                    return value;
+                }
+                if ( propertyName == "centerOffset" )
+                {
+                    value = getCenterOffset.call( this, threeObject );
+                    return value;
+                }
+
+                if(propertyName ==  "meshData")
+                {
+                    var threeObject = node.threeObject;
+                    value = [];
+                    var scale = this.gettingProperty( nodeID, "scale", [] ); 
+                    scale = [1,1,1];
+                    var meshList = findAllMeshes.call( this, threeObject );
+                    for ( var i = 0; i < meshList.length; i++ ) {
+                        value.push( {  "vertices": getMeshVertices.call( this, meshList[i],threeObject ),
+                                       "vertexIndices": getMeshVertexIndices.call( this, meshList[i] ),
+                                       "scale": scale 
+                                    } );
+                    }
+                    return value;
+                }
+                
+            }
+            if(threeObject instanceof THREE.Material)
+            {
+                if(propertyName == "texture")
+                {
+                    //debugger;
+                    if( threeObject.map && threeObject.map.image )
+                        return threeObject.map.image.src;
+                        
+                }
+                if(propertyName == "color")
+                {
+                    
+                        
+                }
+            }
         },
 
 
@@ -1038,17 +1037,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         ticking: function( vwfTime ) {
         
-            for(var i in this.state.nodes)
-            {
-                var node = this.state.nodes[i];
-                var threeObject = node.threeObject;
-                if(threeObject instanceof THREE.ParticleSystem)
-                {   
+            //for(var i in this.state.nodes)
+            //{
+            //    var node = this.state.nodes[i];
+            //    var threeObject = node.threeObject;
+            //    if(threeObject instanceof THREE.ParticleSystem)
+            //    {   
                     
                       //threeObject.update();
                 
-                }
-            }
+            //    }
+            //}
         }
 
     } );
@@ -1182,7 +1181,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
         cam.matrixAutoUpdate = false;
         cam.up = new THREE.Vector3(0,0,1);
-		//cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
+        //cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
         cam.updateMatrixWorld(true);    
         return cam;
     }
@@ -1273,7 +1272,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     }
 
-	
+    
     function findAllMeshes(threeObject,list)
     {
         
@@ -1351,81 +1350,76 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }       
         return null;
     }
-	
-	function GetAllLeafMeshes(threeObject,list)
-	{
-		if(threeObject instanceof THREE.Mesh)
-		{
-			list.push(threeObject);
-		}
-		if(threeObject.children)
+    
+    function GetAllLeafMeshes(threeObject,list)
+    {
+        if(threeObject instanceof THREE.Mesh)
+        {
+            list.push(threeObject);
+        }
+        if(threeObject.children)
         {
             for(var i=0; i < threeObject.children.length; i++)
             {
                 GetAllLeafMeshes(threeObject.children[i],list);
             }               
         }     
-	}
-	function fixMissingUVs(mesh)
-	{
-		if(!mesh.geometry.faceVertexUvs[0] )
-			mesh.geometry.faceVertexUvs[0] = [];
-		if(mesh.geometry.faceVertexUvs[0].length == 0)
-		{
-			for(var i =0; i < mesh.geometry.faces.length; i++)
-			{
-				var face = mesh.geometry.faces[i];
-				if(face instanceof THREE.Face4)
-					mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
-				if(face instanceof THREE.Face3)
-					mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
-			}
-		}
-		
-		 
-		mesh.geometry.computeCentroids();
-		mesh.geometry.computeFaceNormals();
-		mesh.geometry.computeVertexNormals();
-		
-		
-		
-		mesh.geometry.uvsNeedUpdate = true;
+    }
+    function fixMissingUVs(mesh)
+    {
+        if(!mesh.geometry.faceVertexUvs[0] )
+            mesh.geometry.faceVertexUvs[0] = [];
+        if(mesh.geometry.faceVertexUvs[0].length == 0)
+        {
+            for(var i =0; i < mesh.geometry.faces.length; i++)
+            {
+                var face = mesh.geometry.faces[i];
+                if(face instanceof THREE.Face4)
+                    mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+                if(face instanceof THREE.Face3)
+                    mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+            }
+        }
+         
+        mesh.geometry.computeCentroids();
+        mesh.geometry.computeFaceNormals();
+        mesh.geometry.computeVertexNormals();
+        mesh.geometry.uvsNeedUpdate = true;
 
-		
-	}
+    }
     //set the material on all the sub meshes of an object.
     //This could cause some strangeness in cases where an asset has multiple sub materials
     //best to only specify the material sub-node where an asset is a mesh leaf
     function SetMaterial(threeObject,material,materialname)
     {
-		
+        
         //something must be pretty seriously wrong if no threeobject
         if(!threeObject)
             return null;
         
-		
-		var meshes =[];
-		GetAllLeafMeshes(threeObject,meshes);
-		//apply to all sub meshes
-		if(!materialname || materialname == 'material')
-		{
-			for(var i=0; i < meshes.length; i++)
-			{
-				
-				meshes[i].material = material;
-				meshes.needsUpdate = true;
-			}
-		}else
-		{
-			var index = parseInt(materialname.substr(8));
-			if(meshes[index])
-			{
-				
-				meshes[index].material = material;
-				meshes.needsUpdate = true;
-				window._dMesh =meshes[index];
-			}
-		}
+        
+        var meshes =[];
+        GetAllLeafMeshes(threeObject,meshes);
+        //apply to all sub meshes
+        if(!materialname || materialname == 'material')
+        {
+            for(var i=0; i < meshes.length; i++)
+            {
+                
+                meshes[i].material = material;
+                meshes.needsUpdate = true;
+            }
+        }else
+        {
+            var index = parseInt(materialname.substr(8));
+            if(meshes[index])
+            {
+                
+                meshes[index].material = material;
+                meshes.needsUpdate = true;
+                window._dMesh =meshes[index];
+            }
+        }
     }
     function createMesh( node, meshDef ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
@@ -1460,10 +1454,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
-//console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
+        //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
 
         node.assetLoaded = function( asset ) { 
-    console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
+            //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
             sceneNode.pendingLoads--;
             var removed = false;
             
@@ -1482,25 +1476,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //asset.updateMatrixWorld(true);
            
             SetMaterialAmbients.call(threeModel,asset);
-			//asset.rotation.z = Math.PI;
-			
+            //asset.rotation.z = Math.PI;
+            
             // remember that this was a loaded collada file
             asset.loadedColladaNode = true;
             
-			var meshes =[];
-			GetAllLeafMeshes(asset,meshes);
-		
-			for(var i =0; i < meshes.length; i++)
-			{
-				fixMissingUVs(meshes[i]);	
+            var meshes =[];
+            GetAllLeafMeshes(asset,meshes);
+        
+            for(var i =0; i < meshes.length; i++)
+            {
+                fixMissingUVs(meshes[i]);   
                 meshes[i].geometry.uvsNeedUpdate = true;
-			}
-			
+            }
+            
             parentObject3.add( asset );
             if ( asset.matrix ) asset.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
             else asset.matrix = { "elements": [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1], };
             if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
-			
+            
             nodeCopy.threeObject.matrixAutoUpdate = false;
 
             for ( var j = 0; j < sceneNode.srcAssetObjects.length; j++ ) {
@@ -1528,9 +1522,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( parentNode && parentNode.threeObject ) {
             parentNode.threeObject.add(node.threeObject);
          } else if ( sceneNode ) {
-//          if ( !sceneNode.glgeScene ) {
-//              this.initScene.call( this, sceneNode );
-//          }
             if ( sceneNode.threeScene ) {
                 sceneNode.threeScene.add( node.threeObject );
             }
@@ -1634,8 +1625,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if ( child ) 
         {
         
-			
-			
+            
+            
             // create the particle variables
            
             var particles = new THREE.Geometry();
@@ -1643,576 +1634,576 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                   new THREE.ParticleBasicMaterial({
                     color: 0xFFFFFF,
                     size: 20,
-					vertexColors:true
+                    vertexColors:true
                   });
-				  
-				
+                  
+                
 
-			//default material expects all computation done cpu side, just renders		
-			var vertShader_default = 
-			"attribute float size; \n"+
-			"attribute vec4 vertexColor;\n"+
-			"varying vec4 vColor;\n"+
-			"void main() {\n"+
-			"	vColor = vertexColor;\n"+
-			"	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"+
-			"	gl_PointSize = size * ( 1000.0/ length( mvPosition.xyz ) );\n"+
-			"	gl_Position = projectionMatrix * mvPosition;\n"+
-			"}	  \n";
-			var fragShader_default = 
-			"uniform float useTexture;\n"+
-			"uniform sampler2D texture;\n"+
-			"varying vec4 vColor;\n"+
-			"void main() {\n"+
-			"	vec4 outColor = (vColor * texture2D( texture, gl_PointCoord )) *useTexture + vColor * (1.0-useTexture);\n"+
-			
-			"	gl_FragColor = outColor;\n"+
-			"}\n";
-			var attributes_default = {
-				size: {	type: 'f', value: [] },
-				vertexColor:   {	type: 'v4', value: [] }
-			};
-			var uniforms_default = {
-				amplitude: { type: "f", value: 1.0 },
-				texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
-				useTexture: { type: "f", value: 0.0 },
-				maxSpin: { type: "f", value: 0.0 },
-				minSpin: { type: "f", value: 0.0 },
-			};
-			uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
-			var shaderMaterial_default = new THREE.ShaderMaterial( {
-				uniforms: 		uniforms_default,
-				attributes:     attributes_default,
-				vertexShader:   vertShader_default,
-				fragmentShader: fragShader_default
+            //default material expects all computation done cpu side, just renders      
+            var vertShader_default = 
+            "attribute float size; \n"+
+            "attribute vec4 vertexColor;\n"+
+            "varying vec4 vColor;\n"+
+            "void main() {\n"+
+            "   vColor = vertexColor;\n"+
+            "   vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"+
+            "   gl_PointSize = size * ( 1000.0/ length( mvPosition.xyz ) );\n"+
+            "   gl_Position = projectionMatrix * mvPosition;\n"+
+            "}    \n";
+            var fragShader_default = 
+            "uniform float useTexture;\n"+
+            "uniform sampler2D texture;\n"+
+            "varying vec4 vColor;\n"+
+            "void main() {\n"+
+            "   vec4 outColor = (vColor * texture2D( texture, gl_PointCoord )) *useTexture + vColor * (1.0-useTexture);\n"+
+            
+            "   gl_FragColor = outColor;\n"+
+            "}\n";
+            var attributes_default = {
+                size: { type: 'f', value: [] },
+                vertexColor:   {    type: 'v4', value: [] }
+            };
+            var uniforms_default = {
+                amplitude: { type: "f", value: 1.0 },
+                texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
+                useTexture: { type: "f", value: 0.0 },
+                maxSpin: { type: "f", value: 0.0 },
+                minSpin: { type: "f", value: 0.0 },
+            };
+            uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
+            var shaderMaterial_default = new THREE.ShaderMaterial( {
+                uniforms:       uniforms_default,
+                attributes:     attributes_default,
+                vertexShader:   vertShader_default,
+                fragmentShader: fragShader_default
 
-			});
-			
-			
-			
-			
-			
-			//analytic shader does entire simulation on GPU
-			var vertShader_analytic = 
-			"attribute float size; \n"+
-			"attribute vec4 vertexColor;\n"+
-			"attribute vec3 acceleration;\n"+
-			"attribute vec3 velocity;\n"+
-			"attribute float lifespan;\n"+
-			"attribute float random;\n"+
-			"uniform float time;\n"+
-			"uniform float startSize;\n"+
-			"uniform float endSize;\n"+
-			"uniform vec4 startColor;\n"+
-			"uniform vec4 endColor;\n"+
-			"varying vec4 vColor;\n"+
-			"varying float vRandom;\n"+
-			"void main() {\n"+
-			"   float lifetime = fract(random+(time))*lifespan*1.33;"+
-			"   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;"+ // ;
-			"	vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n"+
-			"	gl_PointSize = mix(startSize,endSize,lifetime/lifespan) * ( 1000.0/ length( mvPosition.xyz ) );\n"+
-			"	gl_Position = projectionMatrix * mvPosition;\n"+
-			"	vColor = mix(startColor,endColor,lifetime/lifespan);\n"+
-			"   vRandom = random;"+
-			"}	  \n";
-			var fragShader_analytic = 
-			"uniform float useTexture;\n"+
-			"uniform sampler2D texture;\n"+
-			"uniform float time;\n"+
-			"uniform float maxSpin;\n"+
-			"uniform float minSpin;\n"+
-			"varying vec4 vColor;\n"+
-			"varying float vRandom;\n"+
-			"void main() {\n"+
-			" vec2 coord = vec2(0.0,0.0);"+
-			" float spin = mix(maxSpin,minSpin,vRandom);"+
-			" coord.s = (gl_PointCoord.s-.5)*cos(time*spin)-(gl_PointCoord.t-.5)*sin(time*spin);"+
-			" coord.t = (gl_PointCoord.t-.5)*cos(time*spin)+(gl_PointCoord.s-.5)*sin(time*spin);"+
-			"	vec4 outColor = (vColor * texture2D( texture, coord + vec2(.5,.5) )) *useTexture + vColor * (1.0-useTexture);\n"+
-			
-			"	gl_FragColor = outColor;\n"+
-			"}\n";
-			var attributes_analytic = {
+            });
+            
+            
+            
+            
+            
+            //analytic shader does entire simulation on GPU
+            var vertShader_analytic = 
+            "attribute float size; \n"+
+            "attribute vec4 vertexColor;\n"+
+            "attribute vec3 acceleration;\n"+
+            "attribute vec3 velocity;\n"+
+            "attribute float lifespan;\n"+
+            "attribute float random;\n"+
+            "uniform float time;\n"+
+            "uniform float startSize;\n"+
+            "uniform float endSize;\n"+
+            "uniform vec4 startColor;\n"+
+            "uniform vec4 endColor;\n"+
+            "varying vec4 vColor;\n"+
+            "varying float vRandom;\n"+
+            "void main() {\n"+
+            "   float lifetime = fract(random+(time))*lifespan*1.33;"+
+            "   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;"+ // ;
+            "   vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n"+
+            "   gl_PointSize = mix(startSize,endSize,lifetime/lifespan) * ( 1000.0/ length( mvPosition.xyz ) );\n"+
+            "   gl_Position = projectionMatrix * mvPosition;\n"+
+            "   vColor = mix(startColor,endColor,lifetime/lifespan);\n"+
+            "   vRandom = random;"+
+            "}    \n";
+            var fragShader_analytic = 
+            "uniform float useTexture;\n"+
+            "uniform sampler2D texture;\n"+
+            "uniform float time;\n"+
+            "uniform float maxSpin;\n"+
+            "uniform float minSpin;\n"+
+            "varying vec4 vColor;\n"+
+            "varying float vRandom;\n"+
+            "void main() {\n"+
+            " vec2 coord = vec2(0.0,0.0);"+
+            " float spin = mix(maxSpin,minSpin,vRandom);"+
+            " coord.s = (gl_PointCoord.s-.5)*cos(time*spin)-(gl_PointCoord.t-.5)*sin(time*spin);"+
+            " coord.t = (gl_PointCoord.t-.5)*cos(time*spin)+(gl_PointCoord.s-.5)*sin(time*spin);"+
+            "   vec4 outColor = (vColor * texture2D( texture, coord + vec2(.5,.5) )) *useTexture + vColor * (1.0-useTexture);\n"+
+            
+            "   gl_FragColor = outColor;\n"+
+            "}\n";
+            var attributes_analytic = {
 
 
-				acceleration:   {	type: 'v3', value: [] },
-				velocity:   {	type: 'v3', value: [] },
-				lifespan:   {	type: 'f', value: [] },
-				random:   {	type: 'f', value: [] },
-				vertexColor : attributes_default.vertexColor,
-				size: attributes_default.size
-			};
-			var uniforms_analytic = {
-				startColor:{type: "v4", value:new THREE.Vector4()},
-				endColor:{type: "v4", value:new THREE.Vector4()},
-				startSize:{type:"f", value:1},
-				endSize:{type:"f", value:1},
-				texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
-				useTexture: { type: "f", value: 0.0 },
-				time: { type: "f", value: 0.0 },
-				maxSpin: uniforms_default.maxSpin,
-				minSpin: uniforms_default.minSpin
-			};
-			uniforms_analytic.texture.value.wrapS = uniforms_analytic.texture.value.wrapT = THREE.RepeatWrapping;
-			var shaderMaterial_analytic = new THREE.ShaderMaterial( {
-				uniforms: 		uniforms_analytic,
-				attributes:     attributes_analytic,
-				vertexShader:   vertShader_analytic,
-				fragmentShader: fragShader_analytic
-			});
-			
-			
-			
-			
-			
-			
-			// create the particle system
+                acceleration:   {   type: 'v3', value: [] },
+                velocity:   {   type: 'v3', value: [] },
+                lifespan:   {   type: 'f', value: [] },
+                random:   { type: 'f', value: [] },
+                vertexColor : attributes_default.vertexColor,
+                size: attributes_default.size
+            };
+            var uniforms_analytic = {
+                startColor:{type: "v4", value:new THREE.Vector4()},
+                endColor:{type: "v4", value:new THREE.Vector4()},
+                startSize:{type:"f", value:1},
+                endSize:{type:"f", value:1},
+                texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
+                useTexture: { type: "f", value: 0.0 },
+                time: { type: "f", value: 0.0 },
+                maxSpin: uniforms_default.maxSpin,
+                minSpin: uniforms_default.minSpin
+            };
+            uniforms_analytic.texture.value.wrapS = uniforms_analytic.texture.value.wrapT = THREE.RepeatWrapping;
+            var shaderMaterial_analytic = new THREE.ShaderMaterial( {
+                uniforms:       uniforms_analytic,
+                attributes:     attributes_analytic,
+                vertexShader:   vertShader_analytic,
+                fragmentShader: fragShader_analytic
+            });
+            
+            
+            
+            
+            
+            
+            // create the particle system
             var particleSystem = new THREE.ParticleSystem(particles,shaderMaterial_default);
-			
-			particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;
-			particleSystem.shaderMaterial_default = shaderMaterial_default;
-			
-			particleSystem.minVelocity = [0,0,0];
-			particleSystem.maxVelocity = [0,0,0];
-			particleSystem.maxAcceleration = [0,0,0];
-			particleSystem.minAcceleration = [0,0,0];
-			particleSystem.minLifeTime = 0;
-			particleSystem.maxLifeTime = 1;
-			particleSystem.emitterType = 'point';
-			particleSystem.emitterSize = [0,0,0];
-			particleSystem.startColor = [1,1,1,1];
-			particleSystem.endColor = [0,0,0,0];
-			particleSystem.regenParticles = [];
-			particleSystem.maxRate = 1000;
-			particleSystem.particleCount = 1000;
-			particleSystem.damping = 0;
-			particleSystem.startSize = 3;
-			particleSystem.endSize = 3;
-			particleSystem.velocityMode = 'cartesian';
-			particleSystem.createParticle = function(i)
-			{
-				var particle = new THREE.Vector3(0,0,0);
-				this.geometry.vertices.push(particle);
-			
-				particle.i = i;
-				
-				particle.world = new THREE.Vector3();
-				particle.prevworld = new THREE.Vector3();
-				var color = new THREE.Vector4(1,1,1,1);
-				this.material.attributes.vertexColor.value.push(color);
-				particle.color = color;
-				this.material.attributes.size.value.push(1);
-				var self = this;
-				particle.setSize = function(s)
-				{
-					self.material.attributes.size.value[this.i] = s;
-				}
-				
-				shaderMaterial_analytic.attributes.acceleration.value.push(new THREE.Vector3());
-				shaderMaterial_analytic.attributes.velocity.value.push(new THREE.Vector3());
-				shaderMaterial_analytic.attributes.lifespan.value.push(1);
-				shaderMaterial_analytic.attributes.random.value.push(Math.random());
-				return particle;
-			}
-			
-			particleSystem.generatePoint = function()
-			{
-				if(this.emitterType.toLowerCase() == 'point')
-				{
-					return new THREE.Vector3(0,0,0);
-				}
-				if(this.emitterType.toLowerCase() == 'box')
-				{
-					var x = this.emitterSize[0] * Math.random() - this.emitterSize[0]/2;
-					var y = this.emitterSize[1] * Math.random() - this.emitterSize[1]/2;
-					var z = this.emitterSize[2] * Math.random() - this.emitterSize[2]/2;
-					
-					return new THREE.Vector3(x,y,z);
-				}
-				if(this.emitterType.toLowerCase() == 'sphere')
-				{
-					var u2 = Math.random();
-					u2 = Math.pow(u2,1/3);
-					var o = this.emitterSize[0] * Math.random() * Math.PI*2;
-					var u = this.emitterSize[1] * Math.random() * 2 - 1;
-					var r = this.emitterSize[2]  * u2;
-					var x = Math.cos(o)*Math.sqrt(1-(u*u));
-					var y = Math.sin(o)*Math.sqrt(1-(u*u));
-					var z = u;
-					
-					
-					return new THREE.Vector3(x,y,z).setLength(r);
-				}
-			
-			}
-			particleSystem.rebuildParticles = function()
-			{
-				for(var i = 0; i < this.geometry.vertices.length; i++)
-				{
-					this.setupParticle(this.geometry.vertices[i],this.matrix);
-				}
-			}
+            
+            particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;
+            particleSystem.shaderMaterial_default = shaderMaterial_default;
+            
+            particleSystem.minVelocity = [0,0,0];
+            particleSystem.maxVelocity = [0,0,0];
+            particleSystem.maxAcceleration = [0,0,0];
+            particleSystem.minAcceleration = [0,0,0];
+            particleSystem.minLifeTime = 0;
+            particleSystem.maxLifeTime = 1;
+            particleSystem.emitterType = 'point';
+            particleSystem.emitterSize = [0,0,0];
+            particleSystem.startColor = [1,1,1,1];
+            particleSystem.endColor = [0,0,0,0];
+            particleSystem.regenParticles = [];
+            particleSystem.maxRate = 1000;
+            particleSystem.particleCount = 1000;
+            particleSystem.damping = 0;
+            particleSystem.startSize = 3;
+            particleSystem.endSize = 3;
+            particleSystem.velocityMode = 'cartesian';
+            particleSystem.createParticle = function(i)
+            {
+                var particle = new THREE.Vector3(0,0,0);
+                this.geometry.vertices.push(particle);
+            
+                particle.i = i;
+                
+                particle.world = new THREE.Vector3();
+                particle.prevworld = new THREE.Vector3();
+                var color = new THREE.Vector4(1,1,1,1);
+                this.material.attributes.vertexColor.value.push(color);
+                particle.color = color;
+                this.material.attributes.size.value.push(1);
+                var self = this;
+                particle.setSize = function(s)
+                {
+                    self.material.attributes.size.value[this.i] = s;
+                }
+                
+                shaderMaterial_analytic.attributes.acceleration.value.push(new THREE.Vector3());
+                shaderMaterial_analytic.attributes.velocity.value.push(new THREE.Vector3());
+                shaderMaterial_analytic.attributes.lifespan.value.push(1);
+                shaderMaterial_analytic.attributes.random.value.push(Math.random());
+                return particle;
+            }
+            
+            particleSystem.generatePoint = function()
+            {
+                if(this.emitterType.toLowerCase() == 'point')
+                {
+                    return new THREE.Vector3(0,0,0);
+                }
+                if(this.emitterType.toLowerCase() == 'box')
+                {
+                    var x = this.emitterSize[0] * Math.random() - this.emitterSize[0]/2;
+                    var y = this.emitterSize[1] * Math.random() - this.emitterSize[1]/2;
+                    var z = this.emitterSize[2] * Math.random() - this.emitterSize[2]/2;
+                    
+                    return new THREE.Vector3(x,y,z);
+                }
+                if(this.emitterType.toLowerCase() == 'sphere')
+                {
+                    var u2 = Math.random();
+                    u2 = Math.pow(u2,1/3);
+                    var o = this.emitterSize[0] * Math.random() * Math.PI*2;
+                    var u = this.emitterSize[1] * Math.random() * 2 - 1;
+                    var r = this.emitterSize[2]  * u2;
+                    var x = Math.cos(o)*Math.sqrt(1-(u*u));
+                    var y = Math.sin(o)*Math.sqrt(1-(u*u));
+                    var z = u;
+                    
+                    
+                    return new THREE.Vector3(x,y,z).setLength(r);
+                }
+            
+            }
+            particleSystem.rebuildParticles = function()
+            {
+                for(var i = 0; i < this.geometry.vertices.length; i++)
+                {
+                    this.setupParticle(this.geometry.vertices[i],this.matrix);
+                }
+            }
             particleSystem.setupParticle = function(particle,mat,inv)
-			{
-				
-				particle.x = 0;
-				particle.y = 0;
-				particle.z = 0;
-				
-				particle.world = mat.multiplyVector3(this.generatePoint());
-				
-				particle.initialx = particle.world.x;
-				particle.initialy = particle.world.y;
-				particle.initialz = particle.world.z;
-				
-				particle.x = particle.initialx;
-				particle.y = particle.initialy;
-				particle.z = particle.initialz;
-				
-				
-				
-				particle.age = 0;
-				particle.velocity = new THREE.Vector3(0,0,0);
-			    particle.acceleration = new THREE.Vector3( 0,0,0);  
-			    particle.lifespan = 1;  
-				
-				if(this.velocityMode == 'cartesian')
-				{
-					particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
-					particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
-					particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
-				}
-				if(this.velocityMode == 'spherical')
-				{
-				
-					//random sphercial points concentrate at poles
-					/* var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
-					var t = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * Math.PI*2;
-					var w = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI - Math.PI/2;
-					particle.velocity.x = r * Math.sin(t)*Math.cos(w);
-					particle.velocity.y = r * Math.sin(t)*Math.sin(w);
-					particle.velocity.z = r * Math.cos(t); */
-					
-					var o = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI*2;
-					var u = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * 2 - 1;
-					var u2 = Math.random();
-					u2 = Math.pow(u2,1/3);
-					var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * u2;
-					particle.velocity.x = Math.cos(o)*Math.sqrt(1-(u*u));
-					particle.velocity.y = Math.sin(o)*Math.sqrt(1-(u*u));
-					particle.velocity.z = u;
-					particle.velocity.setLength(r);
-				}
-				
-				mat = mat.clone();
-				mat.elements[12] = 0;
-				mat.elements[13] = 0;
-				mat.elements[14] = 0;
-				particle.velocity = mat.multiplyVector3(particle.velocity.clone());
-				
-				
-				particle.acceleration.x = this.minAcceleration[0] + (this.maxAcceleration[0] - this.minAcceleration[0]) * Math.random();
-				particle.acceleration.y = this.minAcceleration[1] + (this.maxAcceleration[1] - this.minAcceleration[1]) * Math.random();
-				particle.acceleration.z = this.minAcceleration[2] + (this.maxAcceleration[2] - this.minAcceleration[2]) * Math.random();
-				particle.lifespan = this.minLifeTime + (this.maxLifeTime - this.minLifeTime) * Math.random();
-				particle.color.x = this.startColor[0];
-				particle.color.y = this.startColor[1];
-				particle.color.z = this.startColor[2];
-				particle.color.w = this.startColor[3];
-				
-				shaderMaterial_analytic.attributes.acceleration.value[particle.i] = (particle.acceleration);
-				shaderMaterial_analytic.attributes.velocity.value[particle.i] = (particle.velocity);
-				shaderMaterial_analytic.attributes.lifespan.value[particle.i] = (particle.lifespan);
-				
-				
-				shaderMaterial_analytic.attributes.acceleration.needsUpdate = true;
-				shaderMaterial_analytic.attributes.velocity.needsUpdate = true;
-				shaderMaterial_analytic.attributes.lifespan.needsUpdate = true;
-				this.geometry.verticesNeedUpdate = true;
-				//randomly move the particle up to one step in time
-				
-			}
-			
-			particleSystem.updateAnalyticShader = function(time)
-			{	
-				particleSystem.material.uniforms.time.value += time/3333.0;
-			
-			}
-			
-			//analytic solver. 
-			//todo: move whole thing to shader
-			particleSystem.updateAnalytic =function(time)
-			{
-				var time_in_ticks = time/33.333;
+            {
+                
+                particle.x = 0;
+                particle.y = 0;
+                particle.z = 0;
+                
+                particle.world = mat.multiplyVector3(this.generatePoint());
+                
+                particle.initialx = particle.world.x;
+                particle.initialy = particle.world.y;
+                particle.initialz = particle.world.z;
+                
+                particle.x = particle.initialx;
+                particle.y = particle.initialy;
+                particle.z = particle.initialz;
+                
+                
+                
+                particle.age = 0;
+                particle.velocity = new THREE.Vector3(0,0,0);
+                particle.acceleration = new THREE.Vector3( 0,0,0);  
+                particle.lifespan = 1;  
+                
+                if(this.velocityMode == 'cartesian')
+                {
+                    particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
+                    particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
+                    particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+                }
+                if(this.velocityMode == 'spherical')
+                {
+                
+                    //random sphercial points concentrate at poles
+                    /* var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+                    var t = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * Math.PI*2;
+                    var w = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI - Math.PI/2;
+                    particle.velocity.x = r * Math.sin(t)*Math.cos(w);
+                    particle.velocity.y = r * Math.sin(t)*Math.sin(w);
+                    particle.velocity.z = r * Math.cos(t); */
+                    
+                    var o = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI*2;
+                    var u = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * 2 - 1;
+                    var u2 = Math.random();
+                    u2 = Math.pow(u2,1/3);
+                    var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * u2;
+                    particle.velocity.x = Math.cos(o)*Math.sqrt(1-(u*u));
+                    particle.velocity.y = Math.sin(o)*Math.sqrt(1-(u*u));
+                    particle.velocity.z = u;
+                    particle.velocity.setLength(r);
+                }
+                
+                mat = mat.clone();
+                mat.elements[12] = 0;
+                mat.elements[13] = 0;
+                mat.elements[14] = 0;
+                particle.velocity = mat.multiplyVector3(particle.velocity.clone());
+                
+                
+                particle.acceleration.x = this.minAcceleration[0] + (this.maxAcceleration[0] - this.minAcceleration[0]) * Math.random();
+                particle.acceleration.y = this.minAcceleration[1] + (this.maxAcceleration[1] - this.minAcceleration[1]) * Math.random();
+                particle.acceleration.z = this.minAcceleration[2] + (this.maxAcceleration[2] - this.minAcceleration[2]) * Math.random();
+                particle.lifespan = this.minLifeTime + (this.maxLifeTime - this.minLifeTime) * Math.random();
+                particle.color.x = this.startColor[0];
+                particle.color.y = this.startColor[1];
+                particle.color.z = this.startColor[2];
+                particle.color.w = this.startColor[3];
+                
+                shaderMaterial_analytic.attributes.acceleration.value[particle.i] = (particle.acceleration);
+                shaderMaterial_analytic.attributes.velocity.value[particle.i] = (particle.velocity);
+                shaderMaterial_analytic.attributes.lifespan.value[particle.i] = (particle.lifespan);
+                
+                
+                shaderMaterial_analytic.attributes.acceleration.needsUpdate = true;
+                shaderMaterial_analytic.attributes.velocity.needsUpdate = true;
+                shaderMaterial_analytic.attributes.lifespan.needsUpdate = true;
+                this.geometry.verticesNeedUpdate = true;
+                //randomly move the particle up to one step in time
+                
+            }
+            
+            particleSystem.updateAnalyticShader = function(time)
+            {   
+                particleSystem.material.uniforms.time.value += time/3333.0;
+            
+            }
+            
+            //analytic solver. 
+            //todo: move whole thing to shader
+            particleSystem.updateAnalytic =function(time)
+            {
+                var time_in_ticks = time/33.333;
 
-				var inv = this.matrix.clone();
-				inv = inv.getInverse(inv);
-					
-				var particles = this.geometry;
+                var inv = this.matrix.clone();
+                inv = inv.getInverse(inv);
+                    
+                var particles = this.geometry;
 
-				var pCount = this.geometry.vertices.length;
-				while(pCount--) 
-				{
-					var particle =particles.vertices[pCount];					
-					this.updateParticleAnalytic(particle,this.matrix,inv,time_in_ticks);
-				}
-					
-				//examples developed with faster tick - maxrate *33 is scale to make work 
-				//with new timing
-				var len = Math.min(this.regenParticles.length,this.maxRate*15*time_in_ticks);
-				for(var i =0; i < len; i++)
-				{
-						
-					var particle = this.regenParticles.shift();
-					this.setupParticle(particle,this.matrix,inv);
-					this.updateParticleAnalytic(particle,this.matrix,inv,Math.random()*3.33);
-					particle.waitForRegen = false;
-				}
-					
-			    this.geometry.verticesNeedUpdate  = true;
-				this.geometry.colorsNeedUpdate  = true;
-				
-				this.material.attributes.vertexColor.needsUpdate = true;
-				this.material.attributes.size.needsUpdate = true;
-			}
-			
-			particleSystem.counter = 0;
-			particleSystem.testtime = 0;
-			particleSystem.totaltime = 0;
-			//timesliced Euler integrator
-			//todo: switch to RK4 and move interpolation to shader
-			particleSystem.updateEuler = function(time)
-			{
-				//var timer = performance.now();
-				var time_in_ticks = time/100.0;
-				
-				if(this.lastTime === undefined) this.lastTime = 0;
-				
-			
-				   
-				this.lastTime += time_in_ticks;//ticks - Math.floor(ticks);
+                var pCount = this.geometry.vertices.length;
+                while(pCount--) 
+                {
+                    var particle =particles.vertices[pCount];                   
+                    this.updateParticleAnalytic(particle,this.matrix,inv,time_in_ticks);
+                }
+                    
+                //examples developed with faster tick - maxrate *33 is scale to make work 
+                //with new timing
+                var len = Math.min(this.regenParticles.length,this.maxRate*15*time_in_ticks);
+                for(var i =0; i < len; i++)
+                {
+                        
+                    var particle = this.regenParticles.shift();
+                    this.setupParticle(particle,this.matrix,inv);
+                    this.updateParticleAnalytic(particle,this.matrix,inv,Math.random()*3.33);
+                    particle.waitForRegen = false;
+                }
+                    
+                this.geometry.verticesNeedUpdate  = true;
+                this.geometry.colorsNeedUpdate  = true;
+                
+                this.material.attributes.vertexColor.needsUpdate = true;
+                this.material.attributes.size.needsUpdate = true;
+            }
+            
+            particleSystem.counter = 0;
+            particleSystem.testtime = 0;
+            particleSystem.totaltime = 0;
+            //timesliced Euler integrator
+            //todo: switch to RK4 and move interpolation to shader
+            particleSystem.updateEuler = function(time)
+            {
+                //var timer = performance.now();
+                var time_in_ticks = time/100.0;
+                
+                if(this.lastTime === undefined) this.lastTime = 0;
+                
+            
+                   
+                this.lastTime += time_in_ticks;//ticks - Math.floor(ticks);
 
-				var inv = this.matrix.clone();
-				inv = inv.getInverse(inv);
-					
-				var particles = this.geometry;
-				
-				//timesliced tick	 give up after 5 steps - just cant go fast enougth				
-				for(var i=0; i < Math.floor(this.lastTime) && i<5 ; i++)
-				{
-					this.lastTime--;
-					
-					var pCount = this.geometry.vertices.length;
-					while(pCount--) 
-					{
-						var particle =particles.vertices[pCount];					
-						this.updateParticleEuler(particle,this.matrix,inv,3.333);
-					}
-					
-					//examples developed with faster tick - maxrate *33 is scale to make work 
-					//with new timing
-					var len = Math.min(this.regenParticles.length,this.maxRate*33);
-					for(var i =0; i < len; i++)
-					{
-						
-						var particle = this.regenParticles.shift();
-						this.setupParticle(particle,this.matrix,inv);
-						this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
-						particle.waitForRegen = false;
-					}
-					
-				}
-				
-				//reset pCount counter and do display interpolation
-				var pCount = this.geometry.vertices.length;
-				while(pCount--) 
-				{
-					var particle =particles.vertices[pCount];					
-					this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
-				
-				}
-				
-			    this.geometry.verticesNeedUpdate  = true;
-				this.geometry.colorsNeedUpdate  = true;
-				this.material.attributes.vertexColor.needsUpdate = true;
-				this.material.attributes.size.needsUpdate = true;
-				//console.log(performance.now() - timer);
-			}
-			particleSystem.temp = new THREE.Vector3();
-			
-			particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
-			{
-				particle.age += delta_time;
-				if(particle.age >= particle.lifespan && !particle.waitForRegen)
-					{
-						
-						this.regenParticles.push(particle);
-						particle.waitForRegen = true;
-						particle.x = 0;
-						particle.y = 0;
-						particle.z = 0;
-						particle.color.w = 0.0;
-					}else
-					{
-				var percent = particle.age/particle.lifespan;
-				particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
-				particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
-				particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
-				
-				this.temp.x = particle.world.x;
-				this.temp.y = particle.world.y;
-				this.temp.z = particle.world.z;
-				inv.multiplyVector3(this.temp);
-				particle.x = this.temp.x;
-				particle.y = this.temp.y;
-				particle.z = this.temp.z;
-				
-				
-				
-				particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
-				particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
-				particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
-				particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
-				
-				particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
-				
-				}
-			}
-			particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
-			{
-				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
-				//we don't actuall want to move to system forward in time.
-				
-				
-				
-				
-					particle.prevage = particle.age;
-					particle.age += step_dist;
-					if(particle.age >= particle.lifespan && !particle.waitForRegen)
-					{
-						
-						this.regenParticles.push(particle);
-						particle.waitForRegen = true;
-						particle.x = 0;
-						particle.y = 0;
-						particle.z = 0;
-						particle.color.w = 0.0;
-					}else
-					{
-					
-					
-						// and the position
-						particle.prevworld.x = particle.world.x;
-						particle.prevworld.y = particle.world.y;
-						particle.prevworld.z = particle.world.z;
-						
-						particle.world.x += particle.velocity.x * step_dist + particle.acceleration.x * step_dist * step_dist;
-						particle.world.y += particle.velocity.y * step_dist + particle.acceleration.y * step_dist * step_dist;;
-						particle.world.z += particle.velocity.z * step_dist + particle.acceleration.z * step_dist * step_dist;;
+                var inv = this.matrix.clone();
+                inv = inv.getInverse(inv);
+                    
+                var particles = this.geometry;
+                
+                //timesliced tick    give up after 5 steps - just cant go fast enougth              
+                for(var i=0; i < Math.floor(this.lastTime) && i<5 ; i++)
+                {
+                    this.lastTime--;
+                    
+                    var pCount = this.geometry.vertices.length;
+                    while(pCount--) 
+                    {
+                        var particle =particles.vertices[pCount];                   
+                        this.updateParticleEuler(particle,this.matrix,inv,3.333);
+                    }
+                    
+                    //examples developed with faster tick - maxrate *33 is scale to make work 
+                    //with new timing
+                    var len = Math.min(this.regenParticles.length,this.maxRate*33);
+                    for(var i =0; i < len; i++)
+                    {
+                        
+                        var particle = this.regenParticles.shift();
+                        this.setupParticle(particle,this.matrix,inv);
+                        this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
+                        particle.waitForRegen = false;
+                    }
+                    
+                }
+                
+                //reset pCount counter and do display interpolation
+                var pCount = this.geometry.vertices.length;
+                while(pCount--) 
+                {
+                    var particle =particles.vertices[pCount];                   
+                    this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
+                
+                }
+                
+                this.geometry.verticesNeedUpdate  = true;
+                this.geometry.colorsNeedUpdate  = true;
+                this.material.attributes.vertexColor.needsUpdate = true;
+                this.material.attributes.size.needsUpdate = true;
+                //console.log(performance.now() - timer);
+            }
+            particleSystem.temp = new THREE.Vector3();
+            
+            particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
+            {
+                particle.age += delta_time;
+                if(particle.age >= particle.lifespan && !particle.waitForRegen)
+                    {
+                        
+                        this.regenParticles.push(particle);
+                        particle.waitForRegen = true;
+                        particle.x = 0;
+                        particle.y = 0;
+                        particle.z = 0;
+                        particle.color.w = 0.0;
+                    }else
+                    {
+                var percent = particle.age/particle.lifespan;
+                particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
+                particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
+                particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
+                
+                this.temp.x = particle.world.x;
+                this.temp.y = particle.world.y;
+                this.temp.z = particle.world.z;
+                inv.multiplyVector3(this.temp);
+                particle.x = this.temp.x;
+                particle.y = this.temp.y;
+                particle.z = this.temp.z;
+                
+                
+                
+                particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+                particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+                particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+                particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
+                
+                particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
+                
+                }
+            }
+            particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
+            {
+                //the particle actually moved. skip this if the parent has moved, and we need to adjust, but
+                //we don't actuall want to move to system forward in time.
+                
+                
+                
+                
+                particle.prevage = particle.age;
+                particle.age += step_dist;
+                if(particle.age >= particle.lifespan && !particle.waitForRegen)
+                {
+                    
+                    this.regenParticles.push(particle);
+                    particle.waitForRegen = true;
+                    particle.x = 0;
+                    particle.y = 0;
+                    particle.z = 0;
+                    particle.color.w = 0.0;
+                }else
+                {
+                
+                
+                    // and the position
+                    particle.prevworld.x = particle.world.x;
+                    particle.prevworld.y = particle.world.y;
+                    particle.prevworld.z = particle.world.z;
+                    
+                    particle.world.x += particle.velocity.x * step_dist + particle.acceleration.x * step_dist * step_dist;
+                    particle.world.y += particle.velocity.y * step_dist + particle.acceleration.y * step_dist * step_dist;;
+                    particle.world.z += particle.velocity.z * step_dist + particle.acceleration.z * step_dist * step_dist;;
 
-						  
-						particle.velocity.x += particle.acceleration.x * step_dist ;
-						particle.velocity.y += particle.acceleration.y * step_dist ;
-						particle.velocity.z += particle.acceleration.z * step_dist ;
-						
-						var damping = 1-(this.damping * step_dist);
-						particle.velocity.x *= damping;
-						particle.velocity.y *= damping;
-						particle.velocity.z *= damping;
-						
-					}
-				
-				
-				
-				
-			
-			}
-			//interpolate current and prev tick for smooth motion when dispaly rate is faster than
-			//simulation tick
-			particleSystem.interpolateDisplay = function(particle,mat,inv,frac_time)
-			{
-				
-				this.temp.x = particle.prevworld.x + (particle.world.x - particle.prevworld.x) * frac_time;
-				this.temp.y = particle.prevworld.y + (particle.world.y - particle.prevworld.y) * frac_time;
-				this.temp.z = particle.prevworld.z + (particle.world.z - particle.prevworld.z) * frac_time;
-				inv.multiplyVector3(this.temp);
-				particle.x = this.temp.x;
-				particle.y = this.temp.y;
-				particle.z = this.temp.z;
-				
-				var percent = (particle.prevage + (particle.age - particle.prevage) * frac_time)/particle.lifespan;
-				
-				particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
-				particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
-				particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
-				particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
-				
-				particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
-			
-			}
-			
-			particleSystem.setSolverType =function(type)
-			{
-				if(type == 'Euler')
-				{
-					particleSystem.update = particleSystem.updateEuler;
-					particleSystem.material = particleSystem.shaderMaterial_default;
-					particleSystem.rebuildParticles();
-				}
-				if(type == 'Analytic')
-				{
-					particleSystem.update = particleSystem.updateAnalytic;
-					particleSystem.material = particleSystem.shaderMaterial_default;
-					particleSystem.rebuildParticles();
-				}
-				if(type == 'AnalyticShader')
-				{
-					particleSystem.update = particleSystem.updateAnalyticShader	;		
-					particleSystem.material = particleSystem.shaderMaterial_analytic;
-					particleSystem.rebuildParticles();
-				}
-				
-			}
-			
+                      
+                    particle.velocity.x += particle.acceleration.x * step_dist ;
+                    particle.velocity.y += particle.acceleration.y * step_dist ;
+                    particle.velocity.z += particle.acceleration.z * step_dist ;
+                    
+                    var damping = 1-(this.damping * step_dist);
+                    particle.velocity.x *= damping;
+                    particle.velocity.y *= damping;
+                    particle.velocity.z *= damping;
+                    
+                }
+                
+                
+                
+                
+            
+            }
+            //interpolate current and prev tick for smooth motion when dispaly rate is faster than
+            //simulation tick
+            particleSystem.interpolateDisplay = function(particle,mat,inv,frac_time)
+            {
+                
+                this.temp.x = particle.prevworld.x + (particle.world.x - particle.prevworld.x) * frac_time;
+                this.temp.y = particle.prevworld.y + (particle.world.y - particle.prevworld.y) * frac_time;
+                this.temp.z = particle.prevworld.z + (particle.world.z - particle.prevworld.z) * frac_time;
+                inv.multiplyVector3(this.temp);
+                particle.x = this.temp.x;
+                particle.y = this.temp.y;
+                particle.z = this.temp.z;
+                
+                var percent = (particle.prevage + (particle.age - particle.prevage) * frac_time)/particle.lifespan;
+                
+                particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+                particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+                particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+                particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
+                
+                particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
+            
+            }
+            
+            particleSystem.setSolverType =function(type)
+            {
+                if(type == 'Euler')
+                {
+                    particleSystem.update = particleSystem.updateEuler;
+                    particleSystem.material = particleSystem.shaderMaterial_default;
+                    particleSystem.rebuildParticles();
+                }
+                if(type == 'Analytic')
+                {
+                    particleSystem.update = particleSystem.updateAnalytic;
+                    particleSystem.material = particleSystem.shaderMaterial_default;
+                    particleSystem.rebuildParticles();
+                }
+                if(type == 'AnalyticShader')
+                {
+                    particleSystem.update = particleSystem.updateAnalyticShader ;       
+                    particleSystem.material = particleSystem.shaderMaterial_analytic;
+                    particleSystem.rebuildParticles();
+                }
+                
+            }
+            
 
-			particleSystem.updateTransform = function()
-			{
-			
-			}
-			particleSystem.setParticleCount = function(newcount)
-			{
-				
-				
-				var inv = this.matrix.clone();
-				inv = inv.getInverse(inv);
-				
-			    var particles = this.geometry;
-			    while(this.geometry.vertices.length > newcount) 
-			    {
-					this.geometry.vertices.pop();
-			    }
-				while(this.geometry.vertices.length < newcount) 
-			    {
-					
-					var particle = particleSystem.createParticle(this.geometry.vertices.length);
-					particleSystem.setupParticle(particle,particleSystem.matrix,inv);
-					particle.age = Infinity;
-					this.regenParticles.push(particle);
-					particle.waitForRegen = true;
-			    }
-			    this.geometry.verticesNeedUpdate  = true;
-				this.geometry.colorsNeedUpdate  = true;
-				this.material.attributes.vertexColor.needsUpdate = true;
-				this.particleCount = newcount;
-			}
-			
-			
-			particleSystem.setParticleCount(1000);
-			particleSystem.setSolverType('AnalyticShader');
-			particleSystem.update(1);
-			
-			
+            particleSystem.updateTransform = function()
+            {
+            
+            }
+            particleSystem.setParticleCount = function(newcount)
+            {
+                
+                
+                var inv = this.matrix.clone();
+                inv = inv.getInverse(inv);
+                
+                var particles = this.geometry;
+                while(this.geometry.vertices.length > newcount) 
+                {
+                    this.geometry.vertices.pop();
+                }
+                while(this.geometry.vertices.length < newcount) 
+                {
+                    
+                    var particle = particleSystem.createParticle(this.geometry.vertices.length);
+                    particleSystem.setupParticle(particle,particleSystem.matrix,inv);
+                    particle.age = Infinity;
+                    this.regenParticles.push(particle);
+                    particle.waitForRegen = true;
+                }
+                this.geometry.verticesNeedUpdate  = true;
+                this.geometry.colorsNeedUpdate  = true;
+                this.material.attributes.vertexColor.needsUpdate = true;
+                this.particleCount = newcount;
+            }
+            
+            
+            particleSystem.setParticleCount(1000);
+            particleSystem.setSolverType('AnalyticShader');
+            particleSystem.update(1);
+            
+            
            
             child.threeObject = particleSystem;
             
@@ -2313,13 +2304,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     }
     function SetVisible(node,state) 
     {
-            if(node)
-                node.visible = state;
-            if(node && node.children)
-            {
-               for(var i in node.children)
-                SetVisible(node.children[i],state);
-            }
+        if(node)
+            node.visible = state;
+        if(node && node.children)
+        {
+           for(var i in node.children)
+            SetVisible(node.children[i],state);
+        }
     }
 
    // -- getBoundingBox ------------------------------------------------------------------------------
