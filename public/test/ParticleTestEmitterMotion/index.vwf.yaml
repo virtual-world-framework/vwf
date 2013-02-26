@@ -31,7 +31,7 @@ children:
       endColor: [ 0, 0, 0, 0]
       image: fire.png
       additive: true
-      opacity: .5
+      damping: .03
       depthTest: false
       solver: 'Analytic'
   camera:

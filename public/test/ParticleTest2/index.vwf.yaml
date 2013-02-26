@@ -33,6 +33,8 @@ children:
       additive: false
       opacity: .5
       depthTest: false
+      maxSpin: 3
+      minSpin: -3
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:

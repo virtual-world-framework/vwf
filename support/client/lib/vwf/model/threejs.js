@@ -554,6 +554,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					{
 						ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
 					}
+					if(propertyName == 'maxSpin')
+					{
+						ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
+					}
+					if(propertyName == 'minSpin')
+					{
+						ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
+					}
 					if(propertyName == 'startColor')
 					{
 						ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
@@ -1667,7 +1675,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			var uniforms_default = {
 				amplitude: { type: "f", value: 1.0 },
 				texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
-				useTexture: { type: "f", value: 0.0 }
+				useTexture: { type: "f", value: 0.0 },
+				maxSpin: { type: "f", value: 0.0 },
+				minSpin: { type: "f", value: 0.0 },
 			};
 			uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
 			var shaderMaterial_default = new THREE.ShaderMaterial( {
@@ -1696,6 +1706,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			"uniform vec4 startColor;\n"+
 			"uniform vec4 endColor;\n"+
 			"varying vec4 vColor;\n"+
+			"varying float vRandom;\n"+
 			"void main() {\n"+
 			"   float lifetime = fract(random+(time))*lifespan*1.33;"+
 			"   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;"+ // ;
@@ -1703,19 +1714,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			"	gl_PointSize = mix(startSize,endSize,lifetime/lifespan) * ( 1000.0/ length( mvPosition.xyz ) );\n"+
 			"	gl_Position = projectionMatrix * mvPosition;\n"+
 			"	vColor = mix(startColor,endColor,lifetime/lifespan);\n"+
+			"   vRandom = random;"+
 			"}	  \n";
 			var fragShader_analytic = 
 			"uniform float useTexture;\n"+
 			"uniform sampler2D texture;\n"+
+			"uniform float time;\n"+
+			"uniform float maxSpin;\n"+
+			"uniform float minSpin;\n"+
 			"varying vec4 vColor;\n"+
+			"varying float vRandom;\n"+
 			"void main() {\n"+
-			"	vec4 outColor = (vColor * texture2D( texture, gl_PointCoord )) *useTexture + vColor * (1.0-useTexture);\n"+
+			" vec2 coord = vec2(0.0,0.0);"+
+			" float spin = mix(maxSpin,minSpin,vRandom);"+
+			" coord.s = (gl_PointCoord.s-.5)*cos(time*spin)-(gl_PointCoord.t-.5)*sin(time*spin);"+
+			" coord.t = (gl_PointCoord.t-.5)*cos(time*spin)+(gl_PointCoord.s-.5)*sin(time*spin);"+
+			"	vec4 outColor = (vColor * texture2D( texture, coord + vec2(.5,.5) )) *useTexture + vColor * (1.0-useTexture);\n"+
 			
 			"	gl_FragColor = outColor;\n"+
 			"}\n";
 			var attributes_analytic = {
 
-				
+
 				acceleration:   {	type: 'v3', value: [] },
 				velocity:   {	type: 'v3', value: [] },
 				lifespan:   {	type: 'f', value: [] },
@@ -1730,7 +1750,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				endSize:{type:"f", value:1},
 				texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
 				useTexture: { type: "f", value: 0.0 },
-				time: { type: "f", value: 0.0 }
+				time: { type: "f", value: 0.0 },
+				maxSpin: uniforms_default.maxSpin,
+				minSpin: uniforms_default.minSpin
 			};
 			uniforms_analytic.texture.value.wrapS = uniforms_analytic.texture.value.wrapT = THREE.RepeatWrapping;
 			var shaderMaterial_analytic = new THREE.ShaderMaterial( {
