@@ -62,6 +62,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.sceneRootID = "index-vwf";
 
             this.delayedProperties = {};
+			
+			//Setup the timer
+			window.performance = window.performance || {};
+			performance.now = (function() {
+			  return performance.now       ||
+					 performance.mozNow    ||
+					 performance.msNow     ||
+					 performance.oNow      ||
+					 performance.webkitNow ||
+					function() { return new Date().getTime(); };
+			})();
             
         },
 
@@ -1984,123 +1995,125 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                    
                 this.lastTime += time_in_ticks;//ticks - Math.floor(ticks);
 
-                var inv = this.matrix.clone();
-                inv = inv.getInverse(inv);
-                    
-                var particles = this.geometry;
-                
-                //timesliced tick    give up after 5 steps - just cant go fast enougth              
-                for(var i=0; i < Math.floor(this.lastTime) && i<5 ; i++)
-                {
-                    this.lastTime--;
-                    
-                    var pCount = this.geometry.vertices.length;
-                    while(pCount--) 
-                    {
-                        var particle =particles.vertices[pCount];                   
-                        this.updateParticleEuler(particle,this.matrix,inv,3.333);
-                    }
-                    
-                    //examples developed with faster tick - maxrate *33 is scale to make work 
-                    //with new timing
-                    var len = Math.min(this.regenParticles.length,this.maxRate*33);
-                    for(var i =0; i < len; i++)
-                    {
-                        
-                        var particle = this.regenParticles.shift();
-                        this.setupParticle(particle,this.matrix,inv);
-                        this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
-                        particle.waitForRegen = false;
-                    }
-                    
-                }
-                
-                //reset pCount counter and do display interpolation
-                var pCount = this.geometry.vertices.length;
-                while(pCount--) 
-                {
-                    var particle =particles.vertices[pCount];                   
-                    this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
-                
-                }
-                
-                this.geometry.verticesNeedUpdate  = true;
-                this.geometry.colorsNeedUpdate  = true;
-                this.material.attributes.vertexColor.needsUpdate = true;
-                this.material.attributes.size.needsUpdate = true;
-                //console.log(performance.now() - timer);
-            }
-            particleSystem.temp = new THREE.Vector3();
-            
-            particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
-            {
-                particle.age += delta_time;
-                if(particle.age >= particle.lifespan && !particle.waitForRegen)
-                    {
-                        
-                        this.regenParticles.push(particle);
-                        particle.waitForRegen = true;
-                        particle.x = 0;
-                        particle.y = 0;
-                        particle.z = 0;
-                        particle.color.w = 0.0;
-                    }else
-                    {
-                var percent = particle.age/particle.lifespan;
-                particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
-                particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
-                particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
-                
-                this.temp.x = particle.world.x;
-                this.temp.y = particle.world.y;
-                this.temp.z = particle.world.z;
-                inv.multiplyVector3(this.temp);
-                particle.x = this.temp.x;
-                particle.y = this.temp.y;
-                particle.z = this.temp.z;
-                
-                
-                
-                particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
-                particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
-                particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
-                particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
-                
-                particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
-                
-                }
-            }
-            particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
-            {
-                //the particle actually moved. skip this if the parent has moved, and we need to adjust, but
-                //we don't actuall want to move to system forward in time.
-                
-                
-                
-                
-                particle.prevage = particle.age;
-                particle.age += step_dist;
-                if(particle.age >= particle.lifespan && !particle.waitForRegen)
-                {
-                    
-                    this.regenParticles.push(particle);
-                    particle.waitForRegen = true;
-                    particle.x = 0;
-                    particle.y = 0;
-                    particle.z = 0;
-                    particle.color.w = 0.0;
-                }else
-                {
-                
-                
-                    // and the position
-                    particle.prevworld.x = particle.world.x;
-                    particle.prevworld.y = particle.world.y;
-                    particle.prevworld.z = particle.world.z;
-                    
-                    particle.world.x += particle.velocity.x * step_dist + particle.acceleration.x * step_dist * step_dist;
-                    particle.world.y += particle.velocity.y * step_dist + particle.acceleration.y * step_dist * step_dist;;
-                    particle.world.z += particle.velocity.z * step_dist + particle.acceleration.z * step_dist * step_dist;;
+				var inv = this.matrix.clone();
+				inv = inv.getInverse(inv);
+					
+				var particles = this.geometry;
+				
+				//timesliced tick	 give up after 5 steps - just cant go fast enougth		
+				if(Math.floor(this.lastTime) > 5)
+					this.lastTime = 1;
+				for(var i=0; i < Math.floor(this.lastTime) ; i++)
+				{
+					this.lastTime--;
+					
+					var pCount = this.geometry.vertices.length;
+					while(pCount--) 
+					{
+						var particle =particles.vertices[pCount];					
+						this.updateParticleEuler(particle,this.matrix,inv,3.333);
+					}
+					
+					//examples developed with faster tick - maxrate *33 is scale to make work 
+					//with new timing
+					var len = Math.min(this.regenParticles.length,this.maxRate*33);
+					for(var i =0; i < len; i++)
+					{
+						
+						var particle = this.regenParticles.shift();
+						this.setupParticle(particle,this.matrix,inv);
+						this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
+						particle.waitForRegen = false;
+					}
+					
+				}
+				
+				//reset pCount counter and do display interpolation
+				var pCount = this.geometry.vertices.length;
+				while(pCount--) 
+				{
+					var particle =particles.vertices[pCount];					
+					this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
+				
+				}
+				
+			    this.geometry.verticesNeedUpdate  = true;
+				this.geometry.colorsNeedUpdate  = true;
+				this.material.attributes.vertexColor.needsUpdate = true;
+				this.material.attributes.size.needsUpdate = true;
+				//console.log(performance.now() - timer);
+			}
+			particleSystem.temp = new THREE.Vector3();
+			
+			particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
+			{
+				particle.age += delta_time;
+				if(particle.age >= particle.lifespan && !particle.waitForRegen)
+					{
+						
+						this.regenParticles.push(particle);
+						particle.waitForRegen = true;
+						particle.x = 0;
+						particle.y = 0;
+						particle.z = 0;
+						particle.color.w = 0.0;
+					}else
+					{
+				var percent = particle.age/particle.lifespan;
+				particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
+				particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
+				particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
+				
+				this.temp.x = particle.world.x;
+				this.temp.y = particle.world.y;
+				this.temp.z = particle.world.z;
+				inv.multiplyVector3(this.temp);
+				particle.x = this.temp.x;
+				particle.y = this.temp.y;
+				particle.z = this.temp.z;
+				
+				
+				
+				particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+				particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+				particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+				particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
+				
+				particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
+				
+				}
+			}
+			particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
+			{
+				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
+				//we don't actuall want to move to system forward in time.
+				
+				
+				
+				
+					particle.prevage = particle.age;
+					particle.age += step_dist;
+					if(particle.age >= particle.lifespan && !particle.waitForRegen)
+					{
+						
+						this.regenParticles.push(particle);
+						particle.waitForRegen = true;
+						particle.x = 0;
+						particle.y = 0;
+						particle.z = 0;
+						particle.color.w = 0.0;
+					}else
+					{
+					
+					
+						// and the position
+						particle.prevworld.x = particle.world.x;
+						particle.prevworld.y = particle.world.y;
+						particle.prevworld.z = particle.world.z;
+						
+						particle.world.x += particle.velocity.x * step_dist + particle.acceleration.x * step_dist * step_dist;
+						particle.world.y += particle.velocity.y * step_dist + particle.acceleration.y * step_dist * step_dist;;
+						particle.world.z += particle.velocity.z * step_dist + particle.acceleration.z * step_dist * step_dist;;
 
                       
                     particle.velocity.x += particle.acceleration.x * step_dist ;
