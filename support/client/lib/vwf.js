@@ -375,6 +375,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 				var space = window.location.pathname.slice( 1,
                         window.location.pathname.lastIndexOf("/") );
 				socket = io.connect("ws://"+window.location.host);
+				
             } catch ( e ) {
 
                 // If a connection to the reflector is not available, then run in single-user mode.
@@ -699,14 +700,14 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
 					queue.time = this.now;
-                    var time = this.now - this.lastTick;
+                    var time = (this.now - this.lastTick);
 					if(time < 1)
 					{
 						while(time > .033333333)
 						{	
 							this.tick();
 							time -= .03333333;
-							console.log('tick');
+							//console.log('tick',this.now);
 						}
 						//save the leftovers
 						this.lastTick = this.now  - time;

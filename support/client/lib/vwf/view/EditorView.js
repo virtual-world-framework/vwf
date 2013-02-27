@@ -24,34 +24,49 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
            
+			jQuery.extend({
+			  parseQuerystring: function(){
+				var nvpair = {};
+				var qs = window.location.search.replace('?', '');
+				var pairs = qs.split('&');
+				$.each(pairs, function(i, v){
+				  var pair = v.split('=');
+				  nvpair[pair[0]] = pair[1];
+				});
+				return nvpair;
+			  }
+			});
+		   
 			   if(nodeID =='index-vwf' && window._Editor == null)
 			   {
-					var data = $.ajax('vwf/view/editorview/menus.html',{async:false,dataType:'html'}).responseText;
-					$(document.body).append(data);
-				    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ddsmoothmenu.js"></script>');
-					
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Editor.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/MaterialEditor.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PrimitiveEditor.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Notifier.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/UserManager.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/DataManager.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ScriptEditor.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_3DRIntegration.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/InventoryManager.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/GlobalInventoryManager.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/HeirarchyManager.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Help.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha256.js"></script>');
-					$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
-					
-					
-				   $(document).ready(function(){
-					InitializeEditor();
-					});
+					if($.parseQuerystring().Edit != 'false')
+					{
+						var data = $.ajax('vwf/view/editorview/menus.html',{async:false,dataType:'html'}).responseText;
+						$(document.body).append(data);
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ddsmoothmenu.js"></script>');
+						
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Editor.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/MaterialEditor.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PrimitiveEditor.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Notifier.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/UserManager.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/DataManager.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ScriptEditor.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_3DRIntegration.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/InventoryManager.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/GlobalInventoryManager.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/HeirarchyManager.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Help.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha256.js"></script>');
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
+						
+						
+					   $(document).ready(function(){
+						InitializeEditor();
+						});
 				   
-			   
+					}
 			   }
 			 
 		   

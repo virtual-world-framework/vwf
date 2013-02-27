@@ -57,11 +57,23 @@ function GenerateNewInstance(request,response,appname,newid)
 	if(newid === undefined)
 		newid = makeid() + "/";
 	
-	activesessions.push(new Session(newid));
-	if(request.url[request.url.length-1] != '/')
-		newid = request.url.substr(request.url.indexOf('/')) + '/' + newid;
+	var query = (url.parse(request.url).query) || "";
+	if(query)
+	{
+		query = '?'+query;
+		newid += query;
+	}
+	
+	
+	var path = url.parse(request.url).pathname;
+	if(path[path-1] != '/')
+		newid = path.substr(path.indexOf('/')) + '/' + newid;
+	newid = newid.replace(/\/\//g,'/');
+	newid = newid.replace(/\/\/\//g,'/');
+	
+	
 				response.writeHead(200, {
-					"Content-Type": "text/html"
+					"Content-Type": "text/html" 
 				});
 				response.write( "<html>" +
 								"<head>" +
@@ -151,7 +163,7 @@ function ServeYAML(filename,response, URL)
 				response.end();
 				return;
 			}
-			console.log(tf);
+			//console.log(tf);
 			try{
 			var deYAML = JSON.stringify(YAML.load(file));
 			}catch(e)
@@ -360,7 +372,7 @@ function startVWF(){
 		//keep track of the timer for this session
 		global.sessions[namespace].timerID = setInterval(function(){
 		
-			global.sessions[namespace].time += 33.3333333;
+			global.sessions[namespace].time += .0333333333;
 			for(var i in global.sessions[namespace].clients)
 			{
 				var client = global.sessions[namespace].clients[i];
