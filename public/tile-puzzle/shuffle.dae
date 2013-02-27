@@ -98,7 +98,7 @@
     </library_effects>
     <library_images>
         <image id="ID5">
-            <init_from>images/ten.png</init_from>
+            <init_from>images/shuffle.png</init_from>
         </image>
     </library_images>
     <scene>
