@@ -11,179 +11,323 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+## `animation.vwf` adds standard animation functions to a node.
+## 
+## Animations play over a given `animationDuration` and at a given `animationRate` with respect to
+## simulation time. `animationTime` tracks time as the animation plays. Setting `animationTime`
+## moves the animation. The animation plays once to the end, or with `animationLoop` repeats
+## indefinitely.
+## 
+## Events are sent to indicate `animationStarted`, `animationStopped` and `animationLooped`. Changes
+## to the animation time are announced with `animationTimeChanged.`
+##
+## A node may provide an `animationUpdate` method to calculate its own animation state, or it may
+## use a specialized behavior that implements a standard animation.
+## 
 ## @name animation.vwf
 ## @namespace
+
+# The duration must be a non-negative number, times are always in the range [ `0`, `duration` ], and
+# the rate may be any number (although there is little protection against rates very near zero).
+# 
+#   0 <= animationDuration
+#   0 <= animationTime <= animationDuration
+#   -Infinity < animationRate < Infinity
+# 
+# The animation play state and time index are maintained in `animationStartTime$` and
+# `animationPauseTime$`. `animationPauseTime$` is `null` while the animation is playing. The
+# distance from `animationStartTime$` to the current time (when playing) or `animationPauseTime$`
+# (when paused) gives the time index, after accounting for the play rate.
+# 
+#   animationTime = ( ( animationPauseTime$ || time ) - ( animationStartTime$ || time ) ) *
+#     animationRate (positive rates)
+#   animationTime = ( ( animationPauseTime$ || time ) - ( animationStartTime$ || time ) ) *
+#     animationRate + animationDuration (negative rates)
+# 
+#   animationPlaying = this.animationStartTime$ != null && this.animationPauseTime$ == null
+# 
+# `animationStartTime$` and `animationPauseTime$` are `null` before the animation is first played.
+# This state is interpreted as `animationPlaying` == `false` and `animationTime` == `0`.
+# 
+#   animationStartTime$ == null => animationPauseTime$ == null
+#   animationStartTime$ == null => animationStopTime$ == null
+# 
+#   animationStartTime$ != null => animationStartTime$ <= time
+#   animationPauseTime$ != null => animationStartTime$ <= animationPauseTime$ <= time
+#   animationStopTime$ != null => animationStartTime$ + animationDuration$ == animationStopTime$
+# 
+#   animationDuration$ == animationDuration / animationRate (positive rates)
+#   animationDuration$ == -animationDuration / animationRate (negative rates)
+# 
+# Properties named with a`$` suffix refer to times or durations on the simulation timeline. All
+# other time-related properties refer to the animation timeline.
 
 ---
 
 properties:
 
-  ## xxx  TOOD: animationPlaying && animationEnabled && enabled
-
-  animationEnabled:
-    set: |
-      this.paused = value;
-    get: |
-      return this.paused;
-
-  ## xxx
+  ## The current animation position in seconds.
+  ## 
+  ## `animationTime` automatically moves with the simulation time while the animation is playing,
+  ## tracking the change in time multiplied by `animationRate`. A negative `animationRate` will
+  ## cause `animationTime` to move backwards. Setting `animationTime` updates the postion whether or
+  ## not the animation is currently playing.
 
   animationTime:
 
     set: |
-      // console.warn( this.id, "time 1", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
-      if ( this.animationRate >= 0 ) {
-        value = Math.min( Math.max( 0, value ), this.animationDuration );
-      } else {
-        value = Math.min( Math.max( 0, value ), this.animationDuration ) - this.animationDuration;
+      // Save copies to avoid repeated reads.
+      var duration = this.animationDuration,
+        rate = this.animationRate;
+      // Range limit the incoming value.
+      value = Math.min( Math.max( 0, value ), duration );
+      // Keep paused if updating start/pause from null/null.
+      if ( this.animationStartTime$ == null ) {
+        this.animationPauseTime$ = this.time;
       }
-      var originalStartTime = this.animationStartTime;
-      if ( this.animationStartTime ) {
-        if ( ! this.animationPauseTime ) {
-          this.animationStartTime = this.time - value / this.animationRate;
-        } else {
-          this.animationStartTime = this.animationPauseTime - value / this.animationRate;
-        }
-      } else {
-        this.animationPauseTime = this.time;
-        this.animationStartTime = this.time - value / this.animationRate;
+      // Calculate the start and stop times that makes the new time work.
+      this.animationStartTime$ =
+        ( this.animationPauseTime$ || this.time ) -
+        ( rate >= 0 ? value : value - duration ) / rate;
+      this.animationStopTime$ =
+        this.animationStartTime$ +
+        ( rate >= 0 ? duration : -duration ) / rate;
+      // Update the node and fire the changed event.
+      if ( value !== this.animationTimeUpdated ) {
+        this.animationTimeUpdated = value;
+        this.animationUpdate( value, duration );
+        this.animationTimeChanged( value );
       }
-      if ( this.animationStartTime != originalStartTime ) {
-        this.animationUpdate();
-        this.animationTimeChanged();
-      }
-      // console.warn( this.id, "time 2", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
-      //@ sourceURL=animation.vwf#time.set
 
     get: |
-      if ( this.animationStartTime ) {
-        if ( ! this.animationPauseTime ) {
-          var value = ( this.time - this.animationStartTime ) * this.animationRate;
-        } else {
-          var value = ( this.animationPauseTime - this.animationStartTime ) * this.animationRate;
-        }
-      } else {
-          var value = 0;
+      // Save copies to avoid repeated reads.
+      var duration = this.animationDuration,
+        rate = this.animationRate;
+      // Calculate the time from the start and current/pause times.
+      var value = (
+        ( this.animationPauseTime$ || this.time ) -
+        ( this.animationStartTime$ || this.time )
+      ) * rate + ( rate >= 0 ? 0 : duration );
+      // If changed since last seen, update and fire the changed event.
+      if ( value !== this.animationTimeUpdated ) {
+        this.animationTimeUpdated = value;
+        this.animationUpdate( value, duration );
+        this.animationTimeChanged( value );
       }
-      if ( this.animationRate >= 0 ) {
-        return value;
-      } else {
-        return value + duration;
-      }
+      return value;
 
-  ## xxx
+  ## The length of the animation in seconds.
+  ## 
+  ## `animationTime` will always be within the range [ `0`, `animationDuration` ]. Animations
+  ## automatically stop playing once `animationTime` reaches `animationDuration` unless
+  ## `animationLoop` is set. Animations with a negative `animationRate` start at
+  ## `animationDuration` and stop at `0`.
 
-  animationDuration: 1
+  animationDuration:  # TODO: allow changes while playing
+    set: |
+      var duration = value, rate = this.animationRate;
+      this.animationDuration = duration;
+      this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
+    value: 1
 
-  ## xxx
+  ## The animation playback rate.
+  ## 
+  ## Set `animationRate` to a value greater than `1` to increase the rate. Set a value between `0`
+  ## and `1` to decrease it. Negative rates will cause the animation to play backwards.
 
-  animationRate: 1  # TODO: set/get
+  animationRate:  # TODO: allow changes while playing
+    set: |
+      var duration = this.animationDuration, rate = value;
+      this.animationRate = rate;
+      this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
+    value: 1
 
-  ## xxx
+  ## Automatically replay the animation from the start after reaching the end.
 
   animationLoop: false
 
-
-  ## xxx
+  ## The animation's play/pause control.
 
   animationPlaying:
 
     set: |
-      // console.warn( this.id, "playing 1", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
-      if ( this.animationStartTime ) {
-        if ( ! this.animationPauseTime ) {
-          if ( ! value ) {
-            this.animationPauseTime = this.time;
-          }
-        } else {
-          if ( value ) {
-            this.animationStartTime +=
-              this.time - this.animationPauseTime;
-            this.animationPauseTime = null;
-            this.animationTick();
+      if ( this.animationStartTime$ && ! this.animationPauseTime$ ) {
+        if ( ! value ) {
+          // Mark as paused at the current time.
+          this.animationPauseTime$ = this.time;
+          // Send the `animationStopped` event if stopping at the end.
+          if ( this.time == this.animationStopTime$ ) {
+            this.animationStopped();
           }
         }
       } else {
         if ( value ) {
-          this.animationStartTime = this.time;
+          // Save copies to avoid repeated reads.
+          var duration = this.animationDuration,
+            rate = this.animationRate;
+          // Start from the beginning if resuming from the end.
+          if ( this.animationPauseTime$ == this.animationStopTime$ ) {
+            this.animationPauseTime$ = this.animationStartTime$;
+          }
+          // Recalculate the start and stop times to keep paused time unchanged, then resume.
+          this.animationStartTime$ =
+            ( this.animationStartTime$ || this.time ) -
+            ( this.animationPauseTime$ || this.time ) +
+            this.time;
+          this.animationStopTime$ =
+            this.animationStartTime$ +
+            ( rate >= 0 ? duration : -duration ) / rate;
+          this.animationPauseTime$ = null;
+          // Send the `animationStarted` event if starting from the beginning.
+          if ( this.time == this.animationStartTime$ ) {
+            this.animationStarted();
+          }
+          // Start the animation worker.
+          this.logger.debug( "scheduling animationTick" );
           this.animationTick();
-          this.animationStarted();
         }
       }
-      // console.warn( this.id, "playing 2", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
+
     get: |
-      return !! this.animationStartTime &&
-        ! this.animationPauseTime;
+      return !! this.animationStartTime$ &&
+        ! this.animationPauseTime$;
 
-  ## xxx
+  ## The most recent value of `animationTime` recognized by this behavior.
+  ## 
+  ## Each `animationTime` change causes `animationUpdate` to be called. `animationTimeUpdated`
+  ## records the value of `animationTime` from the last time this occurred.
+  ## 
+  ## `animationTimeUpdated` is for internal use. Do not set this property.
 
-  animationStartTime: null
+  animationTimeUpdated: null
 
-  ## xxx
+  ## The simulation time corresponding to the start of the animation.
+  ## 
+  ## `animationStartTime$` is `null` until the animation is first played. `animationPlaying` is
+  ## `false` and `animationTime` is `0` while `animationStartTime$` is `null`.
+  ## 
+  ## `animationStartTime$` is for internal use. Do not set this property.
 
-  animationPauseTime: null
+  animationStartTime$: null
+
+  ## The simulation time corresponding to the animation's pause position.
+  ## 
+  ## `animationPauseTime$` is `null` while the animation is playing and before the animation is
+  ## first played.
+  ## 
+  ## `animationPauseTime$` is for internal use. Do not set this property.
+
+  animationPauseTime$: null
+
+  ## The simulation time corresponding to the end of the animation. The animation worker function
+  ## loops or stops the animation when `time` reaches this value.
+  ## 
+  ## `animationStopTime$` is for internal use. Do not set this property.
+
+  animationStopTime$: null
+
+  ## The animation's duration in simulation time, after considering `animationRate`.
+  ## 
+  ## `animationDuration$` is for internal use. Do not set this property.
+
+  animationDuration$: null
 
 methods:
 
-  # play from beginning
+  # Play the animation from the start.
 
   animationPlay: |
     this.animationTime = 0;
     this.animationPlaying = true;
 
-  # stop at current
+  # Pause the animation at the current position.
 
   animationPause: |
     this.animationPlaying = false;
 
-  # play from current
+  # Resume the animation from the current position.
 
   animationResume: |
     this.animationPlaying = true;
 
-  # stop and reset
+  # Stop the animation and reset the position to the start.
 
   animationStop: |
     this.animationPlaying = false;
     this.animationTime = 0;
-    //@ sourceURL=animation.vwf#stop
+
+  ## Update the animation. If `animationTime` has reached the end, stop or loop depending on the
+  ## `animationLoop` setting. Schedule the next tick if the animation did not stop.
+  ## 
+  ## `animationTick` is for internal use. Do not call this method directly.
 
   animationTick: |
-    // console.warn( this.id, "tick 1", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
-    if ( ! this.animationTicking ) {
-      this.logger.info( "animation: scheduling tick" );
-    }
-    if ( this.animationTime >= this.animationDuration ) {
-      var animationTime = this.animationTime;
-      this.animationTime = this.animationDuration;
-      if ( this.animationLoop ) {
-        while ( animationTime >= this.animationDuration ) {
-          animationTime -= this.animationDuration;
+    if ( this.animationPlaying ) {
+      // Read the time to recognize the current time and update.
+      this.animationTime;
+      // Loop or stop after reaching the end.
+      if ( this.time === this.animationStopTime$ ) {
+        if ( this.animationLoop ) {
           this.animationLooped();
+          this.animationTime = this.animationRate >= 0 ?
+            0 : this.animationDuration;
+        } else {
+          this.animationPlaying = false;
         }
-        this.animationTime = animationTime;
+      }
+      // Schedule the next tick if still playing.
+      if ( this.animationPlaying ) {
+        if ( this.animationStopTime$ - this.time > 1/60 ) {
+          this.in( 1/60 ).animationTick(); // next interval
+        } else {
+          this.at( this.animationStopTime$ ).animationTick(); // exactly at end
+        }
       } else {
-        this.animationStopped();
-        this.animationStop();
+        this.logger.debug( "canceling animationTick" );
       }
     }
-    if ( this.animationPlaying ) {
-      this.animationTicking = true;
-      this.animationUpdate();
-      this.animationTimeChanged();
-      this.future( 0.04 ).animationTick();
-    } else {
-      this.animationTicking = false;
-      this.logger.info( "animation: canceling tick" );
-    }
-    // console.warn( this.id, "tick 2", this.animationStartTime, this.animationPauseTime, this.time, this.animationTime, this.animationPlaying );
-    //@ sourceURL=animation.vwf#tick
 
-  animationUpdate: |
-    // TODO
+  ## `animation.vwf` calls `animationUpdate` each time `animationTime` changes. Nodes that
+  ## implement `animation.vwf` should provide an `animationUpdate` method to calculate the animation
+  ## state appropriate for the node.
+  ## 
+  ## Since this event is sent within the `animationTime` getter function, references to
+  ## `this.animationTime` will return `undefined` due to reentrancy protections. Use the provided
+  ## `time` parameter instead.
+  ## 
+  ## @param {Number} time
+  ##   The animation's `animationTime`.
+  ## @param {Number} duration
+  ##   The animation's `animationDuration`.
+
+  animationUpdate:
+    parameters:
+      - time
+      - duration
 
 events:
+
+  # Sent when the animation starts playing from the beginning.
+
   animationStarted:
+
+  # Sent when the animation reaches the end and `animationLoop` is not set.
+
   animationStopped:
+
+  # Sent when the animation reaches the end and `animationLoop` is set.
+
   animationLooped:
+
+  ## Sent each time `animationTime` changes.
+  ## 
+  ## Since this event is sent within the `animationTime` getter function, references to
+  ## `this.animationTime` will return `undefined` due to reentrancy protections. Use the provided
+  ## `time` parameter instead.
+  ## 
+  ## @param {Number} time
+  ##   The animation's `animationTime`.
+
   animationTimeChanged:
+    parameters:
+      - time
