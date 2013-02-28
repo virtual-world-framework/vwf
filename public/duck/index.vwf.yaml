@@ -21,15 +21,32 @@ children:
     extends: http://vwf.example.com/node3.vwf
     implements:
     - http://vwf.example.com/animation.vwf
+    - http://vwf.example.com/node3/animation.vwf
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
       rotation: [ 1, 0, 0, 0 ]
+    children:
+      alpha:
+        extends:
+          http://vwf.example.com/node3.vwf
+        implements:
+        - http://vwf.example.com/animation/position.vwf
+      beta:
+        extends:
+          http://vwf.example.com/node3.vwf
+        implements:
+        - http://vwf.example.com/animation/position.vwf
+      gamma:
+        extends:
+          http://vwf.example.com/node3.vwf
+        implements:
+        - http://vwf.example.com/animation/position.vwf
     scripts:
     - |
       this.pointerClick = function() {
         this.animationPlaying = ! this.animationPlaying;
-      }
+      } //@ sourceURL=http://vwf.example.com/node3/duck.vwf/duck/scripts~initialize
     methods:
       animationUpdate:
         parameters:
@@ -61,6 +78,5 @@ scripts:
       this.duck.animationStarted = function() { this.logger.info( "animation started" ) };
       this.duck.animationStopped = function() { this.logger.info( "animation stopped" ) };
       this.duck.animationLooped = function() { this.logger.info( "animation looped" ) };
-      this.duck.animationTimeChanged = function( time ) { this.logger.info( "animation time changed", time ) };
-    }
-    //@ sourceURL=duck.vwf
+      // this.duck.animationTimeChanged = function( time ) { this.logger.info( "animation time changed", time ) };
+    } //@ sourceURL=http://vwf.example.com/node3/duck.vwf/scripts~initialize
