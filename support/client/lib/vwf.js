@@ -2923,15 +2923,27 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
         /// 
         /// @see {@link module:vwf/api/kernel.prototypes}
 
-        this.prototypes = function( nodeID ) {
+        this.prototypes = function( nodeID, includeBehaviors ) {
 
             var prototypes = [];
+
+            if ( includeBehaviors ) {
+                var b = [].concat( this.behaviors( nodeID ) );
+                Array.prototype.push.apply( prototypes, b.reverse() );
+            }
 
             nodeID = this.prototype( nodeID );
 
             while ( nodeID ) {
+
                 prototypes.push( nodeID );
                 nodeID = this.prototype( nodeID );
+
+                if ( nodeID && includeBehaviors ) {
+                    var b = [].concat( this.behaviors( nodeID ) );
+                    Array.prototype.push.apply( prototypes, b.reverse() );
+                }
+
             }
 
             return prototypes;
@@ -3940,7 +3952,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
             }
 
             var matches_type = ! type || this.uri( nodeID ) == type ||
-                this.prototypes( nodeID ).some( function( prototypeID ) {
+                this.prototypes( nodeID, true ).some( function( prototypeID ) {
                     return this.uri( prototypeID ) == type;
             }, this );
 

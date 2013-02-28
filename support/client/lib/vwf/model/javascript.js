@@ -698,6 +698,8 @@ proxy.id = behavior.id; // TODO: move to vwf/model/object
         proxy.source = behavior.source;
         proxy.type = behavior.type;
 
+        proxy.initialize = behavior.initialize;
+
         proxy.properties = Object.create( prototype.properties || Object.prototype, {
             node: { value: proxy } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
         } );
