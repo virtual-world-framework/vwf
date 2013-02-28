@@ -186,14 +186,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         function renderScene(time) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
-			var now = performance.now();
+			var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
 			
 			var pss = GetParticleSystems(sceneNode.threeScene);
 			for(var i in pss)
 			{
-					if(pss[i].update)
-						pss[i].update(timepassed);
+				if(pss[i].update)
+					pss[i].update(timepassed);
 			}
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
