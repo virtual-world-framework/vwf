@@ -1,0 +1,82 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## @name node3.animation.vwf
+## @namespace
+
+---
+
+extends:
+  http://vwf.example.com/animation.vwf
+
+scripts:
+- |
+  this.initialize = function() {
+
+    // Locate child nodes that extend or implement "http://vwf.example.com/animation/position.vwf"
+    // to identify themselves as animation key positions.
+
+    var positions = this.find( "./element(*,'http://vwf.example.com/animation/position.vwf')" );
+
+    // Fill in missing `animationTime` properties, distributing evenly between the left and right
+    // positions that define `animationTime`.
+
+    // 1: [ - ] => [ 0 ]
+    // 1: [ 0, - ] => [ 0, 1 ]
+    // 1: [ -, 1 ] => [ 0, 1 ]
+    // 1: [ 0, -, - ] => [ 0, 1/2, 1 ]
+    // 1: [ -, -, 1 ] => [ 0, 1/2, 1 ]
+    // 1: [ 0, - , -, 1 ] => [ 0, 1/3 , 2/3, 1 ]
+
+    var leftTime, leftIndex;
+    var rightTime, rightIndex = -Infinity;
+
+    if ( positions.length > 0 ) {
+      
+      if ( positions[0].animationTime === null ) {
+        positions[0].animationTime = 0;
+      }
+
+      if ( positions[positions.length-1].animationTime === null ) {
+        positions[positions.length-1].animationTime = this.animationDuration;
+      }
+
+      positions.forEach( function( position, index ) {
+
+        if ( position.animationTime !== null ) {
+
+          leftTime = position.animationTime;
+          leftIndex = index;
+
+        } else {
+
+          if ( index > rightIndex ) {
+            for ( rightIndex = index + 1; rightIndex < positions.length; rightIndex++ ) {
+              if ( ( rightTime = /* assignment! */ positions[rightIndex].animationTime ) !== null ) {
+                break;
+              }
+            }
+          }
+
+          position.animationTime = leftTime + ( rightTime - leftTime ) *
+            ( index - leftIndex )  / ( rightIndex - leftIndex );
+
+        }
+
+        this.logger.info( "animation position", position.name, position.animationTime );
+
+      }, this );
+
+    }
+
+  } //@ sourceURL=http://vwf.example.com/node3/animation.vwf/scripts~initialize
