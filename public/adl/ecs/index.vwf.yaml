@@ -1,0 +1,511 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/navscene.vwf
+properties:
+  arrowloc: 
+  currentscene:
+    value: 0
+    set: |
+            this.loadState(value);
+            this.currentscene = value;
+            //console.log("setting currentscene: " + value);
+            this.placeArrows();
+events:
+  pointerDown:
+  pointerUp:
+  pointerMove:
+methods:  
+  CreateSky:
+  update:
+scripts:
+- |
+    this.initialize = function(){
+ 
+    this.arrowloc = [[ 10, 0, -1],[ -10, 0, -1],[ 0, 10, -1],[ 0, -10, -1]];
+    //:#add the parseQueryString function to jQuery
+        jQuery.extend({
+          parseQuerystring: function(){
+            var nvpair = {};
+            var qs = window.location.search.replace('?', '');
+            var pairs = qs.split('&');
+            $.each(pairs, function(i, v){
+              var pair = v.split('=');
+              nvpair[pair[0]] = pair[1];
+            });
+            return nvpair;
+          }
+        });
+    
+     
+       
+       this.rel_x = 0;
+       this.rel_y = 0;
+    
+    //:#these are the states for each scene. each state has an arrows param, which lists the links to other states. The offset 
+    //:#param lets you move each arrow from it's normal orientation    
+       this.states = [
+       {sky:'Pano0',arrows:[{loc:'front',state:1}]},
+       {sky:'Pano1',arrows:[{loc:'left',state:17},{loc:'front',state:2},{loc:'back',state:0},{loc:'right',state:3}]},
+       {sky:'Pano2',arrows:[{loc:'front',state:5},{loc:'back',state:1},{loc:'right',state:4},{loc:'left',state:18}]},
+       {sky:'Pano3',arrows:[{loc:'left',state:1},{loc:'right',state:20}]},
+       {sky:'Pano4',arrows:[{loc:'left',state:2},{loc:'right',state:19}]},
+       {sky:'Pano5',arrows:[{loc:'left',state:13},{loc:'back',state:2},{loc:'front',state:6}],offsets:{left:[0,-9.5,0]}},
+       {sky:'Pano6',arrows:[{loc:'right',state:27},{loc:'back',state:5},{loc:'front',state:7}],offsets:{right:[0,3,0]}},
+       {sky:'Pano7',arrows:[{loc:'back',state:6},{loc:'left',state:8},{loc:'left',state:8}]},
+       {sky:'Pano8',arrows:[{loc:'right',state:7},{loc:'left',state:9}]},
+       {sky:'Pano9',arrows:[{loc:'right',state:8},{loc:'back',state:10}]},
+       {sky:'Pano10',arrows:[{loc:'front',state:9},{loc:'right',state:11},{loc:'back',state:14}],offsets:{right:[0,-2,0]}},
+       {sky:'Pano11',arrows:[{loc:'right',state:12},{loc:'left',state:10}],offsets:{right:[0,.75,-.75],left:[0,-.75,-4.75]}},
+       {sky:'Pano12',arrows:[{loc:'left',state:11},{loc:'back',state:13}],offsets:{left:[0,-1.75,-.75],back:[2.5,0,0]}},
+       {sky:'Pano13',arrows:[{loc:'front',state:12},{loc:'left',state:14},{loc:'right',state:5}],offsets:{right:[0,-.75,0],front:[-1.5,0,0],left:[0,1,.35]}},
+       {sky:'Pano14',arrows:[{loc:'right',state:13},{loc:'front',state:10},{loc:'back',state:15}],offsets:{right:[0,1.25,0]}},
+       {sky:'Pano15',arrows:[{loc:'front',state:14},{loc:'back',state:16},{loc:'right',state:18}]},
+       {sky:'Pano16',arrows:[{loc:'front',state:15},{loc:'right',state:17}]},
+       {sky:'Pano17',arrows:[{loc:'left',state:16},{loc:'right',state:1}]},
+       {sky:'Pano18',arrows:[{loc:'left',state:15},{loc:'right',state:2}]},
+       {sky:'Pano19',arrows:[{loc:'left',state:4},{loc:'back',state:20},{loc:'front',state:21}]},
+       {sky:'Pano20',arrows:[{loc:'left',state:3},{loc:'front',state:19}]},
+       {sky:'Pano21',arrows:[{loc:'back',state:19},{loc:'front',state:22},{loc:'left',state:25}],offsets:{left:[0,2.5,0]}},
+       {sky:'Pano22',arrows:[{loc:'back',state:21},{loc:'front',state:23},{loc:'left',state:27}],offsets:{left:[0,.75,0]}},
+       {sky:'Pano23',arrows:[{loc:'back',state:22},{loc:'left',state:24}]},
+       {sky:'Pano24',arrows:[{loc:'left',state:7},{loc:'right',state:23}]},
+       {sky:'Pano25',arrows:[{loc:'left',state:26},{loc:'right',state:21}],offsets:{left:[-1,-.5,-1],right:[0,.8,-3]}},
+       {sky:'Pano26',arrows:[{loc:'front',state:27},{loc:'right',state:25}],offsets:{right:[-5,2.2,0],front:[-5,2.2,-1]}},
+       {sky:'Pano27',arrows:[{loc:'back',state:26},{loc:'right',state:22},{loc:'left',state:6}],offsets:{right:[5,-1.5,0],back:[1,1,0],left:[1,.5,0]}}
+       ]
+       
+       //:##############################################
+       //:#Code for mapping touch input to mouse movement
+       //:#
+       //:##############################################
+       var lastbutton = -1;
+       var ongoingTouches = [];
+        function ongoingTouchIndexById(idToFind) {
+          for (var i=0; i<ongoingTouches.length; i++) {
+                var id = ongoingTouches[i].identifier;
+                 
+                if (id == idToFind) {
+                  return i;
+                }
+              }
+              return -1;    // not found
+            }
+        function touchHandler(event)
+        {
+            try{
+            var touches = event.changedTouches,
+                first = touches[0],
+                type = "";
+                 switch(event.type)
+            {
+                case "touchstart": type = "mousedown"; break;
+                case "touchmove":  type="mousemove"; break;        
+                case "touchend":   type="mouseup"; break;
+                case "touchleave":   type="mouseup"; break;
+                case "touchcancel":   type="mouseup"; break;
+                default: return;
+            }
+            if(event.type == 'touchstart')
+            {
+                for (var i=0; i<touches.length; i++) {
+                        if(ongoingTouchIndexById(touches[i].identifier) == -1) ongoingTouches.push(touches[i]);
+                }
+                var simulatedEvent2 = document.createEvent("MouseEvent");
+                simulatedEvent2.initMouseEvent("mouseup", true, true, window, 1, 
+                                      first.screenX, first.screenY, 
+                                      first.clientX, first.clientY, false, 
+                                      false, false, false, lastbutton/*left*/, null);
+                simulatedEvent2.currentTarget = first.target;
+                first.target.dispatchEvent(simulatedEvent2);
+
+            }
+            if(event.type == 'touchend' || event.type == 'touchleave' || event.type == 'touchcancel')
+            {
+                 for (var i=0; i<touches.length; i++) {
+                 if(ongoingTouchIndexById(touches[i].identifier) != -1)  ongoingTouches.splice(ongoingTouchIndexById(touches[i].identifier), 1);  // remove it; we're done
+                }
+      
+            }
+            
+            var mousebutton = 0;
+            mousebutton = ongoingTouches.length -1;
+            lastbutton = mousebutton;
+                    document.title =  ongoingTouches.length;
+                
+
+            if(type=="mouseup")
+            mousebutton++;			
+
+            var simulatedEvent = document.createEvent("MouseEvent");
+            simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                      first.screenX, first.screenY, 
+                                      first.clientX, first.clientY, false, 
+                                      false, false, false, mousebutton /*left*/, null);
+            simulatedEvent.currentTarget = first.target;
+            first.target.dispatchEvent(simulatedEvent);
+            if(type == 'mouseup')
+            {
+                var simulatedEvent = document.createEvent("MouseEvent");
+                simulatedEvent.initMouseEvent('click', true, true, window, 1, 
+                                          first.screenX, first.screenY, 
+                                          first.clientX, first.clientY, false, 
+                                          false, false, false, mousebutton /*left*/, null);
+                
+                 first.target.dispatchEvent(simulatedEvent);
+            
+            }
+            
+            event.preventDefault();
+            }catch(e)
+            {
+            document.title = e.message;
+            }
+        }
+        //:#####################################################################
+        //:#end touch handler code
+        //:#
+        //:#######################################################################
+       
+       
+        document.addEventListener("touchstart", touchHandler, true);
+        document.addEventListener("touchmove", touchHandler, true);
+        document.addEventListener("touchend", touchHandler, true);
+        document.addEventListener("touchcancel", touchHandler, true); 
+       
+       
+       //:# setup 4 divs to show the arrows
+       var names = ['right','left','front','back'];
+       for(var i = 0; i < 4; i++)
+       {
+           $(document.body).append('<img id="arrow'+i+'" style="z-index: 10000;display: block;position: fixed;"src="vtourskin_hotspot.png"/>');
+           
+           
+           //:#the direction attribute is used to identify the arrows later
+           $('#arrow'+i).attr('direction',names[i]);
+           //:#disable annoying click and drag behavior
+           $('#arrow'+i).get(0).ondragstart = function() { return false; };
+           //:#respond instantly on click by showing the loading screen
+           //:#bounce a message off the reflector to change the scene state
+           //:#the attribute 'tostate' controls what the next state is, and is set on the div when the 
+           //:#system loads that state
+           $('#arrow'+i).click(function(){
+                //:#dont wait for the bounce to show the loading dialog, do it as soon as clicked.
+                $('#loadingscreen2').show();
+                $('#loadingscreenback').show();
+                vwf_view.kernel.setProperty('index-vwf','currentscene',$(this).attr('tostate'));
+           });
+          
+           
+       }
+       
+       //:#append some divs for the loading screens
+       $(document.body).append('<div id="loadingscreen" style="z-index: 10000;display: block;position: fixed;top:40%;background-color: white;width: 300px;height: 20%;"/>');
+       $(document.body).append('<div id="loadingscreenback" style="z-index: 9999;display: block;position: fixed;top:40%;background-color: black;width: 100%;height: 20%;"/>');
+       $(document.body).append('<div id="loadingscreen2" style="z-index: 10000;display: block;position: fixed;background-color: black;opacity: 0.5;width: 100%;color: white;height: 100%;font-family: sans-serif;line-height: 1113px;margin-right: auto;text-align: center;font-size: 100px;">Loading</div>');
+       
+       //:# set some CSS props on the loading screens
+       $('#loadingscreen2').css('line-height',window.innerHeight +'px');
+       $('#loadingscreen').css('background-image','url(stripe2.png)');
+       $('#loadingscreen2').show();
+       $('#loadingscreenback').show();
+       $('#loadingscreen').css('border','1px solid blue');
+       $('#loadingscreen').css('border-radius','10px');
+       
+       //:#initial setup for some values
+       this.leftdown= false;
+       this.middledown=false;
+       this.rightdown= false;
+       this.last_x = 0;
+       this.last_y = 0;
+       this.navmode = 'none';
+      
+       //:#set the field of view for the camera
+       findscene().camera.setFovY(60);
+       
+       //:#begin the update timer at 1 second
+       this.future(1).update();
+       
+       //:#route the input events from the index-vwf div to this objects input handler, and format it properly
+       //:#note this is sort of fake - I'm bypassing the VWF input system. This means that the sync for the view is broken,
+       //:#but there does not have to be a bounce off the server for input, which can give better response time
+       $('#index-vwf').mousemove(function(e)
+       {
+            
+                var event = {position:[e.clientX/e.currentTarget.width,e.clientY/e.currentTarget.height]}
+                this.pointerMove_local(event,null);
+       
+       }.bind(this));
+       //:#same, bind the input
+       $('#index-vwf').mousedown(function(e)
+       {
+                if(e.which == 1)
+                {
+                    var event = {buttons:{left:true},position:[e.clientX/e.currentTarget.width,e.clientY/e.currentTarget.height]};
+                    this.pointerDown_local(event,null);
+                }
+       //:#same, bind the input
+       }.bind(this));
+        $('#index-vwf').mouseup(function(e)
+       {
+                if(e.which == 1)
+                {
+                    var event = {buttons:{left:false},position:[e.clientX/e.currentTarget.width,e.clientY/e.currentTarget.height]};
+                    this.pointerUp_local(event,null);
+                }
+       
+       }.bind(this));
+       //:#load the initial state. This could have been set already by the reflector
+       this.loadState(this.currentscene);
+    }
+    //:#enter a state and setup all the graphics and arrows and such
+    this.loadState = function(newstate)
+    {
+        //:#if not yet initialized, skip
+        if(!this.states) return;
+        
+        //:#get the state
+        newstate = this.states[newstate];
+        //:#some debug 
+        console.log(newstate);
+        window.currentstate = newstate;
+        
+        //:#load the sky panorama from the current state 
+        this.CreateSky(newstate.sky);
+        
+        //:#set all the arrows to have no next state
+        for(var j = 0; j < 4; j++)
+        {
+            $('#arrow'+j).attr('tostate',-1);
+        }        
+        
+        //:#for every arrow in the new state
+        for(var i = 0; i < newstate.arrows.length; i++)
+        {
+            //:#for all the arrows that exist
+            for(var j = 0; j < 4; j++)
+            {
+                //:#if that arrow's direction is the direction of the arrow we're processing, set its tostate
+                if($('#arrow'+j).attr('direction') == newstate.arrows[i].loc)
+                    $('#arrow'+j).attr('tostate',newstate.arrows[i].state);
+            }
+        }
+        //:#place the arrows on the scene
+        this.placeArrows();
+    }
+    
+    //:#load the panoramic image
+    this.CreateSky = function(sky_name)
+    {
+    
+        //:# this is all GLGE specific stuff
+        var filter = new GLGE.Filter2d();
+        this.newSkyFilter = filter;
+        var skyboxShader= "/* From GLGE's examples/skydemo */ precision highp float;uniform samplerCube TEXTURE0;varying vec2 texCoord;varying vec3 rayCoord;void main(void) {gl_FragColor = textureCube(TEXTURE0, rayCoord.xyz * vec3(-1.0,1.0,1.0));}";
+        filter.addPass(skyboxShader);
+        filter.setFilterType(GLGE.FILTER_SKY);
+        var tex = new GLGE.TextureCube();
+        
+        //:#pick the high or low quality images based on the URL params. Default is high
+        var dirname = "./Panos/HighQuality/";
+        if($.parseQuerystring().Quality == 'Low')
+            dirname = "./Panos/LowQuality/";
+        
+        //:#set the images
+        tex.setSrcNegX(dirname+sky_name+'/pano_b.jpg');
+        tex.setSrcNegY(dirname+sky_name+'/pano_l.jpg');
+        tex.setSrcNegZ(dirname+sky_name+'/pano_d.jpg');
+        tex.setSrcPosX(dirname+sky_name+'/pano_f.jpg');
+        tex.setSrcPosY(dirname+sky_name+'/pano_r.jpg');
+        tex.setSrcPosZ(dirname+sky_name+'/pano_u.jpg');
+        
+        //:#mark that we are currently loading
+        this.loading = true;
+        
+        filter.addTexture(tex);
+        
+    }
+    //:# handle the input
+    this.pointerDown_local = function( parms, pickInfo ){
+     
+      //:#keep track of relative movement 
+      if(parms.buttons.left) this.leftdown = true;
+      this.last_x = parms.position[0];
+      this.last_y = parms.position[1];
+     
+    }
+    //:#handle input
+    this.pointerUp_local = function( parms, pickInfo ){
+      
+      if(!parms.buttons.left) this.leftdown = false;
+    
+     
+    }
+    //:#handle movement, keep track of relative movement
+    this.pointerMove_local = function( parms, pickInfo ){
+
+      
+      if(this.rel_x == undefined) return;
+      
+      this.rel_x = this.last_x - parms.position[0];
+      this.rel_y = this.last_y - parms.position[1];
+      
+      this.last_x = parms.position[0];
+      this.last_y = parms.position[1];
+      
+      //:#do the camera motion, standard 3D camera math stuff.
+      //:#note that the this.camera property is populated by the framework, which does some magic 
+      //:#under the hood to actually move the rendersystems camera
+      if(this.leftdown)
+      {
+            var q = GLGE.quatFromAxisAngle([0,0,1],(-this.rel_x*6.0)/(Math.PI));
+            var rot = GLGE.mat4FromQuat(q)
+            this.camera.transform = GLGE.mulMat4(this.camera.transform,rot);
+            
+            q = GLGE.quatFromAxisAngle([1,0,0],(-this.rel_y*6.0)/(Math.PI));
+            rot = GLGE.mat4FromQuat(q)
+            this.camera.transform = GLGE.mulMat4(rot,this.camera.transform);
+       }
+       //:#update the arrows location on the screen
+       this.placeArrows();
+    }
+    //:#return the log base 2 of val
+    function log2(val) {
+            return Math.log(val) / Math.LN2;
+    }
+    //:#update several times per second
+    this.update = function()
+    { 
+        //:#place the arrows
+        this.placeArrows();
+        
+        //:#find how many of the skybox images have loaded
+        var loadstate = 0;
+        if(this.newSkyFilter)
+            loadstate = log2(1+this.newSkyFilter.textures[0].loadState);
+        //:#if we've not loaded all 6    
+        if( loadstate != 6)
+        {
+            //:#animate the progressbar to however many we have loaded
+            $('#loadingscreen').stop().animate({'width':loadstate*window.innerWidth/6},200);
+            
+        }else
+        {   
+            //:#hide the progressbar and mark us as not loading
+            this.loading = false;
+            $('#loadingscreen').stop().css('width',0)
+            
+            //:#now, set the GLGE skyfilter. Don't do this until load is complete to avoid
+            //:#a black flash while there are no graphics loaded
+            if(this.newSkyFilter)
+            {
+                //:#hide the loading screen
+                $('#loadingscreen2').fadeOut();
+                $('#loadingscreenback').hide();
+                findscene().setSkyFilter(this.newSkyFilter);
+                this.newSkyFilter = null;
+                
+            }
+        }
+        //:#schedule another update in 1/10 seconds
+        this.future(.1).update();
+    }
+    
+    //:#utility to grab the rendersystem scene
+      function findscene()
+      {
+             return vwf.views[0].state.scenes["index-vwf"].glgeScene;
+      }
+    //:# place the arrows on the screen
+    this.placeArrows = function()
+    {
+      
+      //:#grab the camera that is being used to render the scene  
+      var viewprojection = vwf.views[0].state.cameraInUse.getViewProjection();
+        var rootdiv = document.getElementById('index-vwf');
+      //:#find the width and height of hte screen  
+        var h = $(rootdiv).height();
+        var w = $(rootdiv).width();
+        var wh =h;
+        var ww =w;
+    
+      //:#for every arrow
+      for(var i = 0; i < 4; i++)
+      {
+          var div = $('#arrow'+i).get(0);
+          
+          //:#if the current state has offsets, find the one that belongs to this arrow and use it
+          var offset = [0,0,0];
+          if(this.states[this.currentscene].offsets && this.states[this.currentscene].offsets[$(div).attr('direction')])
+          offset = this.states[this.currentscene].offsets[$(div).attr('direction')]
+          
+          //:#add the offset to the default arrow positions
+          var pos = this.arrowloc[i];
+          pos = [pos[0]+offset[0],pos[1]+offset[1],pos[2]+offset[2],1];
+          
+          //:#mult by the viewprojection matrix. This is standard 3D camera stuff. maps a point onto the screen  
+          var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+          screen[0] /= screen[3];
+          screen[1] /= screen[3];
+         
+          screen[0] /= 2;
+          screen[1] /= 2;
+          screen[2] /= 2;
+          screen[0] += .5;
+          screen[1] += .5;
+          
+          screen[0] *= ww;
+          screen[1] *= wh;
+          
+          screen[1] = wh - screen[1];
+
+          //:# place the arrow on the screen with absolute CSS coords
+          div.style.top = (screen[1]+35)  +  'px';
+          div.style.left = (screen[0]  - div.offsetWidth/2)  +'px';
+          
+          //:#if the arrow does not lead anywhere, hide it
+          if($(div).attr('tostate') == -1 || this.loading == true)
+          {
+                div.style.display = 'none'
+          }
+          else
+          {
+              //:#if the arrow falls off the screen, hide it to prevent weird overflow behavior
+              if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
+              {
+                    if(div.style.display != 'none')
+                        div.style.display = 'none';
+              }
+              else
+              {
+                  //:#hide if too far away. this is left over from another example, and not really needed
+                  if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')
+                     div.style.display = 'none';
+                  if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
+                     div.style.display = 'block';
+              }
+          }
+      }
+      
+    }    
+          
+
+        
+    
+    
+ 
+ 
+   
+
+   

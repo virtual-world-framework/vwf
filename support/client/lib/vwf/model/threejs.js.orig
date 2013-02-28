@@ -565,10 +565,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
                     }
-					if(propertyName == 'sizeRange')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.sizeRange.value = propertyValue;
-                    }
                     if(propertyName == 'maxSpin')
                     {
                         ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
@@ -577,23 +573,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
                     }
-					if(propertyName == 'maxOrientation')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.maxOrientation.value = propertyValue;
-                    }
-                    if(propertyName == 'minOrientation')
-                    {
-                        ps.shaderMaterial_analytic.uniforms.minOrientation.value = propertyValue;
-                    }
-					if(propertyName == 'colorRange')
-                    {
-                         ps.shaderMaterial_analytic.uniforms.colorRange.value.x = propertyValue[0];
-                        ps.shaderMaterial_analytic.uniforms.colorRange.value.y = propertyValue[1];
-                        ps.shaderMaterial_analytic.uniforms.colorRange.value.z = propertyValue[2];
-                        ps.shaderMaterial_analytic.uniforms.colorRange.value.w = propertyValue[3];
-                    }
-					
-					
                     if(propertyName == 'startColor')
                     {
                         ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
@@ -1676,44 +1655,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "attribute float size; \n"+
             "attribute vec4 vertexColor;\n"+
             "varying vec4 vColor;\n"+
-			"attribute vec4 random;\n"+
-			"varying float vRandom;\n"+
-			"uniform float sizeRange;\n"+
-			"uniform vec4 colorRange;\n"+
             "void main() {\n"+
-            "   vColor = vertexColor + (random -0.5) * colorRange;\n"+
+            "   vColor = vertexColor;\n"+
             "   vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"+
-			"   float psize = size + (random.y -0.5) * sizeRange;\n"+
-            "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n"+
+            "   gl_PointSize = size * ( 1000.0/ length( mvPosition.xyz ) );\n"+
             "   gl_Position = projectionMatrix * mvPosition;\n"+
-			 "   vRandom = random.x;"+
             "}    \n";
             var fragShader_default = 
             "uniform float useTexture;\n"+
             "uniform sampler2D texture;\n"+
             "varying vec4 vColor;\n"+
-			"varying float vRandom;\n"+
-			"uniform float time;\n"+
-            "uniform float maxSpin;\n"+
-            "uniform float minSpin;\n"+
-			"uniform float maxOrientation;\n"+
-            "uniform float minOrientation;\n"+
-			
             "void main() {\n"+
-			" vec2 coord = vec2(0.0,0.0);"+
-            " float spin = mix(maxSpin,minSpin,vRandom);"+
-			" float orientation = mix(maxOrientation,minOrientation,vRandom);"+
-            " coord.s = (gl_PointCoord.s-.5)*cos(time*spin+orientation)-(gl_PointCoord.t-.5)*sin(time*spin+orientation);"+
-            " coord.t = (gl_PointCoord.t-.5)*cos(time*spin+orientation)+(gl_PointCoord.s-.5)*sin(time*spin+orientation);"+
-            "   vec4 outColor = (vColor * texture2D( texture, coord + vec2(.5,.5) )) *useTexture + vColor * (1.0-useTexture);\n"+
+            "   vec4 outColor = (vColor * texture2D( texture, gl_PointCoord )) *useTexture + vColor * (1.0-useTexture);\n"+
             
             "   gl_FragColor = outColor;\n"+
             "}\n";
             var attributes_default = {
                 size: { type: 'f', value: [] },
-                vertexColor:   {    type: 'v4', value: [] },
-				random:   { type: 'v4', value: [] },
-				
+                vertexColor:   {    type: 'v4', value: [] }
             };
             var uniforms_default = {
                 amplitude: { type: "f", value: 1.0 },
@@ -1721,11 +1680,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 useTexture: { type: "f", value: 0.0 },
                 maxSpin: { type: "f", value: 0.0 },
                 minSpin: { type: "f", value: 0.0 },
-				maxOrientation: { type: "f", value: 0.0 },
-                minOrientation: { type: "f", value: 0.0 },
-				time: { type: "f", value: 0.0 },
-				sizeRange: { type: "f", value: 0.0 },
-				colorRange:   { type: 'v4', value: new THREE.Vector4(0,0,0,0) }
             };
             uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
             var shaderMaterial_default = new THREE.ShaderMaterial( {
@@ -1747,7 +1701,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "attribute vec3 acceleration;\n"+
             "attribute vec3 velocity;\n"+
             "attribute float lifespan;\n"+
-            "attribute vec4 random;\n"+
+            "attribute float random;\n"+
             "uniform float time;\n"+
             "uniform float startSize;\n"+
             "uniform float endSize;\n"+
@@ -1755,18 +1709,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "uniform vec4 endColor;\n"+
             "varying vec4 vColor;\n"+
             "varying float vRandom;\n"+
-			"uniform float sizeRange;\n"+
-			"uniform vec4 colorRange;\n"+
             "void main() {\n"+
-            "   float lifetime = fract(random.x+(time))*lifespan*1.33;"+
+            "   float lifetime = fract(random+(time))*lifespan*1.33;"+
             "   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;"+ // ;
             "   vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n"+
-			"   float psize = mix(startSize,endSize,lifetime/lifespan) + (random.y -0.5) * sizeRange;\n"+
-            "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n"+
+            "   gl_PointSize = mix(startSize,endSize,lifetime/lifespan) * ( 1000.0/ length( mvPosition.xyz ) );\n"+
             "   gl_Position = projectionMatrix * mvPosition;\n"+
-			" vec4 nR = (random -0.5);\n"+
-            "   vColor = mix(startColor,endColor,lifetime/lifespan)  +  nR * colorRange;\n"+
-            "   vRandom = random.x;"+
+            "   vColor = mix(startColor,endColor,lifetime/lifespan);\n"+
+            "   vRandom = random;"+
             "}    \n";
             var fragShader_analytic = 
             "uniform float useTexture;\n"+
@@ -1776,15 +1726,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "uniform float minSpin;\n"+
             "varying vec4 vColor;\n"+
             "varying float vRandom;\n"+
-			"uniform float maxOrientation;\n"+
-            "uniform float minOrientation;\n"+
-			
             "void main() {\n"+
             " vec2 coord = vec2(0.0,0.0);"+
             " float spin = mix(maxSpin,minSpin,vRandom);"+
-            " float orientation = mix(maxOrientation,minOrientation,vRandom);"+
-            " coord.s = (gl_PointCoord.s-.5)*cos(time*spin+orientation)-(gl_PointCoord.t-.5)*sin(time*spin+orientation);"+
-            " coord.t = (gl_PointCoord.t-.5)*cos(time*spin+orientation)+(gl_PointCoord.s-.5)*sin(time*spin+orientation);"+
+            " coord.s = (gl_PointCoord.s-.5)*cos(time*spin)-(gl_PointCoord.t-.5)*sin(time*spin);"+
+            " coord.t = (gl_PointCoord.t-.5)*cos(time*spin)+(gl_PointCoord.s-.5)*sin(time*spin);"+
             "   vec4 outColor = (vColor * texture2D( texture, coord + vec2(.5,.5) )) *useTexture + vColor * (1.0-useTexture);\n"+
             
             "   gl_FragColor = outColor;\n"+
@@ -1795,24 +1741,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 acceleration:   {   type: 'v3', value: [] },
                 velocity:   {   type: 'v3', value: [] },
                 lifespan:   {   type: 'f', value: [] },
-                random:   attributes_default.random,
+                random:   { type: 'f', value: [] },
                 vertexColor : attributes_default.vertexColor,
                 size: attributes_default.size
             };
             var uniforms_analytic = {
                 startColor:{type: "v4", value:new THREE.Vector4()},
                 endColor:{type: "v4", value:new THREE.Vector4()},
-				colorRange:uniforms_default.colorRange,
                 startSize:{type:"f", value:1},
                 endSize:{type:"f", value:1},
                 texture:   { type: "t", value: THREE.ImageUtils.loadTexture( "textures/sprites/ball.png" ) },
                 useTexture: { type: "f", value: 0.0 },
-                time: uniforms_default.time,
+                time: { type: "f", value: 0.0 },
                 maxSpin: uniforms_default.maxSpin,
-                minSpin: uniforms_default.minSpin,
-				maxOrientation: uniforms_default.maxOrientation,
-                minOrientation: uniforms_default.minOrientation,
-				sizeRange: uniforms_default.sizeRange
+                minSpin: uniforms_default.minSpin
             };
             uniforms_analytic.texture.value.wrapS = uniforms_analytic.texture.value.wrapT = THREE.RepeatWrapping;
             var shaderMaterial_analytic = new THREE.ShaderMaterial( {
@@ -1849,8 +1791,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             particleSystem.damping = 0;
             particleSystem.startSize = 3;
             particleSystem.endSize = 3;
-			particleSystem.gravity = 0;
-			particleSystem.gravityCenter = [0,0,0];
             particleSystem.velocityMode = 'cartesian';
             particleSystem.createParticle = function(i)
             {
@@ -1874,7 +1814,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 shaderMaterial_analytic.attributes.acceleration.value.push(new THREE.Vector3());
                 shaderMaterial_analytic.attributes.velocity.value.push(new THREE.Vector3());
                 shaderMaterial_analytic.attributes.lifespan.value.push(1);
-                shaderMaterial_analytic.attributes.random.value.push(new THREE.Vector4(Math.random(),Math.random(),Math.random(),Math.random()));
+                shaderMaterial_analytic.attributes.random.value.push(Math.random());
                 return particle;
             }
             
@@ -1916,6 +1856,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
             }
             particleSystem.setupParticle = function(particle,mat,inv)
+<<<<<<< HEAD
             {
                 
                 particle.x = 0;
@@ -1956,7 +1897,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     particle.velocity.y = r * Math.sin(t)*Math.sin(w);
                     particle.velocity.z = r * Math.cos(t); */
                     
-					//better distribution
                     var o = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI*2;
                     var u = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * 2 - 1;
                     var u2 = Math.random();
@@ -2007,8 +1947,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //todo: move whole thing to shader
             particleSystem.updateAnalytic =function(time)
             {
-				particleSystem.material.uniforms.time.value += time/3333.0;
-				
                 var time_in_ticks = time/33.333;
 
                 var inv = this.matrix.clone();
@@ -2049,7 +1987,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //todo: switch to RK4 and move interpolation to shader
             particleSystem.updateEuler = function(time)
             {
-				particleSystem.material.uniforms.time.value += time/3333.0;
                 //var timer = performance.now();
                 var time_in_ticks = time/100.0;
                 
@@ -2059,142 +1996,130 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                    
                 this.lastTime += time_in_ticks;//ticks - Math.floor(ticks);
 
-				var inv = this.matrix.clone();
-				inv = inv.getInverse(inv);
-					
-				var particles = this.geometry;
-				
-				//timesliced tick	 give up after 5 steps - just cant go fast enougth		
-				if(Math.floor(this.lastTime) > 5)
-					this.lastTime = 1;
-				for(var i=0; i < Math.floor(this.lastTime) ; i++)
-				{
-					this.lastTime--;
-					
-					var pCount = this.geometry.vertices.length;
-					while(pCount--) 
-					{
-						var particle =particles.vertices[pCount];					
-						this.updateParticleEuler(particle,this.matrix,inv,3.333);
-					}
-					
-					//examples developed with faster tick - maxrate *33 is scale to make work 
-					//with new timing
-					var len = Math.min(this.regenParticles.length,this.maxRate*33);
-					for(var i =0; i < len; i++)
-					{
-						
-						var particle = this.regenParticles.shift();
-						this.setupParticle(particle,this.matrix,inv);
-						this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
-						particle.waitForRegen = false;
-					}
-					
-				}
-				
-				//reset pCount counter and do display interpolation
-				var pCount = this.geometry.vertices.length;
-				while(pCount--) 
-				{
-					var particle =particles.vertices[pCount];					
-					this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
-				
-				}
-				
-			    this.geometry.verticesNeedUpdate  = true;
-				this.geometry.colorsNeedUpdate  = true;
-				this.material.attributes.vertexColor.needsUpdate = true;
-				this.material.attributes.size.needsUpdate = true;
-				//console.log(performance.now() - timer);
-			}
-			particleSystem.temp = new THREE.Vector3();
-			
-			particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
-			{
-				particle.age += delta_time;
-				if(particle.age >= particle.lifespan && !particle.waitForRegen)
-					{
-						
-						this.regenParticles.push(particle);
-						particle.waitForRegen = true;
-						particle.x = 0;
-						particle.y = 0;
-						particle.z = 0;
-						particle.color.w = 0.0;
-					}else
-					{
-				var percent = particle.age/particle.lifespan;
-				particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
-				particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
-				particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
-				
-				this.temp.x = particle.world.x;
-				this.temp.y = particle.world.y;
-				this.temp.z = particle.world.z;
-				inv.multiplyVector3(this.temp);
-				particle.x = this.temp.x;
-				particle.y = this.temp.y;
-				particle.z = this.temp.z;
-				
-				
-				
-				particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
-				particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
-				particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
-				particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
-				
-				particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
-				
-				}
-			}
-			particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
-			{
-				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
-				//we don't actuall want to move to system forward in time.
-				
-
-					particle.prevage = particle.age;
-					particle.age += step_dist;
-					if(particle.age >= particle.lifespan && !particle.waitForRegen)
-					{
-						
-						this.regenParticles.push(particle);
-						particle.waitForRegen = true;
-						particle.x = 0;
-						particle.y = 0;
-						particle.z = 0;
-						particle.color.w = 0.0;
-					}else
-					{
-					
-					
-						// and the position
-						particle.prevworld.x = particle.world.x;
-						particle.prevworld.y = particle.world.y;
-						particle.prevworld.z = particle.world.z;
-						
-						//find direction to center for gravity
-						var gravityAccel = new THREE.Vector3(particle.world.x,particle.world.y,particle.world.z);
-						gravityAccel.x -= this.gravityCenter[0];
-						gravityAccel.y -= this.gravityCenter[1];
-						gravityAccel.z -= this.gravityCenter[2];
-						var len = gravityAccel.length()+.1;
-						gravityAccel.normalize();
-						gravityAccel.multiplyScalar(-Math.min(1/(len*len),100));
-						gravityAccel.multiplyScalar(this.gravity);
-						
-						
-						particle.world.x += particle.velocity.x * step_dist + (particle.acceleration.x + gravityAccel.x)* step_dist * step_dist;
-						particle.world.y += particle.velocity.y * step_dist + (particle.acceleration.y + gravityAccel.y )* step_dist * step_dist;;
-						particle.world.z += particle.velocity.z * step_dist + (particle.acceleration.z + gravityAccel.z )* step_dist * step_dist;;
+                var inv = this.matrix.clone();
+                inv = inv.getInverse(inv);
+                    
+                var particles = this.geometry;
+                
+                //timesliced tick    give up after 5 steps - just cant go fast enougth              
+                for(var i=0; i < Math.floor(this.lastTime) && i<5 ; i++)
+                {
+                    this.lastTime--;
+                    
+                    var pCount = this.geometry.vertices.length;
+                    while(pCount--) 
+                    {
+                        var particle =particles.vertices[pCount];                   
+                        this.updateParticleEuler(particle,this.matrix,inv,3.333);
+                    }
+                    
+                    //examples developed with faster tick - maxrate *33 is scale to make work 
+                    //with new timing
+                    var len = Math.min(this.regenParticles.length,this.maxRate*33);
+                    for(var i =0; i < len; i++)
+                    {
+                        
+                        var particle = this.regenParticles.shift();
+                        this.setupParticle(particle,this.matrix,inv);
+                        this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
+                        particle.waitForRegen = false;
+                    }
+                    
+                }
+                
+                //reset pCount counter and do display interpolation
+                var pCount = this.geometry.vertices.length;
+                while(pCount--) 
+                {
+                    var particle =particles.vertices[pCount];                   
+                    this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
+                
+                }
+                
+                this.geometry.verticesNeedUpdate  = true;
+                this.geometry.colorsNeedUpdate  = true;
+                this.material.attributes.vertexColor.needsUpdate = true;
+                this.material.attributes.size.needsUpdate = true;
+                //console.log(performance.now() - timer);
+            }
+            particleSystem.temp = new THREE.Vector3();
+            
+            particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
+            {
+                particle.age += delta_time;
+                if(particle.age >= particle.lifespan && !particle.waitForRegen)
+                    {
+                        
+                        this.regenParticles.push(particle);
+                        particle.waitForRegen = true;
+                        particle.x = 0;
+                        particle.y = 0;
+                        particle.z = 0;
+                        particle.color.w = 0.0;
+                    }else
+                    {
+                var percent = particle.age/particle.lifespan;
+                particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
+                particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
+                particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
+                
+                this.temp.x = particle.world.x;
+                this.temp.y = particle.world.y;
+                this.temp.z = particle.world.z;
+                inv.multiplyVector3(this.temp);
+                particle.x = this.temp.x;
+                particle.y = this.temp.y;
+                particle.z = this.temp.z;
+                
+                
+                
+                particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+                particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+                particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+                particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
+                
+                particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
+                
+                }
+            }
+            particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
+            {
+                //the particle actually moved. skip this if the parent has moved, and we need to adjust, but
+                //we don't actuall want to move to system forward in time.
+                
+                
+                
+                
+                particle.prevage = particle.age;
+                particle.age += step_dist;
+                if(particle.age >= particle.lifespan && !particle.waitForRegen)
+                {
+                    
+                    this.regenParticles.push(particle);
+                    particle.waitForRegen = true;
+                    particle.x = 0;
+                    particle.y = 0;
+                    particle.z = 0;
+                    particle.color.w = 0.0;
+                }else
+                {
+                
+                
+                    // and the position
+                    particle.prevworld.x = particle.world.x;
+                    particle.prevworld.y = particle.world.y;
+                    particle.prevworld.z = particle.world.z;
+                    
+                    particle.world.x += particle.velocity.x * step_dist + particle.acceleration.x * step_dist * step_dist;
+                    particle.world.y += particle.velocity.y * step_dist + particle.acceleration.y * step_dist * step_dist;;
+                    particle.world.z += particle.velocity.z * step_dist + particle.acceleration.z * step_dist * step_dist;;
 
                       
-                    particle.velocity.x += (particle.acceleration.x + gravityAccel.x) * step_dist * step_dist;
-                    particle.velocity.y += (particle.acceleration.y + gravityAccel.y) * step_dist * step_dist;
-                    particle.velocity.z += (particle.acceleration.z + gravityAccel.z) * step_dist * step_dist
+                    particle.velocity.x += particle.acceleration.x * step_dist ;
+                    particle.velocity.y += particle.acceleration.y * step_dist ;
+                    particle.velocity.z += particle.acceleration.z * step_dist ;
                     
                     var damping = 1-(this.damping * step_dist);
-					
                     particle.velocity.x *= damping;
                     particle.velocity.y *= damping;
                     particle.velocity.z *= damping;
@@ -2291,6 +2216,369 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             particleSystem.update(1);
             
             
+=======
+			{
+				
+				particle.x = 0;
+				particle.y = 0;
+				particle.z = 0;
+				
+				particle.world = mat.multiplyVector3(this.generatePoint());
+				
+				particle.initialx = particle.world.x;
+				particle.initialy = particle.world.y;
+				particle.initialz = particle.world.z;
+				
+				particle.x = particle.initialx;
+				particle.y = particle.initialy;
+				particle.z = particle.initialz;
+				
+				
+				
+				particle.age = 0;
+				particle.velocity = new THREE.Vector3(0,0,0);
+			    particle.acceleration = new THREE.Vector3( 0,0,0);  
+			    particle.lifespan = 1;  
+				
+				if(this.velocityMode == 'cartesian')
+				{
+					particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
+					particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
+					particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+				}
+				if(this.velocityMode == 'spherical')
+				{
+				
+					//random sphercial points concentrate at poles
+					/* var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
+					var t = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * Math.PI*2;
+					var w = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI - Math.PI/2;
+					particle.velocity.x = r * Math.sin(t)*Math.cos(w);
+					particle.velocity.y = r * Math.sin(t)*Math.sin(w);
+					particle.velocity.z = r * Math.cos(t); */
+					
+					var o = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI*2;
+					var u = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * 2 - 1;
+					var u2 = Math.random();
+					u2 = Math.pow(u2,1/3);
+					var r = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * u2;
+					particle.velocity.x = Math.cos(o)*Math.sqrt(1-(u*u));
+					particle.velocity.y = Math.sin(o)*Math.sqrt(1-(u*u));
+					particle.velocity.z = u;
+					particle.velocity.setLength(r);
+				}
+				
+				mat = mat.clone();
+				mat.elements[12] = 0;
+				mat.elements[13] = 0;
+				mat.elements[14] = 0;
+				particle.velocity = mat.multiplyVector3(particle.velocity.clone());
+				
+				
+				particle.acceleration.x = this.minAcceleration[0] + (this.maxAcceleration[0] - this.minAcceleration[0]) * Math.random();
+				particle.acceleration.y = this.minAcceleration[1] + (this.maxAcceleration[1] - this.minAcceleration[1]) * Math.random();
+				particle.acceleration.z = this.minAcceleration[2] + (this.maxAcceleration[2] - this.minAcceleration[2]) * Math.random();
+				particle.lifespan = this.minLifeTime + (this.maxLifeTime - this.minLifeTime) * Math.random();
+				particle.color.x = this.startColor[0];
+				particle.color.y = this.startColor[1];
+				particle.color.z = this.startColor[2];
+				particle.color.w = this.startColor[3];
+				
+				shaderMaterial_analytic.attributes.acceleration.value[particle.i] = (particle.acceleration);
+				shaderMaterial_analytic.attributes.velocity.value[particle.i] = (particle.velocity);
+				shaderMaterial_analytic.attributes.lifespan.value[particle.i] = (particle.lifespan);
+				
+				
+				shaderMaterial_analytic.attributes.acceleration.needsUpdate = true;
+				shaderMaterial_analytic.attributes.velocity.needsUpdate = true;
+				shaderMaterial_analytic.attributes.lifespan.needsUpdate = true;
+				this.geometry.verticesNeedUpdate = true;
+				//randomly move the particle up to one step in time
+				
+			}
+			
+			particleSystem.updateAnalyticShader = function(time)
+			{	
+				particleSystem.material.uniforms.time.value += time/3333.0;
+			
+			}
+			
+			//analytic solver. 
+			//todo: move whole thing to shader
+			particleSystem.updateAnalytic =function(time)
+			{
+				var time_in_ticks = time/33.333;
+
+				var inv = this.matrix.clone();
+				inv = inv.getInverse(inv);
+					
+				var particles = this.geometry;
+
+				var pCount = this.geometry.vertices.length;
+				while(pCount--) 
+				{
+					var particle =particles.vertices[pCount];					
+					this.updateParticleAnalytic(particle,this.matrix,inv,time_in_ticks);
+				}
+					
+				//examples developed with faster tick - maxrate *33 is scale to make work 
+				//with new timing
+				var len = Math.min(this.regenParticles.length,this.maxRate*15*time_in_ticks);
+				for(var i =0; i < len; i++)
+				{
+						
+					var particle = this.regenParticles.shift();
+					this.setupParticle(particle,this.matrix,inv);
+					this.updateParticleAnalytic(particle,this.matrix,inv,Math.random()*3.33);
+					particle.waitForRegen = false;
+				}
+					
+			    this.geometry.verticesNeedUpdate  = true;
+				this.geometry.colorsNeedUpdate  = true;
+				
+				this.material.attributes.vertexColor.needsUpdate = true;
+				this.material.attributes.size.needsUpdate = true;
+			}
+			
+			particleSystem.counter = 0;
+			particleSystem.testtime = 0;
+			particleSystem.totaltime = 0;
+			//timesliced Euler integrator
+			//todo: switch to RK4 and move interpolation to shader
+			particleSystem.updateEuler = function(time)
+			{
+				//var timer = performance.now();
+				var time_in_ticks = time/100.0;
+				
+				if(this.lastTime === undefined) this.lastTime = 0;
+				
+			
+				   
+				this.lastTime += time_in_ticks;//ticks - Math.floor(ticks);
+
+				var inv = this.matrix.clone();
+				inv = inv.getInverse(inv);
+					
+				var particles = this.geometry;
+				
+				//timesliced tick	 give up after 5 steps - just cant go fast enougth		
+				if(Math.floor(this.lastTime) > 5)
+					this.lastTime = 1;
+				for(var i=0; i < Math.floor(this.lastTime) ; i++)
+				{
+					this.lastTime--;
+					
+					var pCount = this.geometry.vertices.length;
+					while(pCount--) 
+					{
+						var particle =particles.vertices[pCount];					
+						this.updateParticleEuler(particle,this.matrix,inv,3.333);
+					}
+					
+					//examples developed with faster tick - maxrate *33 is scale to make work 
+					//with new timing
+					var len = Math.min(this.regenParticles.length,this.maxRate*33);
+					for(var i =0; i < len; i++)
+					{
+						
+						var particle = this.regenParticles.shift();
+						this.setupParticle(particle,this.matrix,inv);
+						this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
+						particle.waitForRegen = false;
+					}
+					
+				}
+				
+				//reset pCount counter and do display interpolation
+				var pCount = this.geometry.vertices.length;
+				while(pCount--) 
+				{
+					var particle =particles.vertices[pCount];					
+					this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
+				
+				}
+				
+			    this.geometry.verticesNeedUpdate  = true;
+				this.geometry.colorsNeedUpdate  = true;
+				this.material.attributes.vertexColor.needsUpdate = true;
+				this.material.attributes.size.needsUpdate = true;
+				//console.log(performance.now() - timer);
+			}
+			particleSystem.temp = new THREE.Vector3();
+			
+			particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
+			{
+				particle.age += delta_time;
+				if(particle.age >= particle.lifespan && !particle.waitForRegen)
+					{
+						
+						this.regenParticles.push(particle);
+						particle.waitForRegen = true;
+						particle.x = 0;
+						particle.y = 0;
+						particle.z = 0;
+						particle.color.w = 0.0;
+					}else
+					{
+				var percent = particle.age/particle.lifespan;
+				particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
+				particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
+				particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
+				
+				this.temp.x = particle.world.x;
+				this.temp.y = particle.world.y;
+				this.temp.z = particle.world.z;
+				inv.multiplyVector3(this.temp);
+				particle.x = this.temp.x;
+				particle.y = this.temp.y;
+				particle.z = this.temp.z;
+				
+				
+				
+				particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+				particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+				particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+				particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
+				
+				particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
+				
+				}
+			}
+			particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
+			{
+				//the particle actually moved. skip this if the parent has moved, and we need to adjust, but
+				//we don't actuall want to move to system forward in time.
+				
+				
+				
+				
+					particle.prevage = particle.age;
+					particle.age += step_dist;
+					if(particle.age >= particle.lifespan && !particle.waitForRegen)
+					{
+						
+						this.regenParticles.push(particle);
+						particle.waitForRegen = true;
+						particle.x = 0;
+						particle.y = 0;
+						particle.z = 0;
+						particle.color.w = 0.0;
+					}else
+					{
+					
+					
+						// and the position
+						particle.prevworld.x = particle.world.x;
+						particle.prevworld.y = particle.world.y;
+						particle.prevworld.z = particle.world.z;
+						
+						particle.world.x += particle.velocity.x * step_dist + particle.acceleration.x * step_dist * step_dist;
+						particle.world.y += particle.velocity.y * step_dist + particle.acceleration.y * step_dist * step_dist;;
+						particle.world.z += particle.velocity.z * step_dist + particle.acceleration.z * step_dist * step_dist;;
+
+						  
+						particle.velocity.x += particle.acceleration.x * step_dist ;
+						particle.velocity.y += particle.acceleration.y * step_dist ;
+						particle.velocity.z += particle.acceleration.z * step_dist ;
+						
+						var damping = 1-(this.damping * step_dist);
+						particle.velocity.x *= damping;
+						particle.velocity.y *= damping;
+						particle.velocity.z *= damping;
+						
+					}
+				
+				
+				
+				
+			
+			}
+			//interpolate current and prev tick for smooth motion when dispaly rate is faster than
+			//simulation tick
+			particleSystem.interpolateDisplay = function(particle,mat,inv,frac_time)
+			{
+				
+				this.temp.x = particle.prevworld.x + (particle.world.x - particle.prevworld.x) * frac_time;
+				this.temp.y = particle.prevworld.y + (particle.world.y - particle.prevworld.y) * frac_time;
+				this.temp.z = particle.prevworld.z + (particle.world.z - particle.prevworld.z) * frac_time;
+				inv.multiplyVector3(this.temp);
+				particle.x = this.temp.x;
+				particle.y = this.temp.y;
+				particle.z = this.temp.z;
+				
+				var percent = (particle.prevage + (particle.age - particle.prevage) * frac_time)/particle.lifespan;
+				
+				particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
+				particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
+				particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
+				particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
+				
+				particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
+			
+			}
+			
+			particleSystem.setSolverType =function(type)
+			{
+				if(type == 'Euler')
+				{
+					particleSystem.update = particleSystem.updateEuler;
+					particleSystem.material = particleSystem.shaderMaterial_default;
+					particleSystem.rebuildParticles();
+				}
+				if(type == 'Analytic')
+				{
+					particleSystem.update = particleSystem.updateAnalytic;
+					particleSystem.material = particleSystem.shaderMaterial_default;
+					particleSystem.rebuildParticles();
+				}
+				if(type == 'AnalyticShader')
+				{
+					particleSystem.update = particleSystem.updateAnalyticShader	;		
+					particleSystem.material = particleSystem.shaderMaterial_analytic;
+					particleSystem.rebuildParticles();
+				}
+				
+			}
+			
+
+			particleSystem.updateTransform = function()
+			{
+			
+			}
+			particleSystem.setParticleCount = function(newcount)
+			{
+				
+				
+				var inv = this.matrix.clone();
+				inv = inv.getInverse(inv);
+				
+			    var particles = this.geometry;
+			    while(this.geometry.vertices.length > newcount) 
+			    {
+					this.geometry.vertices.pop();
+			    }
+				while(this.geometry.vertices.length < newcount) 
+			    {
+					
+					var particle = particleSystem.createParticle(this.geometry.vertices.length);
+					particleSystem.setupParticle(particle,particleSystem.matrix,inv);
+					particle.age = Infinity;
+					this.regenParticles.push(particle);
+					particle.waitForRegen = true;
+			    }
+			    this.geometry.verticesNeedUpdate  = true;
+				this.geometry.colorsNeedUpdate  = true;
+				this.material.attributes.vertexColor.needsUpdate = true;
+				this.particleCount = newcount;
+			}
+			
+			
+			particleSystem.setParticleCount(1000);
+			particleSystem.setSolverType('AnalyticShader');
+			particleSystem.update(1);
+			
+			
+>>>>>>> fix for older browsers that dont support performance.now()
            
             child.threeObject = particleSystem;
             
