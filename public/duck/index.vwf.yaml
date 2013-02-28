@@ -31,8 +31,12 @@ children:
         this.animationPlaying = ! this.animationPlaying;
       }
     methods:
-      animationUpdate: |
-        this.rotation = [ 0, 0, 1, this.animationTime * 360 ];
+      animationUpdate:
+        parameters:
+          - time
+          - duration
+        body: |
+          this.rotation = [ 0, 0, 1, time * 360 ];
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -54,9 +58,9 @@ scripts:
     this.initialize = function(){
       this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,16,616,90,1 ];
       this.camera.far = this.camera.far * 4;
-      this.duck.animationStarted = function() { console.warn( this.id, "animation started" ) };
-      this.duck.animationStopped = function() { console.warn( this.id, "animation stopped" ) };
-      this.duck.animationLooped = function() { console.warn( this.id, "animation looped" ) };
-      this.duck.animationTimeChanged = function() { console.warn( this.id, "animation time changed" ) };
+      this.duck.animationStarted = function() { this.logger.info( "animation started" ) };
+      this.duck.animationStopped = function() { this.logger.info( "animation stopped" ) };
+      this.duck.animationLooped = function() { this.logger.info( "animation looped" ) };
+      this.duck.animationTimeChanged = function( time ) { this.logger.info( "animation time changed", time ) };
     }
     //@ sourceURL=duck.vwf
