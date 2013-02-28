@@ -25,6 +25,7 @@ children:
       minAcceleration: [ 0, 0, 0]
       startSize: 130
       image: nebula.jpg
+      textureTiles: 2
       endSize: 3
       sizeRange: 50
       maxLifeTime: 3000
@@ -56,6 +57,7 @@ children:
       minAcceleration: [ 0, 0, 0]
       startSize: 130
       image: nebula.jpg
+      textureTiles: 2
       endSize: 3
       sizeRange: 50
       maxLifeTime: 3000

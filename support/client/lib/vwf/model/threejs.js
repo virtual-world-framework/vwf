@@ -573,6 +573,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
                     }
+					if(propertyName == 'textureTiles')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.textureTiles.value = propertyValue;
+                    }
                     if(propertyName == 'minSpin')
                     {
                         ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
@@ -1677,7 +1681,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "attribute vec4 vertexColor;\n"+
             "varying vec4 vColor;\n"+
 			"attribute vec4 random;\n"+
-			"varying float vRandom;\n"+
+			"varying vec4 vRandom;\n"+
 			"uniform float sizeRange;\n"+
 			"uniform vec4 colorRange;\n"+
             "void main() {\n"+
@@ -1686,26 +1690,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			"   float psize = size + (random.y -0.5) * sizeRange;\n"+
             "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n"+
             "   gl_Position = projectionMatrix * mvPosition;\n"+
-			 "   vRandom = random.x;"+
+			 "   vRandom = random;"+
             "}    \n";
             var fragShader_default = 
             "uniform float useTexture;\n"+
             "uniform sampler2D texture;\n"+
             "varying vec4 vColor;\n"+
-			"varying float vRandom;\n"+
+			"varying vec4 vRandom;\n"+
 			"uniform float time;\n"+
             "uniform float maxSpin;\n"+
             "uniform float minSpin;\n"+
 			"uniform float maxOrientation;\n"+
             "uniform float minOrientation;\n"+
-			
+			"uniform float textureTiles;\n"+
             "void main() {\n"+
-			" vec2 coord = vec2(0.0,0.0);"+
-            " float spin = mix(maxSpin,minSpin,vRandom);"+
-			" float orientation = mix(maxOrientation,minOrientation,vRandom);"+
-            " coord.s = (gl_PointCoord.s-.5)*cos(time*spin+orientation)-(gl_PointCoord.t-.5)*sin(time*spin+orientation);"+
-            " coord.t = (gl_PointCoord.t-.5)*cos(time*spin+orientation)+(gl_PointCoord.s-.5)*sin(time*spin+orientation);"+
-            "   vec4 outColor = (vColor * texture2D( texture, coord + vec2(.5,.5) )) *useTexture + vColor * (1.0-useTexture);\n"+
+			            " vec2 coord = vec2(0.0,0.0);"+
+			" vec2 orig_coord = vec2(gl_PointCoord.s,1.0-gl_PointCoord.t);"+
+            " float spin = mix(maxSpin,minSpin,vRandom.x);"+
+            " float orientation = mix(maxOrientation,minOrientation,vRandom.y);"+
+            " coord.s = (orig_coord.s-.5)*cos(time*spin+orientation)-(orig_coord.t-.5)*sin(time*spin+orientation);"+
+            " coord.t = (orig_coord.t-.5)*cos(time*spin+orientation)+(orig_coord.s-.5)*sin(time*spin+orientation);"+
+			" coord = coord + vec2(.5,.5);\n"+
+			" coord = coord/textureTiles;\n"+
+			" coord.x = clamp(coord.x,0.0,1.0/textureTiles);\n"+
+			" coord.y = clamp(coord.y,0.0,1.0/textureTiles);\n"+
+			" coord += vec2(floor(vRandom.x*textureTiles)/textureTiles,floor(vRandom.y*textureTiles)/textureTiles);\n"+
+            "   vec4 outColor = (vColor * texture2D( texture, coord  )) *useTexture + vColor * (1.0-useTexture);\n"+
             
             "   gl_FragColor = outColor;\n"+
             "}\n";
@@ -1725,6 +1735,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 minOrientation: { type: "f", value: 0.0 },
 				time: { type: "f", value: 0.0 },
 				sizeRange: { type: "f", value: 0.0 },
+				textureTiles: { type: "f", value: 1.0 },
 				colorRange:   { type: 'v4', value: new THREE.Vector4(0,0,0,0) }
             };
             uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
@@ -1754,7 +1765,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "uniform vec4 startColor;\n"+
             "uniform vec4 endColor;\n"+
             "varying vec4 vColor;\n"+
-            "varying float vRandom;\n"+
+            "varying vec4 vRandom;\n"+
 			"uniform float sizeRange;\n"+
 			"uniform vec4 colorRange;\n"+
             "void main() {\n"+
@@ -1766,7 +1777,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "   gl_Position = projectionMatrix * mvPosition;\n"+
 			" vec4 nR = (random -0.5);\n"+
             "   vColor = mix(startColor,endColor,lifetime/lifespan)  +  nR * colorRange;\n"+
-            "   vRandom = random.x;"+
+            "   vRandom = random;"+
             "}    \n";
             var fragShader_analytic = 
             "uniform float useTexture;\n"+
@@ -1775,17 +1786,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             "uniform float maxSpin;\n"+
             "uniform float minSpin;\n"+
             "varying vec4 vColor;\n"+
-            "varying float vRandom;\n"+
+            "varying vec4 vRandom;\n"+
 			"uniform float maxOrientation;\n"+
             "uniform float minOrientation;\n"+
-			
+			"uniform float textureTiles;\n"+
             "void main() {\n"+
             " vec2 coord = vec2(0.0,0.0);"+
-            " float spin = mix(maxSpin,minSpin,vRandom);"+
-            " float orientation = mix(maxOrientation,minOrientation,vRandom);"+
-            " coord.s = (gl_PointCoord.s-.5)*cos(time*spin+orientation)-(gl_PointCoord.t-.5)*sin(time*spin+orientation);"+
-            " coord.t = (gl_PointCoord.t-.5)*cos(time*spin+orientation)+(gl_PointCoord.s-.5)*sin(time*spin+orientation);"+
-            "   vec4 outColor = (vColor * texture2D( texture, coord + vec2(.5,.5) )) *useTexture + vColor * (1.0-useTexture);\n"+
+			" vec2 orig_coord = vec2(gl_PointCoord.s,1.0-gl_PointCoord.t);"+
+            " float spin = mix(maxSpin,minSpin,vRandom.x);"+
+            " float orientation = mix(maxOrientation,minOrientation,vRandom.y);"+
+            " coord.s = (orig_coord.s-.5)*cos(time*spin+orientation)-(orig_coord.t-.5)*sin(time*spin+orientation);"+
+            " coord.t = (orig_coord.t-.5)*cos(time*spin+orientation)+(orig_coord.s-.5)*sin(time*spin+orientation);"+
+			" coord = coord + vec2(.5,.5);\n"+
+			" coord = coord/textureTiles;\n"+
+			" coord.x = clamp(coord.x,0.0,1.0/textureTiles);\n"+
+			" coord.y = clamp(coord.y,0.0,1.0/textureTiles);\n"+
+			" coord += vec2(floor(vRandom.x*textureTiles)/textureTiles,floor(vRandom.y*textureTiles)/textureTiles);\n"+
+            " vec4 outColor = (vColor * texture2D( texture, coord )) *useTexture + vColor * (1.0-useTexture);\n"+
             
             "   gl_FragColor = outColor;\n"+
             "}\n";
@@ -1812,7 +1829,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 minSpin: uniforms_default.minSpin,
 				maxOrientation: uniforms_default.maxOrientation,
                 minOrientation: uniforms_default.minOrientation,
-				sizeRange: uniforms_default.sizeRange
+				sizeRange: uniforms_default.sizeRange,
+				textureTiles: uniforms_default.textureTiles
             };
             uniforms_analytic.texture.value.wrapS = uniforms_analytic.texture.value.wrapT = THREE.RepeatWrapping;
             var shaderMaterial_analytic = new THREE.ShaderMaterial( {
