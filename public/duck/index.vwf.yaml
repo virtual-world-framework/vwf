@@ -22,6 +22,7 @@ children:
     implements:
     - http://vwf.example.com/animation.vwf
     - http://vwf.example.com/node3/animation.vwf
+    - http://vwf.example.com/control.vwf
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
@@ -32,20 +33,26 @@ children:
           http://vwf.example.com/node3.vwf
         implements:
         - http://vwf.example.com/animation/position.vwf
+        - http://vwf.example.com/control/position.vwf
       beta:
         extends:
           http://vwf.example.com/node3.vwf
         implements:
         - http://vwf.example.com/animation/position.vwf
+        - http://vwf.example.com/control/position.vwf
+        properties:
+          controlValue: 2
       gamma:
         extends:
           http://vwf.example.com/node3.vwf
         implements:
         - http://vwf.example.com/animation/position.vwf
+        - http://vwf.example.com/control/position.vwf
     scripts:
     - |
       this.pointerClick = function() {
-        this.animationPlaying = ! this.animationPlaying;
+        this.controlValue = this.controlValue + 1;
+        // this.animationPlaying = ! this.animationPlaying;
       } //@ sourceURL=http://vwf.example.com/node3/duck.vwf/duck/scripts~initialize
     methods:
       animationUpdate:
