@@ -496,25 +496,22 @@ scripts:
     }
     
     this.setPositions = function() {
-      if (this.time >= (this.lastSetPositionTime || 0) + 0.1) {
-        this.lastSetPositionTime = this.time
-        this.tile1.translation = this.tilePositions[0];
-        this.tile2.translation = this.tilePositions[1];
-        this.tile3.translation = this.tilePositions[2];
-        this.tile4.translation = this.tilePositions[3];
-        this.tile5.translation = this.tilePositions[4];
-        this.tile6.translation = this.tilePositions[5];
-        this.tile7.translation = this.tilePositions[6];
-        this.tile8.translation = this.tilePositions[7];
-        this.tile9.translation = this.tilePositions[8];
-        this.tile10.translation = this.tilePositions[9];
-        this.tile11.translation = this.tilePositions[10];
-        this.tile12.translation = this.tilePositions[11];
-        this.tile13.translation = this.tilePositions[12];
-        this.tile14.translation = this.tilePositions[13];
-        this.tile15.translation = this.tilePositions[14];
-        this.openTilePosition = this.tilePositions[15];
-      }
+      this.tile1.translation = this.tilePositions[0];
+      this.tile2.translation = this.tilePositions[1];
+      this.tile3.translation = this.tilePositions[2];
+      this.tile4.translation = this.tilePositions[3];
+      this.tile5.translation = this.tilePositions[4];
+      this.tile6.translation = this.tilePositions[5];
+      this.tile7.translation = this.tilePositions[6];
+      this.tile8.translation = this.tilePositions[7];
+      this.tile9.translation = this.tilePositions[8];
+      this.tile10.translation = this.tilePositions[9];
+      this.tile11.translation = this.tilePositions[10];
+      this.tile12.translation = this.tilePositions[11];
+      this.tile13.translation = this.tilePositions[12];
+      this.tile14.translation = this.tilePositions[13];
+      this.tile15.translation = this.tilePositions[14];
+      this.openTilePosition = this.tilePositions[15];
     }
 
     this.moveTile = function(obj) {
