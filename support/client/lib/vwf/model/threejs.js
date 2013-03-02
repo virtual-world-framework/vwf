@@ -779,6 +779,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(threeObject instanceof THREE.Material)
                 {
+                    console.log(["setting material property: ",nodeID,propertyName,propertyValue]);
                     if(propertyName == "texture")
                     {
                         if(propertyValue !== "")
@@ -800,10 +801,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         // use utility to allow for colors, web colors....
                         //this breaks on array values for colors
                         var vwfColor = new utility.color( propertyValue );
-                        if ( !propertyValue.length ) {
-                            threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                        if ( propertyValue instanceof Array && propertyValue.length ) {
+                            threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);                           
                         } else {
-                            threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+                            threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
 
                         threeObject.needsUpdate = true;
@@ -829,11 +830,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         {
                             if(threeObject.__lights[i] instanceof THREE.AmbientLight)
                             {
-                                if ( !propertyValue.length ) {
-                                    threeObject.__lights[i].color.setRGB(vwfColor.red()/255,vwfColor.green()/255,vwfColor.blue()/255);
-                                } else {
+                                if ( propertyValue instanceof Array && propertyValue.length ) {
                                     threeObject.__lights[i].color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-
+                                    
+                                } else {
+                                    threeObject.__lights[i].color.setRGB(vwfColor.red()/255,vwfColor.green()/255,vwfColor.blue()/255);
                                 }
                                 SetMaterialAmbients.call(this);
                                 lightsFound++;
@@ -842,10 +843,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         if ( lightsFound == 0 ) {
                             var ambientlight = new THREE.AmbientLight( '#000000' );
-                            if ( !propertyValue.length ) {
-                                ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
-                            } else {
+                            if ( propertyValue instanceof Array && propertyValue.length ) {
                                 ambientlight.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
+                            } else {
+                                ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                             }                            
                             node.threeScene.add( ambientlight );
                             SetMaterialAmbients.call(this);                            
