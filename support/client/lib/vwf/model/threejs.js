@@ -61,7 +61,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.kernel = this.kernel.kernel.kernel;
             this.state.sceneRootID = "index-vwf";
 
-            this.delayedProperties = {};
 			
 			//Setup the timer
 			window.performance = window.performance || {};
@@ -275,10 +274,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         //The parent three object did not have any childrent with the name matching the nodeID, so make a new group
                         if( !node.threeObject ) {
                             // doesn't this object need to be added to the parent node
-                            //debugger;
-                            //console.info( "{=========================================================" );
-                            //console.info( " == Creating Object3D with name: "+childName+" ==" );
-                            //console.info( " =========================================================}" );
                             node.threeObject = new THREE.Object3D(); 
                             node.threeObject.name = childName;
                             if ( threeParent !== undefined ) {
@@ -336,7 +331,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-            return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
 
         // -- initializingProperty -----------------------------------------------------------------
@@ -346,13 +340,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var value = undefined;
             //console.log(["initializingProperty: ",nodeID,propertyName,propertyValue]);
 
-            if ( !( propertyValue === undefined ) ) {
+            if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( !node ) node = this.state.scenes[ nodeID ];
                 if ( node ) {
                     switch ( propertyName ) {
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue );
+                            break;
+                        case "texture":
                             break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
@@ -785,16 +781,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {
                     if(propertyName == "texture")
                     {
-                        
                         if(propertyValue !== "")
                         {
-                            var img = new Image();
-                            img.src = propertyValue;
-                            var newmap = THREE.ImageUtils.loadTexture(propertyValue);
-                            threeObject.map = newmap;
-                            threeObject.needsUpdate = true;
-                        }else
-                        {
+                            THREE.ImageUtils.loadTexture( propertyValue, undefined, function( texture ) { 
+                                threeObject.map = texture;
+                                threeObject.needsUpdate = true;                                 
+                            }, function( event ) { 
+                                this.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue );
+                            } );
+                        } else {
                             threeObject.map = null;
                             threeObject.needsUpdate = true;
                         }
@@ -802,7 +797,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == "color" || propertyName == "diffuse")
                     {
-                        
                         // use utility to allow for colors, web colors....
                         //this breaks on array values for colors
                         var vwfColor = new utility.color( propertyValue );
@@ -1168,7 +1162,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         node.threeScene.name = "scene";
         node.pendingLoads = 0;
         node.srcAssetObjects = [];
-        node.delayedProperties = {};
         
         return node;
     }
@@ -1539,15 +1532,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     removed = true;
                 }
             } 
-            if ( removed ) {
-                if ( sceneNode.srcAssetObjects.length == 0 ) {
-                    //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
-                    loadComplete.call( threeModel );
-                }
-            }
+            //if ( removed ) {
+            //    if ( sceneNode.srcAssetObjects.length == 0 ) {
+            //        //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
+            //        loadComplete.call( threeModel );
+            //    }
+            //}
 
             // let vwf know the asset is loaded 
             if ( nodeCopy.loadingCallback ) {
+                console.info( "========= LOADED ========== "+node.name+" ========= LOADED ==========" );
                 nodeCopy.loadingCallback( true );                    
             }
         }
@@ -1577,22 +1571,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
             
         
-    }
-    function loadComplete() {
-        var itemsToDelete = [];
-        for ( var id in this.delayedProperties ) {
-            if ( this.state.nodes[id] ) {
-                var props = this.delayedProperties[id];
-                for ( var propertyName in props ) {
-                    Object.getPrototypeOf( this ).settingProperty.call( this, id, propertyName, props[propertyName] );
-                }
-                itemsToDelete.push( id );
-            }
-        }
-        
-        for ( var i = 0; i < itemsToDelete.length; i++ ) {
-            delete this.delayedProperties[itemsToDelete[i]];
-        }
     }
     function getObjectID( objectToLookFor, bubbleUp, debug ) {
 
