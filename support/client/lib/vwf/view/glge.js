@@ -22,7 +22,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
     return view.load( module, /** @lends module:vwf/view/glge */ {
 
         initialize: function( rootSelector ) {
-            if (!vwf) return;
 
             this.rootSelector = rootSelector;
             this.canvasQuery = undefined;
