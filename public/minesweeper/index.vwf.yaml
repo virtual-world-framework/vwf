@@ -51,18 +51,21 @@ children:
         }
     children:
       blankTile1: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png"
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup2:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -76,18 +79,21 @@ children:
         }
     children:
       blankTile2: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup3:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -101,18 +107,21 @@ children:
         }
     children:
       blankTile3: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup4:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -126,18 +135,21 @@ children:
         }
     children:
       blankTile4: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup5:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -151,18 +163,21 @@ children:
         }
     children:
       blankTile5: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup6:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -176,18 +191,21 @@ children:
         }
     children:
       blankTile6: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup7:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -201,18 +219,21 @@ children:
         }
     children:
       blankTile7: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup8:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -226,18 +247,21 @@ children:
         }
     children:
       blankTile8: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup9:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -251,18 +275,21 @@ children:
         }
     children:
       blankTile9: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ] 
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup10:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -276,18 +303,21 @@ children:
         }
     children:
       blankTile10: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup11:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -301,18 +331,21 @@ children:
         }
     children:
       blankTile11: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup12:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -326,18 +359,21 @@ children:
         }
     children:
       blankTile12: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup13:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -351,18 +387,21 @@ children:
         }
     children:
       blankTile13: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup14:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -376,18 +415,21 @@ children:
         }
     children:
       blankTile14: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"  
   tileGroup15:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -401,18 +443,21 @@ children:
         }
     children:
       blankTile15: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png" 
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ]
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"              
   tileGroup16:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -426,59 +471,89 @@ children:
         }
     children:
       blankTile16: 
-          extends: http://vwf.example.com/node3.vwf
-          source: models/tile.dae
-          type: model/vnd.collada+xml
-          properties: 
-            translation: [ 0, 0, 0 ]
-            rotation: [ 1, 0, 0, 0 ]
-            scale: [4.8, 4, 4.8]
-          children:
-            material:
-              extends: http://vwf.example.com/material.vwf
-              properties:
-                texture: "images/ltBlue.png"           
+        extends: http://vwf.example.com/node3.vwf
+        source: models/tile.dae
+        type: model/vnd.collada+xml
+        properties: 
+          translation: [ 0, 0, 0 ]
+          rotation: [ 1, 0, 0, 0 ]
+          scale: [ 4.8, 4, 4.8 ] 
+        children: 
+          Cube: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              material: 
+                extends: http://vwf.example.com/material.vwf
+                properties:
+                  color: "lightblue"     
 scripts:
 - | 
+    var materialDef = {
+      extends: "http://vwf.example.com/material.vwf",
+      properties: {
+        color: "darkblue",
+      }
+    };
+    var textDef = {
+      extends: "http://vwf.example.com/node3.vwf",
+      children: { "material": materialDef },
+    };
     var tile0 = {
       extends: "http://vwf.example.com/node3.vwf",
       source: "models/zero.dae",
       type: "model/vnd.collada+xml",
       properties: {
-        scale: [4.8, 4, 4.8]
-      }
+        scale: [ 4.8, 4, 4.8 ]
+      },
+      children: { "Text": textDef, },
     };
     var tile1 = {
       extends: "http://vwf.example.com/node3.vwf",
       source: "models/one.dae",
       type: "model/vnd.collada+xml",
       properties: {
-        scale: [4.8, 4, 4.8]
-      }
+        scale: [ 4.8, 4, 4.8 ]
+      },
+      children: { "Text": textDef, },
     };
     var tile2 = {
       extends: "http://vwf.example.com/node3.vwf",
       source: "models/two.dae",
       type: "model/vnd.collada+xml",
       properties: {
-        scale: [4.8, 4, 4.8]
-      }
+        scale: [ 4.8, 4, 4.8 ]
+      },
+      children: { "Text_001": textDef, },
     };
     var tile3 = {
       extends: "http://vwf.example.com/node3.vwf",
       source: "models/three.dae",
       type: "model/vnd.collada+xml",
       properties: {
-        scale: [4.8, 4, 4.8]
+        scale: [ 4.8, 4, 4.8 ]
+      },
+      children: { "Text_002": textDef, },
+    };
+
+    materialDef = {
+      extends: "http://vwf.example.com/material.vwf",
+      properties: {
+        color: "red",
       }
     };
+    var sphereDef = {
+      extends: "http://vwf.example.com/node3.vwf",
+      children: { "material": materialDef },
+    };
+
     var mineTile = {
       extends: "http://vwf.example.com/node3.vwf",
       source: "models/mine.dae",
       type: "model/vnd.collada+xml",
       properties: {
         scale: [5, 5, 5]
-      }
+      },
+      children: { "Sphere": sphereDef },
     }
 
     var tileList = [
