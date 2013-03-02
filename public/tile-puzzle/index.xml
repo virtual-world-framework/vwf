@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<glge>
-	<camera id="maincamera" loc_y="38" loc_x="0" loc_z="75" rot_order="ROT_XZY" xtype="C_ORTHO" rot_z="0" rot_x="2.6" rot_y="3.15" />
-
-	<scene id="mainscene" camera="#maincamera" ambient_color="#AAA" fog_type="FOG_NONE">
-
-	</scene>
-
-</glge>
