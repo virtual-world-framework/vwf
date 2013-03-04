@@ -398,7 +398,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
                         if ( threeObject instanceof THREE.Camera ) {
-                            var columny = goog.vec.Vec4.create();
+                            
+							var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 1, columny );
                             var columnz = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 2, columnz );
@@ -408,10 +409,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                         threeObject.matrixAutoUpdate = false;
                         threeObject.matrix.elements = matCpy(transform);
-                        threeObject.updateMatrixWorld(true);                        
+                        threeObject.updateMatrixWorld(true);  
+
+						//because threejs does not do auto tracking of lookat, we must do it manually.
+						//after updating the matrix for an ojbect, if it's looking at something, update to lookat from
+						//the new position
+						if(threeObject.lookatval)
+						{
+							debugger;
+							this.settingProperty(nodeID,'lookAt',threeObject.lookatval);
+						}
                     }
                     if(propertyName == 'lookAt')
-                    {
+                    {     
+					    
+						threeObject.lookatval = propertyValue;
                         //Threejs does not currently support auto tracking the lookat,
                         //instead, we'll take the position of the node and look at that.
                         if(typeof propertyValue == 'string')
@@ -435,16 +447,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                                             0, 1,0,0,
                                                             0,0,1,0,
                                                             0, 0,0,1);
-                            
+                               
                                 var up = new THREE.Vector3();
                                 up.set(0,0,1);
                                 lookatPosition.copy(lookatObject.matrix.getPosition());
                                 thisPosition.copy(thisMatrix.getPosition());
                                 
-                                
-                                threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
-                                
-                                threeObject.updateMatrixWorld(true); 
+                                if(thisPosition.distanceTo(lookatPosition) > 0)
+								{
+									threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
+									threeObject.updateMatrixWorld(true); 
+								}
                                                             
                             }
                         
@@ -465,7 +478,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             matrix = matrix.multiply(flipmat,matrix);
                             threeObject.matrix.copy(matrix);
                             threeObject.updateMatrixWorld(true);    
-                        }
+                        } else
+						{
+							if(!propertyValue)
+							{
+								delete threeObject.lookatval;
+							}
+						
+						}
                     
                     }
                     if(propertyName == 'visible')
@@ -733,7 +753,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 //CopyProperties(threeObject,cam);
                                 cam.far = threeObject.far;
                                 cam.near = threeObject.near;
-                                cam.matrix = threeObject.matrix;
+                                cam.matrix.elements = matCpy(threeObject.matrix.elements);
                                 cam.matrixAutoUpdate = false;
                                 if(threeObject.fov)
                                     cam.fov = threeObject.fov;
@@ -982,6 +1002,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         goog.vec.Mat4.getColumn( value, 2, columnz );
                         goog.vec.Mat4.setColumn( value, 2, columny );
                         goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+						
                     }
                     
                     var ret =  value;
@@ -1211,7 +1232,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
         cam.matrixAutoUpdate = false;
         cam.up = new THREE.Vector3(0,0,1);
-        //cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
+        cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1];
         cam.updateMatrixWorld(true);    
         return cam;
     }

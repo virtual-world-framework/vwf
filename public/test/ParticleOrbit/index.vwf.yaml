@@ -30,8 +30,8 @@ children:
       sizeRange: 50
       maxLifeTime: 3000
       minLifeTime: 220
-      startColor: [ 1, 1, 1, 0.1]
-      endColor: [ 1, 1, 1, 0.1]
+      startColor: [ 1, 0.5, 0.5, 0.1]
+      endColor: [ 1, 0.2, 0.2, 0.1]
       colorRange: [ .5, .5, .5, .05]
       additive: true
       opacity: 1
@@ -122,7 +122,7 @@ scripts:
     this.pointerMove = function(e,ed)
     {
       
-        //this.system.translation = [e.position[0]*550.0-275.0,0,-e.position[1]*400+250];
+        this.system.translation = [e.position[0]*550.0-275.0,0,-e.position[1]*400+250];
     
     
     }
