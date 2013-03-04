@@ -416,7 +416,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						//the new position
 						if(threeObject.lookatval)
 						{
-							debugger;
+							
 							this.settingProperty(nodeID,'lookAt',threeObject.lookatval);
 						}
                     }
