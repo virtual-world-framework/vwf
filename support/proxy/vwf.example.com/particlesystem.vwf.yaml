@@ -232,6 +232,18 @@ properties:
   
   colorRange:
   
+  ## gravatational force toward gravityCenter
+  ## @name particlesystem.vwf#gravity
+  ## @property
+  
+  gravity:
+  
+  ## the point in worldspace that the gravity force pulls toward
+  ## @name particlesystem.vwf#gravity
+  ## @property
+  
+  gravityCenter:
+  
   worldBoundingBox:
     get: |
       return null;
