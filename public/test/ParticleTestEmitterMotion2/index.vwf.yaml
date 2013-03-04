@@ -37,7 +37,7 @@ children:
       additive: true
       damping: .03
       depthTest: false
-      solver: 'Analytic'
+      solver: 'AnalyticShader'
       maxRate: .03
   camera:
     extends: http://vwf.example.com/camera.vwf

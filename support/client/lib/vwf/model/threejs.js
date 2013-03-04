@@ -407,6 +407,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
                         }
                         
+						
+						if(threeObject instanceof THREE.ParticleSystem)
+						{	
+							threeObject.updateTransform(transform);
+						}
+						
+						
                         threeObject.matrixAutoUpdate = false;
                         threeObject.matrix.elements = matCpy(transform);
                         threeObject.updateMatrixWorld(true);  
@@ -542,10 +549,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     var particles = ps.geometry;
                     ps[propertyName] = propertyValue;
                     
-                    if(propertyName == 'transform')
-                    {
-                        ps.updateTransform();
-                    }
+                    
                     if(propertyName == 'maxVelocity'||
                         propertyName == 'minVelocity'||
                         propertyName == 'maxAcceleration'||
@@ -641,6 +645,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
                         ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
                         ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
+					
                     }
                     if(propertyName == 'additive')
                     {
@@ -650,6 +655,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             ps.shaderMaterial_default.transparent = true;
                             ps.shaderMaterial_analytic.blending = THREE.AdditiveBlending;
                             ps.shaderMaterial_analytic.transparent = true;
+							ps.shaderMaterial_interpolate.blending = THREE.AdditiveBlending;
+                            ps.shaderMaterial_interpolate.transparent = true;
                         }
                         else
                         {
@@ -657,10 +664,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             ps.shaderMaterial_default.transparent = false;
                             ps.shaderMaterial_analytic.blending = THREE.NormalBlending; 
                             ps.shaderMaterial_analytic.transparent = false;
+						    ps.shaderMaterial_interpolate.blending = THREE.NormalBlending; 
+                            ps.shaderMaterial_interpolate.transparent = false;
                         }
 
                         ps.shaderMaterial_default.needsUpdate = true;   
-                        ps.shaderMaterial_analytic.needsUpdate = true;                      
+                        ps.shaderMaterial_analytic.needsUpdate = true;   
+						ps.shaderMaterial_interpolate.needsUpdate = true;  						
                     }
                     if(propertyName == 'depthTest')
                     {
@@ -668,6 +678,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         ps.shaderMaterial_default.depthWrite = propertyValue;
                         ps.shaderMaterial_analytic.depthTest = propertyValue;   
                         ps.shaderMaterial_analytic.depthWrite = propertyValue;
+						ps.shaderMaterial_interpolate.depthTest = propertyValue;   
+                        ps.shaderMaterial_interpolate.depthWrite = propertyValue;
                     }
                     if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
                     {
@@ -1735,9 +1747,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				maxOrientation: { type: "f", value: 0.0 },
                 minOrientation: { type: "f", value: 0.0 },
 				time: { type: "f", value: 0.0 },
+				fractime: { type: "f", value: 0.0 },
 				sizeRange: { type: "f", value: 0.0 },
 				textureTiles: { type: "f", value: 1.0 },
 				colorRange:   { type: 'v4', value: new THREE.Vector4(0,0,0,0) }
+				
             };
             uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
             var shaderMaterial_default = new THREE.ShaderMaterial( {
@@ -1748,8 +1762,39 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             });
             
+			//default material expects all computation done cpu side, just renders      
+            var vertShader_interpolate = 
+            "attribute float size; \n"+
+            "attribute vec4 vertexColor;\n"+
+			"attribute vec3 previousPosition;\n"+
+            "varying vec4 vColor;\n"+
+			"attribute vec4 random;\n"+
+			"varying vec4 vRandom;\n"+
+			"uniform float sizeRange;\n"+
+			"uniform vec4 colorRange;\n"+
+			"uniform float fractime;\n"+
+            "void main() {\n"+
+            "   vColor = vertexColor + (random -0.5) * colorRange;\n"+
+            "   vec4 mvPosition = modelViewMatrix * vec4(mix(previousPosition,position,fractime), 1.0 );\n"+
+			"   float psize = size + (random.y -0.5) * sizeRange;\n"+
+            "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n"+
+            "   gl_Position = projectionMatrix * mvPosition;\n"+
+			 "   vRandom = random;"+
+            "}    \n";
             
-            
+			var attributes_interpolate = {
+                size: attributes_default.size,
+                vertexColor:   attributes_default.vertexColor,
+				random:   attributes_default.random,
+				previousPosition: { type: 'v3', value: [] }
+            };
+            var shaderMaterial_interpolate = new THREE.ShaderMaterial( {
+                uniforms:       uniforms_default,
+                attributes:     attributes_interpolate,
+                vertexShader:   vertShader_interpolate,
+                fragmentShader: fragShader_default
+
+            });
             
             
             //analytic shader does entire simulation on GPU
@@ -1851,6 +1896,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;
             particleSystem.shaderMaterial_default = shaderMaterial_default;
+			particleSystem.shaderMaterial_interpolate = shaderMaterial_interpolate;
             
             particleSystem.minVelocity = [0,0,0];
             particleSystem.maxVelocity = [0,0,0];
@@ -1880,6 +1926,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 
                 particle.world = new THREE.Vector3();
                 particle.prevworld = new THREE.Vector3();
+				this.shaderMaterial_interpolate.attributes.previousPosition.value.push(particle.prevworld);
                 var color = new THREE.Vector4(1,1,1,1);
                 this.material.attributes.vertexColor.value.push(color);
                 particle.color = color;
@@ -1951,7 +1998,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 particle.y = particle.initialy;
                 particle.z = particle.initialz;
                 
-                
+              
                 
                 particle.age = 0;
                 particle.velocity = new THREE.Vector3(0,0,0);
@@ -2013,7 +2060,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 shaderMaterial_analytic.attributes.lifespan.needsUpdate = true;
                 this.geometry.verticesNeedUpdate = true;
                 //randomly move the particle up to one step in time
-                
+                particle.prevworld.x = particle.x;
+                particle.prevworld.y = particle.y;
+                particle.prevworld.z = particle.z;
             }
             
             particleSystem.updateAnalyticShader = function(time)
@@ -2099,31 +2148,37 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 					
 					//examples developed with faster tick - maxrate *33 is scale to make work 
 					//with new timing
-					var len = Math.min(this.regenParticles.length,this.maxRate*33);
+					var len = Math.min(this.regenParticles.length,this.maxRate*333);
 					for(var i =0; i < len; i++)
 					{
 						
+						particle.waitForRegen = false;
 						var particle = this.regenParticles.shift();
 						this.setupParticle(particle,this.matrix,inv);
 						this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
-						particle.waitForRegen = false;
+						
 					}
+					
+					this.geometry.verticesNeedUpdate  = true;	
+					this.material.attributes.previousPosition.needsUpdate = true;
+						
 					
 				}
 				
-				//reset pCount counter and do display interpolation
-				var pCount = this.geometry.vertices.length;
-				while(pCount--) 
+				for(var i =0; i < this.geometry.vertices.length; i++)
 				{
-					var particle =particles.vertices[pCount];					
-					this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
-				
+					var particle =this.geometry.vertices[i]
+					if(!particle.waitForRegen)
+						this.interpolateDisplay(particle,this.matrix,inv,this.lastTime);
+					else
+						this.material.attributes.vertexColor.value[i].w = 0.0;
 				}
-				
-			    this.geometry.verticesNeedUpdate  = true;
 				this.geometry.colorsNeedUpdate  = true;
 				this.material.attributes.vertexColor.needsUpdate = true;
 				this.material.attributes.size.needsUpdate = true;
+				this.material.uniforms.fractime.value = this.lastTime;
+				
+			 
 				//console.log(performance.now() - timer);
 			}
 			particleSystem.temp = new THREE.Vector3();
@@ -2182,7 +2237,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						particle.x = 0;
 						particle.y = 0;
 						particle.z = 0;
-						particle.color.w = 0.0;
+					    particle.world.x = 0;
+						particle.world.y = 0;
+						particle.world.z = 0;
+						particle.prevworld.x = 0;
+						particle.prevworld.y = 0;
+						particle.prevworld.z = 0;
+						particle.color.w = 1.0;
+						particle.size = 100;
 					}else
 					{
 					
@@ -2218,6 +2280,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     particle.velocity.y *= damping;
                     particle.velocity.z *= damping;
                     
+					
+					
+					this.temp.x = particle.world.x ;
+					this.temp.y = particle.world.y ;
+					this.temp.z = particle.world.z;
+					inv.multiplyVector3(this.temp);
+					particle.x = this.temp.x;
+					particle.y = this.temp.y;
+					particle.z = this.temp.z;
+					
+					inv.multiplyVector3(particle.prevworld);
+				
                 }
                 
                 
@@ -2229,14 +2303,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //simulation tick
             particleSystem.interpolateDisplay = function(particle,mat,inv,frac_time)
             {
-                
-                this.temp.x = particle.prevworld.x + (particle.world.x - particle.prevworld.x) * frac_time;
-                this.temp.y = particle.prevworld.y + (particle.world.y - particle.prevworld.y) * frac_time;
-                this.temp.z = particle.prevworld.z + (particle.world.z - particle.prevworld.z) * frac_time;
-                inv.multiplyVector3(this.temp);
-                particle.x = this.temp.x;
-                particle.y = this.temp.y;
-                particle.z = this.temp.z;
                 
                 var percent = (particle.prevage + (particle.age - particle.prevage) * frac_time)/particle.lifespan;
                 
@@ -2251,11 +2317,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             particleSystem.setSolverType =function(type)
             {
-				
+				this.solver = type;
                 if(type == 'Euler')
                 {
                     particleSystem.update = particleSystem.updateEuler;
-                    particleSystem.material = particleSystem.shaderMaterial_default;
+                    particleSystem.material = particleSystem.shaderMaterial_interpolate;
                     particleSystem.rebuildParticles();
                 }
                 if(type == 'Analytic')
@@ -2274,9 +2340,33 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
             
 
-            particleSystem.updateTransform = function()
+            particleSystem.updateTransform = function(newtransform)
             {
-            
+				
+				
+				var inv = new THREE.Matrix4();
+				var newt = new THREE.Matrix4();
+				inv.elements = matCpy(newtransform);
+				newt = newt.copy(this.matrix);
+				inv = inv.getInverse(inv);
+				
+				if(particleSystem.solver == 'AnalyticShader')
+				{
+					return;
+				
+				}
+				
+				for(var i =0; i < this.geometry.vertices.length; i++)
+				{
+						inv.multiplyVector3(this.geometry.vertices[i]);
+						inv.multiplyVector3(this.shaderMaterial_interpolate.attributes.previousPosition.value[i]);
+						newt.multiplyVector3(this.geometry.vertices[i]);
+						newt.multiplyVector3(this.shaderMaterial_interpolate.attributes.previousPosition.value[i]);
+				}
+					this.geometry.verticesNeedUpdate  = true;
+					
+					this.shaderMaterial_interpolate.attributes.previousPosition.needsUpdate = true;
+						
             }
             particleSystem.setParticleCount = function(newcount)
             {
