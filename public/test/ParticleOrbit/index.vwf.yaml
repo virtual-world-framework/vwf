@@ -58,8 +58,8 @@ children:
       startSize: 130
       image: nebula.jpg
       textureTiles: 2
-      endSize: 3
-      sizeRange: 50
+      endSize: 30
+      sizeRange: 20
       maxLifeTime: 3000
       minLifeTime: 220
       startColor: [ .5, .5, 1, 0.1]

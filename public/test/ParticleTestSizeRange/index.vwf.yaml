@@ -24,8 +24,8 @@ children:
       maxAcceleration: [ 0, 0, 0.0]
       minAcceleration: [ 0, 0, 0.0]
       startSize: 30
-      endSize: 30
-      sizeRange: 60
+      endSize: 0
+      sizeRange: 30
       maxLifeTime: 50
       minLifeTime: 30
       startColor: [ 1, 1, 1, 1]
@@ -37,6 +37,7 @@ children:
       minOrientation: 3
       emitterSize: [ 1000 , 0 , 1000.0 ]
       emitterType: box
+      solver: 'Analytic'
   camera:
     extends: http://vwf.example.com/camera.vwf
     properties:

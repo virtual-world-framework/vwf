@@ -26,8 +26,8 @@ children:
       minAcceleration: [ 0, 0, 0]
       startSize: 3
       endSize: 3
-      maxLifeTime: 40
-      minLifeTime: 40
+      maxLifeTime: 140
+      minLifeTime: 140
       startColor: [ 1, 1, 1, 1]
       endColor: [ 0, 0, 0, 0]
       additive: false

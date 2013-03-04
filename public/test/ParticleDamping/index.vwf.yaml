@@ -24,7 +24,8 @@ children:
       velocityMode: 'cartesian'
       maxAcceleration: [ 0, 0, -.1]
       minAcceleration: [ 0, 0, -.1]
-      size: 3
+      startSize: 5
+      endSize: 0
       maxLifeTime: 120
       minLifeTime: 30
       startColor: [ 1, 1, 1 , 1]
