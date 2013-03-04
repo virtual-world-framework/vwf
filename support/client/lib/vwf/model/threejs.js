@@ -632,6 +632,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
                     if(propertyName == 'solver')
                     {
+						
                         ps.setSolverType(propertyValue)
                     }
                     if(propertyName == 'image')
@@ -2250,6 +2251,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             particleSystem.setSolverType =function(type)
             {
+				
                 if(type == 'Euler')
                 {
                     particleSystem.update = particleSystem.updateEuler;

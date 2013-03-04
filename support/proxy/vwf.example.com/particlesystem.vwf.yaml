@@ -179,6 +179,59 @@ properties:
   
   velocityMode:
   
+  
+  ## solver - the system used to update the position of the particles. 
+  ## 'Euler' solver can take into account emitter motion, damping and gravity. Runs at 10 ticks per second with linear interpolation
+  ## 'Analytic' - runs in realtime, but requires more bandwidth on the GPU bus. Cannot take into account complex forces like damping or gravity
+  ## 'AnalyticShader' offloads the analytic solver into a shader. Very high performance, but cannot take into account emitter motion
+  ## also, because it cannot branch based on previous states, it does not support maxRate. Instead, it offsets all particles randomly in time to distribute them
+  ## @name particlesystem.vwf#solver
+  ## @property
+  
+  solver:
+  
+  ## Split the particle texture by the value. 2 would be a 2x2 tiled texture, 3 is 3x3.
+  ## @name particlesystem.vwf#textureTiles
+  ## @property
+  
+  textureTiles:
+  
+  ## the particles spin over time
+  ## @name particlesystem.vwf#maxSpin
+  ## @property
+  
+  maxSpin:
+  
+  ## the particles spin over time
+  ## @name particlesystem.vwf#minSpin
+  ## @property
+  
+  minSpin:
+  
+  ## the particles orientation
+  ## @name particlesystem.vwf#minSpin
+  ## @property
+  
+  minOrientation:
+  
+  ## the particles orientation
+  ## @name particlesystem.vwf#minSpin
+  ## @property
+  
+  maxOrientation:
+  
+  ## the variation offset from the start and end size
+  ## @name particlesystem.vwf#sizeRange
+  ## @property
+  
+  sizeRange:
+  
+  ## the variation offset from the start and end color
+  ## @name particlesystem.vwf#colorRange
+  ## @property
+  
+  colorRange:
+  
   worldBoundingBox:
     get: |
       return null;
