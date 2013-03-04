@@ -81,19 +81,19 @@ function MaterialEditor()
 	{
 	
 		
-		if(document.PlayerNumber == null)
-		{
-			_Notifier.notify('You must log in to participate');
-			return;
-		}
+		// if(document.PlayerNumber == null)
+		// {
+			// _Notifier.notify('You must log in to participate');
+			// return;
+		// }
 		
 		for(var i =0; i < _Editor.getSelectionCount(); i++)
 		{
-			if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(i).id,document.PlayerNumber))
-			{
-				_Notifier.notify('You do not have permission to edit this material');
-				continue;
-			}
+			// if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(i).id,document.PlayerNumber))
+			// {
+				// _Notifier.notify('You do not have permission to edit this material');
+				// continue;
+			// }
 			
 			var id = _Editor.GetSelectedVWFNode(i).id;
 			vwf_view.kernel.setProperty(id,'materialDef',_MaterialEditor.currentMaterial);
@@ -302,7 +302,7 @@ function MaterialEditor()
 			{prop:'scaley',min:-10,max:10,step:.1},
 			{prop:'offsetx',min:-1,max:1,step:.01},
 			{prop:'offsety',min:-1,max:1,step:.01},
-			{prop:'rot',min:-2,max:2,step:.01}
+	//		{prop:'rot',min:-2,max:2,step:.01}
 			];
 				
 			for(var j = 0; j < layersliderprops.length;j++)
@@ -329,20 +329,11 @@ function MaterialEditor()
 			$('#'+rootid+'mapToDiv').append('<div  style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Map To Property: </div>');
 			$('#'+rootid+'mapToDiv').append('<select id="'+rootid+'mapTo" style="float:right;clear:right">'+
 			'<option value="1">Diffuse Color</option>'+
-			'<option value="256">Alpha</option>'+
-			'<option value="16384">Ambient</option>'+
-			'<option value="128">Emit</option>'+
-			'<option value="8192">Height</option>'+
-			'<option value="4096">Mask A</option>'+
-			'<option value="512">Mask R</option>'+
-			'<option value="1024">Mask G</option>'+
-			'<option value="2048">Mask B</option>'+
-			'<option value="2">Normal</option>'+
-			'<option value="64">Reflect</option>'+
-			'<option value="32">Shine</option>'+
-			'<option value="8">Spec Color</option>'+
-			'<option value="16">Specular</option>'+
-			'<option value="32768">Steep</option>'+
+			'<option value="2">Bump Map</option>'+
+			'<option value="3">Light Map</option>'+
+			'<option value="4">Normal Map</option>'+
+			'<option value="5">Specular Map</option>'+
+			'<option value="6">Environment Map</option>'+
 			'</select>');
 			
 			$('#'+rootid+'mapTo').val(this.currentMaterial.layers[i].mapTo + "");
@@ -357,13 +348,11 @@ function MaterialEditor()
 			$('#'+rootid).append('<div style="clear:right" id="'+rootid+'mapInputDiv" />');
 			$('#'+rootid+'mapInputDiv').append('<div  style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Coord Type: </div>');
 			$('#'+rootid+'mapInputDiv').append('<select id="'+rootid+'mapInput" style="float:right;clear:right">'+
-			'<option value="0">UV 1</option>'+
-			'<option value="1">UV 2</option>'+
-			'<option value="6">Environment</option>'+
-			'<option value="3">Normal</option>'+
-			'<option value="4">Object</option>'+
-			'<option value="5">Reflection</option>'+
-			'<option value="7">View</option>'+
+			'<option value="0">UV Set 1</option>'+
+			'<option value="1">Cube Reflection</option>'+
+			'<option value="2">Cube Refraction</option>'+
+			'<option value="3">Spherical Reflection</option>'+
+			'<option value="4">Spherical Reflection</option>'+
 			'</select>');
 			
 			
@@ -378,12 +367,12 @@ function MaterialEditor()
 			
 			
 			
-			$('#'+rootid).append('<div style="clear:right" id="'+rootid+'blendModeDiv" />');
-			$('#'+rootid+'blendModeDiv').append('<div  style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Blend Mode: </div>');
-			$('#'+rootid+'blendModeDiv').append('<select id="'+rootid+'blendMode" style="float:right;clear:right">'+
-			'<option value="0">Multiply</option>'+
-			'<option value="1">Mix</option>'+
-			'</select>');
+	//		$('#'+rootid).append('<div style="clear:right" id="'+rootid+'blendModeDiv" />');
+	//		$('#'+rootid+'blendModeDiv').append('<div  style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Blend Mode: </div>');
+	//		$('#'+rootid+'blendModeDiv').append('<select id="'+rootid+'blendMode" style="float:right;clear:right">'+
+	//		'<option value="0">Multiply</option>'+
+	//		'<option value="1">Mix</option>'+
+	//		'</select>');
 			
 			$('#'+rootid+'blendMode').val(this.currentMaterial.layers[i].mapTo + "");
 			$('#'+rootid+'blendMode').attr('layer',i);

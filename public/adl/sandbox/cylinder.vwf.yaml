@@ -100,21 +100,22 @@ scripts:
         if(this.uri == "cylinder.vwf")
             return;
 
-       var primobj = new GLGE.Object();
        
-       this.mesh = primobj;
+       
+       this.mesh = new THREE.Mesh(undefined,_Editor.getDefaultMaterial());
        if(vwf.getProperty(this.id,'radius') == undefined) vwf.setProperty(this.id,'radius',1);
        if(vwf.getProperty(this.id,'height') == undefined) vwf.setProperty(this.id,'height',1);
        if(vwf.getProperty(this.id,'heightsegments') == undefined) vwf.setProperty(this.id,'heightsegments',2);
        if(vwf.getProperty(this.id,'radialsegments') == undefined) vwf.setProperty(this.id,'radialsegments',12);
        if(vwf.getProperty(this.id,'base2pivot') == undefined) vwf.setProperty(this.id,'base2pivot',false);
        
-       vwf.views[0].state.nodes[this.id].glgeObject.addChild(this.mesh);
-       
+       vwf.views[0].state.nodes[this.id].threeObject.add(this.mesh);
+       this.mesh.rotation.x = Math.PI/2;
       
        this._initialized = true;
        this.dirtyStack();
-       this.setupMaterial();        
+       if(this.materialDef)
+       this.setupMaterial(this.materialDef);             
     }
     this.Build = function()
     {
@@ -129,111 +130,7 @@ scripts:
     this.BuildCylinder =function(height,radius,heightsteps,rsteps,base2pivot)
     {
         
-        var rv = [radius,0,0];
-            
-        var positions = [];
-        var normals = [];
-        var colors = [];
-        var faces = [];
-        var uvs = [];
-        var z_rot = 0;
-        
-        var segs = Math.floor(rsteps/2);
-        var zinc = 180/segs;
-        
-        for(var band = 0; band <= height; band+= height/heightsteps)        
-        for(z_rot = 0; z_rot <= 360; z_rot += zinc)
-        {
-        
-            uvs.push((z_rot + 90)/180);
-            uvs.push(band/height);
-            var zmatrix = GLGE.angleAxis(z_rot*0.0174532925,[0,0,1]);
-            var offset = GLGE.mulMat4Vec3(zmatrix,rv);
-            
-            var length = GLGE.lengthVec3(offset);
-            var normal = GLGE.scaleVec3(offset,1/length);
-            normals.push(normal[0]);
-            normals.push(normal[1]);
-            normals.push(normal[2]);
-            offset[2] = band;
-            positions.push(offset[0]);
-            positions.push(offset[1]);
-            if(base2pivot == true)
-                positions.push(offset[2]);
-            else
-                positions.push(offset[2]-height/2);
-        }
-        
-         for(var band = 0; band < heightsteps; band+= 1)
-            {
-                for(z_rot = 0; z_rot <= 360/zinc + heightsteps-1; z_rot += 1)
-                {
-                    var ynum = ( (360/zinc)*band);
-                    var ynum1 = ( (360/zinc)*(band+1));
-                    var znum = z_rot;
-                    var znum1 = (z_rot + 1);
-                   
-                    faces.push(ynum+znum);
-                    faces.push(ynum1+znum1);
-                    faces.push(ynum1+znum);
-                    
-                    
-                    faces.push(ynum1+znum1);
-                    faces.push(ynum+znum);
-                    faces.push(ynum+znum1);;
-                }
-            }
-            
-        var capindexstart = positions.length/3-1;    
-        for(var capnum = 0; capnum <= 2; capnum+= 1)        
-        for(z_rot = 0; z_rot <= 360; z_rot += zinc)
-        {
-        
-            //uvs.push((z_rot + 90)/180);
-           // uvs.push(band/height);
-            var zmatrix = GLGE.angleAxis(z_rot*0.0174532925,[0,0,1]);
-            offset = GLGE.mulMat4Vec3(zmatrix,rv);
-            
-            var length = GLGE.lengthVec3(offset);
-            var normal = GLGE.scaleVec3(offset,1/length);
-            
-            uvs.push((offset[1]/radius)/2);
-            uvs.push((offset[0]/radius)/2);
-            normals.push(0);
-            normals.push(0);
-            normals.push(capnum == 0 ? -1: 1);
-            offset[2] = capnum == 0 ? 0: height;
-            positions.push(offset[0]);
-            positions.push(offset[1]);
-            if(base2pivot == true)
-                positions.push(offset[2]);
-            else
-                positions.push(offset[2]-height/2);
-        }
-       
-        for(var i = capindexstart; i < capindexstart+360/zinc -1;i++)
-        {
-            
-            faces.push(i+1);
-            faces.push(capindexstart+1);
-            faces.push(i+2);
-        }
-        capindexstart += 360/zinc + 1;
-        for(var i = capindexstart; i < capindexstart+360/zinc -1;i++)
-        {
-            faces.push(capindexstart+1);
-            faces.push(i+1);
-            faces.push(i+2);
-        }
-
-        var planemesh = new GLGE.Mesh();
-          
-            planemesh.setPositions(positions);
-            planemesh.setFaces(faces);
-            planemesh.setNormals(normals);
-            planemesh.setUV(uvs);
-      
-            return planemesh;
+        return new THREE.CylinderGeometry(radius,radius,height,rsteps,heightsteps);
     }
    
    

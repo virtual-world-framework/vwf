@@ -62,6 +62,7 @@
   <!-- This is the common view implementation and an example view that summarizes the          -->
     <!-- simulation state in HTML on the main page.                                              -->
     <script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
+	<script type="text/javascript" src="vwf/model/threejs/THREE.js"></script>
     <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
     <script type="text/javascript">
 
@@ -74,14 +75,14 @@
             "vwf/kernel/model",
             "vwf/model/javascript",
             "vwf/model/jiglib",
-            "vwf/model/glge",
+            "vwf/model/threejs",
             "vwf/model/scenejs",
             "vwf/model/object",
             "vwf/model/stage/log",
             "vwf/kernel/view",
             "vwf/view/document",
 			"vwf/view/EditorView",
-            "vwf/view/glge",
+            "vwf/view/threejs",
             "vwf/view/googleEarth",
             "vwf/utility",
 
@@ -119,7 +120,7 @@
                     [
                         "vwf/model/javascript",
                         "vwf/model/jiglib",
-                        "vwf/model/glge",
+                        "vwf/model/threejs",
                         "vwf/model/object",
                     ],
 
@@ -128,7 +129,7 @@
 
                     [
 						
-						{ "vwf/view/glge": "#vwf-root" },
+						{ "vwf/view/threejs": "#vwf-root" },
                         "vwf/view/document",
                         //"vwf/view/editor",
 						"vwf/view/EditorView",

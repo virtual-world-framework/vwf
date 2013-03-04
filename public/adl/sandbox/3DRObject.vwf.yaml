@@ -48,7 +48,7 @@ scripts:
             var currentMaterial = this.GetMesh().material;
             if(!currentMaterial)
                 return;
-            return GLGE.MaterialManager.getDefForMaterial(currentMaterial);
+            return _Editor.getDefForMaterial(currentMaterial);
     
     }
     this.initialize = function()
@@ -61,30 +61,30 @@ scripts:
              var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
              if(!newMaterial) return;
              
-             var currentMaterial = this.GetMesh().getMaterial();
+             var currentMaterial = this.GetMesh().material;
              if(!this.GetMesh().originalMaterial)
              {
                 this.GetMesh().originalMaterial = currentMaterial;
-                currentMaterial = new GLGE.Material();
-                this.GetMesh().setMaterial(currentMaterial);
+                currentMaterial = new THREE.MeshPhongMaterial();
+                this.GetMesh().material = (currentMaterial);
              }
              if(!currentMaterial) return;
              
-            this.GetMesh().setMaterial(GLGE.MaterialManager.getMaterialByDef(newMaterial,this.GetMesh().material));
+            _Editor.setMaterialByDef(currentMaterial,newMaterial);
    
-            this.GetMesh().batchDirty = true;   
+   
     }
     function findviewnode(id)
     {
         for(var i =0; i<vwf.views.length;i++)
         {
-            if(vwf.views[i].state.nodes[id].glgeObject) return vwf.views[i].state.nodes[id].glgeObject;
+            if(vwf.views[i].state.nodes[id].threeObject) return vwf.views[i].state.nodes[id].threeObject;
         }
         return null;
     }
     function findleaf(node)
     {
-        if(node.getMesh && node.getMesh())
+        if(node.geometry)
             return node;
         if(node.children)
         {
@@ -123,46 +123,54 @@ scripts:
     }
     this.backupMesh = function()
     {
+        
         if(!this.GetMesh())
             return;
-        var mesh = this.GetMesh().getMesh();
-        if(mesh.positions)
-            mesh.originalPositions = mesh.positions.slice(0);
-        if(mesh.normals)
-            mesh.originalNormals = mesh.normals.slice(0);
-        if(mesh.faces)
-            mesh.originalFaces = mesh.faces.data.slice(0);
-        if(mesh.uv1set)
-            mesh.originalUV1 = mesh.uv1set.slice(0);
-        if(mesh.uv2set)
-            mesh.originalUV2 = mesh.uv2set.slice(0);
+        var geometry = this.GetMesh().geometry;
+        if(geometry.vertices)
+            geometry.originalPositions = this.copyArray([],geometry.vertices);
+        if(geometry.faces)
+            geometry.originalFaces = this.copyArray([],geometry.faces);
+        if(geometry.normals)
+            geometry.originalNormals = this.copyArray([],geometry.normals);
+       
+    }
+    this.copyArray = function(arrNew, arrOld)
+    {
+        if(!arrNew)
+            arrNew = [];
+        arrNew.length = 0;
+        for(var i =0; i< arrOld.length; i++)
+            arrNew.push(arrOld[i].clone());
+        return arrNew;
     }
     this.restoreMesh = function()
     {
+        
       if(!this.GetMesh())
             return;
-        var mesh = this.GetMesh().getMesh();
-        if(mesh.originalPositions)
-            mesh.setPositions(mesh.originalPositions.slice(0));
-        if(mesh.originalNormals)    
-            mesh.setNormals(mesh.originalNormals.slice(0));
-        if(mesh.originalFaces)
-            mesh.setFaces(mesh.originalFaces.slice(0));
-        if(mesh.originalUV1)        
-            mesh.setUV(mesh.originalUV1.slice(0));
-        if(mesh.originalUV2)
-            mesh.setUV2(mesh.originalUV2.slice(0));
+        var geometry = this.GetMesh().geometry;
+        if(geometry.originalPositions)
+             this.copyArray(geometry.vertices,geometry.originalPositions);
+        if(geometry.originalNormals)    
+             this.copyArray(geometry.normals,geometry.originalNormals);
+        if(geometry.originalFaces)
+             this.copyArray(geometry.faces,geometry.originalFaces);
+        
+        geometry.verticesNeedUpdate = true;
+        geometry.normalsNeedUpdate = true;
+        geometry.facesNeedUpdate = true;
     }
     this.updateSelf = function()
     {
       if(!this.GetMesh())
             return;
-        if(!this.GetMesh().getMesh().originalPositions)
+        if(!this.GetMesh().geometry.originalPositions)
             this.backupMesh();
         else   
             this.restoreMesh();
-        if(this.GetMesh().getMesh())
-            this.GetMesh().getMesh().dirtyMesh = true;		
+        if(this.GetMesh().geometry)
+            this.GetMesh().geometry.dirtyMesh = true;		
     }
     this.dirtyStack = function()
     {
@@ -177,8 +185,7 @@ scripts:
         {
             return vwf.callMethod(this.children[i].id,'updateStack');
         }
-        if(this.GetMesh() && this.GetMesh().getMesh())
-            this.GetMesh().getMesh().dirtyMesh = true;
+        
     }
     this.GetBounds = function()
     {

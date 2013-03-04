@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
+<!-- Secretary of Defense (Personnel & Readiness).                                               -->
+<!--                                                                                             -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
+<!-- except in compliance with the License. You may obtain a copy of the License at              -->
+<!--                                                                                             -->
+<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
+<!--                                                                                             -->
+<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
+<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
+<!-- either express or implied. See the License for the specific language governing permissions  -->
+<!-- and limitations under the License.                                                          -->
+
+<html>
+
+  <!-- The Virtual World Framework client is a collection of scripts and a world specification   -->
+  <!-- passed to an initialization call. In this sample, the world specification is provided     -->
+  <!-- inline for clarity, but it is normally provided by the reflector or may be specified as a -->
+  <!-- URI and loaded from a network-visible location.                                           -->
+
+  <head>
+
+    <title>Virtual World Framework</title>
+
+    <!-- The Virtual World Framework makes use of the jQuery library.                            -->
+
+    <script type="text/javascript" src="require.js"></script>
+
+    <script type="text/javascript" src="jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="jquery-ui-1.8.16.custom.js"></script>
+    <script type="text/javascript" src="async.js"></script>
+
+    <script type="text/javascript" src="closure/base.js"></script>
+    <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
+    <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
+
+    <script type="text/javascript">if (!window.WebSocket && window.MozWebSocket) window.WebSocket=window.MozWebSocket</script> <!-- for Firefox 5 -->
+    
+
+    <script type="text/javascript" src="crypto.js"></script>
+    <script type="text/javascript" src="md5.js"></script>
+
+    <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
+    <!-- the global window object as window.vwf. All access to the framework is through that     -->
+    <!-- reference, and no other objects are globally visible.                                   -->
+
+    <script type="text/javascript" src="vwf.js"></script>
+
+    <!-- The core framework manages the simulation and synchronizes it across worlds shared by   -->
+    <!-- multiple users. But, the manner in which the simulation is expressed is controlled by   -->
+    <!-- extension modules. There are two flavors. Models directly control the simulation but    -->
+    <!-- cannot accept external input. The model configuration is identical for all participants -->
+    <!-- in a shared world. Views may accept external input -such as pointer and key events or   -->
+    <!-- directives from a connection to an outside engine that is not visible to all users- but -->
+    <!-- may only affect the simulation indirectly through the synchronization server.           -->
+
+    <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
+    <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
+    <script type="text/javascript">connected && google.load( "earth", "1" )</script>
+  <!-- This is the common view implementation and an example view that summarizes the          -->
+    <!-- simulation state in HTML on the main page.                                              -->
+    <script type="text/javascript" src="vwf/model/glge/glge-compiled.js"></script>
+    <script type="text/javascript" src="vwf/model/jiglib/jiglib.js"></script>
+    <script type="text/javascript">
+
+        require( [
+
+            "domReady",
+			"/socket.io/socket.io.js",
+            // This is the common model implementation and an example model that connects the
+            // simulation to a WebGL scene manager.
+            "vwf/kernel/model",
+            "vwf/model/javascript",
+            "vwf/model/jiglib",
+            "vwf/model/glge",
+            "vwf/model/scenejs",
+            "vwf/model/object",
+            "vwf/model/stage/log",
+            "vwf/kernel/view",
+            "vwf/view/document",
+			"vwf/view/EditorView",
+            "vwf/view/glge",
+            "vwf/view/googleEarth",
+            "vwf/utility",
+
+        ], function( ready ) {
+
+            ready( function() {
+
+                // With the scripts loaded, we must initialize the framework. vwf.initialize()
+                // accepts three parameters: a world specification, model configuration parameters,
+                // and view configuration parameters.
+				$(document.body).append('<div id="glyphOverlay" />');
+                vwf.initialize(
+
+                    // This is the world specification. The world may be specified using a component
+                    // literal as shown here, or the specification may be placed in a network-
+                    // visible location and specified here as a URI or as a query parameter to this
+                    // index page.
+     
+                    // As a literal:
+                    //     { extends: "http://vwf.example.com/example-type.vwf", properties: { ... }, ... }
+     
+                    // As a string:
+                    //     "http://vwf.example.com/example-type.vwf",
+     
+                    // These are the model configurations. Each key within the configuration object
+                    // is a model name, and each value is an argument or an array of arguments to be
+                    // passed to the model's constructor.
+     
+                    // With an array of arguments for the "example" model:
+                    //     { example: [ p1, p2, ... ], // ==> new vwf.modules.example( vwf, p1, p2, ... ) }
+     
+                    // As a single argument to the "html" view:
+                    //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
+     
+                    [
+                        "vwf/model/javascript",
+                        "vwf/model/jiglib",
+                        "vwf/model/glge",
+                        "vwf/model/object",
+                    ],
+
+                    // These are the view configurations. They use the same format as the model
+                    // configurations.
+
+                    [
+						
+						{ "vwf/view/glge": "#vwf-root" },
+                        "vwf/view/document",
+                        //"vwf/view/editor",
+						"vwf/view/EditorView",
+                    	"vwf/view/googleEarth",
+                    ]
+
+                );
+
+            } );
+
+        } );
+
+    </script>
+
+  
+
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-ui-1.8.16.custom.css" />
+
+  </head>
+
+  <body>
+
+    <!-- Generic clients may have nearly empty pages, but pages for custom clients may be laid   -->
+    <!-- out in any manner desired. Any view and models that render to the page should be        -->
+    <!-- instructed where to attach their content.                                               -->
+
+    <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
+
+    <div id="vwf-root"></div>
+
+    <!-- Overlay div to display loading information -->
+    <div id='loadstatus' class='overlay'>
+      <div class='loading'>
+        <div class='requirements'>
+          <p><span>Checking Compatibility</span></p>
+          <p><span id='WGL' class='req'>WebGL</span></p>
+          <p><span id='ES5' class='req'>ECMAScript5</span></p>
+          <p><span id='WS' class='req'>WebSockets</span></p>
+        </div>
+        <div id='loadText'>    
+          <span class='loadText'>LOADING</span>
+          <img class='loadImg' src='images/loading.gif' alt=' '/>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="compatibility.js"></script>
+    <script type="text/javascript">
+        updateOverlay();
+    </script>
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+  </body>
+
+</html>

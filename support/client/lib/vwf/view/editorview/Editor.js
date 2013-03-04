@@ -1,3 +1,242 @@
+function to3Vec(vec,two,three)
+      {
+        if(vec.length)
+            return new THREE.Vector3(vec[0],vec[1],vec[2]);
+        else
+            return new THREE.Vector3(vec,two,three);
+      }
+function pointInFrustrum(point,frustrum)
+{
+//checks if cube points are within the frustum planes
+	
+	
+	var x, y, z;
+	
+		x=point[0];
+		y=point[1];
+		z=point[2];
+	
+	for(var i = 0; i < frustrum.planes.length; i++)
+	{
+		var vec = GLGE.subVec3(point,frustrum.planes[i].point);
+		vec = GLGE.toUnitVec3(vec);
+		if(GLGE.dotVec3(vec,frustrum.planes[i].normal) < 0)
+			return false;
+	}
+	return true;
+
+}
+
+
+
+// a quick structure to test bounding boxes
+function BoundingBoxRTAS(min,max)
+{
+	this.max = [-Infinity,-Infinity,-Infinity];
+	this.min = [Infinity,Infinity,Infinity];
+	if(min)
+		this.min = min;
+	if(max)	
+		this.max = max;
+}
+// copy
+BoundingBoxRTAS.prototype.clone = function()
+{
+	return new BoundingBoxRTAS([this.min[0],this.min[1],this.min[2]],[this.max[0],this.max[1],this.max[2]]);
+}
+//sort of like add for two boxes. expand this box to include the new one was well as itself
+BoundingBoxRTAS.prototype.expandBy = function(bb)
+{
+	if(bb.min[0] < this.min[0]) this.min[0] = bb.min[0];
+	if(bb.min[1] < this.min[1]) this.min[1] = bb.min[1];
+	if(bb.min[2] < this.min[2]) this.min[2] = bb.min[2];
+	if(bb.max[0] > this.max[0]) this.max[0] = bb.max[0];
+	if(bb.max[1] > this.max[1]) this.max[1] = bb.max[1];
+	if(bb.max[2] > this.max[2]) this.max[2] = bb.max[2];
+}
+//transform the boundging box by a matrix, then re-axis align.
+BoundingBoxRTAS.prototype.transformBy = function(matrix)
+{
+	var mat = [];
+	for(var i = 0; i < matrix.length; i++)
+	 mat.push(matrix[i]);
+	//mat = GLGE.inverseMat4(mat); 
+	
+	var points = [];
+	var allpoints = [];
+	var min = this.min;
+	var max = this.max;
+	//list of all corners
+	points.push([min[0],min[1],min[2]]);
+	points.push([min[0],min[1],max[2]]);
+	points.push([min[0],max[1],min[2]]);
+	points.push([min[0],max[1],max[2]]);
+	points.push([max[0],min[1],min[2]]);
+	points.push([max[0],min[1],max[2]]);
+	points.push([max[0],max[1],min[2]]);
+	points.push([max[0],max[1],max[2]]);
+	for(var i = 0; i < points.length; i++)
+	{
+		//transform all points
+		allpoints = allpoints.concat(GLGE.mulMat4Vec3(mat,points[i]));
+	}
+	//find new axis aligned bounds
+	var bounds = FindMaxMin(allpoints);
+	var min2 = bounds[0];
+	var max2 = bounds[1];
+	return new  BoundingBoxRTAS(min2,max2);
+}
+
+BoundingBoxRTAS.prototype.intersectFrustrum = function(frustrum)
+{
+	var p0 = [this.min[0],this.min[1],this.min[2]];
+	var p1 = [this.min[0],this.min[1],this.max[2]];
+	var p2 = [this.min[0],this.max[1],this.min[2]];
+	var p3 = [this.min[0],this.max[1],this.max[2]];
+	var p4 = [this.max[0],this.min[1],this.min[2]];
+	var p5 = [this.max[0],this.min[1],this.max[2]];
+	var p6 = [this.max[0],this.max[1],this.min[2]];
+	var p7 = [this.max[0],this.max[1],this.max[2]];
+	
+	var points = [p0,p1,p2,p3,p4,p5,p6,p7];
+	for(var i =0; i < 8; i++)
+	{
+		if(pointInFrustrum(points[i],frustrum))
+			return true;
+	}
+	for(var i=0; i < 4; i ++)
+	{
+		if(this.intersect(frustrum.cornerRays[i].o,frustrum.cornerRays[i].d).length > 0)
+			return true;
+	}
+	return false;
+}
+//intersect ray and bounding box
+BoundingBoxRTAS.prototype.intersect = function(o,d)
+{	
+		//TODO: are these loose bounds necessary?
+		var min = [this.min[0]-.01,this.min[1]-.01,this.min[2]-.01];
+		var max = [this.max[0]+.01,this.max[1]+.01,this.max[2]+.01];
+ 		var dirfrac = [0,0,0];
+		var t;
+		// d is unit direction vector of ray
+		dirfrac[0] = 1.0 / d[0];
+		dirfrac[1] = 1.0 / d[1];
+		dirfrac[2] = 1.0 / d[2];
+		// this.min is the corner of AABB with Math.minimal coordinates - left bottom, this.max is Math.maximal corner
+		// o is origin of ray
+		var t1 = (min[0] - o[0])*dirfrac[0];
+		var t2 = (max[0] - o[0])*dirfrac[0];
+		var t3 = (min[1] - o[1])*dirfrac[1];
+		var t4 = (max[1] - o[1])*dirfrac[1];
+		var t5 = (min[2] - o[2])*dirfrac[2];
+		var t6 = (max[2] - o[2])*dirfrac[2];
+
+		var tMathmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
+		var tMathmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
+
+		// if tMath.max < 0, ray (line) is intersecting AABB, but whole AABB is behing us
+		if (tMathmax < 0)
+		{
+			t = tMathmax;
+			return [];
+		}
+
+		// if tMath.min > tMath.max, ray doesn't intersect AABB
+		if (tMathmin > tMathmax)
+		{
+			t = tMathmax;
+			return [];
+		}
+
+		t = tMathmin;
+		return [true]; 
+    
+   
+    return [true]; // if we made it here, there was an intersection - YAY
+
+}
+
+
+
+	  
+function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)
+{
+	this.ntl = ntl;
+	this.ntr = ntr;
+	this.nbl = nbl;
+	this.nbr = nbr;
+					
+	this.ftl = ftl;
+	this.ftr = ftr;
+	this.fbl = fbl;
+	this.fbr = fbr;
+					
+
+	this.nearnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ntr,this.nbr),GLGE.subVec3(this.nbl,this.nbr)));
+	this.farnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ftl,this.fbl),GLGE.subVec3(this.ftr,this.fbl)));
+	this.leftnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.nbl,this.fbl),GLGE.subVec3(this.ftl,this.fbl)));
+	this.rightnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ftr,this.ntr),GLGE.subVec3(this.ntr,this.nbr)));
+	this.topnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.ftl,this.ntr),GLGE.subVec3(this.ntr,this.ftr)));
+	this.bottomnorm=GLGE.toUnitVec3(GLGE.crossVec3(GLGE.subVec3(this.nbl,this.nbr),GLGE.subVec3(this.fbl,this.nbl)));
+	
+	this.nearplane = {point:this.ntl,normal:GLGE.scaleVec3(this.nearnorm,-1)};
+	this.farplane = {point:this.ftl,normal:GLGE.scaleVec3(this.farnorm,-1)};
+	this.leftplane = {point:this.ftl,normal:GLGE.scaleVec3(this.leftnorm,-1)};
+	this.rightplane = {point:this.ntr,normal:GLGE.scaleVec3(this.rightnorm,-1)};
+	this.topplane = {point:this.ftl,normal:GLGE.scaleVec3(this.topnorm,-1)};
+	this.bottomplane = {point:this.fbl,normal:GLGE.scaleVec3(this.bottomnorm,-1)};
+	this.planes = [this.nearplane,this.farplane,this.leftplane,this.rightplane,this.topplane,this.bottomplane];
+	
+	this.cornerRays = [];
+	var rayTL = GLGE.toUnitVec3(GLGE.subVec3(this.ftl,this.ntl));
+	var rayTR = GLGE.toUnitVec3(GLGE.subVec3(this.ftr,this.ntr));
+	var rayBL = GLGE.toUnitVec3(GLGE.subVec3(this.fbl,this.nbl));
+	var rayBR = GLGE.toUnitVec3(GLGE.subVec3(this.fbr,this.nbr));
+	
+	this.cornerRays.push({o:this.ntl,d:rayTL});
+	this.cornerRays.push({o:this.ntr,d:rayTR});
+	this.cornerRays.push({o:this.nbl,d:rayBL});
+	this.cornerRays.push({o:this.nbr,d:rayBR});
+	
+	this.to3Frust = function()
+	{
+		var nearplane = new THREE.Plane(to3Vec(this.nearplane.normal),to3Vec(this.nearplane.point));
+		var farplane = new THREE.Plane(to3Vec(this.farplane.normal),to3Vec(this.farplane.point));
+		var leftplane = new THREE.Plane(to3Vec(this.leftplane.normal),to3Vec(this.leftplane.point));
+		var rightplane = new THREE.Plane(to3Vec(this.rightplane.normal),to3Vec(this.rightplane.point));
+		var topplane = new THREE.Plane(to3Vec(this.topplane.normal),to3Vec(this.topplane.point));
+		var bottomplane = new THREE.Plane(to3Vec(this.bottomplane.normal),to3Vec(this.bottomplane.point));
+		return new THREE.Frustum(nearplane,farplane,leftplane,rightplane,topplane,bottomplane);
+	}
+	this.transformBy = function(matrix)
+	{
+		var ntl = GLGE.mulMat4Vec3(matrix,this.ntl);
+		var ntr = GLGE.mulMat4Vec3(matrix,this.ntr);
+		var nbl = GLGE.mulMat4Vec3(matrix,this.nbl);
+		var nbr = GLGE.mulMat4Vec3(matrix,this.nbr);
+		
+		var ftl = GLGE.mulMat4Vec3(matrix,this.ftl);
+		var ftr = GLGE.mulMat4Vec3(matrix,this.ftr);
+		var fbl = GLGE.mulMat4Vec3(matrix,this.fbl);
+		var fbr = GLGE.mulMat4Vec3(matrix,this.fbr);
+		
+		return new Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr);	
+	}
+	this.intersectsObject = function(geo)
+	{
+		
+		var bb = geo.boundingBox;
+		if(!bb)
+			geo.computeBoundingBox();
+		bb = geo.boundingBox;
+		
+		var box = new BoundingBoxRTAS([bb.min.x,bb.min.y,bb.min.z],[bb.max.x,bb.max.y,bb.max.z]);
+		return box.intersectFrustrum(this)
+		
+	}
+}
+
 function Editor()
 {
 	var SelectedVWFNodes = [];
@@ -80,6 +319,7 @@ function Editor()
 	//	$('#vwf-root').mousedown(function(e){
 	var mousedown = function(e)
 	{	
+		
 		$('#index-vwf').focus();
 			$('#ContextMenu').hide();
 			$('#ContextMenu').css('z-index','-1');
@@ -93,8 +333,10 @@ function Editor()
 			var axis = -1;
 			for(var i =0; i < MoveGizmo.children.length;i++)
 			{
+				if(vwf.views[0].lastPick)
 				if(vwf.views[0].lastPick.object)
-				if(vwf.views[0].lastPick.object.uid == MoveGizmo.children[i].uid)
+				if(vwf.views[0].lastPick.object == MoveGizmo.children[i])
+				
 				axis = i;
 			}			
 			
@@ -103,8 +345,10 @@ function Editor()
 			OldX = e.clientX;
 			OldY = e.clientY;
 			updateGizmoOrientation(true);
-			var gizpos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
-			var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+			var t = 	new THREE.Vector3();
+			t.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
+			var gizpos = [t.x,t.y,t.z];
+			var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 			var ray = GetWorldPickRay(e);
 			
 			var dxy = intersectLinePlaneTEST(ray,campos,gizpos,WorldZ);
@@ -167,12 +411,19 @@ function Editor()
 			for(var i =0; i < MoveGizmo.children.length;i++)
 			{
 				if(MoveGizmo.children[i].material)
-				MoveGizmo.children[i].material.setVertexColorMode(GLGE.VC_MUL);
+				{
+					var c = MoveGizmo.children[i].material.originalColor;
+					MoveGizmo.children[i].material.color.setRGB(c.r,c.g,c.b);
+					MoveGizmo.children[i].material.emissive.setRGB(c.r,c.g,c.b);
+				}
 			}
 			if(axis >= 0)
 			{
 				if(MoveGizmo.children[axis].material)
-				MoveGizmo.children[axis].material.setVertexColorMode(GLGE.VC_AMB);
+				{
+					MoveGizmo.children[axis].material.color.setRGB(1,1,1);
+					MoveGizmo.children[axis].material.emissive.setRGB(1,1,1);
+				}
 			}
 		}
 	}.bind(this);
@@ -201,15 +452,55 @@ function Editor()
 	{
 		
 	}.bind(this);
+	this.ThreeJSPick = function(campos,ray)
+    {
+       
+       // ray[0] *=-1;
+	//	ray[2] *=-1;
+	//	ray[1] *=-1;
+        var threeCam = this.findcamera();
+        if(!this.ray) this.ray = new THREE.Ray();
+        if(!this.projector) this.projector = new THREE.Projector();
+        
+        
+        var pos = to3Vec(campos);
+        this.ray.set(pos, to3Vec(ray));
+		var caster = new THREE.Raycaster(pos, to3Vec(ray));
+        var intersects = caster.intersectObjects(this.findscene().children, true);
+        if (intersects.length) {
+            var found =  intersects[0];
+			var priority = -1;
+			var dist = 0;
+			for(var i =0; i < intersects.length; i++)
+			{
+				if(intersects[i].object.visible == true)
+				{
+				
+					if(intersects[i].object.PickPriority === undefined)
+						intersects[i].object.PickPriority = 0;
+					if(intersects[i].object.PickPriority > priority)
+					{
+						found = intersects[i];
+						priority = intersects[i].object.PickPriority;
+					}
+				
+				}
+			}
+			
+			return found;
+        }
+		
+        return null;
+    }
 	this.ShowContextMenu = function(e)
 	{
 			e.preventDefault();
 			e.stopPropagation();
 			var ray = GetWorldPickRay(e);
-			var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+			var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 			
 			MoveGizmo.InvisibleToCPUPick = true;
-			var pick = findscene().CPUPick(campos,ray);
+			var pick = this.ThreeJSPick(campos,ray);
 			MoveGizmo.InvisibleToCPUPick = false;
 			
 			var vwfnode;
@@ -253,6 +544,8 @@ function Editor()
 			this.ContextShowEvent = e;
 			$('#ContextMenuActions').empty();
 			
+			if(vwfnode)
+			{
 			var actions = vwf.getEvents(vwfnode);
 			
 			for(var i in actions)
@@ -267,11 +560,12 @@ function Editor()
 						$('#ContextMenu').css('z-index','-1');
 						$(".ddsmoothmenu").find('li').trigger('mouseleave');
 						$('#index-vwf').focus();
-						console.log($(this).attr('EventName'));
+						
 						vwf_view.kernel.dispatchEvent(vwfnode,$(this).attr('EventName'));
 					});
 				}
 			}
+	}
 	}
 	this.mouseleave = function(e)
 	{
@@ -339,7 +633,7 @@ function Editor()
 					var TopRightRay = GetWorldPickRay({clientX:right,clientY:top});
 					var BottomLeftRay = GetWorldPickRay({clientX:left,clientY:bottom});
 					var BottomRighttRay = GetWorldPickRay({clientX:right,clientY:bottom});
-					var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+					var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 					
 					var ntl = GLGE.addVec3(campos,TopLeftRay);
 					var ntr = GLGE.addVec3(campos,TopRightRay);
@@ -353,7 +647,7 @@ function Editor()
 					
 					var frustrum = new Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr);	
 					
-					var hits = this.findscene().FrustrumCast(frustrum);
+					var hits = this.FrustrumCast(frustrum);
 					var vwfhits = [];
 					for(var i = 0; i < hits.length; i++)
 					{
@@ -389,7 +683,11 @@ function Editor()
 			for(var i =0; i < MoveGizmo.children.length;i++)
 			{
 				if(MoveGizmo.children[i].material)
-				MoveGizmo.children[i].material.setVertexColorMode(GLGE.VC_MUL);
+				{
+					var c = MoveGizmo.children[i].material.originalColor;
+					MoveGizmo.children[i].material.color.setRGB(c.r,c.g,c.b);
+					MoveGizmo.children[i].material.emissive.setRGB(c.r,c.g,c.b);
+				}
 			}
 			document.AxisSelected = -1;
 			$('#StatusAxis').html('Axis: -1');
@@ -398,22 +696,52 @@ function Editor()
 		
 		
 	}.bind(this);
-	
+	this.GetAllLeafMeshes = function(threeObject,list)
+	{
+		if(threeObject instanceof THREE.Mesh)
+		{
+			list.push(threeObject);
+		}
+		if(threeObject.children)
+        {
+            for(var i=0; i < threeObject.children.length; i++)
+			{
+                this.GetAllLeafMeshes(threeObject.children[i],list);
+            }               
+			}
+	}
+	this.FrustrumCast = function(frustrum)
+			{
+		
+		var scene = this.findscene();
+		var meshes = [];
+		var hits = [];
+		this.GetAllLeafMeshes(scene,meshes);
+		
+		for(var i =0; i < meshes.length; i++)
+		{
+			var mat = GLGE.inverseMat4(GLGE.transposeMat4(meshes[i].matrixWorld.elements));
+			var tfrustrum = frustrum.transformBy(mat);
+			if(tfrustrum.intersectsObject(meshes[i].geometry))
+				hits.push({object:meshes[i]});
+			}
+		return hits;
+	}
 	var DeleteSelection = function()
 	{
 		for(var s =0; s<SelectedVWFNodes.length; s++)
 		{
-			if(document.PlayerNumber == null)
-			{
-				_Notifier.notify('You must log in to participate');
-				return;
-			}
-			var owner = vwf.getProperty(SelectedVWFNodes[s].id,'owner');
-			if(!_Editor.isOwner(SelectedVWFNodes[s].id,document.PlayerNumber))
-			{
-				_Notifier.notify('You do not have permission to delete this object');
-				return;
-			}
+			// if(document.PlayerNumber == null)
+			// {
+				// _Notifier.notify('You must log in to participate');
+				// return;
+			// }
+			// var owner = vwf.getProperty(SelectedVWFNodes[s].id,'owner');
+			// if(!_Editor.isOwner(SelectedVWFNodes[s].id,document.PlayerNumber))
+			// {
+				// _Notifier.notify('You do not have permission to delete this object');
+				// return;
+			// }
 			if(SelectedVWFNodes[s])
 			{
 				vwf_view.kernel.deleteNode(SelectedVWFNodes[s].id);
@@ -545,13 +873,13 @@ function Editor()
 	var GetCameraCenterRay = function(e)
 	{
 		screenmousepos = [0,0,0,1];
-		var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(findscene().camera.getViewProjection()),screenmousepos);
+		var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(_Editor.getViewProjection()),screenmousepos);
 		worldmousepos[0] /= worldmousepos[3];
 		worldmousepos[1] /= worldmousepos[3];
 		worldmousepos[2] /= worldmousepos[3];
 		
 		
-		var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+		var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 		var ray = GLGE.subVec3(worldmousepos,campos);
 		var dist = GLGE.lengthVec3(ray);
 		ray = GLGE.scaleVec3(ray,1.0/GLGE.lengthVec3(ray));
@@ -570,13 +898,13 @@ function Editor()
 		screenmousepos[0] -= 1;
 		screenmousepos[1] -= 1;
 		screenmousepos[1] *= -1;
-		var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(findscene().camera.getViewProjection()),screenmousepos);
+		var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(_Editor.getViewProjection()),screenmousepos);
 		worldmousepos[0] /= worldmousepos[3];
 		worldmousepos[1] /= worldmousepos[3];
 		worldmousepos[2] /= worldmousepos[3];
 		
 		
-		var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+		var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 		var ray = GLGE.subVec3(worldmousepos,campos);
 		var dist = GLGE.lengthVec3(ray);
 		ray = GLGE.scaleVec3(ray,1.0/GLGE.lengthVec3(ray));
@@ -628,14 +956,14 @@ function Editor()
 		if(CoordSystem == WorldCoords)
 		{	
 		
-			var childmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getModelMatrix());
-			var parentmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.getModelMatrix());
+			var childmat = GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).matrixWorld));
+			var parentmat = GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.matrixWorld));
 			Axis = GLGE.mulMat4Vec3(GLGE.inverseMat4(parentmat),Axis);
 			
 		}
 		if(CoordSystem == LocalCoords)
 		{	
-			var childmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getModelMatrix());
+			var childmat = GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).matrixWorld));
 			Axis = GLGE.mulMat4Vec3(GLGE.inverseMat4(childmat),Axis);
 		}
 		//Get a quaternion for the input matrix
@@ -651,7 +979,7 @@ function Editor()
 	{
 			
 			//_Editor.findviewnode(id).parent.updateMatrix();
-			var parentmat = _Editor.findviewnode(id).parent.getModelMatrix();
+			var parentmat = toGMat(_Editor.findviewnode(id).parent.matrixWorld);
 			parentmat = GLGE.inverseMat4(parentmat);
 			parentmat[3] = 0;
 			parentmat[7] = 0;
@@ -661,18 +989,20 @@ function Editor()
 	}.bind(this)
 	var GetRotationTransform = function(Axis, Radians)
 	{
+			
+		
 		if(CoordSystem == WorldCoords)
 		{	
 		
-			_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.updateMatrix();
-			var parentmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.getModelMatrix());
+				//_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.updateMatrix();
+				var parentmat = GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).parent.matrixWorld));
 			Axis = GLGE.mulMat4Vec3(parentmat,Axis);
 			
 		}
 		if(CoordSystem == LocalCoords)
 		{	
-			_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).updateMatrix();
-			var childmat = GetRotationMatrix(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).staticMatrix);
+				//_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).updateMatrix();
+				var childmat = GetRotationMatrix(toGMat(_Editor.findviewnode(_Editor.GetSelectedVWFNode().id).matrix));
 			Axis = GLGE.mulMat4Vec3(GLGE.inverseMat4(childmat),Axis);
 		}
 		//Get a quaternion for the input matrix
@@ -680,6 +1010,8 @@ function Editor()
 		
 		var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
 		return NewMatrix;
+			
+		
 	}.bind(this);
 	//takes a normal 4x4 rotation matrix and returns a VWF style angle axis
 	//in the format {angle:0,axis:[0,1,0]} with the angle in degrees
@@ -706,12 +1038,13 @@ function Editor()
 	}.bind(this);
 	var SetLocation = function(object,vector)
 	{
-		object.setLocX(vector[0]);
-		object.setLocY(vector[1]);
-		object.setLocZ(vector[2]);
+		object.position.x = vector[0];
+		object.position.y = vector[1];
+		object.position.z = vector[2];
 	}.bind(this);
 	var MoveTransformGizmo = function(axis,amount)
 	{
+		return GLGE.scaleVec3(axis,amount);
 		var pos = GetLocation(MoveGizmo);
 		pos = GLGE.addVec3(pos,GLGE.scaleVec3(axis,amount));
 		SetLocation(MoveGizmo,pos);
@@ -721,9 +1054,9 @@ function Editor()
 	var GetLocation = function(object)
 	{
 		var vector =[0,0,0];
-		vector[0]=object.getLocX();
-		vector[1]=object.getLocY();
-		vector[2]=object.getLocZ();
+		vector[0]=object.position.x;
+		vector[1]=object.position.y;
+		vector[2]=object.position.z;
 		return vector;
 	}.bind(this);
 	var isScale = function(axis)
@@ -767,6 +1100,9 @@ function Editor()
 		var rmat = Matrix();
 		for(var i = 0; i < mat.length; i++)
 		rmat[i] = mat[i];
+		
+		
+		
 		rmat[3] = 0;
 		rmat[7] = 0;
 		rmat[11] = 0;
@@ -793,7 +1129,9 @@ function Editor()
 		{
 			return;
 		}
-		var originalGizmoPos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
+		var tpos = new THREE.Vector3();
+		tpos.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
+		var originalGizmoPos = [tpos.x,tpos.y,tpos.z];
 		//updateGizmoSize();
 		updateGizmoOrientation(false);
 		
@@ -820,10 +1158,11 @@ function Editor()
 		
 		if(document.AxisSelected != -1)
 		{
-				
-			var gizpos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
+			var t = new	THREE.Vector3();
+			t.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
+			var gizpos = [t.x,t.y,t.z];
 			$('#StatusGizmoLocation').html(displayVec(gizpos));	
-			var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+			var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 			$('#StatusCameraLocation').html(displayVec(campos));	
 			var ray = GetWorldPickRay(e);
 
@@ -832,7 +1171,7 @@ function Editor()
 			var IntersectPlaneNormalY = CurrentY;
 			var IntersectPlaneNormalZ = CurrentZ;
 			
-			var rotmat2 = GetRotationMatrix(findviewnode(SelectedVWFNodes[0].id).getLocalMatrix());//GLGE.angleAxis(aa[3] * 0.0174532925,[aa[0],aa[1],aa[2]]);
+			var rotmat2 = GetRotationMatrix(toGMat(findviewnode(SelectedVWFNodes[0].id).matrix));//GLGE.angleAxis(aa[3] * 0.0174532925,[aa[0],aa[1],aa[2]]);
 			var invRot2 = GLGE.inverseMat4(rotmat2);
 			
 			var MoveAxisX = CurrentX;
@@ -972,48 +1311,48 @@ function Editor()
 					var PickDist = 10000/vwf.views[0].lastPick.distance;
 					//var tempscale = vwf.getProperty(SelectedVWFNode.id,'scale');
 					//var s = findviewnode(SelectedVWFNode.id).getScale();
-					
+			var gizposoffset = null;		
 					if(document.AxisSelected == 0)
 					{
 						wasMoved = true;
 						if(Math.abs(GLGE.dotVec3(ray,CurrentZ)) > .8)
-						MoveTransformGizmo(CurrentX,relintersectxy[0]);
+						gizposoffset = MoveTransformGizmo(CurrentX,relintersectxy[0]);
 						else
-						MoveTransformGizmo(CurrentX,relintersectxz[0]);
+						gizposoffset = MoveTransformGizmo(CurrentX,relintersectxz[0]);
 					}
 					if(document.AxisSelected == 1)
 					{
 						wasMoved = true;
 						if(Math.abs(GLGE.dotVec3(ray,CurrentZ)) > .8)
-						MoveTransformGizmo(CurrentY,relintersectxy[1]);
+						gizposoffset = MoveTransformGizmo(CurrentY,relintersectxy[1]);
 						else
-						MoveTransformGizmo(CurrentY,relintersectyz[1]);
+						gizposoffset = MoveTransformGizmo(CurrentY,relintersectyz[1]);
 					}
 					if(document.AxisSelected == 2)
 					{
 						wasMoved = true;
 						if(Math.abs(GLGE.dotVec3(ray,CurrentX)) > .8)
-						MoveTransformGizmo(MoveAxisZ,relintersectyz[2]);
+						gizposoffset = MoveTransformGizmo(MoveAxisZ,relintersectyz[2]);
 						else	
-						MoveTransformGizmo(MoveAxisZ,relintersectxz[2]);
+						gizposoffset = MoveTransformGizmo(MoveAxisZ,relintersectxz[2]);
 					}
 					if(document.AxisSelected == 12)
 					{
 						wasMoved = true;
-						MoveTransformGizmo(MoveAxisX,relintersectxy[0]);
-						MoveTransformGizmo(MoveAxisY,relintersectxy[1]);
+						gizposoffset = MoveTransformGizmo(MoveAxisX,relintersectxy[0]);
+						gizposoffset = GLGE.addVec3(gizposoffset,MoveTransformGizmo(MoveAxisY,relintersectxy[1]));
 					}
 					if(document.AxisSelected == 13)
 					{
 						wasMoved = true;
-						MoveTransformGizmo(MoveAxisX,relintersectxz[0]);
-						MoveTransformGizmo(MoveAxisZ,relintersectxz[2]);
+						gizposoffset = MoveTransformGizmo(MoveAxisX,relintersectxz[0]);
+						gizposoffset = GLGE.addVec3(gizposoffset,MoveTransformGizmo(MoveAxisZ,relintersectxz[2]));
 					}
 					if(document.AxisSelected == 14)
 					{
 						wasMoved = true;
-						MoveTransformGizmo(MoveAxisY,relintersectyz[1]);
-						MoveTransformGizmo(MoveAxisZ,relintersectyz[2]);
+						gizposoffset = MoveTransformGizmo(MoveAxisY,relintersectyz[1]);
+						gizposoffset = GLGE.addVec3(gizposoffset,MoveTransformGizmo(MoveAxisZ,relintersectyz[2]));
 					}
 					
 					
@@ -1104,8 +1443,8 @@ function Editor()
 					if(wasMoved)
 					{
 						
-						var gizoffset = GLGE.subVec3([MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()],originalGizmoPos);
-						gizoffset = TransformOffset(gizoffset,SelectedVWFNodes[s].id);
+						var gizoffset = GLGE.subVec3([MoveGizmo.position.x,MoveGizmo.position.y,MoveGizmo.position.z],originalGizmoPos);
+						gizoffset = TransformOffset(gizposoffset,SelectedVWFNodes[s].id); //TransformOffset(gizoffset,SelectedVWFNodes[s].id);
 						
 						
 						
@@ -1182,7 +1521,7 @@ function Editor()
 						if(SelectedVWFNodes.length > 1)
 						{
 							
-							var parentmat = _Editor.findviewnode(SelectedVWFNodes[s].id).parent.getModelMatrix();
+							var parentmat = toGMat(_Editor.findviewnode(SelectedVWFNodes[s].id).parent.matrixWorld);
 							var parentmatinv = GLGE.inverseMat4(parentmat);
 							
 							var parentgizloc = GLGE.mulMat4Vec3(parentmatinv,originalGizmoPos);
@@ -1214,7 +1553,7 @@ function Editor()
 			
 			for(var i =0; i < MoveGizmo.children.length;i++)
 			{
-				if(vwf.views[0].lastPick && vwf.views[0].lastPick.object && vwf.views[0].lastPick.object.uid == MoveGizmo.children[i].uid)
+				if(vwf.views[0].lastPick && vwf.views[0].lastPick.object && vwf.views[0].lastPick.object == MoveGizmo.children[i])
 				axis = i;
 			}			
 			
@@ -1222,12 +1561,19 @@ function Editor()
 			{
 				if(i!=document.AxisSelected)
 				if(MoveGizmo.children[i].material)
-				MoveGizmo.children[i].material.setVertexColorMode(GLGE.VC_MUL);
+				{
+				var c = MoveGizmo.children[i].material.originalColor;
+				MoveGizmo.children[i].material.color.setRGB(c.r,c.g,c.b);
+				MoveGizmo.children[i].material.emissive.setRGB(c.r,c.g,c.b);
+				}
 			}
 			
 			if(axis >= 0)
 			if(MoveGizmo.children[axis].material)
-			MoveGizmo.children[axis].material.setVertexColorMode(GLGE.VC_AMB);
+			{
+				MoveGizmo.children[axis].material.color.setRGB(1,1,1);
+				MoveGizmo.children[axis].material.emissive.setRGB(1,1,1);
+			}
 		}
 		
 		
@@ -1263,23 +1609,24 @@ function Editor()
 	}
 	this.GetInsertPoint = function()
 	{
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
+			var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 			var ray = _Editor.GetCameraCenterRay();
-			var pick = _Editor.findscene().CPUPick(campos,ray);
+			var pick = this.ThreeJSPick(campos,ray);
 			var dxy = pick.distance;
 			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
-			
+			newintersectxy[2] += .01;
 			var dxy2 = _Editor.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
 			var newintersectxy2 = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy2));
+			newintersectxy2[2] += .01;
 			return newintersectxy[2] > newintersectxy2[2]?newintersectxy:newintersectxy2;
 	}
 	this.createChild = function(parent,name,proto,uri,callback)
 	{
-		if(document.PlayerNumber == null)
-		{
-			_Notifier.notify('You must log in to participate');
-			return;
-		}
+		//if(document.PlayerNumber == null)
+		//{
+		//	_Notifier.notify('You must log in to participate');
+		//	return;
+		//}
 		
 		vwf_view.kernel.createChild(parent,name,proto,uri,callback);
 	}
@@ -1292,7 +1639,7 @@ function Editor()
 					  rotation: [ 1, 0, 0, 0 ],
 					  translation: pos,
 					  owner:owner,
-					  type:'light',
+					  type:'Light',
 					  lightType:type,
 					  DisplayName: _Editor.GetUniqueName('Light')
 					  }
@@ -1308,7 +1655,7 @@ function Editor()
 					  rotation: [ 1, 0, 0, 0 ],
 					  translation: pos,
 					  owner:owner,
-					  type:'particlesystem',
+					  type:'ParticleSystem',
 					  DisplayName: _Editor.GetUniqueName('ParticleSystem')
 					  }
                     };
@@ -1319,6 +1666,7 @@ function Editor()
 			translation[0] = SnapTo(translation[0],MoveSnap);
 			translation[1] = SnapTo(translation[1],MoveSnap);
 			translation[2] = SnapTo(translation[2],MoveSnap);
+			translation[2] += .001;
 			var BoxProto = { 
 				
 			extends: type+'.vwf',
@@ -1335,7 +1683,7 @@ function Editor()
 			proto.properties.rotation = [0,0,1,0];
 			proto.properties.owner = owner;
 			proto.properties.texture = texture;
-			proto.properties.type = 'primitive';
+			proto.properties.type = type;
 			proto.properties.tempid = id;
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			
@@ -1491,14 +1839,14 @@ function Editor()
 		{
 			var t = _CoppiedNodes[i];
 			
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
+			var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
 				var ray;
 				if(!useMousePoint)
 					ray = _Editor.GetCameraCenterRay();
 				else
 					ray = _Editor.GetWorldPickRay(this.ContextShowEvent);
 				_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-				var pick = _Editor.findscene().CPUPick(campos,ray);
+				var pick = this.ThreeJSPick(campos,ray);
 				_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
 				var dxy = pick.distance;
 				var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
@@ -1525,10 +1873,23 @@ function Editor()
 		if(CoordSystem == LocalCoords && SelectedVWFNodes[0])
 		{
 			
+			
+			
 			var aa = vwf.getProperty(SelectedVWFNodes[0].id,'rotation');
-			var rotmat = GetRotationMatrix(findviewnode(SelectedVWFNodes[0].id).getModelMatrix());//GLGE.angleAxis(aa[3] * 0.0174532925,[aa[0],aa[1],aa[2]]);
+			var rotmat = GetRotationMatrix(toGMat(findviewnode(SelectedVWFNodes[0].id).matrixWorld));//GLGE.angleAxis(aa[3] * 0.0174532925,[aa[0],aa[1],aa[2]]);
 			var invRot = GLGE.inverseMat4(rotmat);
-			MoveGizmo.setRotMatrix(invRot);
+			var invRotT = GLGE.transposeMat4(invRot);
+			
+                       
+			
+			
+
+			MoveGizmo.parent.matrixAutoUpdate = false;
+			for(var i=0; i < 16; i++)
+				if( i!=12 && i!=13 && i!=14)
+					MoveGizmo.parent.matrix.elements[i] = invRotT[i];
+			//MoveGizmo.matrix.setRotationFromQuaternion(q);
+			MoveGizmo.parent.updateMatrixWorld(true);
 			if(updateBasisVectors)
 			{
 				CurrentZ = GLGE.mulMat4Vec3(invRot,WorldZ);
@@ -1538,7 +1899,16 @@ function Editor()
 		}else
 		{
 			//var rotmat = GetRotationMatrix(findviewnode(SelectedVWFNode.id).parent.getModelMatrix());//GLGE.angleAxis(aa[3] * 0.0174532925,[aa[0],aa[1],aa[2]]);
-			MoveGizmo.setRotMatrix([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+			
+			var q = new THREE.Quaternion();
+			var rotmat = new THREE.Matrix4();
+			rotmat.elements =[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+			
+			for(var i=0; i < 16; i++)
+				if( i!=12 && i!=13 && i!=14)
+					MoveGizmo.parent.matrix.elements[i] = rotmat.elements[i];
+					
+			MoveGizmo.parent.updateMatrixWorld(true);
 			//var invRot = GLGE.inverseMat4(rotmat);
 			CurrentZ = WorldZ; //GLGE.mulMat4Vec3(invRot,WorldZ);
 			CurrentX = WorldX; //GLGE.mulMat4Vec3(invRot,WorldX);
@@ -1560,7 +1930,7 @@ function Editor()
 	this.updateGizmoLocation = function()
 	{
 			
-			var childmat = this.findviewnode(this.GetSelectedVWFNode().id).getModelMatrix();
+			var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode().id).matrixWorld);
 			
 			lastpos[0] = [childmat[3],childmat[7],childmat[11]];
 			
@@ -1570,8 +1940,8 @@ function Editor()
 			
 			for(var s =1; s < SelectedVWFNodes.length; s++)
 			{
-				this.findviewnode(SelectedVWFNodes[s].id).updateMatrix();
-				var nextchildmat = this.findviewnode(SelectedVWFNodes[s].id).getModelMatrix();
+				//this.findviewnode(SelectedVWFNodes[s].id).updateMatrix();
+				var nextchildmat = toGMat(this.findviewnode(SelectedVWFNodes[s].id).matrixWorld);
 				gizpos[0] += nextchildmat[3];
 				gizpos[1] += nextchildmat[7];
 				gizpos[2] += nextchildmat[11];
@@ -1585,14 +1955,15 @@ function Editor()
 			gizpos[1] /= SelectedVWFNodes.length;
 			gizpos[2] /= SelectedVWFNodes.length;
 			
-			MoveGizmo.setLoc(gizpos[0],gizpos[1],gizpos[2]);
+			MoveGizmo.parent.matrix.setPosition(new THREE.Vector3(gizpos[0],gizpos[1],gizpos[2]));
+			MoveGizmo.parent.updateMatrixWorld(true);
 	}
 	this.updateBounds = function()
 	{
 			
 			for(var i =0; i < SelectionBounds.length; i++)
 			{
-				SelectionBounds[i].parent.removeChild(SelectionBounds[i]);
+				SelectionBounds[i].parent.remove(SelectionBounds[i]);
 			}
 			SelectionBounds = [];
 			for(var i =0; i < SelectedVWFNodes.length; i++)
@@ -1600,8 +1971,8 @@ function Editor()
 				var box;
 				var mat;
 				
-				box = _Editor.findviewnode(SelectedVWFNodes[i].id).GetBoundingBox(true);
-				mat = _Editor.findviewnode(SelectedVWFNodes[i].id).getModelMatrix().slice(0);
+				box = _Editor.findviewnode(SelectedVWFNodes[i].id).getBoundingBox(true);
+				mat = toGMat(_Editor.findviewnode(SelectedVWFNodes[i].id).matrixWorld).slice(0);
 				
 				
 				var color = [1,1,1,1];
@@ -1612,22 +1983,29 @@ function Editor()
 				if(vwf.getProperty(SelectedVWFNodes[i].id,'type') == 'Group' && vwf.getProperty(SelectedVWFNodes[i].id,'open') == true)	
 					color = [.5,1,.5,1];	
 					
-				SelectionBounds[i] = BuildBox([box.max[0] - box.min[0],box.max[1] - box.min[1],box.max[2] - box.min[2]],[box.min[0] + (box.max[0] - box.min[0])/2,box.min[1] + (box.max[1] - box.min[1])/2,box.min[2] + (box.max[2] - box.min[2])/2],color);
 				
-			
-				SelectionBounds[i].setStaticMatrix(mat);
-				SelectionBounds[i].InvisibleToCPUPick = true;
-				SelectionBounds[i].setCastShadows(false);
-				SelectionBounds[i].setDrawType(GLGE.DRAW_LINELOOPS);
-				SelectionBounds[i].setDepthTest(false);
-				SelectionBounds[i].setZtransparent(true);
-				SelectionBounds[i].setCull(GLGE.NONE);
-				SelectionBounds[i].setPickable(false);
-				SelectionBounds[i].RenderPriority = 999;
+				SelectionBounds[i] = new THREE.Object3D();
+				SelectionBounds[i].add(BuildBox([box.max.x - box.min.x,box.max.y - box.min.y,box.max.z - box.min.z],[box.min.x + (box.max.x - box.min.x)/2,box.min.y + (box.max.y - box.min.y)/2,box.min.z + (box.max.z - box.min.z)/2],color));
+				SelectionBounds[i].matrixAutoUpdate = false;
+				SelectionBounds[i].matrix.elements = GLGE.transposeMat4(mat);
+				SelectionBounds[i].updateMatrixWorld(true);
+				SelectionBounds[i].children[0].material.wireframe = true;
+				SelectionBounds[i].children[0].renderDepth = 10000 -3;
+				SelectionBounds[i].children[0].material.depthTest = false;
+				SelectionBounds[i].children[0].material.depthWrite = false;
+				SelectionBounds[i].children[0].PickPriority = -1;
+				// SelectionBounds[i].InvisibleToCPUPick = true;
+				// SelectionBounds[i].setCastShadows(false);
+				// SelectionBounds[i].setDrawType(GLGE.DRAW_LINELOOPS);
+				// SelectionBounds[i].setDepthTest(false);
+				// SelectionBounds[i].setZtransparent(true);
+				// SelectionBounds[i].setCull(GLGE.NONE);
+				// SelectionBounds[i].setPickable(false);
+				// SelectionBounds[i].RenderPriority = 999;
 				SelectionBounds[i].vwfid = SelectedVWFNodes[i].id;
 				
-				SelectionBounds[i].setMaterial(GLGE.MaterialManager.findMaterialRecord(SelectionBounds[i].getMaterial()).material);
-				this.SelectionBoundsContainer.addChild(SelectionBounds[i]);
+			//	SelectionBounds[i].setMaterial(GLGE.MaterialManager.findMaterialRecord(SelectionBounds[i].getMaterial()).material);
+				this.SelectionBoundsContainer.add(SelectionBounds[i]);
 			}
 	}
 	this.updateBoundsTransform = function(id)
@@ -1636,8 +2014,9 @@ function Editor()
 		{
 			if(SelectionBounds[i].vwfid == id)
 			{
-				var mat = _Editor.findviewnode(id).getModelMatrix().slice(0);
-				SelectionBounds[i].setStaticMatrix(mat);
+				var mat = toGMat(_Editor.findviewnode(id).matrixWorld).slice(0);
+				SelectionBounds[i].matrix.elements = GLGE.transposeMat4(mat);
+				SelectionBounds[i].updateMatrixWorld(true);
 			}
 		}
 	}
@@ -1773,11 +2152,11 @@ function Editor()
 			{
 				lastscale[s] = vwf.getProperty(SelectedVWFNodes[s].id,'scale');
 				
-				MoveGizmo.setVisible(true);
+				this.showMoveGizmo();
 				
 				if(findviewnode(SelectedVWFNodes[s].id))
 				{
-					findviewnode(SelectedVWFNodes[s].id).setTransformMode(GLGE.P_MATRIX);
+					//findviewnode(SelectedVWFNodes[s].id).setTransformMode(GLGE.P_MATRIX);
 					//findviewnode(SelectedVWFNodes[s].id).setRotMatrix(GetRotationMatrix(findviewnode(SelectedVWFNodes[s].id).getLocalMatrix()));
 					//findviewnode(SelectedVWFNodes[s].id).updateMatrix
 				}
@@ -1787,18 +2166,33 @@ function Editor()
 		}
 		else
 		{
-			MoveGizmo.setVisible(false);
+			this.hideMoveGizmo();
 			MoveGizmo.InvisibleToCPUPick = true;
 			if(SelectionBounds.length > 0)
 			{
 				for(var i =0; i < SelectionBounds.length; i++)
 				{
-					SelectionBounds[i].parent.removeChild(SelectionBounds[i]);
+					SelectionBounds[i].parent.remove(SelectionBounds[i]);
 				}
 				SelectionBounds = [];
 			}
 		}
 	}.bind(this);
+	this.hideMoveGizmo = function()
+	{
+			for(var i =0; i < MoveGizmo.children.length; i++)
+			{ 
+				MoveGizmo.children[i].oldVis = MoveGizmo.children[i].visible;
+				MoveGizmo.children[i].visible=false;
+			}
+	}
+	this.showMoveGizmo = function()
+	{
+			for(var i =0; i < MoveGizmo.children.length; i++)
+			{ 
+				MoveGizmo.children[i].visible=MoveGizmo.children[i].oldVis;
+			}
+	}
 	var updateBoundsAndGizmoLoc = function()
 	{
 	
@@ -1816,25 +2210,128 @@ function Editor()
 	}.bind(this);
 	var updateGizmoSize = function()
 	{
-		var gizpos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
-		var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+		var pos = new THREE.Vector3();
+		pos.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
+		var gizpos = [pos.x,pos.y,pos.z];
+		var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 		var dist = GLGE.lengthVec3(GLGE.subVec3(gizpos,campos));
-		dist = dist/10;
 		
+		var cam = findcamera();
+		cam.updateMatrixWorld(true);
+        cam.matrixWorldInverse.getInverse( cam.matrixWorld );
+		gizpos = GLGE.mulMat4Vec3(GLGE.transposeMat4(cam.matrixWorldInverse.elements),gizpos);
+		
+		dist = -gizpos[2]/65;
+		
+		var oldscale  = MoveGizmo.matrix.elements[0];
+		MoveGizmo.matrix.scale(new THREE.Vector3(1/oldscale,1/oldscale,1/oldscale));
 		var windowXadj = 1600.0/$('#index-vwf').width();
 		var windowYadj = 1200.0/$('#index-vwf').height();
 		var winadj = Math.max(windowXadj,windowYadj);
-		MoveGizmo.setScaleX(dist*winadj);
-		MoveGizmo.setScaleY(dist*winadj);
-		MoveGizmo.setScaleZ(dist*winadj);
+		
+		
+		
+		MoveGizmo.matrix.scale(new THREE.Vector3(dist*winadj,dist*winadj,dist*winadj));
+		MoveGizmo.updateMatrixWorld(true);
 	}.bind(this);
 	var BuildMoveGizmo = function()
 	{
-		
+		var red = [1,0,0,1];
+		var green = [0,1,.0,1];
+		var blue = [0,0,1,1];
 		if(MoveGizmo != null)
 		return;
 		
-		var red = [1,.55,.55,1];
+		  //temp mesh for all geometry to test
+                var cubeX = new THREE.Mesh(
+                    new THREE.CubeGeometry( 10.00, .40, .40 ),
+                    new THREE.MeshLambertMaterial( { color: 0xFF0000, emissive:0xFF0000 } )
+                );
+                cubeX.position.set(5.00,.15,.15);
+                var cubeY = new THREE.Mesh(
+                    new THREE.CubeGeometry( .40, 10.00, .40 ),
+                    new THREE.MeshLambertMaterial( { color: 0x00FF00, emissive:0x00FF00 } )
+                );
+                cubeY.position.set(.15,5.00,.15);
+                var cubeZ = new THREE.Mesh(
+                    new THREE.CubeGeometry( .40, .40, 10.00 ),
+                    new THREE.MeshLambertMaterial( { color: 0x0000FF, emissive:0x0000FF} )
+                );
+                cubeZ.position.set(.15,.15,5.00);
+                
+                MoveGizmo = new THREE.Object3D();
+                MoveGizmo.add(cubeX);
+                MoveGizmo.add(cubeY);
+                MoveGizmo.add(cubeZ);
+				
+				var rotx = new THREE.Mesh(
+                    new THREE.TorusGeometry( 7, .50,4,20 ),
+                    new THREE.MeshLambertMaterial( { color: 0xFF0000, emissive:0xFF0000} )
+                );
+				var roty = new THREE.Mesh(
+                    new THREE.TorusGeometry( 7, .50 ,4,20 ),
+                    new THREE.MeshLambertMaterial( { color: 0x00FF00, emissive:0x00FF00} )
+                );
+				var rotz = new THREE.Mesh(
+                    new THREE.TorusGeometry( 7, .50 ,4,20 ),
+                    new THREE.MeshLambertMaterial( { color: 0x0000FF, emissive:0x0000FF} )
+                );
+                
+				MoveGizmo.add(rotx);
+				roty.rotation.x = Math.PI/2;
+                MoveGizmo.add(roty);
+				rotx.rotation.y = Math.PI/2;
+                MoveGizmo.add(rotz);
+				rotz.rotation.z = 90;
+				
+		
+		MoveGizmo.add(BuildBox([.5,.5,.5],[10.25,0,0],red));//scale x		
+		MoveGizmo.add(BuildBox([.5,.5,.5],[0,10.25,0],green));//scale y
+		MoveGizmo.add(BuildBox([.5,.5,.5],[0,0,10.25],blue));//scale z
+		MoveGizmo.add(BuildBox([.85,.85,.85],[9.25,0,0],red));//scale xyz
+		MoveGizmo.add(BuildBox([.85,.85,.85],[0,9.25,0],green));//scale xyz
+		MoveGizmo.add(BuildBox([.85,.85,.85],[0,0,9.25],blue));//scale xyz
+		MoveGizmo.add(BuildBox([1.50,1.50,.30],[.75,.75,.15],[75,75,0,1]));//movexy
+	
+		MoveGizmo.add(BuildBox([1.50,.30,1.50],[.75,.15,.75],[75,0,75,1]));//movexz
+	
+		MoveGizmo.add(BuildBox([.30,1.50,1.50],[.15,.75,.75],[0,75,75,1]));//moveyz
+		
+		MoveGizmo.add(BuildRing(12,.7,[0,0,1],30,[1,1,1,1],90,450));//rotate z
+		
+		MoveGizmo.add(BuildRing(7,0.5,[1,0,0],37,red,0,370));//rotate x
+		MoveGizmo.add(BuildRing(7,0.5,[0,1,0],37,green,0,370));//rotate y
+		MoveGizmo.add(BuildRing(7,0.5,[0,0,1],37,blue,0,370));//rotate z
+		
+		MoveGizmo.add(BuildBox([5,5,5],[0,0,0],[1,1,1,1]));//scale uniform
+		MoveGizmo.add(BuildBox([0.30,5,5],[5,0,0],red));//scale uniform
+		MoveGizmo.add(BuildBox([5,.30,5],[0,5,0],green));//scale uniform
+		MoveGizmo.add(BuildBox([5,5,.30],[0,0,5],blue));//scale uniform
+		MoveGizmo.add(BuildBox([.30,5,5],[-5,0,0],red));//scale uniform
+		MoveGizmo.add(BuildBox([5,.30,5],[0,-5,0],green));//scale uniform
+		MoveGizmo.add(BuildBox([5,5,.30],[0,0,-5],blue));//scale uniform		
+				
+				
+				var movegizhead = new THREE.Object3D();
+				movegizhead.matrixAutoUpdate = false;
+				movegizhead.add(MoveGizmo);
+		findscene().add(movegizhead);
+		MoveGizmo.matrixAutoUpdate = false;
+		
+		for(var i =0; i < MoveGizmo.children.length; i++)
+		{
+			MoveGizmo.children[i].material.originalColor = new THREE.Color();
+			var c = MoveGizmo.children[i].material.color;
+			MoveGizmo.children[i].material.originalColor.setRGB(c.r,c.g,c.b);
+			MoveGizmo.children[i].renderDepth = 10000 - i;
+			MoveGizmo.children[i].material.depthTest = false;
+			MoveGizmo.children[i].material.depthWrite = false;
+			MoveGizmo.children[i].material.transparent = true;
+			MoveGizmo.children[i].PickPriority = 1;
+		}		
+		
+		SetGizmoMode(Move);
+/* 		var red = [1,.55,.55,1];
 		var green = [.55,1,.55,1];
 		var blue = [.55,.55,1,1];
 		
@@ -1879,13 +2376,13 @@ function Editor()
 		MoveGizmo.addChild(BuildBox([.5,.5,.030],[0,0,-.5],blue));//scale uniform
 		for(var i=0; i < MoveGizmo.children.length;i++){
 			MoveGizmo.children[i].setZtransparent(true); MoveGizmo.children[i].setDepthTest(false);
-			SetGizmoMode(Move);
+			
 			MoveGizmo.children[i].PickPriority = Infinity;
 			MoveGizmo.children[i].RenderPriority = 1000+i;
 			MoveGizmo.children[i].setCastShadows(false);
 		}
 		MoveGizmo.InvisibleToCPUPick = false;
-		findscene().addChild(MoveGizmo);
+		findscene().addChild(MoveGizmo); */
 		
 	}.bind(this);
 	var SetGizmoMode = function(type)
@@ -1897,11 +2394,11 @@ function Editor()
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if((i>=0 && i <=2) || (i>=12 && i<=14))
 				{
-					MoveGizmo.children[i].setVisible(true);
+					MoveGizmo.children[i].visible = true;
 				}
 				else
 				{
-					MoveGizmo.children[i].setVisible(false);
+					MoveGizmo.children[i].visible = false;
 				}
 				GizmoMode = Move;
 			}
@@ -1912,11 +2409,11 @@ function Editor()
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if(i>=16 && i <=18)
 				{
-					MoveGizmo.children[i].setVisible(true);
+					MoveGizmo.children[i].visible = true;
 				}
 				else
 				{
-					MoveGizmo.children[i].setVisible(false);
+					MoveGizmo.children[i].visible = false;
 				}
 				GizmoMode = Rotate;
 			}
@@ -1928,11 +2425,11 @@ function Editor()
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if(i>=19 && i <=25)
 				{
-					MoveGizmo.children[i].setVisible(true);
+					MoveGizmo.children[i].visible = true;
 				}
 				else
 				{
-					MoveGizmo.children[i].setVisible(false);
+					MoveGizmo.children[i].visible = false;
 				}
 				GizmoMode = Scale;
 			}
@@ -1943,11 +2440,11 @@ function Editor()
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if(i <=15)
 				{
-					MoveGizmo.children[i].setVisible(true);
+					MoveGizmo.children[i].visible = true;
 				}
 				else
 				{
-					MoveGizmo.children[i].setVisible(false);
+					MoveGizmo.children[i].visible = false;
 				}
 				
 				GizmoMode = Multi;
@@ -1960,129 +2457,35 @@ function Editor()
 	}.bind(this);
 	var BuildRing = function(radius1,radius2,axis,steps,color,startdeg,enddeg)
 	{
+		var mesh = new THREE.Mesh( new THREE.TorusGeometry(radius1,radius2,6,steps), new THREE.MeshLambertMaterial());
+		mesh.material.color.r = color[0];
+		mesh.material.color.g = color[1];
+		mesh.material.color.b = color[2];
+		mesh.material.emissive.r = color[0];
+		mesh.material.emissive.g = color[1];
+		mesh.material.emissive.b = color[2];
+		mesh.rotation.x = axis[1] * Math.PI/2;
+		mesh.rotation.y = axis[0] * Math.PI/2;
+		mesh.rotation.z = axis[2] * Math.PI/2;
 		
-		var positions = [];
-		//var startdeg = 25;
-		//var enddeg = 65;
-		for(var i=startdeg; i<enddeg;i+=((enddeg-startdeg)/steps))
-		{
-			var rotmat = GLGE.angleAxis(i*0.0174532925,axis);		  
-			var offset1 =  GLGE.mulMat4Vec3(rotmat,radius1);
-			var offset2 =  GLGE.mulMat4Vec3(rotmat,radius2);
-			positions.push(offset1[0]);
-			positions.push(offset1[1]);
-			positions.push(offset1[2]);
-			positions.push(offset2[0]);
-			positions.push(offset2[1]);
-			positions.push(offset2[2]);  
-		}
-		var faces = [];
-		
-		for(var i = 0; i < positions.length/3-3; i+=2)
-		{
-			faces.push(i);	
-			faces.push(i+1);
-			faces.push(i+2);
-			faces.push(i+2);
-			faces.push(i+1);
-			faces.push(i+3);
-		}
-		
-		//	faces.push(positions.length/3-2);
-		//	faces.push(positions.length/3-1);
-		//	faces.push(0);
-		//	faces.push(0);
-		//	faces.push(positions.length/3-1);
-		//	faces.push(1);
-		
-		var colors = [];
-		for(var i = 0; i < positions.length/3; i+=1)
-		{
-			colors.push(color[0]);
-			colors.push(color[1]);
-			colors.push(color[2]);
-			colors.push(color[3]);
+		mesh.updateMatrixWorld(true);
+		return mesh;
 			
-		}
-		
-		
-		
-		var planemesh = new GLGE.Mesh();
-		var planeobj = new GLGE.Object();
-		planeobj.setMesh(planemesh);
-		
-		planemesh.setPositions(positions);
-		planemesh.setFaces(faces);
-		planemesh.setVertexColors(colors);
-		planemesh.cullFaces = false;
-		var mat = new GLGE.Material();
-		
-		planeobj.setPickable(true);
-		planeobj.setMaterial(mat);
-		mat.setVertexColorMode(GLGE.VC_MUL);
-		mat.setShadeless(true);
-		//mat.setColor(color);
-		//mat.setShadeless(true);
-		//mat.setAmbient([.5,.5,.5,1]);
-		//mat.setEmit(color);
-		return planeobj;
 	}.bind(this);
 	var BuildBox = function(size,offset,color)
 	{
+		var mesh = new THREE.Mesh( new THREE.CubeGeometry(size[0],size[1],size[2]), new THREE.MeshLambertMaterial());
+		mesh.material.color.r = color[0];
+		mesh.material.color.g = color[1];
+		mesh.material.color.b = color[2];
+		mesh.material.emissive.r = color[0];
+		mesh.material.emissive.g = color[1];
+		mesh.material.emissive.b = color[2];
+		mesh.matrix.setPosition(new THREE.Vector3(offset[0],offset[1],offset[2]));
+		mesh.matrixAutoUpdate = false;
+		mesh.updateMatrixWorld(true);
+		return mesh;
 		
-		var hx = size[0]/2;
-		var hy = size[1]/2;
-		var hz = size[2]/2;
-		
-		var ox = offset[0];
-		var oy = offset[1];
-		var oz = offset[2];
-		
-		var planemesh = new GLGE.Mesh();
-		var planeobj = new GLGE.Object();
-		planeobj.setMesh(planemesh);
-		
-		var positions = [
-		hx + ox,hy + oy,hz + oz, 
-		hx + ox,hy + oy,-hz + oz, 
-		hx + ox,-hy + oy,hz + oz, 
-		hx + ox,-hy + oy,-hz + oz,
-		-hx + ox,hy + oy,hz + oz,
-		-hx + ox,hy + oy,-hz + oz, 
-		-hx + ox,-hy + oy,hz + oz, 
-		-hx + ox,-hy + oy,-hz + oz
-		];
-		
-		var colors = [];
-		for(var i = 0; i < (positions.length/3); i++)
-		{	colors.push(color[0]);
-			colors.push(color[1]);
-			colors.push(color[2]);
-			colors.push(color[3]);
-		}
-		
-		var indexes = [0,2,6,6,4,0,
-					   1,3,7,7,5,1,
-					   0,1,3,3,2,0,
-					   4,5,7,7,6,4,
-					   0,1,5,5,4,0,
-					   2,3,7,7,6,2];
-		
-		planemesh.setPositions(positions);
-		planemesh.setVertexColors(colors);
-		planemesh.setFaces(indexes);
-		planemesh.cullFaces = false;
-		var mat = new GLGE.Material();
-		
-		planeobj.setPickable(true);
-		planeobj.setMaterial(mat);
-		mat.setVertexColorMode(GLGE.VC_MUL);
-		mat.setShadeless(true);
-		//mat.setColor(color);
-		//mat.setEmit(color);
-		//mat.setShadeless(true);
-		//mat.setAmbient([.5,.5,.5,1]);
-		return planeobj;
 	}.bind(this);
 	this.PickParentCallback = function(parentnode)
 	{
@@ -2091,8 +2494,8 @@ function Editor()
 		var node = _DataManager.getCleanNodePrototype(this.GetSelectedVWFNode().id);
 		
 		
-		var childmat = this.findviewnode(this.GetSelectedVWFNode().id).getModelMatrix();
-		var parentmat = this.findviewnode(parentnode.id).getModelMatrix();
+		var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode().id).matrixWorld);
+		var parentmat = toGMat(this.findviewnode(parentnode.id).matrixWorld);
 		var invparentmat = GLGE.inverseMat4(parentmat);
 		childmat = GLGE.mulMat4(invparentmat,childmat);
 		
@@ -2114,7 +2517,7 @@ function Editor()
 		
 		var node = _DataManager.getCleanNodePrototype(this.GetSelectedVWFNode().id);
 
-		var childmat = this.findviewnode(this.GetSelectedVWFNode().id).getModelMatrix();
+		var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode().id).matrixWorld);
 
 		delete node.properties.translation;
 		delete node.properties.rotation;
@@ -2144,11 +2547,11 @@ function Editor()
 		for(var i=0; i<this.getSelectionCount(); i++)
 		{
 		
-			if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
-			{
-				_Notifier.alert('You must be the group owner to ungroup objects.');
-				continue;
-			}
+			// if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
+			// {
+				// _Notifier.alert('You must be the group owner to ungroup objects.');
+				// continue;
+			// }
 		
 			var vwfparent = vwf.parent(this.GetSelectedVWFNode(i).id);
 			var children = vwf.children(this.GetSelectedVWFNode(i).id);
@@ -2156,8 +2559,8 @@ function Editor()
 			{
 				
 				var node = _DataManager.getCleanNodePrototype(children[j]);
-				var childmat = this.findviewnode(children[j]).getModelMatrix();
-				var parentmat = this.findviewnode(vwfparent).getModelMatrix();
+				var childmat = toGMat(this.findviewnode(children[j]).matrixWorld);
+				var parentmat = toGMat(this.findviewnode(vwfparent).matrixWorld);
 				var invparentmat = GLGE.inverseMat4(parentmat);
 				childmat = GLGE.mulMat4(invparentmat,childmat);
 			
@@ -2189,12 +2592,12 @@ function Editor()
 				_Notifier.alert('All objects must have the same parent to be grouped');
 				return;
 			}
-			if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
-			{
-				_Notifier.alert('You must be the owner of all objects to group them.');
-				return;
-			}
-			var childmat = this.findviewnode(this.GetSelectedVWFNode(i).id).getModelMatrix();
+			// if(!_Editor.isOwner(SelectedVWFNodes[i].id,document.PlayerNumber))
+			// {
+				// _Notifier.alert('You must be the owner of all objects to group them.');
+				// return;
+			// }
+			var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode(i).id).matrixWorld);
 			if(!pos)
 				pos = [childmat[3],childmat[7],childmat[11]];
 			else
@@ -2224,7 +2627,7 @@ function Editor()
 		for(var i=0; i<this.getSelectionCount(); i++)
 		{
 			var node = _DataManager.getCleanNodePrototype(this.GetSelectedVWFNode(i).id);
-			var childmat = this.findviewnode(this.GetSelectedVWFNode(i).id).getModelMatrix();
+			var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode(i).id).matrixWorld);
 			var invparentmat = GLGE.inverseMat4(parentmat);
 			childmat = GLGE.mulMat4(invparentmat,childmat);
 			
@@ -2247,8 +2650,8 @@ function Editor()
 	{
 		for(var i =0; i<vwf.views.length;i++)
 		{
-			if(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].glgeObject ) return vwf.views[i].state.nodes[id].glgeObject ;
-			if(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.scenes && vwf.views[i].state.scenes[id] && vwf.views[i].state.scenes[id].glgeScene ) return vwf.views[i].state.scenes[id].glgeScene ;
+			if(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].threeObject ) return vwf.views[i].state.nodes[id].threeObject ;
+			if(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.scenes && vwf.views[i].state.scenes[id] && vwf.views[i].state.scenes[id].threeScene ) return vwf.views[i].state.scenes[id].threeScene ;
 			
 			
 		}
@@ -2358,9 +2761,39 @@ function Editor()
 	}.bind(this);
 	var findscene = function()
 	{
-		return vwf.views[0].state.scenes["index-vwf"].glgeScene;
+             return vwf.views[0].state.scenes["index-vwf"].threeScene;
+      }
+    var findcamera = function()
+      {
+             return vwf.views[0].state.scenes["index-vwf"].camera.threeJScameras[vwf.views[0].state.scenes["index-vwf"].camera.defaultCamID];
+      }
+      function matcpy(mat)
+      {
+        var newmat = [];
+        for(var i = 0; i < 16; i++)
+            newmat[i] = mat[i];
+        return newmat;    
+      }
+      function getViewProjection()
+      {
+        var cam = findcamera();
+        cam.matrixWorldInverse.getInverse( cam.matrixWorld );
         
-	}.bind(this);
+        var _viewProjectionMatrix = new THREE.Matrix4();
+        _viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
+
+
+        return GLGE.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
+      }
+      
+	  function toGMat(threemat)
+      {
+        var mat = [];
+		mat = matcpy(threemat.elements);
+		
+		mat = (GLGE.transposeMat4(mat));
+		return mat;
+      }
 	this.buildContextMenu = function()
 	{
 		$(document.body).append('<div id="ContextMenu" />');
@@ -2463,7 +2896,200 @@ function Editor()
 		});
 		
 	}
+	this.getDefaultMaterial = function()
+	{
+		var currentmat = new THREE.MeshPhongMaterial();
+		currentmat.color.r = 1;
+        currentmat.color.g = 1;
+        currentmat.color.b = 1;
+		
+		currentmat.ambient.r = 1;
+        currentmat.ambient.g = 1;
+        currentmat.ambient.b = 1;
+		
+		currentmat.emissive.r = 0;
+        currentmat.emissive.g = 0;
+        currentmat.emissive.b = 0;
+		
+		currentmat.specular.r = .5;
+        currentmat.specular.g = .5;
+        currentmat.specular.b = .5;
+		
+		currentmat.map = THREE.ImageUtils.loadTexture('checker.jpg');
+		return currentmat;
+	}
+	this.getDefForMaterial = function(currentmat)
+	{
+		var value = {};
+		
+		value.color={}
+		value.color.r = currentmat.color.r;
+        value.color.g = currentmat.color.g;
+        value.color.b = currentmat.color.b;
+		
+		value.ambient={}
+		value.ambient.r = currentmat.ambient.r;
+        value.ambient.g = currentmat.ambient.g;
+        value.ambient.b = currentmat.ambient.b;
+		
+		value.emit={}
+		value.emit.r = currentmat.emissive.r;
+        value.emit.g = currentmat.emissive.g;
+        value.emit.b = currentmat.emissive.b;
+		
+		value.specularColor={}
+		value.specularColor.r = currentmat.specular.r;
+        value.specularColor.g = currentmat.specular.g;
+        value.specularColor.b = currentmat.specular.b;
+		value.specularLevel = 1;
+		
+		var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
+		value.layers = [];
+		for(var i = 0; i < mapnames.length; i++)
+		{
+			var map = currentmat[mapnames[i]];
+			if(map)
+			{
+				
+				value.layers.push({});
+				value.layers[i].mapTo = i+1;
+				value.layers[i].scalex = map.repeat.x ;
+                value.layers[i].scaley = map.repeat.y ;
+                value.layers[i].offsetx = map.offset.x ;
+                value.layers[i].offsety = map.offset.y ;
+				if(i==1)
+					value.layers[i].alpha = -currentmat.alphaTest +1 ;
+				if(i==4)
+					value.layers[i].alpha = currentmat.normalScale.x;
+				if(i==2)
+					value.layers[i].alpha = currentmat.bumpScale;
+				
+				value.layers[i].src	= map.image.src;
+				if(map.mapping instanceof THREE.UVMapping)
+					value.layers[i].mapInput = 0;
+				if(map.mapping instanceof THREE.CubeReflectionMapping)
+					value.layers[i].mapInput = 1;
+				if(map.mapping instanceof THREE.CubeRefractionMapping)
+					value.layers[i].mapInput = 2;
+				if(map.mapping instanceof THREE.SphericalReflectionMapping)
+					value.layers[i].mapInput = 3;
+				if(map.mapping instanceof THREE.SphericalRefractionMapping)
+					value.layers[i].mapInput = 4;					
+			}
 	
+		}
+		return value;
+	}
+	this.setMaterialByDef = function(currentmat,value)
+	{
+		currentmat.color.r = value.color.r;
+        currentmat.color.g = value.color.g;
+        currentmat.color.b = value.color.b;
+		
+		currentmat.ambient.r = value.ambient.r;
+        currentmat.ambient.g = value.ambient.g;
+        currentmat.ambient.b = value.ambient.b;
+		
+		currentmat.emissive.r = value.emit.r;
+        currentmat.emissive.g = value.emit.g;
+        currentmat.emissive.b = value.emit.b;
+		
+		currentmat.specular.r = value.specularColor.r * value.specularLevel;
+        currentmat.specular.g = value.specularColor.g * value.specularLevel;
+        currentmat.specular.b = value.specularColor.b * value.specularLevel;
+		
+		currentmat.opacity = value.alpha;
+		if(value.alpha < 1)
+			currentmat.transparent = true;
+		else
+			currentmat.transparent = false;
+			
+		currentmat.shininess = value.shininess * 5 ;
+        
+		var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
+		currentmat.reflectivity = value.reflect;
+        for(var i =0; i < value.layers.length; i++)
+        {
+				var mapname;
+				if(value.layers[i].mapTo == 1)
+				{
+					mapname = 'map';
+					
+					
+					currentmat.alphaTest = 1 - value.layers[i].alpha;
+					
+				}
+				if(value.layers[i].mapTo == 2)
+				{
+					mapname = 'bumpMap';
+					currentmat.bumpScale = value.layers[i].alpha;
+				}
+				if(value.layers[i].mapTo == 3)
+				{
+					mapname = 'lightMap';
+				}	
+				if(value.layers[i].mapTo == 4)
+				{
+					mapname = 'normalMap';
+					currentmat.normalScale.x = value.layers[i].alpha;
+					currentmat.normalScale.y = value.layers[i].alpha;
+				}	
+				if(value.layers[i].mapTo == 5)
+				{
+					mapname = 'specularMap';
+				}
+				
+				if(value.layers[i].mapTo == 6)
+				{
+					mapname = 'envMap';
+				}
+				
+				mapnames.splice(mapnames.indexOf(mapname),1);				
+				
+				String.prototype.endsWith = function(suffix) {
+					return this.indexOf(suffix, this.length - suffix.length) !== -1;
+				};
+
+                if((currentmat[mapname] && currentmat[mapname].image && !currentmat[mapname].image.src.toString().endsWith(value.layers[i].src)) || !currentmat[mapname])
+				{
+                    currentmat[mapname] = THREE.ImageUtils.loadTexture(value.layers[i].src);
+					
+				}
+				
+				if(value.layers[i].mapInput == 0)
+				{
+					currentmat[mapname].mapping = new THREE.UVMapping();
+				}
+				if(value.layers[i].mapInput == 1)
+				{
+					currentmat[mapname].mapping = new THREE.CubeReflectionMapping();
+				}
+				if(value.layers[i].mapInput == 2)
+				{
+					currentmat[mapname].mapping = new THREE.CubeRefractionMapping();
+				}
+				if(value.layers[i].mapInput == 3)
+				{
+					currentmat[mapname].mapping = new THREE.SphericalReflectionMapping();
+				}
+				if(value.layers[i].mapInput == 4)
+				{
+					currentmat[mapname].mapping = new THREE.SphericalRefractionMapping();
+				}
+                currentmat[mapname].wrapS = THREE.RepeatWrapping;
+                currentmat[mapname].wrapT = THREE.RepeatWrapping;
+                currentmat[mapname].repeat.x = value.layers[i].scalex;
+                currentmat[mapname].repeat.y = value.layers[i].scaley;
+                currentmat[mapname].offset.x = value.layers[i].offsetx;
+                currentmat[mapname].offset.y = value.layers[i].offsety;
+			
+        }
+   		for(var i in mapnames)
+		{
+			currentmat[mapnames[i]] = null;
+		}
+		currentmat.needsUpdate = true;
+	}
 	this.initialize = function()
 	{
 		
@@ -2471,8 +3097,8 @@ function Editor()
 		this.SelectObject(null);
 		$(document).bind('prerender',this.updateGizmoSize.bind(this));
 		document.oncontextmenu = function() {return false;};
-		this.SelectionBoundsContainer = new GLGE.Group();
-		this.findscene().addChild(this.SelectionBoundsContainer);
+		this.SelectionBoundsContainer = new THREE.Object3D();
+		this.findscene().add(this.SelectionBoundsContainer);
 		this.buildContextMenu();
 		
 		this.mouseDownScreenPoint = [0,0];
@@ -2500,6 +3126,7 @@ function Editor()
 	
 	this.GetSelectionBounds = function(){return SelectionBounds;};
 	this.findscene = findscene;
+	this.findcamera = findcamera;
 	this.findviewnode =findviewnode;
 	this.mousedown = mousedown;
 	this.mousemove =mousemove;
@@ -2562,11 +3189,118 @@ function Editor()
 	this.updateBoundsAndGizmoLoc = updateBoundsAndGizmoLoc;
 	this.keyup = keyup;
 	this.GetSelectMode = function(){return SelectMode;}
-	
+	this.getViewProjection = getViewProjection;
 	
 	
 
 	//$(document).bind('prerender',this.rt.bind(this));
+}
+
+function FindMaxMin(positions)
+{
+
+	var min = [Infinity,Infinity,Infinity];
+	var max = [-Infinity,-Infinity,-Infinity];
+	
+	for(var i =0; i<positions.length-2; i+=3)
+	{	
+		var vert = [positions[i],positions[i+1],positions[i+2]];
+		if(vert[0] > max[0]) max[0] = vert[0];
+		if(vert[1] > max[1]) max[1] = vert[1];
+		if(vert[2] > max[2]) max[2] = vert[2];
+		
+		if(vert[0] < min[0]) min[0] = vert[0];
+		if(vert[1] < min[1]) min[1] = vert[1];
+		if(vert[2] < min[2]) min[2] = vert[2];
+	}
+	return [min,max];
+}
+
+function TransformBoundingBox(matrix,bb)
+{
+
+
+	var mat = matCpy(matrix.elements);
+	mat = GLGE.transposeMat4(mat);
+	
+	//mat = GLGE.inverseMat4(mat); 
+	
+	var points = [];
+	var allpoints = [];
+	var min = bb.min;
+	var max = bb.max;
+	//list of all corners
+	points.push([min.x,min.y,min.z]);
+	points.push([min.x,min.y,max.z]);
+	points.push([min.x,max.y,min.z]);
+	points.push([min.x,max.y,max.z]);
+	points.push([max.x,min.y,min.z]);
+	points.push([max.x,min.y,max.z]);
+	points.push([max.x,max.y,min.z]);
+	points.push([max.x,max.y,max.z]);
+	for(var i = 0; i < points.length; i++)
+	{
+		//transform all points
+		allpoints = allpoints.concat(GLGE.mulMat4Vec3(mat,points[i]));
+	}
+	//find new axis aligned bounds
+	var bounds = FindMaxMin(allpoints);
+	var min2 = bounds[0];
+	var max2 = bounds[1];
+	return {min:new THREE.Vector3(min2[0],min2[1],min2[2]),max:new THREE.Vector3(max2[0],max2[1],max2[2])}
+
+
+
+}
+
+THREE.Object3D.prototype.getBoundingBoxes = function(bbxes,donttransform){
+  var object = this;
+  if(object.geometry){
+	object.geometry.computeBoundingBox();
+	var bb = object.geometry.boundingBox;
+		if(!donttransform)
+			bb = TransformBoundingBox(this.matrix,bb);
+    bbxes.push(bb);
+  }else{
+    for(i in object.children){
+      child = object.children[i];
+	  var bbs = [];
+      child.getBoundingBoxes(bbs);
+	  if(!donttransform)
+	  {
+		for(var i =0; i < bbs.length; i++)
+			bbs[i] = TransformBoundingBox(this.matrix,bbs[i]);
+	  }
+	  for(var i = 0; i < bbs.length; i++)
+	  bbxes.push(bbs[i]);
+    }
+  }
+}
+
+THREE.Object3D.prototype.getBoundingBox = function(donttransform){
+
+  var object = this;
+     var boundingBox = {};
+    var max = new THREE.Vector3(-Infinity,-Infinity,-Infinity);
+    var min = new THREE.Vector3(Infinity,Infinity,Infinity);
+    var bboxes = [];
+    object.getBoundingBoxes(bboxes,donttransform);
+    for(i in bboxes){
+      var bbox = bboxes[i];
+      var bbmin = bbox.min;
+      var bbmax = bbox.max;
+      if(bbmin.x < min.x){ min.x = bbmin.x; }
+      if(bbmin.y < min.y){ min.y = bbmin.y; }
+      if(bbmin.z < min.z){ min.z = bbmin.z; }
+      if(bbmax.x > max.x){ max.x = bbmax.x; }
+      if(bbmax.y > max.y){ max.y = bbmax.y; }
+      if(bbmax.z > max.z){ max.z = bbmax.z; }
+    }
+    boundingBox.max = max;
+    boundingBox.min = min;
+    object.boundingBox = boundingBox;
+    return object.boundingBox;
+  
 }
 
 _Editor = new Editor();

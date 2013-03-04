@@ -199,13 +199,8 @@ function UserManager()
 			return;
 		}
 		
-		var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-		var ray = _Editor.GetCameraCenterRay();
-		_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-		var pick = _Editor.findscene().CPUPick(campos,ray);
-		_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-		var dxy = pick.distance;
-		var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
+	
+		var newintersectxy = _Editor.GetInsertPoint();
 		
 		$('#Logon').dialog('close');
 		this.PlayerProto.properties.PlayerNumber = name;

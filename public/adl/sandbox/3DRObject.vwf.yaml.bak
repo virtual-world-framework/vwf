@@ -1,0 +1,186 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+extends: http://vwf.example.com/node3.vwf
+methods:
+  GetMesh:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetBounds:
+  initTexture:
+  getTexture:
+  setupMaterial:
+  backupMesh:
+  restoreMesh:
+  initialize:
+  setTransparent:
+properties:
+  materialDef:
+    get: |
+            return this.getTexture();
+    set: |
+             
+             this.materialDef = value;
+             this.initTexture(value);
+  transparent:
+    set: |
+            
+             this.setTransparent(value);
+scripts: 
+- |  
+    this.getTexture = function()
+    {
+            
+            if(this.materialDef) return this.materialDef;    
+            if(!this.GetMesh())
+                return null;
+            var currentMaterial = this.GetMesh().material;
+            if(!currentMaterial)
+                return;
+            return GLGE.MaterialManager.getDefForMaterial(currentMaterial);
+    
+    }
+    this.initialize = function()
+    {
+        this.dirtyStack();
+    }
+    this.initTexture = function(value)
+    {
+           
+             var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
+             if(!newMaterial) return;
+             
+             var currentMaterial = this.GetMesh().getMaterial();
+             if(!this.GetMesh().originalMaterial)
+             {
+                this.GetMesh().originalMaterial = currentMaterial;
+                currentMaterial = new GLGE.Material();
+                this.GetMesh().setMaterial(currentMaterial);
+             }
+             if(!currentMaterial) return;
+             
+            this.GetMesh().setMaterial(GLGE.MaterialManager.getMaterialByDef(newMaterial,this.GetMesh().material));
+   
+            this.GetMesh().batchDirty = true;   
+    }
+    function findviewnode(id)
+    {
+        for(var i =0; i<vwf.views.length;i++)
+        {
+            if(vwf.views[i].state.nodes[id].glgeObject) return vwf.views[i].state.nodes[id].glgeObject;
+        }
+        return null;
+    }
+    function findleaf(node)
+    {
+        if(node.getMesh && node.getMesh())
+            return node;
+        if(node.children)
+        {
+            for(var i = 0; i < node.children.length; i++)
+            {
+                var ret = findleaf(node.children[i]);
+                if(ret)
+                    return ret;
+            }
+        }
+        return null;
+    }
+    this.setTransparentR = function(node, v)
+    {
+     
+        if(node.setZtransparent)
+           node.setZtransparent(v);
+        if(node.children)
+        {
+            for(var i = 0; i < node.children.length; i++)
+            {
+                setTransparentR(node.children[i],v);
+            }
+        }
+    }
+    this.setTransparent = function(v)
+    {
+        this.setTransparentR(this.GetMesh(),v);
+    }
+    this.GetMesh = function()
+    {
+        var root = findviewnode(this.id);
+        var mesh = findleaf(root);
+        
+        return mesh;
+    }
+    this.backupMesh = function()
+    {
+        if(!this.GetMesh())
+            return;
+        var mesh = this.GetMesh().getMesh();
+        if(mesh.positions)
+            mesh.originalPositions = mesh.positions.slice(0);
+        if(mesh.normals)
+            mesh.originalNormals = mesh.normals.slice(0);
+        if(mesh.faces)
+            mesh.originalFaces = mesh.faces.data.slice(0);
+        if(mesh.uv1set)
+            mesh.originalUV1 = mesh.uv1set.slice(0);
+        if(mesh.uv2set)
+            mesh.originalUV2 = mesh.uv2set.slice(0);
+    }
+    this.restoreMesh = function()
+    {
+      if(!this.GetMesh())
+            return;
+        var mesh = this.GetMesh().getMesh();
+        if(mesh.originalPositions)
+            mesh.setPositions(mesh.originalPositions.slice(0));
+        if(mesh.originalNormals)    
+            mesh.setNormals(mesh.originalNormals.slice(0));
+        if(mesh.originalFaces)
+            mesh.setFaces(mesh.originalFaces.slice(0));
+        if(mesh.originalUV1)        
+            mesh.setUV(mesh.originalUV1.slice(0));
+        if(mesh.originalUV2)
+            mesh.setUV2(mesh.originalUV2.slice(0));
+    }
+    this.updateSelf = function()
+    {
+      if(!this.GetMesh())
+            return;
+        if(!this.GetMesh().getMesh().originalPositions)
+            this.backupMesh();
+        else   
+            this.restoreMesh();
+        if(this.GetMesh().getMesh())
+            this.GetMesh().getMesh().dirtyMesh = true;		
+    }
+    this.dirtyStack = function()
+    {
+      
+        this.updateStack();
+    }
+    this.updateStack = function()
+    {
+        
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+        if(this.GetMesh() && this.GetMesh().getMesh())
+            this.GetMesh().getMesh().dirtyMesh = true;
+    }
+    this.GetBounds = function()
+    {
+        return this.boundingbox;
+    }                

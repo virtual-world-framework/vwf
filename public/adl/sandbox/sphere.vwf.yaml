@@ -65,20 +65,22 @@ scripts:
         if(this.uri == "sphere.vwf")
             return;
 
-       var primobj = new GLGE.Object();
        
-       this.mesh = primobj;
+       
+       this.mesh = new THREE.Mesh(undefined,_Editor.getDefaultMaterial());
        
        if(vwf.getProperty(this.id,'radius') == undefined)  vwf.setProperty(this.id,'radius',1);
        if(vwf.getProperty(this.id,'segments') == undefined)  vwf.setProperty(this.id,'segments',6);
       
-       vwf.views[0].state.nodes[this.id].glgeObject.addChild(this.mesh);
-       
+       vwf.views[0].state.nodes[this.id].threeObject.add(this.mesh);
+       this.mesh.rotation.x = Math.PI/2;
       
        
        this._initialized = true;
        this.dirtyStack();
-       this.setupMaterial();       
+       
+       if(this.materialDef)
+       this.setupMaterial(this.materialDef);       
     }
     this.Build = function()
     {
@@ -89,70 +91,9 @@ scripts:
 
     this.BuildSphere = function(width,segs)
     {
+        var geo = new THREE.SphereGeometry(width,segs*2,segs*2);
         
-            var rv = [width,0,0];
-            
-            var positions = [];
-            var normals = [];
-            var colors = [];
-            var faces = [];
-            var uvs = [];
-            var z_rot = 0;
-            var y_rot = 0;
-           
-            var yinc = 180/segs;
-            var zinc = 180/segs;
-            for(y_rot = -90; y_rot <= 90 + yinc; y_rot += yinc )
-            {
-                for(z_rot = 0; z_rot <= 360; z_rot += zinc)
-                {
-                    uvs.push(((z_rot)/360)*2);
-                    uvs.push(((y_rot + 90)/180)*2);
-                    
-                    var ymatrix = GLGE.angleAxis(y_rot*0.0174532925,[0,1,0]);
-                    var offset = GLGE.mulMat4Vec3(ymatrix,rv);
-                    var zmatrix = GLGE.angleAxis(z_rot*0.0174532925,[0,0,1]);
-                    offset = GLGE.mulMat4Vec3(zmatrix,offset);
-                    positions.push(offset[0]);
-                    positions.push(offset[1]);
-                    positions.push(offset[2]);
-                    var length = GLGE.lengthVec3(offset);
-                    var normal = GLGE.scaleVec3(offset,1/length);
-                    normals.push(normal[0]);
-                    normals.push(normal[1]);
-                    normals.push(normal[2]);
-                }
-            }
-            
-            for(y_rot = 0; y_rot <= 180/yinc ; y_rot += 1)
-            {
-                for(z_rot = 0; z_rot < 360/zinc; z_rot += 1)
-                {
-                    var ynum = ( (360/zinc)*y_rot);
-                    var ynum1 = ( (360/zinc)*(y_rot+1));
-                    var znum = z_rot;
-                    var znum1 = (z_rot + 1);
-                   
-                    faces.push(ynum+znum);
-                    faces.push(ynum1+znum);
-                    faces.push(ynum1+znum1);
-                    
-                    faces.push(ynum1+znum1);
-                    faces.push(ynum+znum1);;
-                    faces.push(ynum+znum);
-                    
-                }
-            }
-            
-            
-            var planemesh = new GLGE.Mesh();
-          
-            planemesh.setPositions(positions);
-            planemesh.setFaces(faces);
-            planemesh.setNormals(normals);
-            planemesh.setUV(uvs);
-        
-            return planemesh;
+        return geo;
     }
      
     function findChildViewNode(node, name)

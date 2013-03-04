@@ -31,12 +31,12 @@ scripts:
     this.initialize = function(){
         
         if(this.id == 'character.vwf') return;
+       
          this.DownKeys= [];
          this.motionStack= [];
          this.jumpcounter = 0;
         
-        this.PickOptions = new GLGE.CPUPickOptions();
-        this.PickOptions.UserRenderBatches = true;
+       
         
         if(this.hasOwnProperty('PlayerNumber') == false) return;
         var PlayerNumber = vwf.getProperty(this.id,'PlayerNumber');
@@ -72,6 +72,8 @@ scripts:
           //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
           this.updatecounter = 0;
           this.mesh = findChildViewNode(findscene(),this.id);
+          this.mesh.children[0].children[0].position.z = -.85
+          this.skin = this.mesh.children[0].children[0].children[1];
           this.jumpcounter = 0.0;
           this.stand();
          
@@ -228,7 +230,8 @@ scripts:
             return;
         }
         
-        this.mesh.setRotZ(this.rotZ);
+       // this.mesh.setRotZ(this.rotZ);
+          this.rotation = [0,0,1,this.rotZ/0.0174532925];
         
         //this.placeNameTag();
         var standing = 1.703559666;
@@ -236,14 +239,16 @@ scripts:
         {
             
             var newframe = this.activeCycle.increment(updateFreqDivisor);
+            newframe = Math.max(newframe,0);
             if(this.currentframe != newframe)
             {
                 
-                this.mesh.setFrameRate(0);
-                this.mesh.setPaused(GLGE.FALSE)
-                this.mesh.setStartFrame(newframe,0,false);
-                this.mesh.animate();
-                this.mesh.setPaused(GLGE.TRUE)
+               
+               // this.mesh.setStartFrame(newframe,0,false);
+               for(var i = 0; i < this.skin.morphTargetInfluences.length; i++)
+                    this.skin.morphTargetInfluences[i] = 0;
+               
+               this.skin.morphTargetInfluences[parseInt(newframe)] = 1;     
             }
             this.currentframe = newframe;
         }
@@ -263,12 +268,14 @@ scripts:
             if(this.cycleName == 'turnright')
             {
                 this.rotZ += -.07*updateFreqDivisor;
-                this.mesh.setRotZ(this.rotZ);
+               // this.mesh.setRotZ(this.rotZ);
+               this.rotation = [0,0,1,this.rotZ/0.0174532925];
             }
             if(this.cycleName == 'turnleft')
             {
                 this.rotZ += +.07*updateFreqDivisor;
-                this.mesh.setRotZ(this.rotZ);
+               // this.mesh.setRotZ(this.rotZ);
+               this.rotation = [0,0,1,this.rotZ/0.0174532925];
             }
              if(this.cycleName == 'straferight')
             {
@@ -340,13 +347,13 @@ scripts:
             //for intersetions, and prevent penetration through objects
             if((GLGE.lengthVec3(this.originalvelocity) > .001 || motionvec) && !this.inMotion('jump') && this.activeCycle != this.cycles.stand)
             {
-                this.mesh.setPickable(false);
-                this.mesh.InvisibleToCPUPick = true;
+                this.skin.PickPriority = -1;
+                
                 //var forward = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,-1,0]);
                
                 motionvec = GLGE.toUnitVec3(motionvec);
                 var testpos = GLGE.subVec3(this.translation,GLGE.scaleVec3(motionvec,-.15));
-                var intersectfront = findscene().CPUPick(GLGE.addVec3(testpos,[0,0,1]),motionvec,this.PickOptions);
+                var intersectfront = _Editor.ThreeJSPick(GLGE.addVec3(testpos,[0,0,1]),motionvec,this.PickOptions);
                 if(intersectfront)
                 {
                     if(intersectfront.distance < .3)
@@ -355,7 +362,7 @@ scripts:
                         var offset = GLGE.subVec3(originalpos,this.translation);
                         var len = GLGE.lengthVec3(offset);
                         offset = GLGE.scaleVec3(offset,1/GLGE.lengthVec3(offset));
-                        var norm = intersectfront.norm;
+                        var norm = [intersectfront.face.normal.x,intersectfront.face.normal.y,intersectfront.face.normal.z];
                         //console.log(norm);
                         if(Math.abs(norm[0]) < .05) norm[0] = 0;
                         if(Math.abs(norm[1]) < .05) norm[1] = 0;
@@ -368,7 +375,8 @@ scripts:
                 }
                 var falldist = 1000;
                
-                var intersect = findscene().CPUPick(GLGE.addVec3(this.translation,[0,0,1.7]),[0,0,-1],this.PickOptions);
+                var intersect = _Editor.ThreeJSPick(GLGE.addVec3(this.translation,[0,0,1.7]),[0,0,-1],this.PickOptions);
+                //console.log(intersect.distance);
                 //console.log(intersect);
                
                 falldist = intersect?intersect.distance:falldist;
@@ -395,16 +403,15 @@ scripts:
                         this.translation = GLGE.addVec3(this.translation, [0,0,zmove/3]);
                     }
                 }
-                this.mesh.setPickable(true);
-                this.mesh.InvisibleToCPUPick = false;
+                this.skin.PickPriority = 0;
+                
             }
             //if they are jumpping, and have been for more than a 10th of a second, start checking below them for intersections.
             //10th of second is where they start falling?
             if(this.inMotion('jump') && this.jumpcounter > 10)
             {
-                this.mesh.setPickable(false);
-                this.mesh.InvisibleToCPUPick = true;
-                var intersect = findscene().CPUPick(GLGE.addVec3(this.translation,[0,0,2]),[0,0,-1]);
+                this.skin.PickPriority = -1;
+                var intersect = _Editor.ThreeJSPick(GLGE.addVec3(this.translation,[0,0,2]),[0,0,-1]);
                 if(intersect)
                 {
                     //console.log(zdiff);
@@ -422,8 +429,7 @@ scripts:
                         this.jumpcounter  = 0;
                     }
                 }
-                this.mesh.setPickable(true);
-                this.mesh.InvisibleToCPUPick = false;
+                this.skin.PickPriority = 0;
             }
             
         
@@ -484,11 +490,7 @@ scripts:
      }
      function findscene()
      {
-         for(var i =0; i<vwf.views.length;i++)
-         {
-             if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].glgeScene;
-         }
-         return null;
+             return vwf.views[0].state.scenes["index-vwf"].threeScene;
      }
      
     this.markKeyDown =function(m)

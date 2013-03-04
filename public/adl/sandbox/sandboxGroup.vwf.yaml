@@ -59,8 +59,8 @@ scripts:
       
       
       var div = this.nametag;
-      var trans = _Editor.findviewnode(this.id).getModelMatrix();
-      var pos = [trans[3],trans[7],trans[11]];
+      var trans = _Editor.findviewnode(this.id).matrixWorld.getPosition();
+      var pos = [trans.x,trans.y,trans.z];
       pos = [pos[0],pos[1],pos[2],1];
          
       

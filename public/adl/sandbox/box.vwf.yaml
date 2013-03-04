@@ -126,9 +126,10 @@ scripts:
         if(this.uri == "box-vwf")
             return;
 
-       var primobj = new GLGE.Object();
        
-       this.mesh = primobj;
+       
+       this.mesh = new THREE.Mesh(undefined,_Editor.getDefaultMaterial());
+       
        if(vwf.getProperty(this.id,'_length') == undefined) vwf.setProperty(this.id,'_length',1);
        if(vwf.getProperty(this.id,'_width') == undefined) vwf.setProperty(this.id,'_width',1);
        if(vwf.getProperty(this.id,'_height') == undefined) vwf.setProperty(this.id,'_height',1);
@@ -137,15 +138,13 @@ scripts:
        if(vwf.getProperty(this.id,'_heightSegs') == undefined) vwf.setProperty(this.id,'_heightSegs',1);
        if(vwf.getProperty(this.id,'base2pivot') == undefined) vwf.setProperty(this.id,'base2pivot',false);
        
-       vwf.views[0].state.nodes[this.id].glgeObject.addChild(this.mesh);
+       vwf.views[0].state.nodes[this.id].threeObject.add(this.mesh);
        
-       //this.initTexture();
-       
+       if(vwf.getProperty(this.id,'materialDef') != undefined) this.setupMaterial(this.materialDef);
        this._initialized = true;
-       //window.setTimeout(this.dirtyStack.bind(this),500);        
-       //window.setTimeout(this.setupMaterial.bind(this),500); 
        this.dirtyStack();
-       this.setupMaterial();
+        if(this.materialDef)
+       this.setupMaterial(this.materialDef);     
     }
     this.Build = function()
     {
@@ -164,238 +163,13 @@ scripts:
     this.BuildCube = function(length,width,height,lengthsegs,widthsegs,heightsegs,base2pivot)
     {
         
-        var positions = [];
-        var faces = [];
-        var uvs = []
-        var normals = [];
-        var faces = [];
-        var b2p = height/2;
-        if(base2pivot == true)
-            b2p = 0;
-        var faceUppos = positions.length/3;
-        for(var i = 0; i < widthsegs; i++)
-        {
-            for(var j = 0; j<lengthsegs;j++)
-            {
-                positions.push(((i/(widthsegs-1)) * width)-width/2);
-                positions.push(((j/(lengthsegs-1)) * length)-length/2);
-                positions.push(base2pivot==true?height:b2p);
-                uvs.push(i/(widthsegs-1));
-                uvs.push(j/(lengthsegs-1));
-                normals.push(0);
-                normals.push(0);
-                normals.push(1);
-            }
-        }
-        var faceDownpos = positions.length/3;
-        for(var i = 0; i < widthsegs; i++)
-        {
-            for(var j = 0; j<lengthsegs;j++)
-            {
-                positions.push(((i/(widthsegs-1)) * width)-width/2);
-                positions.push(((j/(lengthsegs-1)) * length)-length/2);
-                positions.push(base2pivot==true?0:-b2p);
-                uvs.push(i/(widthsegs-1));
-                uvs.push(j/(lengthsegs-1));
-                normals.push(0);
-                normals.push(0);
-                normals.push(-1);
-            }
-        }
-        var faceFrontpos = positions.length/3;
-        for(var i = 0; i < widthsegs; i++)
-        {
-            for(var j = 0; j<heightsegs;j++)
-            {
-                positions.push(((i/(widthsegs-1)) * width)-width/2);
-                positions.push(-length/2);
-                positions.push(((j/(heightsegs-1)) * height)-b2p);
-                uvs.push(i/(widthsegs-1));
-                uvs.push(j/(heightsegs-1));
-                normals.push(0);
-                normals.push(-1);
-                normals.push(0);
-            }
-        }
-        var faceBackpos = positions.length/3;
-        for(var i = 0; i < widthsegs; i++)
-        {
-            for(var j = 0; j<heightsegs;j++)
-            {
-                positions.push(((i/(widthsegs-1)) * width)-width/2);
-                positions.push(length/2);
-                positions.push(((j/(heightsegs-1)) * height)-b2p);
-                uvs.push(i/(widthsegs-1));
-                uvs.push(j/(heightsegs-1));
-                normals.push(0);
-                normals.push(1);
-                normals.push(0);
-            }
-        }
-      
-        var faceLeftpos = positions.length/3;
-        for(var i = 0; i < lengthsegs; i++)
-        {
-            for(var j = 0; j<heightsegs;j++)
-            {
-                positions.push(width/2);
-                positions.push(((i/(lengthsegs-1)) * length)-length/2);
-                positions.push(((j/(heightsegs-1)) * height)-b2p);
-                uvs.push(i/(lengthsegs-1));
-                uvs.push(j/(heightsegs-1));
-                normals.push(1);
-                normals.push(0);
-                normals.push(0);
-            }
-        }
-        var faceRightpos = positions.length/3;
-        for(var i = 0; i < lengthsegs; i++)
-        {
-            for(var j = 0; j<heightsegs;j++)
-            {
-                positions.push(-width/2);
-                positions.push(((i/(lengthsegs-1)) * length)-length/2);
-                positions.push(((j/(heightsegs-1)) * height)-b2p);
-                uvs.push(i/(lengthsegs-1));
-                uvs.push(j/(heightsegs-1));
-                normals.push(-1);
-                normals.push(0);
-                normals.push(0);
-            }
-        }
-        
-        
-        for(var i = 0; i < widthsegs-1; i++)
-        {
-            for(var j = 0; j<lengthsegs-1;j++)
-            {
-                var thisi = lengthsegs * i + j;
-                var thisj = lengthsegs * i + (j+1);
-                var thisi1 = lengthsegs * (i+1) + j;
-                var thisi1j1 = lengthsegs * (i+1) + (j+1);
-               
-               faces.push(thisj + faceUppos);
-               faces.push(thisi + faceUppos);
+        var geo = new THREE.CubeGeometry(width,length,height,widthsegs,lengthsegs,heightsegs);
                 
-                faces.push(thisi1 + faceUppos);
-               
-               faces.push(thisi1 + faceUppos);
-                faces.push(thisi1j1 + faceUppos);
-                
-                faces.push(thisj + faceUppos);
                 
                
-            }
+        return geo;
         }
         
-        for(var i = 0; i < widthsegs-1; i++)
-        {
-            for(var j = 0; j<lengthsegs-1;j++)
-            {
-                var thisi = lengthsegs * i + j;
-                var thisj = lengthsegs * i + (j+1);
-                var thisi1 = lengthsegs * (i+1) + j;
-                var thisi1j1 = lengthsegs * (i+1) + (j+1);
-                faces.push(thisi + faceDownpos);
-                faces.push(thisj + faceDownpos);
-                faces.push(thisi1 + faceDownpos);
-                faces.push(thisi1j1 + faceDownpos);
-                faces.push(thisi1 + faceDownpos);
-                faces.push(thisj + faceDownpos);
-            }
-        }
-        
-        for(var i = 0; i < widthsegs-1; i++)
-        {
-            for(var j = 0; j<heightsegs-1;j++)
-            {
-                var thisi = heightsegs * i + j;
-                var thisj = heightsegs * i + (j+1);
-                var thisi1 = heightsegs * (i+1) + j;
-                var thisi1j1 = heightsegs * (i+1) + (j+1);
-                
-                
-                faces.push(thisj + faceFrontpos);
-                faces.push(thisi + faceFrontpos);
-                faces.push(thisi1 + faceFrontpos);
-                
-                
-                faces.push(thisi1 + faceFrontpos);
-                faces.push(thisi1j1 + faceFrontpos);
-                faces.push(thisj + faceFrontpos);
-            }
-        }
-        
-        for(var i = 0; i < widthsegs-1; i++)
-        {
-            for(var j = 0; j<heightsegs-1;j++)
-            {
-                var thisi = heightsegs * i + j;
-                var thisj = heightsegs * i + (j+1);
-                var thisi1 = heightsegs * (i+1) + j;
-                var thisi1j1 = heightsegs * (i+1) + (j+1);
-                
-                faces.push(thisi + faceBackpos);
-                faces.push(thisj + faceBackpos);
-                faces.push(thisi1 + faceBackpos);
-                
-                faces.push(thisi1j1 + faceBackpos);
-                faces.push(thisi1 + faceBackpos);
-                faces.push(thisj + faceBackpos);
-            }
-        }
-        
-        for(var i = 0; i < lengthsegs-1; i++)
-        {
-            for(var j = 0; j<heightsegs-1;j++)
-            {
-                var thisi = heightsegs * i + j;
-                var thisj = heightsegs * i + (j+1);
-                var thisi1 = heightsegs * (i+1) + j;
-                var thisi1j1 = heightsegs * (i+1) + (j+1);
-                
-                faces.push(thisi + faceLeftpos);
-                
-                faces.push(thisi1 + faceLeftpos);
-                faces.push(thisj + faceLeftpos);
-                
-                faces.push(thisi1j1 + faceLeftpos);
-               
-                faces.push(thisj + faceLeftpos); 
-                faces.push(thisi1 + faceLeftpos);
-            }
-        }
-        
-        for(var i = 0; i < lengthsegs-1; i++)
-        {
-            for(var j = 0; j<heightsegs-1;j++)
-            {
-                var thisi = heightsegs * i + j;
-                var thisj = heightsegs * i + (j+1);
-                var thisi1 = heightsegs * (i+1) + j;
-                var thisi1j1 = heightsegs * (i+1) + (j+1);
-                faces.push(thisi + faceRightpos);
-                faces.push(thisj + faceRightpos);
-                faces.push(thisi1 + faceRightpos);
-                faces.push(thisi1j1 + faceRightpos);
-                faces.push(thisi1 + faceRightpos);
-                faces.push(thisj + faceRightpos);
-            }
-        }
-        
-        var planemesh = new GLGE.Mesh();
-          
-        planemesh.setPositions(positions);
-        planemesh.setFaces(faces);
-        planemesh.setNormals(normals);
-        planemesh.setUV(uvs);
-        
-        return planemesh;
-    }
-    
-    
-    
-    
 
     function findChildViewNode(node, name)
     {
@@ -417,7 +191,7 @@ scripts:
      {
          for(var i =0; i<vwf.views.length;i++)
          {
-             if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].glgeScene;
+             if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].threeScene;
          }
          return null;
     }

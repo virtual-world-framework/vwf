@@ -303,8 +303,8 @@ scripts:
        this.last_x = 0;
        this.last_y = 0;
        this.navmode = 'none';
-       this.PickOptions = new GLGE.CPUPickOptions();
-       this.PickOptions.UserRenderBatches = true;
+     //  this.PickOptions = new GLGE.CPUPickOptions();
+     //  this.PickOptions.UserRenderBatches = true;
       
         $('#index-vwf').mousedown(function(e){this.localpointerDown(e);}.bind(this));
         $('#index-vwf').mouseup(function(e){this.localpointerUp(e);}.bind(this));
@@ -326,50 +326,52 @@ scripts:
        this.updateCallbacks = [];
        this.OwnedPrims = [];
       
-       findscene().camera.setFovY(70);
-       var ground = this.CreatePlane(250,250);
+       findcamera().fov = 70;
+       findcamera().updateProjectionMatrix();
+       var ground = new THREE.Mesh(new THREE.PlaneGeometry(250,250,1,1), new THREE.MeshPhongMaterial());
+       ground.PickPriority = -1;
        
-       var grass = new GLGE.Material();
-       var grassTex = new GLGE.MaterialLayer();
-       var grasstexsrc = new GLGE.Texture();
-       grasstexsrc.setSrc('textures/grid2.gif');
-       grassTex.setTexture(grasstexsrc);
-       grassTex.setMapinput(GLGE.UV1);
-       grassTex.setMapto(GLGE.M_COLOR);
-       grassTex.setScaleX(1);
-       grassTex.setScaleY(1);
-       grass.addMaterialLayer(grassTex);
-       grass.addTexture(grasstexsrc);
-       ground.setMaterial(grass);
        
+       var grassTex = THREE.ImageUtils.loadTexture('textures/grid2.gif');
+       
+      
+       ground.material.map = grassTex;
+        grassTex.wrapS = THREE.RepeatWrapping;
+        grassTex.wrapT = THREE.RepeatWrapping;
+        grassTex.repeat.x = 250/9;
+        grassTex.repeat.y = 250/9;
+       grassTex.anisotropy  = _dRenderer.getMaxAnisotropy();
        this.groundplane = ground;
        
-       grass.setSpecular(.0);
-       grass.setShininess(15);
-       var l = new GLGE.Light();
-       this.sun = l;
-       l.setType(2);
-       l.setCastShadows(true);
-       l.setColor('rgb(200,200,200)');
-       l.setRotX(1);
-       l.setDistance(300);
-       l.setShadowBias(-.001);
-       l.setVarianceMin(.0000000001)
+       findscene().add(ground);
        
-       findscene().addChild(l);
-       findscene().setAmbientColor('rgb(200,200,200)');
+       var l = new THREE.DirectionalLight();
+       this.sun = l;
+       findscene().add(l);
+       this.sun.position.x = 1;
+       this.sun.position.y = 1;
+       this.sun.position.z = 4;
+       this.sun.intensity = .8;
+       
        this.CreateSky('white');
+       /*findscene().setAmbientColor('rgb(200,200,200)');
+       
+       
+      
+       
+       
        
        findscene().setFogType(GLGE.FOG_QUADRATIC);
        findscene().setFogFar(360);
        findscene().setFogNear(100);
        findscene().setFogColor('#FFFFFF');
-       this.updateCamera();
        
+       */
          if(this.id == 'Scene-vwf') return;
-          this.prerendercallback = this.placeNameTag.bind(this);
+          this.prerendercallback = this.prerender.bind(this);
           $(document).bind('prerender',this.prerendercallback);
           this.createNameTag();
+          this.updateCamera();
     }
     this.latencyTest = function(e)
     {
@@ -411,21 +413,41 @@ scripts:
     }
     this.CreateSky = function(sky_name)
     {
-        var filter = new GLGE.Filter2d;
-        findscene().setSkyFilter(filter);
-        var skyboxShader= "/* From GLGE's examples/skydemo */ precision highp float;uniform samplerCube TEXTURE0;varying vec2 texCoord;varying vec3 rayCoord;void main(void) {gl_FragColor = textureCube(TEXTURE0, rayCoord.xyz);}";
-        filter.addPass(skyboxShader);
-        filter.setFilterType(GLGE.FILTER_SKY);
-        var tex = new GLGE.TextureCube();
         
-        tex.setSrcNegX('skys/'+sky_name+'_BK.jpg');
-        tex.setSrcNegY('skys/'+sky_name+'_LF.jpg');
-        tex.setSrcNegZ('skys/'+sky_name+'_DN.jpg');
-        tex.setSrcPosX('skys/'+sky_name+'_FR.jpg');
-        tex.setSrcPosY('skys/'+sky_name+'_RT.jpg');
-        tex.setSrcPosZ('skys/'+sky_name+'_UP.jpg');
+        if(this.skycube)
+            this.skycube.parent.remove(this.skycube);
+       //var sky_name = 'cloudy_noon';
+       var urls = [];
+
         
-        filter.addTexture(tex);
+        urls.push('skys/'+sky_name+'_FR.jpg');
+        urls.push('skys/'+sky_name+'_BK.jpg');
+        urls.push('skys/'+sky_name+'_LF.jpg');
+        urls.push('skys/'+sky_name+'_RT.jpg');
+        urls.push('skys/'+sky_name+'_DN.jpg');
+        urls.push('skys/'+sky_name+'_UP.jpg');
+       
+       
+        
+
+       var skyCubeTexture = THREE.ImageUtils.loadTextureCube(urls);
+            skyCubeTexture.format = THREE.RGBFormat;
+            skyCubeTexture.generateMipmaps = true;
+            skyCubeTexture.minFilter = THREE.LinearFilter;
+            skyCubeTexture.magFilter = THREE.LinearFilter;
+            skyCubeTexture.wrapS = THREE.ClampToEdgeWrapping;
+            skyCubeTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+            
+       
+       this.skymaterial = new THREE.MeshBasicMaterial();
+       this.skymaterial.side = 1;
+       this.skymaterial.envMap = skyCubeTexture;
+       this.skycube = new THREE.Mesh(new THREE.CubeGeometry(1000,1000,1000), this.skymaterial);
+       this.skycube.renderDepth = -1;
+       this.skycube.depthWrite = false;
+       this.skycube.depthCheck = false;
+       findscene().add(this.skycube);
         
     }
     this.removeUpdateCallback = function(m)
@@ -580,13 +602,13 @@ scripts:
         screenmousepos[0] -= 1;
         screenmousepos[1] -= 1;
         screenmousepos[1] *= -1;
-        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(findscene().camera.getViewProjection()),screenmousepos);
+        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos[0] /= worldmousepos[3];
         worldmousepos[1] /= worldmousepos[3];
         worldmousepos[2] /= worldmousepos[3];
 
 
-        var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+        var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
         var ray = GLGE.subVec3(worldmousepos,campos);
         var dist = GLGE.lengthVec3(ray);
         ray = GLGE.scaleVec3(ray,1.0/GLGE.lengthVec3(ray));
@@ -625,14 +647,16 @@ scripts:
       if(this.cameramode == 'Navigate')
       {
              
-           var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+           var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
            var ray = this.GetWorldPickRay(parms);
 
            var dxy = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
            var oldintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
            
-           oldintersectxy = findscene().CPUPick(campos,ray,this.PickOptions).point;
-           
+            this.groundplane.PickPriority = 0;
+           oldintersectxy = _Editor.ThreeJSPick(campos,ray,this.PickOptions).point;
+            this.groundplane.PickPriority = -1;
+           oldintersectxy = [oldintersectxy.x,oldintersectxy.y,oldintersectxy.z];
            this.navpoint =  oldintersectxy;
       }
      
@@ -673,7 +697,7 @@ scripts:
         {  
             this.oldRotZ += this.rel_x*10 || 0;
             vwf_view.kernel.setProperty(this.objectFollowed.id,'rotZ', this.oldRotZ);
-            _Editor.findviewnode(this.objectFollowed.id).setRotZ(this.oldRotZ);
+            //_Editor.findviewnode(this.objectFollowed.id).setRotZ(this.oldRotZ);
             
         }
         
@@ -693,7 +717,7 @@ scripts:
         screenmousepos[0] -= 1;
         screenmousepos[1] -= 1;
         screenmousepos[1] *= -1;
-        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(findscene().camera.getViewProjection()),screenmousepos);
+        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos[0] /= worldmousepos[3];
         worldmousepos[1] /= worldmousepos[3];
         worldmousepos[2] /= worldmousepos[3];
@@ -704,15 +728,16 @@ scripts:
         screenmousepos[0] -= 1;
         screenmousepos[1] -= 1;
         screenmousepos[1] *= -1;
-        var worldmousepos2 = GLGE.mulMat4Vec4(GLGE.inverseMat4(findscene().camera.getViewProjection()),screenmousepos);
+        var worldmousepos2 = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos2[0] /= worldmousepos2[3];
         worldmousepos2[1] /= worldmousepos2[3];
         worldmousepos2[2] /= worldmousepos2[3];
        
-       var panfactor = 5;
+       var panfactor = 50;
        if(this.cameramode == 'Free')
        panfactor = 50;
        
+       console.log(this.zoom);
         this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(worldmousepos2,worldmousepos),panfactor * this.zoom));
         this.updateCamera();
         
@@ -720,7 +745,7 @@ scripts:
       
       if(this.cameramode == 'Navigate' && this.middledown == true)
       {   
-           var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+           var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
            var ray = this.GetWorldPickRay(parms);
 
            var dxy = this.intersectLinePlane(ray,campos,[0,0,this.navpoint[2]],[0,0,1]);
@@ -767,10 +792,10 @@ scripts:
             var finalpos = GLGE.addVec3(finaloffset,this.center);
             
             //this.camera.translation = finalpos;
-            findscene().camera.setLoc(finalpos[0],finalpos[1],finalpos[2]);
-            findscene().camera.Lookat(this.center);
-            findscene().camera.setFar(Math.abs(1000));
-            findscene().camera.setNear(Math.abs(.1));
+            findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
+            findcamera().lookAt(to3Vec(this.center));
+            findcamera().far = 1000;
+            findcamera().near = .1;
         }else if(this.cameramode == 'FirstPerson')
         {
             //this.oldRotZ var xmatrix = GLGE.angleAxis(this.x_rot*10,[0,0,1]);
@@ -794,10 +819,10 @@ scripts:
             var finalpos = GLGE.addVec3(finaloffset,this.center);
             
             //this.camera.translation = finalpos;
-            findscene().camera.setLoc(finalpos[0],finalpos[1],finalpos[2]);
-            findscene().camera.Lookat(this.center);
-            findscene().camera.setFar(Math.abs(1000));
-            findscene().camera.setNear(Math.abs(.2));
+            findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
+            findcamera().lookAt(to3Vec(this.center));
+            findcamera().far = 1000;
+            findcamera().near = .1;
             this.zoom = .0001;
             
         }else  if(this.cameramode == '3RDPerson')
@@ -810,27 +835,57 @@ scripts:
             offset = GLGE.scaleVec3(offset,1/finaldist);            
             var start = GLGE.addVec3(this.center,GLGE.scaleVec3(offset,.3));
             
-            var oldpickstate = findviewnode(this.objectFollowed.id).InvisibleToCPUPick;
-            findviewnode(this.objectFollowed.id).InvisibleToCPUPick = true;
-            var hit = findscene().CPUPick(start,GLGE.scaleVec3(offset,1),this.PickOptions);
+            var oldpickstate = findviewnode(this.objectFollowed.id).PickPriority;
+            
+            var hit = _Editor.ThreeJSPick(start,GLGE.scaleVec3(offset,1),this.PickOptions);
             if(hit)
             {
                 finaldist = Math.min(finaldist,hit.distance-.2);
             }
-            findviewnode(this.objectFollowed.id).InvisibleToCPUPick = oldpickstate;
+            findviewnode(this.objectFollowed.id).PickPriority = oldpickstate;
             offset = GLGE.scaleVec3(offset,finaldist);
             
             var finalpos = GLGE.addVec3(offset,start);
-            findscene().camera.setLoc(finalpos[0],finalpos[1],finalpos[2]);
-            findscene().camera.Lookat(this.center);
+            findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
+            findcamera().lookAt(to3Vec(this.center));
             
         }
         this.callUpdateCallbacks();
-        
+        findcamera().updateMatrixWorld();
+        findcamera().updateMatrix();
       }
       function findscene()
       {
-             return vwf.views[0].state.scenes["index-vwf"].glgeScene;
+             return vwf.views[0].state.scenes["index-vwf"].threeScene;
+      }
+      function findcamera()
+      {
+             return vwf.views[0].state.scenes["index-vwf"].camera.threeJScameras[vwf.views[0].state.scenes["index-vwf"].camera.defaultCamID];
+      }
+      function matcpy(mat)
+      {
+        var newmat = [];
+        for(var i = 0; i < 16; i++)
+            newmat[i] = mat[i];
+        return newmat;    
+      }
+      function getViewProjection()
+      {
+        var cam = findcamera();
+        cam.matrixWorldInverse.getInverse( cam.matrixWorld );
+
+        var _viewProjectionMatrix = new THREE.Matrix4();
+        _viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
+
+
+        return GLGE.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
+      }
+      function to3Vec(vec,two,three)
+      {
+        if(vec.length)
+            return new THREE.Vector3(vec[0],vec[1],vec[2]);
+        else
+            return new THREE.Vector3(vec,two,three);
       }
     this.setCameraMode = function(mode)
     {
@@ -846,7 +901,7 @@ scripts:
     this.orbitPoint = function(point)
     {
         this.setCameraMode('Orbit');
-        var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+        var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
         var diff = GLGE.subVec3(campos,point);
         var length = GLGE.lengthVec3(diff);
         diff = GLGE.scaleVec3(diff,1.0/length);
@@ -858,7 +913,7 @@ scripts:
     }
     this.ReprojectCameraCenter = function()
     {
-            var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+            var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
             var worldmousepos  = this.GetCameraCenterRay();
             worldmousepos = GLGE.scaleVec3(worldmousepos,.4);
             this.center = GLGE.addVec3(worldmousepos,campos);  
@@ -867,13 +922,13 @@ scripts:
     this.GetCameraCenterRay = function()
     {
         var screenmousepos = [0,0,0,1];
-        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(findscene().camera.getViewProjection()),screenmousepos);
+        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos[0] /= worldmousepos[3];
         worldmousepos[1] /= worldmousepos[3];
         worldmousepos[2] /= worldmousepos[3];
 
 
-        var campos = [findscene().camera.getLocX(),findscene().camera.getLocY(),findscene().camera.getLocZ()];
+         var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
         var ray = GLGE.subVec3(worldmousepos,campos);
         var dist = GLGE.lengthVec3(ray);
         ray = GLGE.scaleVec3(ray,1.0/GLGE.lengthVec3(ray));
@@ -888,9 +943,9 @@ scripts:
         if(this.cameramode != 'Navigate' && this.cameramode != 'Free')
         { 
             if(pickInfo.wheel.deltaY < 0 )
-            this.zoom *= 1.1;
-            else
             this.zoom *= .9;
+            else
+            this.zoom *= 1.1;
         }
         if(this.cameramode == 'Navigate')
         {  
@@ -900,17 +955,17 @@ scripts:
         
         if(this.cameramode == 'Free')
         { 
-            if(pickInfo.wheel.deltaY < 0 )
+            if(pickInfo.wheel.deltaY > 0 )
             this.center = GLGE.subVec3(this.center,this.GetCameraCenterRay());
             else
             this.center = GLGE.addVec3(this.GetCameraCenterRay(),this.center);
             
         }
-        if(this.cameramode == 'FirstPerson' && pickInfo.wheel.deltaY < 0)
+        if(this.cameramode == 'FirstPerson' && pickInfo.wheel.deltaY > 0)
         {
             this.cameramode = '3RDPerson';
         }
-        else if(this.cameramode == '3RDPerson' && pickInfo.wheel.deltaY > 0)
+        else if(this.cameramode == '3RDPerson' && pickInfo.wheel.deltaY < 0)
         {
             this.y_rot =.6245;
             this.cameramode = 'FirstPerson';
@@ -952,7 +1007,7 @@ scripts:
     {
         for(var i =0; i<vwf.views.length;i++)
         {
-            if(vwf.views[i].state.nodes[id].glgeObject) return vwf.views[i].state.nodes[id].glgeObject;
+            if(vwf.views[i].state.nodes[id].threeObject) return vwf.views[i].state.nodes[id].threeObject;
         }
         return null;
     }
@@ -989,117 +1044,37 @@ scripts:
     {
             if(this.materialDef) return this.materialDef;    
            
-            var newMaterial = {};
-            var currentMaterial = this.groundplane.getMaterial();
-            if(!currentMaterial)
-                return;
-            newMaterial.shininess = currentMaterial.getShininess();
-            newMaterial.alpha = currentMaterial.getAlpha();
-            newMaterial.ambient = currentMaterial.getAmbient();
-            newMaterial.color = currentMaterial.getColor();
-            newMaterial.emit = currentMaterial.getEmit();
-            newMaterial.reflect = currentMaterial.getReflectivity();
-            newMaterial.shadeless = currentMaterial.getShadeless();
-            newMaterial.shadow = currentMaterial.getShadow();
-            
-            newMaterial.specularColor = currentMaterial.getSpecularColor();
-            newMaterial.specularLevel = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
-            newMaterial.specularColor.r = newMaterial.specularColor.r/newMaterial.specularLevel || 0.01;
-            newMaterial.specularColor.g = newMaterial.specularColor.g/newMaterial.specularLevel || 0.01;
-            newMaterial.specularColor.b = newMaterial.specularColor.b/newMaterial.specularLevel || 0.01;
-            newMaterial.layers = [];
-            for(var i = 0; i<currentMaterial.layers.length;i++)
-            {
-                var newLayer = {};
-                newMaterial.layers.push(newLayer);
-                newLayer.src = currentMaterial.layers[i].getTexture().getSrc();
-                newLayer.mapTo = currentMaterial.layers[i].getMapto();
-                newLayer.blendMode = currentMaterial.layers[i].getBlendMode();
-                newLayer.alpha = currentMaterial.layers[i].getAlpha();
-                
-                newLayer.scalex = currentMaterial.layers[i].getScaleX();
-                newLayer.scaley = currentMaterial.layers[i].getScaleY();
-                newLayer.offsetx = currentMaterial.layers[i].getOffsetX();
-                newLayer.offsety = currentMaterial.layers[i].getOffsetY();
-                newLayer.rot = currentMaterial.layers[i].getRotZ();
-                newLayer.mapInput = currentMaterial.layers[i].getMapinput();
+            return {
+                    shininess:15,
+                    alpha:1,
+                    ambient:{r:.8,g:.8,b:.8},
+                    color:{r:1,g:1,b:1,a:1},
+                    emit:{r:0,g:0,b:0},
+                    reflect:0.8,
+                    shadeless:false,
+                    shadow:true,
+                    specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
+                    specularLevel:1,
+                    layers:[
+                      {  alpha: 1,
+                        blendMode: 0,
+                        mapInput: 0,
+                        mapTo: 1,
+                        offsetx: 0,
+                        offsety: 0,
+                        rot: 0,
+                        scalex: 250/9,
+                        scaley: 250/9,
+                        src: "textures/grid2.gif"}
+                    ]
             }            
-            return newMaterial;
     
     }
     this.setTexture = function(value)
     {
-             
-             var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
-             if(!newMaterial) return;
-             var currentMaterial = this.groundplane.getMaterial();
-             if(!currentMaterial) return;
-             currentMaterial.setShininess(newMaterial.shininess);
-             currentMaterial.setAlpha(newMaterial.alpha);
-             currentMaterial.setAmbient(newMaterial.ambient);
-             currentMaterial.setColor(newMaterial.color);
-             currentMaterial.setEmit(newMaterial.emit);
-             currentMaterial.setReflectivity(newMaterial.reflect);
-             currentMaterial.setShadeless(newMaterial.shadeless);
-             currentMaterial.setShadow(newMaterial.shadow);
-            
-             
-             
-             
-             newMaterial.specularColor.r = newMaterial.specularColor.r || 0.01;
-             newMaterial.specularColor.g = newMaterial.specularColor.g || 0.01;
-             newMaterial.specularColor.b = newMaterial.specularColor.b || 0.01;
-             
-             var norm = Math.sqrt(newMaterial.specularColor.r * newMaterial.specularColor.r + newMaterial.specularColor.g * newMaterial.specularColor.g + newMaterial.specularColor.b * newMaterial.specularColor.b);
-             newMaterial.specularColor.r /= norm;
-             newMaterial.specularColor.g /= norm;
-             newMaterial.specularColor.b /= norm;
-             
-             newMaterial.specularColor.r *= newMaterial.specularLevel;
-             newMaterial.specularColor.g *= newMaterial.specularLevel;
-             newMaterial.specularColor.b *= newMaterial.specularLevel;
-             currentMaterial.setSpecularColor(newMaterial.specularColor);
-             for(var i=0 ; i < newMaterial.layers.length; i++)
-             {
-                var layer = currentMaterial.layers[i];
-                var newLayer = newMaterial.layers[i];
-                if(!layer)
-                {
-                    layer = new GLGE.MaterialLayer();
-                    layer.setMapinput(GLGE.UV1);
-                    currentMaterial.addMaterialLayer(layer);
-                }
-                
-                layer.setMapto(newLayer.mapTo);
-                layer.setBlendMode(newLayer.blendMode);
-                layer.setAlpha(newLayer.alpha);
-                
-                layer.setScaleX(newLayer.scalex);
-                layer.setScaleY(newLayer.scaley);
-                layer.setOffsetX(newLayer.offsetx);
-                layer.setOffsetY(newLayer.offsety);
-                layer.setRotZ(newLayer.rot);
-                layer.setMapinput(newLayer.mapInput );
-                
-                var texture = layer.getTexture();
-                if(texture && texture.getSrc() != newMaterial.layers[i].src)
-                {
-                    //currentMaterial.removeTexture(texture);
-                    layer.setTexture(null);
-                    texture = null;
-                }
-                if(!texture)
-                {
-                    texture = new GLGE.Texture();
-                    layer.setTexture(texture);
-                    currentMaterial.addTexture(texture);
-                    texture.setSrc(newMaterial.layers[i].src);
-                }
-                
-             }
-             while(currentMaterial.layers.length > newMaterial.layers.length)
-                currentMaterial.removeMaterialLayer(currentMaterial.layers[currentMaterial.layers.length -1])
-    
+            debugger;
+             _Editor.setMaterialByDef(this.groundplane.material,value);
+           // this.materialDef = value;
     }
     this.createNameTag = function()
     {
@@ -1128,9 +1103,11 @@ scripts:
        $(document).unbind('prerender',this.prerendercallback);
        $(this.nametag).remove();
     }
-    this.placeNameTag = function(e,viewprojection, wh, ww)
+    this.prerender = function(e,viewprojection, wh, ww)
     {
+        //set the skybox position
       
+        this.skycube.position = findcamera().position;
    
       var div = this.nametag;
       var pos = [0,0,0];

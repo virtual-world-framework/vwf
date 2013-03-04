@@ -18,14 +18,9 @@ methods:
   updateSelf:
   dirtyStack:
   GetBounds:
-  initTexture:
   getTexture:
   setupMaterial:
   setTransparent:
-events:
-  pointerOver:  
-  pointerOut:
-  pointerClick:
 properties:
   isStatic:
   materialDef:
@@ -34,7 +29,7 @@ properties:
     set: |
              
              this.materialDef = value;
-             this.initTexture(value);
+             this.setupMaterial(value);
   transparent:           
     set: |
              this.setTransparent(value); 
@@ -42,33 +37,51 @@ scripts:
 - |  
     this.getTexture = function()
     {
+        if(this.GetMesh().lastMatDef)
+            return this.GetMesh().lastMatDef;
+        else
+        {
             if(this.materialDef) return this.materialDef;    
-            if(!this.mesh)
-                return null;
-            var currentMaterial = this.mesh.material;
-            if(!currentMaterial)
-                return;
-            return GLGE.MaterialManager.getDefForMaterial(currentMaterial);
     
+                return {
+                    shininess:15,
+                    alpha:1,
+                    ambient:{r:1,g:1,b:1},
+                    color:{r:1,g:1,b:1,a:1},
+                    emit:{r:0,g:0,b:0},
+                    reflect:0.8,
+                    shadeless:false,
+                    shadow:true,
+                    specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
+                    specularLevel:1,
+                    layers:[
+                      {  alpha: 1,
+                        blendMode: 0,
+                        mapInput: 0,
+                        mapTo: 1,
+                        offsetx: 0,
+                        offsety: 0,
+                        rot: 0,
+                        scalex: 1,
+                        scaley: 1,
+                        src: "checker.jpg"}
+                    ]
     }
-    this.setupMaterial = function()
+        
+    }
+             
+    }
+    this.setupMaterial = function(value)
     {
         
-        //this.mesh.setMaterial(new GLGE.Material());
-        this.initTexture();
-    }
-    this.initTexture = function(value)
-    {
-             
-             var newMaterial = value || vwf.getProperty(this.id,'materialDef') ;//|| {shininess:10,alpha:1,ambient:{r:0,g:0,b:0},color:{r:1,g:1,b:1},emit:{r:0,g:0,b:0},reflect:.08,shadeless:false,shadow:true};
-             if(!newMaterial) return;
-             this.mesh.setMaterial(GLGE.MaterialManager.getMaterialByDef(newMaterial,this.mesh.getMaterial()));
-            this.mesh.batchDirty = true;   
+        this.GetMesh().lastMatDef = value;
+        var currentmat = this.GetMesh().material;
+        _Editor.setMaterialByDef(currentmat,value);
+          
     }
     this.setTransparent = function(v)
     {
-        if(this.mesh &&  this.mesh)
-            this.mesh.setZtransparent(v);
+        
     }
     this.GetMesh = function()
     {
@@ -77,15 +90,20 @@ scripts:
     this.updateSelf = function()
     {
         
-        this.mesh.setMesh(this.Build());
-        this.mesh.isStatic = vwf.getProperty(this.id,'isStatic');
-        this.mesh.batchDirty = true;
-        if(this.mesh.mesh)
-            this.mesh.mesh.dirtyMesh = true;		
+        
+        var lastmatdef = this.mesh.lastMatDef || this.materialDef;
+        var lastmat = this.mesh.material;
+        var parent = this.mesh.parent;
+        var rotation = this.mesh.rotation;
+        parent.remove(this.mesh);
+        this.mesh = new THREE.Mesh(this.Build(),lastmat);
+        this.mesh.rotation = rotation;
+        this.mesh.lastMatDef = lastmatdef;
+       
+        parent.add(this.mesh);
     }
     this.dirtyStack = function()
     {
-        
         this.updateStack();
     }
     this.updateStack = function()
@@ -96,34 +114,8 @@ scripts:
         {
             return vwf.callMethod(this.children[i].id,'updateStack');
         }
-        if(this.mesh.mesh)
-            this.mesh.mesh.dirtyMesh = true;
     }
     this.GetBounds = function()
     {
         return this.boundingbox;
-    }
-    this.pointerOver = function(e,ed)
-    {   
-        for(var i=0; i < this.children.length; i++)
-        {
-            if(this.children[i].pointerOver)
-                this.children[i].pointerOver(e,ed);
-        }
-    }
-    this.pointerOut = function(e,ed)
-    {   
-        for(var i=0; i < this.children.length; i++)
-        {
-            if(this.children[i].pointerOut)
-                this.children[i].pointerOut(e,ed);
-        }
-    }
-    this.pointerClick = function(e,ed)
-    {   
-        for(var i=0; i < this.children.length; i++)
-        {
-            if(this.children[i].pointerClick)
-                this.children[i].pointerClick(e,ed);
-        }
     }

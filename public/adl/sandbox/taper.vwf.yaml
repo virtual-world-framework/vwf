@@ -52,17 +52,23 @@ scripts:
     {
          if(this.amount == undefined) return;
          var mesh = this.GetMesh();
-         var m = mesh.getMesh();
+         var m = mesh.geometry;
          var positions = [];
-         for(var i=0;i<m.positions.length-2; i+=3)
+         
+         for(var i=0;i<m.vertices.length; i++)
          {
-            positions.push([m.positions[i],m.positions[i+1],m.positions[i+2]]);
+            positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
          }
          
-         var bounds = this.GetBounds();
-         var height = bounds.max[2] - bounds.min[2];
-         var length = bounds.max[0] - bounds.min[0];
-         var width = bounds.max[1] - bounds.min[1];
+         var bounds = m.boundingBox;
+         if(!bounds)
+            m.computeBoundingBox();
+         bounds = m.boundingBox;
+         
+         var height = bounds.max.z - bounds.min.z;
+         var length = bounds.max.x - bounds.min.x;
+         var width = bounds.max.y - bounds.min.y;
+         
          var amt = this.amount*2;
          for(var i=0;i<positions.length; i+=1)
          {
@@ -70,15 +76,15 @@ scripts:
             positions[i][0] *= 1+(amt*factor) ;
             positions[i][1] *= 1+(amt*factor) ;
          }
-         var newpositions = []
+         
          for(var i=0;i<positions.length; i+=1)
          {
-            newpositions.push(positions[i][0]);
-            newpositions.push(positions[i][1]);
-            newpositions.push(positions[i][2]);
+            m.vertices[i].x = (positions[i][0]);
+            m.vertices[i].y = (positions[i][1]);
+            m.vertices[i].z = (positions[i][2]);
          }
          
-         m.setPositions(newpositions);
+         m.verticesNeedUpdate = true;
     }
     this.updateStack = function()
     {

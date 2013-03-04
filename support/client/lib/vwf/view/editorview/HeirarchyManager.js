@@ -71,34 +71,36 @@ function hierarchyManager()
 		{
 			if(this.SelectionBounds != null)
 			{
-				this.SelectionBounds.parent.removeChild(this.SelectionBounds);
+				this.SelectionBounds.parent.remove(this.SelectionBounds);
 				this.SelectionBounds = null;
 			}
-				var box = node.GetBoundingBox(true);
-				box = box.clone();
-				box.max[0] += .05;
-				box.max[1] += .05;
-				box.max[2] += .05;
-				box.min[0] -= .05;
-				box.min[1] -= .05;
-				box.min[2] -= .05;
-				var mat = node.getModelMatrix().slice(0);
+				var box = node.getBoundingBox(false);
+				
+				box.max.x += .05;
+				box.max.y += .05;
+				box.max.z += .05;
+				box.min.x -= .05;
+				box.min.y -= .05;
+				box.min.z -= .05;
+				var mat = matCpy(node.matrixWorld.elements);
 				//mat = GLGE.inverseMat4(mat);
 				//mat[3] = 0;
 				//mat[7] = 0;
 				//mat[11] = 0;
 				
 				
-				this.SelectionBounds = _Editor.BuildBox([box.max[0] - box.min[0],box.max[1] - box.min[1],box.max[2] - box.min[2]],[box.min[0] + (box.max[0] - box.min[0])/2,box.min[1] + (box.max[1] - box.min[1])/2,box.min[2] + (box.max[2] - box.min[2])/2],color);
+				this.SelectionBounds = _Editor.BuildBox([box.max.x - box.min.x,box.max.y - box.min.y,box.max.z - box.min.z],[box.min.x + (box.max.x - box.min.x)/2,box.min.y + (box.max.y - box.min.y)/2,box.min.z + (box.max.z - box.min.z)/2],color);
 				
-				this.SelectionBounds.setStaticMatrix(mat);
-				this.SelectionBounds.InvisibleToCPUPick = true;
-				this.SelectionBounds.setDrawType(GLGE.DRAW_LINELOOPS);
-				this.SelectionBounds.setDepthTest(false);
-				this.SelectionBounds.setZtransparent(true);
-				this.SelectionBounds.setCull(GLGE.NONE);
-				this.SelectionBounds.setPickable(false);
-				_Editor.findscene().addChild(this.SelectionBounds);
+				this.SelectionBounds.matrixAutoUpdate = false;
+				this.SelectionBounds.matrix.elements = mat;
+				this.SelectionBounds.updateMatrixWorld(true);
+				this.SelectionBounds.material.wireframe = true;
+				this.SelectionBounds.renderDepth = 10000 -1;
+				this.SelectionBounds.material.depthTest = false;
+				this.SelectionBounds.material.depthWrite = false;
+				this.SelectionBounds.PickPriority = -1;
+				
+				_Editor.findscene().add(this.SelectionBounds);
 		}
 	
 	}
@@ -197,6 +199,7 @@ function hierarchyManager()
 	}
 	this.getGLGEChildren = function(node,list,depth)
 	{
+		
 		if(node === undefined)
 		{
 		    node = _Editor.findviewnode(this.selectedID);
@@ -213,10 +216,13 @@ function hierarchyManager()
 		if(node.vwfID)
 			return;
 		var nodename = node.name;
-		if(!nodename)
+	
+		if(nodename === null || nodename === undefined)
 			nodename = node.uid;
-		if(!nodename)
+		if(nodename === null || nodename === undefined)
 			nodename = node.vwfID;	
+		if(nodename === null || nodename === undefined || nodename === "")
+			nodename = "no name";			
 		list.push({name:nodename,depth:depth});
 		var children = node.children;
 		if(children)
@@ -283,7 +289,7 @@ function hierarchyManager()
 			
 			if(this.SelectionBounds != null)
 			{
-				this.SelectionBounds.parent.removeChild(this.SelectionBounds);
+				this.SelectionBounds.parent.remove(this.SelectionBounds);
 				this.SelectionBounds = null;
 			}
 			

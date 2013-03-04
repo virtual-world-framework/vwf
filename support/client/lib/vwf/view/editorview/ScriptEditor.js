@@ -129,7 +129,8 @@ function ScriptEditor()
 		if(scripteditorheight != 0)
 		   scripteditorheight = $(window).height() - scripteditorheight;
 		$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - (scripteditorheight-25) + 'px');
-			_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+			_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
+			_Editor.findcamera().updateProjectionMatrix();
 		}
 		_ScriptEditor.resize();
 	});
@@ -465,7 +466,8 @@ function ScriptEditor()
 			{
 				$('#ScriptEditorTabs').css('height',$('#ScriptEditor').height() + 'px');
 					$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px');
-					_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+					_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
+					_Editor.findcamera().updateProjectionMatrix();
 			},
 			complete:function()
 			{
@@ -498,7 +500,8 @@ function ScriptEditor()
 				{
 					$('#ScriptEditorTabs').css('height',$('#ScriptEditor').height() + 'px');
 					$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px');
-					_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+					_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
+					_Editor.findcamera().updateProjectionMatrix();
 				},
 				complete:function()
 				{

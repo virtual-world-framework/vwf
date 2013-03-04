@@ -31,7 +31,7 @@ function PrimitiveEditor()
 	}}});
 	
 	$('#sidepanel').append("<div id='PrimitiveEditor'>" +
-	"<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-ObjectProperties'>Object Properties</span></div>"+
+	"<div id='primeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Object Properties</span></div>"+
 					'<div id="accordion" style="height:100%;overflow:hidden">'+
 						'<h3><a href="#">Flags</a></h3>'+
 						'<div>'+
@@ -143,18 +143,18 @@ function PrimitiveEditor()
 	}
 	this.setProperty = function(id,prop,val)
 	{
-		if(document.PlayerNumber == null)
-		{
-			_Notifier.notify('You must log in to participate');
-			return;
-		}
+		// if(document.PlayerNumber == null)
+		// {
+			// _Notifier.notify('You must log in to participate');
+			// return;
+		// }
 		if(id != 'selection')
 		{
-			if(!_Editor.isOwner(id,_UserManager.GetCurrentUserName()))
-			{
-				_Notifier.notify('You do not have permission to edit this object');
-				return;
-			}
+			// if(!_Editor.isOwner(id,_UserManager.GetCurrentUserName()))
+			// {
+				// _Notifier.notify('You do not have permission to edit this object');
+				// return;
+			// }
 			vwf_view.kernel.setProperty(id,prop,val)
 		}
 		if(id == 'selection')
@@ -163,11 +163,11 @@ function PrimitiveEditor()
 			for(var k=0; k < _Editor.getSelectionCount(); k++)
 			{
 				
-				if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(k).id,_UserManager.GetCurrentUserName()))
-				{
-					_Notifier.notify('You do not have permission to edit this object');
-					continue;
-				}
+				// if(!_Editor.isOwner(_Editor.GetSelectedVWFNode(k).id,_UserManager.GetCurrentUserName()))
+				// {
+					// _Notifier.notify('You do not have permission to edit this object');
+					// continue;
+				// }
 				vwf_view.kernel.setProperty(_Editor.GetSelectedVWFNode(k).id,prop,val)
 			}
 		}
@@ -660,8 +660,8 @@ function PrimitiveEditor()
 	{
 		
 		var val = [0,0,0,0];
-		val[0] = $('#RotationX').val();
-		val[2] = $('#RotationY').val();
+		val[2] = $('#RotationX').val();
+		val[0] = $('#RotationY').val();
 		val[1] = $('#RotationZ').val();
 		//val[3] = $('#RotationW').val();
 		
@@ -717,7 +717,7 @@ function PrimitiveEditor()
 			if(node)
 			{
 				
-				var mat = _Editor.findviewnode(node.id).getLocalMatrix();
+				var mat = GLGE.transposeMat4(_Editor.findviewnode(node.id).matrix.elements);
 				var angles = this.rotationMatrix_2_XYZ(mat);
 				var pos = vwf.getProperty(node.id,'translation');
 				var rot = vwf.getProperty(node.id,'rotation');
@@ -725,9 +725,9 @@ function PrimitiveEditor()
 				$('#PositionX').val(Math.floor(pos[0]));
 				$('#PositionY').val(Math.floor(pos[1]));
 				$('#PositionZ').val(Math.floor(pos[2]));
-				$('#RotationX').val(Math.floor(.05 + angles[1] * 57.2957795));
-				$('#RotationY').val(Math.floor(.05 + angles[0] * -57.2957795));
-				$('#RotationZ').val(Math.floor(.05 + angles[2] * 57.2957795));
+				$('#RotationX').val(Math.floor(.05 + angles[0] * -57.2957795));
+				$('#RotationY').val(Math.floor(.05 + angles[1] * -57.2957795));
+				$('#RotationZ').val(Math.floor(.05 + angles[2] * -57.2957795));
 				//$('#RotationW').val(rot[3]);
 				$('#ScaleX').val(scl[0]);
 				$('#ScaleY').val(scl[1]);

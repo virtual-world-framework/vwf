@@ -279,22 +279,15 @@ function _3DRIntegration()
 	{
 		var pos = [0,0,0];
 		
-		if(!_UserManager.GetCurrentUserName())
-		{
-			_Notifier.notify('You must log in to create objects');
-			return;
-		}
+		// if(!_UserManager.GetCurrentUserName())
+		// {
+			// _Notifier.notify('You must log in to create objects');
+			// return;
+		// }
 		
 		if(_Editor)
 		{
-		var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
-		pos = newintersectxy;
+		pos = _Editor.GetInsertPoint();
 		}
 		
 		pos[0] = _Editor.SnapTo(pos[0],_Editor.MoveSnap);

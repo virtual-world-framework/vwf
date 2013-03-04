@@ -133,24 +133,31 @@ scripts:
     {   
          
          if(this.amount == undefined) return;
+         debugger;
          var mesh = this.GetMesh();
-         var m = mesh.getMesh();
+         var m = mesh.geometry;
          var positions = [];
-         for(var i=0;i<m.positions.length-2; i+=3)
+         
+         for(var i=0;i<m.vertices.length; i++)
          {
-            positions.push([m.positions[i],m.positions[i+1],m.positions[i+2]]);
+            positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
          }
          
          var normals = [];
-         for(var i=0;i<m.normals.length-2; i+=3)
+         for(var i=0;i<m.faces.length; i++)
          {
-            normals.push([m.normals[i],m.normals[i+1],m.normals[i+2]]);
+            normals.push([m.faces[i].normal.x,m.faces[i].normal.y,m.faces[i].normal.z]);
          }
          
-         var bounds = this.GetBounds();
-         var height = bounds.max[2] - bounds.min[2];
-         var length = bounds.max[0] - bounds.min[0];
-         var width = bounds.max[1] - bounds.min[1];
+         var bounds = m.boundingBox;
+         if(!bounds)
+            m.computeBoundingBox();
+         bounds = m.boundingBox;
+         
+         var height = bounds.max.z - bounds.min.z;
+         var length = bounds.max.x - bounds.min.x;
+         var width = bounds.max.y - bounds.min.y;
+         
          var amt = this.amount*6.28318530718;
          var X = 0;
          var Y = 1;
@@ -204,7 +211,8 @@ scripts:
                 newpos[X] *= -1;   
             }
             
-            
+            if(i < normals.length)
+            {
             var newnorm = RotateVecAroundAxis(normals[i],axis,theta);
             newnorm[affectaxis] *= -1;
             newnorm[minoraxis] *= -1;
@@ -212,31 +220,40 @@ scripts:
             normals[i][0] = newnorm[0];
             normals[i][1] = newnorm[1];
             normals[i][2] = newnorm[2];
+            }
             
             positions[i][0] = newpos[0];
             positions[i][1] = newpos[1];
             positions[i][2] = newpos[2];
          }
-         var newpositions = []
+         
+         
          for(var i=0;i<positions.length; i+=1)
          {
-            newpositions.push(positions[i][0]);
-            newpositions.push(positions[i][1]);
-            newpositions.push(positions[i][2]);
+            m.vertices[i].x = (positions[i][0]);
+            m.vertices[i].y = (positions[i][1]);
+            m.vertices[i].z = (positions[i][2]);
          }
          
-         m.setPositions(newpositions);
+         m.verticesNeedUpdate = true;
+         
          
 
-         var newnormals = []
          for(var i=0;i<normals.length; i+=1)
          {
-            newnormals.push(normals[i][0]);
-            newnormals.push(normals[i][1]);
-            newnormals.push(normals[i][2]);
+            m.faces[i].normal.x = (normals[i][0]);
+            m.faces[i].normal.y = (normals[i][1]);
+            m.faces[i].normal.z = (normals[i][2]);
+            for(var j = 0; j < m.faces[i].vertexNormals.length; j++)
+            {
+                m.faces[i].vertexNormals[j].x = (normals[i][0]);
+                m.faces[i].vertexNormals[j].y = (normals[i][1]);
+                m.faces[i].vertexNormals[j].z = (normals[i][2]);
          }
-         
-         m.setNormals(newnormals);
+         }
+         m.computeFaceNormals();
+         m.computeVertexNormals();
+         m.normalsNeedUpdate = true;
     }
     this.updateStack = function()
     {

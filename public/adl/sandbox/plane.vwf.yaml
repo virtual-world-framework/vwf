@@ -89,21 +89,21 @@ scripts:
         if(this.uri == "plane.vwf" )
             return;
 
-       var primobj = new GLGE.Object();
-       primobj.testname = "TEST PLANE1";
-       this.mesh = primobj;
+      
+       this.mesh = new THREE.Mesh(undefined,_Editor.getDefaultMaterial());
        if(vwf.getProperty(this.id,'_length') == undefined) vwf.setProperty(this.id,'_length',1);
        if(vwf.getProperty(this.id,'_width') == undefined) vwf.setProperty(this.id,'_width',1);
        if(vwf.getProperty(this.id,'_widthSegs') == undefined) vwf.setProperty(this.id,'_widthSegs',1);
        if(vwf.getProperty(this.id,'_lengthSegs') == undefined) vwf.setProperty(this.id,'_lengthSegs',1);
       
        
-       vwf.views[0].state.nodes[this.id].glgeObject.addChild(this.mesh);
+       vwf.views[0].state.nodes[this.id].threeObject.add(this.mesh);
        
        
        this._initialized = true;
        this.dirtyStack();
-       this.setupMaterial();        
+        if(this.materialDef)
+       this.setupMaterial(this.materialDef);       
     }
     this.Build = function()
     {
@@ -117,57 +117,7 @@ scripts:
     this.BuildPlane = function(width,height,widthsegs,heightsegs)
     {
     
-        var positions = [];
-        var faces = [];
-        var uvs = []
-        var normals = [];
-        for(var i = 0; i < widthsegs; i++)
-        {
-            for(var j = 0; j<heightsegs;j++)
-            {
-                positions.push(((i/(widthsegs-1)) * width)-width/2);
-                positions.push(((j/(heightsegs-1)) * height)-height/2);
-                positions.push(0);
-                uvs.push(i/(widthsegs-1));
-                uvs.push(j/(heightsegs-1));
-                normals.push(0);
-                normals.push(0);
-                normals.push(1);
-            }
-        }
-      
-        var faces = [];
-        for(var i = 0; i < widthsegs-1; i++)
-        {
-            for(var j = 0; j<heightsegs-1;j++)
-            {
-                var thisi = heightsegs * i + j;
-                var thisj = heightsegs * i + (j+1);
-                var thisi1 = heightsegs * (i+1) + j;
-                var thisi1j1 = heightsegs * (i+1) + (j+1);
-                
-                faces.push(thisi);
-                faces.push(thisi1);
-                faces.push(thisj);
-                
-
-                faces.push(thisi1j1);
-                faces.push(thisj);
-                faces.push(thisi1);
-                
-                
-                
-            }
-        }
-       
-        var planemesh = new GLGE.Mesh();
-          
-        planemesh.setPositions(positions);
-        planemesh.setFaces(faces);
-        planemesh.setNormals(normals);
-        planemesh.setUV(uvs);
-        
-        return planemesh;
+       return new THREE.PlaneGeometry(width,height,widthsegs,heightsegs);
     }
     
     function findChildViewNode(node, name)

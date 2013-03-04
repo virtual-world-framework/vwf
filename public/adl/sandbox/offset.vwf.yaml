@@ -81,11 +81,12 @@ scripts:
     {
          
          var mesh = this.GetMesh();
-         var m = mesh.getMesh();
+         var m = mesh.geometry;
          var positions = [];
-         for(var i=0;i<m.positions.length-2; i+=3)
+         
+         for(var i=0;i<m.vertices.length; i++)
          {
-            positions.push([m.positions[i],m.positions[i+1],m.positions[i+2]]);
+            positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
          }
          
 
@@ -95,15 +96,15 @@ scripts:
             positions[i][1] += this.yamount;
             positions[i][2] += this.zamount;
          }
-         var newpositions = []
+         
          for(var i=0;i<positions.length; i+=1)
          {
-            newpositions.push(positions[i][0]);
-            newpositions.push(positions[i][1]);
-            newpositions.push(positions[i][2]);
+            m.vertices[i].x = (positions[i][0]);
+            m.vertices[i].y = (positions[i][1]);
+            m.vertices[i].z = (positions[i][2]);
          }
          
-         m.setPositions(newpositions);
+         m.verticesNeedUpdate = true;
     }
     this.updateStack = function()
     {

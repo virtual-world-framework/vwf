@@ -506,9 +506,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			 {
 				if(_Editor.GetSelectedVWFNode())
 				 {
-					var gizpos = [_Editor.GetMoveGizmo().getLocX(),_Editor.GetMoveGizmo().getLocY(),_Editor.GetMoveGizmo().getLocZ()];
-					var box = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).GetBoundingBox();
-					var dist = GLGE.distanceVec3(box.max,box.min);
+					var t = 	_Editor.GetMoveGizmo().parent.matrixWorld.getPosition();
+					var gizpos = [t.x,t.y,t.z];
+
+					var box = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getBoundingBox();
+					var dist = GLGE.distanceVec3([box.max.x,box.max.y,box.max.z],[box.min.x,box.min.y,box.min.z]);
 					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
 					vwf.models[0].model.nodes['index-vwf'].zoom = dist * 2;
 					vwf.models[0].model.nodes['index-vwf'].updateCamera();
@@ -522,7 +524,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 				clearCameraModeIcons();
 				$('#MenuCameraOrbiticon').css('background','#9999FF');
-				var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
+				var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
 				var ray = _Editor.GetCameraCenterRay();
 				var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
 				var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
@@ -714,7 +716,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 			
 			
-			_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+			_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
+			_Editor.findcamera().updateProjectionMatrix();
 		});
 		$(window).resize();
 		
@@ -885,7 +888,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 	var sizeTimeoutHandle;
 	function sizeWindowTimer()
 	{
-		_Editor.findscene().camera.setAspect($('#index-vwf').width()/$('#index-vwf').height());
+		_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
+		_Editor.findcamera().updateProjectionMatrix();
 		_ScriptEditor.resize();
 		
 	}
