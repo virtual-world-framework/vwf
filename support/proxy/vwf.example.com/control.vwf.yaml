@@ -36,7 +36,6 @@ properties:
   controlValue: 
     set: |
       this.controlValue = value;
-      // var positions = this.find( "./element(*,'http://vwf.example.com/control/position.vwf')" );
       if(this.positions.length > 1) {
         if(this.controlValue > this.positions[this.positions.length-1].controlValue) {
           this.controlDirection = -1;
@@ -98,6 +97,10 @@ scripts:
     var rightValue, rightIndex = -Infinity;
 
     if ( this.positions.length > 0 ) {
+
+      this.positions.sort(function(a, b) {
+        return a.sequence - b.sequence;
+      });
       
       if ( this.positions[0].controlValue === null ) {
         this.positions[0].controlValue = 0;
@@ -178,6 +181,9 @@ scripts:
     this.input.pickInfo = pickInfo;
     this.intermediateValue = this.controlValue;
     this.positions = this.find( "./element(*,'http://vwf.example.com/control/position.vwf')" );
+    this.positions.sort(function(a, b) {
+      return a.sequence - b.sequence;
+    });
   }
 
   this.pointerUp = function( pointerInfo, pickInfo ) {

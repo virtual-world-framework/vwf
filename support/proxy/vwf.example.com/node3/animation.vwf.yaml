@@ -43,6 +43,10 @@ scripts:
 
     if ( positions.length > 0 ) {
       
+      positions.sort(function(a, b) {
+        return a.sequence - b.sequence;
+      });
+
       if ( positions[0].animationTime === null ) {
         positions[0].animationTime = 0;
       }

@@ -39,3 +39,8 @@ properties:
   # animation positions and control positions are not necessarily coincident, although they typically are
   # animation data may be missing from control positions if no transform is necessary
   # control data may be missing from animation positions if value/time == 1, attraction does not change
+
+  # The sequence of the animation key value. Key values will be sorted on the sequence to keep the order correct,
+  # because Ruby 1.8.7 doesn't preserve child order in component objects.
+
+  sequence: 0
