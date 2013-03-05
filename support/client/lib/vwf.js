@@ -1105,7 +1105,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
                     // Suppress kernel reentry so that we can write the state without coloring from
                     // any scripts.
 
-                    kernel.models.kernel.disable();
+                    disableReentry();
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
@@ -1136,7 +1136,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
                     // Restore kernel reentry.
 
-                    kernel.models.kernel.enable();
+                    enableReentry();
 
                     series_callback( undefined, undefined );
                 },
@@ -1266,7 +1266,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Suppress kernel reentry so that we can read the state without coloring from any
             // scripts.
 
-            this.models.kernel.disable();
+            disableReentry();
 
             // Properties.
 
@@ -1314,7 +1314,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Restore kernel reentry.
 
-            this.models.kernel.enable();
+            enableReentry();
 
             // Children.
 
@@ -1645,7 +1645,7 @@ if ( ! childComponent.source ) {
                     // Suppress kernel reentry so that we can read the state without coloring from
                     // any scripts.
 
-                    replicating && kernel.models.kernel.disable();
+                    replicating && disableReentry();
 
                     // Create the properties, methods, and events. For each item in each set, invoke
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
@@ -1718,7 +1718,7 @@ if ( ! childComponent.source ) {
 
                     // Restore kernel reentry.
 
-                    replicating && kernel.models.kernel.enable();
+                    replicating && enableReentry();
 
                     series_callback( undefined, undefined );
                 },
@@ -1747,7 +1747,7 @@ if ( ! childComponent.source ) {
                     // Suppress kernel reentry so that initialization functions don't make any
                     // changes during replication.
 
-                    replicating && kernel.models.kernel.disable();
+                    replicating && disableReentry();
 
                     // Attach the scripts. For each script, load the network resource if the script is
                     // specified as a URI, then once loaded, call execute() to direct any model that
@@ -1765,7 +1765,7 @@ if ( ! childComponent.source ) {
 
                     // Restore kernel reentry.
 
-                    replicating && kernel.models.kernel.enable();
+                    replicating && enableReentry();
 
                     series_callback( undefined, undefined );
                 },
@@ -1788,7 +1788,7 @@ if ( kernel.execute( childID, "Boolean( this.tick )" ) ) {
                     // Suppress kernel reentry so that initialization functions don't make any
                     // changes during replication.
 
-                    replicating && kernel.models.kernel.disable();
+                    replicating && disableReentry();
 
                     // Call initializingNode() on each model and initializedNode() on each view to
                     // indicate that the node is fully constructed.
@@ -1803,7 +1803,7 @@ if ( kernel.execute( childID, "Boolean( this.tick )" ) ) {
 
                     // Restore kernel reentry.
 
-                    replicating && kernel.models.kernel.enable();
+                    replicating && enableReentry();
 
                     series_callback( undefined, undefined );
                 },
@@ -3603,6 +3603,22 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
         }
 
     }
+
+    /// Prevent drivers from calling into the kernel by disabling the model and view kernel 
+    /// interface stages.
+
+    var disableReentry = function() {
+        kernel.models.kernel.disable();
+        kernel.views.kernel.disable();
+    };
+
+    /// Allow drivers to call into the kernel by enabling the model and view kernel interface
+    /// stages.
+
+    var enableReentry = function() {
+        kernel.models.kernel.enable();
+        kernel.views.kernel.enable();
+    };
 
     // -- getQueryString ---------------------------------------------------------------------------
 

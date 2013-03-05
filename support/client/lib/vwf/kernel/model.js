@@ -42,7 +42,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         },
 
         /// Indicate if a driver attempted to call back into the kernel while reentry was disabled,
-        /// and clear the *blocked* flag.
+        /// and clear the `blocked` flag.
         
         blocked: function() {
             var blocked = this.state.blocked;
