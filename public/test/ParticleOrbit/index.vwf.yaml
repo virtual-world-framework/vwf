@@ -61,7 +61,7 @@ children:
       endSize: 30
       sizeRange: 20
       maxLifeTime: 3000
-      minLifeTime: 220
+      minLifeTime: 2200
       startColor: [ .5, .5, 1, 0.1]
       endColor: [ .5, .5, 1, 0.1]
       colorRange: [ .5, .5, .5, .05]

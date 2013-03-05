@@ -2925,6 +2925,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if(node.name && newnode)
             newnode.name = node.name;
             
+		if(newnode && newnode.children && newnode.children.length == 1 && isIdentityMatrix(newnode.matrix.elements))
+		return newnode.children[0];
+		
         return newnode;
     }
     var blobsfound = 0;
