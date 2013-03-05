@@ -213,7 +213,7 @@ scripts:
         }
         else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
           var nearPosition, farPosition;
-          if((this.positions[i].controlValue - this.intermediateValue) >= (this.positions[i+1].controlValue - this.intermediateValue)) {
+          if(Math.abs((this.positions[i].controlValue - this.intermediateValue)) < Math.abs((this.positions[i+1].controlValue - this.intermediateValue))) {
             nearPosition = this.positions[i];
             farPosition = this.positions[i+1];
           }
