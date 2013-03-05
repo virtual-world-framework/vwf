@@ -1494,7 +1494,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
     var childID = ( childComponent["extends"] || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
 } else {    
-                var childID = nodeID + ":" + this.sequence( nodeID ) +
+                var childID = nodeID + ":" + this.models.object.sequence( nodeID ) +
                     ( configuration.active["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( configuration.active["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
 }
@@ -2685,14 +2685,9 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
             return descendants;
         },
 
-        // -- sequence -----------------------------------------------------------------------------
 
-        /// sequence.
         /// 
-        /// @see {@link module:vwf/api/kernel.sequence}
 
-        sequence: function( nodeID ) {
-            return this.models.object.sequence( nodeID );
         },
 
         /// Locate nodes matching a search pattern. See vwf.api.kernel#find for details.
