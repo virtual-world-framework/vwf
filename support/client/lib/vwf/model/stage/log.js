@@ -34,12 +34,14 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             if ( this.model[modelFunctionName] ) {
 
+                // Copy and filter the arguments to remove functions and simplify long scripts.
+
                 var logees = Array.prototype.slice.call( arguments );
 
                 switch ( modelFunctionName ) {
 
-                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */
-                        logees[8] = undefined; // callback /* ( ready ) */
+                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback( ready )
+                        logees[8] = undefined; // callback( ready )
                         break;
 
                     case "creatingProperty":
@@ -52,14 +54,18 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                         break;
 
                     case "ticking":
-                        logees = undefined; // no logging for model.ticking()
+                        logees = undefined; // don't log model.ticking()
                         break;
 
                 }
 
+                // Log the call.
+
                 if ( logees ) {
                     this.logger.tracex.apply( this.logger, [ modelFunctionName ].concat( logees ) );
                 }
+
+                // Forward toward the model.
 
                 return this.model[modelFunctionName].apply( this.model, arguments );
             }
@@ -72,15 +78,25 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         return function() {
 
+            // Copy and filter the arguments to simplify deep objects and long scripts.
+
             var logees = Array.prototype.slice.call( arguments );
 
             switch ( kernelFunctionName ) {
 
-                case "createNode": // nodeComponent, callback /* ( nodeID ) */
+                case "setState": // applicationState, callback( nodeID )
+                    logees[0] && ( logees[0] = undefined ); // applicationState  // TODO: need an objectIsApplication() and loggableApplication()
+                    break;
+
+                case "createNode": // nodeComponent, callback( nodeID )
                     objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // nodeComponent
                     break;
 
-                case "createChild": // nodeID, childName, childComponent, childURI, callback /* ( childID ) */
+                case "setNode": // nodeComponent, callback( nodeID )
+                    objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // nodeComponent
+                    break;
+
+                case "createChild": // nodeID, childName, childComponent, childURI, callback( childID )
                     objectIsComponent( logees[2] ) && ( logees[2] = JSON.stringify( loggableComponent( logees[2] ) ) ); // childComponent
                     break;
 
@@ -94,14 +110,18 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                     break;
 
                 case "time":
-                    logees = undefined; // no logging for kernel.time()
+                    logees = undefined; // don't log kernel.time()
                     break;
 
             }
 
+            // Log the call.
+
             if ( logees ) {
                 this.logger.tracex.apply( this.logger, [ kernelFunctionName ].concat( logees ) );
             } 
+
+            // Forward toward the kernel.
 
             return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
         };

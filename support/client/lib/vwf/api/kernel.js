@@ -21,9 +21,49 @@ define( function() {
 
     var exports = {
 
-        // TODO: setState
-        // TODO: getState
-        // TODO: hashState
+        /// Set the application to the state specified by the given object. This function may return
+        /// before the state has completely updated. A callback is invoked once the application is
+        /// ready.
+        /// 
+        /// @function
+        /// 
+        /// @param {Object} applicationState
+        ///   An application state object previously retrieved using `setState`.
+        /// @param {Function} [callback]
+        ///   A callback to indicate when the application has been updated.
+        /// 
+        /// @returns {}
+
+        setState: [ /* applicationState, callback() */ ],
+
+        /// Get the application state. The object that `getState` returns may later be passed to
+        /// `setState` to restore the application to its current configuration. The state is
+        /// normally expressed as a set of changes from the original components. Set `full` to
+        /// retrieve the unchanged data as well.
+        /// 
+        /// @function
+        /// 
+        /// @param {Boolean} [full]
+        ///   Return the entire state, including data from the original components. Normally the
+        ///   components are included by reference and only the changes are returned.
+        /// @param {Boolean} [normalize]
+        ///   Rearrange the return value so that it can be serialized and compared for equality with
+        ///   other objects representing the same state. Object keys are ordered alphabetically, and
+        ///   numeric precision is reduced slightly since the Ruby server can affect it.
+        /// 
+        /// @returns {}
+
+        getState: [ /* full, normalize */ ],
+
+        /// Get a representation of the application state as a cryptographic hash. Two applications
+        /// having the same state, such the application before and after replication, or the same
+        /// application on different clients, should have the same hash.
+        /// 
+        /// @function
+        /// 
+        /// @returns {}
+
+        hashState: [],
 
         /// Create a node from a component specification. Construction may require loading data from
         /// multiple remote documents. This function returns before construction is complete. A callback
@@ -93,7 +133,17 @@ define( function() {
 
         getNode: [ /* nodeID, full, normalize */ ],
 
-        // TODO: hashNode
+        /// Get the representation of a node as a cryptographic hash of its state. Two nodes having
+        /// the same state, such a node before and after replication, or the same node on different
+        /// clients, should have the same hash.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// 
+        /// @returns {}
+
+        hashNode: [ /* nodeID */ ],
 
         /// @function
         /// 

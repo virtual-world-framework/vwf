@@ -66,9 +66,64 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // -- Read-write functions -------------------------------------------------------------
 
-            // TODO: setState
-            // TODO: getState
-            // TODO: hashState
+            case "setState":
+
+                return function( applicationState, when, callback /* () */ ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( applicationState, function() {
+                                callback && callback();  // TODO: can be passed directly, without the wrapping function?
+                            } );
+                        } else {
+                            this.kernel.plan( undefined, kernelFunctionName, undefined,
+                                [ applicationState ], when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "getState":
+
+                return function( full, normalize, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( full, normalize );
+                        } else {
+                            this.kernel.plan( undefined, kernelFunctionName, undefined,
+                                [ full, normalize ], when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "hashState":
+
+                return function( when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]();
+                        } else {
+                            this.kernel.plan( undefined, kernelFunctionName, undefined,
+                                [], when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
 
             case "createNode":
 
@@ -78,7 +133,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                         if ( when === undefined ) {
                             return this.kernel[kernelFunctionName]( nodeComponent, function( nodeID ) {
-                                callback && callback( nodeID );
+                                callback && callback( nodeID );  // TODO: can be passed directly, without the wrapping function?
                             } );
                         } else {
                             this.kernel.plan( undefined, kernelFunctionName, undefined,
@@ -110,8 +165,64 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 };
 
-            // TODO: setNode
-            // TODO: getNode
+            case "setNode":
+
+                return function( nodeID, nodeComponent, callback /* ( nodeID ) */ ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, nodeComponent, function( nodeID ) {
+                                callback && callback( nodeID );  // TODO: can be passed directly, without the wrapping function?
+                            } );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                                [ nodeComponent ], when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "getNode":
+
+                return function( nodeID, full, normalize, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, full, normalize );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                                [ full, normalize ], when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "hashNode":
+
+                return function( when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, undefined,
+                                [], when, callback /* ( result ) */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
 
             case "createChild":
 
@@ -121,7 +232,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                         if ( when === undefined ) {
                             return this.kernel[kernelFunctionName]( nodeID, childName, childComponent, childURI, function( childID ) {
-                                callback && callback( childID );
+                                callback && callback( childID );  // TODO: can be passed directly, without the wrapping function?
                             } );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, childName,

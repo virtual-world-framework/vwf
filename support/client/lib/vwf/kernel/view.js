@@ -66,9 +66,32 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             // -- Read-write functions -------------------------------------------------------------
 
-            // TODO: setState
-            // TODO: getState
-            // TODO: hashState
+            case "setState":
+
+                return function( applicationState, when, callback /* () */ ) {
+                    if ( this.state.enabled ) {
+                        this.kernel.send( undefined, kernelFunctionName, undefined,
+                            [ applicationState ], when || 0, callback /* ( result ) */ );
+                    }
+                };
+
+            case "getState":
+
+                return function( full, normalize, when, callback ) {
+                    if ( this.state.enabled ) {
+                        this.kernel.send( undefined, kernelFunctionName, undefined,
+                            [ full, normalize ], when || 0, callback /* ( result ) */ );
+                    }
+                };
+
+            case "hashState":
+
+                return function( when, callback ) {
+                    if ( this.state.enabled ) {
+                        this.kernel.send( undefined, kernelFunctionName, undefined,
+                            [], when || 0, callback /* ( result ) */ );
+                    }
+                };
 
             case "createNode":
 
@@ -88,8 +111,32 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     }
                 };
 
-            // TODO: setNode
-            // TODO: getNode
+            case "setNode":
+
+                return function( nodeID, nodeComponent, callback /* ( nodeID ) */ ) {
+                    if ( this.state.enabled ) {
+                        this.kernel.send( nodeID, kernelFunctionName, undefined,
+                            [ nodeComponent ], when || 0, callback /* ( result ) */ );
+                    }
+                };
+
+            case "getNode":
+
+                return function( nodeID, full, normalize, when, callback ) {
+                    if ( this.state.enabled ) {
+                        this.kernel.send( nodeID, kernelFunctionName, undefined,
+                            [ full, normalize ], when || 0, callback /* ( result ) */ );
+                    }
+                };
+
+            case "hashNode":
+
+                return function( when, callback ) {
+                    if ( this.state.enabled ) {
+                        this.kernel.send( nodeID, kernelFunctionName, undefined,
+                            [], when || 0, callback /* ( result ) */ );
+                    }
+                };
 
             case "createChild":
 

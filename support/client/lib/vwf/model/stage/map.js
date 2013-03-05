@@ -43,9 +43,23 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // == Kernel API ===========================================================================
 
-        // TODO: setState
-        // TODO: getState
-        // TODO: hashState
+        // -- setState -----------------------------------------------------------------------------
+
+        setState: function( applicationState, callback /* () */ ) {
+            return this.kernel.setState( applicationState, callback );  // TODO: remap internal nodes
+        },
+
+        // -- getState -----------------------------------------------------------------------------
+
+        getState: function( full, normalize ) {
+            return this.kernel.getState( full, normalize );  // TODO: remap internal IDs in result
+        },
+
+        // -- hashState ----------------------------------------------------------------------------
+
+        hashState: function() {
+            return this.kernel.hashState();
+        },
 
         // -- createNode ---------------------------------------------------------------------------
 
@@ -59,9 +73,25 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return this.kernel.deleteNode( this.model_to_kernel[this.object_id(node)] || node );
         },
 
-        // TODO: setNode
-        // TODO: getNode
-        // TODO: hashNode
+        // -- setNode ------------------------------------------------------------------------------
+
+        setNode: function( node, nodeComponent, callback /* ( nodeID ) */ ) {
+            return this.kernel.setNode( this.model_to_kernel[this.object_id(node)] || node,
+                nodeComponent, callback );  // TODO: remap internal nodes  // TODO: remap callback parameter
+        },
+
+        // -- getNode ------------------------------------------------------------------------------
+
+        getNode: function( node, full, normalize ) {
+            return this.kernel.getNode( this.model_to_kernel[this.object_id(node)] || node,
+                full, normalize );  // TODO: remap internal IDs in result
+        },
+
+        // -- hashNode -----------------------------------------------------------------------------
+
+        hashNode: function( node ) {
+            return this.kernel.hashNode( this.model_to_kernel[this.object_id(node)] || node );
+        },
 
         // -- createChild --------------------------------------------------------------------------
 
