@@ -14,233 +14,113 @@
 --- 
 extends: http://vwf.example.com/navscene.vwf
 properties:
-  navmode: none
-  ambientColor:
+  navmode: none     
+  sunColor: 
+    value: [255, 255, 255]
     set: |
-            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-            scene.setAmbientColor(value);
+            if(!this.sun) return;
+            this.sun.color.r = value[0];
+            this.sun.color.g = value[1];
+            this.sun.color.b = value[2];
     get: |
-            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-            return scene.getAmbientColor();
-  ambientR:
+             return [    this.sun.color.r , this.sun.color.g , this.sun.color.b]
+  sunDirection: 
+    value: [0, 0, 0]
     set: |
-            this.ambientColor = 'rgb('+value+','+this.ambientG+','+this.ambientB+')';
-  ambientG:
+            if(!this.sun) return;
+            this.sun.position.x = value[0];
+            this.sun.position.y = value[1];
+            this.sun.position.z = value[2];
+    get: |
+             return [    this.sun.position.x , this.sun.position.y , this.sun.position.z]       
+  sunIntensity: 
+    value: 1
     set: |
-            this.ambientColor = 'rgb('+this.ambientR+','+value+','+this.ambientB+')';
-  ambientB:
-    set: |
-            this.ambientColor = 'rgb('+this.ambientR+','+this.ambientG+','+value+')';            
-  fogColor:
-    set: |  
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           scene.setFogColor(value);
+            if(!this.sun) return;
+            this.sun.intensity = value;
     get: |
-            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-            return scene.getFogColor();
-  fogR:
-    set: |  
-           var color = this.fogColor;
-           color.r = value/255;
-           
-    get: |
-            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-            return scene.getFogColor().r * 255;
-  fogG:
-    set: |  
-           var color = this.fogColor;
-           color.g = value/255;
-           
-    get: |
-            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-            return scene.getFogColor().g* 255; 
-  fogB:
-    set: |  
-           var color = this.fogColor;
-           color.b = value/255;
-           
-    get: |
-            var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-            return scene.getFogColor().b* 255;                
-  sunR:
-    set: |  
-           this.sun.getColor().r = value/255;
-    get: |
-            this.sun.getColor().r* 255;
-  sunG:
-    set: |  
-          this.sun.getColor().g = value/255;
-    get: |
-            this.sun.getColor().g* 255;
-  sunB:
-    set: |  
-           this.sun.getColor().b = value/255;
-    get: |
-            this.sun.getColor().b* 255;
-  sunX:
-    set: |  
-           this.sun.setRotX(value);
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           scene.updateMatrix();
-    get: |
-           this.sun.getRotX();
-  sunY:
-    set: |  
-           this.sun.setRotY(value);
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           scene.updateMatrix();
-    get: |
-           this.sun.getRotY();
-  sunZ:
-    set: |  
-           this.sun.setRotZ(value);
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           scene.updateMatrix();
-    get: |
-           this.sun.getRotZ();           
-  fogNear:
-    set: |  
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           scene.setFogNear(value);
-    get: |
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           return scene.getFogNear();
-  fogFar:
-    set: |  
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           scene.setFogFar(value);
-    get: |
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           return scene.getFogFar();
-  fogType:
-    set: |  
-           var scene = vwf.views[0].state.scenes["index-vwf"].glgeScene;
-           scene.setFogType(value);
+             return this.sun.intensity                     
+  ambientColor: [155, 155, 155]
+  fogColor: [155, 155, 155]
+  fogNear: 100
+  fogFar: 1000
+  fogType: 0
+  fogDensity: .005
   materialDef:
     set: |  
+           this.materialDef = value;
+           
            return this.setTexture(value);
     get: |  
-            return this.getTexture();
+           return this.getTexture();
   skyTexture:
     set: |
+            
+            this.skyTexture = value;
+            if(!this.sun) return;
             this.CreateSky(value);
+            
+    get: |
+             return this.skyTexture    
   owner:
   type: scene
   EditorData:
     fogNear:
-      displayname: fogNear
+      displayname: Fog Near
       property: fogNear
       type: slider
       min: 0
       max: 2000
       step: 1
     fogFar:
-      displayname: fogFar
+      displayname: Fog Far
       property: fogFar
       type: slider
       min: 0
       max: 2000
       step: 1
+    fogDensity:
+      displayname: Fog Density
+      property: fogDensity
+      type: slider
+      min: 0
+      max: 1
+      step: .001
+    sunIntensity:
+      displayname: Sun Intensity
+      property: sunIntensity
+      type: slider
+      min: 0
+      max: 5
+      step: .1      
     fogType:
-      displayname: fogType
+      displayname: Fog Type
       property: fogType
       type: choice
-      labels: 
+      labels:         
         - None
         - Linear
         - Quad
-        - SkyLinear
-        - SkyQuad
       values:
-        - 1
-        - 2
-        - 3  
-        - 4  
-        - 5  
+        - null
+        - linear
+        - exp  
     fogColorR:
-      displayname: fogColorR
-      property: fogR
-      type: slider
-      min: 0
-      max: 256
-      step: 1
-    fogColorG:
-      displayname: fogColorG
-      property: fogG
-      type: slider
-      min: 0
-      max: 256
-      step: 1 
-    fogColorB:
-      displayname: fogColorB
-      property: fogB
-      type: slider
-      min: 0
-      max: 256
-      step: 1
-    ambientR:
-      displayname: ambientR
-      property: ambientR
-      type: slider
-      min: 0
-      max: 256
-      step: 1  
-    ambientG:
-      displayname: ambientG
-      property: ambientG
-      type: slider
-      min: 0
-      max: 256
-      step: 1  
-    ambientB:
-      displayname: ambientB
-      property: ambientB
-      type: slider
-      min: 0
-      max: 256
-      step: 1        
-    sunColorB:
-      displayname: sunColorB
-      property: sunB
-      type: slider
-      min: 0
-      max: 256
-      step: 1
-    sunColorR:
-      displayname: sunColorR
-      property: sunR
-      type: slider
-      min: 0
-      max: 256
-      step: 1
-    sunColorG:
-      displayname: sunColorG
-      property: sunG
-      type: slider
-      min: 0
-      max: 256
-      step: 1
-    sunRotX:
-      displayname: sunRotX
-      property: sunX
-      type: slider
-      min: 0
-      max: 3.14
-      step: .1
-    sunRotY:
-      displayname: sunRotY
-      property: sunY
-      type: slider
-      min: 0
-      max: 3.14
-      step: .1   
-    sunRotZ:
-      displayname: sunRotZ
-      property: sunZ
-      type: slider
-      min: 0
-      max: 3.14
-      step: .1
+      displayname: Fog Color
+      property: fogColor
+      type: color
+    ambientColor:
+      displayname: ambient
+      property: ambientColor
+      type: color     
+    AsunColor:
+      displayname: Sun Color
+      property: sunColor
+      type: color
+    sunRot:
+      displayname: Sun Direction
+      property: sunDirection
+      type: vector
     skyTexture:
       displayname: skyTexture
       property: skyTexture
@@ -276,7 +156,6 @@ methods:
   initialize:
   receiveChat:
   CreatePlane:
-  CreateSky:
   PM:
   latencyTest:
 scripts:
@@ -342,18 +221,19 @@ scripts:
         grassTex.repeat.y = 250/9;
        grassTex.anisotropy  = _dRenderer.getMaxAnisotropy();
        this.groundplane = ground;
-       
        findscene().add(ground);
        
+       if(this.materialDef)
+       this.setTexture(this.materialDef);
        var l = new THREE.DirectionalLight();
        this.sun = l;
        findscene().add(l);
-       this.sun.position.x = 1;
-       this.sun.position.y = 1;
-       this.sun.position.z = 4;
-       this.sun.intensity = .8;
+       this.sun.position.x = this.sunDirection.x;
+       this.sun.position.y = this.sunDirection.y;
+       this.sun.position.z = this.sunDirection.z;
+       this.sun.intensity = this.sunIntensity;
        
-       this.CreateSky('white');
+       this.CreateSky(vwf.getProperty(this.id,'skyTexture') || 'white');
        /*findscene().setAmbientColor('rgb(200,200,200)');
        
        
@@ -413,7 +293,8 @@ scripts:
     }
     this.CreateSky = function(sky_name)
     {
-        
+     
+        console.log('set sky ' + sky_name);
         if(this.skycube)
             this.skycube.parent.remove(this.skycube);
        //var sky_name = 'cloudy_noon';
@@ -443,6 +324,7 @@ scripts:
        this.skymaterial = new THREE.MeshBasicMaterial();
        this.skymaterial.side = 1;
        this.skymaterial.envMap = skyCubeTexture;
+       this.skymaterial.fog = false;
        this.skycube = new THREE.Mesh(new THREE.CubeGeometry(1000,1000,1000), this.skymaterial);
        this.skycube.renderDepth = -1;
        this.skycube.depthWrite = false;
@@ -733,7 +615,7 @@ scripts:
         worldmousepos2[1] /= worldmousepos2[3];
         worldmousepos2[2] /= worldmousepos2[3];
        
-       var panfactor = 50;
+       var panfactor = 10;
        if(this.cameramode == 'Free')
        panfactor = 50;
        
@@ -822,7 +704,8 @@ scripts:
             findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
             findcamera().lookAt(to3Vec(this.center));
             findcamera().far = 1000;
-            findcamera().near = .1;
+            findcamera().near = .3;
+            findcamera().updateProjectionMatrix(true);
             this.zoom = .0001;
             
         }else  if(this.cameramode == '3RDPerson')
@@ -1072,9 +955,10 @@ scripts:
     }
     this.setTexture = function(value)
     {
-            debugger;
-             _Editor.setMaterialByDef(this.groundplane.material,value);
-           // this.materialDef = value;
+            
+            
+             this.setMaterialByDef(this.groundplane.material,value);
+             
     }
     this.createNameTag = function()
     {
@@ -1149,7 +1033,116 @@ scripts:
              div.style.display = 'block';
       }
     }    
-          
+    this.setMaterialByDef = function(currentmat,value)
+    {
+        currentmat.color.r = value.color.r;
+        currentmat.color.g = value.color.g;
+        currentmat.color.b = value.color.b;
+        
+        currentmat.ambient.r = value.ambient.r;
+        currentmat.ambient.g = value.ambient.g;
+        currentmat.ambient.b = value.ambient.b;
+        
+        currentmat.emissive.r = value.emit.r;
+        currentmat.emissive.g = value.emit.g;
+        currentmat.emissive.b = value.emit.b;
+        
+        currentmat.specular.r = value.specularColor.r * value.specularLevel;
+        currentmat.specular.g = value.specularColor.g * value.specularLevel;
+        currentmat.specular.b = value.specularColor.b * value.specularLevel;
+        
+        currentmat.opacity = value.alpha;
+        if(value.alpha < 1)
+            currentmat.transparent = true;
+        else
+            currentmat.transparent = false;
+            
+        currentmat.shininess = value.shininess * 5 ;
+        
+        var mapnames = ['map','bumpMap','lightMap','normalMap','specularMap','envMap'];
+        currentmat.reflectivity = value.reflect;
+        for(var i =0; i < value.layers.length; i++)
+        {
+                var mapname;
+                if(value.layers[i].mapTo == 1)
+                {
+                    mapname = 'map';
+                    
+                    
+                    currentmat.alphaTest = 1 - value.layers[i].alpha;
+                    
+                }
+                if(value.layers[i].mapTo == 2)
+                {
+                    mapname = 'bumpMap';
+                    currentmat.bumpScale = value.layers[i].alpha;
+                }
+                if(value.layers[i].mapTo == 3)
+                {
+                    mapname = 'lightMap';
+                }	
+                if(value.layers[i].mapTo == 4)
+                {
+                    mapname = 'normalMap';
+                    currentmat.normalScale.x = value.layers[i].alpha;
+                    currentmat.normalScale.y = value.layers[i].alpha;
+                }	
+                if(value.layers[i].mapTo == 5)
+                {
+                    mapname = 'specularMap';
+                }
+                
+                if(value.layers[i].mapTo == 6)
+                {
+                    mapname = 'envMap';
+                }
+                
+                mapnames.splice(mapnames.indexOf(mapname),1);				
+                
+                String.prototype.endsWith = function(suffix) {
+                    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+                };
+
+                if((currentmat[mapname] && currentmat[mapname].image && !currentmat[mapname].image.src.toString().endsWith(value.layers[i].src)) || !currentmat[mapname])
+                {
+                    currentmat[mapname] = THREE.ImageUtils.loadTexture(value.layers[i].src);
+                    
+                }
+                
+                if(value.layers[i].mapInput == 0)
+                {
+                    currentmat[mapname].mapping = new THREE.UVMapping();
+                }
+                if(value.layers[i].mapInput == 1)
+                {
+                    currentmat[mapname].mapping = new THREE.CubeReflectionMapping();
+                }
+                if(value.layers[i].mapInput == 2)
+                {
+                    currentmat[mapname].mapping = new THREE.CubeRefractionMapping();
+                }
+                if(value.layers[i].mapInput == 3)
+                {
+                    currentmat[mapname].mapping = new THREE.SphericalReflectionMapping();
+                }
+                if(value.layers[i].mapInput == 4)
+                {
+                    currentmat[mapname].mapping = new THREE.SphericalRefractionMapping();
+                }
+                currentmat[mapname].wrapS = THREE.RepeatWrapping;
+                currentmat[mapname].wrapT = THREE.RepeatWrapping;
+                currentmat[mapname].repeat.x = value.layers[i].scalex;
+                currentmat[mapname].repeat.y = value.layers[i].scaley;
+                currentmat[mapname].offset.x = value.layers[i].offsetx;
+                currentmat[mapname].offset.y = value.layers[i].offsety;
+            
+        }
+        for(var i in mapnames)
+        {
+            currentmat[mapnames[i]] = null;
+        }
+        currentmat.needsUpdate = true;
+    }      
 
         
     

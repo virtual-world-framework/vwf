@@ -27,7 +27,7 @@ function PrimitiveEditor()
 		_Editor.setProperty(_Editor.GetSelectedVWFNode().id,'owner',owner);
 		$('#ShareWithDialog').dialog('close');
 	},Cancel:function(){
-	
+		$('#ShareWithDialog').dialog('close');
 	}}});
 	
 	$('#sidepanel').append("<div id='PrimitiveEditor'>" +

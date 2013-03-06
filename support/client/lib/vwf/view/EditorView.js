@@ -764,7 +764,6 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		createIcon('../vwf/view/editorview/images/icons/cube.png','MenuCreateBox','Create Box');
 		createIcon('../vwf/view/editorview/images/icons/Cylinder.png','MenuCreateCylinder','Create Cylinder');
 		createIcon('../vwf/view/editorview/images/icons/cone.png','MenuCreateCone','Create Cone');
-		createIcon('../vwf/view/editorview/images/icons/pyramid.png','MenuCreatePyramid','Create Pyramid');
 		createIcon('../vwf/view/editorview/images/icons/plane.png','MenuCreatePlane','Create Plane');
 		createSeperator();
 		

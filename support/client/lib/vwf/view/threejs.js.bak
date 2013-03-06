@@ -252,18 +252,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
         }());
         
-        function GetParticleSystems(node,list)
-		{
-			if(!list)
-				list = [];
-			for(var i =0; i<node.children.length; i++)
-			{
-				if(node.children[i] instanceof THREE.ParticleSystem)
-					list.push(node.children[i]);
-				list = 	GetParticleSystems(node.children[i],list);
-			}			
-				return list;
-		}
+        
         function renderScene(time) {
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;

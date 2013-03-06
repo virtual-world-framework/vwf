@@ -51,22 +51,17 @@ function InventoryManager()
 		{
 			var t = _InventoryManager.selectedItem;
 		
-			var campos = [_Editor.findscene().camera.getLocX(),_Editor.findscene().camera.getLocY(),_Editor.findscene().camera.getLocZ()];
-			var ray = _Editor.GetCameraCenterRay();
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-			var pick = _Editor.findscene().CPUPick(campos,ray);
-			_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-			var dxy = pick.distance;
-			var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
+		
+			var newintersectxy = _Editor.GetInsertPoint()
 			
 			if(t.properties.type != 'modifier' && t.properties.type != 'behavior')
 			{
 				t.properties.transform[12] = newintersectxy[0];
 				t.properties.transform[13] = newintersectxy[1];
 				t.properties.transform[14] = newintersectxy[2];
-				t.properties.translation[0] = newintersectxy[0];
-				t.properties.translation[1] = newintersectxy[1];
-				t.properties.translation[2] = newintersectxy[2];
+				//t.properties.translation[0] = newintersectxy[0];
+				//t.properties.translation[1] = newintersectxy[1];
+				//t.properties.translation[2] = newintersectxy[2];
 				t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
 				
 				t = _DataManager.getCleanNodePrototype(t);

@@ -15,21 +15,25 @@
 
 /// Kernel utility functions.
 /// 
-/// @name vwf.utility
-/// @namespace
+/// @module vwf/utility
 
-define( [ "module" ], function( module ) {
+define( [ "module",
+    "vwf/utility/xpath",
+    "vwf/utility/color",
+    "vwf/utility/coordinates"
+], function( module,
+    xpath,
+    color,
+    coordinates
+) {
 
-    return {
+    var exports = {
 
         // -- transform ----------------------------------------------------------------------------
 
         /// Recursively transform an arbitrary object using the provided transformation function.
         /// Containers are duplicated where necessary so that the original object and any contained
         /// objects are not modified. Unchanged objects will be referenced directly in the result.
-        /// 
-        /// @name vwf.utility#transform
-        /// @function
         /// 
         /// @param {Object} object
         ///   The object to transform. Object and Array contents are recursively transformed using
@@ -60,10 +64,11 @@ define( [ "module" ], function( module ) {
 
                     for ( var index = 0; index < object.length; index++ ) {
 
-                        if ( ( item = this.transform( object[index], transformation, [ index ].concat( names ), depth + 1 ) ) !== object[index] ) {
+                        if ( ( item = this.transform( object[index], transformation, [ index ].concat( names ), depth + 1 ) ) !==
+                                object[index] ) {
 
                             if ( result === object ) {
-                                result = [].concat( object ); // shallow copy into new Array
+                                result = [].concat( object ); // shallow copy into a new Array
                             }
 
                             result[index] = item;
@@ -74,10 +79,12 @@ define( [ "module" ], function( module ) {
 
                     Object.keys( object ).forEach( function( key ) {
 
-                        if ( ( item = this.transform( object[key], transformation, [ key ].concat( names ), depth + 1 ) ) !== object[key] ) {
+                        if ( ( item = this.transform( object[key], transformation, [ key ].concat( names ), depth + 1 ) ) !==
+                                object[key] ) {
 
                             if ( result === object ) {
-                                result = {}; Object.keys( object ).forEach( function( k ) { result[k] = object[k] } ); // shallow copy into new Object
+                                result = {};
+                                Object.keys( object ).forEach( function( k ) { result[k] = object[k] } ); // shallow copy into a new Object
                             }
 
                             result[key] = item;
@@ -92,12 +99,103 @@ define( [ "module" ], function( module ) {
             return result;
         },
 
+        // -- transforms ---------------------------------------------------------------------------
+
+        /// Transformation functions for vwf.utility.transform. Invoke these as:
+        /// 
+        ///   utility.transform( object, utility.transforms.*transform* )
+        ///
+        /// to apply the transform utility.transforms.*transform* to object.
+
+        transforms: {
+
+            // -- transit --------------------------------------------------------------------------
+
+            /// A vwf.utility.transform transformation function to convert an object for proper JSON
+            /// serialization. Array-like objects are converted to actual Arrays. All other objects
+            /// are unchanged. Invoke as: utility.transform( object, utility.transforms.transit ).
+            /// 
+            /// @param {Object} object
+            ///   The object being transformed or one of its descendants.
+            /// 
+            /// @returns {Object}
+            ///   An Array-like converted to an Array, or *object*.
+
+            transit: function( object ) {
+
+                // Determine if an object is Array-like (but not an Array) to identify objects that
+                // need to be converted to Arrays for normalization.
+
+                function isArraylike( candidate ) {
+
+                    var arraylike = false;
+
+                    // Filter with typeof and instanceof since they're much faster than toString().
+                    // Then check for typed arrays (Int8Array, Uint8Array, ...) or the Arguments
+                    // object using the type string.
+
+                    if ( typeof candidate == "object" && candidate != null && ! ( candidate instanceof Array ) ) {
+                        var typeString = Object.prototype.toString.call( candidate ) // eg, "[object *Type*]"
+                        arraylike = ( typeString.slice( -6 ) == "Array]" || typeString == "[object Arguments]" );
+                    }
+
+                    return arraylike;
+                };
+
+                // Convert typed arrays to regular arrays.
+
+                return isArraylike( object ) ?
+                    Array.prototype.slice.call( object ) : object;
+
+            },
+
+            // -- hash -----------------------------------------------------------------------------
+
+            /// A vwf.utility.transform transformation function to normalize an object so that it
+            /// can be serialized and hashed with consistent results. Numeric precision is reduced
+            /// to match the precision retained by the reflector. Non-Array objects are reordered so
+            /// that their keys are in alphabetic order. Other objects are unchanged. Invoke as:
+            /// utility.transform( object, utility.transforms.hash ).
+            /// 
+            /// @param {Object} object
+            ///   The object being transformed or one of its descendants.
+            /// 
+            /// @returns {Object}
+            ///   A reduced-precision number, an Object with alphabetic keys, or *object*.
+
+            hash: function( object ) {
+
+                if ( typeof object == "number" ) {
+
+                    // Reduce precision slightly to match what passes through the reflector.
+
+                    return Number( object.toPrecision(15) );
+
+                } else if ( typeof object == "object" && object != null && ! ( object instanceof Array ) ) {
+                    
+                    // Order objects alphabetically.
+
+                    var ordered = {};
+
+                    Object.keys( object ).sort().forEach( function( key ) {
+                        ordered[key] = object[key];
+                    } );
+
+                    return ordered;
+
+                } else {
+
+                    return object;
+
+                }
+
+            },
+
+        },
+
         // -- exceptionMessage ---------------------------------------------------------------------
 
         /// Format the stack trace for readability.
-        /// 
-        /// @name vwf.utility#exceptionMessage
-        /// @function
         /// 
         /// @param {Error} error
         ///   An Error object, generally provided by a catch statement.
@@ -134,9 +232,6 @@ define( [ "module" ], function( module ) {
         // -- resolveURI ---------------------------------------------------------------------------
 
         /// Convert a relative URI to an absolute URI.
-        /// 
-        /// @name vwf.utility#resolveURI
-        /// @function
         /// 
         /// @param {String} uri
         ///   The URI to resolve. If uri is relative, it will be interpreted with respect to
@@ -177,6 +272,26 @@ define( [ "module" ], function( module ) {
             return a.href;
         },
 
+        // -- xpath --------------------------------------------------------------------------------
+
+        /// XPath resolution functions.
+
+        xpath: xpath,
+
+        // -- color --------------------------------------------------------------------------------
+
+        /// HTML/CSS color conversion functions.
+
+        color: color,
+
+        // -- coordinates --------------------------------------------------------------------------
+
+        /// DOM element coordinate conversion functions.
+
+        coordinates: coordinates,
+
     };
+
+    return exports;
 
 } );

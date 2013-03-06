@@ -452,12 +452,16 @@ function Editor()
 	{
 		
 	}.bind(this);
-	this.ThreeJSPick = function(campos,ray)
+	this.ThreeJSPick = function(campos,ray, ignoreNodes)
     {
        
        // ray[0] *=-1;
 	//	ray[2] *=-1;
 	//	ray[1] *=-1;
+		if(!ignoreNodes)
+		 ignoreNodes = [];
+	
+		
         var threeCam = this.findcamera();
         if(!this.ray) this.ray = new THREE.Ray();
         if(!this.projector) this.projector = new THREE.Projector();
@@ -466,7 +470,18 @@ function Editor()
         var pos = to3Vec(campos);
         this.ray.set(pos, to3Vec(ray));
 		var caster = new THREE.Raycaster(pos, to3Vec(ray));
-        var intersects = caster.intersectObjects(this.findscene().children, true);
+		
+		var nodes_to_test = []
+		for (var i =0; i < this.findscene().children.length; i++)
+		{
+			if(ignoreNodes.indexOf(this.findscene().children[i]) == -1)
+			{
+				if(this.findscene().children[i].PickPriority != -1)
+					nodes_to_test.push(this.findscene().children[i]);
+			}
+		}
+		
+        var intersects = caster.intersectObjects(nodes_to_test, true);
         if (intersects.length) {
             var found =  intersects[0];
 			var priority = -1;
@@ -1683,7 +1698,7 @@ function Editor()
 			proto.properties.rotation = [0,0,1,0];
 			proto.properties.owner = owner;
 			proto.properties.texture = texture;
-			proto.properties.type = type;
+			proto.properties.type = 'primitive';
 			proto.properties.tempid = id;
 			proto.properties.DisplayName = _Editor.GetUniqueName(type);
 			
@@ -1819,14 +1834,20 @@ function Editor()
 		for(var i = 0; i < tocopy.length; i++)
 		{
 			var t = _DataManager.getCleanNodePrototype(tocopy[i].id);
-			var originalGizmoPos = [MoveGizmo.getLocX(),MoveGizmo.getLocY(),MoveGizmo.getLocZ()];
+			var tpos = new THREE.Vector3();
+			tpos.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
+			var originalGizmoPos = [tpos.x,tpos.y,tpos.z];
 			var gizoffset = GLGE.subVec3(vwf.getProperty(tocopy[i].id,'translation'),originalGizmoPos);
 			t.properties.transform[12] = gizoffset[0];
 			t.properties.transform[13] = gizoffset[1];
 			t.properties.transform[14] = gizoffset[2];
-			t.properties.translation[0] = gizoffset[0];
-			t.properties.translation[1] = gizoffset[1];
-			t.properties.translation[2] = gizoffset[2];
+			delete t.properties.translation;
+			delete t.properties.rotation;
+			delete t.properties.quaternion;
+			delete t.properties.scale;
+		//	t.properties.translation[0] = gizoffset[0];
+		//	t.properties.translation[1] = gizoffset[1];
+		//	t.properties.translation[2] = gizoffset[2];
 			
 			_CoppiedNodes.push(t);
 		}
@@ -1838,34 +1859,39 @@ function Editor()
 		for(var i = 0; i < _CoppiedNodes.length; i++)
 		{
 			var t = _CoppiedNodes[i];
-			
+			debugger;
 			var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
-				var ray;
+				
+				var newintersectxy;
 				if(!useMousePoint)
-					ray = _Editor.GetCameraCenterRay();
+					newintersectxy = _Editor.GetInsertPoint();
 				else
+				{
+					var ray;
 					ray = _Editor.GetWorldPickRay(this.ContextShowEvent);
-				_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
-				var pick = this.ThreeJSPick(campos,ray);
-				_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
-				var dxy = pick.distance;
-				var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
+					_Editor.GetMoveGizmo().InvisibleToCPUPick = true;
+					var pick = this.ThreeJSPick(campos,ray);
+					_Editor.GetMoveGizmo().InvisibleToCPUPick = false;
+					var dxy = pick.distance;
+					newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy*.99));
+					var dxy2 = _Editor.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
+					var newintersectxy2 = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy2));
+					newintersectxy2[2] += .01;
+					if(newintersectxy2[2] > newintersectxy[2])
+					newintersectxy = newintersectxy2;
+				}
 			
 			t.properties.transform[12] += newintersectxy[0];
 			t.properties.transform[13] += newintersectxy[1];
 			t.properties.transform[14] += newintersectxy[2];
-			t.properties.translation[0] += newintersectxy[0];
-			t.properties.translation[1] += newintersectxy[1];
-			t.properties.translation[2] += newintersectxy[2];
+		
 			t.properties.DisplayName = _Editor.GetUniqueName(t.properties.DisplayName);
 			_Editor.SelectOnNextCreate();
 			this.createChild('index-vwf',GUID(),t,null,null); 
 			t.properties.transform[12] -= newintersectxy[0];
 			t.properties.transform[13] -= newintersectxy[1];
 			t.properties.transform[14] -= newintersectxy[2];
-			t.properties.translation[0] -= newintersectxy[0];
-			t.properties.translation[1] -= newintersectxy[1];
-			t.properties.translation[2] -= newintersectxy[2];
+		
 		}
 	}
 	var updateGizmoOrientation = function(updateBasisVectors)

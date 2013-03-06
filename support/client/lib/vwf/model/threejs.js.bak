@@ -43,122 +43,8 @@
 			ret.push(mat[i]);
 		return ret.slice(0);	
 	}
-	function transformMatrix (propertyValue,flip,iscam)
-	{
-		return propertyValue;
-	}
-	function unTransformMatrix (inelements,flip,iscam)
-	{
-		return inelements;
-	}
-	function transformMatrix (propertyValue,flip,iscam)
-	{
-	 
-	  //set is columns, not rows
-                        var matrix = new THREE.Matrix4(propertyValue[0],propertyValue[4],propertyValue[8],propertyValue[12],
-                                                      propertyValue[1],propertyValue[5],propertyValue[9],propertyValue[13],
-                                                      propertyValue[2],propertyValue[6],propertyValue[10],propertyValue[14],
-                                                      propertyValue[3],propertyValue[7],propertyValue[11],propertyValue[15]);
-                        
-                        
-                            matrix.elements[13] *= -1;
-                            var translation = new THREE.Vector3();
-                            var quat = new THREE.Quaternion();
-                            var scale = new THREE.Vector3();
-                            
-                            
-                        
-                            matrix.decompose(translation,quat,scale);
-                            var googquat = goog.vec.Quaternion.createFromValues(quat.x,quat.y,quat.z,quat.w);
-							
-							var angle = 0;
-                            var axis = [0,0,0];
-                            angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
-                            if(isNaN(angle))
-                                angle = 0;
-                            axis[0] *= -1;
-                            axis[2] *= -1;
-                            
-                            var vx = new THREE.Vector3();
-                            vx.set(axis[0],axis[1],axis[2]);
-                            quat.setFromAxisAngle(vx,angle);
-                            if(!isNaN(quat.w))
-                            matrix.setRotationFromQuaternion(quat);
-                            
-                            matrix = matrix.scale(scale);
-							
-                            if(flip)
-                            {                           
-                            var flipmat = new THREE.Matrix4(1, 0,0,0,
-                                                            0, 0,1,0,
-                                                            0,1,0,0,
-                                                            0, 0,0,1);
-                            
-                                            
-                            matrix = matrix.multiply(flipmat,matrix);
-                            }
-							
-                            var elements = matrix.elements;
-                            
-                            matrix.set(elements[0],elements[8],elements[4],elements[12],
-                                                    elements[2],elements[10],elements[6],elements[14],
-                                                    elements[1],elements[9],elements[5],elements[13],
-                                                    elements[3],elements[11],elements[7],elements[15]);
-                            
-							if(!iscam)
-								matrix.elements[6] *= -1;
-							return matrix.elements;
 	
-	}
-	function unTransformMatrix2 (inelements,flip,iscam)
-	{
-						var propertyValue = new THREE.Matrix4();
-						if(!iscam)
-								inelements[6] *= -1;
-						propertyValue.set(inelements[0],inelements[8],inelements[4],inelements[12],
-                                                  inelements[2],inelements[10],inelements[6],inelements[14],
-                                                  inelements[1],inelements[9],inelements[5],inelements[13],
-                                                  inelements[3],inelements[11],inelements[7],inelements[15]);
-												  
-                        if(flip)
-                        {                           
-                            var flipmat = new THREE.Matrix4(1, 0, 0, 0,
-                                                            0, 0, 1, 0,
-                                                            0, 1, 0, 0,
-                                                            0, 0, 0, 1);    
-                            propertyValue = propertyValue.multiply(flipmat,propertyValue);
-                        }
-                            
-                            
-                        var translation = new THREE.Vector3();
-                        var quat = new THREE.Quaternion();
-                        var scale = new THREE.Vector3();
-                        
-                        propertyValue.decompose(translation,quat,scale);
-                        var googquat = goog.vec.Quaternion.createFromValues(quat.x+quat.y+quat.z == 0 ? 1 : quat.x,quat.y,quat.z,quat.w);
-						
-                        var angle = 0;
-                        var axis = [0,0,0];
-                        angle = goog.vec.Quaternion.toAngleAxis(googquat,axis);
-                        if(isNaN(angle))
-                            angle = 0;
-                        axis[0] *= -1;
-                        axis[2] *= -1;
-                        
-                        var vx = new THREE.Vector3();
-                        vx.set(axis[0],axis[1],axis[2]);
-                        quat.setFromAxisAngle(vx,angle);
-						
-                        if(!isNaN(quat.w))
-                        propertyValue.setRotationFromQuaternion(quat);
-                        
-                        propertyValue = propertyValue.scale(scale);
-                        propertyValue.elements[13] *= -1;
-                        
-						var elements = propertyValue.elements; 
-                        return elements;                 
-	}
-
+	
 define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, Color ) {
 
 
@@ -189,6 +75,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             //console.log(["creatingNode:",nodeID,childID,childExtendsID,childType]);
             //console.log("Create " + childID);
+			
+			
             var parentNode, threeChild, threeParent;
             
             if ( nodeID )
@@ -250,7 +138,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 group.vwfID = "TEST DUMMY AXIS GIZMO";
                 
 				sceneNode.axes = group;
-				//sceneNode.threeScene.add(group);
+			//	sceneNode.threeScene.add(group);
                 //cam.position.set(0, 0, 0);
                 //cam.lookAt( sceneNode.threeScene.position );
                 
@@ -261,7 +149,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 vwf.createChild( childID, "camera", { "extends": camType } );
             }
             
-            
+            if ( !nodeID )
+            {
+				return;
+			
+			}
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
                 
@@ -313,6 +205,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 };
                 if(!node.threeObject)
                 {
+					
                     createLight.call(this,nodeID,childID,childName);
                 }
             
@@ -525,15 +418,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(propertyName == 'transform' || propertyName == 'localMatrix')
                     {
                         
+						
+						 //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
+                        var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
+
+                        // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
+                        if ( threeObject instanceof THREE.Camera ) {
+                            var columny = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( transform, 1, columny );
+                            var columnz = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( transform, 2, columnz );
+                            goog.vec.Mat4.setColumn( transform, 1, columnz );
+                            goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
+                        }
+						
                             threeObject.matrixAutoUpdate = false;
-                            threeObject.up = new THREE.Vector3(0,0,1);
-                            var flip = false;
-                            if(threeObject.parent instanceof THREE.Scene)
-                            {                           
-								flip = true;
-                            }
-                            
-                            threeObject.matrix.elements = transformMatrix(matCpy(propertyValue),flip, threeObject instanceof THREE.Camera);
+                            threeObject.matrix.elements = matCpy(transform);
                             threeObject.updateMatrixWorld(true);                        
                                                     
                     
@@ -553,36 +453,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             
                             if(lookatObject)
                             {
-								for(var i =0; i <2; i++)
-								{
+								
 									var lookatPosition = new THREE.Vector3();
 									var thisPosition = new THREE.Vector3();
 									var thisMatrix = new THREE.Matrix4();
 									thisMatrix.elements = matCpy(threeObject.matrix.elements);
 									
-									var flipmat = new THREE.Matrix4(-1, 0,0,0,
-																0, 1,0,0,
-																0,0,1,0,
-																0, 0,0,1);
-								
-									var up = new THREE.Vector3();
-									up.set(0,0,1);
+									
 									lookatPosition.copy(lookatObject.matrix.getPosition());
 									thisPosition.copy(thisMatrix.getPosition());
-									console.log(thisPosition.x,thisPosition.y,thisPosition.z);
+									
 									
 									threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
 									
-									
-									var matrix = new THREE.Matrix4();
-									matrix.elements = matCpy(threeObject.matrix.elements);                        
-									matrix = matrix.multiply(flipmat,matrix);
-								
-									
-									
-									threeObject.matrix.elements = matCpy(matrix.elements);
 									threeObject.updateMatrixWorld(true); 
-								}								
+															
                             }
                         
                         }else if (propertyValue instanceof Array)
@@ -651,23 +536,37 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             material.color.setRGB(0,0,0);                           
                         material.ambient.setRGB( material.color.r,material.color.g,material.color.b);
                     }
+					if(propertyName == 'transparent')
+					{
+						var list = [];
+						GetAllLeafMeshes(threeObject,list);
+						for(var i = 0; i < list.length; i++)
+						{
+							if(list[i].material)
+								list[i].material.transparent = propertyValue;
+						}
+					}
                 }
+				
                 if(threeObject instanceof THREE.Camera)
                 {
+					
                     if(propertyName == "fovy")
                     {
                         if(propertyValue)
                         {
                             threeObject.fov = parseFloat(propertyValue);
-                            threeObject.updateProjectionMatrix();
+                            threeObject.updateProjectionMatrix(true);
                         }
                     }
                     if(propertyName == "near")
                     {
+						
                         if(propertyValue)
                         {
+							
                             threeObject.near = parseFloat(propertyValue);
-                            threeObject.updateProjectionMatrix();
+                            threeObject.updateProjectionMatrix(true);
                         }
                     }
                     if(propertyName == "aspect")
@@ -675,7 +574,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if(propertyValue)
                         {
                             threeObject.aspect = parseFloat(propertyValue); 
-                            threeObject.updateProjectionMatrix();                           
+                            threeObject.updateProjectionMatrix(true);                           
                         }
                     }
                     if(propertyName == "far")
@@ -683,7 +582,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if(propertyValue)
                         {
                             threeObject.far = parseFloat(propertyValue);                    
-                            threeObject.updateProjectionMatrix();
+                            threeObject.updateProjectionMatrix(true);
                         }
                     }
                     if(propertyName == "cameraType")
@@ -709,7 +608,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                     cam.aspect = threeObject.aspect;    
                                 if(this.state.cameraInUse == threeObject)
                                     this.state.cameraInUse = cam;
-                                threeObject.updateProjectionMatrix();   
+                                threeObject.updateProjectionMatrix(true);   
                                 node.threeObject = cam;
                                 sceneNode.camera.threeJScameras[ nodeID ] = cam;
                                 parent.add(node.threeObject);
@@ -813,7 +712,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }   
                 if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight || threeObject instanceof THREE.SpotLight )
                 {
-                    if(propertyName == 'lightType')
+                    
+					if(propertyName == 'transform')
+					{
+						if(threeObject.target)
+						{
+							var offset = new THREE.Vector3(0,0,-1);
+							threeObject.matrixWorld.multiplyVector3(offset);
+							threeObject.target.position.x = offset.x;
+							threeObject.target.position.y = offset.y;
+							threeObject.target.position.z = offset.z;
+						}
+					
+					}
+					
+					
+					
+					if(propertyName == 'lightType')
                     {
                         var newlight;
                         var parent = threeObject.parent;
@@ -823,18 +738,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             "color":  threeObject.color,
                             "intensity": threeObject.intensity,
                             "castShadows": threeObject.castShadow,
+							"matrix": threeObject.matrix,
+							"targetpos": threeObject.target ? threeObject.target.position.clone() : new THREE.Vector3(),
                             "clone": function( newObj ) {
                                 newObj.distance = this.distance;
                                 console.info( "light.clone.color = " + JSON.stringify( this.color ) )
                                 newObj.color.setRGB( this.color.r, this.color.g, this.color.b );
                                 newObj.intensity = this.intensity;
                                 newObj.castShadows = this.castShadows;
+								newObj.matrix.elements = matCpy(this.matrix.elements);
+								if(newObj.target)
+									newObj.target.position.copy(this.targetpos);
                             }
                         };
 
                         if(propertyValue == 'point' && !(threeObject instanceof THREE.PointLight))
                         {
-                            newlight = new THREE.PointLight('FFFFFF',1,0);
+                            newlight = new THREE.PointLight(0xFFFFFF,1,0);
                             currProps.clone( newlight );                            
                             newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
@@ -844,7 +764,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         if(propertyValue == 'directional' && !(threeObject instanceof THREE.DirectionalLight))
                         {
-                            newlight = new THREE.DirectionalLight('FFFFFF',1,0);
+                            newlight = new THREE.DirectionalLight(0xFFFFFF,1,0);
                             currProps.clone( newlight );                            
                             newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
@@ -854,7 +774,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         if(propertyValue == 'spot' && !(threeObject instanceof THREE.SpotLight))
                         {
-                            newlight = new THREE.SpotLight('FFFFFF',1,0);
+                            newlight = new THREE.SpotLight(0xFFFFFF,1,0);
                             currProps.clone( newlight );
                             newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
@@ -868,18 +788,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
-			if ( propertyName != "transform" && propertyName != "translation" ) console.info( "Set Light property: " + propertyName + " = " + propertyValue );
+			        if ( propertyName != "transform" && propertyName != "translation" ) console.info( "Set Light property: " + propertyName + " = " + propertyValue );
                     if ( propertyName == 'distance' ) {
                         threeObject.distance = propertyValue;
                     }
                     if ( propertyName == 'color' ) {
                         console.info( "======        Set Light.color property: " + propertyName + " = " + JSON.stringify( propertyValue ) );
-                        threeObject.color.setRGB( propertyValue[0]/255, propertyValue[1]/255, propertyValue[2]/255);
+                        threeObject.color.setRGB( propertyValue[0], propertyValue[1], propertyValue[2]);
                     }
                     if ( propertyName == 'intensity' ) {
                         threeObject.intensity = propertyValue;
-						threeObject.updateMatrix();
-                    }                    
+						//threeObject.updateMatrix();
+                    }   
+					if ( propertyName == 'distance' ) {
+                        threeObject.distance = propertyValue;
+						//threeObject.updateMatrix();
+                    } 					
                     if ( propertyName == 'castShadows' ) {
                         threeObject.castShadow = propertyValue;
                     }
@@ -920,15 +844,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(propertyName == 'transform')
                     {
                         
-                        var flip = false;
-                            if(threeObject.parent instanceof THREE.Scene)
-                            {                           
-								flip = true;
-                            }
-                        var elements = matCpy(threeObject.matrix.elements); 
+                        
+                        var value = matCpy(threeObject.matrix.elements); 
 						
+						if ( threeObject instanceof THREE.Camera ) {
+                            var columny = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 1, columny );
+                            var columnz = goog.vec.Vec4.create();
+                            goog.vec.Mat4.getColumn( value, 2, columnz );
+                            goog.vec.Mat4.setColumn( value, 2, columny );
+                            goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                        }
 						
-						var ret =  unTransformMatrix(elements,flip,threeObject instanceof THREE.Camera);	
+						var ret =  value;
 						return ret;
                         
                     
@@ -1022,6 +950,33 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(propertyName == "color")
                     {
                         
+                            
+                    }
+                }
+				
+				if(threeObject instanceof THREE.Light)
+                {
+                    if(propertyName == "intensity")
+                    {
+						return threeObject.intensity;     
+                    }
+					if(propertyName == "distance")
+                    {
+						return threeObject.distance;     
+                    }
+                    if(propertyName == "color")
+                    {
+                        return [threeObject.color.r,threeObject.color.g,threeObject.color.b];
+                            
+                    }
+					if(propertyName == "lightType")
+                    {
+                        if(threeObject instanceof THREE.DirectionalLight)
+							return 'directional';
+						if(threeObject instanceof THREE.SpotLight)
+							return 'spot';
+						if(threeObject instanceof THREE.PointLight)
+							return 'point';	
                             
                     }
                 }
@@ -1436,8 +1391,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         var childName = node.name;
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-
+		$(document).trigger('BeginParse');
         function assetLoaded( asset ) { 
+			$(document).trigger('EndParse');
             sceneNode.pendingLoads--;
             
             //possibly deal with setting intial scale and rotation here, if threejs does something strange by default
@@ -1597,7 +1553,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         //debugger;
         var child = this.state.nodes[childID];
         if ( child ) {
-            child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
+            child.threeObject = new THREE.PointLight(0xFFFFFF,1,0);
             //child.threeObject.shadowCameraRight     =  500;
             //child.threeObject.shadowCameraLeft      = -500;
             //child.threeObject.shadowCameraTop       =  500;
@@ -1611,7 +1567,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
             child.threeObject.name = childName;
             child.name = childName;
+		
             addThreeChild.call( this, nodeID, childID );
+			rebuildAllMaterials.call(this);
         } 
                
     }
@@ -1960,6 +1918,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 ApplyMaterial(newnode.children[0],newmaterial);
         }   
     }   
+	function isIdentityMatrix(matrix)
+{
+	
+	if(matrix == null)
+		return true;
+	if(
+	matrix[0] == 1 &&	
+	matrix[1] == 0 &&
+	matrix[2] == 0 &&
+	matrix[3] == 0 &&
+	matrix[4] == 0 &&
+	matrix[5] == 1 &&
+	matrix[6] == 0 &&
+	matrix[7] == 0 &&
+	matrix[8] == 0 &&
+	matrix[9] == 0 &&
+	matrix[10] == 1 &&
+	matrix[11] == 0 &&
+	matrix[12] == 0 &&
+	matrix[13] == 0 &&
+	matrix[14] == 0 &&
+	matrix[15] == 1)
+		return true;
+	return false;	
+}
     function ParseSceneGraph(node, texture_load_callback) {
         
         var newnode;
@@ -2047,7 +2030,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             mesh.geometry.verticesNeedUpdate  = true;
             mesh.geometry.facesNeedUpdate  = true;
-            }
+			mesh.geometry.computeBoundingSphere();
+			mesh.geometry.computeBoundingBox();
+         }
             var newmaterial = null;
             if (node.stateset) {
                 newmaterial = new THREE.MeshPhongMaterial();
@@ -2102,13 +2087,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var glmat = new THREE.Matrix4();
             glmat.elements = matrix;
             
-            var flipmat = new THREE.Matrix4(1, 0,0,0,
-                                            0, 0,1,0,
-                                            0,-1,0,0,
-                                            0, 0,0,1);
+            
                             
                                             
-            glmat = glmat.multiply(flipmat,glmat);
+            //glmat = glmat.multiply(flipmat,glmat);
             
             //glmat = glmat.transpose();
             newnode.matrix.copy(glmat)  
@@ -2130,7 +2112,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         if(node.name && newnode)
             newnode.name = node.name;
-            
+        
+		if(newnode && newnode.children && newnode.children.length == 1 && isIdentityMatrix(newnode.matrix.elements))
+		return newnode.children[0];
+		
         return newnode;
     }
     var blobsfound = 0;

@@ -133,7 +133,7 @@ scripts:
     {   
          
          if(this.amount == undefined) return;
-         debugger;
+         
          var mesh = this.GetMesh();
          var m = mesh.geometry;
          var positions = [];

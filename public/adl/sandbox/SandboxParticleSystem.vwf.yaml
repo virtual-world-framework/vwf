@@ -15,15 +15,31 @@ extends: http://vwf.example.com/particlesystem.vwf
 methods:
 properties:
   type: "ParticleSystem"
-  blendMode: "MIX"
+  startColor_noAplha:
+    value: [1 ,1 ,1]
+    set: |
+            this.startColor = [value[0],value[1],value[2],this.startAlpha]
+    get: |
+            return [this.startColor[0],this.startColor[1],this.startColor[2]]
+  endColor_noAplha:
+    value: [1 ,1 ,1]
+    set: |
+            this.endColor = [value[0],value[1],value[2],this.endAlpha]
+    get: |
+            return [this.endColor[0],this.endColor[1],this.endColor[2]]
+  endAlpha:
+    value: 1
+    set: |
+            this.endColor = [endColor[0],endColor[1],endColor[2],value]
+    get: |
+            return this.endColor[3];   
+  startAlpha:
+    value: 1
+    set: |
+            this.startColor = [startColor[0],startColor[1],startColor[2],value]
+    get: |
+            return this.startColor[3];              
   EditorData:
-    AZNumberParticles:
-      displayname: Number of Particles
-      property: numberParticles
-      type: slider
-      min: 1
-      max: 1500
-      step: 1
     ABstartAlpha:
       displayname: "Alpha: (start - end)"
       property: [startAlpha, startAlpha, endAlpha]
@@ -33,35 +49,26 @@ properties:
       step: .01
     AALifeTime:
       displayname: "Lifetime: (min - max)"
-      property: [lifeTime, minLifeTime, maxLifeTime]
+      property: [minLifeTime, minLifeTime, maxLifeTime]
       type: rangeslider
       min: 1
       max: 5000
       step: 1
     AStartSize:
       displayname: "Size: (start - end)"
-      property: [size, startSize, endSize]
+      property: [startSize, startSize, endSize]
       type: rangeslider
       min: 0
-      max: 10
-      step: .1
-    Bloop:
-      displayname: loop
-      property: loop
-      type: check
+      max: .10
+      step: .01
     CStartVelocity:
-      displayname: Start Velocity
+      displayname: Velocity
       property: [minVelocity, maxVelocity]
       type: rangevector
       step: .001
     CStartAcceleration:
-      displayname: Start Acceleration
-      property: [minStartAcceleration, maxStartAcceleration]
-      type: rangevector
-      step: .001
-    CEndAcceleration:
-      displayname: End Acceleration
-      property: [minEndAcceleration, maxEndAcceleration]
+      displayname: Acceleration
+      property: [minAcceleration, maxAcceleration]
       type: rangevector
       step: .001
     ZZImage:
@@ -70,32 +77,24 @@ properties:
       type: map
     YStartColor:
       displayname: Start Color
-      property: startColor
+      property: startColor_noAplha
       type: color
     YEndColor:
       displayname: End Color
-      property: endColor
+      property: endColor_noAplha
       type: color
-    ZZZBlendMode:
-      displayname: "Blending Mode"
-      property: blendMode
+    solver:
+      displayname: "Simulation Solver"
+      property: solver
       type: choice
       labels: 
-        - Add
-        - Mix
+        - Euler
+        - Analytic
+        - Analytic (Shader)
       values:
-        - ADD
-        - MIX
-    ZZZEmitter:
-      displayname: "Emitter shape"
-      property: emitter
-      type: choice
-      labels: 
-        - Box
-        - Point
-      values:
-        - box
-        - point
+        - Euler
+        - Analytic
+        - AnalyticShader
 scripts:
 -  |
     this.initialize = function()
