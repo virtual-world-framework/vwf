@@ -1668,6 +1668,7 @@ function Editor()
                     extends: 'SandboxParticleSystem.vwf',
 					properties:{
 					  rotation: [ 1, 0, 0, 0 ],
+					  
 					  translation: pos,
 					  owner:owner,
 					  type:'ParticleSystem',

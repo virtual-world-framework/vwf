@@ -92,13 +92,14 @@ function FindSession(uri)
 {
 	//find the application name
 	var app = findAppName(uri);
+	console.log(app);
 	if(!app)
 		return null;
 	//remove the application name	
 	var minusapp = uri.substr(app.length-2);
 	var parts = minusapp.split('\\');
 	var testapp = parts[0];
-	
+	console.log(testapp);
 	//Really, any slash delimited string after the app name should work
 	//sticking with 16 characters for now 
 	if(testapp.length == 16)
@@ -237,7 +238,7 @@ function startVWF(){
 	
 	var filename = libpath.join(path, uri);
 	var session = FindSession(filename);
-	
+	console.log(session);
 	//remove the session identifier from the request
 	filename = filterSession(filename,session);
     
@@ -247,7 +248,7 @@ function startVWF(){
 	var c2;
 	
 	
-	
+	console.log(filename);
 	c1 = libpath.existsSync(filename);
 	c2 = libpath.existsSync(filename+".yaml");
     if(!c1 && !c2)
@@ -302,6 +303,7 @@ function startVWF(){
 			//no app name but is directory. Not listing directories, so 404
 			if(!appname)
 			{
+				console.log(filename + "is a directory")
 				_404(response);
 				
 				return;
@@ -339,6 +341,7 @@ function startVWF(){
 	}
 	else
 	{
+		console.log("404 : " + filename)
 		_404(response);
 		
 		return;

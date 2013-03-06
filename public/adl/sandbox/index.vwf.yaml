@@ -22,24 +22,20 @@ properties:
             this.sun.color.r = value[0];
             this.sun.color.g = value[1];
             this.sun.color.b = value[2];
-    get: |
-             return [    this.sun.color.r , this.sun.color.g , this.sun.color.b]
   sunDirection: 
-    value: [0, 0, 0]
+    value: [0 , 0 , 1 ]
     set: |
             if(!this.sun) return;
             this.sun.position.x = value[0];
             this.sun.position.y = value[1];
-            this.sun.position.z = value[2];
-    get: |
-             return [    this.sun.position.x , this.sun.position.y , this.sun.position.z]       
+            this.sun.position.z = value[2];      
+            this.sun.position.normalize();
+            this.sun.position.multiplyScalar(100);
   sunIntensity: 
-    value: 1
+    value: .5
     set: |
             if(!this.sun) return;
-            this.sun.intensity = value;
-    get: |
-             return this.sun.intensity                     
+            this.sun.intensity = value;                   
   ambientColor: [155, 155, 155]
   fogColor: [155, 155, 155]
   fogNear: 100
@@ -208,6 +204,7 @@ scripts:
        findcamera().fov = 70;
        findcamera().updateProjectionMatrix();
        var ground = new THREE.Mesh(new THREE.PlaneGeometry(250,250,1,1), new THREE.MeshPhongMaterial());
+       ground.receiveShadow = true;
        ground.PickPriority = -1;
        
        
@@ -221,17 +218,35 @@ scripts:
         grassTex.repeat.y = 250/9;
        grassTex.anisotropy  = _dRenderer.getMaxAnisotropy();
        this.groundplane = ground;
+       
+       
        findscene().add(ground);
        
        if(this.materialDef)
        this.setTexture(this.materialDef);
        var l = new THREE.DirectionalLight();
        this.sun = l;
+       this.sun.castShadow = true;
+       this.sun.shadowCameraNear = 1;
+       this.sun.shadowCameraFar = 100;
+       //this.sun.shadowCameraVisible = true;
+       this.sun.shadowCameraBottom = -10;
+       this.sun.shadowCameraLeft = -10;
+       
+       this.sun.shadowCameraTop = 10;
+       this.sun.shadowCameraRight = 10;
        findscene().add(l);
-       this.sun.position.x = this.sunDirection.x;
-       this.sun.position.y = this.sunDirection.y;
-       this.sun.position.z = this.sunDirection.z;
+      
+       
+       this.sun.position.x = this.sunDirection[0];
+       this.sun.position.y = this.sunDirection[1];
+       this.sun.position.z = this.sunDirection[2];
+       this.sun.position.normalize();
+       this.sun.position.multiplyScalar(100);
        this.sun.intensity = this.sunIntensity;
+       
+       window._dGround = this.groundplane;
+       window._dSun = this.sun;
        
        this.CreateSky(vwf.getProperty(this.id,'skyTexture') || 'white');
        /*findscene().setAmbientColor('rgb(200,200,200)');
@@ -330,6 +345,7 @@ scripts:
        this.skycube.depthWrite = false;
        this.skycube.depthCheck = false;
        findscene().add(this.skycube);
+       window._dSky = this.skycube;
         
     }
     this.removeUpdateCallback = function(m)
@@ -736,6 +752,9 @@ scripts:
         this.callUpdateCallbacks();
         findcamera().updateMatrixWorld();
         findcamera().updateMatrix();
+        var campos = findcamera().position;
+        
+        this.sun.shadowCamera.projectionMatrix.makeOrthographic(campos.x + 10,campos.x - 10,campos.y + 10,campos.y-10,1,150);
       }
       function findscene()
       {

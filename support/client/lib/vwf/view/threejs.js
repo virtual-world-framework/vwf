@@ -396,7 +396,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     mycanvas.height = self.height;
                     mycanvas.width = self.width;
                     sceneNode.renderer.setViewport(0,0,window.innerWidth,window.innerHeight)
-                    
+                    sceneNode.renderer.setSize($('#index-vwf').width(),$('#index-vwf').height());
 					view.state.cameraInUse.aspect =  mycanvas.width / mycanvas.height;
 					view.state.cameraInUse.updateProjectionMatrix()
                     //var cam = self.state.cameraInUse;
@@ -409,13 +409,15 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
             {
                 sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
-				 sceneNode.renderer.shadowMapEnabled = true;
+				sceneNode.renderer.setSize($('#index-vwf').width(),$('#index-vwf').height());
+				sceneNode.renderer.shadowMapEnabled = true;
+				sceneNode.renderer.setClearColor({r:0,g:0,b:0},1.0);
             }else
             {
                 sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
-            //sceneNode.renderer.setClearColor({r:.5,g:1,b:1},1.0);
+            //
 //            var ambientlight = new THREE.AmbientLight('#000000');
 //            ambientlight.color.setRGB(.7,.7,.7);
 //            sceneNode.threeScene.add(ambientlight);

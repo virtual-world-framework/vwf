@@ -432,6 +432,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
                         }
 						
+						if(threeObject instanceof THREE.ParticleSystem)
+						{	
+							threeObject.updateTransform(transform);
+						}
+						
+						
                             threeObject.matrixAutoUpdate = false;
                             threeObject.matrix.elements = matCpy(transform);
                             threeObject.updateMatrixWorld(true);                        
@@ -558,7 +564,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         propertyName == 'minVelocity'||
                         propertyName == 'maxAcceleration'||
                         propertyName == 'minAcceleration'||
-                        propertyName == 'emitterType'
+                        propertyName == 'emitterType' ||
+						propertyName == 'emitterSize' ||
+						propertyName == 'maxLifetime' ||
+						propertyName == 'minLifetime' 
                     )
                     {
                         if(ps.material == ps.shaderMaterial_analytic)
@@ -665,11 +674,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         else
                         {
                             ps.shaderMaterial_default.blending = THREE.NormalBlending;  
-                            ps.shaderMaterial_default.transparent = false;
+                            ps.shaderMaterial_default.transparent = true;
                             ps.shaderMaterial_analytic.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_analytic.transparent = false;
+                            ps.shaderMaterial_analytic.transparent = true;
 						    ps.shaderMaterial_interpolate.blending = THREE.NormalBlending; 
-                            ps.shaderMaterial_interpolate.transparent = false;
+                            ps.shaderMaterial_interpolate.transparent = true;
                         }
 
                         ps.shaderMaterial_default.needsUpdate = true;   
@@ -678,11 +687,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == 'depthTest')
                     {
-                        ps.shaderMaterial_default.depthTest = propertyValue;    
+                        ps.shaderMaterial_default.depthTest = false;    
                         ps.shaderMaterial_default.depthWrite = propertyValue;
-                        ps.shaderMaterial_analytic.depthTest = propertyValue;   
+                        ps.shaderMaterial_analytic.depthTest = false;   
                         ps.shaderMaterial_analytic.depthWrite = propertyValue;
-						ps.shaderMaterial_interpolate.depthTest = propertyValue;   
+						ps.shaderMaterial_interpolate.depthTest = false;   
                         ps.shaderMaterial_interpolate.depthWrite = propertyValue;
                     }
                     if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
@@ -1961,6 +1970,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             particleSystem.shaderMaterial_default = shaderMaterial_default;
 			particleSystem.shaderMaterial_interpolate = shaderMaterial_interpolate;
             
+			particleSystem.shaderMaterial_analytic.transparent = true;
+            particleSystem.shaderMaterial_default.transparent = true;
+			particleSystem.shaderMaterial_interpolate.transparent = true;
+			
 			//setup all the default values
             particleSystem.minVelocity = [0,0,0];
             particleSystem.maxVelocity = [0,0,0];

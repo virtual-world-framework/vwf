@@ -97,6 +97,7 @@ scripts:
         var rotation = this.mesh.rotation;
         parent.remove(this.mesh);
         this.mesh = new THREE.Mesh(this.Build(),lastmat);
+        this.mesh.castShadow = true;
         this.mesh.rotation = rotation;
         this.mesh.lastMatDef = lastmatdef;
        
