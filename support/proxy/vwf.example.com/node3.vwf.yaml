@@ -38,7 +38,7 @@ properties:
       {
         return goog.vec.Mat4.multMat( this.parent.worldTransform, this.transform, goog.vec.Mat4.create() );
       }
-      else return this.transform;
+      else return this.transform; //@ sourceURL=node3.worldTransform.get.vwf
 
   ## Transform of 3D node
   ## 
@@ -631,6 +631,29 @@ methods:
         this.playing = false;
       }
 
+  ## Transform by the given amount over duration.
+  ## 
+  ## @name node3.vwf#transformBy
+  ## @function
+  ##
+  ## @param {Array} transform
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+
+  transformBy:
+    parameters:
+      - transform
+      - duration
+    body: |
+      var startTransform = this.transform || goog.vec.Vec3.create();
+      var deltaTransform = this.transformFromValue( transform );
+
+      // Left multiply by the delta
+      var stopTransform = goog.vec.Mat4.multMat( deltaTransform, startTransform, goog.vec.Mat4.createFloat32() );
+
+      this.transformTo( stopTransform, duration ); //@ sourceURL=node3.transformBy.vwf
+
   ## Transform to given transform over duration.
   ## 
   ## @name node3.vwf#transformTo
@@ -646,19 +669,92 @@ methods:
       - transform
       - duration
     body: |
-      var stopTransform = this.transformFromValue( transform );
+      var stopTransform = this.transformFromValue( transform ) || goog.vec.Mat4.createIdentity();
+
+      // Calculate the stop translation
       var stopTranslation = goog.vec.Vec3.create();
-      goog.vec.Mat4.getColumn( stopTransform || goog.vec.Mat4.createIdentity(), 3, stopTranslation );
+      goog.vec.Mat4.getColumn( stopTransform, 3, stopTranslation );
+
+      // Calculate the stop quaternion
+      var scale = goog.vec.Vec3.create();
       var stopQuaternion = goog.vec.Quaternion.fromRotationMatrix4(
-        this.unscaledTransform(
-          stopTransform || goog.vec.Mat4.createIdentity(),
-          goog.vec.Vec3.create(),
-          goog.vec.Mat4.create()
-        ),
+        this.unscaledTransform( stopTransform || goog.vec.Mat4.createIdentity(), scale, goog.vec.Mat4.create() ),
         goog.vec.Quaternion.create()
       );
+
+      // Call the appropriate functions to do the translation and quaterniation (that is totally a word)
       this.translateTo( stopTranslation, duration );
-      this.quaterniateTo( stopQuaternion, duration ); //@ sourceURL=node3.transformTo.vwf
+      this.quaterniateTo( stopQuaternion, duration );
+      this.scaleTo( scale, duration ); //@ sourceURL=node3.transformTo.vwf
+
+  ## Transform the world transform by the given amount over duration.
+  ## 
+  ## @name node3.vwf#worldTransformBy
+  ## @function
+  ##
+  ## @param {Array} transform
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+
+  worldTransformBy:
+    parameters:
+      - transform
+      - duration
+    body: |
+      var startWorldTransform = this.worldTransform || goog.vec.Vec3.create();
+      var deltaTransform = this.transformFromValue( transform );
+
+      // Left multiply by the delta
+      var stopWorldTransform = goog.vec.Mat4.multMat( deltaTransform, startWorldTransform, 
+                                                      goog.vec.Mat4.createFloat32() );
+
+      this.worldTransformTo( stopWorldTransform, duration ) //@ sourceURL=node3.worldTransformBy.vwf
+
+  ## Transform the world transform to given transform over duration.
+  ## 
+  ## @name node3.vwf#worldTransformTo
+  ## @function
+  ##
+  ## @param {Array} transform
+  ## @param {Number} duration
+  ##
+  ## @returns undefined
+
+  worldTransformTo:
+    parameters:
+      - transform
+      - duration
+    body: |
+      var stopWorldTransform = this.transformFromValue( transform );
+      var stopTransform;
+
+      if ( this.parent ) {
+
+        // We need to find the local transform that will bring about the desired world transform
+        // The math for this looks like -
+        // (new worldTransform) = (parentWorldTransform) * (transform)
+        // So, if we left multiply both sides by the inverse of the parentWorldTransform...
+        // inv(parentWorldTransform) * (new worldTransform) = (transform)
+
+        // Find the inverse parent worldTransform
+        var inverseParentWorldTransform = goog.vec.Mat4.createFloat32();
+        if ( goog.vec.Mat4.invert( this.parent.worldTransform, inverseParentWorldTransform ) ) {
+        
+          // Left multiply the new worldTransform by the inverse parent worldTransform
+          stopTransform = goog.vec.Mat4.multMat( inverseParentWorldTransform, stopWorldTransform, 
+                                                 goog.vec.Mat4.createFloat32() );
+        }
+        else {
+          stopTransform = goog.vec.Mat4.createIdentity();
+          this.logger.error( "Parent '" + this.parent.id + "' transform matrix is not invertible: " + 
+                             this.parent.transform );
+        }
+      }
+      else
+        stopTransform = stopWorldTransform;
+
+      this.transformTo( stopTransform, duration ); //@ sourceURL=node3.worldTransformTo.vwf
 
 events:
 
