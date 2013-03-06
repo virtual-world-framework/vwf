@@ -17,7 +17,7 @@ The task component contains the following properties that can be set in the less
 * **scenePath**: xpath reference to the top node of the scene to which the lesson listens for task completion events
 * **taskIndex**: Index of the currently active subtask
 
-In the following example, we'll focus on the *text* and *cameraPoseRef* properties. The remaining properties can be used for more complex lessons that are more than one level deep. In this example, they will be set only on the overall lesson task.
+In the following example, we'll focus on the *text* and *cameraPoseRef* properties. The remaining properties can be used for more complex lessons that are more than one level deep. 
 
 The task component also consists of the following methods and events:
 
@@ -36,7 +36,6 @@ Events:
 We can use the events defined above to add steps to the event handlers for each task. For instance, the entering event is in most cases the best place to increment the taskIndex and define the success event, or the step required to complete the task, as stated in the text property.
 
 	this.entering = function() {
-	  this.parent.taskIndex++;
 	  var self = this;
 	  appObject.pointerClick = appObject.events.add( function() {
 	    appObject.pointerClick = appObject.events.flush( this );
@@ -59,7 +58,6 @@ First we'll need to add an overall lesson task as a child of the application.
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           scenePath: /
-          taskIndex: 0
 
 Subtasks of the lesson, can then be defined as children of the lesson component. Here the entering event is used to define the success event - where clicking on the application object, flushes the click event and calls the completed event for the step. 
 
@@ -73,7 +71,6 @@ Subtasks of the lesson, can then be defined as children of the lesson component.
             - |
               this.entering = function() {
                 console.info( "Step 1 entering" );
-                this.parent.taskIndex++;
                 var self = this;
                 var appObject = this.find( "/applicationObject" )[ 0 ];
                 appObject.pointerClick = appObject.events.add( function() {
@@ -126,30 +123,65 @@ Thus the complete lesson hierarchy is defined in the VWF model, including all le
 
 The user interface for the lesson will mainly be defined in the application's view. The primary interface for a lesson will consist of the instructional text for each lesson step.
 
-In this example, the array *lessonSteps* will contain a list of instructional text for each step defined. As each *text* property value is created and initialized, it will be stored in the view, and the UI updated with the new instructions. 
+First, add an accordian *div* to the HTML body.
+
+	<body>
+	  <div id="instructionPanel">
+	    <div id="accordion">
+	    </div>
+	  </div>
+	</body>
+
+This will be populated and scripted on load.
+
+In this example, the array *lessonSteps* will contain a list of instructional text for each step defined. On load, each *text* property value will be gathered and stored in the view, and the UI updated with the new instructions. 
 
 	var lessonSteps = new Array();
 
-	vwf_view.initializedProperty = function (nodeId, propertyName, propertyValue) {
+	$(document).ready(function() {  
+	  var vwfTasks = vwf.find("task", "/lesson/*");
+	  for(var i=0; i<vwfTasks.length;i++)
+	  {
+	    vwf.getProperty(vwfTasks[i], "text");
+	  }
+	  updateLessonInstructions();
+	});
+
+	vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
 	  switch (propertyName) {
 	    case "text": 
-	      lessonSteps[nodeId] = propertyValue;
-	      updateLessonInstructions(); // JS function to update the HTML instruction list
+	      lessonSteps[vwf_view.kernel.name( nodeId )] = propertyValue;
 	      break;
 	  }
 	}
 
-Additionally, the UI will need to update based on the current *taskIndex* (defined in the overall lesson task). As the lesson progresses through each step, and this taskIndex updated, the *satProperty* listener for *taskIndex* will call the *updateLessonStep* function.
+The *updateLessonInstructions* function defined below will take the values stored in the *lessonSteps* array, and fill in appropriate values in the accordian *div* created above, and call the *jQuery accordion* method to activate the lesson panel. 
 
-	vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-	  switch (propertyName) {
-	    case "taskIndex":
-	      updateLessonStep(propertyValue); // JS function to update which step is being shown in the HTML
-	      break;
+	function updateLessonInstructions() {
+	  $('#accordion').html('');
+
+	  for(var step in lessonSteps)
+	  {
+	    $('#accordion').append("<h2><a id='" + step + "' href='#'>" + step + "</a></h2>");
+	    $('#accordion').append("<div><p>" + lessonSteps[step] + "</p></div>");
 	  }
+
+	  $("#accordion").accordion();
+	}
+
+Additionally, the UI will need to update the instruction list based on the current step as the student progress through the lesson. Here, this is accomplished through the *firedEvent* listener. Each step's *entering* event will trigger a click event on the appropriate step in the instruction panel. The text of that step will then be visible to the user. 
+
+	vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
+	  switch (eventName) {
+	    case "entering":
+	      $('#'+vwf_view.kernel.name( nodeId )).trigger('click');
+	      break;
+	    }
 	}
 
 --------------
 
 <!-- **Note: need to update build to include subfolders** 
 [task component](jsdoc_cmp/symbols/instruction.vwf.html) -->
+
+<!-- Add screenshots -->

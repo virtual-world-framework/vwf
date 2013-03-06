@@ -1,14 +1,21 @@
-div.wrapper {
-	width:99%;
-	position:absolute;
-	bottom:30px;
-	pointer-events:none;
+/* typography */
+h2 {
+  font-size: 10px;
+  letter-spacing: -1px;
+  text-align: left;
 }
-div.toolstyle {
-	padding: 5px;
-	text-align:center;
-	width:120px;
-	height:45px;
-	margin:auto;
-	pointer-events:all;
+
+p {
+  font-size: 0.8em;
+  margin:0px;
+}
+
+/* divs */
+#instructionPanel {
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:20%;
+  height:100%;
+  background:#333;
 }

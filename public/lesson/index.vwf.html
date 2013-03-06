@@ -1,4 +1,4 @@
-<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
+<!-- Copyright 2013 United States Government, as represented by the Secretary of Defense, Under  -->
 <!-- Secretary of Defense (Personnel & Readiness).                                               -->
 <!--                                                                                             -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
@@ -11,11 +11,61 @@
 <!-- either express or implied. See the License for the specific language governing permissions  -->
 <!-- and limitations under the License.                                                          --> 
 
-<link href="lesson.css" rel="stylesheet" type="text/css" />
-<div id="wrapper" class="wrapper" style="position:absolute">
-	<div id="toolbar" class="toolstyle">
-		<a id="startButton" href="#" role="button">
-			<span>Start</span>
-		</a>
-	</div>
-</div>
+<html>
+	<head>
+		<link rel='stylesheet' type='text/css' href='lesson.css' />
+		<link rel='stylesheet' type='text/css' href='css/jquery-ui-1.8.20.custom.css' />
+		<script type='text/javascript'>
+			var lessonSteps = new Array();
+
+			vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
+				switch (propertyName) {
+				  case "text": 
+				    lessonSteps[vwf_view.kernel.name( nodeId )] = propertyValue;
+				    break;
+				}
+			}
+
+			vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
+				switch (eventName) {
+				  case "entering":
+				    $('#'+vwf_view.kernel.name( nodeId )).trigger('click');
+				    break;
+				}
+			}
+
+			function updateLessonInstructions() {
+				$('#accordion').html('');
+
+				for(var step in lessonSteps)
+				{
+					$('#accordion').append("<h2><a id='" + step + "' href='#'>" + step + "</a></h2>");
+					$('#accordion').append("<div><p>" + lessonSteps[step] + "</p></div>");
+				}
+
+				$("#accordion").accordion();
+			}
+
+			// Open and close instruction panel?
+			// $('#instructionPanel').animate({ 'left' : "400px" }, 200);
+		</script>
+	</head>
+	<body>
+		<div id="instructionPanel">
+			<div id="accordion">
+			</div>
+
+			<script>
+				$(document).ready(function() {
+					var vwfTasks = vwf.find("task", "/lesson/*");
+					for(var i=0; i<vwfTasks.length;i++)
+					{
+						vwf.getProperty(vwfTasks[i], "text");
+					}
+					updateLessonInstructions();
+				});
+			</script>
+
+		</div>
+	</body>
+</html>
