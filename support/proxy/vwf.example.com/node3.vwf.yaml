@@ -729,7 +729,7 @@ methods:
       var stopWorldTransform = this.transformFromValue( transform );
       var stopTransform;
 
-      if ( this.parent ) {
+      if ( this.parent && this.parent.worldTransform ) {
 
         // We need to find the local transform that will bring about the desired world transform
         // The math for this looks like -
