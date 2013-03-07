@@ -23,6 +23,8 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         initialize: function( rootSelector ) {
 
+            var self = this;
+
             this.rootSelector = rootSelector;
             this.canvasQuery = undefined;
  
@@ -41,7 +43,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
           
             // Connect GLGE to the VWF timeline.
             GLGE.now = function() {
-                return vwf.time() * 1000;
+                return self.kernel.time() * 1000;
             }
         },
 
