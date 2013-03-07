@@ -302,7 +302,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 return function( nodeID, result ) {
                     return this.kernel[kernelFunctionName]( nodeID, result );
-                }            
+                };
 
             case "uri":
             case "name":
@@ -318,6 +318,12 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 return function( nodeID ) {
                     return this.kernel[kernelFunctionName]( nodeID );
+                };
+
+            case "property":
+
+                return function( nodeID, propertyName ) {
+                    return this.kernel[kernelFunctionName]( nodeID, propertyName );
                 };
 
             case "find":

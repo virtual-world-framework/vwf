@@ -2064,6 +2064,8 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
             // has performed the set and dictates the return value. The property is considered set
             // after each model has run.
 
+var delegated;
+
             this.models.some( function( model, index ) {
 
                 // Skip models up through the one making the most recent call here (if any).
@@ -2102,14 +2104,23 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
                         propertyValue = value;
                     }
 
+// TODO: detect setters that set properties other than propertyName; these are the main ones
+delegated = propertyName == "translation" || propertyName == "rotation" || propertyName == "quaternion" || propertyName == "scale";
+
                     // If we are setting, exit from the this.models.some() iterator once the value
                     // has been set. Don't exit early if we are creating or initializing since every
                     // model needs the opportunity to register the property.
 
-                    return settingPropertyEtc == "settingProperty" && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+                    // return settingPropertyEtc == "settingProperty" && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
+                    return delegated || reentry.hasOwnProperty( "value" ); // TODO: stops for delegated this.p = value; also stop for this.q = value or this.whatever = cancel
                 }
 
             }, this );
+
+
+if ( delegated || reentry.hasOwnProperty( "value" ) ) {
+    this.models.object.computedProperties( nodeID )[propertyName] = propertyValue;
+}
 
             if ( entry.index !== undefined ) {
 
@@ -2685,9 +2696,28 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
             return descendants;
         },
 
+        // -- property -----------------------------------------------------------------------------
 
+        /// property.
         /// 
+        /// @see {@link module:vwf/api/kernel.property}
 
+        property: function( nodeID, propertyName ) {
+            var properties = this.models.object.properties( nodeID );
+            var result = properties[propertyName];
+            if ( result === undefined ) {
+                result = this.models.object.computedProperties( nodeID )[propertyName];
+            }
+
+if ( result === undefined ) {
+    var prototypeID = this.prototype( nodeID );
+    if ( prototypeID ) {
+        result = this.property( prototypeID, propertyName );
+    }
+}
+            // return properties[propertyName] || this.models.object.computedProperties( nodeID );
+if ( result === undefined ) this.logger.warn( "property", nodeID, propertyName, result, properties[propertyName], this.models.object.computedProperties( nodeID )[propertyName] );
+            return result;
         },
 
         /// Locate nodes matching a search pattern. See vwf.api.kernel#find for details.
@@ -3587,7 +3617,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
 
     var xpathPropertyMatchesStep = function( nodeID, name ) {
 
-        var properties = kernel.models.object.properties( nodeID );
+        var properties = kernel.models.object.properties( nodeID );  // TODO: do the same thing as kernel.property()
 
         if ( name ) {
             return properties[name];

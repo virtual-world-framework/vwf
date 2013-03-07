@@ -495,6 +495,17 @@ define( function() {
 
         descendants: [ /* nodeID */ ],
 
+        /// TODO
+        ///
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} propertyName
+        /// 
+        /// @returns {Value} propertyValue
+
+        property: [ /* nodeID, propertyName */ ],
+
         /// Locate nodes matching a search pattern. matchPattern supports an XPath subset consisting of
         /// the following:
         /// 

@@ -60,6 +60,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                 name: childName,
 
                 properties: {},
+computedProperties: {},
 
                 parent: undefined,
                 children: [],
@@ -287,6 +288,10 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
         properties: function( nodeID ) {
             return this.objects[nodeID].properties;
         },
+
+computedProperties: function( nodeID ) {
+    return this.objects[nodeID].computedProperties;
+},
 
         // -- internals ----------------------------------------------------------------------------
 

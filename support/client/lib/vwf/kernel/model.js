@@ -568,6 +568,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     return this.kernel[kernelFunctionName]( nodeID );
                 };
 
+            case "property":
+
+                return function( nodeID, propertyName ) {
+                    return this.kernel[kernelFunctionName]( nodeID, propertyName );
+                };
+
             case "find":
 
                 return function( nodeID, matchPattern, callback /* ( matchID ) */ ) {

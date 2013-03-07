@@ -276,6 +276,12 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
             return this.kernel.descendants( this.model_to_kernel[this.object_id(node)] || node ); // TODO remap return value
         },
 
+        // -- property -----------------------------------------------------------------------------
+
+        property: function( node, propertyName ) {
+            return this.kernel.property( this.model_to_kernel[this.object_id(node)] || node, propertyName );
+        },
+
         // -- find ---------------------------------------------------------------------------------
 
         find: function( node, matchPattern, callback /* ( matchID ) */ ) { // TODO remap return value and callback parameter
