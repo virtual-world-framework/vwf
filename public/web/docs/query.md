@@ -11,7 +11,7 @@ The remainer of this section will focus on how to use the find and test query fu
 
 **Example Queries**
 
-The following query will search for the node on which it is called. This is most useful if called from the kernel (ie. using a vwf.find), it will return the root of the application.
+The following query will search for the node on which it is called. This is most useful if called from the kernel (ie. using a vwf_view.kernel.find), it will return the root of the application.
 
 	this.find( "/" );
 

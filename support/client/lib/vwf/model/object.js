@@ -29,7 +29,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
 
         initialize: function() {
             this.objects = {}; // maps id => { property: value, ... }
-            this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.creatingNode( undefined, 0 ); // global root  // TODO: to allow kernel.children( 0 ), kernel.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
         // == Model API ============================================================================

@@ -205,7 +205,7 @@ Finally, back in the HTML file, we'll need to add a few javascript functions to 
 
 	function setMode(mode) {
     	highlightMode(mode);
-        vwf_view.kernel.setProperty(vwf.find("", "/")[0], "mouseMode", mode);
+        vwf_view.kernel.setProperty(vwf_view.kernel.find("", "/")[0], "mouseMode", mode);
   	}
 
     function highlightMode(mode) {
@@ -216,7 +216,7 @@ Finally, back in the HTML file, we'll need to add a few javascript functions to 
     }
 
     vwf_view.satProperty = function (nodeId, propertyName, propertyValue) {
-      	if (nodeId == vwf.find("", "/")[0] ) {
+      	if (nodeId == vwf_view.kernel.find("", "/")[0] ) {
       		switch (propertyName) {
       		  case "mouseMode":
       		    highlightMode( propertyValue );

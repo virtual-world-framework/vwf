@@ -804,7 +804,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             } 
             if ( removed ) {
                 if ( sceneNode.srcColladaObjects.length == 0 ) {
-                    //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
+                    //glgeModel.kernel.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
                     loadComplete.call( glgeModel );
                 }
 

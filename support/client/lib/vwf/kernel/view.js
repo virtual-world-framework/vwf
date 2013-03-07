@@ -188,7 +188,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 return function( nodeID, propertyName, propertyValue, propertyGet, propertySet, when, callback ) {
                     if ( this.state.enabled ) {
                         this.kernel.send( nodeID, kernelFunctionName, propertyName,
-                            [ propertyValue, propertyGet, propertySet ], when || 0, callback /* ( result ) */ );  // TODO: { value: propertyValue, get: propertyGet, set: propertySet } ? -- vwf.receive() needs to parse
+                            [ propertyValue, propertyGet, propertySet ], when || 0, callback /* ( result ) */ );  // TODO: { value: propertyValue, get: propertyGet, set: propertySet } ? -- kernel.receive() needs to parse
                     }
                 };
 
@@ -217,7 +217,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 return function( nodeID, methodName, methodParameters, methodBody, when, callback ) {
                     if ( this.state.enabled ) {
                         this.kernel.send( nodeID, kernelFunctionName, methodName,
-                            [ methodParameters, methodBody ], when || 0, callback /* ( result ) */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- vwf.receive() needs to parse
+                            [ methodParameters, methodBody ], when || 0, callback /* ( result ) */ );  // TODO: { parameters: methodParameters, body: methodBody } ? -- kernel.receive() needs to parse
                     }
                 };
 
@@ -266,7 +266,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 return function( nodeID, scriptText, scriptType, when, callback ) {
                     if ( this.state.enabled ) {
                         this.kernel.send( nodeID, kernelFunctionName, undefined,
-                            [ scriptText, scriptType ], when || 0, callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- vwf.receive() needs to parse
+                            [ scriptText, scriptType ], when || 0, callback /* ( result ) */ );  // TODO: { text: scriptText, type: scriptType } ? -- kernel.receive() needs to parse
                     }
                 };
 

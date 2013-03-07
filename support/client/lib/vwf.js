@@ -3090,7 +3090,7 @@ if ( result === undefined ) this.logger.warn( "property", nodeID, propertyName, 
     };
 
     /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by
-    /// vwf.createChild. The following forms are accepted:
+    /// kernel.createChild. The following forms are accepted:
     /// 
     ///   - Descriptor: { extends: component, source: ..., type: ..., ... }
     ///   - Component URI: http://host/path/to/component.vwf
