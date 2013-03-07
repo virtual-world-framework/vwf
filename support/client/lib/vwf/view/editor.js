@@ -292,7 +292,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         var pv = {};
         if ( node ) {
             for ( var i = 0; i < node.properties.length; i++ ) {
-                pv[ node.properties[i] ] = vwf.getProperty( node.ID, node.properties[i], [] );
+                pv[ node.properties[i] ] = vwf_view.kernel.property( node.ID, node.properties[i], [] );
             }
         }
         return pv;
@@ -731,7 +731,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
                 if(prop.value == undefined)
                 {
-                    prop.value = JSON.stringify( utility.transform( vwf.getProperty( nodeID, prop.name, []), utility.transforms.transit ) );
+                    prop.value = JSON.stringify( utility.transform( vwf_view.kernel.property( nodeID, prop.name, []), utility.transforms.transit ) );
                 }
 
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", prop.name, true);
@@ -1550,6 +1550,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         {
             var xhr = new XMLHttpRequest();
 
+// TODO
             var state = vwf.getState();
 
             var timestamp = state["queue"].time;

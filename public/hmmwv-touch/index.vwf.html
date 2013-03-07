@@ -23,15 +23,10 @@
 
       var rootNode = vwf.find("", "/")[0];
       var externalCam = vwf.find(rootNode, "camera")[0];
-      var camera = vwf.getProperty(rootNode, "activeCamera");
+      var camera;
+      vwf_view.kernel.getProperty(rootNode, "activeCamera")
 
       $(function() {
-        if(camera == externalCam) {
-          $("#exterior").attr("checked", true);
-        }
-        else {
-          $("#interior").attr("checked", true);
-        }
         $("#toolbar").buttonset();
       });
 
@@ -39,10 +34,14 @@
         vwf_view.kernel.callMethod(rootNode, "switchCameraView", [location]);
       }
 
-      vwf_view.calledMethod = function (nodeId, methodName, methodParameters, methodValue) {
-        if(methodName == "switchCameraView") {
-          camera = vwf.getProperty(rootNode, "activeCamera");
-          $("#" + methodParameters[0]).attr("checked", true);
+      vwf_view.gotProperty = function (nodeID, propertyName, propertyValue) {
+        if(propertyName == "activeCamera") {
+          camera = propertyValue;
+          if(camera == externalCam) {
+            $("#exterior").attr("checked", true);
+          } else {
+            $("#interior").attr("checked", true);
+          }
           $("#exterior").button("refresh");
           $("#interior").button("refresh");
         }

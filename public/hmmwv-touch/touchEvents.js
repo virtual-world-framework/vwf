@@ -47,7 +47,7 @@ var priorMouseX, priorMouseY;
 $sw.on('dragstart', function (event) {
     event.stopPropagation();
 
-    camPosArray = vwf.getProperty(camera, "translation");
+    camPosArray = vwf_view.kernel.property(camera, "translation");
     priorMouseX = event.position.x;
     priorMouseY = event.position.y;
 });
@@ -60,7 +60,7 @@ $sw.on('drag', function (event) {
         // Assemble the variables we need
         var yValueOfFocalPlane = 0;
         var dist = Math.abs(yValueOfFocalPlane - camPosArray[1]);
-        var fovy = vwf.getProperty(camera, "fovy");
+        var fovy = vwf_view.kernel.property(camera, "fovy");
         var deg2rad = Math.PI / 180;
         var fovyRad = fovy * deg2rad;
 
@@ -76,7 +76,7 @@ $sw.on('drag', function (event) {
 
         // Move on to x:
         var mouseXMovementInPixels = event.position.x - priorMouseX;
-        var aspectRatio = vwf.getProperty(camera, "aspect");
+        var aspectRatio = vwf_view.kernel.property(camera, "aspect");
         var totalXSpanOfFovIn3Space = totalZSpanOfFovIn3Space * aspectRatio;
         var totalXScreenPixels = $(window).width();
         var objectXMovementIn3D = 0;
