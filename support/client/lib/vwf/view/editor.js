@@ -114,7 +114,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
             $('#model_a').hide();
             $('#model_b').hide();
             
-            var canvas = document.getElementById(vwf_view.kernel.find("", "/")[0]);
+            var canvas = document.getElementById(this.kernel.find("", "/")[0]);
             if ( canvas ) {
                 $('#topdown_a').height(canvas.height);
                 $('#topdown_b').height(canvas.height);
@@ -164,7 +164,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 parent.children.push( node );
             }
 
-            if ( childID == vwf_view.kernel.find("", "/")[0] && childExtendsID && this.kernel.test( childExtendsID,
+            if ( childID == this.kernel.find("", "/")[0] && childExtendsID && this.kernel.test( childExtendsID,
                     "self::element(*,'http://vwf.example.com/scene.vwf')", childExtendsID ) ) {
                 this.scenes[ childID ] = node;
             }
@@ -288,11 +288,11 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
     // -- getPropertyValues -----------------------------------------------------------------
 
-    function getPropertyValues( node ) {
+    function getPropertyValues( node ) { // invoke with the view as "this"
         var pv = {};
         if ( node ) {
             for ( var i = 0; i < node.properties.length; i++ ) {
-                pv[ node.properties[i] ] = vwf_view.kernel.property( node.ID, node.properties[i], [] );
+                pv[ node.properties[i] ] = this.kernel.property( node.ID, node.properties[i], [] );
             }
         }
         return pv;
@@ -329,7 +329,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
                 if( this.currentNodeID == '' )
                 {
-                    this.currentNodeID = vwf_view.kernel.find("", "/")[0];
+                    this.currentNodeID = this.kernel.find("", "/")[0];
                 }
 
                 drill.call(this, this.currentNodeID, undefined);
@@ -583,7 +583,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
         
         drill.call(this, nodeID, drillBackID);
         
-        if(nodeID != vwf_view.kernel.find("", "/")[0]) $(topdownName).hide('slide', {direction: 'left'}, 175); 
+        if(nodeID != this.kernel.find("", "/")[0]) $(topdownName).hide('slide', {direction: 'left'}, 175); 
         $(topdownTemp).show('slide', {direction: 'right'}, 175);    
         
         this.topdownName = topdownTemp;
@@ -638,7 +638,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
 
         if(!drillBackID) drillBackID = node.parentID;
      
-        if(nodeID == vwf_view.kernel.find("", "/")[0]) 
+        if(nodeID == this.kernel.find("", "/")[0]) 
         {
             $(topdownTemp).html("<div class='header'>index</div>");
         }
@@ -731,7 +731,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility" ], function( module, ve
                 displayedProperties[ prop.name ] = prototypeProperties[key].prototype;
                 if(prop.value == undefined)
                 {
-                    prop.value = JSON.stringify( utility.transform( vwf_view.kernel.property( nodeID, prop.name, []), utility.transforms.transit ) );
+                    prop.value = JSON.stringify( utility.transform( this.kernel.property( nodeID, prop.name, []), utility.transforms.transit ) );
                 }
 
                 var propertyNameAttribute = $.encoder.encodeForHTMLAttribute("id", prop.name, true);
