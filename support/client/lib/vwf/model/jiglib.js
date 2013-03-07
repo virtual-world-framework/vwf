@@ -311,7 +311,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 scene = this.scenes[ node.sceneID ];
                 if ( propertyName == "physics" ) {
                     if ( scene && scene.system && propertyValue ) {
-                        var type = ( Array.isArray(propertyValue) ) ? propertyValue[0] : propertyValue;
+                        var type = ( propertyValue.constructor == Array ) ? propertyValue[0] : propertyValue;
                         switch ( type ) {
                             case "mesh":
                                 createJMesh.call( this, nodeID, undefined );
