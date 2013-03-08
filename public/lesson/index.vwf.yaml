@@ -29,7 +29,7 @@ children:
       step1:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: First, do the first thing.
+          text: "Click the duck to change the camera view."
           cameraPoseRef: /cameraPose1
         scripts:
         - |
@@ -43,14 +43,14 @@ children:
               this.completed();
               console.info( "Step 1 after completed");
             }, this );
-            this.exiting = function() {
-              console.info( "Step 1 exiting" );
-            }
           } //@ sourceURL=step1.entering
+          this.exiting = function() {
+            console.info( "Step 1 exiting" );
+          } //@ sourceURL=step1.exiting
       step2:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: Second, do the second thing.
+          text: "Click the duck to complete the lesson."
           cameraPoseRef: /cameraPose2
         scripts:
         - |
@@ -64,18 +64,18 @@ children:
               this.completed();
               console.info( "Step 2 after completed");
             }, this );
-            this.exiting = function() {
-              console.info( "Step 2 exiting" );
-            }
           } //@ sourceURL=step2.entering
+          this.exiting = function() {
+            console.info( "Step 2 exiting" );
+          } //@ sourceURL=step1.exiting
     scripts:
     - |
       this.entering = function() {
         console.info( "Lesson entering" );
-        this.exiting = function() {
-          console.info( "Lesson exiting" );
-        }
       } //@ sourceURL=lesson.entering
+      this.exiting = function() {
+        console.info( "Lesson exiting" );
+      } //@ sourceURL=lesson.exiting
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -98,13 +98,3 @@ children:
       lightType: "directional"
       constantAttenuation: 1
       rotation: [ -1, 0, 0, 225 ]
-scripts:
-- |
-  this.initialize = function() {
-    var self = this;
-    this.lesson.enter();
-    this.lesson.completed = function() {
-      console.info( "Lesson completed");
-      self.lesson.exit();
-    }
-  } //@ sourceURL=index.vwf
