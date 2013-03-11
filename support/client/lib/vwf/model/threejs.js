@@ -13,25 +13,24 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-    function rebuildAllMaterials(start)
+    function rebuildAllMaterials( obj )
     {
         
-        if(!start)
+        if( obj === undefined )
         {
             for(var i in this.state.scenes)
             {
-                rebuildAllMaterials(this.state.scenes[i].threeScene);
+                rebuildAllMaterials.call( this, this.state.scenes[i].threeScene );
             }
-        }else
-        {
-            if(start && start.material)
+        } else {
+            if(obj && obj.material)
             {
-                start.material.needsUpdate = true;
+                obj.material.needsUpdate = true;
             }
-            if(start && start.children)
+            if(obj && obj.children)
             {
-               for(var i in start.children)
-                rebuildAllMaterials(start.children[i]);
+               for(var i in obj.children)
+                rebuildAllMaterials.call( this, obj.children[i] );
             }
         }
     }
@@ -296,7 +295,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         deletingNode: function( nodeID ) {
 
-            
             if(nodeID)
             {
                 var childNode = this.state.nodes[nodeID];
@@ -349,6 +347,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             createMesh.call( this, node, propertyValue );
                             break;
                         case "texture":
+                            // delay the setting of the texture until the actual
+                            // settingProperty call
                             break;
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
@@ -963,7 +963,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         threeObject.distance = propertyValue;
                     }
                     if ( propertyName == 'color' ) {
-                        threeObject.color.setRGB( propertyValue[0]/255, propertyValue[1]/255, propertyValue[2]/255);
+                        var vwfColor = new utility.color( propertyValue );
+                        if ( propertyValue instanceof Array && propertyValue.length ) {
+                            threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);                           
+                        } else {
+                            threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                        }
                     }
                     if ( propertyName == 'intensity' ) {
                         threeObject.intensity = propertyValue;
@@ -1241,7 +1246,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     }   
     function CreateThreeCamera()
     {
-        
         var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
         cam.matrixAutoUpdate = false;
         cam.up = new THREE.Vector3(0,0,1);
