@@ -105,15 +105,20 @@
 								</li>
 								<li>
 									<span style='position:relative;left:20px'>
+										<a href='logging.html' title='Logging'>Logging</a>
+									</span>
+								</li>
+								<li>
+									<span style='position:relative;left:20px'>
 										<a href='events.html' title='Events'>Events</a>
 									</span>
 								</li>
+								<!-- 
 								<li>
 									<span style='position:relative;left:20px'>
 										<a href='latency.html' title='Latency'>Performance</a>
 									</span>
 								</li>
-								<!-- 
 								<li>
 									<span style='position:relative;left:20px'>
 										<a href='files.html' title='Files'>Files I/O</a>

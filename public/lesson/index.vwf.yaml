@@ -34,18 +34,18 @@ children:
         scripts:
         - |
           this.entering = function() {
-            console.info( "Step 1 entering" );
+            this.logger.info( "Step 1 entering" );
             var self = this;
             var duck = this.find( "/duck" )[ 0 ];
             duck.pointerClick = duck.events.add( function() {
               duck.pointerClick = duck.events.flush( this );
-              console.info( "Step 1 completed" );
+              this.logger.info( "Step 1 completed" );
               this.completed();
-              console.info( "Step 1 after completed");
+              this.logger.info( "Step 1 after completed");
             }, this );
           } //@ sourceURL=step1.entering
           this.exiting = function() {
-            console.info( "Step 1 exiting" );
+            this.logger.info( "Step 1 exiting" );
           } //@ sourceURL=step1.exiting
       step2:
         extends: http://vwf.example.com/lesson/task.vwf
@@ -55,26 +55,26 @@ children:
         scripts:
         - |
           this.entering = function() {
-            console.info( "Step 2 entering" );
+            this.logger.info( "Step 2 entering" );
             var self = this;
             var duck = this.find( "/duck" )[ 0 ];
             duck.pointerClick = duck.events.add( function() {
               duck.pointerClick = duck.events.flush( this );
-              console.info( "Step 2 completed" );
+              this.logger.info( "Step 2 completed" );
               this.completed();
-              console.info( "Step 2 after completed");
+              this.logger.info( "Step 2 after completed");
             }, this );
           } //@ sourceURL=step2.entering
           this.exiting = function() {
-            console.info( "Step 2 exiting" );
+            this.logger.info( "Step 2 exiting" );
           } //@ sourceURL=step1.exiting
     scripts:
     - |
       this.entering = function() {
-        console.info( "Lesson entering" );
+        this.logger.info( "Lesson entering" );
       } //@ sourceURL=lesson.entering
       this.exiting = function() {
-        console.info( "Lesson exiting" );
+        this.logger.info( "Lesson exiting" );
       } //@ sourceURL=lesson.exiting
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
