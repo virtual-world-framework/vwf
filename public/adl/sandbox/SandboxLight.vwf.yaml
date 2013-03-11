@@ -94,7 +94,7 @@ scripts:
          
       
       
-      var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+      var screen = MATH.mulMat4Vec4(viewprojection,pos);
       screen[0] /= screen[3];
       screen[1] /= screen[3];
      

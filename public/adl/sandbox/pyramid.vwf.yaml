@@ -126,7 +126,7 @@ scripts:
         if(this.uri == "pyramid.vwf")
             return;
 
-       var primobj = new GLGE.Object();
+       var primobj = new MATH.Object();
        
        this.mesh = primobj;
        if(vwf.getProperty(this.id,'_length') == undefined) vwf.setProperty(this.id,'_length',1);
@@ -136,7 +136,7 @@ scripts:
        if(vwf.getProperty(this.id,'_widthSegs') == undefined) vwf.setProperty(this.id,'_widthSegs',1);
        if(vwf.getProperty(this.id,'_heightSegs') == undefined) vwf.setProperty(this.id,'_heightSegs',1);
        if(vwf.getProperty(this.id,'base2pivot') == undefined) vwf.setProperty(this.id,'base2pivot',false);
-       vwf.views[0].state.nodes[this.id].glgeObject.addChild(this.mesh);
+       vwf.views[0].state.nodes[this.id].MATHObject.addChild(this.mesh);
        
       
        this._initialized = true;
@@ -346,7 +346,7 @@ scripts:
             }
         }
        
-        var planemesh = new GLGE.Mesh();
+        var planemesh = new MATH.Mesh();
           
         planemesh.setPositions(positions);
         planemesh.setFaces(faces);
@@ -390,7 +390,7 @@ scripts:
      {
          for(var i =0; i<vwf.views.length;i++)
          {
-             if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].glgeScene;
+             if(vwf.views[i].module.id = 'vwf/view/MATH') return vwf.views[i].state.scenes["index-vwf"].MATHScene;
          }
          return null;
     }

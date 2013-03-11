@@ -16,7 +16,7 @@ extends: http://vwf.example.com/navscene.vwf
 properties:
   navmode: none     
   sunColor: 
-    value: [255, 255, 255]
+    value: [1, 1, 1]
     set: |
             if(!this.sun) return;
             this.sun.color.r = value[0];
@@ -178,7 +178,7 @@ scripts:
        this.last_x = 0;
        this.last_y = 0;
        this.navmode = 'none';
-     //  this.PickOptions = new GLGE.CPUPickOptions();
+     //  this.PickOptions = new MATH.CPUPickOptions();
      //  this.PickOptions.UserRenderBatches = true;
       
         $('#index-vwf').mousedown(function(e){this.localpointerDown(e);}.bind(this));
@@ -244,7 +244,7 @@ scripts:
        this.sun.position.normalize();
        this.sun.position.multiplyScalar(100);
        this.sun.intensity = this.sunIntensity;
-       
+       this.sun.shadowBias = -.002
        window._dGround = this.groundplane;
        window._dSun = this.sun;
        
@@ -256,7 +256,7 @@ scripts:
        
        
        
-       findscene().setFogType(GLGE.FOG_QUADRATIC);
+       findscene().setFogType(MATH.FOG_QUADRATIC);
        findscene().setFogFar(360);
        findscene().setFogNear(100);
        findscene().setFogColor('#FFFFFF');
@@ -293,9 +293,9 @@ scripts:
         var hw = width/2;
         var hh = height/2;
         
-        var planemesh = new GLGE.Mesh();
+        var planemesh = new MATH.Mesh();
        
-        var planeobj = new GLGE.Object();
+        var planeobj = new MATH.Object();
         planeobj.PickPriority = 0;
         planeobj.setMesh(planemesh);
         planemesh.setPositions([-hw,-hh,-.001, hw,-hh,-.001, hw,hh,-.001, -hw,hh,-.001]);
@@ -309,7 +309,7 @@ scripts:
     this.CreateSky = function(sky_name)
     {
      
-        console.log('set sky ' + sky_name);
+        ////console.log('set sky ' + sky_name);
         if(this.skycube)
             this.skycube.parent.remove(this.skycube);
        //var sky_name = 'cloudy_noon';
@@ -392,17 +392,17 @@ scripts:
         {
         this.center = obj.translation;
         if(obj.followOffset != null)
-            this.center = GLGE.addVec3(obj.translation,obj.followOffset);
+            this.center = MATH.addVec3(obj.translation,obj.followOffset);
         }
         
     }
     this.lookat = function(posfrom,posto,pointfront)
     {
                 
-                var to = GLGE.subVec3(posfrom,posto);
-                to = GLGE.scaleVec3(to,1.0/GLGE.lengthVec3(to));
-                var a = GLGE.crossVec3(pointfront,to);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(pointfront,to) );    
+                var to = MATH.subVec3(posfrom,posto);
+                to = MATH.scaleVec3(to,1.0/MATH.lengthVec3(to));
+                var a = MATH.crossVec3(pointfront,to);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(pointfront,to) );    
                 var angle = 0; var axis = [0,0,1];
                 var  tofront_norm = [];
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);    
@@ -452,7 +452,7 @@ scripts:
     {   
     
         if(vec == undefined) return;
-        return GLGE.scaleVec3(vec,1.0/GLGE.lengthVec3(vec));
+        return MATH.scaleVec3(vec,1.0/MATH.lengthVec3(vec));
     }
     this.makeLookAt = function(eye, center, up, result) {
     
@@ -462,13 +462,13 @@ scripts:
             result = [];
         }
 
-        var f = GLGE.subVec3(center, eye);
+        var f = MATH.subVec3(center, eye);
         f = this.normalize(f);
 
-        var s = GLGE.subVec3(f, up);
+        var s = MATH.subVec3(f, up);
         s = this.normalize(s);
 
-        var u = GLGE.crossVec3(s, f);
+        var u = MATH.crossVec3(s, f);
         u =this.normalize(u);
 
         // s[0], u[0], -f[0], 0.0,
@@ -485,7 +485,7 @@ scripts:
         tra[12] = -eye[0];
         tra[13] = -eye[1];
         tra[14] = -eye[2];
-        var newresult = GLGE.mulMat4(result,tra);
+        var newresult = MATH.mulMat4(result,tra);
         return newresult;
     }
     this.GetWorldPickRay = function(e)
@@ -500,22 +500,22 @@ scripts:
         screenmousepos[0] -= 1;
         screenmousepos[1] -= 1;
         screenmousepos[1] *= -1;
-        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
+        var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos[0] /= worldmousepos[3];
         worldmousepos[1] /= worldmousepos[3];
         worldmousepos[2] /= worldmousepos[3];
 
 
         var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
-        var ray = GLGE.subVec3(worldmousepos,campos);
-        var dist = GLGE.lengthVec3(ray);
-        ray = GLGE.scaleVec3(ray,1.0/GLGE.lengthVec3(ray));
+        var ray = MATH.subVec3(worldmousepos,campos);
+        var dist = MATH.lengthVec3(ray);
+        ray = MATH.scaleVec3(ray,1.0/MATH.lengthVec3(ray));
         return ray;
     }
     this.intersectLinePlane = function(ray,raypoint,planepoint,planenormal)
     {
-        var n = GLGE.dotVec3(GLGE.subVec3(planepoint,raypoint),planenormal);
-        var d = GLGE.dotVec3(ray,planenormal);
+        var n = MATH.dotVec3(MATH.subVec3(planepoint,raypoint),planenormal);
+        var d = MATH.dotVec3(ray,planenormal);
         if(d == 0)
             return null;
 
@@ -549,7 +549,7 @@ scripts:
            var ray = this.GetWorldPickRay(parms);
 
            var dxy = this.intersectLinePlane(ray,campos,[0,0,0],[0,0,1]);
-           var oldintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
+           var oldintersectxy = MATH.addVec3(campos,MATH.scaleVec3(ray,dxy));
            
             this.groundplane.PickPriority = 0;
            oldintersectxy = _Editor.ThreeJSPick(campos,ray,this.PickOptions).point;
@@ -615,7 +615,7 @@ scripts:
         screenmousepos[0] -= 1;
         screenmousepos[1] -= 1;
         screenmousepos[1] *= -1;
-        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
+        var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos[0] /= worldmousepos[3];
         worldmousepos[1] /= worldmousepos[3];
         worldmousepos[2] /= worldmousepos[3];
@@ -626,7 +626,7 @@ scripts:
         screenmousepos[0] -= 1;
         screenmousepos[1] -= 1;
         screenmousepos[1] *= -1;
-        var worldmousepos2 = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
+        var worldmousepos2 = MATH.mulMat4Vec4(MATH.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos2[0] /= worldmousepos2[3];
         worldmousepos2[1] /= worldmousepos2[3];
         worldmousepos2[2] /= worldmousepos2[3];
@@ -635,8 +635,8 @@ scripts:
        if(this.cameramode == 'Free')
        panfactor = 50;
        
-       console.log(this.zoom);
-        this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(worldmousepos2,worldmousepos),panfactor * this.zoom));
+       ////console.log(this.zoom);
+        this.center = MATH.addVec3(this.center,MATH.scaleVec3(MATH.subVec3(worldmousepos2,worldmousepos),panfactor * this.zoom));
         this.updateCamera();
         
       }
@@ -647,11 +647,11 @@ scripts:
            var ray = this.GetWorldPickRay(parms);
 
            var dxy = this.intersectLinePlane(ray,campos,[0,0,this.navpoint[2]],[0,0,1]);
-           var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
+           var newintersectxy = MATH.addVec3(campos,MATH.scaleVec3(ray,dxy));
            
-           var len  = GLGE.subVec3(this.navpoint,newintersectxy)
+           var len  = MATH.subVec3(this.navpoint,newintersectxy)
            
-           this.center = GLGE.addVec3(this.center,GLGE.subVec3(this.navpoint,newintersectxy));
+           this.center = MATH.addVec3(this.center,MATH.subVec3(this.navpoint,newintersectxy));
           
            this.updateCamera();
       }
@@ -670,24 +670,24 @@ scripts:
         if(this.cameramode != '3RDPerson' && this.cameramode != 'FirstPerson')
         {
             if(this.x_rot == undefined) return;
-            var xmatrix = GLGE.angleAxis(this.x_rot*10,[0,0,1]);
+            var xmatrix = MATH.angleAxis(this.x_rot*10,[0,0,1]);
             
-            var offset = GLGE.mulMat4Vec3(xmatrix,[1,0,0]);
-            offset = GLGE.scaleVec3(offset,1/GLGE.lengthVec3(offset));
-            var side = GLGE.crossVec3([0,0,1],offset);
+            var offset = MATH.mulMat4Vec3(xmatrix,[1,0,0]);
+            offset = MATH.scaleVec3(offset,1/MATH.lengthVec3(offset));
+            var side = MATH.crossVec3([0,0,1],offset);
             
             if(this.y_rot < .479 ) this.y_rot = .479;
             if(this.y_rot > .628 && this.cameramode != 'Free') this.y_rot = .628;
             if(this.y_rot > .783 && this.cameramode == 'Free') this.y_rot = .783;
             
-            var crossmatrix = GLGE.angleAxis(this.y_rot*10,side);
-            var stage2offset = GLGE.mulMat4Vec3(crossmatrix,offset);
+            var crossmatrix = MATH.angleAxis(this.y_rot*10,side);
+            var stage2offset = MATH.mulMat4Vec3(crossmatrix,offset);
             
-            stage2offset = GLGE.scaleVec3(stage2offset,1/GLGE.lengthVec3(stage2offset));
-            var finaloffset = GLGE.scaleVec3(stage2offset,this.zoom);
+            stage2offset = MATH.scaleVec3(stage2offset,1/MATH.lengthVec3(stage2offset));
+            var finaloffset = MATH.scaleVec3(stage2offset,this.zoom);
             if(this.center[2] < .05)
              this.center[2] = .05;
-            var finalpos = GLGE.addVec3(finaloffset,this.center);
+            var finalpos = MATH.addVec3(finaloffset,this.center);
             
             //this.camera.translation = finalpos;
             findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
@@ -696,25 +696,25 @@ scripts:
             findcamera().near = .1;
         }else if(this.cameramode == 'FirstPerson')
         {
-            //this.oldRotZ var xmatrix = GLGE.angleAxis(this.x_rot*10,[0,0,1]);
+            //this.oldRotZ var xmatrix = MATH.angleAxis(this.x_rot*10,[0,0,1]);
             var rotation = this.objectFollowed.rotation;
-            var xmatrix = GLGE.angleAxis(this.oldRotZ,[0,0,1]);
-            var offset = GLGE.mulMat4Vec3(xmatrix,[0,1.5,.5]);
+            var xmatrix = MATH.angleAxis(this.oldRotZ,[0,0,1]);
+            var offset = MATH.mulMat4Vec3(xmatrix,[0,1.5,.5]);
             
-            offset = GLGE.scaleVec3(offset,1/GLGE.lengthVec3(offset));
-            var side = GLGE.crossVec3([0,0,1],offset);
+            offset = MATH.scaleVec3(offset,1/MATH.lengthVec3(offset));
+            var side = MATH.crossVec3([0,0,1],offset);
            
             if(this.y_rot < .479 ) this.y_rot = .479;
             if(this.y_rot > .783 ) this.y_rot = .783;
             
-            var crossmatrix = GLGE.angleAxis(this.y_rot*10,side);
-            var stage2offset = GLGE.mulMat4Vec3(crossmatrix,offset);
+            var crossmatrix = MATH.angleAxis(this.y_rot*10,side);
+            var stage2offset = MATH.mulMat4Vec3(crossmatrix,offset);
             
-            stage2offset = GLGE.scaleVec3(stage2offset,1/GLGE.lengthVec3(stage2offset));
-            var finaloffset = GLGE.scaleVec3(stage2offset,this.zoom);
+            stage2offset = MATH.scaleVec3(stage2offset,1/MATH.lengthVec3(stage2offset));
+            var finaloffset = MATH.scaleVec3(stage2offset,this.zoom);
             if(this.center[2] < .05)
              this.center[2] = .05;
-            var finalpos = GLGE.addVec3(finaloffset,this.center);
+            var finalpos = MATH.addVec3(finaloffset,this.center);
             
             //this.camera.translation = finalpos;
             findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
@@ -727,24 +727,24 @@ scripts:
         }else  if(this.cameramode == '3RDPerson')
         {
             
-            var xmatrix = GLGE.angleAxis(this.oldRotZ,[0,0,1]);
-            var offset = GLGE.mulMat4Vec3(xmatrix,[0,1.5,.5]);
+            var xmatrix = MATH.angleAxis(this.oldRotZ,[0,0,1]);
+            var offset = MATH.mulMat4Vec3(xmatrix,[0,1.5,.5]);
             
-            var finaldist = GLGE.lengthVec3(offset);  
-            offset = GLGE.scaleVec3(offset,1/finaldist);            
-            var start = GLGE.addVec3(this.center,GLGE.scaleVec3(offset,.3));
+            var finaldist = MATH.lengthVec3(offset);  
+            offset = MATH.scaleVec3(offset,1/finaldist);            
+            var start = MATH.addVec3(this.center,MATH.scaleVec3(offset,.3));
             
             var oldpickstate = findviewnode(this.objectFollowed.id).PickPriority;
             
-            var hit = _Editor.ThreeJSPick(start,GLGE.scaleVec3(offset,1),this.PickOptions);
+            var hit = _Editor.ThreeJSPick(start,MATH.scaleVec3(offset,1),this.PickOptions);
             if(hit)
             {
                 finaldist = Math.min(finaldist,hit.distance-.2);
             }
             findviewnode(this.objectFollowed.id).PickPriority = oldpickstate;
-            offset = GLGE.scaleVec3(offset,finaldist);
+            offset = MATH.scaleVec3(offset,finaldist);
             
-            var finalpos = GLGE.addVec3(offset,start);
+            var finalpos = MATH.addVec3(offset,start);
             findcamera().position = to3Vec(finalpos[0],finalpos[1],finalpos[2]);
             findcamera().lookAt(to3Vec(this.center));
             
@@ -752,9 +752,7 @@ scripts:
         this.callUpdateCallbacks();
         findcamera().updateMatrixWorld();
         findcamera().updateMatrix();
-        var campos = findcamera().position;
-        
-        this.sun.shadowCamera.projectionMatrix.makeOrthographic(campos.x + 10,campos.x - 10,campos.y + 10,campos.y-10,1,150);
+       
       }
       function findscene()
       {
@@ -780,7 +778,7 @@ scripts:
         _viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
 
 
-        return GLGE.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
+        return MATH.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
       }
       function to3Vec(vec,two,three)
       {
@@ -804,9 +802,9 @@ scripts:
     {
         this.setCameraMode('Orbit');
         var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
-        var diff = GLGE.subVec3(campos,point);
-        var length = GLGE.lengthVec3(diff);
-        diff = GLGE.scaleVec3(diff,1.0/length);
+        var diff = MATH.subVec3(campos,point);
+        var length = MATH.lengthVec3(diff);
+        diff = MATH.scaleVec3(diff,1.0/length);
         //this.offset = diff;
         this.zoom = length;
         this.center = point;
@@ -817,23 +815,23 @@ scripts:
     {
             var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
             var worldmousepos  = this.GetCameraCenterRay();
-            worldmousepos = GLGE.scaleVec3(worldmousepos,.4);
-            this.center = GLGE.addVec3(worldmousepos,campos);  
+            worldmousepos = MATH.scaleVec3(worldmousepos,.4);
+            this.center = MATH.addVec3(worldmousepos,campos);  
             this.zoom = .4;
     }
     this.GetCameraCenterRay = function()
     {
         var screenmousepos = [0,0,0,1];
-        var worldmousepos = GLGE.mulMat4Vec4(GLGE.inverseMat4(getViewProjection()),screenmousepos);
+        var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(getViewProjection()),screenmousepos);
         worldmousepos[0] /= worldmousepos[3];
         worldmousepos[1] /= worldmousepos[3];
         worldmousepos[2] /= worldmousepos[3];
 
 
          var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
-        var ray = GLGE.subVec3(worldmousepos,campos);
-        var dist = GLGE.lengthVec3(ray);
-        ray = GLGE.scaleVec3(ray,1.0/GLGE.lengthVec3(ray));
+        var ray = MATH.subVec3(worldmousepos,campos);
+        var dist = MATH.lengthVec3(ray);
+        ray = MATH.scaleVec3(ray,1.0/MATH.lengthVec3(ray));
         return ray;
     }    
     this.pointerLeave = function( parms ){
@@ -851,16 +849,16 @@ scripts:
         }
         if(this.cameramode == 'Navigate')
         {  
-            this.center = GLGE.addVec3(this.center,GLGE.scaleVec3(GLGE.subVec3(this.navpoint,this.center),.05));
+            this.center = MATH.addVec3(this.center,MATH.scaleVec3(MATH.subVec3(this.navpoint,this.center),.05));
             this.zoom = this.zoom + (3- this.zoom )*.01;
         }
         
         if(this.cameramode == 'Free')
         { 
             if(pickInfo.wheel.deltaY > 0 )
-            this.center = GLGE.subVec3(this.center,this.GetCameraCenterRay());
+            this.center = MATH.subVec3(this.center,this.GetCameraCenterRay());
             else
-            this.center = GLGE.addVec3(this.GetCameraCenterRay(),this.center);
+            this.center = MATH.addVec3(this.GetCameraCenterRay(),this.center);
             
         }
         if(this.cameramode == 'FirstPerson' && pickInfo.wheel.deltaY > 0)
@@ -1018,7 +1016,7 @@ scripts:
          
       
       
-      var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+      var screen = MATH.mulMat4Vec4(viewprojection,pos);
       screen[0] /= screen[3];
       screen[1] /= screen[3];
      
@@ -1051,6 +1049,25 @@ scripts:
           if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
              div.style.display = 'block';
       }
+      
+      
+      
+      //focus the shadow camera projection matrix around the camera tha views the scene.
+      if(this.sun && this.sun.shadowCamera)
+      {
+       
+      
+       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-5));
+       
+       this.sun.shadowCamera.updateMatrixWorld(true)
+        var lm = this.sun.shadowCamera.matrixWorld.clone();
+        lm = (new THREE.Matrix4()).getInverse(lm);
+        var camposLS = campos.applyMatrix4(lm);
+        
+       
+        
+        this.sun.shadowCamera.projectionMatrix.makeOrthographic(camposLS.x - 5,camposLS.x + 5,camposLS.y - 5,camposLS.y+5,-camposLS.z - 10 ,-camposLS.z + 10 );
+        }
     }    
     this.setMaterialByDef = function(currentmat,value)
     {

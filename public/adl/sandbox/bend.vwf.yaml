@@ -127,7 +127,7 @@ scripts:
         //Get a quaternion for the input matrix
         var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
         var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
-        return GLGE.mulMat4Vec3(NewMatrix,Vector);
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
     }
     this.bend = function(majoraxis,minoraxis)
     {   
@@ -191,8 +191,8 @@ scripts:
             axis[majoraxis] = 1;
             
             var theta = 3.14159 -(h/r);
-            var newpos = RotateVecAroundAxis(GLGE.subVec3(offset,radoffset),axis,-theta);
-            newpos = GLGE.addVec3(newpos,[-radoffset[X],-radoffset[Y],-radoffset[Z]]);
+            var newpos = RotateVecAroundAxis(MATH.subVec3(offset,radoffset),axis,-theta);
+            newpos = MATH.addVec3(newpos,[-radoffset[X],-radoffset[Y],-radoffset[Z]]);
             if((majoraxis == X && minoraxis == Y))
                 newpos[Y] *= -1;
             if(majoraxis == Y && minoraxis == Z)

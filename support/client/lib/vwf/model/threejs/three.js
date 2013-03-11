@@ -16277,8 +16277,14 @@ THREE.ShaderChunk = {
 						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx1, dy1 ) ) );",
 						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
 
-						"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * shadow ) );",
-
+						
+						
+						"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
+						"vec3 dirVector = normalize( lDirection.xyz );",
+						"float dotProduct = 1.0-clamp(dot( normal, -dirVector ),0.0,1.0);",
+						"dotProduct = pow(dotProduct,4.0);",
+						"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * shadow * dotProduct ) );",
+						"shadowColor = mix(shadowColor,vec3(1.0,1.0,1.0),length(shadowCoord.xy - .5)*1.7);",
 					"#elif defined( SHADOWMAP_TYPE_PCF_SOFT )",
 
 						// Percentage-close filtering

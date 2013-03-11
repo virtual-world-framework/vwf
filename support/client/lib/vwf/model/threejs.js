@@ -56,8 +56,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         initialize: function() {
             
-            this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
-            this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.scenes = {}; // id => { MATHDocument: new MATH.Document(), MATHRenderer: new MATH.Renderer(), MATHScene: new MATH.Scene() }
+            this.state.nodes = {}; // id => { name: string, MATHObject: MATH.Object, MATH.Collada, MATH.Light, or other...? }
             this.state.kernel = this.kernel.kernel.kernel;
             this.state.sceneRootID = "index-vwf";
 
@@ -390,8 +390,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         settingProperty: function( nodeID, propertyName, propertyValue ) {
         
           //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
-          var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
-          if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
+          var node = this.state.nodes[ nodeID ]; // { name: childName, MATHObject: undefined }
+          if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, MATHObject: undefined }
           var value = undefined;
           
           //this driver has no representation of this node, so there is nothing to do.
@@ -422,7 +422,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						 //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
 
-                        // Rotate 90 degress around X to convert from VWF Z-up to GLGE Y-up.
+                        // Rotate 90 degress around X to convert from VWF Z-up to MATH Y-up.
                         if ( threeObject instanceof THREE.Camera ) {
                             var columny = goog.vec.Vec4.create();
                             goog.vec.Mat4.getColumn( transform, 1, columny );
@@ -566,8 +566,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         propertyName == 'minAcceleration'||
                         propertyName == 'emitterType' ||
 						propertyName == 'emitterSize' ||
-						propertyName == 'maxLifetime' ||
-						propertyName == 'minLifetime' 
+						propertyName == 'maxLifeTime' ||
+						propertyName == 'minLifeTime' ||
+						propertyName == 'velocityMode'						
+						
                     )
                     {
                         if(ps.material == ps.shaderMaterial_analytic)
@@ -687,12 +689,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == 'depthTest')
                     {
-                        ps.shaderMaterial_default.depthTest = false;    
+                        ps.shaderMaterial_default.depthTest = true;    
                         ps.shaderMaterial_default.depthWrite = propertyValue;
-                        ps.shaderMaterial_analytic.depthTest = false;   
+                        ps.shaderMaterial_analytic.depthTest = true;   
                         ps.shaderMaterial_analytic.depthWrite = propertyValue;
-						ps.shaderMaterial_interpolate.depthTest = false;   
+						ps.shaderMaterial_interpolate.depthTest = true;   
                         ps.shaderMaterial_interpolate.depthWrite = propertyValue;
+						
+						ps.shaderMaterial_default.needsUpdate = true;   
+                        ps.shaderMaterial_analytic.needsUpdate = true;   
+						ps.shaderMaterial_interpolate.needsUpdate = true;  	
                     }
                     if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
                     {
@@ -999,8 +1005,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         gettingProperty: function( nodeID, propertyName ) {
 
           //console.log([nodeID,propertyName,propertyValue]);
-          var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
-          if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
+          var node = this.state.nodes[ nodeID ]; // { name: childName, MATHObject: undefined }
+          if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, MATHObject: undefined }
           var value = undefined;
           
           //this driver has no representation of this node, so there is nothing to do.
@@ -1288,7 +1294,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         return node;
     }
-    //changing this function significantly from the GLGE code. Will search heirarchy down until encountering a matching chile
+    //changing this function significantly from the MATH code. Will search heirarchy down until encountering a matching chile
     //will look into nodes that don't match.... this might not be desirable
      function FindChildByName( obj, childName, childType ) {
         
@@ -1556,7 +1562,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             sceneNode.pendingLoads--;
             
             //possibly deal with setting intial scale and rotation here, if threejs does something strange by default
-            //collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
+            //collada.setRot( 0, 0, 0 ); // undo the default MATH rotation applied in MATH.Collada.initVisualScene that is adjusting for +Y up
             if(asset.scene)
                 asset = asset.scene;
             var removed = false;
@@ -1569,10 +1575,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			var meshes =[];
 			GetAllLeafMeshes(asset,meshes);
 		
-			for(var i =0; i < meshes.length; i++)
-			{
-				fixMissingUVs(meshes[i]);	
-			}
+		//	for(var i =0; i < meshes.length; i++)
+		//	{
+		//		fixMissingUVs(meshes[i]);	
+		//	}
 			
 		//	window.setTimeout(function(){
 			nodeCopy.threeObject.add(asset);
@@ -1592,14 +1598,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             } 
             if ( removed ) {
                 if ( sceneNode.srcAssetObjects.length == 0 ) {
-                    //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
+                    //vwf.setProperty( MATHModel.state.sceneRootID, "loadDone", true );
                     loadComplete.call( threeModel );
                 }
 
                 var id = nodeCopy.vwfID;
                 if ( !id ) id = getObjectID.call( threeModel, asset, true, false );
                 if ( id && id != "" ){
-                    //glgeModel.kernel.callMethod( id, "loadComplete" );
+                    //MATHModel.kernel.callMethod( id, "loadComplete" );
                     if ( threeModel.state.nodes[id] ) {
                         var assetNode = threeModel.state.nodes[id];
                         //finally, here is the async callback
@@ -1626,13 +1632,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         node.threeObject.vwfID = nodeID;
 
         //todo, set when dealing with actual collada load. Three js should have some sort of loader with a callback. 
-        //node.glgeObject.loadedCallback = assetLoaded;
+        //node.MATHObject.loadedCallback = assetLoaded;
         sceneNode.pendingLoads++;
         
         if ( parentNode && parentNode.threeObject ) {
             parentNode.threeObject.add(node.threeObject);
          } else if ( sceneNode ) {
-//          if ( !sceneNode.glgeScene ) {
+//          if ( !sceneNode.MATHScene ) {
 //              this.initScene.call( this, sceneNode );
 //          }
             if ( sceneNode.threeScene ) {
@@ -1677,10 +1683,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
         while (objectIDFound == -1 && objectToLookFor) {
             if ( debug ) {
-                this.logger.info("====>>>  vwf.model-glge.mousePick: searching for: " + path(objectToLookFor) );
+                this.logger.info("====>>>  vwf.model-MATH.mousePick: searching for: " + path(objectToLookFor) );
             }
             jQuery.each( this.state.nodes, function (nodeID, node) {
-                if ( node.threeObject == objectToLookFor && !node.glgeMaterial ) {
+                if ( node.threeObject == objectToLookFor && !node.MATHMaterial ) {
                     if ( debug ) { this.logger.info("pick object name: " + name(objectToLookFor) + " with id = " + nodeID ); }
                     objectIDFound = nodeID;
                 }
@@ -1818,8 +1824,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				sizeRange: { type: "f", value: 0.0 },
 				textureTiles: { type: "f", value: 1.0 },
 				colorRange:   { type: 'v4', value: new THREE.Vector4(0,0,0,0) },
-				startColor:{type: "v4", value:new THREE.Vector4()},
-                endColor:{type: "v4", value:new THREE.Vector4()},
+				startColor:{type: "v4", value:new THREE.Vector4(1,1,1,1)},
+                endColor:{type: "v4", value:new THREE.Vector4(0,0,0,1)},
                 startSize:{type:"f", value:1},
                 endSize:{type:"f", value:1},
             };
@@ -1865,7 +1871,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				random:   attributes_default.random,
 				previousPosition: { type: 'v3', value: [] },
 				age: { type: 'f', value: [] },
-				lifespan: { type: 'f', value: [] }
+				lifespan: { type: 'f', value: [] },
             };
             var shaderMaterial_interpolate = new THREE.ShaderMaterial( {
                 uniforms:       uniforms_default,
@@ -1949,6 +1955,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var attributes_analytic = {
                 acceleration:   {   type: 'v3', value: [] },
                 velocity:   {   type: 'v3', value: [] },
+				previousPosition: attributes_interpolate.previousPosition,
+				age: attributes_interpolate.age,
                 lifespan:  attributes_interpolate.lifespan,
                 random:   attributes_default.random,
                 vertexColor : attributes_default.vertexColor,
@@ -1979,18 +1987,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             particleSystem.maxVelocity = [0,0,0];
             particleSystem.maxAcceleration = [0,0,0];
             particleSystem.minAcceleration = [0,0,0];
-            particleSystem.minLifeTime = 0;
-            particleSystem.maxLifeTime = 1;
+            particleSystem.minLifeTime = 30;
+            particleSystem.maxLifeTime = 30;
             particleSystem.emitterType = 'point';
             particleSystem.emitterSize = [0,0,0];
             particleSystem.startColor = [1,1,1,1];
-            particleSystem.endColor = [0,0,0,0];
+            particleSystem.endColor = [0,0,0,1];
             particleSystem.regenParticles = [];
-            particleSystem.maxRate = 1000;
+            particleSystem.maxRate = 1;
             particleSystem.particleCount = 1000;
             particleSystem.damping = 0;
-            particleSystem.startSize = 3;
-            particleSystem.endSize = 3;
+            particleSystem.startSize = 1;
+            particleSystem.endSize = 1;
 			particleSystem.gravity = 0;
 			particleSystem.gravityCenter = [0,0,0];
             particleSystem.velocityMode = 'cartesian';
@@ -2105,7 +2113,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 for(var i = 0; i < this.geometry.vertices.length; i++)
                 {
                     this.setupParticle(this.geometry.vertices[i],this.matrix);
+					this.geometry.vertices[i].waitForRegen = false;
                 }
+				this.regenParticles.length = 0;
             }
 			//set the particles initial values. Used when creating and resuing particles
             particleSystem.setupParticle = function(particle,mat,inv)
@@ -2116,8 +2126,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 particle.z = 0;
                 
 				//generate a point in objects space, the move to world space
-                particle.world = this.generatePoint();
+				//dont do if in analytic shader mode
+				particle.world = this.generatePoint();
+				if(this.solver != "AnalyticShader")
+				{
 				particle.world.applyMatrix4(mat);
+				}
+                
+				
                 
 				//back up initial (needed by the analyticShader)
                 particle.initialx = particle.world.x;
@@ -2602,7 +2618,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }       
         return ret;
     }
-    //necessary when settign the amibent color to match GLGE behavior
+    //necessary when settign the amibent color to match MATH behavior
     //Three js mults scene ambient by material ambient
     function SetMaterialAmbients(start)
     {
@@ -2875,6 +2891,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             //newnode = new THREE.Object3D();
             var geo = new THREE.Geometry();
             var mesh = newnode = new THREE.Mesh(geo);
+			mesh.castShadow = true;
+			mesh.receiveShadow = true;
             mesh.geometry.normals = [];
             mesh.geometry.UVS = [];
             

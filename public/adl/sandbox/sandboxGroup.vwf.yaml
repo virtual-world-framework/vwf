@@ -59,13 +59,13 @@ scripts:
       
       
       var div = this.nametag;
-      var trans = _Editor.findviewnode(this.id).matrixWorld.getPosition();
+      var trans = (new THREE.Vector3()).getPositionFromMatrix(_Editor.findviewnode(this.id).matrixWorld);
       var pos = [trans.x,trans.y,trans.z];
       pos = [pos[0],pos[1],pos[2],1];
          
       
       
-      var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+      var screen = MATH.mulMat4Vec4(viewprojection,pos);
       screen[0] /= screen[3];
       screen[1] /= screen[3];
      

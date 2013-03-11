@@ -45,6 +45,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 						$(document.body).append(data);
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ddsmoothmenu.js"></script>');
 						
+						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_THREERayTracer.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Editor.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/MaterialEditor.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PrimitiveEditor.js"></script>');
@@ -57,6 +58,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/GlobalInventoryManager.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/HeirarchyManager.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Help.js"></script>');
+						
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.qtip-1.0.0-rc3.min.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha256.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
@@ -448,7 +450,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		});
 		
 		$('#MenuViewStats').click(function(e){
-			GLGE.Stats.showDisplay();
+			MATH.Stats.showDisplay();
 		});
 		$('#MenuViewShadows').click(function(e){
 			var val = !_Editor.findscene().children[1].castShadows;
@@ -494,7 +496,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 				_Editor.findscene().setFilter2d();
 			}else
 			{
-				var ao = new GLGE.FilterAO();
+				var ao = new MATH.FilterAO();
 				_Editor.findscene().setFilter2d(ao)
 			}
 		});
@@ -510,7 +512,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 					var gizpos = [t.x,t.y,t.z];
 
 					var box = _Editor.findviewnode(_Editor.GetSelectedVWFNode().id).getBoundingBox();
-					var dist = GLGE.distanceVec3([box.max.x,box.max.y,box.max.z],[box.min.x,box.min.y,box.min.z]);
+					var dist = MATH.distanceVec3([box.max.x,box.max.y,box.max.z],[box.min.x,box.min.y,box.min.z]);
 					vwf.models[0].model.nodes['index-vwf'].orbitPoint(gizpos);
 					vwf.models[0].model.nodes['index-vwf'].zoom = dist * 2;
 					vwf.models[0].model.nodes['index-vwf'].updateCamera();
@@ -527,7 +529,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 				var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
 				var ray = _Editor.GetCameraCenterRay();
 				var dxy = _Editor.intersectLinePlane(ray,campos,[0,0,0],_Editor.WorldZ);
-				var newintersectxy = GLGE.addVec3(campos,GLGE.scaleVec3(ray,dxy));
+				var newintersectxy = MATH.addVec3(campos,MATH.scaleVec3(ray,dxy));
 				vwf.models[0].model.nodes['index-vwf'].orbitPoint(newintersectxy);
 				vwf.models[0].model.nodes['index-vwf'].updateCamera();
 			 

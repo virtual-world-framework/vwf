@@ -21,6 +21,12 @@ properties:
             this.startColor = [value[0],value[1],value[2],this.startAlpha]
     get: |
             return [this.startColor[0],this.startColor[1],this.startColor[2]]
+  colorRange_noAplha:
+    value: [1 ,1 ,1]
+    set: |
+            this.colorRange = [value[0],value[1],value[2],this.alphaRange]
+    get: |
+            return [this.colorRange[0],this.colorRange[1],this.colorRange[2]]          
   endColor_noAplha:
     value: [1 ,1 ,1]
     set: |
@@ -38,7 +44,13 @@ properties:
     set: |
             this.startColor = [this.startColor[0],this.startColor[1],this.startColor[2],value]
     get: |
-            return this.startColor[3];              
+            return this.startColor[3];
+  alphaRange:
+    value: 1
+    set: |
+            this.colorRange = [this.colorRange[0],this.colorRange[1],this.colorRange[2],value]
+    get: |
+            return this.colorRange[3];                       
   EditorData:
     ABstartAlpha:
       displayname: "Alpha: start"
@@ -54,6 +66,13 @@ properties:
       min: 0
       max: 1
       step: .01
+    ABstartAlphaEndRange:
+      displayname: "Alpha:  range"
+      property:  alphaRange
+      type: slider
+      min: 0
+      max: 1
+      step: .01  
     AALifeTime:
       displayname: "Lifetime: (min - max)"
       property: [minLifeTime, minLifeTime, maxLifeTime]
@@ -61,48 +80,69 @@ properties:
       min: 1
       max: 1000
       step: 1
-    TextureTiles:
+    AABBBTextureTiles:
       displayname: "Texture Tiles"
       property: textureTiles
       type: slider
       min: 1
       max: 4
       step: 1
+    AABBBGravity:
+      displayname: "Gravity (Euler)"
+      property: gravity
+      type: slider
+      min: 0
+      max: 4
+      step: .01 
+    AABBBDamping:
+      displayname: "Damping (Euler)"
+      property: damping
+      type: slider
+      min: 0
+      max: 1
+      step: .01     
     AAOrientation:
       displayname: "Orientation: (min - max)"
       property: [minOrientation, minOrientation, maxOrientation]
       type: rangeslider
-      min: 0
-      max: 3
+      min: -30
+      max: 30
       step: .1
     AASpin:
       displayname: "Spin: (min - max)"
       property: [minSpin, minSpin, mamSpin]
       type: rangeslider
-      min: -2
-      max: 2
+      min: -20
+      max: 20
       step: .1       
     AStartSize:
       displayname: "Size: start"
       property: startSize
       type: slider
       min: 0
-      max: 10
+      max: 1
       step: .01
     AStartSizeEnd:
       displayname: "Size: end"
       property: endSize
       type: slider
       min: 0
-      max: 10
+      max: 1
       step: .01
+    AStartSizeEndR:
+      displayname: "Size: range"
+      property: sizeRange
+      type: slider
+      min: 0
+      max: 1
+      step: .01  
     ABCMatx:
       displayname: "Max Rate "
       property: maxRate
       type: slider
       min: 0
-      max: 100
-      step: .01  
+      max: 1
+      step: .001  
     CStartVelocity:
       displayname: Velocity
       property: [minVelocity, maxVelocity]
@@ -113,6 +153,10 @@ properties:
       property: [minAcceleration, maxAcceleration]
       type: rangevector
       step: .001
+    CGravityPoint:
+      displayname: "Gravity Center"
+      property: gravityCenter
+      type: vector  
     ZZImage:
       displayname: "Choose Image"
       property: image
@@ -125,6 +169,10 @@ properties:
       displayname: End Color
       property: endColor_noAplha
       type: color
+    YVariationColor:
+      displayname: Color Variation
+      property: colorRange_noAplha
+      type: color  
     solver:
       displayname: "Simulation Solver"
       property: solver
@@ -223,7 +271,7 @@ scripts:
          
       
       
-      var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+      var screen = MATH.mulMat4Vec4(viewprojection,pos);
       screen[0] /= screen[3];
       screen[1] /= screen[3];
      

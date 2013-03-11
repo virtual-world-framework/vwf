@@ -124,7 +124,7 @@ scripts:
         //Get a quaternion for the input matrix
         var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
         var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
-        return GLGE.mulMat4Vec3(NewMatrix,Vector);
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
     }
     
     this.PerlinNoise = function(permutation) {
@@ -219,7 +219,7 @@ scripts:
     {
             var Perlin = new this.PerlinNoise(this.permutation);
             var z =0;
-           // return 10-GLGE.lengthVec3([x,y,z]);
+           // return 10-MATH.lengthVec3([x,y,z]);
             for(var j = 1; j < iterations; j++)
             {
               
@@ -290,7 +290,7 @@ scripts:
              var thispos = positions[i];
              if(useWorldSpace == true)
              {
-                thispos = GLGE.mulMat4Vec3(mesh.getModelMatrix(),thispos);
+                thispos = MATH.mulMat4Vec3(mesh.getModelMatrix(),thispos);
              }
              if(effectZ)
              {
@@ -302,22 +302,22 @@ scripts:
                 var y1 = [positions[i][0],positions[i][1]+.1,positions[i][2]+ zy1*amt];
                 positions[i][2] += z * amt;
                 
-                var dx = GLGE.subVec3(x1,positions[i]);
-                dx = GLGE.scaleVec3(dx,1/GLGE.lengthVec3(dx));
-                var dy = GLGE.subVec3(y1,positions[i]);
-                dy = GLGE.scaleVec3(dy,1/GLGE.lengthVec3(dy));
-                var norm = GLGE.crossVec3(dx,dy);
+                var dx = MATH.subVec3(x1,positions[i]);
+                dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
+                var dy = MATH.subVec3(y1,positions[i]);
+                dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
+                var norm = MATH.crossVec3(dx,dy);
                 
-                norm = GLGE.scaleVec3(norm,1/GLGE.lengthVec3(norm));
+                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
                 
-                var a = GLGE.crossVec3(norm,[0,0,1]);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(norm,[0,0,1]) );  
+                var a = MATH.crossVec3(norm,[0,0,1]);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[0,0,1]) );  
                 var  tofront_norm = [];
                 
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
                 var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
                 if(i < normals.length)
-                normals[i] = GLGE.mulMat4Vec3(rotmat,normals[i]);
+                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
                 //normals[i][1] *= -1;
                  //normals[i][0] *= -1;
              }
@@ -330,22 +330,22 @@ scripts:
                 var z1 = [positions[i][0]+ xz1*amt,positions[i][1],positions[i][2]+.1];
                 positions[i][0] += x * amt;
                 
-                var dy = GLGE.subVec3(y1,positions[i]);
-                dy = GLGE.scaleVec3(dy,1/GLGE.lengthVec3(dy));
-                var dz = GLGE.subVec3(z1,positions[i]);
-                dz = GLGE.scaleVec3(dz,1/GLGE.lengthVec3(dz));
-                var norm = GLGE.crossVec3(dy,dz);
+                var dy = MATH.subVec3(y1,positions[i]);
+                dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
+                var dz = MATH.subVec3(z1,positions[i]);
+                dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
+                var norm = MATH.crossVec3(dy,dz);
                 
-                norm = GLGE.scaleVec3(norm,1/GLGE.lengthVec3(norm));
+                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
                 
-                var a = GLGE.crossVec3(norm,[1,0,0]);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(norm,[1,0,0]) );  
+                var a = MATH.crossVec3(norm,[1,0,0]);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[1,0,0]) );  
                 var  tofront_norm = [];
                 
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
                 var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
                 if(i < normals.length)
-                normals[i] = GLGE.mulMat4Vec3(rotmat,normals[i]);
+                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
              }
              if(effectY)
              {
@@ -356,24 +356,24 @@ scripts:
                 var z1 = [positions[i][0],positions[i][1]+ yz1*amt,positions[i][2]+.1];
                 positions[i][1] += y * amt;
                 
-                var dx = GLGE.subVec3(x1,positions[i]);
-                dx = GLGE.scaleVec3(dx,1/GLGE.lengthVec3(dx));
-                var dz = GLGE.subVec3(z1,positions[i]);
-                dz = GLGE.scaleVec3(dz,1/GLGE.lengthVec3(dz));
-                var norm = GLGE.crossVec3(dz,dx);
-                norm = GLGE.scaleVec3(norm,1/GLGE.lengthVec3(norm));
+                var dx = MATH.subVec3(x1,positions[i]);
+                dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
+                var dz = MATH.subVec3(z1,positions[i]);
+                dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
+                var norm = MATH.crossVec3(dz,dx);
+                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
                 
-                var a = GLGE.crossVec3(norm,[0,1,0]);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(norm,[0,1,0]) );  
+                var a = MATH.crossVec3(norm,[0,1,0]);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[0,1,0]) );  
                 var  tofront_norm = [];
                 
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
                 var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
                 if(i < normals.length)
-                normals[i] = GLGE.mulMat4Vec3(rotmat,normals[i]);
+                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
               }
               if(i < normals.length)
-              normals[i] = GLGE.scaleVec3(normals[i],1/GLGE.lengthVec3(normals[i]));
+              normals[i] = MATH.scaleVec3(normals[i],1/MATH.lengthVec3(normals[i]));
          }
          
          for(var i=0;i<positions.length; i+=1)
@@ -480,5 +480,5 @@ scripts:
         //Get a quaternion for the input matrix
         var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
         var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
-        return GLGE.mulMat4Vec3(NewMatrix,Vector);
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
     }

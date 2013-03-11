@@ -281,7 +281,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			cam.matrixWorldInverse.getInverse( cam.matrixWorld );
 			var _viewProjectionMatrix = new THREE.Matrix4();
 			_viewProjectionMatrix.multiplyMatrices( cam.projectionMatrix, cam.matrixWorldInverse );
-			var vp =  GLGE.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
+			var vp =  MATH.transposeMat4(_viewProjectionMatrix.flattenToArray([]));
 			
 			var rootdiv = document.getElementById('index-vwf');
 			var h = rootdiv.style.height;
@@ -466,7 +466,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
         }
     }   
-    //necessary when settign the amibent color to match GLGE behavior
+    //necessary when settign the amibent color to match MATH behavior
     //Three js mults scene ambient by material ambient
     function SetMaterialAmbients(start)
     {
@@ -481,7 +481,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         {
             if(start && start.material)
             {
-                //.005 chosen to make the 255 range for the ambient light mult to values that look like GLGE values.
+                //.005 chosen to make the 255 range for the ambient light mult to values that look like MATH values.
                 //this will override any ambient colors set in materials.
                 if(start.material.ambient)
                     start.material.ambient.setRGB(1,1,1);
@@ -514,7 +514,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
         var container = document.getElementById("container");
         var sceneCanvas = canvas;
-        //var mouse = new GLGE.MouseInput( sceneCanvas );
+        //var mouse = new MATH.MouseInput( sceneCanvas );
 
         var self = this;
 
@@ -1001,8 +1001,11 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         
         this.ray.set(pos, directionVector);
 		var caster = new THREE.Raycaster(pos,directionVector);
-        var intersects = caster.intersectObjects(sceneNode.threeScene.children, true);
-        if (intersects.length) {
+		var intersects;
+		if(!sceneNode.threeScene.CPUPick)
+		{
+			intersects = caster.intersectObjects(sceneNode.threeScene.children, true);
+			if (intersects.length) {
             // intersections are, by default, ordered by distance,
             // so we only care for the first one. The intersection
             // object holds the intersection point, the face that's
@@ -1012,7 +1015,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             
             var ID = getPickObjectID.call(this,target);
             
-			  var found =  intersects[0];
+			var found =  intersects[0];
 			var priority = -1;
 			var dist = 0;
 			
@@ -1032,8 +1035,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			return found;
 			
 			
-        }
-        return null;
+			}
+    
+		}else
+		{
+			
+			intersects = sceneNode.threeScene.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z]);
+			return intersects;
+		}
     }
     function getPickObjectID(threeObject)
     {   

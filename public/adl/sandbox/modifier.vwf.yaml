@@ -121,7 +121,7 @@ scripts:
         //Get a quaternion for the input matrix
         var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
         var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
-        return GLGE.mulMat4Vec3(NewMatrix,Vector);
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
     }
     this.twist = function()
     {   

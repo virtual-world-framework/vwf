@@ -36,8 +36,8 @@ scripts:
         var hy = size[1]/2;
         var hz = size[2]/2;
         
-        var planemesh = new GLGE.Mesh();
-        var planeobj = new GLGE.Object();
+        var planemesh = new MATH.Mesh();
+        var planeobj = new MATH.Object();
         planeobj.setMesh(planemesh);
         
         var positions = [
@@ -78,8 +78,8 @@ scripts:
         
         //planeobj.vwfID = this.id;
         var scene = findscene();
-        vwf.views[0].state.nodes[this.id].glgeObject.addChild(planeobj);
-        //findscene().addChild(vwf.views[0].state.nodes[this.id].glgeObject);
+        vwf.views[0].state.nodes[this.id].MATHObject.addChild(planeobj);
+        //findscene().addChild(vwf.views[0].state.nodes[this.id].MATHObject);
         
         
         
@@ -171,7 +171,7 @@ scripts:
      {
          for(var i =0; i<vwf.views.length;i++)
          {
-             if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].glgeScene;
+             if(vwf.views[i].module.id = 'vwf/view/MATH') return vwf.views[i].state.scenes["index-vwf"].MATHScene;
          }
          return null;
     }

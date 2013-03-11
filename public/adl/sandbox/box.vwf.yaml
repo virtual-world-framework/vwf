@@ -191,7 +191,7 @@ scripts:
      {
          for(var i =0; i<vwf.views.length;i++)
          {
-             if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].threeScene;
+             if(vwf.views[i].module.id = 'vwf/view/MATH') return vwf.views[i].state.scenes["index-vwf"].threeScene;
          }
          return null;
     }

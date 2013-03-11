@@ -396,7 +396,7 @@ function PrimitiveEditor()
 				var minval = vwf.getProperty(node.id,editordata[i].property[1]);
 				var maxval = vwf.getProperty(node.id,editordata[i].property[2]);
 				var val = [minval || editordata[i].min, maxval || editordata[i].max]
-				$('#'+nodeid+i).slider({range:false,step:parseFloat(editordata[i].step),min:parseFloat(editordata[i].min),max:parseFloat(editordata[i].max),values:val,
+				$('#'+nodeid+i).slider({range:true,step:parseFloat(editordata[i].step),min:parseFloat(editordata[i].min),max:parseFloat(editordata[i].max),values:val,
 					slide:function(e, ui)
 					{
 						var propmin = $(this).attr('propnamemin');
@@ -717,7 +717,7 @@ function PrimitiveEditor()
 			if(node)
 			{
 				
-				var mat = GLGE.transposeMat4(_Editor.findviewnode(node.id).matrix.elements);
+				var mat = MATH.transposeMat4(_Editor.findviewnode(node.id).matrix.elements);
 				var angles = this.rotationMatrix_2_XYZ(mat);
 				var pos = vwf.getProperty(node.id,'translation');
 				var rot = vwf.getProperty(node.id,'rotation');
