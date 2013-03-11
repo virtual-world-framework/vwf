@@ -1,0 +1,194 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+
+  ## Text to display to the user to explain the task
+  ## 
+  ## @name task.vwf#text
+  ## @property
+
+  text:
+
+  ## Search string used to find a node3 that represents the transform that the camera will move to at the 
+  ## beginning of this task
+  ## 
+  ## @name task.vwf#cameraPoseRef
+  ## @property
+
+  cameraPoseRef:
+
+  ## xpath reference to the top node of the scene that the lesson listens to for task completion events
+  ## 
+  ## @name task.vwf#scenePath
+  ## @property
+
+  scenePath:
+
+  ## Index of the currently active subtask
+  ## 
+  ## @name task.vwf#taskIndex
+  ## @property
+
+  taskIndex:
+
+methods:
+
+  ## Method to begin the task
+  ## 
+  ## @name task.vwf#enter
+  ## @function
+
+  enter:
+
+  ## Method to step to the next task
+  ## 
+  ## @name task.vwf#next
+  ## @function
+
+  next:
+
+  ## Method to exit the task
+  ## 
+  ## @name task.vwf#exit
+  ## @function
+
+  exit:
+
+  # ## Method to step to the previous task
+  # ## 
+  # ## @name task.vwf#previous
+  # ## @function
+
+  # previous:
+
+events:
+
+  ## Event fired on the task to let itself and others know that it is beginning
+  ## 
+  ## @name task.vwf#entering
+  ## @event
+
+  entering:
+
+  ## Event fired by the task to signify that its completion criteria has been met
+  ## 
+  ## @name task.vwf#completed
+  ## @event
+
+  completed:
+
+  ## Event fired on the task to let it and others know that it is ending
+  ## 
+  ## @name task.vwf#exiting
+  ## @event
+
+  exiting:
+
+scripts:
+- |
+  this.scene;
+  this.subtasks;
+
+  this.enter = function() {
+
+    // If this task has a parent task, get the scene node from the parent
+    // Else, search for it via the scenePath
+    var parentTaskArray = this.find( "parent::element(*,'http://vwf.example.com/lesson/task.vwf')" );
+    if ( parentTaskArray.length ) {
+      var parentTask = parentTaskArray[ 0 ];
+      this.scene = parentTask.scene;
+    }
+    else {
+      var searchResults = this.find( this.scenePath );
+
+      // If the search returned the scene node, set it for later use
+      // Else, print an error to the console
+      if ( searchResults.length )
+        this.scene = searchResults[ 0 ];
+      else
+        console.error( "Could not find scene node '" + this.scenePath + "' - please set the scenePath property " +
+                       "on the top-level task" );
+    }
+
+    // If a camera pose has been specified for this task, move the camera to it
+    if ( this.cameraPoseRef ) {
+      var cameraPoseSearchResults = this.find( this.cameraPoseRef );
+      if ( cameraPoseSearchResults && cameraPoseSearchResults.length ) {
+        var newCameraPose = cameraPoseSearchResults[ 0 ];
+        if ( newCameraPose.translation && newCameraPose.quaternion ) {
+          if ( this.scene ) {
+            var camera = this.scene.camera;
+            if ( camera ) {
+              var duration = 2;
+              camera.transformTo( newCameraPose.transform, duration);
+            }
+            else
+              console.error( "Could not find camera - to move the 3D camera using cameraPose, make sure the " +
+                             "scene derives from navScene.vwf or another component that defines a valid camera" );
+          }
+          else
+            console.error( "Scene property is not set - must be set for task to find camera to move" );
+        }
+        else
+          console.error( "Camera pose '" + this.cameraPoseRef + "' is not a valid node3" );
+      }
+      else
+        console.error( "Could not find camera pose: " + this.cameraPoseRef + " - will not move camera" );
+    }
+
+    // Fire the entering event which runs lesson-specific code
+    this.entering( this.text );
+
+    // Activate subtasks if they exist
+    this.taskIndex = null;
+    this.subtasks = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" );
+    if ( this.subtasks && this.subtasks.length )
+      this.next();
+  }
+
+  this.next = function() {
+
+    // If the first subtask has not been run yet (so taskIndex is null), initialize it
+    // Else, exit the current subtask and increment taskIndex
+    if ( this.taskIndex == null )
+      this.taskIndex = 0;
+    else {
+      var oldSubtask = this.subtasks[ this.taskIndex ];
+      oldSubtask.completed = oldSubtask.events.flush( this );
+      oldSubtask.exit();
+      this.taskIndex++;
+    }
+
+    // If there are subtasks still to run, enter the next one
+    // Else, mark this task as complete
+    if ( this.taskIndex < this.subtasks.length ) {
+      var newSubtask = this.subtasks[ this.taskIndex ];
+      newSubtask.enter();
+      newSubtask.completed = newSubtask.events.add( function() { this.in(0).next(); }, this );
+    }
+    else
+      this.completed();
+  } 
+
+  this.exit = function() {
+
+    // TODO: Find the scene node properly to make this possible
+    // this.scene.events.flush( this );
+
+    // Fire the exiting event
+    this.exiting();
+
+  } //@ sourceURL=task.vwf

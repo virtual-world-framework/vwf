@@ -13,7 +13,7 @@
 
 # Version string format: http://docs.rubygems.org/read/chapter/16
 
-source :rubygems
+source "https://rubygems.org"
 
 gem "sinatra", ">= 1.3", :require => "sinatra/base"
 gem "json"
