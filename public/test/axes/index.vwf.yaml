@@ -1,6 +1,10 @@
 --- 
-extends: http://vwf.example.com/navscene.vwf
+extends: http://vwf.example.com/navtouch.vwf
+properties: 
+  navmode: orbit
 children:
+  sceneCenter:
+    extends: http://vwf.example.com/node3.vwf
   origin:
     extends: http://vwf.example.com/node3.vwf
     source: OrientationCube.dae

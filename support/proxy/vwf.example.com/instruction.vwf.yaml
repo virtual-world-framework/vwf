@@ -20,35 +20,27 @@
 extends: http://vwf.example.com/node.vwf
 properties: 
 
-  ## Success
-  ## 
-  ## @name instruction.vwf#success
-  ## @property
-
-  success:
-    set: |
-      this.success = value;
-    value: false
-
   ## Instruction text
   ## 
   ## @name instruction.vwf#instructionText
   ## @property
 
-  instructionText:
-    set: |
-      this.instructionText = value;
-    value: ""
+  instructionText: ""
 
   ## Action text
   ## 
   ## @name instruction.vwf#actionText
   ## @property
 
-  actionText:
-    set: |
-      this.actionText = value;
-    value: ""
+  actionText: ""
+
+  ## The search string used to find a node3 that represents the transform that the camera will move to at the 
+  ## beginning of this instruction
+  ## 
+  ## @name instruction.vwf#cameraPoseRef
+  ## @property
+
+  cameraPoseRef:
 
   ## Active boolean
   ## 
@@ -60,27 +52,70 @@ properties:
       this.active = value;
     value: false
 
-  ## The position of the camera
+methods:
+
+  ## Method that navigates to the camera pose and fires the 
   ## 
-  ## @name instruction.vwf#cameraPosition
-  ## @property
+  ## @name instruction.vwf#begin
+  ## @method
 
-  cameraPosition:
-    set: |
-      this.cameraPosition = value;
-    value: ""
+  begin:
 
-  ## Number
+  ## Method that performs all the generic actions to close out the instruction and prepare for the next
   ## 
-  ## @name instruction.vwf#number
-  ## @property
+  ## @name instruction.vwf#complete
+  ## @method
 
-  number:
-    set: |
-      this.number = value;
-    value: 0
+  complete:
+
+events:
+
+  ## The event that is fired when the instruction is begun
+  ## 
+  ## @name instruction.vwf#entered
+  ## @event
+
+  entered:
+
+  ## The event that is fired when the user has completed the current step
+  ## 
+  ## @name instruction.vwf#exited
+  ## @event
+
+  exited: 
 
 scripts:
 - |
-    this.onEntry = function() {
+    this.begin = function() {
+
+      // If a camera pose has been specified for this instruction, move the camera to it
+      if ( this.cameraPoseRef ) {
+        var cameraPoseSearchResults = this.find( this.cameraPoseRef );
+        if ( cameraPoseSearchResults && cameraPoseSearchResults.length ) {
+          var newCameraPose = cameraPoseSearchResults[ 0 ];
+          if ( newCameraPose.translation && newCameraPose.quaternion ) {
+            var scene = this.find( "/" )[ 0 ];
+            var camera = scene.camera;
+            if ( camera ) {
+              var duration = 2;
+              camera.translateTo( newCameraPose.translation, duration );
+              camera.quaterniateTo( newCameraPose.quaternion, duration );
+            }
+            else
+              console.error( "Could not find camera - make sure the scene derives from navScene.vwf or another component " +
+                             "that defines a valid camera" );
+          }
+          else
+            console.error( "Camera pose '" + this.cameraPoseRef + "' is not a valid node3" );
+        }
+        else
+          console.error( "Could not find camera pose: " + this.cameraPoseRef + " - will not move camera" );
+      }
+
+      // Fire event signifying that instruction has been entered
+      this.entered( this.instructionText, this.actionText );
     }
+
+    this.complete = function() {
+      this.exited();
+    } //@ sourceURL=instruction.vwf

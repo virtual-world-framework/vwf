@@ -1,0 +1,83 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+## The component representation of a navigation touch sensitive scene
+## 
+## @name navtouch.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/navscene.vwf
+properties: 
+  dist:
+  zenith:
+  azimuth:
+methods:
+  setInitialValues:
+events:
+  touchTransform:
+  touchDrag:
+scripts:
+- |
+    this.setValues = function() {
+      var trans = this.camera.translation;
+      this.dist = Math.sqrt(Math.pow(trans[0], 2) + Math.pow(trans[1], 2) + Math.pow(trans[2], 2));
+      this.zenith = Math.acos(this.camera.translation[2] / this.dist);
+      this.azimuth = Math.asin( this.camera.translation[1] / (this.dist * Math.sin(this.zenith)) );
+    }
+    this.touchTransform = function( rotation, scale ) {
+      if(this.navmode == "orbit")
+      {
+        if(!this.dist) this.setValues();
+        var trans = this.camera.translation;
+
+        if(scale < 1) scale = 1.025;
+        else if(this.dist > 10) scale = 0.975;
+        else scale = 1;
+        console.info(this.dist);
+
+        var newTranslation = trans;
+        newTranslation[0] = newTranslation[0]*scale;
+        newTranslation[1] = newTranslation[1]*scale;
+        newTranslation[2] = newTranslation[2]*scale;
+
+        this.camera.translation = newTranslation;
+
+        this.setValues();
+      }
+      else if(this.navmode == "walk")
+      {
+        
+      }
+    }
+    this.touchDrag = function( x, y ) {
+      if(this.navmode == "orbit")
+      {
+        if(!this.dist) this.setValues();
+
+        x = x / 300.0;
+        y = y / 300.0;
+        this.zenith -= y;
+        this.azimuth -= x;
+
+        var newX = this.dist * Math.sin(this.zenith) * Math.cos(this.azimuth);
+        var newY = this.dist * Math.sin(this.zenith) * Math.sin(this.azimuth);
+        var newZ = this.dist * Math.cos(this.zenith);
+
+        this.camera.translation = [ newX, newY, newZ ];
+      }
+      else if(this.navmode == "walk")
+      {
+
+      }
+    } //@ sourceURL=navScene.vwf

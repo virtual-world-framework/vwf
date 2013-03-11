@@ -4,8 +4,8 @@
 
  **Coming soon!**
 
- Check back on Feb. 14
+ Check back on Mar. 10
 
- (It will be our Valentine to you)
+ (It will be our Daylight Saving Time gift to you)
 
 --------------

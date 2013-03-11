@@ -17,88 +17,78 @@
 ## @namespace
 
 --- 
-extends: http://vwf.example.com/instruction.vwf
+extends: http://vwf.example.com/node.vwf
 properties: 
-
-  ## The active instruction
-  ## 
-  ## @name lesson.vwf#activeInstruction
-  ## @property
-
-  activeInstruction:
-    set: |
-      this.activeInstruction = value;
-    value: false
 
   ## Index value for the instruction
   ## 
   ## @name lesson.vwf#instructionIndex
   ## @property
 
-  instructionIndex:
-    set: |
-      this.instructionIndex = value;
-    value: 0
+  instructionIndex: 0
 
 methods:
 
-  ## On entry function
+  ## Method to start the lesson
   ## 
-  ## @name lesson.vwf#onEntry
+  ## @name lesson.vwf#begin
   ## @function
   ##
   ## @returns undefined
 
-  onEntry:
+  begin:
 
-  ## Next instruction
+events:
+
+  ## The event that is fired (usually from the view) when the user has clicked the Next button
   ## 
-  ## @name lesson.vwf#nextInstruction
-  ## @function
-  ##
-  ## @returns undefined
+  ## @name instruction.vwf#nextButtonClicked
+  ## @event
 
-  nextInstruction:
+  nextButtonClicked:
 
-  ## Activate next
+  ## The event that is fired when the lesson has been completed
   ## 
-  ## @name lesson.vwf#activateNext
-  ## @function
-  ##
-  ## @returns undefined
+  ## @name instruction.vwf#completed
+  ## @event
 
-  activateNext:
-
-  ## Instruction success
-  ## 
-  ## @name lesson.vwf#instructionSuccess
-  ## @function
-  ##
-  ## @returns undefined
-
-  instructionSuccess:
+  completed:
 
 scripts:
 - |
-    this.onEntry = function() {
-      if ( this.instructions && this.instructions.length ) {
+    var self = this;
+    var instructions;
+    var activeInstruction;
+
+    this.begin = function() {
+
+      // Find lesson's children which are of type "instruction"
+      instructions = this.find( ".//element(*,'http://vwf.example.com/instruction.vwf')" )
+
+      if ( instructions && instructions.length ) {
         this.instructionIndex = 0;
-        this.activeInstruction = this.instructions[this.instructionIndex];
+        this.activateInstruction();
       }
+      else
+        console.warn( "This lesson has no instructions - add some as children to use it");
     }
-    this.nextInstruction(){
-      this.instructionIndex = this.instructionIndex + 1;
+
+    this.activateInstruction = function() {
+      
+      // Remove event handlers from the instruction that just completed
+      if ( activeInstruction )
+        activeInstruction.events.flush();
+
+      // Set up the new instruction
+      activeInstruction = instructions[ this.instructionIndex ];
+      activeInstruction.exited = this.activateNext;
+      activeInstruction.begin();
     }
+
     this.activateNext = function() {
-      this.activeInstruction = this.instructions[this.instructionIndex];
-      this.activeInstruction.onEntry();
-    }
-    this.instructionSuccess = function() {
-      this.activeInstruction.success = true;
-      this.nextInstruction();
-      if ( this.instructionIndex >= this.instructions.length ) {
-        this.success = true;
-      } else {
-        activateNext();
-      }
-    }
+      self.instructionIndex++;
+      if ( self.instructionIndex < self.instructions.length )
+        self.activateInstruction();
+      else
+        self.completed();
+    } //@ sourceURL=lesson.vwf

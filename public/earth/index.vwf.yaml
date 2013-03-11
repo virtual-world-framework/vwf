@@ -42,6 +42,7 @@ children:
       cameraData:
 methods:
   setInstance:
+  loaded:
 scripts:
 - |
     var earthInstance = undefined;
@@ -52,4 +53,18 @@ scripts:
       // the initialize fucntion is called too early
       // reference is not valid yet
       // earthInstance = google.earth.gInstance;
+    } 
+    this.loaded = function(){
+      var cameraData = this.lookAt.cameraData;
+      if(cameraData && google.earth && google.earth.geInstance){
+        var la = google.earth.geInstance.getView().copyAsLookAt(google.earth.geInstance.ALTITUDE_RELATIVE_TO_GROUND);
+        la.setLongitude( cameraData[0] );
+        la.setLatitude( cameraData[1] );
+        la.setAltitude( cameraData[2] );
+        la.setAltitudeMode( cameraData[3] );
+        la.setHeading( cameraData[4] );
+        la.setTilt( cameraData[5] );
+        la.setRange( cameraData[6] );
+        google.earth.geInstance.getView().setAbstractView(la);
+      }
     } //@ sourceURL=googleEarthApp.vwf
