@@ -61,7 +61,7 @@ scripts:
       for(i = 0; i < this.powerImages.length; i++) {
         new Image().src = this.powerImages[i];
       }
-    }
+    } //@ sourceURL=radio.index.vwf
 children:
   Omni01:
     extends: http://vwf.example.com/light.vwf
@@ -109,7 +109,7 @@ children:
               this.volume = 0;
               this.Radio.LCD.material.texture = "images/lcd.png";
             } 
-          }
+          } //@ sourceURL=radio.property.powerOn.index.vwf
         value: false
       volume:
         set: |
@@ -120,7 +120,7 @@ children:
               this.powerOn = false;
             }
             this.volume = value;
-          }
+          } //@ sourceURL=radio.property.volume.index.vwf
         value: 0
       speak: "up"
       channel:
@@ -429,7 +429,7 @@ children:
         }
         this.ptt = function() {
           if ( radio.keysLocked ) return;
-        }
+        } //@ sourceURL=radio.base.index.vwf
     children: 
       EnvironmentAmbientLight: 
         extends: http://vwf.example.com/node3.vwf 
@@ -576,7 +576,7 @@ children:
             - |
                 this.pointerUp = function() {
                   this.parent.parent.red();
-                }   
+                } //@ sourceURL=ic40Red.vwf  
             children: 
               material: 
                 extends: http://vwf.example.com/material.vwf 
@@ -592,7 +592,7 @@ children:
             - |
                 this.pointerUp = function() {
                   this.parent.parent.up();
-                }
+                } //@ sourceURL=ic40Up.vwf 
             children: 
               material: 
                 extends: http://vwf.example.com/material.vwf 
@@ -614,7 +614,7 @@ children:
                   } else {
                     this.parent.parent.volume = 0;
                   }                            
-                }
+                } //@ sourceURL=ic40Volume.vwf
             children: 
               material: 
                 extends: http://vwf.example.com/material.vwf 
