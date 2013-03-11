@@ -49,7 +49,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
 
-            var node, parentNode, glgeChild, prototypes;
+            var node, parentNode, glgeChild, prototypes, glgeParent;
             var kernel = this.kernel;
 
             if ( childExtendsID === undefined /* || childName === undefined */ )
@@ -68,9 +68,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     parentNode = this.state.scenes[ nodeID ];
 
                 if ( parentNode ) {
-                    var glgeParent = parentNode.glgeObject ? parentNode.glgeObject : parentNode.glgeScene;
+                    glgeParent = parentNode.glgeObject ? parentNode.glgeObject : parentNode.glgeScene;
+                    var recursive = false;
                     if ( glgeParent && childName ) {
-                        glgeChild = glgeObjectChild.call( this, glgeParent, childName, childExtendsID );
+                        recursive = ( glgeParent.constructor == GLGE.Collada );
+                        glgeChild = glgeObjectChild.call( this, glgeParent, childName, childExtendsID, recursive );
                     }
                 }
             }
@@ -2233,16 +2235,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // Search a GLGE.Object, GLGE.Collada, GLGE.Light for a child with the given name.  TODO: really, it's anything with children[]; could be the same as glgeSceneChild().
 
-    function glgeObjectChild( glgeObject, childName, childType ) {
+    function glgeObjectChild( glgeObject, childName, childType, recursive ) {
         
         var childToReturn = jQuery.grep( glgeObject.children || [], function ( glgeChild ) {
             return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
         }).shift();
 
         // to slow, and may bind to the incorrect object
-        //if ( !childToReturn ) {
-        //    childToReturn = findGlgeObject.call( this, childName, childType );
-        //}
+        if ( recursive && !childToReturn ) {
+            childToReturn = findGlgeObject.call( this, childName, childType );
+        }
         //this.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
 
