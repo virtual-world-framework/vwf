@@ -22,15 +22,15 @@ document.TerrainFunctions = {
             var v1 = [p2[0] - p1[0],p2[1] - p1[1],p2[2] - p1[2]];
             var v2 = [p3[0] - p1[0],p3[1] - p1[1],p3[2] - p1[2]];
             
-            v1 = GLGE.scaleVec3(v1,1/GLGE.lengthVec3(v1));
-            v2 = GLGE.scaleVec3(v2,1/GLGE.lengthVec3(v2));
-            var norm = GLGE.crossVec3(v1,v2);
+            v1 = goog.vec.Vec3.scale(v1,1/goog.vec.Vec3.magnitude(v1),[0,0,0]);
+            v2 = goog.vec.Vec3.scale(v2,1/goog.vec.Vec3.magnitude(v2),[0,0,0]);
+            var norm = goog.vec.Vec3.cross(v1,v2,[0,0,0]);
             
             return norm;
         },
         normalize: function(v1)
         {
-            return GLGE.scaleVec3(v1,1/GLGE.lengthVec3(v1));
+            return goog.vec.Vec3.scale(v1,1/goog.vec.Vec3.magnitude(v1),[0,0,0]);
         },
         SampleNormalByPos: function(y,x)
         {

@@ -56,24 +56,5 @@ scripts:
         vwf_view.kernel.kernel.deleteNode(e,0,null);
         
     }
-    this.newplayer = function(e)
-    {
-        
-        var proto = JSON.parse(e);
-        
-        //Because SendSelf will create circular messages, don't create a guy who is already created.
-        var newname = "player-"+proto.properties.PlayerNumber;
-        
-        if(!document[proto.properties.PlayerNumber + 'link'])
-        {
-            //When a new player is created, you'll have to let the new guy know that you exist. SendSelf does this.
-            SendSelf();
-            
-            //This is odd. It seems like supplying an ID for the new object causes the initialize not to fire
-            proto.id = "player-"+proto.properties.PlayerNumber;
-            proto.uri = "player-"+proto.properties.PlayerNumber;
-            vwf_view.kernel.kernel.createNode(proto,  function(){vwf_view.kernel.kernel.models[0].model.nodes[proto.id].initialize();
-            });
-        }
-    }
+    
    

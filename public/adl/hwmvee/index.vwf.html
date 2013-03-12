@@ -15,13 +15,293 @@
 
 <html>
   <head>
-    <script type="text/javascript" src="terrainheight.js"></script>
-	<script type="text/javascript" src="terrainfunctions.js"></script> 
 	<script type="text/javascript" src="TCDriver.js"></script>
 	<script type="text/javascript" src="base64.js"></script>
 	<script type="text/javascript">
 	
+	
+	function findChildColladaNode(node, name)
+         {
+            
+            if(node.colladaId == name)
+                return node;
+            else if(node.children){
+                for(var i = 0; i < node.children.length; i++) {
+                    var child = findChildColladaNode(node.children[i],name);
+                    if(child) return child;
+                }
+            }
+            return null;
+         }
+         function findChildViewNode(node, name)
+         {
+            
+            if(node.vwfID == name)
+                return node;
+            else if(node.children){
+                for(var i = 0; i < node.children.length; i++) {
+                    var child = findChildViewNode(node.children[i],name);
+                    if(child) return child;
+                }
+            }
+            return null;
+         }
+         function recurseshow(obj, depth)
+         {
+             if(!obj) return null;		 
+             if(depth > 1) return null;
+             depth++;
+             var keys = {};
+             if(obj.__proto__) keys['proto'] = recurseshow(obj.__proto__,depth);
+             for (var key in obj) if(key != 'parent' && key != 'vertices'){
+                if(obj[key] && obj[key].constructor === String) keys[key] = obj[key];
+                else keys[key] = recurseshow(obj[key],depth) ;
+             }
+             return keys;
+         }
+         function debugshow(obj)
+         {
+            var keys = recurseshow(obj,0);
+            var data = "data:application/json;UTF8," + (JSON.stringify(keys));
+            window.open(data);	 
+         }
+         function findscene(vwf)
+         {
+            
+             return vwf.views[0].state.scenes["index-vwf"].glgeScene;
+             
+             return null;
+         }
+	
+	vwf_view.satProperty = function(id,prop,val)
+	{
+		var node = this.nodes && this.nodes[id];
+		if(node)
+		{
+			if(prop == 'steerAmt')
+			{
+				node.steerAmtView();
+			}
+			if(prop == 'wheelRotate')
+			{
+				node.wheelRotateView();
+			}
+		}
+	}
+	vwf_view.calledMethod = function(id,prop,val)
+	{
+		var node = this.nodes && this.nodes[id];
+		if(node)
+		{
+			
+			if(prop == 'update')
+			{
+				
+				node.updateView(window);
+			}
+		}
+	}
+	vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName)
+	{
+		if(nodeID)   //ignore prototypes
+		{
+			if(childExtendsID == 'hmvee.vwf')    // if this node is a player
+			{
+				if(!this.nodes)
+				   this.nodes = {};
+				this.nodes[childID] =  vwf.models[0].model.nodes[childID].node;  
+			}
+		}
+	}
+	
+	vwf_view.initializedNode = function( nodeID, childID )
+	{
+		var node = this.nodes && this.nodes[childID];
+		if(node)
+		{
+			node.initializeView = function(context)
+			{
+						
+						
+						
+						var root = findChildViewNode(findscene(vwf),this.id);       
+						this.tireRF = findChildColladaNode(root,'passenger_side_front_wheel');
+						this.tireRB = findChildColladaNode(root,'passenger_side_back_wheel');
+						this.tireLF = findChildColladaNode(root,'driver_side_front_wheel');
+						this.tireLB = findChildColladaNode(root,'driver_side_back_wheel');
+						this.turret = findChildColladaNode(root,'turret');
+						
+						//this.AmFirstClient();
+						document[this.PlayerNumber +'link'] = this;
+						//If the player that is initializing is the local player, then link up the keypress handlers
+						if(document.PlayerNumber == this.PlayerNumber)
+						{
+							
+							$(document).mousemove(function(e){  document[this.PlayerNumber +'link'].pointerMove(e);});                    
+							$(document).keydown(function(e){  document[this.PlayerNumber +'link'].keydown(e);});
+							$(document).keyup(function(e){document[this.PlayerNumber +'link'].keyup(e);});
+						}
+						  var newdiv = document.createElement('div');
+						  newdiv.style.position = 'absolute';
+						  newdiv.id = "Player " + this.PlayerNumber + 'label';
+						  newdiv.innerHTML = "Player " + this.PlayerNumber;
+						  newdiv.style.left = '0px';
+						  newdiv.style.top = '0px';
+						  newdiv.style.background = 'white';
+						  document.body.appendChild(newdiv);
+						  
+						  var hitscreen = document.createElement('img');  
+						  hitscreen.src = 'hitscreen.png';
+						  hitscreen.style.position = 'absolute';
+						  hitscreen.style.width = '100%';
+						  hitscreen.style.height = '100%';
+						  hitscreen.style.left = '0';
+						  hitscreen.style.top = '0';
+						  hitscreen.style.opacity = '0';
+						  hitscreen.id = "hitscreen";
+						  document.body.appendChild(hitscreen);
+					
+			}
+			node.updateView = function()
+			{
+			 
+				
+					this.turret.setRotZ(this.lookAngle);
+					
+					this.updateCamera(document);
+					
+				  var div = document.getElementById("Player " + this.PlayerNumber + 'label');
+				  var pos = this.translation;
+				  pos = [pos[0],pos[1],pos[2]+3,1];
+					 
+				  var viewprojection = window.vwf.views[0].state.cameraInUse.getViewProjection();
+				  var screen = GLGE.mulMat4Vec4(viewprojection,pos);
+				  screen[0] /= screen[3];
+				  screen[1] /= screen[3];
+				  screen[2] /= screen[3];
+				  screen[0] /= 2;
+				  screen[1] /= 2;
+				  screen[2] /= 2;
+				  screen[0] += .5;
+				  screen[1] += .5;
+				  screen[2] += .5;
+			  
+				  screen[0] *= window.innerWidth;
+				  screen[1] *= window.innerHeight;
+				  screen[2] *= window.innerHeight;
+				 
+				  screen[1] = window.innerHeight - screen[1];
+				 
+				  
+				  div.style.left = screen[0]  +'px';
+				  div.style.top = screen[1]  +  'px';
+				  div.innerHTML = this.PlayerNumber + " " + this.Health;
+				  
+				  div.style.left = (screen[0] - div.offsetWidth/2)  +'px';
+				  
+				
+			}
+			node.updateCamera = function(document)
+			{
+					  
+					  if(document["PlayerNumber"] != this.PlayerNumber)
+						  return;
+					  var cameraTarget = vwf_view.kernel.kernel.models[0].model.nodes['http-vwf-example-com-node3-vwf-' + this.camtarget];
+					  if(!cameraTarget)
+							cameraTarget = this;
+					  else
+							return;
+							
+					  var camera = window.vwf.views[0].state.cameraInUse;
+					  var camoffset = [];
+					  camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.RotationAmt+this.lookAngle,[0,0,1]),[0,-20,8]);
+				
+					  var cameragoal = [cameraTarget.translation[0]+camoffset[0],cameraTarget.translation[1]+camoffset[1],cameraTarget.translation[2]+camoffset[2]];
+					  var togoal = [cameragoal[0] - camera.getLocX(),
+									cameragoal[1] - camera.getLocY(),
+									cameragoal[2] - camera.getLocZ()];
+					  var blendfactor = 30;
+					  
+							
+					  camera.setLoc(camera.getLocX() + togoal[0]/blendfactor,
+									camera.getLocY() + togoal[1]/blendfactor,
+									camera.getLocZ() + togoal[2]/blendfactor);
+					  camera.Lookat([cameraTarget.translation[0],cameraTarget.translation[1],cameraTarget.translation[2]+2]);
+			 
+			 
+			}
+			node.keydown = function(e)
+			{
+           
+			  // debugger;
+			   //Only the local player is controlled by the keypresses
+			   if(document["PlayerNumber"] != this.PlayerNumber)
+			              return;
+				 
+				if(e.keyCode == 65 && this.ADown == true) return;
+				if(e.keyCode == 68 && this.DDown == true) return;
+				if(e.keyCode == 87 && this.SDown == true) return;
+				if(e.keyCode == 83 && this.WDown == true) return;
+				 
+				if(e.keyCode == 65) vwf_view.kernel.callMethod(this.id,'localKeyDown',['A'],0,null);
+				if(e.keyCode == 68) vwf_view.kernel.callMethod(this.id,'localKeyDown',['D'],0,null);
+				if(e.keyCode == 87) vwf_view.kernel.callMethod(this.id,'localKeyDown',['S'],0,null);
+				if(e.keyCode == 83) vwf_view.kernel.callMethod(this.id,'localKeyDown',['W'],0,null);
+			}
+			node.keyup = function(e)
+			{
+				 
+				 //Only the local player is controlled by the keypresses
+			    if(document["PlayerNumber"] != this.PlayerNumber)
+			              return;
+						  
+				  if(e.keyCode == 65) vwf_view.kernel.callMethod(this.id,'localKeyUp',['A'],0,null);
+				  if(e.keyCode == 68) vwf_view.kernel.callMethod(this.id,'localKeyUp',['D'],0,null);
+				  if(e.keyCode == 87) vwf_view.kernel.callMethod(this.id,'localKeyUp',['S'],0,null);
+				  if(e.keyCode == 83) vwf_view.kernel.callMethod(this.id,'localKeyUp',['W'],0,null);
+				  if(e.keyCode == 32)
+				 {
+					window.vwf.send(this.id,'callMethod','fire',0,null);
+				 }
+			}
+			node.steerAmtView = function()
+			{
+				this.wheelRotMatrix	= this.BuildSteerMatrix();		
+				this.tireRF.setRotMatrix(this.wheelRotMatrix);
+				this.tireLF.setRotMatrix(this.wheelRotMatrix);	
+			}
+			node.wheelRotateView = function()
+			{
+				this.wheelRotMatrix	= this.BuildSteerMatrix();		
+				this.tireRF.setRotMatrix(this.wheelRotMatrix);
+				this.tireLF.setRotMatrix(this.wheelRotMatrix);	
+				this.tireRB.setRotX(this.wheelRotate);	
+				this.tireLB.setRotX(this.wheelRotate);
+			}
+			 
+			node.BuildSteerMatrix = function()
+			{
+				
+				 var steermat = goog.vec.Quaternion.fromAngleAxis(-this.steerAmt,[0,0,1],[0,0,0]);		  
+				 steermat = goog.vec.Quaternion.toRotationMatrix4(steermat,goog.vec.Mat4.create());
+				 var sidevec = goog.vec.Mat4.multVec3(steermat,[0,1,0],[0,0,0]);
+				
+				 
+				 
+				 var spinmat = goog.vec.Quaternion.fromAngleAxis(-this.steerAmt,[0,0,1],[0,0,0]);		  
+				 spinmat = goog.vec.Quaternion.toRotationMatrix4(spinmat,goog.vec.Mat4.create());
+				 return goog.vec.Mat4.multMat(spinmat,steermat,goog.vec.Mat4.create());
+			}
+			node.pointerMove = function( parms, pickInfo ){
 
+				  if(document["PlayerNumber"] != this.PlayerNumber)
+						  return;
+				  vwf_view.kernel.callMethod(this.id,'localpointerMove',[{clientX:parms.clientX,clientY:parms.clientY}],0,null)
+				 
+			}
+			node.initializeView();
+		}
+	}
 	var PlayerProto  = { 
                     
                     extends: 'hmvee.vwf',
@@ -62,14 +342,14 @@
 		
 		document[name + 'link'] = null;
 		PlayerProto.properties.PlayerNumber = name;
-		PlayerProto.id = "player"+name;
+		//PlayerProto.id = "player"+name;
 		document["PlayerNumber"] = name;
 		var parms = new Array();
 		parms.push(JSON.stringify(PlayerProto));
 		
-		console.log(vwf_view);
-		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
-		
+		//console.log(vwf_view);
+		//vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
+		newplayer(PlayerProto);
 		
 		
 	}
@@ -95,7 +375,28 @@
 		var parms = new Array();
 		parms.push(JSON.stringify(PlayerProto));
 		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
+		
 	}
+	function newplayer(e)
+    {
+        window.vwf = vwf;
+        var proto = e;//JSON.parse(e);
+        
+        //Because SendSelf will create circular messages, don't create a guy who is already created.
+        var newname = "player-"+proto.properties.PlayerNumber;
+        
+        //if(!document[proto.properties.PlayerNumber + 'link'])
+        {
+            //debugger;
+            //When a new player is created, you'll have to let the new guy know that you exist. SendSelf does this.
+           // SendSelf();
+            
+            //This is odd. It seems like supplying an ID for the new object causes the initialize not to fire
+            //proto.id = "player-"+proto.properties.PlayerNumber;
+            //proto.uri = "player-"+proto.properties.PlayerNumber;
+            vwf_view.kernel.createChild("index-vwf","player-"+proto.properties.PlayerNumber,proto);
+        }
+    }
 	function testhit()
 	{
 		vwf_view.kernel.callMethod(document[document.PlayerNumber +'link'].id,'hit',[]);
