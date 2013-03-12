@@ -109,8 +109,22 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 this.state.cameraInUse = sceneNode.glgeScene.camera;
                 initCamera.call( this, sceneNode.glgeScene.camera );
 
-                var camType = "http://vwf.example.com/camera.vwf";
-                vwf.createChild( childID, "camera", { "extends": camType } );    
+                // This can't be done here since:
+                // 
+                //   - `creatingNode` hasn't reached all of the model drivers, so the child only
+                //     partially exists and can't accept new actions yet.
+                //   
+                //   - The child's thread of construction doesn't know about the camera and won't
+                //     wait for it. The camera won't necessarily exist if the child attempts to
+                //     reference it `initializingNode`.
+                // 
+                // This needs to move to scene.vwf since the system shouldn't magically change the
+                // meaning of certain components. But to minimize changes, a special case is
+                // temporarily being added to the kernel where the new child can be created
+                // properly.
+
+                // var camType = "http://vwf.example.com/camera.vwf";
+                // this.kernel.createChild( childID, "camera", { "extends": camType } );    
 
                 var model = this;
                 var xmlDocLoadedCallback = callback;

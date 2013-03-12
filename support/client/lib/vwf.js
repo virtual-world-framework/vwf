@@ -1447,9 +1447,8 @@ var useLegacyID = childURI &&  // TODO: fix static ID references and remove
     ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
     childURI != "http://vwf.example.com/node.vwf";
     
-useLegacyID = useLegacyID ||
-    // work around model/glge creating a camera on a not-initialized application node
-    nodeID == this.find("", "/")[0] && ! this.models.object.objects[nodeID] && childName == "camera";
+useLegacyID = useLegacyID ||  // TODO: fix static ID references and remove
+    nodeID == this.find( undefined, "/" )[0] && childName == "camera"; // scene.vwf's default camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 var childID = childComponent.id;
@@ -1536,6 +1535,18 @@ if ( ! childComponent.source ) {
                 },
 
                 function( series_callback_async /* ( err, results ) */ ) {
+
+                    // model/glge and model/threejs want to automatically create a camera when the
+                    // scene node is created, but they can't easily do it without causing a race
+                    // condition. This needs to be handled in scene.vwf since it's an application
+                    // concern. But, to minimize changes, temporarily do it here where the child can
+                    // be managed properly.  // TODO: make work with scene.vwf and remove this and the comments in model/glge and model/threejs
+
+                    if ( childID == kernel.find( undefined, "/" )[0] &&
+                            kernel.test( childPrototypeID, "self::element(*,'http://vwf.example.com/scene.vwf')", childPrototypeID ) ) {
+                        childComponent.children = childComponent.children || {};
+                        childComponent.children.camera = { extends: "http://vwf.example.com/camera.vwf" };
+                    }
 
                     // Call creatingNode() on each model. The node is considered to be constructed after
                     // each model has run.
