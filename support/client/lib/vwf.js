@@ -1443,38 +1443,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-var useLegacyID = [  // TODO: fix static ID references and remove
-    // use the legacy ID scheme except for nodes with these names, ...
-    // "...",
-    "material", 
-    "media", 
-    "plane", 
-    "border", 
-    "button", 
-    "window", 
-    "controlBar", 
-    "titlebar", 
-    "closeButton", 
-    "minButton", 
-    "maxButton", 
-    "glgeObj1",
-    "bone1",
-    "bone3",
-    "Scene",
-    "Tank",
-    "playerModel",
-    "TankMaterial1",
-    "laserModel",
-    "laserParticle"
-].indexOf( childName ) < 0 && [
-    // ... or with these URIs, ...
-    "http://vwf.example.com/node.vwf",
-].indexOf( childURI ) < 0 &&
-    // ... but not for tests
-    require.toUrl( "dummy" ).indexOf( "../lib/" ) != 0;
-
-useLegacyID = childURI &&
-    ( childURI == "index.vwf" || childURI == "appscene-vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
+var useLegacyID = childURI &&  // TODO: fix static ID references and remove
+    ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
