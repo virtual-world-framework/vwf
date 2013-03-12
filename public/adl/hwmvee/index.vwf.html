@@ -111,7 +111,13 @@
 				   this.nodes = {};
 				this.nodes[childID] =  vwf.models[0].model.nodes[childID].node;  
 			}
+			if(nodeID == 'index-vwf')
+			{
+				findscene(vwf).setAmbientColor('rgb(255,255,255)')
+			
+			}
 		}
+		
 	}
 	
 	vwf_view.initializedNode = function( nodeID, childID )
@@ -288,7 +294,7 @@
 				
 				 
 				 
-				 var spinmat = goog.vec.Quaternion.fromAngleAxis(-this.steerAmt,[0,0,1],[0,0,0]);		  
+				 var spinmat = goog.vec.Quaternion.fromAngleAxis(-this.wheelRotate,[1,0,0],[0,0,0]);		  
 				 spinmat = goog.vec.Quaternion.toRotationMatrix4(spinmat,goog.vec.Mat4.create());
 				 return goog.vec.Mat4.multMat(spinmat,steermat,goog.vec.Mat4.create());
 			}
