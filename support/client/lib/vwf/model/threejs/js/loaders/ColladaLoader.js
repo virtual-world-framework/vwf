@@ -841,7 +841,7 @@ THREE.ColladaLoader = function () {
 
 		}
 
-		obj.name = node.id || "";
+		obj.name = node.name || node.id || "";
 		obj.matrix = node.matrix;
 		var props = node.matrix.decompose();
 		obj.position = props[ 0 ];
