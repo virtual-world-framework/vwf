@@ -812,7 +812,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
                 if(threeObject instanceof THREE.Material)
                 {
-                    console.log(["setting material property: ",nodeID,propertyName,propertyValue]);
+                    //console.log(["setting material property: ",nodeID,propertyName,propertyValue]);
                     if(propertyName == "texture")
                     {
                         if(propertyValue !== "")
@@ -831,21 +831,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if(propertyName == "color" || propertyName == "diffuse")
                     {
-                        // use utility to allow for colors, web colors....
-                        //this breaks on array values for colors
                         var vwfColor = new utility.color( propertyValue );
-                        if ( propertyValue instanceof Array && propertyValue.length ) {
-                            threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);                           
-                        } else {
+                        if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
-
                         threeObject.needsUpdate = true;
                         if ( threeObject.ambient !== undefined ) {
                             threeObject.ambient.setRGB( threeObject.color.r, threeObject.color.g, threeObject.color.b );                    }
                     }
                 }
-                if(threeObject instanceof THREE.Scene)
+                if( threeObject instanceof THREE.Scene )
                 {
                     if(propertyName == 'activeCamera')
                     {
@@ -859,44 +854,36 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         var lightsFound = 0;
                         var vwfColor = new utility.color( propertyValue );
-                        for( var i = 0; i < threeObject.__lights.length; i++ )
-                        {
-                            if(threeObject.__lights[i] instanceof THREE.AmbientLight)
+                        if ( vwfColor ) {
+                            for( var i = 0; i < threeObject.__lights.length; i++ )
                             {
-                                if ( propertyValue instanceof Array && propertyValue.length ) {
-                                    threeObject.__lights[i].color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-                                    
-                                } else {
+                                if(threeObject.__lights[i] instanceof THREE.AmbientLight)
+                                {
                                     threeObject.__lights[i].color.setRGB(vwfColor.red()/255,vwfColor.green()/255,vwfColor.blue()/255);
+                                    SetMaterialAmbients.call(this);
+                                    lightsFound++;
                                 }
-                                SetMaterialAmbients.call(this);
-                                lightsFound++;
+                            
                             }
-                        
-                        }
-                        if ( lightsFound == 0 ) {
-                            var ambientlight = new THREE.AmbientLight( '#000000' );
-                            if ( propertyValue instanceof Array && propertyValue.length ) {
-                                ambientlight.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-                            } else {
+                            if ( lightsFound == 0 ) {
+                                var ambientlight = new THREE.AmbientLight( '#000000' );
                                 ambientlight.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
-                            }                            
-                            node.threeScene.add( ambientlight );
-                            SetMaterialAmbients.call(this);                            
+                                node.threeScene.add( ambientlight );
+                                SetMaterialAmbients.call(this);                            
+                            }
                         }
                     }
                     if ( propertyName == 'backgroundColor' )
                     {
                         if ( node && node.renderer ) {
-                            if ( propertyValue instanceof Array ) {
-                                switch ( propertyValue.length ) {
-                                     case 3:
-                                         node.renderer.setClearColor( { r:propertyValue[0], g:propertyValue[1], b:propertyValue[2] } );    
-                                         break;
-                                     case 4:
-                                         node.renderer.setClearColor( { r:propertyValue[0], g:propertyValue[1], b:propertyValue[2] }, propertyValue[3] );    
-                                         break;          
-                                }
+                            var vwfColor = new utility.color( propertyValue );
+                            //console.info( "backgroundColor = " + propertyValue );
+                            //console.info( "     red = " + vwfColor.red() );
+                            //console.info( "   green = " + vwfColor.green() );
+                            //console.info( "    blue = " + vwfColor.blue() );
+                            //console.info( "   alpha = " + vwfColor.alpha() );
+                            if ( vwfColor ) {
+                                node.renderer.setClearColor( { r:vwfColor.red(), g:vwfColor.green(), b:vwfColor.blue() }, vwfColor.alpha() );
                             }
                         }
                     }
@@ -964,9 +951,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                     if ( propertyName == 'color' ) {
                         var vwfColor = new utility.color( propertyValue );
-                        if ( propertyValue instanceof Array && propertyValue.length ) {
-                            threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);                           
-                        } else {
+                        if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
                     }
@@ -1082,7 +1067,60 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     
                         
                 }
+                if(propertyName == "diffuse")
+                {
+                    
+                        
+                }
             }
+            if( threeObject instanceof THREE.Camera ) {
+                switch ( propertyName ) {
+                    case "fovy":
+                        value = threeObject.fovy; 
+                        break;
+                    case "near":
+                        value = threeObject.near;
+                        break; 
+                    case "aspect":
+                        value = threeObject.aspect;
+                        break; 
+                    case "far":
+                        value = threeObject.far;
+                        break;                    
+                    case "cameraType":
+                        if ( threeObject instanceof THREE.OrthographicCamera ) {
+                            value = 'orthographic';
+                        } else {
+                            value = 'perspective';
+                        }
+                        break;
+                }
+            }
+            if( threeObject instanceof THREE.Scene ) {
+                switch ( propertyName ) {
+                    case "ambientColor":
+                        break;
+                    case "backgroundColor":
+                        break;
+                    case "activeCamera":
+                        break;
+                }
+            }
+            if( threeObject instanceof THREE.Light ) {
+                switch ( propertyName ) {
+                    case "lightType":
+                        break;
+                    case "distance":
+                        break;
+                    case "color":
+                        break;
+                    case "intensity":
+                        break;
+                    case "castShadows":
+                        break;
+                }
+            }
+            return value;
         },
 
 
@@ -1106,18 +1144,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // == ticking =============================================================================
 
         ticking: function( vwfTime ) {
-        
-            //for(var i in this.state.nodes)
-            //{
-            //    var node = this.state.nodes[i];
-            //    var threeObject = node.threeObject;
-            //    if(threeObject instanceof THREE.ParticleSystem)
-            //    {   
-                    
-                      //threeObject.update();
-                
-            //    }
-            //}
         }
 
     } );
