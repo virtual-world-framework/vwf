@@ -1,4 +1,5 @@
-﻿"use strict";
+﻿
+"use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -316,10 +317,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
                 sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
-            //sceneNode.renderer.setClearColor({r:.5,g:1,b:1},1.0);
-//            var ambientlight = new THREE.AmbientLight('#000000');
-//            ambientlight.color.setRGB(.7,.7,.7);
-//            sceneNode.threeScene.add(ambientlight);
             
             rebuildAllMaterials.call(this);
             if(sceneNode.renderer.setFaceCulling)
