@@ -2045,7 +2045,7 @@ kernel.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) im
             // has performed the set and dictates the return value. The property is considered set
             // after each model has run.
 
-var delegated;
+var delegated = propertyName == "translation" || propertyName == "rotation" || propertyName == "quaternion" || propertyName == "scale"; // TODO: detect setters that set properties other than propertyName; these are the main ones
 
             this.models.some( function( model, index ) {
 
@@ -2085,23 +2085,25 @@ var delegated;
                         propertyValue = value;
                     }
 
-// TODO: detect setters that set properties other than propertyName; these are the main ones
-delegated = propertyName == "translation" || propertyName == "rotation" || propertyName == "quaternion" || propertyName == "scale";
+                    // Exit from this.models.some() if the driver delegated the property, either by
+                    // making a reentrant call to the same property, which will have invoked the
+                    // remaining drivers, or by writing one or more properties elsewhere in the
+                    // application.
 
-                    // If we are setting, exit from the this.models.some() iterator once the value
-                    // has been set. Don't exit early if we are creating or initializing since every
-                    // model needs the opportunity to register the property.
-
-                    // return settingPropertyEtc == "settingProperty" && value !== undefined;  // TODO: this stops after p: { set: "this.p = value" } or p: { set: "return value" }, but should it also stop on p: { set: "this.q = value" }?
-                    return delegated || reentry.hasOwnProperty( "value" ); // TODO: stops for delegated this.p = value; also stop for this.q = value or this.whatever = cancel
+                    return delegated || reentry.value !== undefined;
                 }
 
             }, this );
 
+            // For a delegated property, cache the value that was set so that `kernel.property` can
+            // return a recent value. `kernel.property` is read-only and prevents drivers from
+            // calling back to the kernel.
 
-if ( delegated || reentry.hasOwnProperty( "value" ) ) {
-    this.models.object.computedProperties( nodeID )[propertyName] = propertyValue;
-}
+            if ( delegated || reentry.value !== undefined ) {
+this.logger.warn( "set: updating cache for", nodeID, propertyName, "from", computedProperties[nodeID] && computedProperties[nodeID][propertyName], "to", propertyValue );
+                computedProperties[nodeID] = computedProperties[nodeID] || {};
+                computedProperties[nodeID][propertyName] = propertyValue;
+            }
 
             if ( entry.index !== undefined ) {
 
@@ -2157,6 +2159,8 @@ if ( delegated || reentry.hasOwnProperty( "value" ) ) {
             // Call gettingProperty() on each model. The first model to return a non-undefined value
             // dictates the return value.
 
+var delegated = propertyName == "translation" || propertyName == "rotation" || propertyName == "quaternion" || propertyName == "scale"; // TODO: detect setters that set properties other than propertyName; these are the main ones
+
             this.models.some( function( model, index ) {
 
                 // Skip models up through the one making the most recent call here (if any).
@@ -2200,6 +2204,16 @@ if ( delegated || reentry.hasOwnProperty( "value" ) ) {
                 }
 
             }, this );
+
+            // For a delegated property, cache the value that was retrieved so that
+            // `kernel.property` can return a recent value. `kernel.property` is read-only and
+            // prevents drivers from calling back to the kernel.
+
+            if ( delegated || reentry.value !== undefined ) {
+this.logger.warn( "get: updating cache for", nodeID, propertyName, "from", computedProperties[nodeID] && computedProperties[nodeID][propertyName], "to", propertyValue );
+                computedProperties[nodeID] = computedProperties[nodeID] || {};
+                computedProperties[nodeID][propertyName] = propertyValue;
+            }
 
             if ( entry.index !== undefined ) {
 
@@ -2679,26 +2693,62 @@ if ( delegated || reentry.hasOwnProperty( "value" ) ) {
 
         // -- property -----------------------------------------------------------------------------
 
-        /// property.
+        /// Like `getProperty`, except that `property` always executes immediately and returns the
+        /// result directly.
         /// 
         /// @see {@link module:vwf/api/kernel.property}
 
-        property: function( nodeID, propertyName ) {
-            var properties = this.models.object.properties( nodeID );
-            var result = properties[propertyName];
-            if ( result === undefined ) {
-                result = this.models.object.computedProperties( nodeID )[propertyName];
+        property: function( nodeID, propertyName, ignorePrototype ) {
+
+            // Suppress kernel reentry so that we can read the state without coloring from any
+            // scripts.
+
+            disableReentry();
+
+            // Call the regular `getProperty`. The result will be `undefined` if a driver tries to
+            // call back into the kernel.
+
+            var propertyValue = this.getProperty( nodeID, propertyName );
+
+            // Restore kernel reentry.
+
+            enableReentry();
+
+            // If a value wasn't returned because the property delegates to other properties, but
+            // kernel reentry was disabled, then get the most recent value seen from `setProperty`
+            // or `getProperty` during normal operation.
+
+            if ( propertyValue === undefined ) {
+                propertyValue = computedProperties[nodeID] && computedProperties[nodeID][propertyName];
             }
 
-if ( result === undefined ) {
-    var prototypeID = this.prototype( nodeID );
-    if ( prototypeID ) {
-        result = this.property( prototypeID, propertyName );
-    }
-}
-            // return properties[propertyName] || this.models.object.computedProperties( nodeID );
-if ( result === undefined ) this.logger.warn( "property", nodeID, propertyName, result, properties[propertyName], this.models.object.computedProperties( nodeID )[propertyName] );
-            return result;
+            // Delegate to the behaviors and the prototype if we didn't get a result from the
+            // current node.
+
+            if ( propertyValue === undefined && ! ignorePrototype ) {
+
+                var behaviorIDs = this.behaviors( nodeID );
+
+                while ( propertyValue === undefined && behaviorIDs.length ) {
+                    var behaviorID = behaviorIDs.pop();
+                    propertyValue = this.getProperty( behaviorID, propertyName, true ); // behavior node only, not its prototypes
+                }
+
+            }
+
+            if ( propertyValue === undefined && ! ignorePrototype ) {
+
+                var prototypeID = this.prototype( nodeID );
+
+                if ( prototypeID !== nodeTypeURI ) {
+                    propertyValue = this.getProperty( prototypeID, propertyName );
+                }
+
+            }
+
+if ( propertyValue === undefined ) this.logger.warn( "undefined property", nodeID, propertyName, propertyValue, this.models.object.objects[nodeID].properties, computedProperties[nodeID] );
+
+            return propertyValue;
         },
 
         /// Locate nodes matching a search pattern. See vwf.api.kernel#find for details.
@@ -3701,6 +3751,12 @@ if ( result === undefined ) this.logger.warn( "property", nodeID, propertyName, 
     /// return values to shallower calls.
 
     var getPropertyEntrants = {};
+
+    /// Cached property values last seen through `setProperty` or `getProperty`. `kernel.property`
+    /// uses these to return a recent value for calculated properties since `kernel.property` is
+    /// read-only and prevents drivers from calling back to the kernel.
+
+    var computedProperties = {};
 
     /// Control messages from the reflector are stored here in a priority queue, ordered by
     /// execution time.

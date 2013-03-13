@@ -495,7 +495,14 @@ define( function() {
 
         descendants: [ /* nodeID */ ],
 
-        /// TODO
+        /// Like `getProperty`, except that `property` always executes immediately and returns the
+        /// result directly. `property` does not invoke any other kernel actions. Properties that
+        /// would be calculated using the result of other kernel actions, such as properties with
+        /// JavaScript accessor functions, return the most recently known value instead. Properties
+        /// calculated without calling other kernel actions return the current value.
+        /// 
+        /// View drivers may use `property` to retrieve a property values without waiting for the
+        /// action to pass through the reflector.
         ///
         /// @function
         /// 
