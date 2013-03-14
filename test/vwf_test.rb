@@ -132,7 +132,7 @@ class VWFTest < MiniTest::Unit::TestCase
   def test_application_session_client_default_index
     get "/test/component.vwf/0000000000000000/"
     assert last_response.ok?
-    assert last_response.body.include?( "vwf.initialize" )
+    assert last_response.body.include?( "data-main=\"loader\"" )
   end
 
   # Serves a client file from an application session.
@@ -140,7 +140,7 @@ class VWFTest < MiniTest::Unit::TestCase
   def test_application_session_client_explicit_index
     get "/test/component.vwf/0000000000000000/index.html"
     assert last_response.ok?
-    assert last_response.body.include?( "vwf.initialize" )
+    assert last_response.body.include?( "data-main=\"loader\"" )
   end
 
   # Serves the socket.io client from an application session.
