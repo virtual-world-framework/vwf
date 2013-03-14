@@ -92,14 +92,14 @@ function FindSession(uri)
 {
 	//find the application name
 	var app = findAppName(uri);
-	console.log(app);
+	
 	if(!app)
 		return null;
 	//remove the application name	
 	var minusapp = uri.substr(app.length-2);
 	var parts = minusapp.split('\\');
 	var testapp = parts[0];
-	console.log(testapp);
+	
 	//Really, any slash delimited string after the app name should work
 	//sticking with 16 characters for now 
 	if(testapp.length == 16)
@@ -169,7 +169,7 @@ function ServeYAML(filename,response, URL)
 			var deYAML = JSON.stringify(YAML.load(file));
 			}catch(e)
 			{
-				console.log(file);
+				console.log("error parsing YAML " + filename );
 				_404(response);
 				return;
 			}
@@ -214,6 +214,17 @@ function getNamespace(socket)
 	  return namespace;
 
 }
+function checkOwner(node,name)
+{
+	
+	if(!node) return false;
+	if(!node.properties || !node.properties.owner)
+		return true;
+	var names = node.properties.owner.split(',');
+	if(names.indexOf(name) != -1)
+		return true;
+	return false;
+}
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
 }
@@ -226,7 +237,7 @@ function startVWF(){
 	
 	var URL = url.parse(request.url,true);
     var uri = URL.pathname;
-	console.log(uri);
+	//console.log(uri);
 	uri = uri.replace(/\//g,'\\');
 	
 	if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
@@ -238,7 +249,7 @@ function startVWF(){
 	
 	var filename = libpath.join(path, uri);
 	var session = FindSession(filename);
-	console.log(session);
+	//console.log(session);
 	//remove the session identifier from the request
 	filename = filterSession(filename,session);
     
@@ -248,7 +259,7 @@ function startVWF(){
 	var c2;
 	
 	
-	console.log(filename);
+	//console.log(filename);
 	c1 = libpath.existsSync(filename);
 	c2 = libpath.existsSync(filename+".yaml");
     if(!c1 && !c2)
@@ -350,8 +361,12 @@ function startVWF(){
 	} // close onRequest
 	
 	//create the server
-	var srv = http.createServer(OnRequest).listen(3000);
-	console.log('Serving on port 3000');
+	
+	var p = process.argv.indexOf('-p');
+	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
+	
+	var srv = http.createServer(OnRequest).listen(port);
+	console.log('Serving on port ' + port);
 	
 	//create socket server
 	sio = sio.listen(srv,{log:false});
@@ -372,17 +387,18 @@ function startVWF(){
 		global.sessions[namespace] = {};
 		global.sessions[namespace].clients = {};
 		global.sessions[namespace].time = 0.0;
+		global.sessions[namespace].state = {};
 		//keep track of the timer for this session
 		global.sessions[namespace].timerID = setInterval(function(){
 		
-			global.sessions[namespace].time += .0333333333;
+			global.sessions[namespace].time += .05;
 			for(var i in global.sessions[namespace].clients)
 			{
 				var client = global.sessions[namespace].clients[i];
 				client.emit('message',{"action":"tick","parameters":[],"time":global.sessions[namespace].time});
 			}
 		
-		},33.3333333);
+		},50);
 		
 	  }
 	 
@@ -396,7 +412,94 @@ function startVWF(){
 	  //The client is the first, is can just load the index.vwf, and mark it not pending
 	  if(Object.keys(global.sessions[namespace].clients).length == 1)
 	  {
+		
+		//socket.emit('message',{"action":"getState","respond":true,"time":global.sessions[namespace].time});
+		
+		
+		//todo: align state names with namespace names. currently state filename is not keyed to application name
+		var session = (namespace.split('/'));
+		session = session[session.length-2];
+		
+		//Get the state and load it.
+		//Now the server has a rough idea of what the simulation is
+		var state = SandboxAPI.getState(session);
+		global.sessions[namespace].state = {nodes:{}};
+		global.sessions[namespace].state.nodes['index-vwf'] = {id:"index-vwf",properties:state[state.length-1],children:{}};
+		
+		global.sessions[namespace].state.findNode = function(id,parent)
+		{
+			var ret = null;
+			if(!parent) parent = this.nodes['index-vwf'];
+			if(parent.id == id)
+				ret = parent;
+			else if(parent.children)
+			{
+				for(var i in parent.children)
+				{
+					ret = this.findNode(id, parent.children[i]);
+					if(ret) return ret;
+				}
+			}
+			return ret;
+		}
+		global.sessions[namespace].state.deleteNode = function(id,parent)
+		{
+			if(!parent) parent = this.nodes['index-vwf'];
+			if(parent.children)
+			{
+				for(var i in parent.children)
+				{
+					if( i == id)
+					{
+						delete parent.children[i];
+						return
+					}
+				}
+			}
+		}
+		
+		//change up the ID of the loaded scene so that they match what the client will have
+		var fixIDs = function(node)
+		{
+			if(node.children)
+			var childnames = {};
+			for(var i in node.children)
+			{
+				childnames[i] = null;
+			}
+			for(var i in childnames)
+			{
+				var childComponent = node.children[i];
+				var childName = i;
+				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
+				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+				childComponent.id = childID;
+				node.children[childID] = childComponent;
+				delete node.children[i];
+				fixIDs(childComponent);
+			}
+		}
+		
+		//only really doing this to keep track of the ownership
+		for(var i =0; i < state.length-1; i++)
+		{
+			var childComponent = state[i];
+			var childName = state[i].properties.DisplayName + i;
+			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
+			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+			state[i].id = childID;
+			global.sessions[namespace].state.nodes['index-vwf'].children[childID] = state[i];
+			fixIDs(state[i]);
+		}
+		console.log(Object.keys(global.sessions[namespace].state.nodes['index-vwf'].children));
+		
+		
+		
+		//this is a blank world, go ahead and load the default
 		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.sessions[namespace].time});
+		
+		
+		
 		socket.pending = false;
 	  }
 	  //this client is not the first, we need to get the state and mark it pending
@@ -413,7 +516,107 @@ function startVWF(){
 		
 			//need to add the client identifier to all outgoing messages
 		    var message = JSON.parse(msg);
+			//console.log(message);
 			message.client = socket.id;
+			var sendingclient = global.sessions[namespace].clients[socket.id];
+			
+			//do not accept messages from clients that have not been claimed by a user
+			if(!sendingclient.loginData)
+			{
+				return;
+			}
+			//We'll only accept a setProperty if the user has ownership of the object
+			if(message.action == "setProperty")
+			{
+			      var node = global.sessions[namespace].state.findNode(message.node);
+				  if(!node)
+				  {
+					console.log('server has no record of ' + message.node);
+					return;
+				  }
+				  if(checkOwner(node,sendingclient.loginData.UID))
+				  {	
+						//We need to keep track internally of the properties
+						//mostly just to check that the user has not messed with the ownership manually
+						node.properties[message.member] = message.parameters[0];
+						console.log("Set " +message.member +" of " +node.id+" to " + message.parameters[0]);
+				  }
+				  else
+				  {
+					console.log('permission denied for modifying ' + node.id);
+					return;
+				  }
+			}
+			//We'll only accept a any of these if the user has ownership of the object
+			if(message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" || 
+				message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent")
+			{
+			      var node = global.sessions[namespace].state.findNode(message.node);
+				  if(!node)
+				  {
+					console.log('server has no record of ' + message.node);
+					return;
+				  }
+				  if(checkOwner(node,sendingclient.loginData.UID))
+				  {	
+						console.log("Do " +message.action +" of " +node.id);
+				  }
+				  else
+				  {
+					console.log('permission denied for '+message.action+' on ' + node.id);
+					return;
+				  }
+			}
+			//We'll only accept a deleteNode if the user has ownership of the object
+			if(message.action == "deleteNode")
+			{
+				  var node = global.sessions[namespace].state.findNode(message.node);
+				  if(!node)
+				  {
+					console.log('server has no record of ' + message.node);
+					return;
+				  }
+				  if(checkOwner(node,sendingclient.loginData.UID))
+				  {	
+						//we do need to keep some state data, and note that the node is gone
+						global.sessions[namespace].state.deleteNode(message.node)
+						console.log("deleted " +node.id);
+				  }
+				  else
+				  {
+					console.log('permission denied for deleting ' + node.id);
+					return;
+				  }
+			}
+			//We'll only accept a createChild if the user has ownership of the object
+			//Note that you now must share a scene with a user!!!!
+			if(message.action == "createChild")
+			{
+				  console.log(message);
+				  var node = global.sessions[namespace].state.findNode(message.node);
+				  if(!node)
+				  {
+					console.log('server has no record of ' + message.node);
+					return;
+				  }
+				  //Keep a record of the new node
+				  if(checkOwner(node,sendingclient.loginData.UID))
+				  {	
+						var childComponent = message.parameters[0];
+						var childName = message.member;
+						var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
+						childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+						childComponent.id = childID;
+						if(!node.children) node.children = {};
+						node.children[childID] = childComponent;
+						console.log("created " + childID);
+				  }
+				  else
+				  {
+					console.log('permission denied for creating child ' + node.id);
+					return;
+				  }
+			}
 			//distribute message to all clients on given session
 			for(var i in global.sessions[namespace].clients)
 			{
@@ -424,6 +627,7 @@ function startVWF(){
 				{
 					console.log('Got State');
 					var state = message.result;
+					console.log(state);
 					client.emit('message',{"action":"setState","parameters":[state],"time":global.sessions[namespace].time});
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)

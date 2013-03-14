@@ -290,6 +290,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			var ww = parseInt(w.substr(0,w.length-2));
 			
 			$(document).trigger('prerender',[vp,wh,ww]);
+			$(document).trigger('postprerender',[vp,wh,ww]);
+			
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
 			sceneNode.axes.position = pos;
@@ -331,6 +333,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                 
             }
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
+			$(document).trigger('postrender',[vp,wh,ww]);
 			sceneNode.lastTime = now;
         };
 

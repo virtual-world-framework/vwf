@@ -186,12 +186,34 @@ function UserManager()
                     };
 	this.Login = function(profile)
 	{
+	
+	
+		
+		//take ownership of the client connection
+		var name = profile.Username;
+		var S = window.location.pathname;
+		
+		var data = jQuery.ajax({
+				type: 'GET',
+				url: PersistanceServer + "/vwfDataManager.svc/login?S="+S+"&UID="+profile.Username+"&P="+profile.Password+"&CID="+vwf.moniker(),
+				data: null,
+				success: null,
+				async:false,
+				dataType: "json"
+			});
+		
+		if(data.status != 400)
+		{
+			alert(data.responseText);
+			return;
+		}
+		
 	    $('#MenuLogInicon').css('background',"#555555");
 		$('#MenuLogOuticon').css('background',"");
         $('#MenuLogIn').attr('disabled','disabled');
 		$('#MenuLogOut').removeAttr('disabled');
 		this.PlayerProto.source= profile['Avatar'];
-		var name = profile.Username;
+		
 		
 		if(document.Players && document.Players.indexOf(name) != -1)
 		{
@@ -259,8 +281,14 @@ function UserManager()
 			$("#"+e+"label").append(" (me)");
 		}
 	}
-	this.SceneDestroy = function()
+	this.Logout = function()
 	{
+	
+	
+		
+	
+	
+	
         $('#MenuLogOuticon').css('background',"#555555");
 		$('#MenuLogInicon').css('background',"");
 		$('#MenuLogIn').removeAttr('disabled');
@@ -273,6 +301,30 @@ function UserManager()
 		parms.push(JSON.stringify({sender:'*System*',text:(document.PlayerNumber + " logging off")}));
 		
 		vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
+		
+		
+		
+		//take ownership of the client connection
+		
+		var profile = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName());
+		
+		var S = window.location.pathname;
+		var data = jQuery.ajax({
+				type: 'GET',
+				url: PersistanceServer + "/vwfDataManager.svc/logout?S="+S+"&UID="+profile.Username+"&P="+profile.Password+"&CID="+vwf.moniker(),
+				data: null,
+				success: null,
+				async:false,
+				dataType: "json"
+			});
+		
+		if(data.status != 400)
+		{
+			alert(data.responseText);
+			return;
+		}
+		
+		
 		document[document.PlayerNumber +'link'] = null;
 		document.PlayerNumber = null;
 		_UserManager.currentUsername = null;
@@ -304,19 +356,19 @@ function UserManager()
 	},
 	"Log In": function()
 	{
-			var profile = _DataManager.GetProfileForUser($('#profilenames').val());
+			var profile = _DataManager.GetProfileForUser($('#profilenames').val(),CryptoJS.SHA256($('#password').val()) + '',true);
 			if(!profile)
 			{
 				alert('There is no account with that username');
 				return;
 			}
-			
-			if(profile.Password != CryptoJS.SHA256($('#password').val()) + '')
+			if(profile.constructor == String)
 			{
-				alert('The password is incorrect.');
+				alert(profile);
 				return;
 			}
-			_UserManager.Login(_DataManager.GetProfileForUser($('#profilenames').val()));
+			
+			_UserManager.Login(profile);
 	},
 	"Cancel" : function(){
 		$('#Logon').dialog('close');

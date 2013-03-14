@@ -53,6 +53,7 @@ scripts:
     }
     this.initialize = function()
     {
+        if(this.id == '3DRObject-vwf') return;
         this.dirtyStack();
     }
     this.initTexture = function(value)
@@ -117,6 +118,7 @@ scripts:
     this.GetMesh = function()
     {
         var root = findviewnode(this.id);
+        if(!root) return null;
         var mesh = findleaf(root);
         
         return mesh;

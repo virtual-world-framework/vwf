@@ -74,14 +74,15 @@ function hierarchyManager()
 				this.SelectionBounds.parent.remove(this.SelectionBounds);
 				this.SelectionBounds = null;
 			}
-				var box = node.getBoundingBox(false);
 				
-				box.max.x += .05;
-				box.max.y += .05;
-				box.max.z += .05;
-				box.min.x -= .05;
-				box.min.y -= .05;
-				box.min.z -= .05;
+				var box = node.GetBoundingBox(true);
+				
+				box.max[0] += .05;
+				box.max[1] += .05;
+				box.max[2] += .05;
+				box.min[0] -= .05;
+				box.min[1] -= .05;
+				box.min[2] -= .05;
 				var mat = matCpy(node.matrixWorld.elements);
 				//mat = GLGE.inverseMat4(mat);
 				//mat[3] = 0;
@@ -89,16 +90,23 @@ function hierarchyManager()
 				//mat[11] = 0;
 				
 				
-				this.SelectionBounds = _Editor.BuildBox([box.max.x - box.min.x,box.max.y - box.min.y,box.max.z - box.min.z],[box.min.x + (box.max.x - box.min.x)/2,box.min.y + (box.max.y - box.min.y)/2,box.min.z + (box.max.z - box.min.z)/2],color);
+				this.SelectionBounds = _Editor.BuildBox([box.max[0] - box.min[0],box.max[1] - box.min[1],box.max[2] - box.min[2]],[box.min[0] + (box.max[0] - box.min[0])/2,box.min[1] + (box.max[1] - box.min[1])/2,box.min[2] + (box.max[2] - box.min[2])/2],color);
+				//this.SelectionBounds = _Editor.BuildBox([box.max[0] - box.min[0],box.max[1] - box.min[1],box.max[2] - box.min[2]],[0,0,0],color);
 				
 				this.SelectionBounds.matrixAutoUpdate = false;
 				this.SelectionBounds.matrix.elements = mat;
 				this.SelectionBounds.updateMatrixWorld(true);
+				this.SelectionBounds.material = new THREE.MeshBasicMaterial();
+				this.SelectionBounds.material.color.r = color[0];
+				this.SelectionBounds.material.color.g = color[1];
+				this.SelectionBounds.material.color.b = color[2];
 				this.SelectionBounds.material.wireframe = true;
-				this.SelectionBounds.renderDepth = 10000 -1;
+				this.SelectionBounds.renderDepth = 10000 -3;
 				this.SelectionBounds.material.depthTest = false;
 				this.SelectionBounds.material.depthWrite = false;
 				this.SelectionBounds.PickPriority = -1;
+				
+
 				
 				_Editor.findscene().add(this.SelectionBounds);
 		}

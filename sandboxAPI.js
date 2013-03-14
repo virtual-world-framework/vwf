@@ -43,6 +43,206 @@ function ServeFile(filename,response,URL, JSONHeader)
 			
 		});
 }
+//get a profile for a user
+//url must contain UID for user and password hash
+function ServeProfile(filename,response,URL, JSONHeader)
+{
+		fs.readFile(filename, "utf8", function (err, file) {
+			
+			//the file could not be read
+			if (err) {
+				response.writeHead(400, {
+					"Content-Type": "text/plain"
+				});
+				response.write("Profile not found" + "\n");
+				console.log('Profile not found ' + filename);
+				response.end();
+				return;
+			}
+ 
+			//check that the user can get the data
+			var profile = JSON.parse(file);
+			//def3735d7a0d2696775d6d72f379e4536c4d9e3cd6367f27a0bcb7f40d4558fb
+			var storedPassword = profile.Password;
+			var suppliedPassword = URL.query.P;
+			if(storedPassword == suppliedPassword)
+			{
+				
+				
+				var o = {};
+				o[JSONHeader] = file;
+				response.write(JSON.stringify(o), "utf8");			
+				response.end();
+				console.log('Served Profile ' + filename);
+			}
+			else
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Password not correct", "utf8");
+				console.log('Incorrect password when getting Profile ' + filename);
+				response.end();
+			}
+		});
+}
+
+
+//Take ownership if a client websocket connection
+//must provide a password and name for the user, and the session and client ids.
+//This will associate a user with a reflector connection
+//The reflector will not accept incomming messages from an anonymous connection
+function Login(filename,response,URL, JSONHeader)
+{
+			var UID = URL.query.UID;
+			var password = URL.query.P;
+			var session = URL.query.S;
+			var cid = URL.query.CID;
+			
+			if(!UID || !password || !session || !cid)
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Login Format incorrect", "utf8");
+				response.end();
+				return;
+			}
+			if(!global.sessions || !global.sessions[session])
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Session does not exist", "utf8");
+				response.end();
+				return;
+			}
+			if(!global.sessions[session].clients[cid])
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Client is not connected to session", "utf8");
+				response.end();
+				return;
+			}
+			if(global.sessions[session].clients[cid].loginData)
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Client is already logged in", "utf8");
+				response.end();
+				return;
+			}
+			fs.readFile(filename, "utf8", function (err, file) {
+			
+				//the file could not be read
+				if (err) {
+					response.writeHead(401, {
+						"Content-Type": "text/plain"
+					});
+					response.write("Profile not found" + "\n");
+					console.log('Profile not found ' + filename);
+					response.end();
+					return;
+				}
+	 
+				//check that the user can get the data
+				var profile = JSON.parse(file);
+				//def3735d7a0d2696775d6d72f379e4536c4d9e3cd6367f27a0bcb7f40d4558fb
+				var storedPassword = profile.Password;
+				
+				if(storedPassword == password)
+				{
+					global.sessions[session].clients[cid].loginData = {};
+					global.sessions[session].clients[cid].loginData.UID = UID;
+					global.sessions[session].clients[cid].loginData.Password = password;
+					response.writeHead(400, {
+						"Content-Type":  "text/plain"
+					});
+					response.write("Login Successful", "utf8");
+					console.log('Client Logged in');
+					response.end();
+				}
+				else
+				{
+					response.writeHead(401, {
+						"Content-Type":  "text/plain"
+					});
+					response.write("Password not correct", "utf8");
+					console.log('Incorrect password when getting Profile ' + filename);
+					response.end();
+				}
+				return;
+			});
+}
+
+function Logout(filename,response,URL, JSONHeader)
+{
+			var UID = URL.query.UID;
+			var password = URL.query.P;
+			var session = URL.query.S;
+			var cid = URL.query.CID;
+			
+			if(!UID || !password || !session || !cid)
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Logout Format incorrect", "utf8");
+				response.end();
+				return;
+			}
+			if(!global.sessions || !global.sessions[session])
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Session does not exist", "utf8");
+				response.end();
+				return;
+			}
+			if(!global.sessions[session].clients[cid])
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Client is not connected to session", "utf8");
+				response.end();
+				return;
+			}
+			if(!global.sessions[session].clients[cid].loginData)
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Client is not logged in", "utf8");
+				response.end();
+				return;
+			}
+			if(global.sessions[session].clients[cid].loginData.UID == UID && global.sessions[session].clients[cid].loginData.Password == password)
+			{
+				response.writeHead(400, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Client logged out", "utf8");
+				response.end();
+				delete global.sessions[session].clients[cid].loginData;
+				return;
+			}else
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Name or password incorrect", "utf8");
+				response.end();
+				return;
+			
+			}
+			
+}
+
 function ServeJSON(jsonobject,response,URL)
 {
 		    
@@ -52,6 +252,50 @@ function ServeJSON(jsonobject,response,URL)
 			response.write(JSON.stringify(jsonobject), "utf8");
 			response.end();
 			
+}
+function SaveProfile(URL,filename,data,response)
+{
+	//the profile is new
+	if(!fs.existsSync(filename))
+	{
+		SaveFile(filename,data,response);
+		console.log('Saved Profile ' + filename);
+	}
+	//the profile exists
+	else
+	{
+		fs.readFile(filename, "utf8", function (err, file) {
+			
+			//the file could not be read
+			if (err) {
+				response.writeHead(500, {
+					"Content-Type": "text/plain"
+				});
+				response.write(err + "\n");
+				response.end();
+				return;
+			}
+ 
+			//check that the user can get the data
+			var profile = JSON.parse(file);
+			//def3735d7a0d2696775d6d72f379e4536c4d9e3cd6367f27a0bcb7f40d4558fb
+			var storedPassword = profile.Password;
+			var suppliedPassword = URL.query.P;
+			if(storedPassword == suppliedPassword)
+			{
+				SaveFile(filename,data,response);
+				console.log('Saved Profile ' + filename);
+			}else
+			{
+				response.writeHead(401, {
+					"Content-Type":  "text/plain"
+				});
+				response.write("Password not correct", "utf8");
+				console.log('Incorrect password when saving Profile ' + filename);
+				response.end();
+			}
+		});
+	}
 }
 function SaveFile(filename,data,response)
 {
@@ -98,6 +342,17 @@ function RecurseDirs(currentdir, files)
 		}
 	}
 }
+function getState(UID)
+{
+	var basedir = "C:\\VWFData\\";
+	console.log('servestate ' + basedir+"states\\" + UID);
+	if(fs.existsSync(basedir+"states\\" + UID))
+	{
+		file = fs.readFileSync(basedir+"states\\" + UID,'utf8');
+		return JSON.parse(file);
+	}
+	return null;
+}
 function serve (request, response)
 {
 	var URL = url.parse(request.url,true);
@@ -120,7 +375,13 @@ function serve (request, response)
 				ServeFile(basedir+"states\\" + UID,response,URL,'GetStateResult');		
 			} break;
 			case "profile":{
-				ServeFile(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
+				ServeProfile(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
+			} break;
+			case "login":{
+				Login(basedir+"profiles\\" + UID,response,URL);		
+			} break;
+			case "logout":{
+				Logout(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
 			} break;
 			case "profiles":{
 
@@ -183,7 +444,7 @@ function serve (request, response)
 					SaveFile(basedir+"states\\"+UID,body,response);
 				}break;
 				case "profile":{
-					SaveFile(basedir+"profiles\\"+UID,body,response);
+					SaveProfile(URL, basedir+"profiles\\"+UID,body,response);
 				}break;
 				default:
 				{
@@ -199,3 +460,4 @@ function serve (request, response)
 }
 
 exports.serve = serve;
+exports.getState = getState;

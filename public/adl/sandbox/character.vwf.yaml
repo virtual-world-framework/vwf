@@ -82,6 +82,8 @@ scripts:
           this.initCycles();
           this.activeCycle = this.cycles.stand;
           this.updateLoopStarted = false;
+          var now = performance.now();
+          this.lastUpdate = now;
           //window.setTimeout(function(){document[PlayerNumber +'link'].startloop();},500);
     }
     this.pointerOver = function(e)
@@ -149,6 +151,27 @@ scripts:
     {
       if(!this.ownerClientID)  
         return;
+      var now = performance.now();	
+      var timediff =  now - this.lastUpdate;
+      timediff = timediff/50.0;
+      timediff = Math.min(timediff,1.0);
+      
+       
+      if(this.prevframe !=   this.currentframe    )
+      {      
+        this.skin.morphTargetInfluences[parseInt(this.prevframe)] = 1.0-timediff;
+        this.skin.morphTargetInfluences[parseInt(this.currentframe)] = timediff;     
+      }
+      
+      var slicedTrans = [0,0,0];
+      slicedTrans[0] = this.prevTranslation[0]*(1.0-timediff) + this.currentTranslation[0]  * timediff;    
+      slicedTrans[1] = this.prevTranslation[1]*(1.0-timediff) + this.currentTranslation[1]  * timediff;
+      slicedTrans[2] = this.prevTranslation[2]*(1.0-timediff) + this.currentTranslation[2]  * timediff;
+      this.translation =  slicedTrans;    
+      
+      this.quaternion = goog.vec.Quaternion.slerp(this.prevQuat,this.currentQuat,timediff,[0,0,0,0]);
+      
+      
       var rootdiv = document.getElementById('index-vwf');
       var h = rootdiv.style.height;
       var w = rootdiv.style.width;
@@ -208,6 +231,8 @@ scripts:
     this.update = function(moniker)
     {
         var time = new Date();
+        this.prevTranslation = [this.translation[0],this.translation[1],this.translation[2]];
+        this.prevQuat = [this.quaternion[0],this.quaternion[1],this.quaternion[2],this.quaternion[3]];
         this.updatecounter++;
         var updateFreqDivisor = 1;
         
@@ -250,6 +275,7 @@ scripts:
                
                this.skin.morphTargetInfluences[parseInt(newframe)] = 1;     
             }
+            this.prevframe = this.currentframe;
             this.currentframe = newframe;
         }
         
@@ -455,6 +481,11 @@ scripts:
         }
         //vwf.plan(this.id,'callMethod','update',[],-1.0/30,null);
         //this.future(1.0/30).update(this.moniker);
+        
+        var now = performance.now();
+        this.lastUpdate = now;
+        this.currentTranslation = [this.translation[0],this.translation[1],this.translation[2]];
+        this.currentQuat = [this.quaternion[0],this.quaternion[1],this.quaternion[2],this.quaternion[3]];
     }
     this.tick = function()
     {

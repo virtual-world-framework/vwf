@@ -76,7 +76,7 @@ function DataManager()
 			data = JSON.parse(JSON.parse(data.responseText).GetProfilesResult);
 			return data;
 	}
-	this.GetProfileForUser = function(username,reload)
+	this.GetProfileForUser = function(username,password,reload)
 	{
 		var profile = null;
 		for(var i in this.rawdata.profiles)
@@ -86,11 +86,11 @@ function DataManager()
 		}
 		if(!profile || reload)
 		{
-		
+			
 			var UID  = this.getCurrentSession();
 			var data = jQuery.ajax({
 				type: 'GET',
-				url: PersistanceServer + '/vwfDataManager.svc/Profile?UID=' + username,
+				url: PersistanceServer + '/vwfDataManager.svc/Profile?UID=' + username + "&P=" + password,
 				data: null,
 				success: null,
 				async:false,
@@ -106,7 +106,7 @@ function DataManager()
 				this.rawdata.profiles[username] = profile;
 			}catch(e)
 			{
-				debugger;
+				return data.responseText;
 			}
 		    
 		}
@@ -116,7 +116,7 @@ function DataManager()
 	{
 		this.rawdata.profiles[profile.Username] = profile;
 		profile.inventory = this.getInventory(profile.Username);
-		$.post(PersistanceServer + "/VWFDataManager.svc/Profile?UID="+profile.Username, JSON.stringify(profile),function(){});
+		$.post(PersistanceServer + "/VWFDataManager.svc/Profile?UID="+profile.Username +"&P=" + profile.Password, JSON.stringify(profile),function(){});
 		this.saveData();
 	}
 	this.getInventory = function(name)
@@ -526,15 +526,20 @@ function DataManager()
 	this.loadScene  = function(num)
 	{
 		this.clearScene();
+		
 		for(var i =0; i<this.rawdata.scenes[num].length-1; i++)
 		{
-			vwf_view.kernel.createChild('index-vwf',GUID(),this.rawdata.scenes[num][i],null,null);
+			var node = this.rawdata.scenes[num][i];
+			var name = node.properties.DisplayName + i;
+			vwf_view.kernel.kernel.createChild('index-vwf',name,node,null,null);
 		}
 		var props = this.rawdata.scenes[num][this.rawdata.scenes[num].length-1]
 		for(var i in props){if(props[i] !== undefined && i!='EditorData')vwf.setProperty('index-vwf',i,props[i])};
 		
 		this.currentSceneName = name;
 		$('#SceneName').html(name);
+		//push the scene up to the server. Should at this point be no other client, but the server needs to know about the state
+		vwf.respond("","stateLoaded","",[],{});
 	}
 	this.addScene = function(name,s)
 	{

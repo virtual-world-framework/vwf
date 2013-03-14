@@ -245,7 +245,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			
 			if($('#MenuLogOut').attr('disabled') == 'disabled')
 				return;
-			_UserManager.SceneDestroy();	
+			_UserManager.Logout();	
 			
 		});
 		$('#MenuSelectPick').click(function(e){
@@ -656,7 +656,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         if(_DataManager.getClientCount() == 1)
 		{
 			_DataManager.loadFromServer();
-		}	
+		}
 	
 		window.setTimeout(function(){_DataManager.saveTimer();},60000);		
 		window.onbeforeunload = function(){

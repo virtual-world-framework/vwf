@@ -36,7 +36,9 @@ properties:
     set: |
             if(!this.sun) return;
             this.sun.intensity = value;                   
-  ambientColor: [155, 155, 155]
+  ambientColor: 
+    set: |
+            this.sun.shadowDarkness = 1.0-MATH.lengthVec3(value);
   fogColor: [155, 155, 155]
   fogNear: 100
   fogFar: 1000
@@ -244,7 +246,7 @@ scripts:
        this.sun.position.normalize();
        this.sun.position.multiplyScalar(100);
        this.sun.intensity = this.sunIntensity;
-       this.sun.shadowBias = -.002
+       this.sun.shadowBias = -.005
        window._dGround = this.groundplane;
        window._dSun = this.sun;
        
@@ -264,7 +266,9 @@ scripts:
        */
          if(this.id == 'Scene-vwf') return;
           this.prerendercallback = this.prerender.bind(this);
+          this.postrendercallback = this.postrender.bind(this);
           $(document).bind('prerender',this.prerendercallback);
+          $(document).bind('postprerender',this.postrendercallback);
           this.createNameTag();
           this.updateCamera();
     }
@@ -1002,7 +1006,13 @@ scripts:
     this.deinitialize = function()
     {
        $(document).unbind('prerender',this.prerendercallback);
+       $(document).unbind('postprerender',this.postrendercallback);
        $(this.nametag).remove();
+    }
+    this.postrender = function()
+    {
+        
+        this.updateCamera();
     }
     this.prerender = function(e,viewprojection, wh, ww)
     {

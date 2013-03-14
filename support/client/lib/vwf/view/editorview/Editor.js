@@ -1727,9 +1727,9 @@ function Editor()
 				if(findviewnode(SelectedVWFNodes[i].id).initializedFromAsset)
 					color = [1,0,0,1];
 				if(vwf.getProperty(SelectedVWFNodes[i].id,'type') == 'Group' && vwf.getProperty(SelectedVWFNodes[i].id,'open') == false)	
-					color = [.2,.5,.2,1];
+					color = [0,1,0,1];
 				if(vwf.getProperty(SelectedVWFNodes[i].id,'type') == 'Group' && vwf.getProperty(SelectedVWFNodes[i].id,'open') == true)	
-					color = [.5,1,.5,1];	
+					color = [.7,1.0,.7,1];	
 					
 				
 				SelectionBounds[i] = new THREE.Object3D();
@@ -1737,10 +1737,17 @@ function Editor()
 				SelectionBounds[i].matrixAutoUpdate = false;
 				SelectionBounds[i].matrix.elements = MATH.transposeMat4(mat);
 				SelectionBounds[i].updateMatrixWorld(true);
+				SelectionBounds[i].children[0].material = new THREE.MeshBasicMaterial();
 				SelectionBounds[i].children[0].material.wireframe = true;
 				SelectionBounds[i].children[0].renderDepth = 10000 -3;
 				SelectionBounds[i].children[0].material.depthTest = false;
 				SelectionBounds[i].children[0].material.depthWrite = false;
+				SelectionBounds[i].children[0].material.color.r = color[0];
+				SelectionBounds[i].children[0].material.color.g = color[1];
+				SelectionBounds[i].children[0].material.color.b = color[2];
+				
+			
+				
 				SelectionBounds[i].children[0].PickPriority = -1;
 				// SelectionBounds[i].InvisibleToCPUPick = true;
 				// SelectionBounds[i].setCastShadows(false);
@@ -1819,7 +1826,7 @@ function Editor()
 	}
 	var SelectObject = function(VWFNode,selectmod)
 	{
-		
+		this.waitingForSet.length = 0;
 		if(VWFNode && VWFNode.constructor.name == 'Array')
 		{
 			for(var i =0; i < VWFNode.length; i++)
@@ -2239,7 +2246,16 @@ function Editor()
 		mesh.material.emissive.r = color[0];
 		mesh.material.emissive.g = color[1];
 		mesh.material.emissive.b = color[2];
-		mesh.matrix.setPosition(new THREE.Vector3(offset[0],offset[1],offset[2]));
+		mesh.material.shading = false;
+		//mesh.matrix.setPosition(new THREE.Vector3(offset[0],offset[1],offset[2]));
+		for (var i =0 ; i < mesh.geometry.vertices.length; i++)
+		{	
+			mesh.geometry.vertices[i].x += offset[0];
+			mesh.geometry.vertices[i].y += offset[1];
+			mesh.geometry.vertices[i].z += offset[2];
+			
+		
+		}
 		mesh.matrixAutoUpdate = false;
 		mesh.updateMatrixWorld(true);
 		return mesh;

@@ -694,19 +694,20 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             while ( queue.ready && queue.length > 0 && queue[0].time <= queue.time ) {
 
                 var fields = queue.shift();
-
+				
                 // Advance the time.
 
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
-					queue.time = this.now;
+				
                     var time = (this.now - this.lastTick);
 					if(time < 1)
 					{
-						while(time > .033333333)
+						
+						while(time > .05)
 						{	
 							this.tick();
-							time -= .03333333;
+							time -= .05;
 							//console.log('tick',this.now);
 						}
 						//save the leftovers

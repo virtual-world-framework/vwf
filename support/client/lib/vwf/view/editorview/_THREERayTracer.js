@@ -20,7 +20,7 @@ THREE.Object3D.prototype.getLocalMatrix = function()
 {
 		var mat = [];
 	for(var i=0; i < 16; i++)
-		mat.push(this.matrixWorld.elements[i]);
+		mat.push(this.matrix.elements[i]);
 	return MATH.transposeMat4(mat);
 }
 
@@ -78,27 +78,7 @@ THREE.Scene.prototype.CPUPick = function(origin,direction,options)
 }
 
 
-//Get the bounding box for a group
-THREE.Object3D.prototype.GetBoundingBox = function(local)
-{
-	//make blank box and expand by children's bounds
-	var box = new BoundingBoxRTAS();
-	for(var i=0; i <  this.children.length; i++)
-	{
-		if(this.children[i].GetBoundingBox)
-			box.expandBy(this.children[i].GetBoundingBox());
-	}
-	if(this.geometry)
-	{
-		box.expandBy(this.geometry.GetBoundingBox());	
-	}
-	//Transform by the local matrix.
-	//set local to true to get the bounds without this top node transform
-	//useful for drawing the bounds in non AABB form
-	if(!local)
-		box = box.transformBy(this.getLocalMatrix());
-	return box;
-}
+
 
 
 //MATH.Collada.prototype.CPUPick = MATH.Group.prototype.CPUPick;
@@ -942,17 +922,27 @@ THREE.Geometry.prototype.FrustrumCast = function(frustrum)
 	  this.dirtyMesh = false;
       return intersections;
 }
-//Gets it in this groups local space!
+
+//Get the bounding box for a group
 THREE.Object3D.prototype.GetBoundingBox = function(local)
 {
+	//make blank box and expand by children's bounds
+	var box = new BoundingBoxRTAS();
+	for(var i=0; i <  this.children.length; i++)
+	{
+		if(this.children[i].GetBoundingBox)
+			box.expandBy(this.children[i].GetBoundingBox());
+	}
 	if(this.geometry)
-		{
-			var box = this.geometry.GetBoundingBox();
-			if(!local)
-				box = box.transformBy(this.getLocalMatrix());	
-			return box;
-		}
-	return new BoundingBoxRTAS();	
+	{
+		box.expandBy(this.geometry.GetBoundingBox());	
+	}
+	//Transform by the local matrix.
+	//set local to true to get the bounds without this top node transform
+	//useful for drawing the bounds in non AABB form
+	if(!local)
+		box = box.transformBy(this.getLocalMatrix());
+	return box;
 }
 
 //no need to test bounding box here. Can only contain one mesh, and the mesh will check its own
