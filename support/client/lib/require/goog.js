@@ -4,7 +4,7 @@
  * Version: 0.2.0 (2011/12/06)
  * Released under the MIT license
  */
-define(['async', 'propertyParser'], function (async, propertyParser) {
+define(['./async', './propertyParser', 'require'], function (async, propertyParser, pluginRequire) {
 
     var rParts = /^([^,]+)(?:,([^,]+))?(?:,(.+))?/;
 
@@ -28,7 +28,7 @@ define(['async', 'propertyParser'], function (async, propertyParser) {
 
                 settings.callback = onLoad;
 
-                req(['async!'+ (document.location.protocol === 'https:'? 'https' : 'http') +'://www.google.com/jsapi'], function(){
+                pluginRequire(['./async!'+ (document.location.protocol === 'https:'? 'https' : 'http') +'://www.google.com/jsapi'], function(){
                     google.load(data.moduleName, data.version, settings);
                 });
             }
