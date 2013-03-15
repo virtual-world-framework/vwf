@@ -15,6 +15,34 @@
 
 ( function() {
 
+    var config = {
+
+        shim: {
+            async: {
+                exports: "async",
+                init: function() { return this.async.noConflict() },
+            },
+            crypto: {
+                exports: "Crypto",
+            },
+            md5: {
+                deps: [ "crypto" ],
+                exports: "Crypto.MD5",
+            },
+            alea: {
+                deps: [ "mash" ],
+                exports: "Alea",
+            },
+            mash: {
+                exports: "Mash"
+            },
+            rAF: {
+                exports: "requestAnimationFrame"
+            },
+        },
+
+    };
+
     // `kernel.initialize` parameters.
 
     var application, modelInitializers, viewInitializers;
@@ -55,7 +83,7 @@
  
     // Load the kernel, wait for the DOM ready state, then initialize the kernel.
 
-    require( [ "domReady", "vwf" ], function( ready, vwf ) {
+    require( config, [ "domReady", "vwf" ], function( ready, vwf ) {
         ready( function() {
             vwf.initialize( application, modelInitializers, viewInitializers );
         } );

@@ -17,7 +17,7 @@
 /// @requires vwf/view
 /// @requires vwf/utility
 
-define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility ) {
+define( [ "module", "vwf/view", "vwf/utility", "rAF" ], function( module, view, utility, requestAnimationFrame ) {
 
     return view.load( module, /** @lends module:vwf/view/glge */ {
 
@@ -202,7 +202,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var lastPickTime = 0;
         function renderScene(time) {
             time = time || 0;
-            window.requestAnimationFrame( renderScene );
+            requestAnimationFrame( renderScene );
             sceneNode.frameCount++;
             if((time - lastPickTime) > 10) {
                 var newPick = mousePick.call( this, mouse, sceneNode );

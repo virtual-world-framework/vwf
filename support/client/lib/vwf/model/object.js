@@ -19,7 +19,7 @@
 /// @requires vwf/model
 /// @requires vwf/configuration
 
-define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model, configuration ) {
+define( [ "module", "vwf/model", "vwf/configuration", "alea" ], function( module, model, configuration, Alea ) {
 
     return model.load( module, /** @lends module:vwf/model/object */ {
 

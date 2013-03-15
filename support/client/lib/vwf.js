@@ -31,13 +31,17 @@ define( [ "module",
     "vwf/configuration",
     "vwf/kernel/model",
     "vwf/kernel/view",
-    "vwf/utility"
+    "vwf/utility",
+    "async",
+    "md5"
 ], function( module,
     logger,
     configuration,
     kernel_model,
     kernel_view,
-    utility
+    utility,
+    async,
+    md5
 ) {
 
     logger.for( module.id ).debug( "loading" );
@@ -891,11 +895,11 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             // Hash the queue.
 
-            var hashq = "q" + Crypto.MD5( JSON.stringify( applicationState.queue ) ).toString().substring( 0, 16 );
+            var hashq = "q" + md5( JSON.stringify( applicationState.queue ) ).toString().substring( 0, 16 );
 
             // Hash the other kernel properties.
 
-            var hashk = "k" + Crypto.MD5( JSON.stringify( applicationState.kernel ) ).toString().substring( 0, 16 );
+            var hashk = "k" + md5( JSON.stringify( applicationState.kernel ) ).toString().substring( 0, 16 );
 
             this.logger.debugu();
 
@@ -1432,21 +1436,21 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             internal.source === undefined && delete internal.source;
             internal.type === undefined && delete internal.type;
 
-            var hashi = "i" + Crypto.MD5( JSON.stringify( internal ) ).toString().substring( 0, 16 );
+            var hashi = "i" + md5( JSON.stringify( internal ) ).toString().substring( 0, 16 );
 
             // Hash the properties.
 
             var properties = nodeComponent.properties || {};
 
             var hashp = Object.keys( properties ).length ?
-                "p" + Crypto.MD5( JSON.stringify( properties ) ).toString().substring( 0, 16 ) : undefined;
+                "p" + md5( JSON.stringify( properties ) ).toString().substring( 0, 16 ) : undefined;
 
             // Hash the children.
 
             var children = nodeComponent.children || {};
 
             var hashc = Object.keys( children ).length ?
-                "c" + Crypto.MD5( JSON.stringify( children ) ).toString().substring( 0, 16 ) : undefined;
+                "c" + md5( JSON.stringify( children ) ).toString().substring( 0, 16 ) : undefined;
 
             this.logger.debugu();
 
@@ -1506,7 +1510,7 @@ useLegacyID = useLegacyID ||  // TODO: fix static ID references and remove
                 var childID = childComponent.id;
             } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
                 var childID = childURI ||  // TODO: hash uri => id to shorten for faster lookups?
-                    Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
+                    md5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
 }
