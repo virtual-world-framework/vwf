@@ -348,7 +348,7 @@
                         // accepts three parameters: a world specification, model configuration parameters,
                         // and view configuration parameters.
 
-                        vwf.initialize(getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true));
+                        vwf.initialize(application, getActiveLibraries(initializers["model"], true), getActiveLibraries(initializers["view"], true));
 
                     } );
 
@@ -392,6 +392,7 @@
             [ viewInitializers ] */ ) {
 
             var args = Array.prototype.slice.call( arguments );
+            var application;
 
             // Load the runtime configuration. We start with the factory defaults. The reflector may
             // provide additional settings when we connect.
