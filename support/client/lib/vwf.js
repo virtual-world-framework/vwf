@@ -1573,15 +1573,20 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Methods.
 
-            // nodeComponent.methods = {};  // TODO
+            if ( full || !patching || patches.methods ) {
+                var self = this;
+                nodeComponent.methods = {};
+                patches.methods.forEach( function( methodName ) {
+                    var method = self.models.javascript.nodes[ nodeID ].methods.node.private.bodies[ methodName ];
+                    if ( method )
+                        nodeComponent.methods[ methodName ] = method.toString();
+                } );
 
-            // for ( var methodName in nodeComponent.methods ) {
-            //     nodeComponent.methods[methodName] === undefined &&
-            //         delete nodeComponent.methods[methodName];
-            // }
-
-            // Object.keys( nodeComponent.methods ).length ||
-            //     delete nodeComponent.methods;
+                if ( Object.keys( nodeComponent.methods ).length == 0 )
+                    delete nodeComponent.methods;
+                else
+                    patched = true;
+            }
 
             // Events.
 
