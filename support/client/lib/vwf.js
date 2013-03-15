@@ -32,6 +32,7 @@ define( [ "module",
     "vwf/kernel/model",
     "vwf/kernel/view",
     "vwf/utility",
+    "socket.io",
     "async",
     "md5"
 ], function( module,
@@ -40,6 +41,7 @@ define( [ "module",
     kernel_model,
     kernel_view,
     utility,
+    io,
     async,
     md5
 ) {

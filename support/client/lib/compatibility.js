@@ -34,6 +34,13 @@ function testES5()
     return !this;
 }
 
+// Copied from socket.io's WS.check to avoid loading the library before testing.
+
+function testWS(){
+    return 'WebSocket' in window && WebSocket.prototype && ( WebSocket.prototype.send &&
+        !!WebSocket.prototype.send.toString().match(/native/i)) && typeof WebSocket !== "undefined";
+}
+
 function updateOverlay()
 {
 	$("#loadVWFModal").centerInClient();
@@ -67,7 +74,7 @@ function updateOverlay()
     }
 
 	// Test for WebSockets
-    if( io.Transport.websocket.check() )
+    if(testWS())
 	{
 		//$('#WS').prepend("<img src='images/check.png' alt=' ' width='20px'/>"); 
 		$('#loadVWFProgressBar').width("90%");

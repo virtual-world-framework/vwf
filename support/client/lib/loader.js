@@ -18,6 +18,9 @@
     var config = {
 
         shim: {
+            "socket.io": {
+                exports: "io",
+            },
             async: {
                 exports: "async",
                 init: function() { return this.async.noConflict() },
