@@ -2,6 +2,30 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.4
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Switch `source` from :rubygems to "https://rubygems.org".
+- NEW: Add compliance page to the website to define what it means to use the framework.
+- CHG: Fix part of lesson synch problem by making taskIndex a property
+- NEW: Add first draft of complex transformation recipe to cookbook.
+- CHG: Change task property for scene node to be scenePath. This avoids replication problems w/ node properties
+- CHG*: Add scene property to task component. It need only be set on the top node, and it will recursively cascade to all its children tasks.
+- CHG: Update pitfalls doc
+- NEW: Add chat and sound recipes to the cookbook.
+- CHG: Update OrientationCubeYUp.dae to convert -Y to Z.
+- CHG: Update OrientationCubeYUp.dae to convert -Y to Z.
+- NEW: Add OrientationCubeYUp.dae.
+- CHG: Update lesson to work with new lesson/task component
+- CHG: Add comments to task component
+- CHG: Have task component use methods instead of events where appropriate
+- NEW: Add two new cookbook templates for complex transforms and event system.
+- CHG: Update login dialog to select an existing user or create a new one. Allow for multiplayer persistence.
+- CHG: Fix documentation menu spacing issue for IE8 and correct typo in FAQ page.
+- CHG*:  Add transformTo to node3
+- CHG:  Add event handling pitfall to Pitfalls page
+- CHG:  Add to-do comment to lesson app
 
 0.6.3
 ----------------------------------------------------------------------------------------------------
