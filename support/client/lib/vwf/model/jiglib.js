@@ -16,7 +16,7 @@
 /// @module vwf/model/jiglib
 /// @requires vwf/model
 
-define( [ "module", "vwf/model" ], function( module, model ) {
+define( [ "module", "vwf/model", "vwf/model/jiglib/jiglib" ], function( module, model ) {
 
     return model.load( module, /** @lends module:vwf/model/jiglib */ {
 

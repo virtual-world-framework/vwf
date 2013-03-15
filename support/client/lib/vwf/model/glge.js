@@ -19,7 +19,7 @@
 /// @requires vwf/model
 /// @requires vwf/utility
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/model/glge/glge-compiled" ], function( module, model, utility ) {
 
     // For historical reasons yet to be resolved, the GLGE model code currently resides in
     // vwf-model.glge.js intermixed with the view code. This driver is a gross hack to delegate model

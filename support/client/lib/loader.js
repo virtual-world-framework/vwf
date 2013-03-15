@@ -39,6 +39,12 @@
             rAF: {
                 exports: "requestAnimationFrame"
             },
+            "vwf/model/glge/glge-compiled": {
+                exports: "GLGE"
+            },
+            "vwf/model/jiglib/jiglib": {
+                exports: "jigLib"
+            },
         },
 
     };
