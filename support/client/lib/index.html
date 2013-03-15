@@ -37,22 +37,6 @@
     <script type="text/javascript" src="Class.create.js"></script>
     <script type="text/javascript" src="jquery-encoder-0.1.0.js"></script>
 
-    <!-- The core framework manages the simulation and synchronizes it across worlds shared by   -->
-    <!-- multiple users. But, the manner in which the simulation is expressed is controlled by   -->
-    <!-- extension modules. There are two flavors. Models directly control the simulation but    -->
-    <!-- cannot accept external input. The model configuration is identical for all participants -->
-    <!-- in a shared world. Views may accept external input -such as pointer and key events or   -->
-    <!-- directives from a connection to an outside engine that is not visible to all users- but -->
-    <!-- may only affect the simulation indirectly through the synchronization server.           -->
-
-    <script type="text/javascript">var connected = window.location.search.indexOf( "?connected" ) == 0</script>
-    <script type="text/javascript">var cesium = window.location.search.indexOf( "?cesium" ) == 0</script>
-    <script type="text/javascript">connected && document.write( "<scr" + "ipt type='text/javascript' src='http://www.google.com/jsapi?hl=en&amp;key=ABQIAAAAwbkbZLyhsmTCWXbTcjbgbRSzHs7K5SvaUdm8ua-Xxy_-2dYwMxQMhnagaawTo7L1FE1-amhuQxIlXw'></scr" + "ipt>")</script>
-    <script type="text/javascript">connected && google.load( "earth", "1" )</script>
-
-    <!-- This is the common view implementation and an example view that summarizes the          -->
-    <!-- simulation state in HTML on the main page.                                              -->
-
     <script type="text/javascript" src="require.js" data-main="loader"></script>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />

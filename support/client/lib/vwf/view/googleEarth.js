@@ -16,7 +16,7 @@
 /// @module vwf/view/googleEarth
 /// @requires vwf/view
 
-define( [ "module", "vwf/view" ], function( module, view ) {
+define( [ "module", "vwf/view", "require/goog!earth,1" ], function( module, view ) {
 
     return view.load( module, /** @lends module:vwf/view/googleEarth */ {
 
