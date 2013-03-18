@@ -993,25 +993,26 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 		  if(this.geometry)
 		  {
 				//collide with the mesh
-				ret = this.geometry.CPUPick(newo,newd,options);
+				var ret2 = this.geometry.CPUPick(newo,newd,options);
 				
-				for(var i = 0; i < ret.length; i++)
+				for(var i = 0; i < ret2.length; i++)
 				{	
+					
 					//move the normal and hit point into worldspace
 					var mat2 = this.getModelMatrix().slice(0);
-					ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].point);
+					ret2[i].point = MATH.mulMat4Vec3(mat2,ret2[i].point);
 					mat2[3] = 0;
 					mat2[7] = 0;
 					mat2[11] = 0;
-					ret[i].norm = MATH.mulMat4Vec3(mat2,ret[i].norm);
-					ret[i].norm = MATH.scaleVec3(ret[i].norm,1.0/MATH.lengthVec3(ret[i].norm));
-					ret[i].distance = MATH.distanceVec3(origin,ret[i].point);
-					ret[i].object = this;
-					ret[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
+					ret2[i].norm = MATH.mulMat4Vec3(mat2,ret2[i].norm);
+					ret2[i].norm = MATH.scaleVec3(ret2[i].norm,1.0/MATH.lengthVec3(ret2[i].norm));
+					ret2[i].distance = MATH.distanceVec3(origin,ret2[i].point);
+					ret2[i].object = this;
+					ret2[i].priority = this.PickPriority !== undefined ? this.PickPriority :  1;
 				}
 		  }
 	  
-	  return ret;
+	  return ret.concat(ret2);
 }
 
 function Frustrum(ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr)

@@ -173,7 +173,7 @@ function UserManager()
     }
     this.GetCurrentUserID = function() 
     {
-        return 'player-'+this.currentUsername;
+        return 'character-vwf-'+this.currentUsername;
     }
     this.PlayerProto  = { 
                     
@@ -183,7 +183,13 @@ function UserManager()
                     properties: {
                         PlayerNumber: 1,
                         },
-                    };
+					events: {
+						ShowProfile: null,
+						Message: null
+                    },
+					scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(_DataManager.GetProfileForUser(this.PlayerNumber))     }; \n" +
+					          "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.PlayerNumber)     }"]
+					};
 	this.Login = function(profile)
 	{
 	
@@ -202,7 +208,7 @@ function UserManager()
 				dataType: "json"
 			});
 		
-		if(data.status != 400)
+		if(data.status != 200)
 		{
 			alert(data.responseText);
 			return;
@@ -231,17 +237,18 @@ function UserManager()
 		this.PlayerProto.properties.profile = profile;
 		this.PlayerProto.properties.translation = newintersectxy;
 		document[name + 'link'] = null;
-		this.PlayerProto.id = "player"+name;
+		//this.PlayerProto.id = "player"+name;
 		document["PlayerNumber"] = name;
 		var parms = new Array();
 		parms.push(JSON.stringify(this.PlayerProto));
 		
-		
-		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
-		
 		this.currentUsername = profile.Username;
+		//vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
+		vwf_view.kernel.createChild('index-vwf',this.currentUsername,this.PlayerProto);
+		
 		if(vwf.getProperty('index-vwf','owner') == null)
 			vwf.setProperty('index-vwf','owner',this.currentUsername);
+			
 		var parms = new Array();
 		parms.push(JSON.stringify({sender:'*System*',text:(document.PlayerNumber + " logging on")}));
 		vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
@@ -262,10 +269,16 @@ function UserManager()
 		vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
 	
 	}
-    this.PlayerCreated = function(e)
+	this.PlayerDeleted = function(e)
 	{
+		$("#"+e+"label").remove();
+	
+	}
+    this.PlayerCreated = function(e,id)
+	{
+		
 		$("#PlayerList").append("<div id='"+(e+"label")+"'  class='playerlabel'>"+e+"</div>");
-		$("#"+e+"label").attr("playerid","player-"+e);
+		$("#"+e+"label").attr("playerid",id);
 		$("#"+e+"label").click(function()
 		{
 			$(".playerlabel").css("background-image","");// -webkit-linear-gradient(right, white 0%, #D9EEEF 100%)
@@ -293,16 +306,16 @@ function UserManager()
 		$('#MenuLogInicon').css('background',"");
 		$('#MenuLogIn').removeAttr('disabled');
 		$('#MenuLogOut').attr('disabled','disabled');
-	    var parms = new Array();
-		parms.push(document[document.PlayerNumber +'link'].id);
+	    //var parms = new Array();
+		//parms.push(document[document.PlayerNumber +'link'].id);
 		//alert(JSON.stringify(parms));
-		vwf_view.kernel.callMethod('index-vwf','deleteplayer',parms);
-		 parms = new Array();
+		//vwf_view.kernel.callMethod('index-vwf','deleteplayer',parms);
+		var parms = new Array();
 		parms.push(JSON.stringify({sender:'*System*',text:(document.PlayerNumber + " logging off")}));
+		//
+		//vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
 		
-		vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
-		
-		
+		vwf_view.kernel.deleteNode(document[document.PlayerNumber +'link'].id);
 		
 		//take ownership of the client connection
 		
@@ -318,7 +331,7 @@ function UserManager()
 				dataType: "json"
 			});
 		
-		if(data.status != 400)
+		if(data.status != 200)
 		{
 			alert(data.responseText);
 			return;
@@ -349,7 +362,7 @@ function UserManager()
 		//	$('#profilenames').append('<option value="'+profile.Username+'">'+profile.Username+'</option>');
 		//}
 	}
-    $(window).unload(function(){this.SceneDestroy();}.bind(this));
+    $(window).unload(function(){this.Logout();}.bind(this));
 	//$('#Players').dialog({ position:['left','bottom'],width:300,height:200,title: "Players",autoOpen:false});
 	$('#Logon').dialog({autoOpen:false,title:'Log in',modal:true,buttons:{"Create Profile":function(){ 
 			_UserManager.showCreateProfile(); 
@@ -396,7 +409,7 @@ function UserManager()
 	$('#CreateProfileDialog').dialog({autoOpen:false,title:'Create New Profile',modal:true,buttons:{"Save and Log in":function(){ 	
 			
 			var newprofile = {};
-			
+			debugger;
 			var inputs = $('#CreateUserProfiletable tbody tr input');
 			
 			for(var i=0; i<inputs.length;i++)
@@ -424,8 +437,9 @@ function UserManager()
 			
 			newprofile['Avatar'] = $('#SetProfileAvatar').val();
 			
-			var userprofile = _DataManager.GetProfileForUser(newprofile.Username)
-			if(userprofile)
+			//var userprofile = _DataManager.GetProfileForUser(newprofile.Username)
+			var users = _DataManager.GetUsers();
+			if(users.indexOf(newprofile.Username) != -1)
 			{
 				alert('User already exists');
 				return;

@@ -1122,7 +1122,7 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Call deletingNode() on each model. The node is considered deleted after each model
             // has run.
-
+			
             this.models.forEach( function( model ) {
                 model.deletingNode && model.deletingNode( nodeID );
             } );
@@ -1130,10 +1130,15 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
 
+			
             this.views.forEach( function( view ) {
                 view.deletedNode && view.deletedNode( nodeID );
             } );
 
+			if(this.tickable.nodeIDs.indexOf(nodeID) > -1)
+			{	
+				this.tickable.nodeIDs.splice(this.tickable.nodeIDs.indexOf(nodeID));
+			}
             this.logger.groupEnd();
         };
 
@@ -1785,10 +1790,7 @@ if ( ! childComponent.source ) {
 
 // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
 
-if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
-if(vwf.tickable.nodeIDs.indexOf(childID) < 0)
-    vwf.tickable.nodeIDs.push( childID );
-}
+
 
                     // Call initializingNode() on each model and initializedNode() on each view to
                     // indicate that the node is fully constructed.
@@ -1814,6 +1816,11 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
                 // application is now fully initialized.
 
                 create_callback && create_callback( childID );
+				
+				if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
+					if(vwf.tickable.nodeIDs.indexOf(childID) < 0)
+						vwf.tickable.nodeIDs.push( childID );
+					}
             } );
 
             this.logger.groupEnd();
@@ -2401,6 +2408,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 		
 			if(methodName == 'tick')
 			{
+				
 				if(vwf.tickable.nodeIDs.indexOf(nodeID) < 0)
 					vwf.tickable.nodeIDs.push(nodeID)
 			}

@@ -16,12 +16,12 @@ function GlobalInventoryManager()
 	$('#GlobalInventoryManagerDelete').button({label:'Delete'});
 	$('#GlobalInventoryManagerView').button({label:'View'});
 	$('#GlobalInventoryManagerRename').button({label:'Rename'});
-	$('#GlobalInventoryManagertitle').append('<a id="inventoryclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
+	$('#GlobalInventoryManagertitle').append('<a id="ginventoryclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
 	$('#GlobalInventoryManagertitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/inventory.png" />');	
 	$('#GlobalInventoryManager').css('border-bottom','5px solid #444444')
 	$('#GlobalInventoryManager').css('border-left','2px solid #444444')
 		
-		$('#inventoryclose').click(function(){_GlobalInventoryManager.hide()});
+		$('#ginventoryclose').click(function(){_GlobalInventoryManager.hide()});
 	this.renameSelectedItem = function()
 	{
 	

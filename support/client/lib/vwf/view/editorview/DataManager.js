@@ -1,3 +1,8 @@
+//////////////////////////////
+//The datamanager class fetches and posts data to the 
+//sandbox API.
+
+
 var PersistanceServer = '';
 function DataManager()
 {
@@ -11,7 +16,9 @@ function DataManager()
 	//if(!this.rawdata)
 		this.rawdata = {scenes:{},profiles:{},inventory:{}};
 	
-	$(document.body).append("<div id='NewInstanceDialog'><input type='text' id='NewInstanceName' style='width: 90%;border-radius: 6px;font-size: 1.6em;'/><div style='margin-top: 2em;color: grey;font-size: 0.8em;'>The name of the instance must be a 16 letter word with no spaces and only alphanumeric characters. The string you enter above will be modified to enforce these rules. Please note that the creator of an instance has no special right or abilities within the instance.</div></div>");	
+	$(document.body).append("<div id='NewInstanceDialog'><input type='text' id='NewInstanceName' style='width: 90%;border-radius: 6px;font-size: 1.6em;'/><div style='margin-top: 2em;color: grey;font-size: 0.8em;'>The name of the instance must be a 16 letter word with no spaces and only alphanumeric characters. The string you enter above will be modified to enforce these rules.</div></div>");	
+	
+	$(document.body).append("<div id='DeleteInstanceDialog'><div style='margin-top: 2em;color: grey;font-size: 0.8em;'>You must be the owner of an instance to delete it. This world will cease to exist, and the page will load a blank, unsaved world under this name. Simply navigate away after the reload if you do not wish to build in this world again.</div></div>");	
 	
 	
 	$('#NewInstanceName').keydown(function(e){
@@ -31,6 +38,23 @@ function DataManager()
 	}
 	}
 	);
+	
+	
+	$('#DeleteInstanceDialog').dialog({title:"Delete Instance",modal:true,autoOpen:false,buttons:{
+	Delete:function(){
+		
+		$('#DeleteInstanceDialog').dialog('close');
+		_DataManager.DeleteInstance_internal();
+	},
+	Cancel:function()
+	{
+		$('#DeleteInstanceDialog').dialog('close');
+	}
+	}
+	}
+	);
+	
+	
 	this.loadedScene = null;	
 	this.CleanInstanceName = function(name)
 	{
@@ -309,16 +333,29 @@ function DataManager()
 		// }	
 		
 		nodes.push(vwf.getProperties('index-vwf'));
-		var UID  = this.getCurrentSession();
+		
+		var SID  = this.getCurrentSession();
+		var UID = _UserManager.GetCurrentUserName();
+		var P = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName()).Password;
+		//var ret = $.ajax('/vwfDataManager.svc/state?SID='+SID+'&UID='+UID+'&P='+P,{type:"DELETE",async:false});
+		
 		if(nodes.length > 0)
-		jQuery.ajax({
+		var ret = jQuery.ajax({
 			type: 'POST',
-			url: PersistanceServer + '/vwfDataManager.svc/State?UID=' + UID,
+			url: PersistanceServer + '/vwfDataManager.svc/state?SID='+SID+'&UID='+UID+'&P='+P,
 			data: JSON.stringify(nodes),
 			success: null,
 			async:false,
 			dataType: "json"
 		});
+		if(ret.status != 200)
+		{
+			alert('Save failed! Reloading');
+			window.onunload = function(e){};
+			window.onbeforeunload = function(e){};
+			document.location.reload(true);
+		
+		}
 		this.loadedScene = nodes;
 	}
 	this.save = function()
@@ -506,6 +543,28 @@ function DataManager()
 		 count++;
 		
 		return count;		
+	}
+	this.DeleteInstance = function()
+	{
+		$('#DeleteInstanceDialog').dialog('open');
+	}
+	this.DeleteInstance_internal = function()
+	{
+		
+		var SID  = this.getCurrentSession();
+		var UID = _UserManager.GetCurrentUserName();
+		var P = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName()).Password;
+		var ret = $.ajax('/vwfDataManager.svc/state?SID='+SID+'&UID='+UID+'&P='+P,{type:"DELETE",async:false});
+		if(ret.status == 200)
+		{
+		window.onunload = function(e){};
+		window.onbeforeunload = function(e){};
+		document.location.reload(true);
+		}else
+		{
+			_Notifier.alert(ret.responseText);
+		
+		}
 	}
 	this.clearScene = function()
 	{

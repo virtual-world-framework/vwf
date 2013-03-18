@@ -332,7 +332,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         threeObject.parent.remove(threeObject);
                     }
-                    delete this.state.nodes[childNode];
+                    delete this.state.nodes[nodeID];
                 }               
             }
         },

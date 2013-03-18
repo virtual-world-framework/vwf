@@ -184,6 +184,8 @@ scripts:
      //  this.PickOptions.UserRenderBatches = true;
       
         $('#index-vwf').mousedown(function(e){this.localpointerDown(e);}.bind(this));
+        
+        $('#index-vwf').mousewheel(function(e){e.deltaY *= -1; this.localpointerWheel(e);}.bind(this));
         $('#index-vwf').mouseup(function(e){this.localpointerUp(e);}.bind(this));
         $('#index-vwf').mouseleave(function(e)
         {
@@ -841,12 +843,12 @@ scripts:
     this.pointerLeave = function( parms ){
 
     }
-    this.pointerWheel = function( parms, pickInfo ) {
+    this.localpointerWheel = function( pickInfo ) {
        
-        if(this.client != this.moniker) return;
+        
         if(this.cameramode != 'Navigate' && this.cameramode != 'Free')
         { 
-            if(pickInfo.wheel.deltaY < 0 )
+            if(pickInfo.deltaY < 0 )
             this.zoom *= .9;
             else
             this.zoom *= 1.1;
@@ -859,37 +861,22 @@ scripts:
         
         if(this.cameramode == 'Free')
         { 
-            if(pickInfo.wheel.deltaY > 0 )
+            if(pickInfo.deltaY > 0 )
             this.center = MATH.subVec3(this.center,this.GetCameraCenterRay());
             else
             this.center = MATH.addVec3(this.GetCameraCenterRay(),this.center);
             
         }
-        if(this.cameramode == 'FirstPerson' && pickInfo.wheel.deltaY > 0)
+        if(this.cameramode == 'FirstPerson' && pickInfo.deltaY > 0)
         {
             this.cameramode = '3RDPerson';
         }
-        else if(this.cameramode == '3RDPerson' && pickInfo.wheel.deltaY < 0)
+        else if(this.cameramode == '3RDPerson' && pickInfo.deltaY < 0)
         {
             this.y_rot =.6245;
             this.cameramode = 'FirstPerson';
         }
         this.updateCamera();
-    }
-    this.deleteplayer = function(e)
-    {
-        
-       
-        var player = vwf_view.kernel.kernel.models[0].model.nodes[e];
-        if(!player)
-            player = vwf_view.kernel.kernel.models[0].model.nodes['-object-Object-'+e];
-        var num = player.PlayerNumber;
-        PlayerDeleted(num);
-        
-        player.deinitialize();
-        
-        
-        
     }
     this.receiveChat = function(e)
     {
@@ -920,27 +907,6 @@ scripts:
     {
         
        
-        this.loaded = true;
-        var proto = JSON.parse(e);
-        //this.players.push(proto);
-        //Because SendSelf will create circular messages, don't create a guy who is already created.
-        var newname = "player-"+proto.properties.PlayerNumber;
-        this.future(.1).updateCamera();
-        if(!document[proto.properties.PlayerNumber + 'link'])
-        {
-            this.players.push(proto.properties.PlayerNumber);
-            _UserManager.PlayerCreated(proto.properties.PlayerNumber);
-           
-            //This is odd. It seems like supplying an ID for the new object causes the initialize not to fire
-            delete proto.id;//"player-"+proto.properties.PlayerNumber;
-            proto.uri = "-object-Object-player-"+proto.properties.PlayerNumber;
-            //vwf_view.kernel.kernel.createNode(proto,  function(){this.updateCamera();vwf_view.kernel.kernel.models[0].model.nodes[proto.id].initialize();
-            //}.bind(this));
-            this.children.create("player-"+proto.properties.PlayerNumber,proto);
-            
-            
-            
-        }
         
     }
     

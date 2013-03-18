@@ -37,14 +37,24 @@ scripts:
          this.jumpcounter = 0;
         
        
+       
+        
+       
         
         if(this.hasOwnProperty('PlayerNumber') == false) return;
         var PlayerNumber = vwf.getProperty(this.id,'PlayerNumber');
         
-        document[PlayerNumber +'link'] = this;
-        if(!document.Players)
-            document.Players = [];
-        document.Players.push(PlayerNumber);
+        
+        if(!document[PlayerNumber + 'link'])
+        {
+            //this.parent.players.push(PlayerNumber); 
+            document[PlayerNumber +'link'] = this;
+            _UserManager.PlayerCreated(PlayerNumber,this.id);
+           
+        }
+        
+       
+        
         
         this.originalvelocity = [0,0,0];
         this.updateCallbacks = [];
@@ -94,13 +104,6 @@ scripts:
     {
         
     }
-    this.pointerClick = function(e)
-    {
-        if(vwf.client() == vwf.moniker())
-        {
-            document._UserManager.showProfile(this.profile);
-        }
-    }
     this.initCycles = function()
     {
         for(var i in this.cycles)
@@ -143,21 +146,22 @@ scripts:
     {
        //findVWFscene().removeUpdateCallback(this.callbacknum);
        $(document).unbind('prerender',this.prerendercallback);
-       this.deleteMe = true;            
-       
+        _UserManager.PlayerDeleted(this.PlayerNumber);
+       //this.deleteMe = true;            
+       $(this.nametag).remove()
        
     }
     this.placeNameTag = function(e,viewprojection)
     {
-      if(!this.ownerClientID)  
+      if(!this.ownerClientID || ! this.prevTranslation || !this.currentTranslation)  
         return;
       var now = performance.now();	
       var timediff =  now - this.lastUpdate;
       timediff = timediff/50.0;
       timediff = Math.min(timediff,1.0);
       
-       
-      if(this.prevframe !=   this.currentframe    )
+       //profile shows this is too slow!
+      if(false && this.prevframe !=   this.currentframe    )
       {      
         this.skin.morphTargetInfluences[parseInt(this.prevframe)] = 1.0-timediff;
         this.skin.morphTargetInfluences[parseInt(this.currentframe)] = timediff;     
@@ -242,18 +246,18 @@ scripts:
         //if(this.moniker != moniker)
         // return;
 
-        if(this.deleteMe == true)
-        {
-            var id = this.id;
+        //if(this.deleteMe == true)
+        //{
+         //   var id = this.id;
             
-            var div = document.getElementById("Player " + this.PlayerNumber + 'label');
-            div.parentNode.removeChild(div);
-            document[this.PlayerNumber + 'link'] = null;
-            vwf.deleteNode(this.id);
+         //   var div = document.getElementById("Player " + this.PlayerNumber + 'label');
+         //   div.parentNode.removeChild(div);
+         //   document[this.PlayerNumber + 'link'] = null;
+         //   vwf.deleteNode(this.id);
             
            
-            return;
-        }
+         //   return;
+        //}
         
        // this.mesh.setRotZ(this.rotZ);
           this.rotation = [0,0,1,this.rotZ/0.0174532925];
@@ -379,17 +383,18 @@ scripts:
                
                 motionvec = MATH.toUnitVec3(motionvec);
                 var testpos = MATH.subVec3(this.translation,MATH.scaleVec3(motionvec,-.15));
+                
                 var intersectfront = _Editor.ThreeJSPick(MATH.addVec3(testpos,[0,0,1]),motionvec,this.PickOptions);
                 if(intersectfront)
                 {
                     if(intersectfront.distance < .3)
                     {
-                      
+                        
                         var offset = MATH.subVec3(originalpos,this.translation);
                         var len = MATH.lengthVec3(offset);
                         offset = MATH.scaleVec3(offset,1/MATH.lengthVec3(offset));
-                        var norm = [intersectfront.face.normal.x,intersectfront.face.normal.y,intersectfront.face.normal.z];
-                        //console.log(norm);
+                        var norm = [intersectfront.norm[0],intersectfront.norm[1],intersectfront.norm[2]];
+                        console.log(norm);
                         if(Math.abs(norm[0]) < .05) norm[0] = 0;
                         if(Math.abs(norm[1]) < .05) norm[1] = 0;
                         if(Math.abs(norm[2]) < .05) norm[2] = 0;
@@ -429,7 +434,7 @@ scripts:
                         this.translation = MATH.addVec3(this.translation, [0,0,zmove/3]);
                     }
                 }
-                this.skin.PickPriority = 0;
+                this.skin.PickPriority = 1;
                 
             }
             //if they are jumpping, and have been for more than a 10th of a second, start checking below them for intersections.
@@ -455,7 +460,7 @@ scripts:
                         this.jumpcounter  = 0;
                     }
                 }
-                this.skin.PickPriority = 0;
+                this.skin.PickPriority = 1;
             }
             
         
@@ -486,12 +491,15 @@ scripts:
         this.lastUpdate = now;
         this.currentTranslation = [this.translation[0],this.translation[1],this.translation[2]];
         this.currentQuat = [this.quaternion[0],this.quaternion[1],this.quaternion[2],this.quaternion[3]];
+        this.skin.PickPriority = 1;
     }
     this.tick = function()
     {
         var time = new Date();
       if(this.id == 'character-vwf') return;
+      try{
         this.update();
+        }catch(e){}
         var time2 = new Date();
         var t = time2-time;
         

@@ -598,7 +598,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			{
 				clearCameraModeIcons();
 				$('#MenuCamera3RDPersonicon').css('background','#9999FF');
-				vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes['-object-Object-player-' + _UserManager.GetCurrentUserName()]);
+				vwf.models[0].model.nodes['index-vwf'].followObject(vwf.models[0].model.nodes[_UserManager.GetCurrentUserID()]);
 				vwf.models[0].model.nodes['index-vwf'].setCameraMode('3RDPerson');
 			}else
 			{
@@ -609,6 +609,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#MenuCreateParticlesBasic').click(function(e){
 			_Editor.createParticleSystem('basic',_Editor.GetInsertPoint(),document.PlayerNumber);
 		});
+		
+		$('#MenuDeleteInstance').click(function(e){
+			_DataManager.DeleteInstance();
+		});
+		
 		
 		$('#MenuCreateLightPoint').click(function(e){
 			_Editor.createLight('point',_Editor.GetInsertPoint(),document.PlayerNumber);

@@ -232,132 +232,145 @@ function strEndsWith(str, suffix) {
 function startVWF(){
 
 	global.activesessions = [];
-	function OnRequest(request, response) {
-	var path = ".\\public\\";
-	
-	var URL = url.parse(request.url,true);
-    var uri = URL.pathname;
-	//console.log(uri);
-	uri = uri.replace(/\//g,'\\');
-	
-	if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
+	function OnRequest(request, response) 
 	{
-		//Route to DataServer
-		SandboxAPI.serve(request,response);
-		return;
-	}
 	
-	var filename = libpath.join(path, uri);
-	var session = FindSession(filename);
-	//console.log(session);
-	//remove the session identifier from the request
-	filename = filterSession(filename,session);
-    
-	//file is not found - serve index or map to support files
-	//file is also not a yaml document
-	var c1;
-	var c2;
-	
-	
-	//console.log(filename);
-	c1 = libpath.existsSync(filename);
-	c2 = libpath.existsSync(filename+".yaml");
-    if(!c1 && !c2)
-	{
+		try{
+			var path = ".\\public\\";
 			
-		 //try to find the correct support file	
-		 var appname = findAppName(filename);
-		 if(!appname)
-		 {
+			var URL = url.parse(request.url,true);
+			var uri = URL.pathname;
+			//console.log(uri);
+			uri = uri.replace(/\//g,'\\');
 			
-				filename = filename.substr(13);
-				filename = ".\\support\\" + filename;
-				filename = filename.replace('vwf.example.com','proxy\\vwf.example.com');
-				
-				
-		 }
-		 else
-		 {
-			 filename = filename.substr(appname.length-2);
-			 if(appname == "")
-				filename = './support/client/lib/index.html'
-			 else	
-				filename = './support/client/lib/' + filename;
-		 }
+			if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
+			{
+				//Route to DataServer
+				SandboxAPI.serve(request,response);
+				return;
+			}
+			
+			var filename = libpath.join(path, uri);
+			var session = FindSession(filename);
+			//console.log(session);
+			//remove the session identifier from the request
+			filename = filterSession(filename,session);
+			
+			//file is not found - serve index or map to support files
+			//file is also not a yaml document
+			var c1;
+			var c2;
+			
+			
+			//console.log(filename);
+			c1 = libpath.existsSync(filename);
+			c2 = libpath.existsSync(filename+".yaml");
+			if(!c1 && !c2)
+			{
+					
+				 //try to find the correct support file	
+				 var appname = findAppName(filename);
+				 if(!appname)
+				 {
+					
+						filename = filename.substr(13);
+						filename = ".\\support\\" + filename;
+						filename = filename.replace('vwf.example.com','proxy\\vwf.example.com');
+						
+						
+				 }
+				 else
+				 {
+					 filename = filename.substr(appname.length-2);
+					 if(appname == "")
+						filename = './support/client/lib/index.html'
+					 else	
+						filename = './support/client/lib/' + filename;
+				 }
 
-	}
-	//file does exist, serve normally 
-	var c3 = libpath.existsSync(filename);
-	var c4 = libpath.existsSync(filename +".yaml");
-	if(c3)
-	{
-		//if requesting directory, setup instance
-		//also, redirect to current instnace name of does not end in slash
-		if (fs.statSync(filename).isDirectory()) 
-		{
-			var appname = findAppName(filename);
-			if(!appname)
-				appname = findAppName(filename+"\\");
-			
-			//no session id is given, new instance
-			if(appname && session == null)
-			{			
-				GenerateNewInstance(request,response,appname);
-				return;
 			}
-			//session needs to end in a slash, so redirect but keep session id
-			if(appname && strEndsWith(URL.pathname,session))
+			//file does exist, serve normally 
+			var c3 = libpath.existsSync(filename);
+			var c4 = libpath.existsSync(filename +".yaml");
+			if(c3)
 			{
-				GenerateNewInstance(request,response,appname,"");
-				return;
+				//if requesting directory, setup instance
+				//also, redirect to current instnace name of does not end in slash
+				if (fs.statSync(filename).isDirectory()) 
+				{
+					var appname = findAppName(filename);
+					if(!appname)
+						appname = findAppName(filename+"\\");
+					
+					//no session id is given, new instance
+					if(appname && session == null)
+					{			
+						GenerateNewInstance(request,response,appname);
+						return;
+					}
+					//session needs to end in a slash, so redirect but keep session id
+					if(appname && strEndsWith(URL.pathname,session))
+					{
+						GenerateNewInstance(request,response,appname,"");
+						return;
+					}
+					//no app name but is directory. Not listing directories, so 404
+					if(!appname)
+					{
+						console.log(filename + "is a directory")
+						_404(response);
+						
+						return;
+					}
+					//should never reach here.
+					filename = './support/client/lib/index.html';
+				}
+				//just serve the file
+				ServeFile(filename,response,URL);
+				
 			}
-			//no app name but is directory. Not listing directories, so 404
-			if(!appname)
+			else if(c4)
 			{
-				console.log(filename + "is a directory")
+				//was not found, but found if appending .yaml. Serve as yaml
+				ServeYAML(filename +".yaml",response,URL);
+
+			}
+			// is an admin call, currently only serving instances
+			else if(uri.indexOf('\\admin\\') != -1)
+			{
+				if(uri.indexOf('\\admin\\instances'))
+				{
+					var data = {};
+					for(var i in global.sessions)
+					{
+						data[i] = {clients:{}};
+						for(var j in global.sessions[i].clients)
+						{
+							data[i].clients[j] = null;
+						}
+					}
+					ServeJSON(data,response,URL);
+					return;
+				}
+			}
+			else
+			{
+				console.log("404 : " + filename)
 				_404(response);
 				
 				return;
 			}
-			//should never reach here.
-			filename = './support/client/lib/index.html';
 		}
-		//just serve the file
-		ServeFile(filename,response,URL);
-		
-	}
-	else if(c4)
-	{
-		//was not found, but found if appending .yaml. Serve as yaml
-		ServeYAML(filename +".yaml",response,URL);
-
-	}
-	// is an admin call, currently only serving instances
-	else if(uri.indexOf('\\admin\\') != -1)
-	{
-		if(uri.indexOf('\\admin\\instances'))
+		catch(e)
 		{
-			var data = {};
-			for(var i in global.sessions)
-			{
-				data[i] = {clients:{}};
-				for(var j in global.sessions[i].clients)
-				{
-					data[i].clients[j] = null;
-				}
-			}
-			ServeJSON(data,response,URL);
-			return;
-		}
-	}
-	else
-	{
-		console.log("404 : " + filename)
-		_404(response);
+				response.writeHead(500, {
+					"Content-Type": "text/plain"
+				});
+				response.write(e, "utf8");
+				response.end();
 		
-		return;
-	}
-	
+		
+		}
 	} // close onRequest
 	
 	//create the server
@@ -422,7 +435,7 @@ function startVWF(){
 		
 		//Get the state and load it.
 		//Now the server has a rough idea of what the simulation is
-		var state = SandboxAPI.getState(session);
+		var state = SandboxAPI.getState(session) || [];
 		global.sessions[namespace].state = {nodes:{}};
 		global.sessions[namespace].state.nodes['index-vwf'] = {id:"index-vwf",properties:state[state.length-1],children:{}};
 		
@@ -521,7 +534,8 @@ function startVWF(){
 			var sendingclient = global.sessions[namespace].clients[socket.id];
 			
 			//do not accept messages from clients that have not been claimed by a user
-			if(!sendingclient.loginData)
+			//currently, allow getstate from anonymous clients
+			if(!sendingclient.loginData && message.action != "getState")
 			{
 				return;
 			}
@@ -600,7 +614,7 @@ function startVWF(){
 					return;
 				  }
 				  //Keep a record of the new node
-				  if(checkOwner(node,sendingclient.loginData.UID))
+				  if(checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
 				  {	
 						var childComponent = message.parameters[0];
 						var childName = message.member;
