@@ -55,12 +55,16 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
         playerNode = childID;
     }
     else if(childName == (playerName + "Camera")) {
-        var glgeCamera = vwf.views[0].state.nodes[ childID ].glgeObject;
+        // Note: This is reaching directly into the kernel and into the GLGE driver's private data
+        // structures. It is likely to break in the future as the GLGE driver changes, and it also
+        // carries a high risk of breaking synchronization.
+        var kernel = require( "vwf" ); // Danger!
+        var glgeCamera = kernel.views["vwf/view/glge"].state.nodes[ childID ].glgeObject;
         glgeCamera.setAspect(canvas.width / canvas.height);
-        vwf.views[0].state.cameraInUse = glgeCamera;
-        vwf.views[0].state.cameraInUseID = childID;
-        vwf.views[0].state.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
-        vwf.views[0].state.scenes[sceneNode].camera.ID = childID;
+        kernel.views["vwf/view/glge"].state.cameraInUse = glgeCamera;
+        kernel.views["vwf/view/glge"].state.cameraInUseID = childID;
+        kernel.views["vwf/view/glge"].state.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
+        kernel.views["vwf/view/glge"].state.scenes[sceneNode].camera.ID = childID;
     }
 }
 
