@@ -22,13 +22,13 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Test the kernel "future" interface.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
-          var kernel = require( "vwf/kernel/model" ).create( vwf ); // connect through the kernel's model interface
+          var kernel_model = kernel.models.kernel; // connect through the kernel's model interface
 
           // Time passage from future actions and the periodic interval.
 
@@ -42,10 +42,10 @@
 
               var interval = 10; // assumed periodic tick interval
 
-              var timeStart = ( Math.floor( Math.round( vwf.time() * 1000 ) / interval ) *
+              var timeStart = ( Math.floor( Math.round( kernel.time() * 1000 ) / interval ) *
                 interval + interval ) / 1000; // next periodic tick
 
-              var timeStop = ( Math.floor( Math.round( vwf.time() * 1000 ) / interval ) *
+              var timeStop = ( Math.floor( Math.round( kernel.time() * 1000 ) / interval ) *
                 interval + interval + interval ) / 1000; // the following periodic tick
 
               var time1 = fixed3( timeStart + 0.001 );
@@ -57,47 +57,47 @@
 
               // Create a function to drop tags by timestamp in this.property.
 
-              kernel.execute( fixtureID, "this.mark = function( tag ) { " +
+              kernel_model.execute( fixtureID, "this.mark = function( tag ) { " +
                 "var time = this.time.toFixed(3); " +
                 "this.property[time] || ( this.property[time] = [] ); " +
                 "this.property[time].push( tag ); " +
               "}" );
 
-              kernel.execute( fixtureID, "this.property = {}" );
+              kernel_model.execute( fixtureID, "this.property = {}" );
 
               // Schedule the actions.
 
-              kernel.execute( fixtureID, "", undefined, time1 ); // nothing
+              kernel_model.execute( fixtureID, "", undefined, time1 ); // nothing
 
-              kernel.execute( fixtureID, "this.mark( 'one' )", undefined, time2 ); // one thing
+              kernel_model.execute( fixtureID, "this.mark( 'one' )", undefined, time2 ); // one thing
 
-              kernel.execute( fixtureID, "this.mark( 'two' )", undefined, time3 ); // two things
-              kernel.execute( fixtureID, "this.mark( 'three' )", undefined, time3 );
+              kernel_model.execute( fixtureID, "this.mark( 'two' )", undefined, time3 ); // two things
+              kernel_model.execute( fixtureID, "this.mark( 'three' )", undefined, time3 );
 
-              kernel.execute( fixtureID, "", undefined, timeStop ); // nothing, exactly on the tick
+              kernel_model.execute( fixtureID, "", undefined, timeStop ); // nothing, exactly on the tick
 
               // Wait and test.
 
               runFutureAssertions( function( time ) {
 
-                vwf.execute( fixtureID, "this.mark( 'tick' )" ); // tick, just before assertions
+                kernel.execute( fixtureID, "this.mark( 'tick' )" ); // tick, just before assertions
                 
               }, [
 
                 { absolute: timeStart, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ timeStart ], [ "tick" ], "tick at the periodic interval" ) } },
+                    deepEqual( kernel.execute( fixtureID, "this.property" )[ timeStart ], [ "tick" ], "tick at the periodic interval" ) } },
 
                 { absolute: time1, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time1 ], [ "tick" ], "tick when a future action executes" ) } },
+                    deepEqual( kernel.execute( fixtureID, "this.property" )[ time1 ], [ "tick" ], "tick when a future action executes" ) } },
 
                 { absolute: time2, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time2 ], [ "tick", "one" ], "tick is before the future action" ) } },
+                    deepEqual( kernel.execute( fixtureID, "this.property" )[ time2 ], [ "tick", "one" ], "tick is before the future action" ) } },
 
                 { absolute: time3, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ time3 ], [ "tick", "two", "three" ], "one tick per group of future actions" ) } },
+                    deepEqual( kernel.execute( fixtureID, "this.property" )[ time3 ], [ "tick", "two", "three" ], "one tick per group of future actions" ) } },
 
                 { absolute: timeStop, assertion: function() {
-                    deepEqual( vwf.execute( fixtureID, "this.property" )[ timeStop ], [ "tick" ], "one tick with the future action at the periodic interval time" ) } },
+                    deepEqual( kernel.execute( fixtureID, "this.property" )[ timeStop ], [ "tick" ], "one tick with the future action at the periodic interval time" ) } },
 
               ] );
 
@@ -111,45 +111,45 @@
 
             createFixture( function( fixtureID ) {
 
-              vwf.setProperty( fixtureID, "property", undefined );
+              kernel.setProperty( fixtureID, "property", undefined );
 
-              var time0 = fixed3( vwf.time() );
+              var time0 = fixed3( kernel.time() );
               var time1 = fixed3( time0 + 0.011 );
               var time2 = fixed3( time0 + 0.012 );
               var time3 = fixed3( time0 + 0.013 );
 
-              vwf.execute( fixtureID, "this.in().property = 'in undefined'" );
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "relative undefined queued" );
+              kernel.execute( fixtureID, "this.in().property = 'in undefined'" );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "relative undefined queued" );
 
-              vwf.execute( fixtureID, "this.in( 0 ).property = 'in 0'" );
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "relative 0 queued" );
+              kernel.execute( fixtureID, "this.in( 0 ).property = 'in 0'" );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "relative 0 queued" );
 
-              vwf.execute( fixtureID, "this.at().property = 'at undefined'" );
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "absolute undefined queued" );
+              kernel.execute( fixtureID, "this.at().property = 'at undefined'" );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "absolute undefined queued" );
 
-              vwf.execute( fixtureID, "this.at( 0 ).property = 'at 0'" );
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "absolute 0 queued" );
+              kernel.execute( fixtureID, "this.at( 0 ).property = 'at 0'" );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "absolute 0 queued" );
 
-              vwf.execute( fixtureID, "this.future().property = 'queued'" );
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
+              kernel.execute( fixtureID, "this.future().property = 'queued'" );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
-              vwf.execute( fixtureID, "this.in( " + "0.011" + " ).property = 'in'" );
-              vwf.execute( fixtureID, "this.at( " + time2 + " ).property = 'at'" );
-              vwf.execute( fixtureID, "this.future( " + "0.013" + " ).property = 'future'" );
+              kernel.execute( fixtureID, "this.in( " + "0.011" + " ).property = 'in'" );
+              kernel.execute( fixtureID, "this.at( " + time2 + " ).property = 'at'" );
+              kernel.execute( fixtureID, "this.future( " + "0.013" + " ).property = 'future'" );
 
               runFutureAssertions( [
 
                 { relative: 0, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "queued", "immediate" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "queued", "immediate" ) } },
 
                 { absolute: time1, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "in", "relative" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "in", "relative" ) } },
 
                 { absolute: time2, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "at", "absolute" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "at", "absolute" ) } },
 
                 { absolute: time3, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "future", "relative alias" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "future", "relative alias" ) } },
 
               ] );
 
@@ -163,14 +163,14 @@
 
             createFixture( function( fixtureID ) {
 
-              kernel.setProperty( fixtureID, "property", "property", undefined );
-              equal( vwf.getProperty( fixtureID, "property" ), "property", "immediate property" );
+              kernel_model.setProperty( fixtureID, "property", "property", undefined );
+              equal( kernel.getProperty( fixtureID, "property" ), "property", "immediate property" );
 
-              kernel.callMethod( fixtureID, "method", [ "method" ], undefined );
-              equal( vwf.getProperty( fixtureID, "property" ), "method", "immediate method" );
+              kernel_model.callMethod( fixtureID, "method", [ "method" ], undefined );
+              equal( kernel.getProperty( fixtureID, "property" ), "method", "immediate method" );
 
-              kernel.fireEvent( fixtureID, "event", [ "event" ], undefined );
-              equal( vwf.getProperty( fixtureID, "property" ), "event", "immediate event" );
+              kernel_model.fireEvent( fixtureID, "event", [ "event" ], undefined );
+              equal( kernel.getProperty( fixtureID, "property" ), "event", "immediate event" );
 
               start();
             } );
@@ -183,14 +183,14 @@
 
             createFixture( function( fixtureID ) {
 
-              vwf.execute( fixtureID, "this.property = 'property'" );
-              equal( vwf.getProperty( fixtureID, "property" ), "property", "immediate property" );
+              kernel.execute( fixtureID, "this.property = 'property'" );
+              equal( kernel.getProperty( fixtureID, "property" ), "property", "immediate property" );
 
-              vwf.execute( fixtureID, "this.method( 'method' )" );
-              equal( vwf.getProperty( fixtureID, "property" ), "method", "immediate method" );
+              kernel.execute( fixtureID, "this.method( 'method' )" );
+              equal( kernel.getProperty( fixtureID, "property" ), "method", "immediate method" );
 
-              vwf.execute( fixtureID, "this.event( 'event' )" );
-              equal( vwf.getProperty( fixtureID, "property" ), "event", "immediate event" );
+              kernel.execute( fixtureID, "this.event( 'event' )" );
+              equal( kernel.getProperty( fixtureID, "property" ), "event", "immediate event" );
 
               start();
             } );
@@ -203,25 +203,25 @@
 
             createFixture( function( fixtureID ) {
 
-              vwf.setProperty( fixtureID, "property", undefined );
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
+              kernel.setProperty( fixtureID, "property", undefined );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "future initialized" );
 
-              kernel.setProperty( fixtureID, "property", "property", -0.001 );
-              kernel.callMethod( fixtureID, "method", [ "method" ], -0.002 );
-              kernel.fireEvent( fixtureID, "event", [ "event" ], -0.003 );
+              kernel_model.setProperty( fixtureID, "property", "property", -0.001 );
+              kernel_model.callMethod( fixtureID, "method", [ "method" ], -0.002 );
+              kernel_model.fireEvent( fixtureID, "event", [ "event" ], -0.003 );
 
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
               runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "property", "future property" ) } },
 
                 { relative: 0.002, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "method", "future method" ) } },
 
                 { relative: 0.003, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "event", "future event" ) } },
 
               ] );
 
@@ -235,25 +235,25 @@
 
             createFixture( function( fixtureID ) {
 
-              vwf.setProperty( fixtureID, "property", undefined );
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future initialized" );
+              kernel.setProperty( fixtureID, "property", undefined );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "future initialized" );
 
-              vwf.execute( fixtureID, "this.future( 0.001 ).property = 'property'" );
-              vwf.execute( fixtureID, "this.future( 0.002 ).method( 'method' )" );
-              vwf.execute( fixtureID, "this.future( 0.003 ).event( 'event' )" );
+              kernel.execute( fixtureID, "this.future( 0.001 ).property = 'property'" );
+              kernel.execute( fixtureID, "this.future( 0.002 ).method( 'method' )" );
+              kernel.execute( fixtureID, "this.future( 0.003 ).event( 'event' )" );
 
-              equal( vwf.getProperty( fixtureID, "property" ), undefined, "future queued" );
+              equal( kernel.getProperty( fixtureID, "property" ), undefined, "future queued" );
 
               runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "property", "future property" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "property", "future property" ) } },
 
                 { relative: 0.002, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "method", "future method" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "method", "future method" ) } },
 
                 { relative: 0.003, assertion: function() {
-                    equal( vwf.getProperty( fixtureID, "property" ), "event", "future event" ) } },
+                    equal( kernel.getProperty( fixtureID, "property" ), "event", "future event" ) } },
 
               ] );
 
@@ -267,25 +267,25 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
-              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
-              equal( vwf.getProperty( baseID, "base" ), "base", "base in base" );
+              equal( kernel.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
+              equal( kernel.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
+              equal( kernel.getProperty( baseID, "base" ), "base", "base in base" );
 
-              vwf.execute( derivedID, "this.future( 0.001 ).derived = 'derived updated'" );
-              vwf.execute( derivedID, "this.future( 0.002 ).base = 'base updated'" ); // inherit from base, assign to derived
+              kernel.execute( derivedID, "this.future( 0.001 ).derived = 'derived updated'" );
+              kernel.execute( derivedID, "this.future( 0.002 ).base = 'base updated'" ); // inherit from base, assign to derived
               
-              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
-              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
-              equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
+              equal( kernel.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
+              equal( kernel.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
+              equal( kernel.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
               runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
-                    equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
+                    equal( kernel.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
 
                 { relative: 0.002, assertion: function() {
-                    equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
-                    equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
+                    equal( kernel.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
+                    equal( kernel.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
 
               ] );
 
@@ -299,25 +299,25 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
-              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
-              equal( vwf.getProperty( baseID, "base" ), "base", "base in base" );
+              equal( kernel.getProperty( derivedID, "derived" ), "derived", "derived in derived initialized" );
+              equal( kernel.getProperty( derivedID, "base" ), "base", "base in derived initialized" ); // inherited
+              equal( kernel.getProperty( baseID, "base" ), "base", "base in base" );
 
-              vwf.execute( derivedID, "this.future( 0.001 ).properties.derived = 'derived updated'" );
-              vwf.execute( derivedID, "this.future( 0.002 ).properties.base = 'base updated'" ); // inherit from base, assign to derived
+              kernel.execute( derivedID, "this.future( 0.001 ).properties.derived = 'derived updated'" );
+              kernel.execute( derivedID, "this.future( 0.002 ).properties.base = 'base updated'" ); // inherit from base, assign to derived
               
-              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
-              equal( vwf.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
-              equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" );
+              equal( kernel.getProperty( derivedID, "derived" ), "derived", "derived in derived queued" );
+              equal( kernel.getProperty( derivedID, "base" ), "base", "base in derived queued" ); // still inherited
+              equal( kernel.getProperty( baseID, "base" ), "base", "base in base unchanged" );
 
               runFutureAssertions( [
 
                 { relative: 0.001, assertion: function() {
-                    equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
+                    equal( kernel.getProperty( derivedID, "derived" ), "derived updated", "derived in derived executed" ) } },
 
                 { relative: 0.002, assertion: function() {
-                    equal( vwf.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
-                    equal( vwf.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
+                    equal( kernel.getProperty( derivedID, "base" ), "base updated", "base in derived executed" ) // no longer inherited
+                    equal( kernel.getProperty( baseID, "base" ), "base", "base in base unchanged" ) } },
 
               ] );
 
@@ -331,7 +331,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createChild( 0, unique_name( "fixture" ), {
+            kernel.createChild( 0, unique_name( "fixture" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -364,7 +364,7 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( {
+            kernel.createNode( {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -375,7 +375,7 @@
 
             }, function( baseID ) {
 
-              vwf.createNode( {
+              kernel.createNode( {
 
                 extends:
                   baseID,
@@ -437,7 +437,7 @@
 
             }
 
-            var reference = vwf.time();
+            var reference = kernel.time();
             var next = 0;
 
             // Time to run the next one?

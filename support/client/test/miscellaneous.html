@@ -22,9 +22,9 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           module( "initialize() inheritance" );
 
@@ -34,8 +34,8 @@
   
             create_node_prototype_with_initializers( true, true, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "property" ), "node", "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
+                equal( kernel.getProperty( nodeID, "property" ), "node", "node's initialization" );
+                equal( kernel.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
 
                 start();
             } );
@@ -48,8 +48,8 @@
   
             create_node_prototype_with_initializers( true, false, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "property" ), "node", "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
+                equal( kernel.getProperty( nodeID, "property" ), "node", "node's initialization" );
+                equal( kernel.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
 
                 start();
             } );
@@ -62,8 +62,8 @@
   
             create_node_prototype_with_initializers( false, true, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "property" ), "prototype", "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
+                equal( kernel.getProperty( nodeID, "property" ), "prototype", "node's initialization" );
+                equal( kernel.getProperty( prototypeID, "property" ), "prototype", "prototype's initialization" );
 
                 start();
             } );
@@ -76,8 +76,8 @@
   
             create_node_prototype_with_initializers( false, false, function( nodeID, prototypeID ) {
 
-                equal( vwf.getProperty( nodeID, "property" ), null, "node's initialization" );
-                equal( vwf.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
+                equal( kernel.getProperty( nodeID, "property" ), null, "node's initialization" );
+                equal( kernel.getProperty( prototypeID, "property" ), null, "prototype's initialization" );
 
                 start();
             } );
@@ -94,14 +94,14 @@
             prototype.properties = prototype.properties || {};
             prototype.properties.property = prototype.properties.property || null;
 
-            vwf.createNode( prototype, function( prototypeID ) {
+            kernel.createNode( prototype, function( prototypeID ) {
 
                 node.extends = prototypeID;
 
                 node.properties = node.properties || {};
                 node.properties.property = node.properties.property || null;
 
-                vwf.createChild( 0, unique_name( "node" ), node, undefined, function( nodeID ) {
+                kernel.createChild( 0, unique_name( "node" ), node, undefined, function( nodeID ) {
                     callback( nodeID, prototypeID );
                 } );
 

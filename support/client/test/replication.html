@@ -22,11 +22,11 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Test node replication.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           // URI component to be used as a prototype. The state of a URI component can be expressed
           // as a patch to the URI's descriptor.
@@ -51,7 +51,7 @@
             // Function to apply a change.
 
             change: function( state ) {
-              vwf.execute( this.id, "this.p = " + state );
+              kernel.execute( this.id, "this.p = " + state );
             },
 
             // Function to calculate the expected getNode() state after a given change.
@@ -73,34 +73,34 @@
 
           asyncTest( "URI component", function() {
 
-            vwf.createNode( prototype.uri, function( id ) {
+            kernel.createNode( prototype.uri, function( id ) {
               prototype.id = id;
 
-              deepEqual( vwf.getNode( id ), prototype.state(), "unmodified prototype is prototype URI" );
+              deepEqual( kernel.getNode( id ), prototype.state(), "unmodified prototype is prototype URI" );
 
               prototype.change( 1 );
-              deepEqual( vwf.getNode( id ), prototype.state( 1 ), "modified prototype is patched with changes" );
+              deepEqual( kernel.getNode( id ), prototype.state( 1 ), "modified prototype is patched with changes" );
 
               prototype.change( 2 );
-              deepEqual( vwf.getNode( id ), prototype.state( 2 ), "prototype modified again" );
+              deepEqual( kernel.getNode( id ), prototype.state( 2 ), "prototype modified again" );
 
-              vwf.setNode( id, prototype.state( 1 ), function( id ) {
+              kernel.setNode( id, prototype.state( 1 ), function( id ) {
 
-                deepEqual( vwf.getNode( id ), prototype.state( 1 ), "modified prototype restored" );
+                deepEqual( kernel.getNode( id ), prototype.state( 1 ), "modified prototype restored" );
 
-                // vwf.setNode( id, prototype.state() );  TODO: support property deletes
-                // deepEqual( vwf.getNode( id ), prototype.state(), "unmodified prototype restored" );
+                // kernel.setNode( id, prototype.state() );  TODO: support property deletes
+                // deepEqual( kernel.getNode( id ), prototype.state(), "unmodified prototype restored" );
 
                 var state1 = prototype.state( 1 );
 
-                vwf.deleteNode( id );
+                kernel.deleteNode( id );
 
-                vwf.createNode( state1, function( id ) {
+                kernel.createNode( state1, function( id ) {
                   prototype.id = id;
 
-                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+                  deepEqual( kernel.getNode( id ), state1, "modified prototype regenerated" );
 
-                  vwf.deleteNode( id );
+                  kernel.deleteNode( id );
 
                   start();
 
@@ -130,7 +130,7 @@
             // Function to apply a change.
 
             change: function( state ) {
-              vwf.execute( this.id, "this.p = " + state );
+              kernel.execute( this.id, "this.p = " + state );
             },
 
             // Function to calculate the expected getNode() state after a given change.
@@ -156,36 +156,36 @@
 
           asyncTest( "Descriptor component deriving from URI component", function() {
 
-            vwf.createNode( node.descriptor, function( id ) {
+            kernel.createNode( node.descriptor, function( id ) {
               node.id = id;
 
-              deepEqual( vwf.getNode( id ), node.state(), "unmodified node" );
+              deepEqual( kernel.getNode( id ), node.state(), "unmodified node" );
 
               node.change( 1 );
-              deepEqual( vwf.getNode( id ), node.state( 1 ), "modified node shows changes" );
+              deepEqual( kernel.getNode( id ), node.state( 1 ), "modified node shows changes" );
 
               node.change( 2 );
-              deepEqual( vwf.getNode( id ), node.state( 2 ), "node modified again" );
+              deepEqual( kernel.getNode( id ), node.state( 2 ), "node modified again" );
 
-              vwf.setNode( id, node.state( 1 ), function( id ) {
+              kernel.setNode( id, node.state( 1 ), function( id ) {
 
-                deepEqual( vwf.getNode( id ), node.state( 1 ), "modified node restored" );
+                deepEqual( kernel.getNode( id ), node.state( 1 ), "modified node restored" );
 
-                // vwf.setNode( id, node.state() );  TODO: support property deletes
-                // deepEqual( vwf.getNode( id ), node.state(), "unmodified node restored" );
+                // kernel.setNode( id, node.state() );  TODO: support property deletes
+                // deepEqual( kernel.getNode( id ), node.state(), "unmodified node restored" );
 
                 var state1 = node.state( 1 );
 
-                vwf.deleteNode( vwf.prototype( id ) );
-                vwf.deleteNode( id );
+                kernel.deleteNode( kernel.prototype( id ) );
+                kernel.deleteNode( id );
 
-                vwf.createNode( state1, function( id ) {
+                kernel.createNode( state1, function( id ) {
                   node.id = id;
 
-                  deepEqual( vwf.getNode( id ), state1, "modified node regenerated" );
+                  deepEqual( kernel.getNode( id ), state1, "modified node regenerated" );
 
-                  vwf.deleteNode( vwf.prototype( id ) );
-                  vwf.deleteNode( id );
+                  kernel.deleteNode( kernel.prototype( id ) );
+                  kernel.deleteNode( id );
 
                   start();
 
@@ -226,7 +226,7 @@
             // Function to apply a change.
 
             change: function( state ) {
-              vwf.execute( this.id, "this.c.p = " + state );
+              kernel.execute( this.id, "this.c.p = " + state );
             },
 
             // Function to calculate the expected getNode() state after a given change.
@@ -238,7 +238,7 @@
                   sequence: 1,
                   children: {
                     c: {
-                      patches: vwf.execute( this.id, "this.c.id" ),
+                      patches: kernel.execute( this.id, "this.c.id" ),
                       properties: {
                         p: state,
                       },
@@ -254,36 +254,36 @@
 
           asyncTest( "URI component with child", function() {
 
-            vwf.createNode( prototypeWithChild.uri, function( id ) {
+            kernel.createNode( prototypeWithChild.uri, function( id ) {
               prototypeWithChild.id = id;
 
-              deepEqual( vwf.getNode( id ), prototypeWithChild.state(), "unmodified prototype is prototype URI" );
+              deepEqual( kernel.getNode( id ), prototypeWithChild.state(), "unmodified prototype is prototype URI" );
 
               prototypeWithChild.change( 1 );
-              deepEqual( vwf.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype is patched with changes" );
+              deepEqual( kernel.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype is patched with changes" );
 
               prototypeWithChild.change( 2 );
-              deepEqual( vwf.getNode( id ), prototypeWithChild.state( 2 ), "prototype modified again" );
+              deepEqual( kernel.getNode( id ), prototypeWithChild.state( 2 ), "prototype modified again" );
 
-              vwf.setNode( id, prototypeWithChild.state( 1 ), function( id ) {
+              kernel.setNode( id, prototypeWithChild.state( 1 ), function( id ) {
 
-                deepEqual( vwf.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype restored" );
+                deepEqual( kernel.getNode( id ), prototypeWithChild.state( 1 ), "modified prototype restored" );
 
-                // vwf.setNode( id, prototypeWithChild.state() );  TODO: support property deletes
-                // deepEqual( vwf.getNode( id ), prototypeWithChild.state(), "unmodified prototype restored" );
+                // kernel.setNode( id, prototypeWithChild.state() );  TODO: support property deletes
+                // deepEqual( kernel.getNode( id ), prototypeWithChild.state(), "unmodified prototype restored" );
 
                 var state1 = prototypeWithChild.state( 1 );
 
-                vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
-                vwf.deleteNode( id );
+                kernel.deleteNode( kernel.execute( id, "this.c.id" ) );
+                kernel.deleteNode( id );
 
-                vwf.createNode( state1, function( id ) {
+                kernel.createNode( state1, function( id ) {
                   prototypeWithChild.id = id;
 
-                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+                  deepEqual( kernel.getNode( id ), state1, "modified prototype regenerated" );
 
-                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
-                  vwf.deleteNode( id );
+                  kernel.deleteNode( kernel.execute( id, "this.c.id" ) );
+                  kernel.deleteNode( id );
 
                   start();
 
@@ -320,7 +320,7 @@
             // Function to apply a change.
 
             change: function( state ) {
-              vwf.execute( this.id, "this.c.p = " + state );
+              kernel.execute( this.id, "this.c.p = " + state );
             },
 
             // Function to calculate the expected getNode() state after a given change.
@@ -332,7 +332,7 @@
                   sequence: 1,
                   children: {
                     c: {
-                      patches: vwf.execute( this.id, "this.c.id" ),
+                      patches: kernel.execute( this.id, "this.c.id" ),
                       properties: {
                         p: state,
                       },
@@ -349,36 +349,36 @@
 
           asyncTest( "URI component with initializer child", function() {
 
-            vwf.createNode( prototypeWithInitializerChild.uri, function( id ) {
+            kernel.createNode( prototypeWithInitializerChild.uri, function( id ) {
               prototypeWithInitializerChild.id = id;
 
-              deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype is prototype URI" );
+              deepEqual( kernel.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype is prototype URI" );
 
               prototypeWithInitializerChild.change( 1 );
-              deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype is patched with changes" );
+              deepEqual( kernel.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype is patched with changes" );
 
               prototypeWithInitializerChild.change( 2 );
-              deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 2 ), "prototype modified again" );
+              deepEqual( kernel.getNode( id ), prototypeWithInitializerChild.state( 2 ), "prototype modified again" );
 
-              vwf.setNode( id, prototypeWithInitializerChild.state( 1 ), function( id ) {
+              kernel.setNode( id, prototypeWithInitializerChild.state( 1 ), function( id ) {
 
-                deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype restored" );
+                deepEqual( kernel.getNode( id ), prototypeWithInitializerChild.state( 1 ), "modified prototype restored" );
 
-                // vwf.setNode( id, prototypeWithInitializerChild.state() );  TODO: support property deletes
-                // deepEqual( vwf.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype restored" );
+                // kernel.setNode( id, prototypeWithInitializerChild.state() );  TODO: support property deletes
+                // deepEqual( kernel.getNode( id ), prototypeWithInitializerChild.state(), "unmodified prototype restored" );
 
                 var state1 = prototypeWithInitializerChild.state( 1 );
 
-                vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
-                vwf.deleteNode( id );
+                kernel.deleteNode( kernel.execute( id, "this.c.id" ) );
+                kernel.deleteNode( id );
 
-                vwf.createNode( state1, function( id ) {
+                kernel.createNode( state1, function( id ) {
                   prototypeWithInitializerChild.id = id;
 
-                  deepEqual( vwf.getNode( id ), state1, "modified prototype regenerated" );
+                  deepEqual( kernel.getNode( id ), state1, "modified prototype regenerated" );
 
-                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
-                  vwf.deleteNode( id );
+                  kernel.deleteNode( kernel.execute( id, "this.c.id" ) );
+                  kernel.deleteNode( id );
 
                   start();
 
@@ -408,7 +408,7 @@
             // Function to apply a change.
 
             change: function( state ) {
-              vwf.execute( this.id, "this.c.p = " + state );
+              kernel.execute( this.id, "this.c.p = " + state );
             },
 
             // Function to calculate the expected getNode() state after a given change.
@@ -420,7 +420,7 @@
                 sequence: 1, // one child
                 children: {
                   c: { // child always fully specified since createNode() outside of initialize()
-                    id: vwf.execute( this.id, "this.c.id" ),
+                    id: kernel.execute( this.id, "this.c.id" ),
                     properties: {
                       p: state ? state : null,
                     },
@@ -433,43 +433,43 @@
 
           asyncTest( "Descriptor component deriving from URI component with initializer child", function() {
 
-            vwf.createNode( nodeWithPrototypeInitializerChild.descriptor, function( id ) {
+            kernel.createNode( nodeWithPrototypeInitializerChild.descriptor, function( id ) {
               nodeWithPrototypeInitializerChild.id = id;
 
-              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified node" );
+              deepEqual( kernel.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified node" );
 
               nodeWithPrototypeInitializerChild.change( 1 );
-              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node" );
+              deepEqual( kernel.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node" );
 
               nodeWithPrototypeInitializerChild.change( 2 );
-              deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 2 ), "node modified again" );
+              deepEqual( kernel.getNode( id ), nodeWithPrototypeInitializerChild.state( 2 ), "node modified again" );
 
-              vwf.setNode( id, nodeWithPrototypeInitializerChild.state( 1 ), function( id ) {
+              kernel.setNode( id, nodeWithPrototypeInitializerChild.state( 1 ), function( id ) {
 
-                deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node restored" );
+                deepEqual( kernel.getNode( id ), nodeWithPrototypeInitializerChild.state( 1 ), "modified node restored" );
 
-                vwf.setNode( id, nodeWithPrototypeInitializerChild.state(), function( id ) {
+                kernel.setNode( id, nodeWithPrototypeInitializerChild.state(), function( id ) {
 
-                  deepEqual( vwf.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified node restored" );
+                  deepEqual( kernel.getNode( id ), nodeWithPrototypeInitializerChild.state(), "unmodified node restored" );
 
                   var state1 = nodeWithPrototypeInitializerChild.state( 1 );
 
-                  vwf.deleteNode( vwf.execute( vwf.prototype( id ), "this.c.id" ) );
-                  vwf.deleteNode( vwf.prototype( id ) );
+                  kernel.deleteNode( kernel.execute( kernel.prototype( id ), "this.c.id" ) );
+                  kernel.deleteNode( kernel.prototype( id ) );
 
-                  vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
-                  vwf.deleteNode( id );
+                  kernel.deleteNode( kernel.execute( id, "this.c.id" ) );
+                  kernel.deleteNode( id );
 
-                  vwf.createNode( state1, function( id ) {
+                  kernel.createNode( state1, function( id ) {
                     nodeWithPrototypeInitializerChild.id = id;
 
-                    deepEqual( vwf.getNode( id ), state1, "modified node regenerated" );
+                    deepEqual( kernel.getNode( id ), state1, "modified node regenerated" );
 
-                    vwf.deleteNode( vwf.execute( vwf.prototype( id ), "this.c.id" ) );
-                    vwf.deleteNode( vwf.prototype( id ) );
+                    kernel.deleteNode( kernel.execute( kernel.prototype( id ), "this.c.id" ) );
+                    kernel.deleteNode( kernel.prototype( id ) );
 
-                    vwf.deleteNode( vwf.execute( id, "this.c.id" ) );
-                    vwf.deleteNode( id );
+                    kernel.deleteNode( kernel.execute( id, "this.c.id" ) );
+                    kernel.deleteNode( id );
 
                     start();
 

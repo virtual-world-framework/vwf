@@ -22,11 +22,11 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Test methods.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           // Method invocation directly to the kernel
 
@@ -34,20 +34,20 @@
 
             createFixture( function( nodeID ) {
 
-              equal( vwf.callMethod( nodeID, "empty1" ), undefined, "Empty" );
-              equal( vwf.callMethod( nodeID, "empty2" ), undefined, "Empty, as body" );
-              equal( vwf.callMethod( nodeID, "empty3" ), undefined, "Empty, as parameters" );
+              equal( kernel.callMethod( nodeID, "empty1" ), undefined, "Empty" );
+              equal( kernel.callMethod( nodeID, "empty2" ), undefined, "Empty, as body" );
+              equal( kernel.callMethod( nodeID, "empty3" ), undefined, "Empty, as parameters" );
 
-              equal( vwf.callMethod( nodeID, "noParameters1" ), "result", "No parameters, as text" );
-              equal( vwf.callMethod( nodeID, "noParameters2" ), "result", "No parameters, as body" );
-              equal( vwf.callMethod( nodeID, "noParameters3" ), "result", "No parameters, as parameters/body" );
+              equal( kernel.callMethod( nodeID, "noParameters1" ), "result", "No parameters, as text" );
+              equal( kernel.callMethod( nodeID, "noParameters2" ), "result", "No parameters, as body" );
+              equal( kernel.callMethod( nodeID, "noParameters3" ), "result", "No parameters, as parameters/body" );
 
-              equal( vwf.callMethod( nodeID, "unnamedParameters1", [ "value" ] ), "value", "Unnamed parameters, as text" );
-              equal( vwf.callMethod( nodeID, "unnamedParameters2", [ "value" ] ), "value", "Unnamed parameters, as body" );
-              equal( vwf.callMethod( nodeID, "unnamedParameters3", [ "value" ] ), "value", "Unnamed parameters, as parameters/body" );
+              equal( kernel.callMethod( nodeID, "unnamedParameters1", [ "value" ] ), "value", "Unnamed parameters, as text" );
+              equal( kernel.callMethod( nodeID, "unnamedParameters2", [ "value" ] ), "value", "Unnamed parameters, as body" );
+              equal( kernel.callMethod( nodeID, "unnamedParameters3", [ "value" ] ), "value", "Unnamed parameters, as parameters/body" );
 
-              equal( vwf.callMethod( nodeID, "oneParameter", [ "a" ] ), "a", "One parameter" );
-              deepEqual( vwf.callMethod( nodeID, "twoParameters", [ "a", "b" ] ), [ "a", "extra", "b" ], "Two parameters" );
+              equal( kernel.callMethod( nodeID, "oneParameter", [ "a" ] ), "a", "One parameter" );
+              deepEqual( kernel.callMethod( nodeID, "twoParameters", [ "a", "b" ] ), [ "a", "extra", "b" ], "Two parameters" );
 
               start();
             } );
@@ -60,20 +60,20 @@
 
             createFixture( function( nodeID ) {
 
-              equal( vwf.execute( nodeID, "this.empty1()" ), undefined, "Empty" );
-              equal( vwf.execute( nodeID, "this.empty2()" ), undefined, "Empty, as body" );
-              equal( vwf.execute( nodeID, "this.empty3()" ), undefined, "Empty, as parameters" );
+              equal( kernel.execute( nodeID, "this.empty1()" ), undefined, "Empty" );
+              equal( kernel.execute( nodeID, "this.empty2()" ), undefined, "Empty, as body" );
+              equal( kernel.execute( nodeID, "this.empty3()" ), undefined, "Empty, as parameters" );
 
-              equal( vwf.execute( nodeID, "this.noParameters1()" ), "result", "No parameters, as text" );
-              equal( vwf.execute( nodeID, "this.noParameters2()" ), "result", "No parameters, as body" );
-              equal( vwf.execute( nodeID, "this.noParameters3()" ), "result", "No parameters, as parameters/body" );
+              equal( kernel.execute( nodeID, "this.noParameters1()" ), "result", "No parameters, as text" );
+              equal( kernel.execute( nodeID, "this.noParameters2()" ), "result", "No parameters, as body" );
+              equal( kernel.execute( nodeID, "this.noParameters3()" ), "result", "No parameters, as parameters/body" );
 
-              equal( vwf.execute( nodeID, "this.unnamedParameters1( 'value' )" ), "value", "Unnamed parameters, as text" );
-              equal( vwf.execute( nodeID, "this.unnamedParameters2( 'value' )" ), "value", "Unnamed parameters, as body" );
-              equal( vwf.execute( nodeID, "this.unnamedParameters3( 'value' )" ), "value", "Unnamed parameters, as parameters/body" );
+              equal( kernel.execute( nodeID, "this.unnamedParameters1( 'value' )" ), "value", "Unnamed parameters, as text" );
+              equal( kernel.execute( nodeID, "this.unnamedParameters2( 'value' )" ), "value", "Unnamed parameters, as body" );
+              equal( kernel.execute( nodeID, "this.unnamedParameters3( 'value' )" ), "value", "Unnamed parameters, as parameters/body" );
 
-              equal( vwf.execute( nodeID, "this.oneParameter( 'a' )" ), "a", "One parameter" );
-              deepEqual( vwf.execute( nodeID, "this.twoParameters( 'a', 'b' )" ), [ "a", "extra", "b" ], "Two parameters" );
+              equal( kernel.execute( nodeID, "this.oneParameter( 'a' )" ), "a", "One parameter" );
+              deepEqual( kernel.execute( nodeID, "this.twoParameters( 'a', 'b' )" ), [ "a", "extra", "b" ], "Two parameters" );
 
               start();
             } );
@@ -86,11 +86,11 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.callMethod( derivedID, "derived" ), "derived-" + derivedID, "derived method in derived" );
-              equal( vwf.callMethod( derivedID, "base" ), "base-" + derivedID, "base method invoked on derived" );
+              equal( kernel.callMethod( derivedID, "derived" ), "derived-" + derivedID, "derived method in derived" );
+              equal( kernel.callMethod( derivedID, "base" ), "base-" + derivedID, "base method invoked on derived" );
 
-              equal( vwf.callMethod( baseID, "derived" ), undefined, "derived method not visible in base" );
-              equal( vwf.callMethod( baseID, "base" ), "base-" + baseID, "base method in base" );
+              equal( kernel.callMethod( baseID, "derived" ), undefined, "derived method not visible in base" );
+              equal( kernel.callMethod( baseID, "base" ), "base-" + baseID, "base method in base" );
               
               start();
             } );
@@ -103,11 +103,11 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.execute( derivedID, "this.derived()" ), "derived-" + derivedID, "derived method in derived" );
-              equal( vwf.execute( derivedID, "this.base()" ), "base-" + derivedID, "base method invoked on derived" );
+              equal( kernel.execute( derivedID, "this.derived()" ), "derived-" + derivedID, "derived method in derived" );
+              equal( kernel.execute( derivedID, "this.base()" ), "base-" + derivedID, "base method invoked on derived" );
 
-              equal( vwf.execute( baseID, "this.derived && this.derived()" ), undefined, "derived method not visible in base" );
-              equal( vwf.execute( baseID, "this.base()" ), "base-" + baseID, "base method in base" );
+              equal( kernel.execute( baseID, "this.derived && this.derived()" ), undefined, "derived method not visible in base" );
+              equal( kernel.execute( baseID, "this.base()" ), "base-" + baseID, "base method in base" );
               
               start();
             } );
@@ -120,11 +120,11 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.execute( derivedID, "this.methods.derived()" ), "derived-" + derivedID, "derived method in derived" );
-              equal( vwf.execute( derivedID, "this.methods.base()" ), "base-" + derivedID, "base method invoked on derived" );
+              equal( kernel.execute( derivedID, "this.methods.derived()" ), "derived-" + derivedID, "derived method in derived" );
+              equal( kernel.execute( derivedID, "this.methods.base()" ), "base-" + derivedID, "base method invoked on derived" );
 
-              equal( vwf.execute( baseID, "this.methods.derived && this.methods.derived()" ), undefined, "derived method not visible in base" );
-              equal( vwf.execute( baseID, "this.methods.base()" ), "base-" + baseID, "base method in base" );
+              equal( kernel.execute( baseID, "this.methods.derived && this.methods.derived()" ), undefined, "derived method not visible in base" );
+              equal( kernel.execute( baseID, "this.methods.base()" ), "base-" + baseID, "base method in base" );
               
               start();
             } );
@@ -137,7 +137,7 @@
 
           function createFixture( callback ) {
 
-            vwf.createChild( 0, unique_name( "node" ), {
+            kernel.createChild( 0, unique_name( "node" ), {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -173,14 +173,14 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( {
+            kernel.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
               methods: { base: "return 'base-' + this.id", },
 
             }, function( baseID ) {
 
-              vwf.createNode( {
+              kernel.createNode( {
 
                 extends: baseID,
                 methods: { derived: "return 'derived-' + this.id", },

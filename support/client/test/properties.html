@@ -22,11 +22,11 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Test properties.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           // Property inheritance and copy-on-write behavior directly to the kernel
 
@@ -34,20 +34,20 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.getProperty( derivedID, "derived" ), "derived", "derived property in derived" );
-              equal( vwf.getProperty( derivedID, "base" ), "base", "base property inherited by derived" );
+              equal( kernel.getProperty( derivedID, "derived" ), "derived", "derived property in derived" );
+              equal( kernel.getProperty( derivedID, "base" ), "base", "base property inherited by derived" );
 
-              equal( vwf.getProperty( baseID, "derived" ), undefined, "derived property not visible in base" );
-              equal( vwf.getProperty( baseID, "base" ), "base", "base property in base" );
+              equal( kernel.getProperty( baseID, "derived" ), undefined, "derived property not visible in base" );
+              equal( kernel.getProperty( baseID, "base" ), "base", "base property in base" );
               
-              equal( vwf.setProperty( derivedID, "derived", "derived updated" ), "derived updated", "update derived property in derived" );
-              equal( vwf.setProperty( derivedID, "base", "base updated" ), "base updated", "update base property in derived" );
+              equal( kernel.setProperty( derivedID, "derived", "derived updated" ), "derived updated", "update derived property in derived" );
+              equal( kernel.setProperty( derivedID, "base", "base updated" ), "base updated", "update base property in derived" );
 
-              equal( vwf.getProperty( derivedID, "derived" ), "derived updated", "derived property updated in derived" );
-              equal( vwf.getProperty( derivedID, "base" ), "base updated", "base property updated in derived" );
+              equal( kernel.getProperty( derivedID, "derived" ), "derived updated", "derived property updated in derived" );
+              equal( kernel.getProperty( derivedID, "base" ), "base updated", "base property updated in derived" );
 
-              equal( vwf.getProperty( baseID, "derived" ), undefined, "derived property unchanged in base" );
-              equal( vwf.getProperty( baseID, "base" ), "base", "base property unchanged in base" );
+              equal( kernel.getProperty( baseID, "derived" ), undefined, "derived property unchanged in base" );
+              equal( kernel.getProperty( baseID, "base" ), "base", "base property unchanged in base" );
 
               start();
             } );
@@ -60,20 +60,20 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.execute( derivedID, "this.derived" ), "derived", "derived property in derived" );
-              equal( vwf.execute( derivedID, "this.base" ), "base", "base property inherited by derived" );
+              equal( kernel.execute( derivedID, "this.derived" ), "derived", "derived property in derived" );
+              equal( kernel.execute( derivedID, "this.base" ), "base", "base property inherited by derived" );
 
-              equal( vwf.execute( baseID, "this.derived" ), undefined, "derived property not visible in base" );
-              equal( vwf.execute( baseID, "this.base" ), "base", "base property in base" );
+              equal( kernel.execute( baseID, "this.derived" ), undefined, "derived property not visible in base" );
+              equal( kernel.execute( baseID, "this.base" ), "base", "base property in base" );
               
-              equal( vwf.execute( derivedID, "this.derived = 'derived updated'" ), "derived updated", "update derived property in derived" );
-              equal( vwf.execute( derivedID, "this.base = 'base updated'" ), "base updated", "update base property in derived" );
+              equal( kernel.execute( derivedID, "this.derived = 'derived updated'" ), "derived updated", "update derived property in derived" );
+              equal( kernel.execute( derivedID, "this.base = 'base updated'" ), "base updated", "update base property in derived" );
 
-              equal( vwf.execute( derivedID, "this.derived" ), "derived updated", "derived property updated in derived" );
-              equal( vwf.execute( derivedID, "this.base" ), "base updated", "base property updated in derived" );
+              equal( kernel.execute( derivedID, "this.derived" ), "derived updated", "derived property updated in derived" );
+              equal( kernel.execute( derivedID, "this.base" ), "base updated", "base property updated in derived" );
 
-              equal( vwf.execute( baseID, "this.derived" ), undefined, "derived property unchanged in base" );
-              equal( vwf.execute( baseID, "this.base" ), "base", "base property unchanged in base" );
+              equal( kernel.execute( baseID, "this.derived" ), undefined, "derived property unchanged in base" );
+              equal( kernel.execute( baseID, "this.base" ), "base", "base property unchanged in base" );
 
               start();
             } );
@@ -86,20 +86,20 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              equal( vwf.execute( derivedID, "this.properties.derived" ), "derived", "derived property in derived" );
-              equal( vwf.execute( derivedID, "this.properties.base" ), "base", "base property inherited by derived" );
+              equal( kernel.execute( derivedID, "this.properties.derived" ), "derived", "derived property in derived" );
+              equal( kernel.execute( derivedID, "this.properties.base" ), "base", "base property inherited by derived" );
 
-              equal( vwf.execute( baseID, "this.properties.derived" ), undefined, "derived property not visible in base" );
-              equal( vwf.execute( baseID, "this.properties.base" ), "base", "base property in base" );
+              equal( kernel.execute( baseID, "this.properties.derived" ), undefined, "derived property not visible in base" );
+              equal( kernel.execute( baseID, "this.properties.base" ), "base", "base property in base" );
               
-              equal( vwf.execute( derivedID, "this.properties.derived = 'derived updated'" ), "derived updated", "update derived property in derived" );
-              equal( vwf.execute( derivedID, "this.properties.base = 'base updated'" ), "base updated", "update base property in derived" );
+              equal( kernel.execute( derivedID, "this.properties.derived = 'derived updated'" ), "derived updated", "update derived property in derived" );
+              equal( kernel.execute( derivedID, "this.properties.base = 'base updated'" ), "base updated", "update base property in derived" );
 
-              equal( vwf.execute( derivedID, "this.properties.derived" ), "derived updated", "derived property updated in derived" );
-              equal( vwf.execute( derivedID, "this.properties.base" ), "base updated", "base property updated in derived" );
+              equal( kernel.execute( derivedID, "this.properties.derived" ), "derived updated", "derived property updated in derived" );
+              equal( kernel.execute( derivedID, "this.properties.base" ), "base updated", "base property updated in derived" );
 
-              equal( vwf.execute( baseID, "this.properties.derived" ), undefined, "derived property unchanged in base" );
-              equal( vwf.execute( baseID, "this.properties.base" ), "base", "base property unchanged in base" );
+              equal( kernel.execute( baseID, "this.properties.derived" ), undefined, "derived property unchanged in base" );
+              equal( kernel.execute( baseID, "this.properties.base" ), "base", "base property unchanged in base" );
 
               start();
             } );
@@ -112,28 +112,28 @@
 
             createFixtureDerivedBase( function( derivedID, baseID ) {
 
-              vwf.execute( derivedID, "this.properties.derived = { derived: 1 }" );
-              strictEqual( vwf.execute( derivedID, "this.derived" ), vwf.execute( derivedID, "this.properties.derived" ), "derived property in collection appears on node" );
+              kernel.execute( derivedID, "this.properties.derived = { derived: 1 }" );
+              strictEqual( kernel.execute( derivedID, "this.derived" ), kernel.execute( derivedID, "this.properties.derived" ), "derived property in collection appears on node" );
 
-              vwf.execute( derivedID, "this.derived = { derived: 2 }" );
-              strictEqual( vwf.execute( derivedID, "this.properties.derived" ), vwf.execute( derivedID, "this.derived" ), "derived property on node appears in collection" );
+              kernel.execute( derivedID, "this.derived = { derived: 2 }" );
+              strictEqual( kernel.execute( derivedID, "this.properties.derived" ), kernel.execute( derivedID, "this.derived" ), "derived property on node appears in collection" );
 
-              vwf.execute( baseID, "this.properties.base = { base: 1 }" );
-              strictEqual( vwf.execute( baseID, "this.base" ), vwf.execute( baseID, "this.properties.base" ), "base property in collection appears on node" );
+              kernel.execute( baseID, "this.properties.base = { base: 1 }" );
+              strictEqual( kernel.execute( baseID, "this.base" ), kernel.execute( baseID, "this.properties.base" ), "base property in collection appears on node" );
 
-              vwf.execute( baseID, "this.base = { base: 2 }" );
-              strictEqual( vwf.execute( baseID, "this.properties.base" ), vwf.execute( baseID, "this.base" ), "base property on node appears in collection" );
+              kernel.execute( baseID, "this.base = { base: 2 }" );
+              strictEqual( kernel.execute( baseID, "this.properties.base" ), kernel.execute( baseID, "this.base" ), "base property on node appears in collection" );
 
-              strictEqual( vwf.execute( derivedID, "this.base" ), vwf.execute( baseID, "this.base" ), "derived inherits base property on node" );
-              strictEqual( vwf.execute( derivedID, "this.properties.base" ), vwf.execute( baseID, "this.properties.base" ), "derived inherits base property on collection" );
+              strictEqual( kernel.execute( derivedID, "this.base" ), kernel.execute( baseID, "this.base" ), "derived inherits base property on node" );
+              strictEqual( kernel.execute( derivedID, "this.properties.base" ), kernel.execute( baseID, "this.properties.base" ), "derived inherits base property on collection" );
 
-              vwf.execute( derivedID, "this.properties.base = { base: 3 }" );
-              equal( vwf.execute( derivedID, "this.properties.base.base" ), 3, "base property updated in derived" );
+              kernel.execute( derivedID, "this.properties.base = { base: 3 }" );
+              equal( kernel.execute( derivedID, "this.properties.base.base" ), 3, "base property updated in derived" );
 
-              strictEqual( vwf.execute( derivedID, "this.base" ), vwf.execute( derivedID, "this.properties.base" ), "updated property in derived collection still appears on node" );
+              strictEqual( kernel.execute( derivedID, "this.base" ), kernel.execute( derivedID, "this.properties.base" ), "updated property in derived collection still appears on node" );
 
-              notStrictEqual( vwf.execute( derivedID, "this.base" ), vwf.execute( baseID, "this.base" ), "updated property on derived node no longer inherits base property on node" );
-              notStrictEqual( vwf.execute( derivedID, "this.properties.base" ), vwf.execute( baseID, "this.properties.base" ), "updated property on derived collection no longer inherits base property on collection" );
+              notStrictEqual( kernel.execute( derivedID, "this.base" ), kernel.execute( baseID, "this.base" ), "updated property on derived node no longer inherits base property on node" );
+              notStrictEqual( kernel.execute( derivedID, "this.properties.base" ), kernel.execute( baseID, "this.properties.base" ), "updated property on derived collection no longer inherits base property on collection" );
 
               start();
             } );
@@ -146,7 +146,7 @@
 
           function createFixtureDerivedBase( callback ) {
 
-            vwf.createNode( {
+            kernel.createNode( {
 
               extends:
                 "http://vwf.example.com/node.vwf",
@@ -157,7 +157,7 @@
 
             }, function( baseID ) {
 
-              vwf.createNode( {
+              kernel.createNode( {
 
                 extends:
                   baseID,

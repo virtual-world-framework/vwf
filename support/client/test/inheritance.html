@@ -22,15 +22,15 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Verify that prototype-based inheritance in VWF works the same way as in JavaScript.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           test( "Models", function() {
-            equal( vwf.models[0].tail().module.id, "vwf/model/javascript", "JavaScript Model" );
-            equal( vwf.models[1].tail().module.id, "vwf/model/object", "Object Model" );
+            equal( kernel.models[0].tail().module.id, "vwf/model/javascript", "JavaScript Model" );
+            equal( kernel.models[1].tail().module.id, "vwf/model/object", "Object Model" );
           } );
 
           test( "Views", function() {
@@ -63,16 +63,16 @@
 
             createFixtureVWF( "empty", "value", "accessor", function( fixture ) {
 
-              equal( vwf.execute( fixture.top, "this.tag" ), "top", "top tag" );
-              ok( ! vwf.execute( fixture.top, "this.hasOwnProperty( 'property' )" ) ); // "empty" type
+              equal( kernel.execute( fixture.top, "this.tag" ), "top", "top tag" );
+              ok( ! kernel.execute( fixture.top, "this.hasOwnProperty( 'property' )" ) ); // "empty" type
               // ok( ! fixture.top.hasOwnProperty( "property_" ) ); // "empty" type  // TODO: vwf/model/javascript internals
   
-              equal( vwf.execute( fixture.middle, "this.tag" ), "middle", "middle tag" );
-              ok( vwf.execute( fixture.middle, "this.hasOwnProperty( 'property' )" ) ); // "value" type
+              equal( kernel.execute( fixture.middle, "this.tag" ), "middle", "middle tag" );
+              ok( kernel.execute( fixture.middle, "this.hasOwnProperty( 'property' )" ) ); // "value" type
               // ok( ! fixture.middle.hasOwnProperty( "property_" ) ); // "value" type  // TODO: vwf/model/javascript internals
   
-              equal( vwf.execute( fixture.bottom, "this.tag" ), "bottom", "bottom tag" );
-              ok( vwf.execute( fixture.bottom, "this.hasOwnProperty( 'property' )" ) ); // "accessor" type
+              equal( kernel.execute( fixture.bottom, "this.tag" ), "bottom", "bottom tag" );
+              ok( kernel.execute( fixture.bottom, "this.hasOwnProperty( 'property' )" ) ); // "accessor" type
               // ok( fixture.bottom.hasOwnProperty( "property_" ) ); // "accessor" type  // TODO: vwf/model/javascript internals
   
               start();
@@ -104,15 +104,15 @@
 
             createFixtureVWF( "empty", "empty", "empty", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), undefined, "top before" );
-              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
+              equal( kernel.getProperty( fixture.top, "property" ), undefined, "top before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), undefined, "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" );
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
-              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
+              equal( kernel.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), undefined, "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
 
               start();
             } );
@@ -139,15 +139,15 @@
 
             createFixtureVWF( "empty", "empty", "value", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "bottom", "top before" );
-              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
+              equal( kernel.getProperty( fixture.top, "property" ), "bottom", "top before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" );
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
-              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
+              equal( kernel.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
 
               start();
             } );
@@ -179,20 +179,20 @@
 
             createFixtureVWF( "empty", "empty", "accessor", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "BOTTOM", "top before" ); // via accessor on bottom
+              equal( kernel.getProperty( fixture.top, "property" ), "BOTTOM", "top before" ); // via accessor on bottom
               // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on bottom
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on bottom
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" );
+              equal( kernel.getProperty( fixture.top, "property" ), "UPDATED", "top after" );
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
               // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
 
               start();
             } );
@@ -219,15 +219,15 @@
 
             createFixtureVWF( "value", "empty", "empty", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
-              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
+              equal( kernel.getProperty( fixture.top, "property" ), "top", "top before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), undefined, "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" );
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
-              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
+              equal( kernel.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), undefined, "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
 
               start();
             } );
@@ -254,15 +254,15 @@
 
             createFixtureVWF( "value", "empty", "value", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
-              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
+              equal( kernel.getProperty( fixture.top, "property" ), "top", "top before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" );
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" );
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
-              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
+              equal( kernel.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
 
               start();
             } );
@@ -293,19 +293,19 @@
 
             createFixtureVWF( "value", "empty", "accessor", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "top", "top before" );
+              equal( kernel.getProperty( fixture.top, "property" ), "top", "top before" );
               // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // not using accessor on bottom
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" ); // not using accessor on bottom
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
+              equal( kernel.getProperty( fixture.top, "property" ), "UpDaTeD", "top after" );
               // ok( ! fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
 
               start();
             } );
@@ -338,21 +338,21 @@
 
             createFixtureVWF( "accessor", "empty", "empty", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
+              equal( kernel.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
               // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), undefined, "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), undefined, "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
+              equal( kernel.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
               // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), undefined, "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), undefined, "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), undefined, "bottom after" );
 
               start();
             } );
@@ -385,21 +385,21 @@
 
             createFixtureVWF( "accessor", "empty", "value", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
+              equal( kernel.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
               // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "bottom", "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "bottom", "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
+              equal( kernel.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
               // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "bottom", "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "bottom", "bottom after" );
 
               start();
             } );
@@ -432,21 +432,21 @@
 
             createFixtureVWF( "accessor", "empty", "accessor", function( fixture ) {
 
-              equal( vwf.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
+              equal( kernel.getProperty( fixture.top, "property" ), "TOP", "top before" ); // via accessor on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
               // equal( fixture.top.property_, "top" );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "BOTTOM", "middle before" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom before" );
 
-              vwf.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
+              kernel.setProperty( fixture.top, "property", "UpDaTeD" ); // through accessor on top
 
-              equal( vwf.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
+              equal( kernel.getProperty( fixture.top, "property" ), "UPDATED", "top after" ); // via accessor on top using value on top
               // ok( fixture.top.hasOwnProperty( "property_" ) );  // TODO: vwf/model/object internals
               // equal( fixture.top.property_, "updated" );  // TODO: vwf/model/object internals
 
-              equal( vwf.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
-              equal( vwf.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
+              equal( kernel.getProperty( fixture.middle, "property" ), "BOTTOM", "middle after" );
+              equal( kernel.getProperty( fixture.bottom, "property" ), "BOTTOM", "bottom after" );
 
               start();
             } );
@@ -557,12 +557,12 @@
             var middleProperties = factories[middle]( "middle" );
             var topProperties = factories[top]( "top" );
 
-            vwf.createNode( { extends: "http://vwf.example.com/node.vwf", properties: bottomProperties }, function( bottomID ) {
-              vwf.execute( bottomID, "this.tag = 'bottom'" );
-              vwf.createNode( { extends: bottomID, properties: middleProperties }, function( middleID ) {
-                vwf.execute( middleID, "this.tag = 'middle'" );
-                vwf.createNode( { extends: middleID, properties: topProperties }, function( topID ) {
-                  vwf.execute( topID, "this.tag = 'top'" );
+            kernel.createNode( { extends: "http://vwf.example.com/node.vwf", properties: bottomProperties }, function( bottomID ) {
+              kernel.execute( bottomID, "this.tag = 'bottom'" );
+              kernel.createNode( { extends: bottomID, properties: middleProperties }, function( middleID ) {
+                kernel.execute( middleID, "this.tag = 'middle'" );
+                kernel.createNode( { extends: middleID, properties: topProperties }, function( topID ) {
+                  kernel.execute( topID, "this.tag = 'top'" );
                   callback( { top: topID, middle: middleID, bottom: bottomID } );
                 } );
               } );

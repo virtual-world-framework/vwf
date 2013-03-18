@@ -15,7 +15,11 @@
 
 ( function() {
 
+    // RequireJS configuration.
+    
     var config = {
+
+        // Define shims for non-AMD libraries so that they can be listed as RequireJS dependencies.
 
         shim: {
             "socket.io": {
@@ -92,9 +96,9 @@
  
     // Load the kernel, wait for the DOM ready state, then initialize the kernel.
 
-    require( config, [ "domReady", "vwf" ], function( ready, vwf ) {
+    require( config, [ "domReady", "vwf" ], function( ready, kernel ) {
         ready( function() {
-            vwf.initialize( application, modelInitializers, viewInitializers );
+            kernel.initialize( application, modelInitializers, viewInitializers );
         } );
     } );
 

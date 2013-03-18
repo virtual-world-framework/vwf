@@ -22,11 +22,11 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Test dispatching events.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           var emptyParameters = [ {} ]; // eventData == {}
           var emptyNodeParameters = { "": [ {} ] }; // eventNodeData == {} for all nodes
@@ -37,8 +37,8 @@
 
             createFixture( function( topID, middleID, bottomID, baseID ) {
 
-              vwf.fireEvent( topID, "test" );
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top bubble" ], "top fireEvent only visits top" );
+              kernel.fireEvent( topID, "test" );
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "top bubble" ], "top fireEvent only visits top" );
 
               start();
             } );
@@ -51,8 +51,8 @@
 
             createFixture( function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( topID, "test", emptyParameters, emptyNodeParameters );
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top bubble" ], "top dispatchEvent only visits top" );
+              kernel.dispatchEvent( topID, "test", emptyParameters, emptyNodeParameters );
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "top bubble" ], "top dispatchEvent only visits top" );
 
               start();
             } );
@@ -65,8 +65,8 @@
 
             createFixture( function( topID, middleID, bottomID, baseID ) {
 
-              vwf.fireEvent( bottomID, "test" );
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "bottom bubble" ], "bottom fireEvent only visits bottom" );
+              kernel.fireEvent( bottomID, "test" );
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "bottom bubble" ], "bottom fireEvent only visits bottom" );
 
               start();
             } );
@@ -79,9 +79,9 @@
 
             createFixture( function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+              kernel.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble", "top bubble" ],
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble", "top bubble" ],
                 "bottom fireEvent captures from and bubbles to top" );
 
               start();
@@ -95,9 +95,9 @@
 
             createFixture( false, false, { capture: false, bubble: true }, function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+              kernel.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble" ],
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble" ],
                 "handling at target prevents bubbling" );
 
               start();
@@ -111,9 +111,9 @@
 
             createFixture( false, { capture: true }, false, function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+              kernel.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture" ],
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture" ],
                 "handling at middle capture prevents further capture and bubbling" );
 
               start();
@@ -127,9 +127,9 @@
 
             createFixture( false, { capture: false, bubble: true }, false, function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+              kernel.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble" ],
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "top capture", "middle capture", "bottom bubble", "middle bubble" ],
                 "handling at middle bubble prevents further bubbling" );
 
               start();
@@ -143,9 +143,9 @@
 
             createFixture( {}, {}, {}, function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
+              kernel.dispatchEvent( bottomID, "test", emptyParameters, emptyNodeParameters );
 
-              deepEqual( vwf.execute( baseID, "this.properties.targets" ), [ "top capture" ],
+              deepEqual( kernel.execute( baseID, "this.properties.targets" ), [ "top capture" ],
                 "implicit undefined return in handler same as explicit true return" );
 
               start();
@@ -159,9 +159,9 @@
 
             createFixture( function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( topID, "test" );
+              kernel.dispatchEvent( topID, "test" );
 
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0]" ), [ undefined ],
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[0]" ), [ undefined ],
                 "no parameters, no node-parameters, phase" );
 
               start();
@@ -175,9 +175,9 @@
 
             createFixture( function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( topID, "test", [ { parameters: true } ] );
+              kernel.dispatchEvent( topID, "test", [ { parameters: true } ] );
 
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0]" ), [ { parameters: true }, undefined ],
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[0]" ), [ { parameters: true }, undefined ],
                 "parameters, no node-parameters, phase" );
 
               start();
@@ -191,9 +191,9 @@
 
             createFixture( function( topID, middleID, bottomID, baseID ) {
 
-              vwf.dispatchEvent( topID, "test", [ { parameters: true } ], { "": [ { nodeParameters: true } ] } );
+              kernel.dispatchEvent( topID, "test", [ { parameters: true } ], { "": [ { nodeParameters: true } ] } );
 
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0]" ), [ { parameters: true }, { nodeParameters: true }, undefined ],
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[0]" ), [ { parameters: true }, { nodeParameters: true }, undefined ],
                 "parameters, node-parameters, phase" );
 
               start();
@@ -211,19 +211,19 @@
                 "": [ { nodeParameters: true, default: true } ] // default
               };
 
-              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+              kernel.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
 
-              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+              equal( kernel.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
 
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[0][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at top capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[1][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at middle capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[2][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at bottom bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[3][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at middle bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[4][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at top bubble" );
 
               start();
@@ -243,19 +243,19 @@
 
               nodeParameters[topID] = [ { nodeParameters: true, top: true } ]; // for top
 
-              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+              kernel.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
 
-              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+              equal( kernel.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
 
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[0][1]" ),
                 { nodeParameters: true, top: true }, "top node-parameters at top capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[1][1]" ),
                 { nodeParameters: true, top: true }, "top node-parameters at middle capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[2][1]" ),
                 { nodeParameters: true, top: true }, "top node-parameters at bottom bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[3][1]" ),
                 { nodeParameters: true, top: true }, "top node-parameters at middle bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[4][1]" ),
                 { nodeParameters: true, top: true }, "top node-parameters at top bubble" );
 
               start();
@@ -275,19 +275,19 @@
 
               nodeParameters[middleID] = [ { nodeParameters: true, middle: true } ]; // for middle
 
-              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+              kernel.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
 
-              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+              equal( kernel.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
 
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[0][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at top capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[1][1]" ),
                 { nodeParameters: true, middle: true }, "middle node-parameters at middle capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[2][1]" ),
                 { nodeParameters: true, middle: true }, "middle node-parameters at bottom bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[3][1]" ),
                 { nodeParameters: true, middle: true }, "middle node-parameters at middle bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[4][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at top bubble" );
 
               start();
@@ -307,19 +307,19 @@
 
               nodeParameters[bottomID] = [ { nodeParameters: true, bottom: true } ]; // for bottom
 
-              vwf.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
+              kernel.dispatchEvent( bottomID, "test", [ { parameters: true } ], nodeParameters );
 
-              equal( vwf.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
+              equal( kernel.execute( baseID, "this.properties.argumentss.length" ), 5, "two captures, three bubbles" ); // top capture, middle capture, bottom bubble, middle bubble, top bubble
 
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[0][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[0][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at top capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[1][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[1][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at middle capture" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[2][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[2][1]" ),
                 { nodeParameters: true, bottom: true }, "bottom node-parameters at bottom bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[3][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[3][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at middle bubble" );
-              deepEqual( vwf.execute( baseID, "this.properties.argumentss[4][1]" ),
+              deepEqual( kernel.execute( baseID, "this.properties.argumentss[4][1]" ),
                 { nodeParameters: true, default: true }, "default node-parameters at top bubble" );
 
               start();
@@ -357,7 +357,7 @@
 
             // Prototype for the three nodes.
 
-            vwf.createNode( {
+            kernel.createNode( {
 
               extends: "http://vwf.example.com/node.vwf",
 
@@ -398,7 +398,7 @@
 
               // Parent node.
 
-              vwf.createChild( 0, unique_name( "top" ), {
+              kernel.createChild( 0, unique_name( "top" ), {
 
                 extends: baseID,
                 properties: { result: result.top },
@@ -407,7 +407,7 @@
 
                 // Child node.
 
-                vwf.createChild( topID, unique_name( "middle" ), {
+                kernel.createChild( topID, unique_name( "middle" ), {
 
                   extends: baseID,
                   properties: { result: result.middle },
@@ -416,7 +416,7 @@
 
                   // Grandchild node.
 
-                  vwf.createChild( middleID, unique_name( "bottom" ), {
+                  kernel.createChild( middleID, unique_name( "bottom" ), {
 
                     extends: baseID,
                     properties: { result: result.bottom },

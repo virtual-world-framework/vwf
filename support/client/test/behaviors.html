@@ -22,19 +22,19 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Test behavior inheritance.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           asyncTest( "No behaviors", function() {  // Base
 
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              equal( vwf.execute( baseID, "this.base" ), "base", "base property visible on base" );
-              equal( vwf.execute( baseID, "this.baseAccessor" ), "BASE", "base property visible on base through accessor" );
+              equal( kernel.execute( baseID, "this.base" ), "base", "base property visible on base" );
+              equal( kernel.execute( baseID, "this.baseAccessor" ), "BASE", "base property visible on base through accessor" );
 
               start();
             } );
@@ -46,11 +46,11 @@
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              equal( vwf.execute( derivedID, "this.derived" ), "derived", "derived property visible on derived" );
-              equal( vwf.execute( derivedID, "this.base" ), "base", "base property visible on derived" );
+              equal( kernel.execute( derivedID, "this.derived" ), "derived", "derived property visible on derived" );
+              equal( kernel.execute( derivedID, "this.base" ), "base", "base property visible on derived" );
 
-              equal( vwf.execute( derivedID, "this.derivedAccessor" ), "DERIVED", "derived property visible on derived through accessor" );
-              equal( vwf.execute( derivedID, "this.baseAccessor" ), "BASE", "base property visible on derived through accessor" );
+              equal( kernel.execute( derivedID, "this.derivedAccessor" ), "DERIVED", "derived property visible on derived through accessor" );
+              equal( kernel.execute( derivedID, "this.baseAccessor" ), "BASE", "base property visible on derived through accessor" );
 
               start();
             } );
@@ -62,25 +62,25 @@
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "derivedBaseBehavior", "derived property visible on derived with base behavior" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base behavior" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.base" ), "base", "base property visible on derived with base behavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "derivedBaseBehavior", "derived property visible on derived with base behavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base behavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.base" ), "base", "base property visible on derived with base behavior" );
 
-              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehaviorAccessor" ), "DERIVEDBASEBEHAVIOR", "derived property visible on derived with base behavior through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehaviorAccessor" ), "BASEBEHAVIOR", "base behavior property visible on derived with base behavior through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with base behavior through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.derivedBaseBehaviorAccessor" ), "DERIVEDBASEBEHAVIOR", "derived property visible on derived with base behavior through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.baseBehaviorAccessor" ), "BASEBEHAVIOR", "base behavior property visible on derived with base behavior through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with base behavior through accessor" );
 
-              vwf.setProperty( derivedBaseBehaviorID, "derivedBaseBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedBaseBehaviorID, "baseBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedBaseBehaviorID, "base", "UpDaTeD" );
+              kernel.setProperty( derivedBaseBehaviorID, "derivedBaseBehavior", "UpDaTeD" );
+              kernel.setProperty( derivedBaseBehaviorID, "baseBehavior", "UpDaTeD" );
+              kernel.setProperty( derivedBaseBehaviorID, "base", "UpDaTeD" );
 
-              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "UpDaTeD", "derived property after initialization on derived with base behavior" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "UpDaTeD", "base behavior property after initialization on derived with base behavior" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with base behavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "UpDaTeD", "derived property after initialization on derived with base behavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "UpDaTeD", "base behavior property after initialization on derived with base behavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with base behavior" );
 
-              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with base behavior through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehaviorAccessor" ), "UPDATED", "base behavior property after initialization on derived with base behavior through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with base behavior through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.derivedBaseBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with base behavior through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.baseBehaviorAccessor" ), "UPDATED", "base behavior property after initialization on derived with base behavior through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with base behavior through accessor" );
 
               start();
             } );
@@ -92,30 +92,30 @@
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehavior" ), "derivedBaseBehaviorOtherBehavior", "derived property visible on derived with base and other behaviors" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base and other behaviors" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehavior" ), "otherBehavior", "other behavior property visible on derived with base and other behaviors" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.base" ), "base", "base property visible on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehavior" ), "derivedBaseBehaviorOtherBehavior", "derived property visible on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior property visible on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehavior" ), "otherBehavior", "other behavior property visible on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.base" ), "base", "base property visible on derived with base and other behaviors" );
 
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehaviorAccessor" ), "DERIVEDBASEBEHAVIOROTHERBEHAVIOR", "derived property visible on derived with base and other behaviors through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehaviorAccessor" ), "BASEBEHAVIOR", "base behavior property visible on derived with base and other behaviors through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehaviorAccessor" ), "OTHERBEHAVIOR", "other behavior property visible on derived with base and other behaviors through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehaviorAccessor" ), "DERIVEDBASEBEHAVIOROTHERBEHAVIOR", "derived property visible on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehaviorAccessor" ), "BASEBEHAVIOR", "base behavior property visible on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehaviorAccessor" ), "OTHERBEHAVIOR", "other behavior property visible on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with base and other behaviors through accessor" );
 
-              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "derivedBaseBehaviorOtherBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "baseBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "otherBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedBaseBehaviorOtherBehaviorID, "base", "UpDaTeD" );
+              kernel.setProperty( derivedBaseBehaviorOtherBehaviorID, "derivedBaseBehaviorOtherBehavior", "UpDaTeD" );
+              kernel.setProperty( derivedBaseBehaviorOtherBehaviorID, "baseBehavior", "UpDaTeD" );
+              kernel.setProperty( derivedBaseBehaviorOtherBehaviorID, "otherBehavior", "UpDaTeD" );
+              kernel.setProperty( derivedBaseBehaviorOtherBehaviorID, "base", "UpDaTeD" );
 
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehavior" ), "UpDaTeD", "derived property after initialization on derived with base and other behaviors" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehavior" ), "UpDaTeD", "base behavior property after initialization on derived with base and other behaviors" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehavior" ), "UpDaTeD", "other behavior property after initialization on derived with base and other behaviors" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehavior" ), "UpDaTeD", "derived property after initialization on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehavior" ), "UpDaTeD", "base behavior property after initialization on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehavior" ), "UpDaTeD", "other behavior property after initialization on derived with base and other behaviors" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with base and other behaviors" );
 
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with base and other behaviors through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehaviorAccessor" ), "UPDATED", "base behavior property after initialization on derived with base and other behaviors through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehaviorAccessor" ), "UPDATED", "other behavior property after initialization on derived with base and other behaviors through accessor" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.derivedBaseBehaviorOtherBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseBehaviorAccessor" ), "UPDATED", "base behavior property after initialization on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.otherBehaviorAccessor" ), "UPDATED", "other behavior property after initialization on derived with base and other behaviors through accessor" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with base and other behaviors through accessor" );
 
               start();
             } );
@@ -127,34 +127,34 @@
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "derivedDerivedBehavior", "derived property visible on derived with derived behavior" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "derivedBehavior", "derived behavior property visible on derived with derived behavior" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), false, "base behavior property not visible on derived with derived behavior (JavaScript binding)" );
-              equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), undefined, "base behavior property not visible on derived with derived behavior (kernel delegation)" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.base" ), "base", "base property visible on derived with derived behavior" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "derivedDerivedBehavior", "derived property visible on derived with derived behavior" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "derivedBehavior", "derived behavior property visible on derived with derived behavior" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), false, "base behavior property not visible on derived with derived behavior (JavaScript binding)" );
+              equal( kernel.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), undefined, "base behavior property not visible on derived with derived behavior (kernel delegation)" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.base" ), "base", "base property visible on derived with derived behavior" );
 
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehaviorAccessor" ), "DERIVEDDERIVEDBEHAVIOR", "derived property visible on derived with derived behavior through accessor" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehaviorAccessor" ), "DERIVEDBEHAVIOR", "derived behavior property visible on derived with derived behavior through accessor" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehaviorAccessor' in this" ), false, "base behavior property not visible on derived with derived behavior through accessor (JavaScript binding)" );
-              // equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehaviorAccessor" ), undefined, "base behavior property not visible on derived with derived behavior through accessor (kernel delegation)" );  // TODO: would need to handle ignorePrototype in vwf.model.javascript.gettingProperty() to prevent accessor inheritance in behaviors
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with derived behavior through accessor" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehaviorAccessor" ), "DERIVEDDERIVEDBEHAVIOR", "derived property visible on derived with derived behavior through accessor" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedBehaviorAccessor" ), "DERIVEDBEHAVIOR", "derived behavior property visible on derived with derived behavior through accessor" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "'baseBehaviorAccessor' in this" ), false, "base behavior property not visible on derived with derived behavior through accessor (JavaScript binding)" );
+              // equal( kernel.getProperty( derivedDerivedBehaviorID, "baseBehaviorAccessor" ), undefined, "base behavior property not visible on derived with derived behavior through accessor (kernel delegation)" );  // TODO: would need to handle ignorePrototype in kernel.model.javascript.gettingProperty() to prevent accessor inheritance in behaviors
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.baseAccessor" ), "BASE", "base property visible on derived with derived behavior through accessor" );
 
-              vwf.setProperty( derivedDerivedBehaviorID, "derivedDerivedBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedDerivedBehaviorID, "derivedBehavior", "UpDaTeD" );
-              vwf.setProperty( derivedDerivedBehaviorID, "baseBehavior", "CrEaTeD" );
-              vwf.setProperty( derivedDerivedBehaviorID, "base", "UpDaTeD" );
+              kernel.setProperty( derivedDerivedBehaviorID, "derivedDerivedBehavior", "UpDaTeD" );
+              kernel.setProperty( derivedDerivedBehaviorID, "derivedBehavior", "UpDaTeD" );
+              kernel.setProperty( derivedDerivedBehaviorID, "baseBehavior", "CrEaTeD" );
+              kernel.setProperty( derivedDerivedBehaviorID, "base", "UpDaTeD" );
 
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "UpDaTeD", "derived property after initialization on derived with derived behavior" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "UpDaTeD", "derived behavior property after initialization on derived with derived behavior" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), true, "base behavior property created on derived with derived behavior (JavaScript binding)" );  // TODO: kernel doesn't prevent this yet
-              equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), "CrEaTeD", "base behavior property created on derived with derived behavior (kernel delegation)" );  // TODO: kernel doesn't prevent this yet
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with derived behavior" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehavior" ), "UpDaTeD", "derived property after initialization on derived with derived behavior" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedBehavior" ), "UpDaTeD", "derived behavior property after initialization on derived with derived behavior" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "'baseBehavior' in this" ), true, "base behavior property created on derived with derived behavior (JavaScript binding)" );  // TODO: kernel doesn't prevent this yet
+              equal( kernel.getProperty( derivedDerivedBehaviorID, "baseBehavior" ), "CrEaTeD", "base behavior property created on derived with derived behavior (kernel delegation)" );  // TODO: kernel doesn't prevent this yet
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.base" ), "UpDaTeD", "base property after initialization on derived with derived behavior" );
 
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with derived behavior through accessor" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.derivedBehaviorAccessor" ), "UPDATED", "derived behavior property after initialization on derived with derived behavior through accessor" );
-              equal( vwf.execute( derivedDerivedBehaviorID, "'baseBehaviorAccessor' in this" ), false, "base behavior property not initialized on derived with derived behavior through accessor (JavaScript binding)" );
-              // equal( vwf.getProperty( derivedDerivedBehaviorID, "baseBehaviorAccessor" ), undefined, "base behavior property not initialized on derived with derived behavior through accessor (kernel delegation)" );  // TODO: would need to handle ignorePrototype in vwf.model.javascript.gettingProperty() to prevent accessor inheritance in behaviors
-              equal( vwf.execute( derivedDerivedBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with derived behavior through accessor" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedDerivedBehaviorAccessor" ), "UPDATED", "derived property after initialization on derived with derived behavior through accessor" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.derivedBehaviorAccessor" ), "UPDATED", "derived behavior property after initialization on derived with derived behavior through accessor" );
+              equal( kernel.execute( derivedDerivedBehaviorID, "'baseBehaviorAccessor' in this" ), false, "base behavior property not initialized on derived with derived behavior through accessor (JavaScript binding)" );
+              // equal( kernel.getProperty( derivedDerivedBehaviorID, "baseBehaviorAccessor" ), undefined, "base behavior property not initialized on derived with derived behavior through accessor (kernel delegation)" );  // TODO: would need to handle ignorePrototype in kernel.model.javascript.gettingProperty() to prevent accessor inheritance in behaviors
+              equal( kernel.execute( derivedDerivedBehaviorID, "this.baseAccessor" ), "UPDATED", "base property after initialization on derived with derived behavior through accessor" );
 
               start();
             } );
@@ -166,24 +166,24 @@
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              vwf.createProperty( derivedBaseBehaviorOtherBehaviorID, "a", "derivedBaseBehaviorOtherBehavior" );
+              kernel.createProperty( derivedBaseBehaviorOtherBehaviorID, "a", "derivedBaseBehaviorOtherBehavior" );
 
-              vwf.createProperty( baseBehaviorID, "a", "baseBehavior" );
-              vwf.createProperty( baseBehaviorID, "b", "baseBehavior" );
+              kernel.createProperty( baseBehaviorID, "a", "baseBehavior" );
+              kernel.createProperty( baseBehaviorID, "b", "baseBehavior" );
 
-              vwf.createProperty( otherBehaviorID, "a", "otherBehavior" );
-              vwf.createProperty( otherBehaviorID, "b", "otherBehavior" );
-              vwf.createProperty( otherBehaviorID, "c", "otherBehavior" );
+              kernel.createProperty( otherBehaviorID, "a", "otherBehavior" );
+              kernel.createProperty( otherBehaviorID, "b", "otherBehavior" );
+              kernel.createProperty( otherBehaviorID, "c", "otherBehavior" );
 
-              vwf.createProperty( baseID, "a", "base" );
-              vwf.createProperty( baseID, "b", "base" );
-              vwf.createProperty( baseID, "c", "base" );
-              vwf.createProperty( baseID, "d", "base" );
+              kernel.createProperty( baseID, "a", "base" );
+              kernel.createProperty( baseID, "b", "base" );
+              kernel.createProperty( baseID, "c", "base" );
+              kernel.createProperty( baseID, "d", "base" );
 
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.a" ), "derivedBaseBehaviorOtherBehavior", "derived property visible above behaviors and prototype" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.b" ), "baseBehavior", "second behavior property visible above first behavior and prototype" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.c" ), "otherBehavior", "first behavior property visible above prototype" );
-              equal( vwf.execute( derivedBaseBehaviorOtherBehaviorID, "this.d" ), "base", "prototype property visible" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.a" ), "derivedBaseBehaviorOtherBehavior", "derived property visible above behaviors and prototype" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.b" ), "baseBehavior", "second behavior property visible above first behavior and prototype" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.c" ), "otherBehavior", "first behavior property visible above prototype" );
+              equal( kernel.execute( derivedBaseBehaviorOtherBehaviorID, "this.d" ), "base", "prototype property visible" );
 
               start();
             } );
@@ -195,16 +195,16 @@
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              vwf.fireEvent( derivedBaseBehaviorID, "derivedBaseBehavior" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "derivedBaseBehaviorEvent", "derived listener invoked on derived" );
+              kernel.fireEvent( derivedBaseBehaviorID, "derivedBaseBehavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.derivedBaseBehavior" ), "derivedBaseBehaviorEvent", "derived listener invoked on derived" );
 
-              vwf.fireEvent( derivedBaseBehaviorID, "baseBehavior" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "baseBehaviorEvent", "base behavior listener invoked on derived" );
-              equal( vwf.execute( baseBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior listener not invoked on base behavior" );
+              kernel.fireEvent( derivedBaseBehaviorID, "baseBehavior" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.baseBehavior" ), "baseBehaviorEvent", "base behavior listener invoked on derived" );
+              equal( kernel.execute( baseBehaviorID, "this.baseBehavior" ), "baseBehavior", "base behavior listener not invoked on base behavior" );
 
-              vwf.fireEvent( derivedBaseBehaviorID, "base" );
-              equal( vwf.execute( derivedBaseBehaviorID, "this.base" ), "baseEvent", "base listener invoked on derived" );
-              equal( vwf.execute( baseID, "this.base" ), "base", "base listener not invoked on base" );
+              kernel.fireEvent( derivedBaseBehaviorID, "base" );
+              equal( kernel.execute( derivedBaseBehaviorID, "this.base" ), "baseEvent", "base listener invoked on derived" );
+              equal( kernel.execute( baseID, "this.base" ), "base", "base listener not invoked on base" );
 
               start();
             } );
@@ -216,14 +216,14 @@
             createFixture( function( derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID, baseID,
                 derivedBehaviorID, baseBehaviorID, otherBehaviorID ) {
 
-              vwf.execute( derivedBaseBehaviorID, "Object.getPrototypeOf( this ).methods.baseBehavior = function() { this.properties.baseBehavior = 'baseBehaviorMethod' }" );
-              vwf.execute( baseBehaviorID, "this.methods.baseBehavior()" );
-              equal( vwf.execute( baseBehaviorID, "this.properties.baseBehavior" ), "baseBehaviorMethod", "method set on proxy updated the behavior" );
+              kernel.execute( derivedBaseBehaviorID, "Object.getPrototypeOf( this ).methods.baseBehavior = function() { this.properties.baseBehavior = 'baseBehaviorMethod' }" );
+              kernel.execute( baseBehaviorID, "this.methods.baseBehavior()" );
+              equal( kernel.execute( baseBehaviorID, "this.properties.baseBehavior" ), "baseBehaviorMethod", "method set on proxy updated the behavior" );
 
-              vwf.execute( baseBehaviorID, "this.events.baseBehavior = this.events.flush( this )" );
-              vwf.execute( derivedBaseBehaviorID, "Object.getPrototypeOf( this ).events.baseBehavior = function() { this.properties.baseBehavior = 'baseBehaviorEvent' }" );
-              vwf.execute( baseBehaviorID, "this.events.baseBehavior()" );
-              equal( vwf.execute( baseBehaviorID, "this.properties.baseBehavior" ), "baseBehaviorEvent", "event add on proxy updated the behavior" );
+              kernel.execute( baseBehaviorID, "this.events.baseBehavior = this.events.flush( this )" );
+              kernel.execute( derivedBaseBehaviorID, "Object.getPrototypeOf( this ).events.baseBehavior = function() { this.properties.baseBehavior = 'baseBehaviorEvent' }" );
+              kernel.execute( baseBehaviorID, "this.events.baseBehavior()" );
+              equal( kernel.execute( baseBehaviorID, "this.properties.baseBehavior" ), "baseBehaviorEvent", "event add on proxy updated the behavior" );
 
               start();
             } );
@@ -301,7 +301,7 @@
               "}"
             );
 
-            vwf.createNode( descriptor, callback );
+            kernel.createNode( descriptor, callback );
           }
 
         } );

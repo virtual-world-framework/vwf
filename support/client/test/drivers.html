@@ -49,54 +49,54 @@
 
     <script type="text/javascript">
 
-      require( [ "vwf" ], function( vwf ) {
+      require( [ "vwf" ], function( kernel ) {
 
         // Test the kernel-driver interface.
 
-        vwf.ready( function() {
+        kernel.ready( function() {
 
           test( "Models", function() {
 
-            equal( vwf.models[0].tail().module.id, "vwf/model/glge", "GLGE Model by number" );
-            equal( vwf.models["vwf/model/glge"].tail().module.id, "vwf/model/glge", "GLGE Model by name" );
-            equal( vwf.models[0].tail().module.id, vwf.models["vwf/model/glge"].tail().module.id, "GLGE Model by number and name" );
+            equal( kernel.models[0].tail().module.id, "vwf/model/glge", "GLGE Model by number" );
+            equal( kernel.models["vwf/model/glge"].tail().module.id, "vwf/model/glge", "GLGE Model by name" );
+            equal( kernel.models[0].tail().module.id, kernel.models["vwf/model/glge"].tail().module.id, "GLGE Model by number and name" );
 
-            equal( vwf.models[1].tail().module.id, "vwf/model/object", "Object Model by number" );
-            equal( vwf.models["vwf/model/object"].tail().module.id, "vwf/model/object", "Object Model by name" );
-            equal( vwf.models[1].tail().module.id, vwf.models["vwf/model/object"].tail().module.id, "Object Model by number and name" );
+            equal( kernel.models[1].tail().module.id, "vwf/model/object", "Object Model by number" );
+            equal( kernel.models["vwf/model/object"].tail().module.id, "vwf/model/object", "Object Model by name" );
+            equal( kernel.models[1].tail().module.id, kernel.models["vwf/model/object"].tail().module.id, "Object Model by number and name" );
 
           } );
 
           test ( "Model parameters", function() {
 
-            deepEqual( vwf.models[2].tail().arguments, [], "No arguments" );
-            deepEqual( vwf.models[3].tail().arguments, [], "No arguments, explict undefined " );
-            deepEqual( vwf.models[4].tail().arguments, [], "No arguments, explict null" );
-            deepEqual( vwf.models[5].tail().arguments, [ "single" ], "Single argument as a value" );
-            deepEqual( vwf.models[6].tail().arguments, [ "first", "second" ], "Multiple arguments as an array" );
-            deepEqual( vwf.models[7].tail().arguments, [ [ "array" ] ], "Array as an argument" );
+            deepEqual( kernel.models[2].tail().arguments, [], "No arguments" );
+            deepEqual( kernel.models[3].tail().arguments, [], "No arguments, explict undefined " );
+            deepEqual( kernel.models[4].tail().arguments, [], "No arguments, explict null" );
+            deepEqual( kernel.models[5].tail().arguments, [ "single" ], "Single argument as a value" );
+            deepEqual( kernel.models[6].tail().arguments, [ "first", "second" ], "Multiple arguments as an array" );
+            deepEqual( kernel.models[7].tail().arguments, [ [ "array" ] ], "Array as an argument" );
 
           } );
 
           test( "Views", function() {
-            equal( vwf.views[0].tail().module.id, "vwf/view/glge", "GLGE View" );
+            equal( kernel.views[0].tail().module.id, "vwf/view/glge", "GLGE View" );
           } );
 
           test ( "View parameters", function() {
 
-            deepEqual( vwf.views[2].arguments, [], "No arguments" );
-            deepEqual( vwf.views[3].arguments, [], "No arguments, explict undefined " );
-            deepEqual( vwf.views[4].arguments, [], "No arguments, explict null" );
-            deepEqual( vwf.views[5].arguments, [ "single" ], "Single argument as a value" );
-            deepEqual( vwf.views[6].arguments, [ "first", "second" ], "Multiple arguments as an array" );
-            deepEqual( vwf.views[7].arguments, [ [ "array" ] ], "Array as an argument" );
+            deepEqual( kernel.views[2].arguments, [], "No arguments" );
+            deepEqual( kernel.views[3].arguments, [], "No arguments, explict undefined " );
+            deepEqual( kernel.views[4].arguments, [], "No arguments, explict null" );
+            deepEqual( kernel.views[5].arguments, [ "single" ], "Single argument as a value" );
+            deepEqual( kernel.views[6].arguments, [ "first", "second" ], "Multiple arguments as an array" );
+            deepEqual( kernel.views[7].arguments, [ [ "array" ] ], "Array as an argument" );
 
           } );
 
           test( "Shared state", function() {
 
-            var model_glge = vwf.models["vwf/model/glge"].tail();
-            var view_glge = vwf.views["vwf/view/glge"].tail();
+            var model_glge = kernel.models["vwf/model/glge"].tail();
+            var view_glge = kernel.views["vwf/view/glge"].tail();
 
             // The GLGE model and view share state.
 
@@ -104,7 +104,7 @@
 
             // But they don't share it with any other model stage.
 
-            vwf.models.forEach( function( model ) {
+            kernel.models.forEach( function( model ) {
                 while ( model ) {
                     model === model_glge || notStrictEqual( model.state, model_glge.state, "GLGE state" );
                     model = model.model;
@@ -113,7 +113,7 @@
 
             // Or with any other view stage.
 
-            vwf.views.every( function( view ) {
+            kernel.views.every( function( view ) {
                 while ( view ) {
                     view === view_glge || notStrictEqual( view.state, view_glge.state, "GLGE state" + view.module.id );
                     view = view.view;
