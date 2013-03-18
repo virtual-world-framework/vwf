@@ -13,76 +13,82 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-require( [
+( function() {
 
-    "domReady",
+    // `kernel.initialize` parameters.
 
-    "vwf",
+    var application, modelInitializers, viewInitializers;
 
-    // This is the common model implementation and an example model that connects the
-    // simulation to a WebGL scene manager.
+    // If the global `vwf` is defined, take the initialization parameters from there and clear the
+    // global.
 
-    "vwf/model/javascript",
-    "vwf/model/jiglib",
-    "vwf/model/glge",
-    "vwf/model/object",
-    "vwf/view/document",
-    "vwf/view/editor",
-    "vwf/view/glge",
-    connected && "vwf/view/googleEarth",
-    cesium && "vwf/view/cesium"
-    
-], function( ready, vwf ) {
+    if ( window.vwf && typeof vwf == "object" && vwf !== null ) {
 
-    ready( function() {
+        if ( vwf.application ) {
+            application = vwf.application;
+        }
 
-        // With the scripts loaded, we must initialize the framework. vwf.initialize()
-        // accepts three parameters: a world specification, model configuration parameters,
-        // and view configuration parameters.
+        if ( vwf.models ) {
+            modelInitializers = vwf.models;
+        }
 
-        vwf.initialize(
+        if ( vwf.views ) {
+            viewInitializers = vwf.views;
+        }
 
-            // This is the world specification. The world may be specified using a component
-            // literal as shown here, or the specification may be placed in a network-
-            // visible location and specified here as a URI or as a query parameter to this
-            // index page.
+        window.vwf = undefined;
+    }
 
-            // As a literal:
-            //     { extends: "http://vwf.example.com/example-type.vwf", properties: { ... }, ... }
+    // Get the application specification if one is provided in the query string. Parse it into a
+    // component descriptor if it's valid JSON, otherwise keep the query string and assume it's a
+    // URI.
 
-            // As a string:
-            //     "http://vwf.example.com/example-type.vwf",
+    if ( getQueryString( "application" ) ) {
 
-            // These are the model configurations. Each key within the configuration object
-            // is a model name, and each value is an argument or an array of arguments to be
-            // passed to the model's constructor.
+        application = getQueryString( "application" );
 
-            // With an array of arguments for the "example" model:
-            //     { example: [ p1, p2, ... ], // ==> new vwf.modules.example( vwf, p1, p2, ... ) }
+        try { application = JSON.parse( application ) }
+            catch ( exception ) { }  // TODO: conflict between (some relative) uris and json?
+    }
 
-            // As a single argument to the "html" view:
-            //     { html: "#vwf-root" // ==> new vwf.modules.html( vwf, "#vwf-root" ) }
+    // TODO: parse model and view configuration from the URL
+ 
+    // Load the kernel, wait for the DOM ready state, then initialize the kernel.
 
-            [
-                "vwf/model/javascript",
-                "vwf/model/jiglib",
-                "vwf/model/glge",
-                "vwf/model/object",
-            ],
-
-            // These are the view configurations. They use the same format as the model
-            // configurations.
-
-            [
-                { "vwf/view/glge": "#vwf-root" },
-                "vwf/view/document",
-                "vwf/view/editor",
-                connected && "vwf/view/googleEarth",
-                cesium && "vwf/view/cesium"
-            ]
-
-        );
-
+    require( [ "domReady", "vwf" ], function( ready, vwf ) {
+        ready( function() {
+            vwf.initialize( application, modelInitializers, viewInitializers );
+        } );
     } );
 
-} );
+
+    /// Retrieve parameters from the page's query string.
+
+    // From http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/2880929#2880929
+    // and http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/3867610#3867610.
+
+    function getQueryString( name ) {
+
+        function parseParams() {
+            var params = {},
+                e,
+                a = /\+/g, // regex for replacing addition symbol with a space
+                r = /([^&;=]+)=?([^&;]*)/g,
+                d = function( s ) { return decodeURIComponent( s.replace(a, " ") ); },
+                q = window.location.search.substring(1);
+
+            while ( e = r.exec(q) )
+                params[ d(e[1]) ] = d(e[2]);
+
+            return params;
+        }
+
+        if ( ! queryStringParams )
+            queryStringParams = parseParams();
+
+        return queryStringParams[name];
+    };
+
+    var queryStringParams;
+
+} )();

@@ -6,7 +6,14 @@
 
     <title>Virtual World Framework</title>
 
-    <script type="text/javascript" src="qunit.js"></script>
+    <script type="text/javascript">
+
+      var vwf = {
+        models: [ "vwf/model/javascript", "vwf/model/object" ],
+         views: [ "vwf/view/document" ],
+      };
+
+    </script>
 
     <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
@@ -17,40 +24,17 @@
     <script type="text/javascript" src="../lib/alea.js"></script>
     <script type="text/javascript" src="../lib/mash.js"></script>
 
-    <script type="text/javascript" src="../lib/require.js"></script>
+    <script type="text/javascript" src="../lib/require.js" data-main="../lib/loader"></script>
+
+    <script type="text/javascript" src="qunit.js"></script>
 
     <script type="text/javascript">
 
-      require( {
-
-        baseUrl: "../lib"
-
-      }, [
-
-        "domReady",
-
-        "vwf",
-
-        "vwf/configuration",
-        "vwf/kernel/model",
-        "vwf/model/javascript",
-        "vwf/model/object",
-        "vwf/model/stage/log",
-        "vwf/kernel/view",
-        "vwf/view/document",
-        "vwf/utility",
-        "logger",
-
-      ], function( ready, vwf ) {
+      require( [ "vwf" ], function( vwf ) {
 
         // Test node replication.
 
-        ready( function() {
-
-          vwf.initialize(
-            /* models */ [ "vwf/model/javascript", "vwf/model/object" ],
-            /*  views */ [ "vwf/view/document" ]
-          );
+        vwf.ready( function() {
 
           // URI component to be used as a prototype. The state of a URI component can be expressed
           // as a patch to the URI's descriptor.

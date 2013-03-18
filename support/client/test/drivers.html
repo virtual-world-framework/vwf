@@ -6,7 +6,41 @@
 
     <title>Virtual World Framework</title>
 
-    <script type="text/javascript" src="qunit.js"></script>
+    <script type="text/javascript">
+
+      var vwf = {
+
+        models: [
+
+          "vwf/model/glge",
+          "vwf/model/object",
+
+          "vwf/model/test",
+          { "vwf/model/test": undefined },
+          { "vwf/model/test": null },
+          { "vwf/model/test": "single" },
+          { "vwf/model/test": [ "first", "second" ] },
+          { "vwf/model/test": [ [ "array" ] ] },
+
+        ],
+
+        views: [
+
+          "vwf/view/glge",
+          "vwf/view/test", // dummy to make the rest have the same indexes as the models
+
+          "vwf/view/test",
+          { "vwf/view/test": undefined },
+          { "vwf/view/test": null },
+          { "vwf/view/test": "single" },
+          { "vwf/view/test": [ "first", "second" ] },
+          { "vwf/view/test": [ [ "array" ] ] },
+
+        ]
+
+      };
+
+    </script>
 
     <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../lib/async.js"></script>
@@ -16,76 +50,17 @@
 
     <script type="text/javascript" src="../lib/vwf/model/glge/glge-compiled.js"></script>
 
-    <script type="text/javascript" src="../lib/require.js"></script>
+    <script type="text/javascript" src="../lib/require.js" data-main="../lib/loader"></script>
+
+    <script type="text/javascript" src="qunit.js"></script>
 
     <script type="text/javascript">
 
-      require( {
-
-        baseUrl: "../lib"
-
-      }, [
-
-        "domReady",
-
-        "vwf",
-
-        // This is the common model implementation and an example model that connects the
-        // simulation to a WebGL scene manager.
-
-        "vwf/configuration",
-        "vwf/kernel/model", // explicitly loaded until vwf can load its dependencies
-        "vwf/model/glge",
-        "vwf/model/object",
-        "vwf/model/test",
-        "vwf/model/stage/log", // explicitly loaded until vwf can load its dependencies
-        "vwf/kernel/view", // explicitly loaded until vwf can load its dependencies
-        "vwf/view/test",
-        "vwf/view/glge",
-        "vwf/utility",
-        "logger",
-
-      ], function( ready, vwf ) {
+      require( [ "vwf" ], function( vwf ) {
 
         // Test the kernel-driver interface.
 
-        ready( function() {
-
-          vwf.initialize(
-
-            // Models
-
-            [
-
-              "vwf/model/glge",
-              "vwf/model/object",
-
-              "vwf/model/test",
-              { "vwf/model/test": undefined },
-              { "vwf/model/test": null },
-              { "vwf/model/test": "single" },
-              { "vwf/model/test": [ "first", "second" ] },
-              { "vwf/model/test": [ [ "array" ] ] },
-
-            ],
-
-            // Views
-
-            [
-
-              "vwf/view/glge",
-              "vwf/view/test", // dummy to make the rest have the same indexes as the models
-
-              "vwf/view/test",
-              { "vwf/view/test": undefined },
-              { "vwf/view/test": null },
-              { "vwf/view/test": "single" },
-              { "vwf/view/test": [ "first", "second" ] },
-              { "vwf/view/test": [ [ "array" ] ] },
-
-            ]
-
-          );
+        vwf.ready( function() {
 
           test( "Models", function() {
 

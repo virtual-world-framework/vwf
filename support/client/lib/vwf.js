@@ -18,7 +18,6 @@
 /// @requires vwf/configuration
 /// @requires vwf/kernel/model
 /// @requires vwf/kernel/view
-/// @requires vwf/model/stage/log
 /// @requires vwf/utility
 
 /// vwf.js is the main Virtual World Framework manager. It is constructed as a JavaScript module
@@ -32,14 +31,12 @@ define( [ "module",
     "vwf/configuration",
     "vwf/kernel/model",
     "vwf/kernel/view",
-    "vwf/model/stage/log",
     "vwf/utility"
 ], function( module,
     logger,
     configuration,
     kernel_model,
     kernel_view,
-    model_stage_log,
     utility
 ) {
 
@@ -47,15 +44,13 @@ define( [ "module",
 
     var exports = {
 
+        /// RequireJS data about the kernel module.
+
         module: module,
 
         /// The kernel logger.
 
         logger: logger.for( module.id ),
-
-        /// Each model and view module loaded by the main page registers itself here.
-
-        modules: [],
 
         /// vwf.initialize() creates an instance of each model and view module configured on the main
         /// page and attaches them here.
@@ -121,36 +116,69 @@ define( [ "module",
         ///     [5] vwf.initialize( ..., [ { "vwf/model/glge": [ "#scene, "second param" ] } ], [ ... ] )
         ///     [6] vwf.initialize( ..., [ { "vwf/model/glge": "#scene" } ], [ ... ] )
 
-        initialize: function( /* [ componentURI|componentObject ] [ modelInitializers ]
-            [ viewInitializers ] */ ) {
+        initialize: function( /* [ applicationComponent ] [ modelInitializers ] [ viewInitializers ] */ ) {
 
             var args = Array.prototype.slice.call( arguments );
 
             this.logger.debug( "creating" );
 
-            // Get the application specification if one is provided in the query string. Parse it
-            // into an application specification object if it's valid JSON, otherwise keep the query
-            // string and assume it's a URI.
-
-            var application = getQueryString( "application" );  // TODO: move to index.html; don't reach out to the window from the kernel
-
-            try { application = JSON.parse( application ) } catch ( e ) { }  // TODO: conflict between (some relative) uris and json?  // TODO: move to index.html; don't reach out to the window from the kernel
-
             // Parse the function parameters. If the first parameter is not an array, then treat it
             // as the application specification. Otherwise, fall back to the "application" parameter
             // in the query string.
 
-            if ( typeof args[0] != "object" || ! ( args[0] instanceof Array ) ) {
-                application = args.shift();
-            }
+            var applicationComponent =
+                typeof args[0] != "object" || ! ( args[0] instanceof Array ) ?
+                    args.shift() : undefined;
 
             // Shift off the parameter containing the model list and initializer arguments.
 
-            var modelInitializers = args.shift() || [];
+            var modelInitializers = args.shift() || [
+                "vwf/model/javascript",
+                "vwf/model/jiglib",
+                "vwf/model/glge",
+                "vwf/model/object",
+            ];  // TODO: automatically detect drivers and allow an application config to influence the driver selection
 
             // Shift off the parameter containing the view list and initializer arguments.
 
-            var viewInitializers = args.shift() || [];
+            var viewInitializers = args.shift() || [
+                { "vwf/view/glge": "#vwf-root" },
+                "vwf/view/document",
+                "vwf/view/editor",
+            ];  // TODO: automatically detect drivers and allow an application config to influence the driver selection
+
+            window.location.search.indexOf( "?connected" ) == 0 &&
+                viewInitializers.push( "vwf/view/googleEarth" );  // TODO: automatically detect drivers and allow an application config to influence the driver selection
+
+            window.location.search.indexOf( "?cesium" ) == 0 &&
+                viewInitializers.push( "vwf/view/cesium" );  // TODO: automatically detect drivers and allow an application config to influence the driver selection
+
+            // Calculate the list of modules that the application depends on. These are the drivers
+            // referenced in `modelInitializers` and `viewInitializers` and in the `model-stages`
+            // `view-stages` configuration settings.
+
+            var dependencies = [].concat(
+                modelInitializers,
+                viewInitializers
+            ).map( function( initializer ) {
+                return typeof initializer == "object" && initializer != null ?
+                    Object.keys( initializer )[0] : initializer;
+            } ).concat(
+                configuration.active["model-stages"] || [],
+                configuration.active["view-stages"] || []
+            );
+
+            // Load the required drivers.
+
+            require( dependencies, function() {
+                kernel.configure( applicationComponent, modelInitializers, viewInitializers );
+            } );
+
+        },
+
+        configure: function( applicationComponent, modelInitializers, viewInitializers ) {  // TODO: this shouldn't be a public kernel function
+
+            this.logger.debug( "initializing" );
 
             // Create the model interface to the kernel. Models can make direct calls that execute
             // immediately or future calls that are placed on the queue and executed when removed.
@@ -265,17 +293,25 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
             }, this );
 
+            // Send the `ready` notifications.
+
+            readyPhase = true;
+
+            readyCallbacks.forEach( function( callback ) {
+                callback( this );
+            } );
+
+            readyCallbacks.length = 0;
+
             // Load the application.
 
-            this.ready( application );
+            this.launch( applicationComponent );
 
         },
 
-        // -- ready --------------------------------------------------------------------------------
+        // -- launch -------------------------------------------------------------------------------
 
-        /// ready.
-
-        ready: function( applicationComponent ) {
+        launch: function( applicationComponent ) {  // TODO: this shouldn't be a public kernel function
 
             if ( applicationComponent ) {
 
@@ -417,6 +453,31 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 reflector.start();
 
+            }
+
+        },
+
+        // -- ready --------------------------------------------------------------------------------
+
+        /// Register a function to be called after the kernel has initialized. The kernel is ready
+        /// to receive actions once it has sent the `ready` message, but no nodes will have been
+        /// created at this point. If an initial application was provided to `initialize`, the
+        /// application will begin loading immediately after the `ready` message.
+        ///
+        /// @param {Function} callback
+        ///   The callback function. The function is called immediately if the kernel has already
+        ///   reached the `ready` state.
+        /// 
+        /// @returns {}
+
+        ready: function( callback ) {
+
+            if ( typeof callback == "function" || callback instanceof Function ) {
+                if ( ! readyPhase ) {
+                    readyCallbacks.push( callback );
+                } else {
+                    callback( this );
+                }
             }
 
         },
@@ -3667,35 +3728,6 @@ if ( propertyValue === undefined ) this.logger.warn( "undefined property", nodeI
         kernel.views.kernel.enable();
     };
 
-    // -- getQueryString ---------------------------------------------------------------------------
-
-    /// Retrieve parameters from the page's query string.
-    /// 
-    /// From http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/2880929#2880929
-    /// and http://stackoverflow.com/questions/901115/get-querystring-values-with-jquery/3867610#3867610.
-
-    var getQueryString = function( name ) {
-
-        function parseParams() {
-            var params = {},
-                e,
-                a = /\+/g, // regex for replacing addition symbol with a space
-                r = /([^&;=]+)=?([^&;]*)/g,
-                d = function( s ) { return decodeURIComponent( s.replace(a, " ") ); },
-                q = window.location.search.substring(1);
-
-            while ( e = r.exec(q) )
-                params[ d(e[1]) ] = d(e[2]);
-
-            return params;
-        }
-
-        if ( ! queryStringParams )
-            queryStringParams = parseParams();
-
-        return queryStringParams[name];
-    };
-
     // == Private variables ========================================================================
 
     /// Components describe the objects that make up the simulation. They may also serve as
@@ -3715,15 +3747,19 @@ if ( propertyValue === undefined ) this.logger.warn( "undefined property", nodeI
 
     var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
 
+    /// Initialized to the `ready` phase?
+
+    var readyPhase = false;
+
+    /// Callbacks to send when reaching the `ready` phase.
+
+    var readyCallbacks = [];
+
     /// This is the connection to the reflector. In this sample implementation, "socket" is a
     /// socket.io client that communicates over a channel provided by the server hosting the
     /// client documents.
 
     var socket = undefined;
-
-    /// Cached version of window.location.search query parameters generated by getQueryString().
-
-    var queryStringParams = undefined;
 
     /// `setProperty` records sets in progress in `setPropertyEntrants` to prevent infinite
     /// recursion in the case that a driver calls back into the kernel (directly or indirectly)

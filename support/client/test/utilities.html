@@ -6,25 +6,27 @@
 
     <title>Virtual World Framework</title>
 
+    <script type="text/javascript">
+
+      var vwf = {
+        models: [],
+         views: [],
+      };
+
+    </script>
+
+    <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="../lib/require.js" data-main="../lib/loader"></script>
+
     <script type="text/javascript" src="qunit.js"></script>
-    <script type="text/javascript" src="../lib/require.js"></script>
 
     <script type="text/javascript">
 
-      require( {
-
-        baseUrl: "../lib"
-
-      }, [
-
-        "domReady",
-        "vwf/utility",
-
-      ], function( ready, utility ) {
+      require( [ "vwf", "vwf/utility" ], function( vwf, utility ) {
 
         // Test utility module functions.
 
-        ready( function() {
+        vwf.ready( function() {
 
           // == transform ==========================================================================
 
