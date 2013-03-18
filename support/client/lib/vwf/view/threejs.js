@@ -73,60 +73,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         // -- satProperty ------------------------------------------------------------------------------
 
-        satProperty: function (nodeID, propertyName, propertyValue) {
-        
-            //console.log([nodeID,propertyName,propertyValue]);
-            var node = this.state.nodes[ nodeID ]; // { name: childName, threeObject: undefined }
-            if(!node) node = this.state.scenes[nodeID];
-            var value = undefined;
-          
-            //this driver has no representation of this node, so there is nothing to do.
-            if(!node) return;
-          
-            var threeObject = node.threeObject;
-            if(!threeObject)
-              threeObject = node.threeScene;
-          
-            //There is not three object for this node, so there is nothing this driver can do. return
-            if(!threeObject) return value;  
-              
-            if ( node && threeObject && propertyValue !== undefined ) 
-            {
-                if(threeObject instanceof THREE.Scene)
-                {
-                    if(propertyName == 'enableShadows')
-                    {
-                        //debugger;
-                        var sceneNode = this.state.scenes[nodeID];
-                        sceneNode.renderer.shadowMapEnabled = propertyValue;
-                    }
-                    if ( propertyName == 'ambientColor' )
-                    {
-                        var lightsFound = 0;
-                        for( var i = 0; i < threeObject.__lights.length; i++ )
-                        {
-                            if(threeObject.__lights[i] instanceof THREE.AmbientLight)
-                            {
-                                threeObject.__lights[i].color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
-                                SetMaterialAmbients.call(this);
-                                lightsFound++;
-                            }
-                            
-                        }
-                        if ( lightsFound == 0 ) {
-                            var ambientlight = new THREE.AmbientLight( '#000000' );
-                            ambientlight.color.setRGB( propertyValue[0]/255, propertyValue[1]/255, propertyValue[2]/255 );
-                            node.threeScene.add( ambientlight );
-                            SetMaterialAmbients.call(this);                            
-                        }
-                        
-                    }
-                }
-            }
-        
-        
-        
-        }
+        //satProperty: function (nodeID, propertyName, propertyValue) { },
 
         // -- gotProperty ------------------------------------------------------------------------------
 
