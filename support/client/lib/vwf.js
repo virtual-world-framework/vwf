@@ -275,12 +275,28 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
         /// ready.
 
-        ready: function( component_uri_or_json_or_object ) {
+        ready: function( applicationComponent ) {
 
-            // Connect to the reflector. This implementation uses the socket.io library, which
-            // communicates using a channel back to the server that provided the client documents.
+            if ( applicationComponent ) {
 
-            try {
+                // Start the internal single-user mode reflector.
+
+                reflector.start();
+
+                // Load the application. The application is rooted in a single node constructed here
+                // as an instance of the component passed to initialize(). That component, its
+                // prototype(s), and its children, and their prototypes and children, flesh out the
+                // entire application.
+
+                // TODO: add note that this is only for a self-determined application; with socket, wait for reflection server to tell us.
+                // TODO: maybe depends on applicationComponent too; when to override and not connect to reflection server?
+
+                this.createNode( applicationComponent );
+
+            } else if ( window.location.protocol == "http:" || window.location.protocol == "https:" ) {
+
+                // Connect to the reflector. This implementation uses the socket.io library, which
+                // communicates using a channel back to the server that provided the client documents.
 
                 socket = new io.Socket( undefined, {
 
@@ -314,30 +330,6 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     }
 
                 } );
-
-            } catch ( e ) {
-
-                // If a connection to the reflector is not available, then run in single-user mode.
-                // Messages intended for the reflector will loop directly back to us in this case.
-                // Start a timer to monitor the incoming queue and dispatch the messages as though
-                // they were received from the server.
-
-                this.dispatch();
-
-                setInterval( function() {
-
-                    var fields = {
-                        time: kernel.now + 0.010, // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
-                        origin: "reflector",
-                    };
-
-                    queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
-
-                }, 10 );
-
-            }
-
-            if ( socket ) {
 
                 socket.on( "connect", function() {
 
@@ -401,30 +393,29 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 socket.on( "error", function() { 
 
-                    //Overcome by compatibility.js websockets check
-                    //jQuery('body').html("<div class='vwf-err'>WebSockets connections are currently being blocked. Please check your proxy server settings.</div>"); 
+                    // Switch to single-user mode.
+
+                    socket = undefined;
+                    reflector.start();
 
                 } );
 
                 // Start communication with the reflector. 
 
-                socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
+                socket.connect();
 
-            } else if ( component_uri_or_json_or_object ) {
+            } else {  // TODO: also do this if applicationComponent was invalid and createNode() failed
 
-                // Load the application. The application is rooted in a single node constructed here
-                // as an instance of the component passed to initialize(). That component, its
-                // prototype(s), and its children, and their prototypes and children, flesh out the
-                // entire application.
-
-                // TODO: add note that this is only for a self-determined application; with socket, wait for reflection server to tell us.
-                // TODO: maybe depends on component_uri_or_json_or_object too; when to override and not connect to reflection server?
-
-                this.createNode( component_uri_or_json_or_object );
-
-            } else {  // TODO: also do this if component_uri_or_json_or_object was invalid and createNode() failed
+                // If a connection to the reflector is not available, then run in single-user mode.
+                // Messages intended for the reflector will loop directly back to us in this case.
+                // Start a timer to monitor the incoming queue and dispatch the messages as though
+                // they were received from the server.
 
                 // TODO: show a selection dialog
+
+                // Start the internal, single-user mode reflector.
+
+                reflector.start();
 
             }
 
@@ -3888,6 +3879,43 @@ if ( propertyValue === undefined ) this.logger.warn( "undefined property", nodeI
         /// Array containing the messages in the queue.
 
         queue: [],
+
+    };
+
+    /// An internal reflector for use in single-user mode.
+
+    var reflector = {
+
+        /// Initialize and start sending messages.
+
+        start: function() {
+
+            var self = this;
+
+            this.startTime = +new Date();
+
+            setInterval( function() {
+
+                var fields = {
+                    time: kernel.now + 0.010, // TODO: use `time: self.time()` for accurate time flow, but the `future` test needs to adapt  // TODO: support play/pause/stop and different playback rates as with connected mode.
+                    origin: "reflector",
+                };
+
+                queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
+
+            }, 10 );
+
+        },
+
+        /// The reflector's current time.
+
+        time: function() {
+            return ( +new Date() - this.startTime ) / 1000;
+        },
+
+        /// The `+new Date()` value corresponding to the reflector time `0`.
+
+        startTime: undefined,
 
     };
 
