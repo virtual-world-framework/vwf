@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -60,7 +60,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.kernel = this.kernel.kernel.kernel;
             this.state.sceneRootID = "index-vwf";
 
-			
+
+            // shouldn't this just be vwf time? 			
 			//Setup the timer
 			window.performance = window.performance || {};
 			performance.now = (function() {
@@ -406,24 +407,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             goog.vec.Mat4.setColumn( transform, 1, columnz );
                             goog.vec.Mat4.setColumn( transform, 2, goog.vec.Vec4.negate( columny, columny ) );
                         }
-                        
 						
 						if(threeObject instanceof THREE.ParticleSystem)
 						{	
 							threeObject.updateTransform(transform);
 						}
 						
-						
                         threeObject.matrixAutoUpdate = false;
                         threeObject.matrix.elements = matCpy(transform);
-                        threeObject.updateMatrixWorld(true);  
+                        threeObject.updateMatrixWorld(true);
+                        value = propertyValue;  
 
 						//because threejs does not do auto tracking of lookat, we must do it manually.
 						//after updating the matrix for an ojbect, if it's looking at something, update to lookat from
 						//the new position
 						if(threeObject.lookatval)
 						{
-							
 							this.settingProperty(nodeID,'lookAt',threeObject.lookatval);
 						}
                     }
@@ -465,7 +464,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 									threeObject.matrix.lookAt(thisPosition,lookatPosition,up);
 									threeObject.updateMatrixWorld(true); 
 								}
-                                                            
+                                value = propertyValue;                             
                             }
                         
                         } else if (propertyValue instanceof Array)  {
@@ -484,12 +483,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             matrix.copy(threeObject.matrix);                        
                             matrix = matrix.multiply(flipmat,matrix);
                             threeObject.matrix.copy(matrix);
-                            threeObject.updateMatrixWorld(true);    
+                            threeObject.updateMatrixWorld(true);
+                            value = propertyValue;   
                         } else
 						{
 							if(!propertyValue)
 							{
 								delete threeObject.lookatval;
+                                value = "";
 							}
 						
 						}
@@ -541,6 +542,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         if(propertyValue == 'black')
                             material.color.setRGB(0,0,0);                           
                         material.ambient.setRGB( material.color.r,material.color.g,material.color.b);
+
+                        value = propertyValue;
                     }
                 }
                 if(threeObject instanceof THREE.ParticleSystem)
@@ -561,6 +564,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         {
                             ps.rebuildParticles();
                         }
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     
                     if(propertyName == 'size')
@@ -572,49 +576,60 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             ps.material.attributes.size.value[i] = propertyValue;
                         }
                         ps.material.attributes.size.needsUpdate = true;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'particleCount')
                     {
                         ps.setParticleCount(propertyValue);
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'startSize')
                     {
                         ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'endSize')
                     {
                         ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
 					if(propertyName == 'sizeRange')
                     {
                         ps.shaderMaterial_analytic.uniforms.sizeRange.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'maxSpin')
                     {
                         ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
 					if(propertyName == 'textureTiles')
                     {
                         ps.shaderMaterial_analytic.uniforms.textureTiles.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'minSpin')
                     {
                         ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
 					if(propertyName == 'maxOrientation')
                     {
                         ps.shaderMaterial_analytic.uniforms.maxOrientation.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'minOrientation')
                     {
                         ps.shaderMaterial_analytic.uniforms.minOrientation.value = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
 					if(propertyName == 'colorRange')
                     {
-                         ps.shaderMaterial_analytic.uniforms.colorRange.value.x = propertyValue[0];
+                        ps.shaderMaterial_analytic.uniforms.colorRange.value.x = propertyValue[0];
                         ps.shaderMaterial_analytic.uniforms.colorRange.value.y = propertyValue[1];
                         ps.shaderMaterial_analytic.uniforms.colorRange.value.z = propertyValue[2];
                         ps.shaderMaterial_analytic.uniforms.colorRange.value.w = propertyValue[3];
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
 					
 					
@@ -624,6 +639,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         ps.shaderMaterial_analytic.uniforms.startColor.value.y = propertyValue[1];
                         ps.shaderMaterial_analytic.uniforms.startColor.value.z = propertyValue[2];
                         ps.shaderMaterial_analytic.uniforms.startColor.value.w = propertyValue[3];
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'endColor')
                     {
@@ -631,13 +647,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         ps.shaderMaterial_analytic.uniforms.endColor.value.y = propertyValue[1];
                         ps.shaderMaterial_analytic.uniforms.endColor.value.z = propertyValue[2];
                         ps.shaderMaterial_analytic.uniforms.endColor.value.w = propertyValue[3];
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     
             
                     if(propertyName == 'solver')
                     {
-						
-                        ps.setSolverType(propertyValue)
+                        ps.setSolverType(propertyValue);
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == 'image')
                     {
@@ -645,11 +662,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
                         ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
                         ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
 					
                     }
                     if(propertyName == 'additive')
                     {
-                        if(propertyValue)
+                        //value = Boolean( propertyValue );
+                        //if( value )
+                        if ( Boolean( propertyValue ) )
                         {
                             ps.shaderMaterial_default.blending = THREE.AdditiveBlending;
                             ps.shaderMaterial_default.transparent = true;
@@ -680,6 +700,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         ps.shaderMaterial_analytic.depthWrite = propertyValue;
 						ps.shaderMaterial_interpolate.depthTest = propertyValue;   
                         ps.shaderMaterial_interpolate.depthWrite = propertyValue;
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == "minAcceleration" || propertyName == "maxAcceleration")
                     {
@@ -692,6 +713,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             particles.vertices[i].acceleration.y = ps.minAcceleration[1] + (ps.maxAcceleration[1] - ps.minAcceleration[1]) * Math.random();
                             particles.vertices[i].acceleration.z = ps.minAcceleration[2] + (ps.maxAcceleration[2] - ps.minAcceleration[2]) * Math.random();
                         }
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == "minVelocity" || propertyName == "maxVelocity")
                     {
@@ -700,11 +722,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         
                         for(var i = 0; i < particles.vertices.length; i++)
                         {
-                            
                             particles.vertices[i].velocity.x = ps.minVelocity[0] + (ps.maxVelocity[0] - ps.minVelocity[0]) * Math.random();
                             particles.vertices[i].velocity.y = ps.minVelocity[1] + (ps.maxVelocity[1] - ps.minVelocity[1]) * Math.random();
                             particles.vertices[i].velocity.z = ps.minVelocity[2] + (ps.maxVelocity[2] - ps.minVelocity[2]) * Math.random();
                         }
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                     if(propertyName == "minLifeTime" || propertyName == "maxLifeTime")
                     {
@@ -715,6 +737,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         {   
                             particles.vertices[i].lifespan = ps.minLifeTime + (ps.maxLifeTime - ps.minLifeTime) * Math.random();
                         }
+                        //value = propertyValue;  // no gettingProperty support so let the object model record
                     }
                 }
                 if(threeObject instanceof THREE.Camera)
@@ -723,7 +746,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         if(propertyValue)
                         {
-                            threeObject.fov = parseFloat(propertyValue);
+                            value = parseFloat(propertyValue);
+                            threeObject.fov = value;
                             threeObject.updateProjectionMatrix();
                         }
                     }
@@ -731,7 +755,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         if(propertyValue)
                         {
-                            threeObject.near = parseFloat(propertyValue);
+                            value = parseFloat(propertyValue);
+                            threeObject.near = value;
                             threeObject.updateProjectionMatrix();
                         }
                     }
@@ -739,7 +764,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         if(propertyValue)
                         {
-                            threeObject.aspect = parseFloat(propertyValue); 
+                            value = parseFloat(propertyValue);
+                            threeObject.aspect = value; 
                             threeObject.updateProjectionMatrix();                           
                         }
                     }
@@ -747,7 +773,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         if(propertyValue)
                         {
-                            threeObject.far = parseFloat(propertyValue);                    
+                            value = parseFloat(propertyValue);
+                            threeObject.far = value;                    
                             threeObject.updateProjectionMatrix();
                         }
                     }
@@ -755,7 +782,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {   
                         if(propertyValue == 'perspective')
                         {
-                            
+                            value = propertyValue;
                             var parent = threeObject.parent;
                             if(parent && threeObject && !(threeObject instanceof THREE.PerspectiveCamera))
                             {
@@ -782,7 +809,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         if(propertyValue == 'orthographic')
                         {
-                            
+                            value = propertyValue;
                             var parent = threeObject.parent;
                             if(parent && threeObject && !(threeObject instanceof THREE.OrthographicCamera))
                             {
@@ -827,6 +854,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             threeObject.map = null;
                             threeObject.needsUpdate = true;
                         }
+                        value = propertyValue;
                         
                     }
                     if(propertyName == "color" || propertyName == "diffuse")
@@ -837,17 +865,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         }
                         threeObject.needsUpdate = true;
                         if ( threeObject.ambient !== undefined ) {
-                            threeObject.ambient.setRGB( threeObject.color.r, threeObject.color.g, threeObject.color.b );                    }
+                            threeObject.ambient.setRGB( threeObject.color.r, threeObject.color.g, threeObject.color.b ); 
+                        }
+                        value = colorToString.call( this, vwfColor );
                     }
                 }
                 if( threeObject instanceof THREE.Scene )
                 {
                     if(propertyName == 'activeCamera')
                     {
-                        if(this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue])
+                        if( this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue] )
                         {
                             this.state.cameraInUse = this.state.scenes[this.state.sceneRootID].camera.threeJScameras[propertyValue];
                             this.state.scenes[this.state.sceneRootID].camera.ID = propertyValue;
+                            value = propertyValue;
                         }
                     }
                     if(propertyName == 'ambientColor')
@@ -871,20 +902,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 node.threeScene.add( ambientlight );
                                 SetMaterialAmbients.call(this);                            
                             }
+                            value = colorToString.call( this, vwfColor );
                         }
                     }
                     if ( propertyName == 'backgroundColor' )
                     {
                         if ( node && node.renderer ) {
                             var vwfColor = new utility.color( propertyValue );
-                            //console.info( "backgroundColor = " + propertyValue );
-                            //console.info( "     red = " + vwfColor.red() );
-                            //console.info( "   green = " + vwfColor.green() );
-                            //console.info( "    blue = " + vwfColor.blue() );
-                            //console.info( "   alpha = " + vwfColor.alpha() );
                             if ( vwfColor ) {
-                                node.renderer.setClearColor( { r:vwfColor.red(), g:vwfColor.green(), b:vwfColor.blue() }, vwfColor.alpha() );
+                                node.renderer.setClearColor( { r:vwfColor.red()/255, g:vwfColor.green()/255, b:vwfColor.blue()/255 }, vwfColor.alpha() );
+                                value = colorToString.call( this, vwfColor );
                             }
+                        }
+                    }
+                    if(propertyName == 'enableShadows')
+                    {
+                        if ( node && node.renderer ) {
+                            value = Boolean( propertyValue );
+                            node.renderer.shadowMapEnabled = value;
                         }
                     }
                 }   
@@ -940,31 +975,40 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             node.threeObject = newlight;
                             rebuildAllMaterials.call(this);
                         }
-                        
+
+                        if ( propertyValue == 'point' || propertyValue == 'directional' || propertyValue == 'spot' ) {
+                            value = propertyValue;                        
+                        }
                     }
                     //if(propertyName == 'diffuse')
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
                     if ( propertyName == 'distance' ) {
-                        threeObject.distance = propertyValue;
+                        value = Number( propertyValue );
+                        threeObject.distance = value;
                     }
                     if ( propertyName == 'color' ) {
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
+                        value = colorToString.call( this, vwfColor );
                     }
                     if ( propertyName == 'intensity' ) {
-                        threeObject.intensity = propertyValue;
+                        value = parseFloat( propertyValue );
+                        threeObject.intensity = value;
                         threeObject.updateMatrix();
                     }                    
                     if ( propertyName == 'castShadows' ) {
-                        threeObject.castShadow = propertyValue;
+                        value = Boolean( propertyValue );
+                        threeObject.castShadow = value;
                     }
 
                 }
             }
+            //console.log(["                settingProperty: returns ",propertyName,value]);
+            return value;
         },
 
         // -- gettingProperty ----------------------------------------------------------------------
@@ -996,7 +1040,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             {
                 if(propertyName == 'transform')
                 {
-                    var value = matCpy(threeObject.matrix.elements); 
+                    value = matCpy(threeObject.matrix.elements); 
                     
                     if ( threeObject instanceof THREE.Camera ) {
                         var columny = goog.vec.Vec4.create();
@@ -1007,22 +1051,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         goog.vec.Mat4.setColumn( value, 1, goog.vec.Vec4.negate( columnz, columnz ) );
 						
                     }
-                    
-                    var ret =  value;
-                    return ret;
+                    return value;
                 }
                 if(propertyName =='localMatrix')
                 {
-                    var elements = matCpy(threeObject.matrix.elements); 
-                    var ret =  elements;
-                    return ret;
+                    value = matCpy(threeObject.matrix.elements); 
+                    return value;
                 }
                 if(propertyName == 'worldMatrix')
                 {
                     threeObject.updateMatrixWorld(true);
-                    var elements = matCpy(threeObject.matrixWorld.elements); 
-                    var ret =  elements;    
-                    return ret;
+                    value = matCpy(threeObject.matrixWorld.elements); 
+                    return value;
                 }
                                     
                 if(propertyName ==  "boundingbox")
@@ -1038,7 +1078,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                 if(propertyName ==  "meshData")
                 {
-                    var threeObject = node.threeObject;
                     value = [];
                     var scale = this.gettingProperty( nodeID, "scale", [] ); 
                     scale = [1,1,1];
@@ -1057,18 +1096,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             {
                 if(propertyName == "texture")
                 {
-                    //debugger;
                     if( threeObject.map && threeObject.map.image )
                         return threeObject.map.image.src;
                         
                 }
-                if(propertyName == "color")
-                {
+                if(propertyName == "color") {
                     
                         
                 }
-                if(propertyName == "diffuse")
-                {
+                if(propertyName == "diffuse") {
                     
                         
                 }
@@ -1097,26 +1133,65 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
             }
             if( threeObject instanceof THREE.Scene ) {
+                var found = false;
+                var vwfColor, color;
                 switch ( propertyName ) {
                     case "ambientColor":
+                        for( var i = 0; i < threeObject.__lights.length && !found; i++ ) {
+                            if( threeObject.__lights[i] instanceof THREE.AmbientLight ) {
+                                color = threeObject.__lights[i].color;
+                                vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
+                                value = colorToString.call( this, vwfColor );
+                                found = true;
+                            }
+                        }
                         break;
                     case "backgroundColor":
+                        if ( node.renderer ) {
+                            var color = node.renderer.getClearColor();
+                            var alpha = node.renderer.getClearAlpha();
+                            if ( alpha != 1 ){
+                                vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255, alpha ] );
+                            } else {
+                                vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
+                            }
+                            value = colorToString.call( this, vwfColor );
+                        }
+                        break;
+                    case 'enableShadows':
+                        {
+                            if ( node.renderer ) {
+                                value = node.renderer.shadowMapEnabled = value;
+                            }
+                        }
                         break;
                     case "activeCamera":
+                        value = node.camera.ID;
                         break;
                 }
             }
             if( threeObject instanceof THREE.Light ) {
                 switch ( propertyName ) {
                     case "lightType":
+                        if ( threeObject instanceof THREE.DirectionalLight ){
+                            value = 'directional';
+                        } else if ( threeObject instanceof THREE.SpotLight ) {
+                            value = 'spot'; 
+                        } else {
+                            value = 'point';                            
+                        }
                         break;
                     case "distance":
+                        value = threeObject.distance;
                         break;
                     case "color":
+                        value = colorToString.call( this, new utility.color( [ threeObject.color.r, threeObject.color.g, threeObject.color.b ] ) );
                         break;
                     case "intensity":
+                        value = threeObject.intensity;
                         break;
                     case "castShadows":
+                        value = threeObject.castShadows;
                         break;
                 }
             }
@@ -1341,10 +1416,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 if ( sceneNode.camera && sceneNode.camera.threeJScameras ) {
                     if ( !sceneNode.camera.threeJScameras[childID] ) {
                         cam = CreateThreeCamera.call(this);
-                        //camera.position.set(0, 0, 0);
-                        //camera.lookAt( sceneNode.threeScene.position );
-                
-                        
                         sceneNode.camera.threeJScameras[childID] = cam;
                     } else {
                         cam = sceneNode.camera.threeJScameras[childID];
@@ -1565,12 +1636,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             asset.name = childName;
             asset.vwfID = nodeID;
             asset.matrixAutoUpdate = false;
-            
-            //asset.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
-            //asset.updateMatrixWorld(true);
            
             SetMaterialAmbients.call(threeModel,asset);
-            //asset.rotation.z = Math.PI;
             
             // remember that this was a loaded collada file
             asset.loadedColladaNode = true;
@@ -1597,16 +1664,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     removed = true;
                 }
             } 
-            //if ( removed ) {
-            //    if ( sceneNode.srcAssetObjects.length == 0 ) {
-            //        //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
-            //        loadComplete.call( threeModel );
-            //    }
-            //}
 
             // let vwf know the asset is loaded 
             if ( nodeCopy.loadingCallback ) {
-                console.info( "========= LOADED ========== "+node.name+" ========= LOADED ==========" );
+                //console.info( "========= LOADED ========== "+node.name+" ========= LOADED ==========" );
                 nodeCopy.loadingCallback( true );                    
             }
         }
@@ -1696,6 +1757,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         } 
                
     }
+    function vwfColor( color ) {
+        var vwfColor = {};
+        vwfColor['r'] = color['r']*255;
+        vwfColor['g'] = color['g']*255;
+        vwfColor['b'] = color['b']*255;                                
+        if ( color['a'] !== undefined && color['a'] != 1 ) {
+            vwfColor['a'] = color['a'];
+            vwfColor = new utility.color( "rgba("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+","+vwfColor['a']+")" );
+        } else {
+            vwfColor = new utility.color( "rgb("+vwfColor['r']+","+vwfColor['g']+","+vwfColor['b']+")" );
+        }
+        return vwfColor;        
+    }
+
+    function colorToString( color ) {
+        var retColor = "";
+        if ( color.alpha() != 1 ) {
+            retColor = "rgba("+color.red()+","+color.green()+","+color.blue()+","+color.alpha()+")";
+        } else {
+            retColor = "rgb("+color.red()+","+color.green()+","+color.blue()+")";
+        }
+        //console.info( "retColor returns: " + retColor );
+        return retColor;
+    }
+
     function CreateParticleSystem(nodeID, childID, childName )
     {
         
