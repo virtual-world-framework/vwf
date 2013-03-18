@@ -110,12 +110,12 @@ define(function(){
 								this.red( p2v( value[0] ) );
 								this.green( p2v( value[1] ) );
 								this.blue( p2v( value[2] ) );
-								this.alpha( 0 );
+								this.alpha( 1 );
 							} else if ( value.length == 4 ) {
 								this.red( p2v( value[0] ) );
 								this.green( p2v( value[1] ) );
 								this.blue( p2v( value[2] ) );
-								this.alpha( parseFloat(value[3]) || 1 );								
+								this.alpha( parseFloat(value[3]) );								
 							}
 						} else {
 							this.set( value );
