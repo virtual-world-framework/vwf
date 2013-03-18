@@ -1,0 +1,87 @@
+# Copyright 2013 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/navscene.vwf
+properties:
+  ambientColor: [ 183, 183, 183 ]
+  navmode: "orbit"
+  speed: 4.0
+children:
+  humvee:
+    extends: http://vwf.example.com/node3.vwf
+    source: humvee.dae
+    type: model/vnd.collada+xml
+  lesson:
+    extends: http://vwf.example.com/lesson/task.vwf
+    properties:
+      scenePath: /
+    children:
+      step1:
+        extends: http://vwf.example.com/lesson/task.vwf
+        properties:
+          text: "Enter the Vehicle"
+          cameraPoseRef: /cameraPose1
+        children:
+        scripts:
+        - |
+          this.entering = function() {
+            
+          }
+      step2:
+        extends: http://vwf.example.com/lesson/task.vwf
+        properties:
+          text: "Start the Engine"
+          cameraPoseRef: /cameraPose1
+        children:
+        scripts:
+        - |
+          this.entering = function() {
+            
+          }
+      step3:
+        extends: http://vwf.example.com/lesson/task.vwf
+        properties:
+          text: "Drive Vehicle"
+          cameraPoseRef: /cameraPose1
+        children:
+        scripts:
+        - |
+          this.entering = function() {
+            
+          }
+  cameraPose1:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ -320, -360, 164 ]
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      quadraticAttenuation: 10
+      specular: false 
+      rotation: [ 1, 0, 0, -10 ]
+  dir2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      quadraticAttenuation: 10
+      specular: false 
+      rotation: [ -1, 0, 0, 200 ]
+scripts:
+- |
+  this.initialize = function() {
+    this.camera.translation = [ -320, -360, 164 ];
+    this.camera.lookAt = this.humvee.id;
+    this.camera.far = 3000;
+  }
