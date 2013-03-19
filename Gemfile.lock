@@ -13,7 +13,7 @@ GEM
     kramdown (1.0.1)
     minitest (4.7.0)
     mustache (0.99.4)
-    rack (1.5.2)
+    rack (1.4.5)
     rack-google-analytics (0.11.0)
     rack-protection (1.5.0)
       rack
@@ -57,6 +57,7 @@ DEPENDENCIES
   json
   kramdown
   minitest
+  rack (= 1.4.5)
   rack-google-analytics
   rack-test
   rake
