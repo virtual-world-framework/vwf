@@ -15,7 +15,7 @@
 extends: http://vwf.example.com/navscene.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
-  navmode: "orbit"
+  navmode: "walk"
   speed: 4.0
 children:
   humvee:
@@ -42,7 +42,7 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "Start the Engine"
-          cameraPoseRef: /cameraPose1
+          cameraPoseRef: /cameraPose2
         children:
         scripts:
         - |
@@ -53,7 +53,7 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "Drive Vehicle"
-          cameraPoseRef: /cameraPose1
+          cameraPoseRef: /cameraPose3
         children:
         scripts:
         - |
@@ -63,7 +63,11 @@ children:
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
     properties:
-      translation: [ -320, -360, 164 ]
+      translation: [ -45, -380, 74 ]
+  cameraPose2:
+    extends: http://vwf.example.com/node3.vwf
+  cameraPose3:
+    extends: http://vwf.example.com/node3.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -81,7 +85,13 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.translation = [ -320, -360, 164 ];
-    this.camera.lookAt = this.humvee.id;
+    this.camera.translation = this.cameraPose1.translation;
     this.camera.far = 3000;
+
+    this.cameraPose2.transform = [-0.2800654172897339,0.9599801301956177,0,0,
+      -0.9599801301956177,-0.2800654172897339,0,0,
+      0,0,1,0,
+      9.367589950561523,-10.260942459106445,66.83444213867188,1];
+
+    this.cameraPose3.transform = this.cameraPose2.transform;
   }

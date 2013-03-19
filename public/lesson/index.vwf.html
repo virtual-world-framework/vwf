@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <!-- Copyright 2013 United States Government, as represented by the Secretary of Defense, Under  -->
 <!-- Secretary of Defense (Personnel & Readiness).                                               -->
 <!--                                                                                             -->
@@ -9,156 +11,13 @@
 <!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
 <!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
 <!-- either express or implied. See the License for the specific language governing permissions  -->
-<!-- and limitations under the License.                                                          --> 
+<!-- and limitations under the License.                                                          -->
 
 <html>
-	<head>
-		<link rel='stylesheet' type='text/css' href='lesson.css' />
-		<link rel='stylesheet' type='text/css' href='css/jquery-ui-1.8.20.custom.css' />
-		<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css" />
-		<script type='text/javascript'>
-			var lessonSteps = new Array();
-			var progressWidth = 10;
+  <head>
 
-			vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
-				switch (propertyName) {
-				  case "text": 
-				    lessonSteps[vwf_view.kernel.name( nodeId )] = propertyValue;
-				    break;
-				}
-			}
+  </head>
+  <body>
 
-			vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
-				if(nodeId == vwf.find('', '/lesson')[0])
-				{
-					switch (eventName) {
-					  case "entering":
-					    progressWidth = 10;
-					    $('#lessonProgressBar').css('display', 'block');
-					    $('#lessonProgressBar').css('width', '10px');
-					    $('#message').css('display', 'none');
-					    $('#startButton').css('display', 'none');
-					    $('#nextButton').css('display', 'inline-block');
-					    $('#'+vwf_view.kernel.name( vwf.find('task', '/lesson/*')[0] )).trigger('click');
-					    break;
-					  case "completed":
-					    $('#lessonProgressBar').css('width', '100%');
-					    $('#nextButton').css('display', 'none');
-					    $('#completeButton').css('display', 'inline-block');
-					    $("#accordion").accordion("activate", false);
-					    break;
-					  case "exiting":
-					    $('#lessonProgressBar').css('display', 'none');
-					    $('#completeButton').css('display', 'none');
-					    $('#message').css('display', 'inline-block');
-					    $('#startButton').css('display', 'inline-block');
-					}
-				}
-				else
-				{
-					switch (eventName) {
-					  case "entering":
-					    $('#'+vwf_view.kernel.name( nodeId )).trigger('click');
-					    break;
-					  case "completed":
-					    increaseProgressBar();
-					    break;
-					}
-				}
-			}
-
-			function updateLessonInstructions() {
-				$('#accordion').html('');
-
-				for(var step in lessonSteps)
-				{
-					$('#accordion').append("<h2><a id='" + step + "' href='#'>" + step + "</a></h2>");
-					$('#accordion').append("<div><p>" + lessonSteps[step] + "</p></div>");
-				}
-
-				$("#accordion").accordion({ active: false, collapsible: true });
-			}
-
-			function increaseProgressBar() {
-				var numTasks = vwf.find("task", "/lesson/*").length;
-				var widthDelta = Math.ceil(100 / numTasks);
-				var pixelWidth = $('#progress').css('width');
-
-				pixelWidth = pixelWidth.substring(0, pixelWidth.length-2);
-
-				progressWidth = progressWidth + (pixelWidth*widthDelta*0.01);
-				$('#lessonProgressBar').css('width', progressWidth+'px');
-			}
-
-			function startLesson()
-			{
-				vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'enter', []);
-			}
-
-			function nextTask()
-			{
-				vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'next', []);
-			}
-
-			function completeLesson()
-			{
-				vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'exit', []);
-			}
-
-			// Open and close instruction panel?
-			// $('#instructionPanel').animate({ 'left' : "400px" }, 200);
-		</script>
-	</head>
-	<body>
-		<div id="instructionPanel">
-			<div id="accordion">
-			</div>
-			<div id="progress">
-				<div class="progress progress-striped active">
-					<div class="bar" id="lessonProgressBar"></div>
-				</div>
-			</div>
-			<div id="navigation">
-				<ul>
-					<li id='message'><label class="buttonLabel">Lesson Complete!</label></li>
-					<li id='startButton'>
-						<button type="button" class="btn btn-info" onclick="startLesson()">
-							<!-- <i class="icon-play icon-white" id="start" alt="Start"/></i> -->
-							<label class="buttonLabel">Start</label>
-						</button>	
-					</li>
-					<li id='previousButton'>
-						<button type="button" class="btn btn-info">
-							<!-- <i class="icon-step-backward icon-white" id="previous" alt="Previous"/></i> -->
-							<label class="buttonLabel">Previous</label>
-						</button>
-					</li>
-					<li id='nextButton'>
-						<button type="button" class="btn btn-info" onclick="nextTask()">
-							<!-- <i class="icon-step-forward icon-white" id="next" alt="Next"/></i> -->
-							<label class="buttonLabel">Next</label>
-						</button>	
-					</li>
-					<li id='completeButton'>
-						<button type="button" class="btn btn-info" onclick="completeLesson()">
-							<!-- <i class="icon-stop icon-white" id="complete" alt="Complete"/></i> -->
-							<label class="buttonLabel">Complete</label>
-						</button>
-					</li>
-				</ul>
-			</div>
-
-			<script>
-				$(document).ready(function() {
-					var vwfTasks = vwf.find("task", "/lesson/*");
-					for(var i=0; i<vwfTasks.length;i++)
-					{
-						vwf.getProperty(vwfTasks[i], "text");
-					}
-					updateLessonInstructions();
-				});
-			</script>
-
-		</div>
-	</body>
+  </body>
 </html>
