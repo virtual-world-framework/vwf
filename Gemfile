@@ -20,6 +20,7 @@ gem "json"
 gem "websocket-rack", :require => "rack/websocket"
 gem "thin"
 gem "rack-google-analytics", :require => "rack/google-analytics"
+gem "rack", "1.4.5"
 
 group :development do
   gem "sinatra-reloader", :require => "sinatra/reloader"
