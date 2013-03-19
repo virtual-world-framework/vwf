@@ -102,7 +102,6 @@ define(function(){
 				this.copy(value);
 				return this;
 			default : 
-				//console.info( "color parsing: type = " + ( typeof value ) );
 				switch(typeof value) {
 					case 'object' :
 						if ( value instanceof Array ) {
@@ -111,11 +110,13 @@ define(function(){
 								this.green( p2v( value[1] ) );
 								this.blue( p2v( value[2] ) );
 								this.alpha( 1 );
+								this.output = Color.RGB;
 							} else if ( value.length == 4 ) {
 								this.red( p2v( value[0] ) );
 								this.green( p2v( value[1] ) );
 								this.blue( p2v( value[2] ) );
-								this.alpha( parseFloat(value[3]) );								
+								this.alpha( parseFloat( value[3] ) || 1 );
+								this.output = Color.RGBA;								
 							}
 						} else {
 							this.set( value );
