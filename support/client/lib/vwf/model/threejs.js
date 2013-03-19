@@ -1689,6 +1689,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         if(childType == "model/vnd.collada+xml")
         {
             node.loader = new THREE.ColladaLoader();
+            node.loader.options.convertUpAxis = true;
+            node.loader.options.upAxis = "Z";
             node.loader.load(node.source, node.assetLoaded.bind( this ) );
         }
         if(childType == "model/vnd.osgjs+json+compressed")
