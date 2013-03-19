@@ -2,6 +2,43 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.5
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Separate requesting the config file from the initialize call, so apps will still work even if the request fails
+- CHG: Fix tests broken by calling loadConfiguration in index.html instead of initialize
+- CHG: Fix tests broken by moving the application parameter parsing out of the kernel
+- CHG: Add driver config file for xmas-tree app
+- NEW: Add touch driver to driver configuration options
+- NEW*: Add ability to load configuration files to specify necessary drivers. Add sample configuration file in physics.
+- CHG*: Move searching the query string for an application specification out of the kernel and into index.html
+- CHG*:  Use "library" instead of "driver" to describe javascripts loaded before initialize
+- NEW: Add comments to loadDriverConfiguration
+- NEW: Move the driver configuration logic inside the kernel. Only the URL parsing stays in index.html.
+- NEW*: Add threejs driver to driver configuration options
+- CHG: Change index.html to keep a list of drivers in the correct order, with specific drivers enabled or disabled in the list based on URL parameters
+- CHG: Fix adl/hwmvee game to work with driver configuration changes
+- CHG: Update catalog page to use new URL parameters for selecting drivers
+- CHG: Update index.html to use URL parameters to determine what drivers to load
+- CHG: Rename google earth driver to google-earth.js
+- CHG: Change connected parameter to google-earth for loading the google earth driver
+- CHG: Update the lesson cookbook recipe with full UI information. Fixes #1599.
+- NEW: Update to downloads page for automated zip distribution of master branch builds.
+- CHG: Tweak the logging and debugging recipe. Fixes #1602.
+- NEW: Add first draft of the logging and debugging recipe to the cookbook.
+- NEW: Add progress bar and navigation buttons to lesson UI.
+- CHG: Switch the Gemfile source from `https` to `http`.
+- CHG: Make lesson/task move the camera's world transform to the proper place. It has been moving its transform to the cameraPose's transform, instead of moving it's worldTransform to the cameraPose's worldTransform - fixes #1456
+- CHG: Add check in node3.worldTransformTo for when parent is not a node3 fixes #1447
+- NEW: Add transformBy, worldTransformBy, and worldTransformTo to node3
+- NEW: Also added public/test/transformTo so we can regression test future changes
+- NEW: Add basic UI to a lesson to show task instructions. Update lesson recipe to match. Refs #1603 and #1599 and fixes #1627.
+- CHG: Switch the Windows standalone build to Ruby 1.9.3. Fixes the `illegal switch in RUBYOPT: -"` error when launching `run.bat`. Bundler 1.3 is not compatible with Ruby 1.8 on Windows. Fixes #1630, references #1559.
+- CHG: Allow subdirectory files in vwf.example.com to generate source files for jsdoc. 
+- NEW: Add first draft of lesson recipe.
+
+----------------------------------
 0.6.4
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
