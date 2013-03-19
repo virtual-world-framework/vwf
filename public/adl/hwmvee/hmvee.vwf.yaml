@@ -105,10 +105,7 @@ scripts:
          }
          function findscene()
          {
-             for(var i =0; i<vwf.views.length;i++)
-             {
-                 if(vwf.views[i].module.id = 'vwf/view/glge') return vwf.views[i].state.scenes["index-vwf"].glgeScene;
-             }
+             if(vwf.views["vwf/view/glge"]) return vwf.views["vwf/view/glge"].state.scenes["index-vwf"].glgeScene;
              return null;
          }
          this.BuildSteerMatrix = function()
@@ -317,7 +314,7 @@ scripts:
                                  "       if(document[document.PlayerNumber + 'link'].PlayerNumber != this.shooter)"+
                                  "       return;"+
                                  "         var cameraTarget = this;"+             
-                                 "         var camera = vwf.views[0].state.cameraInUse;"+
+                                 "         var camera = vwf.views['vwf/view/glge'].state.cameraInUse;"+
                                  "         var camoffset = [];"+
                                  "         camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,5,5]);"+ 
                                  "         var cameragoal = [cameraTarget.translation[0]+camoffset[0],cameraTarget.translation[1]+camoffset[1],cameraTarget.translation[2]+camoffset[2]];"+
@@ -334,7 +331,7 @@ scripts:
                                 "this.GetNearist = function() { "+
                                 "var dot = -1;"+
                                 "var pos = null;"+
-                                "for(var node in vwf_view.kernel.kernel.models[0].model.nodes) { var lnode = vwf_view.kernel.kernel.models[0].model.nodes[node];"+
+                                "for(var node in vwf_view.kernel.kernel.models['vwf/model/javascript'].model.nodes) { var lnode = vwf_view.kernel.kernel.models['vwf/model/javascript'].model.nodes[node];"+
                                     "if(lnode.PlayerNumber && lnode.PlayerNumber != this.shooter){"+
                                     "   var thisdir = GLGE.subVec3(lnode.translation,this.translation);"+
                                     "    thisdir = document.TerrainFunctions.normalize(thisdir);"+
@@ -531,7 +528,7 @@ scripts:
               var pos = this.translation;
               pos = [pos[0],pos[1],pos[2]+3,1];
                  
-              var viewprojection = vwf.views[0].state.cameraInUse.getViewProjection();
+              var viewprojection = vwf.views['vwf/view/glge'].state.cameraInUse.getViewProjection();
               var screen = GLGE.mulMat4Vec4(viewprojection,pos);
               screen[0] /= screen[3];
               screen[1] /= screen[3];
@@ -563,13 +560,13 @@ scripts:
                   
                   if(document["PlayerNumber"] != this.PlayerNumber)
                       return;
-                  var cameraTarget = vwf_view.kernel.kernel.models[0].model.nodes['http-vwf-example-com-node3-vwf-' + this.camtarget];
+                  var cameraTarget = vwf_view.kernel.kernel.models["vwf/model/javascript"].model.nodes['http-vwf-example-com-node3-vwf-' + this.camtarget];
                   if(!cameraTarget)
                         cameraTarget = this;
                   else
                         return;
                         
-                  var camera = vwf.views[0].state.cameraInUse;
+                  var camera = vwf.views['vwf/view/glge'].state.cameraInUse;
                   var camoffset = [];
                   camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.RotationAmt+this.lookAngle,[0,0,1]),[0,-20,8]);
             

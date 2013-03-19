@@ -12,6 +12,7 @@
 # the License.
 
 require "erb"
+require "yaml"
 
 class VWF::Application::Admin < Sinatra::Base
 
@@ -120,6 +121,14 @@ class VWF::Application::Admin < Sinatra::Base
         Hash[ "url"=>dirContent[0], "basename"=>dirContent[1], "size"=>dirContent[2], "type"=>dirContent[3], "mtime"=>dirContent[4] ]
       end
     end .compact .to_json
+  end
+
+  get "/config" do
+    if(File.exists?("public#{ env["vwf.root"] }/index.vwf.config.yaml"))
+      config = File.read("public#{ env["vwf.root"] }/index.vwf.config.yaml")
+      config = YAML.load(config)
+      config.to_json
+    end
   end
 
 end

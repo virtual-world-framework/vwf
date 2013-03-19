@@ -23,8 +23,8 @@ DELEGATED_TASKS = [ :build, :test, :clean, :clobber ]
 
 # Path to the standalone ruby built by support/build/Rakefile.
 
-RUBY = "support/build/ruby-1.8.7-p357-i386-mingw32"  # TODO: get this from where it's defined in support/build/Rakefile
-RUBY_GEM_HOME = "#{RUBY}/lib/ruby/gems/1.8"
+RUBY = "support/build/ruby-1.9.3-p392-i386-mingw32"  # TODO: get this from where it's defined in support/build/Rakefile
+RUBY_GEM_HOME = "#{RUBY}/lib/ruby/gems/1.9.1"
 
 # CLEAN and CLOBBER
 
