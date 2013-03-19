@@ -37,12 +37,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             lessonCss.href = 'vwf/view/lesson/lesson.css';
             $('head').append(lessonCss);
 
-            var jQueryCss = document.createElement('link');
-            jQueryCss.rel = 'stylesheet';
-            jQueryCss.type = 'text/css';
-            jQueryCss.href = 'vwf/view/lesson/jquery-ui-1.8.20.custom.css';
-            $('head').append(jQueryCss);
-
             // Create instruction panel
             var instructionPanelDiv = document.createElement('div');
             instructionPanelDiv.id = 'instructionPanel';
