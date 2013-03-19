@@ -233,6 +233,18 @@
 
             var userLibraries = args.shift() || {};
 
+            var requireConfig = {
+                shim: {
+                    "vwf/model/threejs/three": {
+                        exports: "THREE",
+                    },
+                    "vwf/model/threejs/js/loaders/ColladaLoader": {
+                        deps: [ "vwf/model/threejs/three" ],
+                        exports: "THREE.ColladaLoader",
+                    },
+                }
+            };
+
             var requireArray = [
                 { library: "domReady", active: true },
                 { library: "vwf/configuration", active: true },
@@ -346,7 +358,7 @@
                     initializers["view"]["vwf/view/glge"].active = true;
                 }
 
-                require( getActiveLibraries(requireArray, false), function( ready ) {
+                require( requireConfig, getActiveLibraries(requireArray, false), function( ready ) {
 
                     ready( function() {
 
