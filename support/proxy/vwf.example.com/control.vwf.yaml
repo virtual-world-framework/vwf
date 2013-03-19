@@ -58,17 +58,17 @@ properties:
   controlScale: 1
   controlDirection: 
     set: |
-      if(!this.playing) {
-        switch(value) {
-          case 1:
-          case -1:
-            this.direction = value;
-            break;
-        }
+      switch(value) {
+        case 1:
+        case -1:
+          this.direction = value;
+          break;
       }
     value: 1
+  controlPlaying: false
 methods:
   mouseInit: 
+  controlTick:
 events:
   controlValueUpdated:
   pointerDown:
@@ -173,7 +173,7 @@ scripts:
       }
     };
   }
-
+  
   this.pointerDown = function( pointerInfo, pickInfo ) {
     if ( !this.input ) this.mouseInit();
     this.input.clear();
@@ -193,16 +193,18 @@ scripts:
           if(!((i + this.controlDirection) >= 0 && (i + this.controlDirection) < this.positions.length)) {
             this.controlDirection = this.controlDirection * -1;
           }
-          // TODO Should animate to the next position
-          this.controlValue = this.positions[i + this.controlDirection].controlValue;
+          this.controlPlaying = true;
+          this.controlTick(this.positions[i + this.controlDirection]);
           break;
         }
         else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
-          if(this.controlDirection) {
-            this.controlValue = this.positions[i+1].controlValue;
+          if(this.controlDirection == 1) {
+            this.controlPlaying = true;
+            this.controlTick(this.positions[i + 1]);
           }
           else {
-            this.controlValue = this.positions[i].controlValue;
+            this.controlPlaying = true;
+            this.controlTick(this.positions[i]);
           }
         }
       }
@@ -223,7 +225,9 @@ scripts:
           }
           switch(nearPosition.controlType) {
             case 1:
-              this.controlValue = nearPosition.controlValue;
+              this.controlPlaying = true;
+              this.controlDirection = this.intermediateValue < nearPosition.controlValue ? 1 : -1;
+              this.controlTick(nearPosition);
               break;
             case -1:
               // TODO How does this work?
@@ -275,4 +279,23 @@ scripts:
     }
     this.input.previous.pointerInfo = pointerInfo;
     this.input.previous.pickInfo = pickInfo;
+  }
+
+  this.controlTick = function (nextPosition) {
+    if ( this.controlPlaying ) {
+      if ( this.animationTime === nextPosition.animationTime ) {
+        this.controlValue = nextPosition.controlValue;
+        this.controlPlaying = false;
+      }
+      // Schedule the next tick if still playing.
+      if ( this.controlPlaying ) {
+        if ( Math.abs(nextPosition.animationTime - this.animationTime) > 1/60 ) {
+          this.animationTime = this.animationTime + (1/60 * this.controlDirection);
+          this.in( 1/60 ).controlTick(nextPosition); // next interval
+        } else {
+          this.animationTime = nextPosition.animationTime;
+          this.at( Math.abs(nextPosition.animationTime - this.animationTime) ).controlTick(nextPosition); // exactly at end
+        }
+      }
+    }
   }
