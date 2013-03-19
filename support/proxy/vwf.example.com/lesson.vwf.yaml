@@ -62,6 +62,8 @@ scripts:
 
     this.begin = function() {
 
+      // TODO: In actuality, I'll need to figure out how to test just the children, not all ancestors (one slash?)
+
       // Find lesson's children which are of type "instruction"
       instructions = this.find( ".//element(*,'http://vwf.example.com/instruction.vwf')" )
 

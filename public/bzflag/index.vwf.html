@@ -26,13 +26,48 @@
 				draggable: false,
 				buttons: {
 					"Create": function() {
-						if($('#userNameInput').val().length > 0) {
-							playerName = $('#userNameInput').val();
-							vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val()]);
+						if($('#selectPlayerInput').val() == 'createNew')
+						{
+							if($('#userNameInput').val().length > 0) {
+								playerName = $('#userNameInput').val();
+								vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [$('#userNameInput').val()]);
+								$('#userName').html(playerName + ":&nbsp;");
+								preloadImages();
+								$(this).dialog("close");
+							}
+						}
+						else
+						{
+							playerNode = $('#selectPlayerInput').val();
+							playerName = $("#selectPlayerInput option[value='" + playerNode + "']").text();
+							vwf_view.kernel.callMethod(vwf.find("","/")[0], "createPlayer", [playerName]);
 							$('#userName').html(playerName + ":&nbsp;");
 							preloadImages();
 							$(this).dialog("close");
+
+							// Set Player Camera
+							var playerCameraID = vwf_view.kernel.find(playerNode, playerName+"Camera")[0];
+						    var viewState = vwf_view.kernel.kernel.views[0].state;
+						    var glgeCamera = viewState.nodes[ playerCameraID ].glgeObject;
+						    glgeCamera.setAspect(canvas.width / canvas.height);
+						    viewState.cameraInUse = glgeCamera;
+						    viewState.cameraInUseID = playerCameraID;
+						    viewState.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
+						    viewState.scenes[sceneNode].camera.ID = playerCameraID;
 						}
+					}
+				},
+				open: function() {
+					var players = vwf_view.kernel.find("", "/players/*");
+
+					// Add existing player options
+					for(var i=0; i<players.length; i++)
+					{
+						var name = vwf_view.kernel.name( players[i] );
+						$('#selectPlayerInput').append($('<option>', { 
+							value: players[i],
+							text : name 
+						}));
 					}
 				}
 			});
@@ -91,6 +126,17 @@
 			map_image.onload = function() {
 				context.drawImage(map_image, 0, 0);
 			};*/
+
+			$('#selectPlayerInput').change(function() {
+				if($('#selectPlayerInput').val() == 'createNew')
+				{
+					$('#newPlayerInput').css('visibility', 'visible');
+				}
+				else
+				{
+					$('#newPlayerInput').css('visibility', 'hidden');
+				}
+			});
 		});
 	</script>
 				
@@ -198,8 +244,18 @@
 		</tr>
 	</table>
 	<div id="createUser">
-		<label for="userNameInput">Name</label>
-		<input type="text" name="userNameInput" id="userNameInput" class="text ui-widget-content ui-corner-all" />
+		<table style="width:100%">
+			<tr>
+				<td style="width:40%;text-align:right"><label for="selectPlayerInput">Player </label></td>
+				<td style="width:60%;text-align:left"><select id="selectPlayerInput" style="height:28px;width:172px" class="select ui-widget-content ui-corner-all">
+					<option value="createNew">Create New</option>
+				</select></td>
+			</tr>
+			<tr id="newPlayerInput" style="visibility:visible">
+				<td style="width:40%;text-align:right"><label for="userNameInput">Name </label></td>
+				<td style="width:60%;text-align:left"><input type="text" name="userNameInput" id="userNameInput" class="text ui-widget-content ui-corner-all" /></td>
+			</tr>
+		</table>
 	</div>
 	<div id="gameOver">
 		<p>Your tank was destroyed. Do you want to play again?</p>

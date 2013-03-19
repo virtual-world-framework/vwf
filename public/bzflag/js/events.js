@@ -55,12 +55,13 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
         playerNode = childID;
     }
     else if(childName == (playerName + "Camera")) {
+        var viewState = vwf_view.kernel.kernel.views[0].state;
         var glgeCamera = vwf.views[0].state.nodes[ childID ].glgeObject;
         glgeCamera.setAspect(canvas.width / canvas.height);
-        vwf.views[0].state.cameraInUse = glgeCamera;
-        vwf.views[0].state.cameraInUseID = childID;
-        vwf.views[0].state.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
-        vwf.views[0].state.scenes[sceneNode].camera.ID = childID;
+        viewState.cameraInUse = glgeCamera;
+        viewState.cameraInUseID = childID;
+        viewState.scenes[sceneNode].glgeScene.setCamera(glgeCamera);
+        viewState.scenes[sceneNode].camera.ID = childID;
     }
 }
 

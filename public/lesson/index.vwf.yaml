@@ -14,39 +14,97 @@
 --- 
 extends: http://vwf.example.com/navscene.vwf
 children:
+  duck:
+    extends: http://vwf.example.com/node3.vwf
+    source: duck.dae
+    type: model/vnd.collada+xml
+    properties:
+      translation: [ 15, 616, -90 ]
+      rotation: [ 0, 0, 1, 180 ]
   lesson:
-    extends: http://vwf.example.com/lesson.vwf
+    extends: http://vwf.example.com/lesson/task.vwf
+    properties:
+      scenePath: /
     children:
       step1:
-        extends: http://vwf.example.com/instruction.vwf
+        extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          instructionText: First, you will do the first thing.
-          actionText: Do the first thing
+          text: First, do the first thing.
           cameraPoseRef: /cameraPose1
         scripts:
         - |
-          this.entered = function() {
-          }
+          this.entering = function() {
+            console.info( "Step 1 entering" );
+            var self = this;
+            var duck = this.find( "/duck" )[ 0 ];
+            duck.pointerClick = duck.events.add( function() {
+              duck.pointerClick = duck.events.flush( this );
+              console.info( "Step 1 completed" );
+              this.completed();
+              console.info( "Step 1 after completed");
+            }, this );
+            this.exiting = function() {
+              console.info( "Step 1 exiting" );
+            }
+          } //@ sourceURL=step1.entering
       step2:
-        extends: http://vwf.example.com/instruction.vwf
+        extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          instructionText: Second, you will do the second thing.
-          actionText: Do the second thing
+          text: Second, do the second thing.
           cameraPoseRef: /cameraPose2
         scripts:
         - |
-          this.entered = function() {
-          }
+          this.entering = function() {
+            console.info( "Step 2 entering" );
+            var self = this;
+            var duck = this.find( "/duck" )[ 0 ];
+            duck.pointerClick = duck.events.add( function() {
+              duck.pointerClick = duck.events.flush( this );
+              console.info( "Step 2 completed" );
+              this.completed();
+              console.info( "Step 2 after completed");
+            }, this );
+            this.exiting = function() {
+              console.info( "Step 2 exiting" );
+            }
+          } //@ sourceURL=step2.entering
+    scripts:
+    - |
+      this.entering = function() {
+        console.info( "Lesson entering" );
+        this.exiting = function() {
+          console.info( "Lesson exiting" );
+        }
+      } //@ sourceURL=lesson.entering
   cameraPose1:
     extends: http://vwf.example.com/node3.vwf
-    position: [ 0, 0, 0 ]
-    rotation: [ 1, 0, 0, 0 ]
+    properties:
+      translation: [ 0, 0, 0 ]
+      rotation: [ 1, 0, 0, 0 ]
   cameraPose2:
     extends: http://vwf.example.com/node3.vwf
-    position: [ 0, 0, 1 ]
-    rotation: [ 1, 0, 0, -45 ]
+    properties:
+      translation: [ 0, 0, 616 ]
+      rotation: [ 1, 0, 0, -45 ]
+  light1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ 1, 0, 0, -45 ]
+  light2:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      constantAttenuation: 1
+      rotation: [ -1, 0, 0, 225 ]
 scripts:
 - |
   this.initialize = function() {
-    this.lesson.begin();
+    var self = this;
+    this.lesson.enter();
+    this.lesson.completed = function() {
+      console.info( "Lesson completed");
+      self.lesson.exit();
+    }
   } //@ sourceURL=index.vwf

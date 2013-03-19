@@ -5,7 +5,9 @@
 <div class="span3" markdown="1" style="margin-left:25px;padding-right: 5px;" >
 ###WHAT![Virtual World Framework Compass](images/compass.png)
 
-The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing secure, scalable, component-based, and collaborative virtual spaces. It leverages existing web-based standards, infrastructure, and emerging technologies with the intent of establishing a powerful yet simple to use platform that is built on top of the next generation of web browsers.
+The Virtual World Framework (VWF) is a fast, light-weight, web-based architecture for creating and distributing, scalable, collaborative, and component-based virtual spaces. It leverages existing web-based standards and emerging technologies to establish a powerful yet simple to use platform that is built for the next generation of web browsers.
+
+VWF Applications are built from components, expose their internal state through properties, and synchronize using the reflector server. For more information about what it means to use the framework and become VWF-compatible, visit [compliance](docs/compliance.html).
 </div>
 
 <div class="span3" markdown="1" style="padding-right: 5px;">
