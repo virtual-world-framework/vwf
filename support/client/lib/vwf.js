@@ -352,11 +352,12 @@
 
                 // Load default renderer if no other librarys specified
                 if(Object.keys(userLibraries["model"]).length == 0 && Object.keys(userLibraries["view"]).length == 0) {
-                    requireArray["vwf/model/glge"].active = true;
-                    requireArray["vwf/view/glge"].active = true;
-                    requireArray["vwf/model/glge/glge-compiled"].active = true;
-                    initializers["model"]["vwf/model/glge"].active = true;
-                    initializers["view"]["vwf/view/glge"].active = true;
+                    requireArray["vwf/model/threejs"].active = true;
+                    requireArray["vwf/view/threejs"].active = true;
+                    requireArray["vwf/model/threejs/three"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/ColladaLoader"].active = true;
+                    initializers["model"]["vwf/model/threejs"].active = true;
+                    initializers["view"]["vwf/view/threejs"].active = true;
                 }
 
                 require( requireConfig, getActiveLibraries(requireArray, false), function( ready ) {
