@@ -173,7 +173,16 @@ module Rack
 
         # logger.debug "Rack::WebSocket::Application#send_data #{data}"
 
-        send_data data
+        begin
+          send_data data
+        rescue EventMachine::WebSocket::WebSocketError => exception
+          if exception.message.match /connection is closing$/
+            logger.info "Rack::SocketIO::Application#send_serialization #{ object_id } #{ message_for_log data } ignoring exception from sending to a closing connection"
+            logger.info exception
+          else
+            raise
+          end
+        end
 
       end
 
