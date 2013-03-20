@@ -1575,7 +1575,8 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Methods.
 
-            if ( full || !patching || patches.methods ) {
+            // Because methods are much more data than properties, we only send them when patching
+            if ( patches && patches.methods ) {
                 var self = this;
                 nodeComponent.methods = {};
                 patches.methods.forEach( function( methodName ) {
