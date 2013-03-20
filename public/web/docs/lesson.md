@@ -110,157 +110,24 @@ Thus the complete lesson hierarchy is defined in the VWF model, including all le
 
 ### Add Lesson Interface to the View
 
-The user interface for the lesson will mainly be defined in the application's view. The primary interface for a lesson will consist of the instructional text for each lesson step.
+The user interface for the lesson will mainly be defined in the application using the lesson view driver. The primary interface for a lesson will consist of the instructional text for each lesson step, a bar to show overall lesson progress, and navigation buttons to start, complete, and skip over lesson tasks.
 
-First, add an accordian *div* to the HTML body.
+In order to pull in the lesson view driver (defined in *support/client/lib/vwf/view/lesson.js*), we simply need to create a configuration file for the application and activate the lesson view.
 
-	<body>
-	  <div id="instructionPanel">
-	    <div id="accordion">
-	    </div>
-	  </div>
-	</body>
+The configuration file will have the same name as the model file, with the addition of a *.config*. For instance, if your model file is entited *index.vwf.yaml*, the configuration file will be titled *index.vwf.config.yaml*. 
 
-This will be populated and scripted on load.
+The contents of the file will look as follows:
 
-In this example, the array *lessonSteps* will contain a list of instructional text for each step defined. On load, each *text* property value will be gathered and stored in the view, and the UI updated with the new instructions. 
+	---
+	model:
+	  vwf/model/glge:
+	view:
+	  vwf/view/glge: "#vwf-root"
+	  vwf/view/lesson: "#vwf-root"
 
-	var lessonSteps = new Array();
+This configuration sets the renderer to use the glge model and view driver in addition to the lesson view driver. 
 
-	$(document).ready(function() {  
-	  var vwfTasks = vwf.find("task", "/lesson/*");
-	  for(var i=0; i<vwfTasks.length;i++)
-	  {
-	    vwf.getProperty(vwfTasks[i], "text");
-	  }
-	  updateLessonInstructions();
-	});
-
-	vwf_view.gotProperty = function (nodeId, propertyName, propertyValue) {
-	  switch (propertyName) {
-	    case "text": 
-	      lessonSteps[vwf_view.kernel.name( nodeId )] = propertyValue;
-	      break;
-	  }
-	}
-
-The *updateLessonInstructions* function defined below will take the values stored in the *lessonSteps* array, and fill in appropriate values in the accordian *div* created above, and call the *jQuery accordion* method to activate the lesson panel. 
-
-	function updateLessonInstructions() {
-	  $('#accordion').html('');
-
-	  for(var step in lessonSteps)
-	  {
-	    $('#accordion').append("<h2><a id='" + step + "' href='#'>" + step + "</a></h2>");
-	    $('#accordion').append("<div><p>" + lessonSteps[step] + "</p></div>");
-	  }
-
-	  $("#accordion").accordion({ active: false, collapsible: true });
-	}
-
-Next, add a *div* for the navigation buttons: *Start*, *Next*, and *Complete*.
-
-	<div id="navigation">
-	  <ul>
-	    <li id='message'><label class="buttonLabel">Lesson Complete!</label></li>
-	    <li id='startButton'>
-	      <button type="button" class="btn btn-info" onclick="startLesson()">
-	        <label class="buttonLabel">Start</label>
-	      </button>	
-	    </li>
-	    <li id='nextButton'>
-	      <button type="button" class="btn btn-info" onclick="nextTask()">
-	        <label class="buttonLabel">Next</label>
-	      </button>	
-	    </li>
-	    <li id='completeButton'>
-	      <button type="button" class="btn btn-info" onclick="completeLesson()">
-	        <label class="buttonLabel">Complete</label>
-	      </button>
-	    </li>
-	  </ul>
-	</div>
-
-Then, add the functions to call the related vwf method.
-
-	function startLesson()
-	{
-	  vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'enter', []);
-	}
-
-	function nextTask()
-	{
-	  vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'next', []);
-	}
-
-	function completeLesson()
-	{
-	  vwf_view.kernel.callMethod(vwf.find('','/lesson')[0], 'exit', []);
-	}
-
-The final piece of the user interface is a progress bar to show progress through the lesson. Add another *div* to the instruction panel.
-
-	<div id="progress">
-	  <div class="progress progress-striped active">
-	    <div class="bar" id="lessonProgressBar"></div>
-	  </div>
-	</div>
-
-Then, add a function to update the progress bar as each task is completed.
-
-	var progressWidth = 10;
-	function increaseProgressBar() {
-	  var numTasks = vwf.find("task", "/lesson/*").length;
-	  var widthDelta = Math.ceil(100 / numTasks);
-	  var pixelWidth = $('#progress').css('width');
-
-	  pixelWidth = pixelWidth.substring(0, pixelWidth.length-2);
-
-	  progressWidth = progressWidth + (pixelWidth*widthDelta*0.01);
-	  $('#lessonProgressBar').css('width', progressWidth+'px');
-	}
-
-Finally we'll need to set up the VWF fired event listeners in order to kickoff the lesson and open the first instruction, update the instruction list based on the current step, and update the progress bar as the student progresses through the lesson.
-
-	vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
-	  if(nodeId == vwf.find('', '/lesson')[0])
-	  {
-	    switch (eventName) {
-	      case "entering":
-	        $('#lessonProgressBar').css('display', 'block');
-	        $('#lessonProgressBar').css('width', '10px');
-	        $('#message').css('display', 'none');
-	        $('#startButton').css('display', 'none');
-	        $('#nextButton').css('display', 'inline-block');
-	        $('#'+vwf_view.kernel.name( vwf.find('task', '/lesson/*')[0] )).trigger('click');
-	        break;
-	      case "completed":
-	        $('#lessonProgressBar').css('width', '100%');
-	        $('#nextButton').css('display', 'none');
-	        $('#completeButton').css('display', 'inline-block');
-	        $("#accordion").accordion("activate", false);
-	        break;
-	      case "exiting":
-	        $('#lessonProgressBar').css('display', 'none');
-	        $('#completeButton').css('display', 'none');
-	        $('#message').css('display', 'inline-block');
-	        $('#startButton').css('display', 'inline-block');
-	    }
-	  }
-	  else
-	  {
-	    switch (eventName) {
-	      case "entering":
-	        $('#'+vwf_view.kernel.name( nodeId )).trigger('click');
-	        break;
-	      case "completed":
-	        increaseProgressBar();
-	        break;
-	    }
-	  }
-	}
-
-Each step's *entering* event will trigger a click event on the appropriate step in the instruction panel. The text of that step will then be visible to the user. Each step's *completed* event will trigger an update the progress bar. Additionally, if the task is the overall lesson, navigation buttons may update and the UI initialized or closed.
+By activating the lesson driver, the application's user interface will automatically be updated to autogenerate an instruction panel upon lesson start. This instruction panel will pull in the *text* properties defined in the task components in the model. Additionally, the instruction panel will update based on *entering* and *completed* events fired in order to show the current step and progress of the overall lesson. 
 
 Visit the [lesson application](../../../lesson) to view the final result.
 
