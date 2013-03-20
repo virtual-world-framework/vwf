@@ -39,6 +39,13 @@ Note: (*) indicates an API change.
 - NEW: Add first draft of lesson recipe.
 
 ----------------------------------
+0.6.4.1
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Update to application.rb file to fix fatal crash caused by eventmachine
+
+----------------------------------
 0.6.4
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
