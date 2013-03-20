@@ -251,17 +251,17 @@
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
-                { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], active: false },
-                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], active: false },
+                { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
+                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/scenejs", active: true },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
                 { library: "vwf/view/editor", active: true },
-                { library: "vwf/view/glge", active: false },
+                { library: "vwf/view/glge", disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                 { library: "vwf/view/lesson", active: false},
-                { library: "vwf/view/threejs", active: false },
+                { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/touch", active: false},
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -326,7 +326,21 @@
                         }
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
                             if(!userLibraries[libraryType][libraryName] || configLibraries[libraryType][libraryName]) {
-                                userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
+                                var disabled = false;
+                                if(requireArray[libraryName].disabledBy) {
+                                    for(var i=0; i<requireArray[libraryName].disabledBy.length; i++) {
+                                        Object.keys(userLibraries).forEach(function(userLibraryType) {
+                                            Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName) {
+                                                if(requireArray[libraryName].disabledBy[i] == userLibraryName) {
+                                                    disabled = true;
+                                                }
+                                            })
+                                        })
+                                    }
+                                }
+                                if(!disabled) {
+                                    userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];   
+                                }
                             }
                         });
                     });
