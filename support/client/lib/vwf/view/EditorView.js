@@ -17,30 +17,26 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			$(document.body).append($.get('vwf/view/editorview/menus.html',{async:false,datatype:'text'}).responseText);
           
 		  
+		  if(!window._EditorInitialized)
+	      {
+			   
+					   jQuery.extend({
+					  parseQuerystring: function(){
+						var nvpair = {};
+						var qs = window.location.search.replace('?', '');
+						var pairs = qs.split('&');
+						$.each(pairs, function(i, v){
+						  var pair = v.split('=');
+						  nvpair[pair[0]] = pair[1];
+						});
+						return nvpair;
+					  }
+					});
 			
-		  
-        },
-        
-        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
-           
-			jQuery.extend({
-			  parseQuerystring: function(){
-				var nvpair = {};
-				var qs = window.location.search.replace('?', '');
-				var pairs = qs.split('&');
-				$.each(pairs, function(i, v){
-				  var pair = v.split('=');
-				  nvpair[pair[0]] = pair[1];
-				});
-				return nvpair;
-			  }
-			});
-		   
-			   if(nodeID =='index-vwf' && window._Editor == null)
-			   {
 					if($.parseQuerystring().Edit != 'false')
 					{
+						window._EditorInitialized = true;
+						console.log('initialize Index-vwf');
 						var data = $.ajax('vwf/view/editorview/menus.html',{async:false,dataType:'html'}).responseText;
 						$(document.body).append(data);
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ddsmoothmenu.js"></script>');
@@ -64,12 +60,23 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/jquery.ui.touch-punch.min.js"></script>');
 						
 						
-					   $(document).ready(function(){
-						InitializeEditor();
-						});
+					 //  $(document).ready(function(){
+						
+					 //	});
 				   
 					}
-			   }
+		   }
+		  
+			
+		  
+        },
+        
+        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
+           
+			
+			
+			   
 			 
 		   
 		   
@@ -77,14 +84,18 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
         
 		initializedNode: function (nodeID,childID)
 		{
-			
-			   if(window._Editor && childID != 'index-vwf')
-			   {
-					if(window._Editor.createNodeCallback != null)
-					{
-						window._Editor.CallCreateNodeCallback(childID);
-					}
-			   }
+			if($.parseQuerystring().Edit != 'false' && childID == 'index-vwf')
+			{
+				_Editor.initialize();
+				InitializeEditor();
+			}
+		   if(window._Editor && childID != 'index-vwf')
+		   {
+				if(window._Editor.createNodeCallback != null)
+				{
+					window._Editor.CallCreateNodeCallback(childID);
+				}
+		   }
 		
 		},
         createdProperty: function (nodeID, propertyName, propertyValue) {
@@ -722,7 +733,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 			$('#statusbar').css('top',($(window).height() - 25) + 'px');
 			
 			
-			
+			$('#sidepanel').css('height',$(window).height() - ($('#statusbar').height() + $('#toolbar').height()+$('#smoothmenu1').height()) + 'px');
 			_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
 			_Editor.findcamera().updateProjectionMatrix();
 		});
@@ -734,7 +745,7 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		
 		window.setTimeout(function(){$(window).resize();hideSidePanel();},500);
 		
-		$( "#sidepanel" ).sortable({distance: 15});
+		
 
 		$(document.body).css('overflow','hidden');
 		
@@ -800,6 +811,9 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		document.addEventListener("touchend", touchHandler, true);
 		document.addEventListener("touchcancel", touchHandler, true); 
 		$('* :not(input)').disableSelection();
+		$('#sidepanel').css('height',$(window).height() - ($('#statusbar').height() + $('#toolbar').height()+$('#smoothmenu1').height()) + 'px')
+		
+		$('#sidepanel').jScrollPane();
 	}
 	var lastbutton = -1;
 	var ongoingTouches = [];
@@ -894,6 +908,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 	var sizeTimeoutHandle;
 	function sizeWindowTimer()
 	{
+		if(!_Editor.findcamera())
+			return;
 		_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
 		_Editor.findcamera().updateProjectionMatrix();
 		_ScriptEditor.resize();

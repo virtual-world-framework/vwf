@@ -128,7 +128,7 @@ scripts:
 
        
        
-       this.mesh = new THREE.Mesh(undefined,_Editor.getDefaultMaterial());
+       this.mesh = new THREE.Mesh(undefined,new THREE.MeshPhongMaterial());
        
        if(vwf.getProperty(this.id,'_length') == undefined) vwf.setProperty(this.id,'_length',1);
        if(vwf.getProperty(this.id,'_width') == undefined) vwf.setProperty(this.id,'_width',1);

@@ -461,16 +461,21 @@ function ScriptEditor()
 		//	},33);
 		//$('#ScriptEditor').show('slide',{direction:'down'},function(){window.clearInterval(window.scripthideinterval);window.scripthideinterval=null;});
 		$('#ScriptEditor').show();
-		$('#ScriptEditor').animate({'top':$(window).height() - $('#ScriptEditor').height()- $('#statusbar').height()  + 'px'},{
+		var newtop = $(window).height() - $('#ScriptEditor').height()- $('#statusbar').height()  + 'px';
+		console.log(newtop);
+		$('#ScriptEditor').animate({'top':newtop},{
 			step:function()
 			{
 				$('#ScriptEditorTabs').css('height',$('#ScriptEditor').height() + 'px');
-					$('#index-vwf').css('height',window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px');
+				var newheight = window.innerHeight - $('#smoothmenu1').height() - $('#statusbar').height() - $('#toolbar').height() - ($(window).height() - $('#ScriptEditor').offset().top-25) + 'px';
+				console.log(newheight);
+					$('#index-vwf').css('height',newheight);
 					_Editor.findcamera().aspect = ($('#index-vwf').width()/$('#index-vwf').height());
 					_Editor.findcamera().updateProjectionMatrix();
 			},
 			complete:function()
 			{
+			
 				_ScriptEditor.resize();
 			}
 		
@@ -830,7 +835,58 @@ function ScriptEditor()
 				$("#methodlist").children().css('border-color','gray');
 				$(this).css('border-color','blue');
 				var method = $(this).attr('method');
-				_ScriptEditor.setSelectedMethod(method,'function tick(){\n\n console.log("got here"); \n\n}');
+				_ScriptEditor.setSelectedMethod(method,'function tick(){\n\n console.log("this is called every 20th of a second"); \n\n}');
+			});
+		}
+		if(!this.currentNode.methods || (this.currentNode.methods && !this.currentNode.methods['initialize']))
+		{
+		
+			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methodinitialize"></div>');
+			$('#methodinitialize').html('initialize');
+			$('#methodinitialize').attr('method','initialize');
+			$('#methodinitialize').qtip({
+			content: "Create the initialize method.",
+			show: { delay: 1000 }
+			});
+			$('#methodinitialize').click(function(){
+				$("#methodinitialize").children().css('border-color','gray');
+				$(this).css('border-color','blue');
+				var method = $(this).attr('method');
+				_ScriptEditor.setSelectedMethod(method,'function initialize(){\n\n console.log("this is called when the objects is created"); \n\n}');
+			});
+		}
+		if(!this.currentNode.methods || (this.currentNode.methods && !this.currentNode.methods['deinitialize']))
+		{
+		
+			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methoddeinitialize"></div>');
+			$('#methoddeinitialize').html('deinitialize');
+			$('#methoddeinitialize').attr('method','deinitialize');
+			$('#methoddeinitialize').qtip({
+			content: "Create the deinitialize method.",
+			show: { delay: 1000 }
+			});
+			$('#methoddeinitialize').click(function(){
+				$("#methoddeinitialize").children().css('border-color','gray');
+				$(this).css('border-color','blue');
+				var method = $(this).attr('method');
+				_ScriptEditor.setSelectedMethod(method,'function deinitialize(){\n\n console.log("this is called when the object is destroyed"); \n\n}');
+			});
+		}
+		if(!this.currentNode.methods || (this.currentNode.methods && !this.currentNode.methods['prerender']))
+		{
+		
+			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methodprerender"></div>');
+			$('#methodprerender').html('prerender');
+			$('#methodprerender').attr('method','prerender');
+			$('#methodprerender').qtip({
+			content: "Create the prerender method.",
+			show: { delay: 1000 }
+			});
+			$('#methodprerender').click(function(){
+				$("#methodprerender").children().css('border-color','gray');
+				$(this).css('border-color','blue');
+				var method = $(this).attr('method');
+				_ScriptEditor.setSelectedMethod(method,'function prerender(){\n\n console.log("this is called when a frame is rendered. Careful, you can break sync here!"); \n\n}');
 			});
 		}
 		var pointersugs = ['pointerDown','pointerUp','pointerOver','pointerOut','pointerClick','pointerMove','keyDown','keyUp','keyPress'];
@@ -872,6 +928,10 @@ function ScriptEditor()
 				{
 					this.BuildGUI(true);
 				}
+			}else
+			{
+				if(this.isOpen())
+					this.hide();
 			}
 	}
 	this.SelectionChanged = function(e,node)
@@ -917,3 +977,4 @@ function ScriptEditor()
 }
 _ScriptEditor = new ScriptEditor();
 $('#ScriptEditor').hide();
+$('#ScriptEditor').css('height','405px');

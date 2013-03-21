@@ -290,6 +290,14 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 			var ww = parseInt(w.substr(0,w.length-2));
 			
 			$(document).trigger('prerender',[vp,wh,ww]);
+			
+			for(var i in vwf.models[0].model.nodes)
+			{
+				var node = vwf.models[0].model.nodes[i];
+				if(node.private.bodies.prerender)
+					node.private.bodies.prerender.call(node,[timepassed]);
+			}
+			
 			$(document).trigger('postprerender',[vp,wh,ww]);
 			
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];

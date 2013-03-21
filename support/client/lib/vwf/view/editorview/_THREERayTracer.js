@@ -1229,7 +1229,7 @@ THREE.Light.prototype.GetBoundingBox = function()
 	return new BoundingBoxRTAS([-bound,-bound,-bound],[bound,bound,bound]);
 
 }
-THREE.ParticleSystem.prototype.GetBoundingBox = MATH.Light.prototype.GetBoundingBox;
+THREE.ParticleSystem.prototype.GetBoundingBox = THREE.Light.prototype.GetBoundingBox;
 THREE.Scene.prototype.GetBoundingBox = function(){return new BoundingBoxRTAS([-.0001,-.0001,-.0001],[.0001,.0001,.0001]);}
 //Do the actuall intersection with the mesh;
 THREE.Light.prototype.FrustrumCast = function(frustrum)
@@ -1260,7 +1260,7 @@ THREE.Light.prototype.FrustrumCast = function(frustrum)
 	return ret;
 }
 
-THREE.ParticleSystem.prototype.FrustrumCast = MATH.Light.prototype.FrustrumCast;
+THREE.ParticleSystem.prototype.FrustrumCast = THREE.Light.prototype.FrustrumCast;
 THREE.Scene.prototype.FrustrumCast =  function(frustrum)
 {
 	

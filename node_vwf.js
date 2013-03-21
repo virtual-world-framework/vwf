@@ -623,6 +623,7 @@ function startVWF(){
 						childComponent.id = childID;
 						if(!node.children) node.children = {};
 						node.children[childID] = childComponent;
+						fixIDs(node.children[childID]);
 						console.log("created " + childID);
 				  }
 				  else

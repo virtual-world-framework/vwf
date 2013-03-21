@@ -281,7 +281,37 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if ( threeParent !== undefined ) {
                         threeParent.add( node.threeObject ); 
                     } 
-                } else {     
+                } else if(childType ==  "link_existing/threejs")
+				{
+					
+					node = this.state.nodes[childID] = {
+						name: childName,  
+						threeObject: null,
+						ID: childID,
+						parentID: nodeID,
+						type: childExtendsID,
+						sourceType: childType, 
+					};
+					node.threeObject = FindChildByName(parentNode.threeObject,childSource);
+					//we need to mark this node - because the VWF node is layered onto a GLGE node loaded from the art asset, deleteing the VWF node should not
+					//delete the GLGE node. This should probably undo any changes made to the GLGE node by the VWF. This is tricky. I'm going to backup the matrix, and reset it
+					//when deleting the VWF node.
+					if(node.threeObject)
+					{
+						node.threeObject.initializedFromAsset = true;
+						node.threeObject.backupMatrix = [];
+						node.threeObject.vwfID = node.ID;
+						for(var u=0; u < 16; u++)
+							node.threeObject.backupMatrix.push(node.threeObject.matrix.elements[u]);
+					}
+					else
+					{
+						console.log("failed to find view node for " + childSource);
+						node.threeObject = new THREE.Object3D();
+						node.threeObject.vwfID = node.ID;
+					}
+				} else
+				{     
                         
                         node = this.state.nodes[childID] = {
                             name: childName,  
@@ -327,11 +357,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var childNode = this.state.nodes[nodeID];
                 if(childNode)
                 {
-                    var threeObject = childNode.threeObject;
-                    if(threeObject && threeObject.parent)
-                    {
-                        threeObject.parent.remove(threeObject);
-                    }
+					if(!childNode.threeObject.initializedFromAsset)
+					{
+						var threeObject = childNode.threeObject;
+						if(threeObject && threeObject.parent)
+						{
+							threeObject.parent.remove(threeObject);
+						}
+					}
+					//This node is a sub node of an asset that was loaded by the VWF. Deleteing the VWF node should reset the asset sub node.
+					//we need to undo some of the changes made by the framework to this asset. 
+					//coded here for now, probably need a delete callback in the framworkd
+					else
+					{
+						
+							restoreObject(childNode.threeObject);
+					}
                     delete this.state.nodes[nodeID];
                 }               
             }
@@ -1294,7 +1335,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         return node;
     }
-    //changing this function significantly from the MATH code. Will search heirarchy down until encountering a matching chile
+    //changing this function significantly from the GLGE code. Will search heirarchy down until encountering a matching chile
     //will look into nodes that don't match.... this might not be desirable
      function FindChildByName( obj, childName, childType ) {
         
@@ -1473,9 +1514,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			{
 				var face = mesh.geometry.faces[i];
 				if(face instanceof THREE.Face4)
-					mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+					mesh.geometry.faceVertexUvs[0].push([new THREE.Vector2(0,1),new THREE.Vector2(0,1),new THREE.Vector2(0,1),new THREE.Vector2(0,1)]);
 				if(face instanceof THREE.Face3)
-					mesh.geometry.faceVertexUvs[0].push([new THREE.UV(0,1),new THREE.UV(0,1),new THREE.UV(0,1)]);
+					mesh.geometry.faceVertexUvs[0].push([new THREE.Vector2(0,1),new THREE.Vector2(0,1),new THREE.Vector2(0,1)]);
 			}
 		}
 		
@@ -1542,7 +1583,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
             }
             for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
-                geo.faceVertexUvs.push( new THREE.UV( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
+                geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
             }             
             node.threeObject.add( new THREE.Mesh( geo, mat ) ); 
             
@@ -1575,10 +1616,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			var meshes =[];
 			GetAllLeafMeshes(asset,meshes);
 		
-		//	for(var i =0; i < meshes.length; i++)
-		//	{
-		//		fixMissingUVs(meshes[i]);	
-		//	}
+			for(var i =0; i < meshes.length; i++)
+			{
+				//fixMissingUVs(meshes[i]);	
+				meshes[i].castShadow = true;
+				meshes[i].receiveShadow = true;
+			}
 			
 		//	window.setTimeout(function(){
 			nodeCopy.threeObject.add(asset);
@@ -1658,6 +1701,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         {
             node.loader = new UTF8JsonLoader(node,assetLoaded.bind(this));
         }
+		
+						
             
         
     }
@@ -2558,7 +2603,55 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             addThreeChild.call( this, nodeID, childID );
         } 
     
+    }	
+	function copyArray(arrNew, arrOld)
+    {
+        if(!arrNew)
+            arrNew = [];
+        arrNew.length = 0;
+        for(var i =0; i< arrOld.length; i++)
+            arrNew.push(arrOld[i].clone());
+        return arrNew;
     }
+	function restoreObject(node)
+	{
+		if(!node)
+			return;
+			
+        if(node.originalPositions)
+             copyArray(node.vertices,node.originalPositions);
+        if(node.originalNormals)    
+             copyArray(node.normals,node.originalNormals);
+        if(node.originalFaces)
+             copyArray(node.faces,node.originalFaces);
+        if(node.originalMaterial)
+			node.material = node.originalMaterial;
+		if(node.backupMatrix)
+             node.matrix.elements = node.backupMatrix;
+			 
+        geometry.verticesNeedUpdate = true;
+        geometry.normalsNeedUpdate = true;
+        geometry.facesNeedUpdate = true;
+    
+		
+		delete node.initializedFromAsset;
+		delete node.vwfID;
+		delete node.originalPositions;
+		delete node.originalNormals;
+		delete node.originalFaces;
+		delete node.originalUV1;
+		delete node.originalUV2;
+		delete node.originalMaterial;
+		delete node.backupMatrix;
+		
+		if(node.geometry)
+			restoreObject(geometry);
+		if(node.children)
+		{
+			for(var i=0; i < node.children.length; i++)
+				restoreObject(node.children[i]);
+		}		
+	}
     function addThreeChild( parentID, childID ) {
         
         var threeParent;
@@ -2578,7 +2671,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
         }
     }
-
+	
     function CopyProperties(from,to)
     {
         for(var i in from)
@@ -2924,7 +3017,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         for(var i = 0; i < node.attributes[key].length-1; i+= 2)
                         {
-                            var uv = new THREE.UV(node.attributes[key][i],node.attributes[key][i+1]);
+                            var uv = new THREE.Vector2(node.attributes[key][i],node.attributes[key][i+1]);
                             mesh.geometry.UVS.push(uv);
                         }
                     }

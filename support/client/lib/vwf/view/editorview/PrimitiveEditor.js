@@ -112,7 +112,13 @@ function PrimitiveEditor()
 	//});
 	$( "#accordion" ).accordion({
 			fillSpace: true,
-			heightStyle: "content"
+			heightStyle: "content",
+			change :function()
+				{
+					
+					if($('#sidepanel').data('jsp'))
+						$('#sidepanel').data('jsp').reinitialise();
+				}
 		});
 	$( ".ui-accordion-content").css('height','auto');	
 	this.show = function()
@@ -123,7 +129,8 @@ function PrimitiveEditor()
 		$('#PrimitiveEditor').prependTo($('#PrimitiveEditor').parent());
 		$('#PrimitiveEditor').show('blind',function()
 		{
-			
+			if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
 		});
 		showSidePanel();
 		
@@ -133,8 +140,15 @@ function PrimitiveEditor()
 	this.hide = function()
 	{
 		//$('#PrimitiveEditor').dialog('close');
-		$('#PrimitiveEditor').hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
+		if(this.isOpen())
+		{
+		$('#PrimitiveEditor').hide('blind',function(){
+		
+				if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+				if(!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
 				hideSidePanel();});
+		}
 	}
 	this.isOpen = function()
 	{
@@ -216,9 +230,20 @@ function PrimitiveEditor()
 				this.setupEditorData(node,true);
 				this.recursevlyAddModifiers(node);
 				this.addBehaviors(node);
-				$( "#accordion" ).accordion({fillSpace: true});
+				$( "#accordion" ).accordion({fillSpace: true,
+				change :function()
+				{
+				
+					if($('#sidepanel').data('jsp'))
+						$('#sidepanel').data('jsp').reinitialise();
+				}
+				});
 				$( ".ui-accordion-content").css('height','auto');	
 				this.updateOtherWindows();
+			}
+			else
+			{
+				this.hide();
 			}
 		}
 		catch(e)

@@ -102,7 +102,7 @@ scripts:
 
        
        
-       this.mesh = new THREE.Mesh(undefined,_Editor.getDefaultMaterial());
+       this.mesh = new THREE.Mesh(undefined,new THREE.MeshPhongMaterial());
        if(vwf.getProperty(this.id,'radius') == undefined) vwf.setProperty(this.id,'radius',1);
        if(vwf.getProperty(this.id,'height') == undefined) vwf.setProperty(this.id,'height',1);
        if(vwf.getProperty(this.id,'heightsegments') == undefined) vwf.setProperty(this.id,'heightsegments',2);

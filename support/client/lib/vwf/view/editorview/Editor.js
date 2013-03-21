@@ -303,7 +303,9 @@ function Editor()
 	}
 	this.mouseleave = function(e)
 	{
-		if(e.toElement != $('#ContextMenu')[0] && $(e.toElement).parent()[0] != $('#ContextMenu')[0] && !$(e.toElement).hasClass('glyph'))
+		
+		var teste = e.toElement || e.relatedTarget;
+		if(teste != $('#ContextMenu')[0] && $(teste).parent()[0] != $('#ContextMenu')[0] && !$(teste).hasClass('glyph'))
 		{	
 			$('#ContextMenu').hide();
 			$('#ContextMenu').css('z-index','-1');
@@ -1665,7 +1667,7 @@ function Editor()
 	}.bind(this);
 	var triggerSelectionChanged = function(VWFNode)
 	{
-		
+		console.log('selectionChanged');
 		$(document).trigger('selectionChanged', [VWFNode]);
 		
 	}.bind(this);
@@ -1733,7 +1735,9 @@ function Editor()
 					
 				
 				SelectionBounds[i] = new THREE.Object3D();
+				SelectionBounds[i].name = "Bounds_+" + SelectedVWFNodes[i].id;
 				SelectionBounds[i].add(BuildBox([box.max.x - box.min.x,box.max.y - box.min.y,box.max.z - box.min.z],[box.min.x + (box.max.x - box.min.x)/2,box.min.y + (box.max.y - box.min.y)/2,box.min.z + (box.max.z - box.min.z)/2],color));
+				SelectionBounds[i].children[0].name = "Bounds_+" + SelectedVWFNodes[i].id + "_Mesh";
 				SelectionBounds[i].matrixAutoUpdate = false;
 				SelectionBounds[i].matrix.elements = MATH.transposeMat4(mat);
 				SelectionBounds[i].updateMatrixWorld(true);
@@ -1844,7 +1848,7 @@ function Editor()
 			SelectedVWFNodes = [];
 		}
 		
-		if(VWFNode)
+		if(VWFNode && VWFNode[0] != null)
 		for(var i =0; i < VWFNode.length; i++)
 		{
 			//if you've selected a node that is grouped, but not selected a group directly, select the nearest open group head.
@@ -2039,12 +2043,14 @@ function Editor()
                 );
                 
 				MoveGizmo.add(rotx);
+				
 				roty.rotation.x = Math.PI/2;
                 MoveGizmo.add(roty);
 				rotx.rotation.y = Math.PI/2;
                 MoveGizmo.add(rotz);
 				rotz.rotation.z = 90;
 				
+		
 		
 		MoveGizmo.add(BuildBox([.5,.5,.5],[10.25,0,0],red));//scale x		
 		MoveGizmo.add(BuildBox([.5,.5,.5],[0,10.25,0],green));//scale y
@@ -2074,8 +2080,44 @@ function Editor()
 		MoveGizmo.add(BuildBox([5,.30,5],[0,-5,0],green));//scale uniform
 		MoveGizmo.add(BuildBox([5,5,.30],[0,0,-5],blue));//scale uniform		
 				
-				
+
+		MoveGizmo.children[0].name = 'XRotation';
+		MoveGizmo.children[1].name = 'YRotation';
+		MoveGizmo.children[2].name = 'ZRotation';
+		
+		MoveGizmo.children[3].name = 'XMovement';
+		MoveGizmo.children[4].name = 'YMovement';
+		MoveGizmo.children[5].name = 'ZMovement';				
+		
+		MoveGizmo.children[6].name = 'XScale';	
+		MoveGizmo.children[7].name = 'YScale';	
+		MoveGizmo.children[8].name = 'ZScale';	
+		
+		MoveGizmo.children[9].name = 'XYScale';	
+		MoveGizmo.children[10].name = 'YZScale';	
+		MoveGizmo.children[11].name = 'ZXScale';	
+		
+		MoveGizmo.children[12].name = 'XYMove';	
+		MoveGizmo.children[13].name = 'YZMove';	
+		MoveGizmo.children[14].name = 'ZXMove';	
+		
+		MoveGizmo.children[15].name = 'SwapCoords';	
+		MoveGizmo.children[16].name = 'XRotate';	
+		MoveGizmo.children[17].name = 'YRotate';	
+		MoveGizmo.children[18].name = 'ZRotate';	
+		
+		MoveGizmo.children[19].name = 'ScaleUniform';	
+		MoveGizmo.children[20].name = 'XScale1';	
+		MoveGizmo.children[21].name = 'YScale1';	
+		MoveGizmo.children[22].name = 'ZScale1';	
+		MoveGizmo.children[23].name = 'XScale2';	
+		MoveGizmo.children[24].name = 'YScale2';	
+		MoveGizmo.children[25].name = 'ZScale2';	
+		MoveGizmo.name = "MoveGizmo";
+		
+		
 				var movegizhead = new THREE.Object3D();
+				movegizhead.name = "MoveGizmoRoot";
 				movegizhead.matrixAutoUpdate = false;
 				movegizhead.add(MoveGizmo);
 		findscene().add(movegizhead);
@@ -2539,7 +2581,12 @@ function Editor()
       }
     var findcamera = function()
       {
+			try{
              return vwf.views[0].state.scenes["index-vwf"].camera.threeJScameras[vwf.views[0].state.scenes["index-vwf"].camera.defaultCamID];
+			 }catch(e)
+			 {
+			 return null;
+			 }
       }
       function matcpy(mat)
       {
@@ -2872,6 +2919,7 @@ function Editor()
 		$(document).bind('prerender',this.updateGizmoSize.bind(this));
 		document.oncontextmenu = function() {return false;};
 		this.SelectionBoundsContainer = new THREE.Object3D();
+		this.SelectionBoundsContainer.name = "SelectionBoundsContainer";
 		this.findscene().add(this.SelectionBoundsContainer);
 		this.buildContextMenu();
 		
@@ -3078,4 +3126,3 @@ THREE.Object3D.prototype.getBoundingBox = function(donttransform){
 }
 
 _Editor = new Editor();
-_Editor.initialize();

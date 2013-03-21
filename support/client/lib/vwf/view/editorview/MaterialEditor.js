@@ -19,7 +19,8 @@ function MaterialEditor()
 		//$('#materialeditor').dialog('open');
 		$('#materialeditor').prependTo($('#materialeditor').parent());
 		$('#materialeditor').show('blind',function(){
-		
+		if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
 		});
 		showSidePanel();
 		
@@ -34,8 +35,16 @@ function MaterialEditor()
 	this.hide = function()
 	{
 		//$('#materialeditor').dialog('close');
-		$('#materialeditor').hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
-				hideSidePanel();});
+		if(this.isOpen())
+		{
+			$('#materialeditor').hide('blind',function(){
+			
+			if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+			if(!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
+				hideSidePanel();
+				});
+		}
 		
 	}
 	
@@ -139,6 +148,7 @@ function MaterialEditor()
 			$('#'+prop+'slider').slider({step:sliderprops[i].step,min:sliderprops[i].min,max:sliderprops[i].max,slide:this.RootPropUpdate,stop:this.RootPropUpdate,value:val});
 		}
 		$('#MaterialBasicSettings').append('<div id="brightdiv" />');
+		$('#MaterialBasicSettings').append('<div style="clear:both" />');
 		$('#brightdiv').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 3px;">Full Bright: </div>');
 		$('#brightdiv').append('<select id="FullBright" style="float:right"><option value="true">true</option><option value="false">false</option></select>')
 		$('#MaterialBasicSettings').append('<div id="shadowdiv" />');
@@ -157,7 +167,7 @@ function MaterialEditor()
 		});
 		
 		var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
-		$('#MaterialBasicSettings').append('<div />');
+		$('#MaterialBasicSettings').append('<div style="clear:both" />');
 		$('#MaterialBasicSettings').append('<div style="margin-bottom:10px" id="colordiv" />');
 		$('#colordiv').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 15px;">Diffuse Color: </div>');
 		$('#colordiv').append('<div id="ColorColorPicker" style="'+colorswatchstyle+'"></div>')
@@ -395,7 +405,12 @@ function MaterialEditor()
 		
 		$( "#materialaccordion" ).accordion({
 			fillSpace:true,
-			heightStyle: "content"
+			heightStyle: "content",
+			change :function()
+			{
+				if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+			}
 		});
 		
 		$( ".ui-accordion-content").css('height','auto');
@@ -456,6 +471,9 @@ function MaterialEditor()
 				if(!this.currentMaterial)
 					return;
 				this.BuildGUI();
+			}else
+			{
+				this.hide();
 			}
 		}
 		catch(e)
@@ -596,8 +614,9 @@ function MapBrowser()
 	}
 	
 	this.hide = function()
-	{
-		$('#MapBrowser').dialog('close');
+	{	
+		if(this.isOpen())
+			$('#MapBrowser').dialog('close');
 		
 	}
 	this.filter = [];

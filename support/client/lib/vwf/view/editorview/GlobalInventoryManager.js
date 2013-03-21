@@ -6,7 +6,7 @@ function GlobalInventoryManager()
 	
 	
 	$('#GlobalInventoryManager').append("<div id='GlobalInventoryManagertitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Global Inventory</span></div>");
-	$('#GlobalInventoryManager').append("<div id='InventoryDisplay' style='font:1.5em sans-serif;padding-bottom:5px;background:#FFFFF8;border: 1px black solid;margin: 3px 3px 3px 3px;height:auto'></div>");
+	$('#GlobalInventoryManager').append("<div id='InventoryDisplay' style='cursor:pointer;font:1.5em sans-serif;padding-bottom:5px;background:#FFFFF8;border: 1px black solid;margin: 3px 3px 3px 3px;height:auto'></div>");
 	$('#GlobalInventoryManager').append("<div id='GlobalInventoryManagerCreate'></div>");
 	$('#GlobalInventoryManager').append("<div id='GlobalInventoryManagerDelete'></div>");
 	$('#GlobalInventoryManager').append("<div id='GlobalInventoryManagerView'></div>");
@@ -39,26 +39,16 @@ function GlobalInventoryManager()
 	this.createInventoryItem = function()
 	{
 		
-		if(!_Editor.GetSelectedVWFNode() && _GlobalInventoryManager.selectedType == 'script')
-		{
-			_Notifier.alert('You must select an object before createing a script from inventory');
-			//$('#GlobalInventoryManagerMessage').dialog('open');
-		}	
-		if(_Editor.GetSelectedVWFNode() && _GlobalInventoryManager.selectedType == 'script')
-		{
-			_ScriptEditor.show();
-			var t = _GlobalInventoryManager.selectedItem;
-			if(t.type == 'method')
-			_ScriptEditor.setSelectedMethod(t.name,t.body);
-			if(t.type == 'event')
-			_ScriptEditor.setSelectedEvent(t.name,t.body);
-			
-			
-		}		
-		if(_GlobalInventoryManager.selectedType == 'object')
-		{
-			var t = _GlobalInventoryManager.selectedItem;
 		
+			
+			 var ret = $.ajax({
+			  type: "GET",
+			  url: '/vwfDataManager.svc/globalasset?AID='+_GlobalInventoryManager.selectedItem,
+			  data: JSON.stringify(t),
+			  async:false
+			});
+			
+			var t = JSON.parse(ret.responseText);
 			var newintersectxy = _Editor.GetInsertPoint()
 			
 			if(t.properties.type != 'modifier' && t.properties.type != 'behavior')
@@ -87,7 +77,7 @@ function GlobalInventoryManager()
 				_GlobalInventoryManager.setOwner(t,_UserManager.GetCurrentUserName());
 				_GlobalInventoryManager.createChild(_Editor.GetSelectedVWFID(),GUID(),t,null,null);
 			}
-		}		
+			
 	}
 	this.setOwner = function(t,owner)
 	{
@@ -104,12 +94,6 @@ function GlobalInventoryManager()
 	this.deleteSelectedItem = function()
 	{
 		
-		if(_GlobalInventoryManager.selectedItem.properties.owner == _UserManager.GetCurrentUserName())
-			_DataManager.deleteInventoryItem("___Global___",_GlobalInventoryManager.selectedItem);
-		else
-			_Notifier.alert('Only the owner of this object may remove it from the global inventory');
-			
-		_GlobalInventoryManager.BuildGUI();
 	}
 	$('#GlobalInventoryManagerDelete').click(this.deleteSelectedItem);
 	this.viewInventoryItem = function()
@@ -117,8 +101,15 @@ function GlobalInventoryManager()
 		$('#InventoryViewer').dialog('open');
 		if(_GlobalInventoryManager.selectedType == 'object')
 		{
-		
-			var text = JSON.stringify(_GlobalInventoryManager.selectedItem);
+			
+	    var ret = $.ajax({
+		  type: "GET",
+		  url: '/vwfDataManager.svc/globalasset?AID='+_GlobalInventoryManager.selectedItem,
+		  data: JSON.stringify(t),
+		  async:false
+		});
+			
+			var text = ret.responseText;
 			text = text.replace(/([^\n])\{/gm,'$1\n\{');
 			text = text.replace(/([^\n])\}/gm,'$1\n\}');
 			var opening = 0;
@@ -233,7 +224,16 @@ function GlobalInventoryManager()
 			return;
 		}		
 		var name = t.properties.DisplayName || GUID();
-		_DataManager.addInventoryItem("___Global___",t,name,'object');
+		var AID = name;
+		var UID = _UserManager.GetCurrentUserName();
+		var P = _DataManager.GetProfileForUser(UID).Password;
+		$.ajax({
+		  type: "POST",
+		  url: '/vwfDataManager.svc/globalasset?AID='+AID+'&UID='+UID+'&P='+P,
+		  data: JSON.stringify(t),
+		  async:false
+		});
+		
 		_GlobalInventoryManager.BuildGUI();
 		showSidePanel();
 		window.setTimeout(function(){
@@ -257,7 +257,8 @@ function GlobalInventoryManager()
 		$('#GlobalInventoryManager').prependTo($('#GlobalInventoryManager').parent());
 		$('#GlobalInventoryManager').show('blind',function()
 		{
-			
+			if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
 		});
 		
 		//$('#GlobalInventoryManager').dialog('option','position',[1282,40]);
@@ -294,7 +295,11 @@ function GlobalInventoryManager()
 	this.hide = function()
 	{
 		//$('#GlobalInventoryManager').dialog('close');
-		$('#GlobalInventoryManager').hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
+		$('#GlobalInventoryManager').hide('blind',function(){
+		
+		if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+		if(!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
 				hideSidePanel();});
 		
 	}
@@ -349,11 +354,8 @@ function GlobalInventoryManager()
 	this.selectItem = function(name,type)
 	{
 
-		var inventory = _DataManager.getInventory("___Global___");
-		if(type == 'script')
-		_GlobalInventoryManager.selectedItem = inventory.scripts[name];
-		if(type == 'object')
-		_GlobalInventoryManager.selectedItem = inventory.objects[name];
+		console.log(name);
+		_GlobalInventoryManager.selectedItem = name;
 		_GlobalInventoryManager.selectedType = type;
 		_GlobalInventoryManager.selectedName = name;
 		$(".inventoryItem").css('background','#FFFFF8');
@@ -378,6 +380,49 @@ function GlobalInventoryManager()
 		}
 	
 	}
+	this.recurseDefs = function(rootid,inventory)
+	{
+		for(var j=0; j < inventory.length; j++)
+		{	
+			var  i = inventory[j];
+			if(i.constructor == String)
+			{
+			$('#'+rootid).append('<div class="inventoryItem" style="overflow:hidden;background:#FFFFF8;padding-left: 10px;border-left: 1px solid rgb(228, 228, 228);" id="inventoryObject'+ToSafeID(i)+'" />');
+			$('#inventoryObject'+ToSafeID(i)).html("<div style='display:inline'>"+i.substr(i.lastIndexOf('/')+1)+"</div>");
+			$('#inventoryObject'+ToSafeID(i)).attr('name',i);
+			$('#inventoryObject'+ToSafeID(i)).attr('type','object');
+			$('#inventoryObject'+ToSafeID(i)).click(_GlobalInventoryManager.itemClicked);
+			}
+			else
+			{	
+				var sectiontitle = Object.keys(i)[0] + "";
+				
+				var o = i[sectiontitle];
+				if(o.length > 0)
+				{
+					$('#'+rootid).append("<div id='"+ToSafeID(sectiontitle)+"' style='overflow:hidden;border-left: 1px solid rgb(228, 228, 228);padding-left:10px'><span style='width: 10px;display: inline-block;cursor:pointer;font-weight:bold' id='"+ToSafeID(sectiontitle)+'collapse'+"'>-</span><span style='font-weight:bold'>"+sectiontitle.substr(sectiontitle.lastIndexOf('/')+1)+"</span></div>");
+					$('#'+ToSafeID(sectiontitle)+'collapse').click(function()
+					{
+						
+						if($(this).parent()[0].style.height != '1em')
+						{
+							$(this).html('+');
+							$(this).parent().css('height','1em');
+							
+						}
+						else
+						{
+							$(this).parent().css('height','initial');
+							$(this).html('-');
+						}
+					});
+					
+					
+					this.recurseDefs(ToSafeID(sectiontitle),o);
+				}
+			}
+		}
+	}
 	this.BuildGUI = function()
 	{
 		_DataManager.GetProfileForUser("___Global___",true);
@@ -391,16 +436,20 @@ function GlobalInventoryManager()
 		
 		$('#InventoryDisplay').append("<div id='InventoryObjects'></div>");
 		//$('#InventoryDisplay').append("<div id='InventoryScripts'></div>");
-		var inventory = _DataManager.getInventory("___Global___");
+		
+		var ret = $.ajax({
+		  type: "GET",
+		  url: '/vwfDataManager.svc/globalassets',
+		  data: JSON.stringify(t),
+		  async:false
+		});
+		
+		
+		
+		var inventory = JSON.parse(JSON.parse(ret.responseText).replace(/\\/g,'/'));
 		if(!inventory) return;
-		for(var i in inventory.objects)
-		{
-			$('#InventoryObjects').append('<div class="inventoryItem" style="background:#FFFFF8;padding-left: 10px;" id="inventoryObject'+ToSafeID(i)+'" />');
-			$('#inventoryObject'+ToSafeID(i)).html("<div style='font-weight:bold;display:inline'>"+i+"</div>" + " : " + (inventory.objects[i].properties.type || ""));
-			$('#inventoryObject'+ToSafeID(i)).attr('name',i);
-			$('#inventoryObject'+ToSafeID(i)).attr('type','object');
-			$('#inventoryObject'+ToSafeID(i)).click(_GlobalInventoryManager.itemClicked);
-		}
+		
+		this.recurseDefs('InventoryObjects',inventory.root);
 		
 		// for(var i in inventory.scripts)
 		// {
@@ -410,6 +459,9 @@ function GlobalInventoryManager()
 			// $('#inventoryScript'+ToSafeID(i)).attr('type','script');
 			// $('#inventoryScript'+ToSafeID(i)).click(_GlobalInventoryManager.itemClicked);
 		// }
+		
+		if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
 	}
 	this.itemViewer = ace.edit("InventoryView");
     this.itemViewer.setTheme("ace/theme/chrome");

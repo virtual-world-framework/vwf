@@ -102,6 +102,7 @@ function DataManager()
 	}
 	this.GetProfileForUser = function(username,password,reload)
 	{
+		
 		var profile = null;
 		for(var i in this.rawdata.profiles)
 		{
@@ -121,14 +122,21 @@ function DataManager()
 				dataType: "json"
 			});
 		
-			try{
-				data = JSON.parse(JSON.parse(data.responseText).GetProfileResult);
-				profile = data;
-				this.rawdata.inventory[username] = profile.inventory;
-				if(profile.inventory)
-					delete profile.inventory;
-				this.rawdata.profiles[username] = profile;
-			}catch(e)
+			if(data.status == 200)
+			{
+				try{
+					data = JSON.parse(JSON.parse(data.responseText).GetProfileResult);
+					profile = data;
+					this.rawdata.inventory[username] = profile.inventory;
+					if(profile.inventory)
+						delete profile.inventory;
+					this.rawdata.profiles[username] = profile;
+				}catch(e)
+				{
+					return data.responseText;
+				}
+			}
+			else
 			{
 				return data.responseText;
 			}
@@ -336,8 +344,12 @@ function DataManager()
 		
 		var SID  = this.getCurrentSession();
 		var UID = _UserManager.GetCurrentUserName();
+		if(!UID)
+			return;
 		var P = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName()).Password;
 		//var ret = $.ajax('/vwfDataManager.svc/state?SID='+SID+'&UID='+UID+'&P='+P,{type:"DELETE",async:false});
+		
+		
 		
 		if(nodes.length > 0)
 		var ret = jQuery.ajax({

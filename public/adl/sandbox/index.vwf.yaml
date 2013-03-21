@@ -230,6 +230,7 @@ scripts:
        this.setTexture(this.materialDef);
        var l = new THREE.DirectionalLight();
        this.sun = l;
+       this.sun.name = 'Sun';
        this.sun.castShadow = true;
        this.sun.shadowCameraNear = 1;
        this.sun.shadowCameraFar = 100;
@@ -250,6 +251,7 @@ scripts:
        this.sun.intensity = this.sunIntensity;
        this.sun.shadowBias = -.005
        window._dGround = this.groundplane;
+       this.groundplane.name = 'GroundPlane';
        window._dSun = this.sun;
        
        this.CreateSky(vwf.getProperty(this.id,'skyTexture') || 'white');
@@ -347,6 +349,7 @@ scripts:
        this.skymaterial.envMap = skyCubeTexture;
        this.skymaterial.fog = false;
        this.skycube = new THREE.Mesh(new THREE.CubeGeometry(1000,1000,1000), this.skymaterial);
+       this.skycube.name = "SkyCube";
        this.skycube.renderDepth = -1;
        this.skycube.depthWrite = false;
        this.skycube.depthCheck = false;
@@ -1033,7 +1036,7 @@ scripts:
       {
        
       
-       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-5));
+       var campos = findcamera().localToWorld(new THREE.Vector3(0,0,-10));
        
        this.sun.shadowCamera.updateMatrixWorld(true)
         var lm = this.sun.shadowCamera.matrixWorld.clone();
@@ -1042,7 +1045,7 @@ scripts:
         
        
         
-        this.sun.shadowCamera.projectionMatrix.makeOrthographic(camposLS.x - 5,camposLS.x + 5,camposLS.y - 5,camposLS.y+5,-camposLS.z - 10 ,-camposLS.z + 10 );
+        this.sun.shadowCamera.projectionMatrix.makeOrthographic(camposLS.x - 10,camposLS.x + 10,camposLS.y - 10,camposLS.y+10,-camposLS.z - 10 ,-camposLS.z + 10 );
         }
     }    
     this.setMaterialByDef = function(currentmat,value)

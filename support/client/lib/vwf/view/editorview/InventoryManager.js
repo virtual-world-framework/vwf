@@ -240,7 +240,8 @@ function InventoryManager()
 		$('#InventoryManager').prependTo($('#InventoryManager').parent());
 		$('#InventoryManager').show('blind',function()
 		{
-			
+			if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
 		});
 		
 		//$('#InventoryManager').dialog('option','position',[1282,40]);
@@ -277,7 +278,10 @@ function InventoryManager()
 	this.hide = function()
 	{
 		//$('#InventoryManager').dialog('close');
-		$('#InventoryManager').hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
+		$('#InventoryManager').hide('blind',function(){
+		if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+		if(!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
 				hideSidePanel();});
 		
 	}
@@ -376,6 +380,10 @@ function InventoryManager()
 			$('#inventoryScript'+ToSafeID(i)).attr('type','script');
 			$('#inventoryScript'+ToSafeID(i)).click(_InventoryManager.itemClicked);
 		}
+		
+		if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+					
 	}
 	this.itemViewer = ace.edit("InventoryView");
     this.itemViewer.setTheme("ace/theme/chrome");

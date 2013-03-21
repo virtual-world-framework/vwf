@@ -410,6 +410,7 @@ function SaveAsset(URL,filename,data,response)
 				if(!fs.existsSync(filename))
 				{
 					//Save the asset Author info
+					console.log('parse asset');
 					var asset = JSON.parse(data);
 					asset.Author = URL.query.UID;
 					data = JSON.stringify(asset);
@@ -848,6 +849,31 @@ function serve (request, response)
         });
         request.on('end', function () {
 
+			if(body == '')
+			{
+				response.writeHead(500, {
+					"Content-Type": "text/json"
+				});
+				response.write("data is null", "utf8");
+				console.log("Error in post: data is null");
+				response.end();
+				return;
+			}
+			
+			//Have to do this here! throw does not work quite as you would think 
+			//with all the async stuff. Do error checking first.
+			try{
+				JSON.parse(body);
+			}catch(e)
+			{
+				response.writeHead(500, {
+					"Content-Type": "text/json"
+				});
+				response.write("data parse error", "utf8");
+				console.log("Error in post: data is not json");
+				response.end();
+				return;
+			}
             switch(command)
 			{	
 				case "state":{

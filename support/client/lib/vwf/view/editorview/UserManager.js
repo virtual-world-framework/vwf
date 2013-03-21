@@ -32,7 +32,10 @@ function UserManager()
 	$("#UserProfileWindow").append("<div id='PrivateMessage'></div>");
 	$("#UserProfileWindow").append("<div id='EditProfile'></div>");
 	$("#userprofileclose").click(function(){
-		$("#UserProfileWindow").hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
+		$("#UserProfileWindow").hide('blind',function(){
+		if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+		if(!$('#sidepanel').children().is(':visible'))
 				hideSidePanel();});
 	});
 	$(document.body).append('<div id="Logon">'+
@@ -56,7 +59,10 @@ function UserManager()
 	$('#playerstitle').append('<a id="playersclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
 		$('#playersclose').click(function()
 		{
-			$('#Players').hide('blind',function(){if(!$('#sidepanel').children().is(':visible'))
+			$('#Players').hide('blind',function(){
+			if($('#sidepanel').data('jsp'))
+					$('#sidepanel').data('jsp').reinitialise();
+			if(!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
 				hideSidePanel();});
 		});
 	$('#playerstitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/users.png" />');	
@@ -298,7 +304,8 @@ function UserManager()
 	{
 	
 	
-		
+		if(!_UserManager.GetCurrentUserName())
+			return;
 	
 	
 	
@@ -315,7 +322,8 @@ function UserManager()
 		//
 		//vwf_view.kernel.callMethod('index-vwf','receiveChat',parms);
 		
-		vwf_view.kernel.deleteNode(document[document.PlayerNumber +'link'].id);
+		if(document[document.PlayerNumber +'link'])
+			vwf_view.kernel.deleteNode(document[document.PlayerNumber +'link'].id);
 		
 		//take ownership of the client connection
 		

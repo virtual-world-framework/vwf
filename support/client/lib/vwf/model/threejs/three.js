@@ -16249,42 +16249,45 @@ THREE.ShaderChunk = {
 						"float dy0 = -1.25 * yPixelOffset;",
 						"float dx1 = 1.25 * xPixelOffset;",
 						"float dy1 = 1.25 * yPixelOffset;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx0, dy0 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( 0.0, dy0 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx1, dy0 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx0, 0.0 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx1, 0.0 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx0, dy1 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( 0.0, dy1 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
-						"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx1, dy1 ) ) );",
-						"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
-
 						
+						"if(shadowCoord.x + dx1 > 1.0 || shadowCoord.x - dx1 < 0.0 || shadowCoord.y + dy1 > 1.0 || shadowCoord.y - dy1 < 0.0)",
+						"shadow = 0.0;",
+						"else {",
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx0, dy0 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( 0.0, dy0 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx1, dy0 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx0, 0.0 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx1, 0.0 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx0, dy1 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( 0.0, dy1 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+							"fDepth = unpackDepth( texture2D( shadowMap[ i ], shadowCoord.xy + vec2( dx1, dy1 ) ) );",
+							"if ( fDepth < shadowCoord.z ) shadow += shadowDelta;",
+
+						"}",
 						
 						"vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ i ], 0.0 );",
 						"vec3 dirVector = normalize( lDirection.xyz );",
 						"float dotProduct = 1.0-clamp(dot( normal, -dirVector ),0.0,1.0);",
 						"dotProduct = pow(dotProduct,4.0);",
 						"shadowColor = shadowColor * vec3( ( 1.0 - shadowDarkness[ i ] * shadow * dotProduct ) );",
-						"shadowColor = mix(shadowColor,vec3(1.0,1.0,1.0),length(shadowCoord.xy - .5)*1.7);",
+						"shadowColor = mix(shadowColor,vec3(1.0,1.0,1.0),clamp(0.0,1.0,pow(length(shadowCoord.xy - .5)*2.0,4.0)));",
 					"#elif defined( SHADOWMAP_TYPE_PCF_SOFT )",
 
 						// Percentage-close filtering
