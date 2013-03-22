@@ -1652,8 +1652,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
             
             parentObject3.add( asset );
-            if ( asset.matrix ) asset.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
-            else asset.matrix = { "elements": [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1], };
             if ( asset.updateMatrixWorld ) asset.updateMatrixWorld(true);
             
             nodeCopy.threeObject.matrixAutoUpdate = false;
