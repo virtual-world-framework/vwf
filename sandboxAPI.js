@@ -5,7 +5,8 @@ var libpath = require('path'),
     mime = require('mime'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml');
-
+	
+var datapath = 'C:\\VWFData';
 //Just serve a simple file
 function ServeFile(filename,response,URL, JSONHeader)
 {
@@ -313,7 +314,7 @@ function SaveProfile(URL,filename,data,response)
 //Read the password from the profile for the UID user, and callback with the match
 function CheckPassword(UID,Password, callback)
 {
-	var basedir = "C:\\VWFData\\profiles\\";
+	var basedir = datapath + "\\profiles\\";
 	var filename = basedir+UID;
 	if(!fs.existsSync(filename))
 	{
@@ -337,7 +338,7 @@ function CheckPassword(UID,Password, callback)
 //Check that the UID is the author of the asset
 function CheckAuthor(UID,assetFilename, callback)
 {
-	var basedir = "C:\\VWFData\\GlobalAssets\\";
+	var basedir = datapath + "\\GlobalAssets\\";
 	
 	if(!fs.existsSync(assetFilename))
 	{
@@ -364,7 +365,7 @@ function CheckAuthor(UID,assetFilename, callback)
 //Check that the UID is the owner of the state
 function CheckOwner(UID,stateFilename, callback)
 {
-	var basedir = "C:\\VWFData\\GlobalAssets\\";
+	var basedir = datapath + "\\GlobalAssets\\";
 	
 	if(!fs.existsSync(stateFilename))
 	{
@@ -739,7 +740,7 @@ function RecurseDirs(startdir, currentdir, files)
 }
 function getState(UID)
 {
-	var basedir = "C:\\VWFData\\";
+	var basedir = datapath + "\\";
 	console.log('servestate ' + basedir+"states\\" + UID);
 	if(fs.existsSync(basedir+"states\\" + UID))
 	{
@@ -754,7 +755,7 @@ function serve (request, response)
 	var command = URL.pathname.substr(URL.pathname.lastIndexOf('/')+1);
 	command = command.toLowerCase();
 	var UID = URL.query.UID;
-	var basedir = "C:\\VWFData\\";
+	var basedir = datapath + "\\";
 	console.log(command,UID);
 	if(request.method == "GET")
 	{
@@ -929,3 +930,8 @@ function serve (request, response)
 
 exports.serve = serve;
 exports.getState = getState;
+exports.setDataPath = function(p)
+{
+	console.log("datapath is " + p);
+	datapath = p;
+}

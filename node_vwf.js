@@ -378,6 +378,10 @@ function startVWF(){
 	var p = process.argv.indexOf('-p');
 	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
 	
+	p = process.argv.indexOf('-d');
+	var datapath = p >= 0 ? process.argv[p+1] : "C:\\VWFData";
+	SandboxAPI.setDataPath(datapath);
+	
 	var srv = http.createServer(OnRequest).listen(port);
 	console.log('Serving on port ' + port);
 	
