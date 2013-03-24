@@ -28,7 +28,7 @@ function findAppName(uri)
 		return null;	
 }
 
-//Generate a random ID for a session
+//Generate a random ID for a instance
 var ValidIDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 function makeid()
 {
@@ -44,7 +44,7 @@ var WaitingForConnection = 0;
 var Active = 1;
 var Dead = 2;
 
-function Session(inid)
+function instance(inid)
 {
 	this.id = inid;
 	this.state = WaitingForConnection;
@@ -87,8 +87,8 @@ function GenerateNewInstance(request,response,appname,newid)
 				return;
 }
 
-//Find the instance(session) ID in a URL
-function FindSession(uri)
+//Find the instance(instance) ID in a URL
+function Findinstance(uri)
 {
 	//find the application name
 	var app = findAppName(uri);
@@ -114,10 +114,10 @@ function FindSession(uri)
 	}
 	return null;
 }
-//Remove the session identifer from the URL
-function filterSession(uri,session)
+//Remove the instance identifer from the URL
+function filterinstance(uri,instance)
 {
-	return uri.replace(session +'\\','').replace(session,'\\');
+	return uri.replace(instance +'\\','').replace(instance,'\\');
 }
 //Just serve a simple file
 function ServeFile(filename,response,URL)
@@ -202,7 +202,7 @@ function ServeJSON(jsonobject,response,URL)
 			response.end();
 			
 }
-//Get the session ID from the handshake headers for a socket
+//Get the instance ID from the handshake headers for a socket
 function getNamespace(socket)
 {
 
@@ -231,7 +231,7 @@ function strEndsWith(str, suffix) {
 //Start the VWF server
 function startVWF(){
 
-	global.activesessions = [];
+	global.activeinstances = [];
 	function OnRequest(request, response) 
 	{
 	
@@ -251,10 +251,10 @@ function startVWF(){
 			}
 			
 			var filename = libpath.join(path, uri);
-			var session = FindSession(filename);
-			//console.log(session);
-			//remove the session identifier from the request
-			filename = filterSession(filename,session);
+			var instance = Findinstance(filename);
+			//console.log(instance);
+			//remove the instance identifier from the request
+			filename = filterinstance(filename,instance);
 			
 			//file is not found - serve index or map to support files
 			//file is also not a yaml document
@@ -302,14 +302,14 @@ function startVWF(){
 					if(!appname)
 						appname = findAppName(filename+"\\");
 					
-					//no session id is given, new instance
-					if(appname && session == null)
+					//no instance id is given, new instance
+					if(appname && instance == null)
 					{			
 						GenerateNewInstance(request,response,appname);
 						return;
 					}
-					//session needs to end in a slash, so redirect but keep session id
-					if(appname && strEndsWith(URL.pathname,session))
+					//instance needs to end in a slash, so redirect but keep instance id
+					if(appname && strEndsWith(URL.pathname,instance))
 					{
 						GenerateNewInstance(request,response,appname,"");
 						return;
@@ -341,10 +341,10 @@ function startVWF(){
 				if(uri.indexOf('\\admin\\instances'))
 				{
 					var data = {};
-					for(var i in global.sessions)
+					for(var i in global.instances)
 					{
 						data[i] = {clients:{}};
-						for(var j in global.sessions[i].clients)
+						for(var j in global.instances[i].clients)
 						{
 							data[i].clients[j] = null;
 						}
@@ -391,59 +391,59 @@ function startVWF(){
 	sio.sockets.on('connection', function (socket) {
 	  
 	  
-	  //get session for new connection
+	  //get instance for new connection
 	  var namespace = getNamespace(socket);
 	  
-	  //create or setup session data
-	  if(!global.sessions)
-	    global.sessions = {};
+	  //create or setup instance data
+	  if(!global.instances)
+	    global.instances = {};
 	   
-	  //if it's a new session, setup record 
-	  if(!global.sessions[namespace])
+	  //if it's a new instance, setup record 
+	  if(!global.instances[namespace])
 	  {
-		global.sessions[namespace] = {};
-		global.sessions[namespace].clients = {};
-		global.sessions[namespace].time = 0.0;
-		global.sessions[namespace].state = {};
-		//keep track of the timer for this session
-		global.sessions[namespace].timerID = setInterval(function(){
+		global.instances[namespace] = {};
+		global.instances[namespace].clients = {};
+		global.instances[namespace].time = 0.0;
+		global.instances[namespace].state = {};
+		//keep track of the timer for this instance
+		global.instances[namespace].timerID = setInterval(function(){
 		
-			global.sessions[namespace].time += .05;
-			for(var i in global.sessions[namespace].clients)
+			global.instances[namespace].time += .05;
+			for(var i in global.instances[namespace].clients)
 			{
-				var client = global.sessions[namespace].clients[i];
-				client.emit('message',{"action":"tick","parameters":[],"time":global.sessions[namespace].time});
+				var client = global.instances[namespace].clients[i];
+				client.emit('message',{"action":"tick","parameters":[],"time":global.instances[namespace].time});
 			}
 		
 		},50);
 		
 	  }
 	 
-	  //add the new client to the session data
-      global.sessions[namespace].clients[socket.id] = socket;	 
+	  //add the new client to the instance data
+      global.instances[namespace].clients[socket.id] = socket;	 
 	  
 	  socket.pending = true;
 	  socket.pendingList = [];
 	  
 	  
 	  //The client is the first, is can just load the index.vwf, and mark it not pending
-	  if(Object.keys(global.sessions[namespace].clients).length == 1)
+	  if(Object.keys(global.instances[namespace].clients).length == 1)
 	  {
 		
-		//socket.emit('message',{"action":"getState","respond":true,"time":global.sessions[namespace].time});
+		//socket.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
 		
 		
 		//todo: align state names with namespace names. currently state filename is not keyed to application name
-		var session = (namespace.split('/'));
-		session = session[session.length-2];
+		var instance = (namespace.split('/'));
+		instance = instance[instance.length-2];
 		
 		//Get the state and load it.
 		//Now the server has a rough idea of what the simulation is
-		var state = SandboxAPI.getState(session) || [];
-		global.sessions[namespace].state = {nodes:{}};
-		global.sessions[namespace].state.nodes['index-vwf'] = {id:"index-vwf",properties:state[state.length-1],children:{}};
+		var state = SandboxAPI.getState(instance) || [];
+		global.instances[namespace].state = {nodes:{}};
+		global.instances[namespace].state.nodes['index-vwf'] = {id:"index-vwf",properties:state[state.length-1],children:{}};
 		
-		global.sessions[namespace].state.findNode = function(id,parent)
+		global.instances[namespace].state.findNode = function(id,parent)
 		{
 			var ret = null;
 			if(!parent) parent = this.nodes['index-vwf'];
@@ -459,7 +459,7 @@ function startVWF(){
 			}
 			return ret;
 		}
-		global.sessions[namespace].state.deleteNode = function(id,parent)
+		global.instances[namespace].state.deleteNode = function(id,parent)
 		{
 			if(!parent) parent = this.nodes['index-vwf'];
 			if(parent.children)
@@ -505,15 +505,15 @@ function startVWF(){
 			var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
 			childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 			state[i].id = childID;
-			global.sessions[namespace].state.nodes['index-vwf'].children[childID] = state[i];
+			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
 			fixIDs(state[i]);
 		}
-		console.log(Object.keys(global.sessions[namespace].state.nodes['index-vwf'].children));
+		console.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
 		
 		
 		
 		//this is a blank world, go ahead and load the default
-		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.sessions[namespace].time});
+		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.instances[namespace].time});
 		
 		
 		
@@ -522,9 +522,9 @@ function startVWF(){
 	  //this client is not the first, we need to get the state and mark it pending
 	  else
 	  {
-		var firstclient = Object.keys(global.sessions[namespace].clients)[0];
-		firstclient = global.sessions[namespace].clients[firstclient];
-		firstclient.emit('message',{"action":"getState","respond":true,"time":global.sessions[namespace].time});
+		var firstclient = Object.keys(global.instances[namespace].clients)[0];
+		firstclient = global.instances[namespace].clients[firstclient];
+		firstclient.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
 		console.log('GetState from Client');
 		socket.pending = true;
 	  }
@@ -535,7 +535,7 @@ function startVWF(){
 		    var message = JSON.parse(msg);
 			//console.log(message);
 			message.client = socket.id;
-			var sendingclient = global.sessions[namespace].clients[socket.id];
+			var sendingclient = global.instances[namespace].clients[socket.id];
 			
 			//do not accept messages from clients that have not been claimed by a user
 			//currently, allow getstate from anonymous clients
@@ -546,7 +546,7 @@ function startVWF(){
 			//We'll only accept a setProperty if the user has ownership of the object
 			if(message.action == "setProperty")
 			{
-			      var node = global.sessions[namespace].state.findNode(message.node);
+			      var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
 					console.log('server has no record of ' + message.node);
@@ -569,7 +569,7 @@ function startVWF(){
 			if(message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" || 
 				message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent")
 			{
-			      var node = global.sessions[namespace].state.findNode(message.node);
+			      var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
 					console.log('server has no record of ' + message.node);
@@ -588,7 +588,7 @@ function startVWF(){
 			//We'll only accept a deleteNode if the user has ownership of the object
 			if(message.action == "deleteNode")
 			{
-				  var node = global.sessions[namespace].state.findNode(message.node);
+				  var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
 					console.log('server has no record of ' + message.node);
@@ -597,7 +597,7 @@ function startVWF(){
 				  if(checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						//we do need to keep some state data, and note that the node is gone
-						global.sessions[namespace].state.deleteNode(message.node)
+						global.instances[namespace].state.deleteNode(message.node)
 						console.log("deleted " +node.id);
 				  }
 				  else
@@ -611,7 +611,7 @@ function startVWF(){
 			if(message.action == "createChild")
 			{
 				  console.log(message);
-				  var node = global.sessions[namespace].state.findNode(message.node);
+				  var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
 					console.log('server has no record of ' + message.node);
@@ -636,10 +636,10 @@ function startVWF(){
 					return;
 				  }
 			}
-			//distribute message to all clients on given session
-			for(var i in global.sessions[namespace].clients)
+			//distribute message to all clients on given instance
+			for(var i in global.instances[namespace].clients)
 			{
-				var client = global.sessions[namespace].clients[i];
+				var client = global.instances[namespace].clients[i];
 				
 				//if the message was get state, then fire all the pending messages after firing the setState
 				if(message.action == "getState")
@@ -647,7 +647,7 @@ function startVWF(){
 					console.log('Got State');
 					var state = message.result;
 					console.log(state);
-					client.emit('message',{"action":"setState","parameters":[state],"time":global.sessions[namespace].time});
+					client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].time});
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)
 						client.emit('message',client.pendingList[j]);
@@ -668,16 +668,16 @@ function startVWF(){
 			
 	  });
 	  
-	  //When a client disconnects, go ahead and remove the session data
+	  //When a client disconnects, go ahead and remove the instance data
 	  socket.on('disconnect', function () {
 		  
-		  global.sessions[namespace].clients[socket.id] = null;	 
-		  delete global.sessions[namespace].clients[socket.id];
+		  global.instances[namespace].clients[socket.id] = null;	 
+		  delete global.instances[namespace].clients[socket.id];
 		  //if it's the last client, delete the data and the timer
-		  if(Object.keys(global.sessions[namespace].clients).length == 0)
+		  if(Object.keys(global.instances[namespace].clients).length == 0)
 		  {
-			clearInterval(global.sessions[namespace].timerID);
-			delete global.sessions[namespace];
+			clearInterval(global.instances[namespace].timerID);
+			delete global.instances[namespace];
 		  }
 
 		});

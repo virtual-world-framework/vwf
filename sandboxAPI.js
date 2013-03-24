@@ -6,6 +6,28 @@ var libpath = require('path'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml');
 	
+	
+// default path to data. over written by setup flags
+
+//generate a random id.
+function GUID()
+    {
+        var S4 = function ()
+        {
+            return Math.floor(
+                    Math.random() * 0x10000 /* 65536 */
+                ).toString(16);
+        };
+
+        return (
+                S4() + S4() + "-" +
+                S4() + "-" +
+                S4() + "-" +
+                S4() + "-" +
+                S4() + S4() + S4()
+            );
+    }
+	
 var datapath = 'C:\\VWFData';
 //Just serve a simple file
 function ServeFile(filename,response,URL, JSONHeader)
@@ -65,7 +87,7 @@ function ServeProfile(filename,response,URL, JSONHeader)
 			var profile = JSON.parse(file);
 			//def3735d7a0d2696775d6d72f379e4536c4d9e3cd6367f27a0bcb7f40d4558fb
 			var storedPassword = profile.Password;
-			var suppliedPassword = URL.query.P;
+			var suppliedPassword = URL.query.P || URL.loginData.Password;
 			if(storedPassword == suppliedPassword)
 			{
 				
@@ -90,17 +112,19 @@ function ServeProfile(filename,response,URL, JSONHeader)
 
 
 //Take ownership if a client websocket connection
-//must provide a password and name for the user, and the session and client ids.
+//must provide a password and name for the user, and the instance and client ids.
 //This will associate a user with a reflector connection
 //The reflector will not accept incomming messages from an anonymous connection
 function Login(filename,response,URL, JSONHeader)
 {
 			var UID = URL.query.UID;
 			var password = URL.query.P;
-			var session = URL.query.S;
+			var instance = URL.query.S;
+			console.log(instance);
+			console.log(global.instances);
 			var cid = URL.query.CID;
 			
-			if(!UID || !password || !session || !cid)
+			if(!UID || !password || !instance || !cid)
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
@@ -109,25 +133,25 @@ function Login(filename,response,URL, JSONHeader)
 				response.end();
 				return;
 			}
-			if(!global.sessions || !global.sessions[session])
+			if(!global.instances || !global.instances[instance])
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
 				});
-				response.write("Session does not exist", "utf8");
+				response.write("instance does not exist", "utf8");
 				response.end();
 				return;
 			}
-			if(!global.sessions[session].clients[cid])
+			if(!global.instances[instance].clients[cid])
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
 				});
-				response.write("Client is not connected to session", "utf8");
+				response.write("Client is not connected to instance", "utf8");
 				response.end();
 				return;
 			}
-			if(global.sessions[session].clients[cid].loginData)
+			if(global.instances[instance].clients[cid].loginData)
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
@@ -136,9 +160,9 @@ function Login(filename,response,URL, JSONHeader)
 				response.end();
 				return;
 			}
-			for (var i in global.sessions[session].clients)
+			for (var i in global.instances[instance].clients)
 			{
-				if(global.sessions[session].clients[i].loginData && global.sessions[session].clients[i].loginData.UID == UID)
+				if(global.instances[instance].clients[i].loginData && global.instances[instance].clients[i].loginData.UID == UID)
 				{
 					response.writeHead(401, {
 						"Content-Type":  "text/plain"
@@ -168,11 +192,16 @@ function Login(filename,response,URL, JSONHeader)
 				
 				if(storedPassword == password)
 				{
-					global.sessions[session].clients[cid].loginData = {};
-					global.sessions[session].clients[cid].loginData.UID = UID;
-					global.sessions[session].clients[cid].loginData.Password = password;
+					global.instances[instance].clients[cid].loginData = {};
+					global.instances[instance].clients[cid].loginData.UID = UID;
+					global.instances[instance].clients[cid].loginData.Password = password;
+					global.instances[instance].clients[cid].loginData.SocketClient = cid;
+					global.instances[instance].clients[cid].loginData.InstanceID = instance;
+					var sessionID = GUID();
+					global.instances[instance].clients[cid].loginData.sessionID = sessionID;
 					response.writeHead(200, {
-						"Content-Type":  "text/plain"
+						"Content-Type":  "text/plain",
+						"Set-Cookie": "session="+sessionID+"; HttpOnly" 
 					});
 					response.write("Login Successful", "utf8");
 					console.log('Client Logged in');
@@ -193,12 +222,12 @@ function Login(filename,response,URL, JSONHeader)
 
 function Logout(filename,response,URL, JSONHeader)
 {
-			var UID = URL.query.UID;
-			var password = URL.query.P;
-			var session = URL.query.S;
-			var cid = URL.query.CID;
+			var UID = URL.query.UID || URL.loginData.UserName;
+			var password = URL.query.P || URL.loginData.Password;
+			var instance = URL.query.S || URL.loginData.InstanceID;
+			var cid = URL.query.CID || URL.loginData.SocketClient;
 			
-			if(!UID || !password || !session || !cid)
+			if(!UID || !password || !instance || !cid)
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
@@ -207,25 +236,25 @@ function Logout(filename,response,URL, JSONHeader)
 				response.end();
 				return;
 			}
-			if(!global.sessions || !global.sessions[session])
+			if(!global.instances || !global.instances[instance])
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
 				});
-				response.write("Session does not exist", "utf8");
+				response.write("instance does not exist", "utf8");
 				response.end();
 				return;
 			}
-			if(!global.sessions[session].clients[cid])
+			if(!global.instances[instance].clients[cid])
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
 				});
-				response.write("Client is not connected to session", "utf8");
+				response.write("Client is not connected to instance", "utf8");
 				response.end();
 				return;
 			}
-			if(!global.sessions[session].clients[cid].loginData)
+			if(!global.instances[instance].clients[cid].loginData)
 			{
 				response.writeHead(401, {
 					"Content-Type":  "text/plain"
@@ -234,14 +263,15 @@ function Logout(filename,response,URL, JSONHeader)
 				response.end();
 				return;
 			}
-			if(global.sessions[session].clients[cid].loginData.UID == UID && global.sessions[session].clients[cid].loginData.Password == password)
+			if(global.instances[instance].clients[cid].loginData.UID == UID && global.instances[instance].clients[cid].loginData.Password == password)
 			{
 				response.writeHead(200, {
-					"Content-Type":  "text/plain"
+					"Content-Type":  "text/plain",
+					"Set-Cookie": "session=; HttpOnly"
 				});
 				response.write("Client logged out", "utf8");
 				response.end();
-				delete global.sessions[session].clients[cid].loginData;
+				delete global.instances[instance].clients[cid].loginData;
 				return;
 			}else
 			{
@@ -393,7 +423,9 @@ function CheckOwner(UID,stateFilename, callback)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function SaveAsset(URL,filename,data,response)
 {
-	CheckPassword(URL.query.UID,URL.query.P,function(e){
+	var UID = URL.query.UID || URL.loginData.UserName;
+	var P = URL.query.P || URL.loginData.Password;
+	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
 		if(!e)
@@ -421,7 +453,7 @@ function SaveAsset(URL,filename,data,response)
 				}else
 				{
 					//overwriting the asset;
-					CheckAuthor(URL.query.UID,filename,function(e){
+					CheckAuthor(UID,filename,function(e){
 						
 						//trying to overwrite existing file that user is not author of
 						if(!e)
@@ -453,7 +485,9 @@ function SaveAsset(URL,filename,data,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteProfile(URL,filename,response)
 {
-	CheckPassword(URL.query.UID,URL.query.P,function(e){
+	var UID = URL.query.UID || URL.loginData.UserName;
+	var P = URL.query.P || URL.loginData.Password;
+	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
 		if(!e)
@@ -500,7 +534,9 @@ function DeleteProfile(URL,filename,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteState(URL,filename,response)
 {
-	CheckPassword(URL.query.UID,URL.query.P,function(e){
+	var UID = URL.query.UID || URL.loginData.UserName;
+	var P = URL.query.P || URL.loginData.Password;
+	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
 		if(!e)
@@ -529,7 +565,7 @@ function DeleteState(URL,filename,response)
 				else
 				{
 					//overwriting the asset;
-					CheckOwner(URL.query.UID,filename,function(e){
+					CheckOwner(UID,filename,function(e){
 						
 						//trying to delete existing file that user is not author of
 						if(!e)
@@ -565,7 +601,9 @@ function DeleteState(URL,filename,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function SaveState(URL,filename,data,response)
 {
-	CheckPassword(URL.query.UID,URL.query.P,function(e){
+	var UID = URL.query.UID || URL.loginData.UserName;
+	var P = URL.query.P || URL.loginData.Password;
+	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
 		if(!e)
@@ -635,7 +673,9 @@ function SaveState(URL,filename,data,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteAsset(URL,filename,response)
 {
-	CheckPassword(URL.query.UID,URL.query.P,function(e){
+	var UID = URL.query.UID || URL.loginData.UserName;
+	var P = URL.query.P || URL.loginData.Password;
+	CheckPassword(UID,P,function(e){
 	
 		//Did no supply a good name password pair
 		if(!e)
@@ -663,7 +703,7 @@ function DeleteAsset(URL,filename,response)
 				else
 				{
 					//overwriting the asset;
-					CheckAuthor(URL.query.UID,filename,function(e){
+					CheckAuthor(UID,filename,function(e){
 						
 						//trying to delete existing file that user is not author of
 						if(!e)
@@ -749,12 +789,27 @@ function getState(UID)
 	}
 	return null;
 }
+function GetSessionData(cookie)
+{
+  for(var i in global.instances)
+  {
+	for(var j in global.instances[i].clients)
+	{
+		if(global.instances[i].clients[j].loginData && global.instances[i].clients[j].loginData.SessionID == cookie)
+		   return global.instances[i].clients[j].loginData;
+	}
+  }
+  return {};
+}
 function serve (request, response)
 {
 	var URL = url.parse(request.url,true);
 	var command = URL.pathname.substr(URL.pathname.lastIndexOf('/')+1);
 	command = command.toLowerCase();
-	var UID = URL.query.UID;
+	
+	URL.loginData = GetSessionData('badcookie');
+	
+	var UID = URL.query.UID || URL.loginData.UserName;
 	var basedir = datapath + "\\";
 	console.log(command,UID);
 	if(request.method == "GET")
