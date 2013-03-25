@@ -27,34 +27,63 @@ children:
     properties:
       scenePath: /
     children:
-      step1:
+      enterVehicle:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: "Enter the Vehicle"
+          text: "1.0 Enter the Vehicle"
           cameraPoseRef: /cameraPose1
         children:
+          walkToVehicle:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "1.1 Walk to the vehicle"
+            children:
+              walkInstructions:
+                extends: http://vwf.example.com/lesson/task.vwf
+                properties:
+                  text: "Use WASD to navigate to the vehicle door."
+          openDoor:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "1.2 Open vehicle door"
+          jumpIn:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "1.3 Jump into the driver's seat"
         scripts:
         - |
           this.entering = function() {
             
           }
-      step2:
+      startEngine:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: "Start the Engine"
+          text: "2.0 Start the Engine"
           cameraPoseRef: /cameraPose2
         children:
+          turnKey:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "2.1 Turn the key"
+          shiftGear:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "2.2 Shift gear into drive"
         scripts:
         - |
           this.entering = function() {
             
           }
-      step3:
+      driveVehicle:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
-          text: "Drive Vehicle"
+          text: "3.0 Drive Vehicle"
           cameraPoseRef: /cameraPose3
         children:
+          pressGas:
+            extends: http://vwf.example.com/lesson/task.vwf
+            properties:
+              text: "3.1 Press gas pedal."
         scripts:
         - |
           this.entering = function() {

@@ -23,6 +23,14 @@ p {
   line-height: 18px;
 }
 
+.taskTitle {
+  color:#CCCCCC;
+  padding:5px;
+  font-size:18px;
+  /*font-weight:bold;*/
+  /*text-align:center;*/
+}
+
 #lessonProgressBar {
   width:0px;
 }

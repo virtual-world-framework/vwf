@@ -163,7 +163,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         initializedProperty: function (nodeID, propertyName, propertyValue) {
             switch (propertyName) {
               case "text": 
-                if(propertyValue) this.lessonSteps[vwf_view.kernel.name( nodeID )] = propertyValue;
+                if(propertyValue) this.lessonSteps[nodeID] = propertyValue;
                 break;
             }
         },
@@ -216,14 +216,43 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
     // -- updateLessonInstructions ----------------------------------------------------------
 
-    function updateLessonInstructions(lessonSteps) {
+    function updateLessonInstructions(lessonSteps) 
+    {
+        var lessonID = vwf.find('', '/lesson')[0];
+        var currentTaskID = lessonID;
+
         for(var step in lessonSteps)
         {
-            $('#accordion').append("<h2><a id='" + step + "' href='#'>" + step + "</a></h2>");
-            $('#accordion').append("<div><p>" + lessonSteps[step] + "</p></div>");
+            var parentID = vwf_view.kernel.parent( step );
+
+            if(parentID == lessonID)
+            {
+                var subAccordionDiv = document.createElement('div');
+                subAccordionDiv.id = 'accordion--' + step.replace(/\:/g, "_");
+
+                $('#accordion').append("<p class='taskTitle'>" + lessonSteps[step] + "</p>");
+                $('#accordion').append(subAccordionDiv);
+                $('#accordion').append("<br />");
+
+                currentTaskID = step;
+            }
+            else if(parentID == currentTaskID)
+            {
+                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<h2><a id='" + step + "' href='#'>" + lessonSteps[step] + "</a></h2>");
+                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<div id='div--" + step.replace(/\:/g, "_") + "'></div>");  
+            }
+            else
+            {
+                var htmlParent = parentID.replace(/\:/g, "_");
+                while(! $('#div--' + htmlParent).length) 
+                {
+                    htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
+                }
+                $('#div--' + htmlParent).append(lessonSteps[step] + "<br />");
+            }
         }
 
-        $("#accordion").accordion({ active: false, collapsible: true });
+        $("#accordion").children('div').accordion({ active: false, collapsible: true });
     }
 
     // -- startLesson -----------------------------------------------------------------------
