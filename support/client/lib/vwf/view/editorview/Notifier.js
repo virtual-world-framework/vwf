@@ -10,7 +10,7 @@ function Notifier()
 	{
 	    clearTimeout($('#element').stop().data('timer'));
 		$('#NotifierWindow').css('font-size',$(window).height()/25 + 'px');
-		$('#NotifierWindow').html(text);
+		$('#NotifierWindow').text(text);
 		$('#NotifierWindow').fadeIn(function() {
 			var elem = $(this);
 			$.data(this, 'timer', setTimeout(function() { elem.fadeOut(); }, 2000));
@@ -18,7 +18,7 @@ function Notifier()
 	}
 	this.alert = function(text,callback)
 	{
-			$('#NotifierAlertMessage').html(text);
+			$('#NotifierAlertMessage').text(text);
 			$('#NotifierAlertMessage').dialog('open');
 			this.alertcallback = callback;
 	}
@@ -48,7 +48,7 @@ function Notifier()
 		$('#WaitingWindow').parent().css('width','200px');
 		$('#WaitingWindow').parent().css('height','200px');
 		$('#WaitingWindow').dialog('option', 'position', 'center');
-		$('#waittitle').html(title);
+		$('#waittitle').text(title);
 	}
 	this.stopWait = function()
 	{

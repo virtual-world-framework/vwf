@@ -94,6 +94,7 @@ function ServeProfile(filename,response,URL, JSONHeader)
 				
 				var o = {};
 				o[JSONHeader] = file;
+				file.Password = '';
 				response.write(JSON.stringify(o), "utf8");			
 				response.end();
 				console.log('Served Profile ' + filename);
@@ -197,11 +198,11 @@ function Login(filename,response,URL, JSONHeader)
 					global.instances[instance].clients[cid].loginData.Password = password;
 					global.instances[instance].clients[cid].loginData.SocketClient = cid;
 					global.instances[instance].clients[cid].loginData.InstanceID = instance;
-					var sessionID = GUID();
-					global.instances[instance].clients[cid].loginData.sessionID = sessionID;
+					var SessionID = GUID();
+					global.instances[instance].clients[cid].loginData.SessionID = SessionID;
 					response.writeHead(200, {
 						"Content-Type":  "text/plain",
-						"Set-Cookie": "session="+sessionID+"; HttpOnly" 
+						"Set-Cookie": "session="+SessionID+"; HttpOnly" 
 					});
 					response.write("Login Successful", "utf8");
 					console.log('Client Logged in');
@@ -222,7 +223,7 @@ function Login(filename,response,URL, JSONHeader)
 
 function Logout(filename,response,URL, JSONHeader)
 {
-			var UID = URL.query.UID || URL.loginData.UserName;
+			var UID = URL.query.UID || URL.loginData.UID;
 			var password = URL.query.P || URL.loginData.Password;
 			var instance = URL.query.S || URL.loginData.InstanceID;
 			var cid = URL.query.CID || URL.loginData.SocketClient;
@@ -423,7 +424,7 @@ function CheckOwner(UID,stateFilename, callback)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function SaveAsset(URL,filename,data,response)
 {
-	var UID = URL.query.UID || URL.loginData.UserName;
+	var UID = URL.query.UID || URL.loginData.UID;
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -485,7 +486,7 @@ function SaveAsset(URL,filename,data,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteProfile(URL,filename,response)
 {
-	var UID = URL.query.UID || URL.loginData.UserName;
+	var UID = URL.query.UID || URL.loginData.UID;
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -530,11 +531,25 @@ function DeleteProfile(URL,filename,response)
 }
 
 
+var deleteFolderRecursive = function(path) {
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      var curPath = path + "/" + file;
+      if(fs.statSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
+
 
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteState(URL,filename,response)
 {
-	var UID = URL.query.UID || URL.loginData.UserName;
+	var UID = URL.query.UID || URL.loginData.UID;
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -565,7 +580,7 @@ function DeleteState(URL,filename,response)
 				else
 				{
 					//overwriting the asset;
-					CheckOwner(UID,filename,function(e){
+					CheckOwner(UID,filename + '/state',function(e){
 						
 						//trying to delete existing file that user is not author of
 						if(!e)
@@ -580,7 +595,9 @@ function DeleteState(URL,filename,response)
 						}else
 						{
 							
-							fs.unlink(filename);
+							deleteFolderRecursive(filename);
+							
+							
 							response.writeHead(200, {
 								"Content-Type":  "text/plain"
 							});
@@ -588,7 +605,8 @@ function DeleteState(URL,filename,response)
 							response.end();
 							console.log('Deleted state ' + filename);
 							return;
-							return;
+							
+							
 						}
 					});
 				}
@@ -596,12 +614,32 @@ function DeleteState(URL,filename,response)
 	});
 }
 
+function RenameFile(filename,newname,callback)
+{
+	fs.rename(filename,newname,callback);
+}
 
+//make a directory if the directory does not exist
+function MakeDirIfNotExist(dirname,callback)
+{
+	fs.exists(dirname, function(e)
+	{
+		if(e)
+			callback();
+		else
+		{
+			fs.mkdir(dirname,function(){
+			callback();
+			});
+		}
+	
+	});
+}
 
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
-function SaveState(URL,filename,data,response)
+function SaveState(URL,dirname,data,response)
 {
-	var UID = URL.query.UID || URL.loginData.UserName;
+	var UID = URL.query.UID || URL.loginData.UID;
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -612,22 +650,22 @@ function SaveState(URL,filename,data,response)
 					"Content-Type":  "text/plain"
 				});
 				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when saving state ' + filename);
+				console.log('Incorrect password when saving state ' + dirname);
 				response.end();
 				return;
 		}
 		else
 		{
 				//the state is new
-				if(!fs.existsSync(filename))
+				if(!fs.existsSync(dirname+'/state'))
 				{
 					response.writeHead(200, {
 								"Content-Type":  "text/plain"
 					});
 					response.write("saving new state", "utf8");
 					response.end();
-					console.log('saving new state' + filename);
-					SaveFile(filename,data,response);
+					console.log('saving new state' + dirname);
+					MakeDirIfNotExist(dirname,function(){SaveFile(dirname+'/state',data,response);});
 					return;
 				}
 				else
@@ -638,7 +676,7 @@ function SaveState(URL,filename,data,response)
 					console.log(asset);
 					var storedOwner = asset[asset.length-1].owner;
 			
-					CheckOwner(storedOwner,filename,function(e){
+					CheckOwner(storedOwner,dirname+'/state',function(e){
 						
 						//trying to delete existing file that user is not author of
 						if(!e)
@@ -648,7 +686,7 @@ function SaveState(URL,filename,data,response)
 							});
 							response.write("Cannot change owner of existing state", "utf8");
 							response.end();
-							console.log('Cannot change owner of existing state' + filename);
+							console.log('Cannot change owner of existing state' + dirname);
 							return;
 						}else
 						{
@@ -658,8 +696,12 @@ function SaveState(URL,filename,data,response)
 							});
 							response.write("saving over state", "utf8");
 							response.end();
-							console.log('saving over state' + filename);
-							SaveFile(filename,data,response);
+							console.log('saving over state' + dirname);
+							MakeDirIfNotExist(dirname,function(){
+								RenameFile(dirname+'/state',dirname+'/state_backup' + GUID(),function(){
+								SaveFile(dirname+'/state',data,response);
+								});
+							});
 							return;
 						}
 					});
@@ -673,7 +715,7 @@ function SaveState(URL,filename,data,response)
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteAsset(URL,filename,response)
 {
-	var UID = URL.query.UID || URL.loginData.UserName;
+	var UID = URL.query.UID || URL.loginData.UID;
 	var P = URL.query.P || URL.loginData.Password;
 	CheckPassword(UID,P,function(e){
 	
@@ -778,24 +820,43 @@ function RecurseDirs(startdir, currentdir, files)
 		}
 	}
 }
-function getState(UID)
+function getState(SID)
 {
+	SID = SID.replace(/[\\,\/]/g,'_');
 	var basedir = datapath + "\\";
-	console.log('servestate ' + basedir+"states\\" + UID);
-	if(fs.existsSync(basedir+"states\\" + UID))
+	console.log('servestate ' + basedir+"states\\" + SID);
+	if(fs.existsSync(basedir+"states\\" + SID+'\\state'))
 	{
-		file = fs.readFileSync(basedir+"states\\" + UID,'utf8');
+		file = fs.readFileSync(basedir+"states\\" + SID+'\\state','utf8');
 		return JSON.parse(file);
 	}
 	return null;
 }
-function GetSessionData(cookie)
+function GetSessionData(request)
 {
+  if(!request.headers['cookie'])
+	return {};
+	
+  cookies = {};
+  var cookielist = request.headers.cookie.split(';');
+  
+  for(var i = 0; i < cookielist.length; i++)
+  {
+	var parts = cookielist[i].split('=');
+    cookies[parts[0].trim()] = (parts[1] || '').trim();
+  }
+
+	
+  
+  var SessionID = cookies.session;
+  
+  if(!SessionID) return {};
+  console.log(SessionID);
   for(var i in global.instances)
   {
 	for(var j in global.instances[i].clients)
 	{
-		if(global.instances[i].clients[j].loginData && global.instances[i].clients[j].loginData.SessionID == cookie)
+		if(global.instances[i].clients[j].loginData && global.instances[i].clients[j].loginData.SessionID == SessionID)
 		   return global.instances[i].clients[j].loginData;
 	}
   }
@@ -807,9 +868,13 @@ function serve (request, response)
 	var command = URL.pathname.substr(URL.pathname.lastIndexOf('/')+1);
 	command = command.toLowerCase();
 	
-	URL.loginData = GetSessionData('badcookie');
+	URL.loginData = GetSessionData(request);
 	
-	var UID = URL.query.UID || URL.loginData.UserName;
+	var UID = URL.query.UID || URL.loginData.UID;
+	var SID = URL.query.SID || URL.loginData.InstanceID;
+	if(SID)
+	 SID = SID.replace(/[\\,\/]/g,'_');
+	 
 	var basedir = datapath + "\\";
 	console.log(command,UID);
 	if(request.method == "GET")
@@ -823,7 +888,7 @@ function serve (request, response)
 				ServeFile(basedir+"thumbnails\\" + UID,response,URL);		
 			} break;
 			case "state":{
-				ServeFile(basedir+"states\\" + UID,response,URL,'GetStateResult');		
+				ServeFile(basedir+"states\\" + SID+'\\state',response,URL,'GetStateResult');		
 			} break;
 			case "profile":{
 				ServeProfile(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
@@ -933,7 +998,7 @@ function serve (request, response)
             switch(command)
 			{	
 				case "state":{
-					SaveState(URL,basedir+"states\\"+URL.query.SID,body,response);
+					SaveState(URL,basedir+"states\\"+SID,body,response);
 				}break;
 				case "globalasset":{
 					SaveAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,body,response);
@@ -962,7 +1027,7 @@ function serve (request, response)
             switch(command)
 			{	
 				case "state":{
-					DeleteState(URL,basedir+"states\\"+URL.query.SID,response);
+					DeleteState(URL,basedir+"states\\"+SID,response);
 				}break;
 				case "globalasset":{
 					DeleteAsset(URL, basedir+"GlobalAssets\\"+URL.query.AID,response);

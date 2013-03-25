@@ -305,7 +305,7 @@ function ScriptEditor()
 		
 		if(_ScriptEditor.checkMethodSyntax())
 		{
-			$('#ScriptEditorMessage').html('This script contains no syntax errors.');
+			$('#ScriptEditorMessage').text('This script contains no syntax errors.');
 			$('#ScriptEditorMessage').dialog('open');
 		}
 	}
@@ -323,7 +323,7 @@ function ScriptEditor()
 		}
 		if(errors != "")
 		{
-			$('#ScriptEditorMessage').html('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
+			$('#ScriptEditorMessage').text('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
 			$('#ScriptEditorMessage').dialog('open');
 			return false;
 		}
@@ -373,7 +373,7 @@ function ScriptEditor()
 	{
 		if(_ScriptEditor.checkEventSyntax())
 		{
-			$('#ScriptEditorMessage').html('This script contains no syntax errors.');
+			$('#ScriptEditorMessage').text('This script contains no syntax errors.');
 			$('#ScriptEditorMessage').dialog('open');
 		}
 	}
@@ -389,7 +389,7 @@ function ScriptEditor()
 		}
 		if(errors != "")
 		{
-			$('#ScriptEditorMessage').html('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
+			$('#ScriptEditorMessage').text('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
 			$('#ScriptEditorMessage').dialog('open');
 			return false;
 		}
@@ -664,7 +664,7 @@ function ScriptEditor()
 		_ScriptEditor.selectedMethod = name;
 		_ScriptEditor.methodEditor.setValue(text);
 		_ScriptEditor.methodEditor.selection.clearSelection();
-		//$('#methodtextback').html(_ScriptEditor.formatScript(indentedtext));
+		//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
 		$('#methodtext').find(".ace_content").css('background','url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
 		
 		$('#methodtext').removeAttr('disabled');
@@ -691,7 +691,7 @@ function ScriptEditor()
 		_ScriptEditor.selectedEvent = name;
 		_ScriptEditor.eventEditor.setValue(text);
 		_ScriptEditor.eventEditor.selection.clearSelection();
-		//$('#eventtextback').html(_ScriptEditor.formatScript(text));
+		//$('#eventtextback').text(_ScriptEditor.formatScript(text));
 		
 		$('#eventtext').find(".ace_content").css('background','url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
 		$('#eventtext').removeAttr('disabled');
@@ -754,7 +754,7 @@ function ScriptEditor()
 		{
 			
 			$('#methodlist').append('<div class="scriptchoice" style="'+style+'" id="method'+i+'"></div>');
-			$('#method'+i).html(i);
+			$('#method'+i).text(i);
 			
 			$('#method'+i).qtip({
 			content: "Edit the " + i + " method",
@@ -784,7 +784,7 @@ function ScriptEditor()
 		for(var i in this.currentNode.events)
 		{
 			$('#eventlist').append('<div  style="'+style+'"  id="event'+i+'"></div>');
-			$('#event'+i).html(i);
+			$('#event'+i).text(i);
 			$('#event'+i).attr('event',i);
 			$('#event'+i).qtip({
 			content: "Edit the " + i + " event",
@@ -825,7 +825,7 @@ function ScriptEditor()
 		{
 		
 			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methodtick"></div>');
-			$('#methodtick').html('tick');
+			$('#methodtick').text('tick');
 			$('#methodtick').attr('method','tick');
 			$('#methodtick').qtip({
 			content: "Create the tick method.",
@@ -842,7 +842,7 @@ function ScriptEditor()
 		{
 		
 			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methodinitialize"></div>');
-			$('#methodinitialize').html('initialize');
+			$('#methodinitialize').text('initialize');
 			$('#methodinitialize').attr('method','initialize');
 			$('#methodinitialize').qtip({
 			content: "Create the initialize method.",
@@ -859,7 +859,7 @@ function ScriptEditor()
 		{
 		
 			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methoddeinitialize"></div>');
-			$('#methoddeinitialize').html('deinitialize');
+			$('#methoddeinitialize').text('deinitialize');
 			$('#methoddeinitialize').attr('method','deinitialize');
 			$('#methoddeinitialize').qtip({
 			content: "Create the deinitialize method.",
@@ -876,7 +876,7 @@ function ScriptEditor()
 		{
 		
 			$('#methodlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="methodprerender"></div>');
-			$('#methodprerender').html('prerender');
+			$('#methodprerender').text('prerender');
 			$('#methodprerender').attr('method','prerender');
 			$('#methodprerender').qtip({
 			content: "Create the prerender method.",
@@ -898,7 +898,7 @@ function ScriptEditor()
 			{
 				var name = pointersugs[i];
 				$('#eventlist').append('<div class="scriptchoice" style="'+lightstyle+'" id="event'+name+'"></div>');
-				$('#event'+name).html(name);
+				$('#event'+name).text(name);
 				$('#event'+name).qtip({
 				content: "Create the " +name+" event.",
 				show: { delay: 1000 }
@@ -948,7 +948,7 @@ function ScriptEditor()
 			if((this.MethodChanged || this.EventChanged) && ((node && this.currentNode && node.id != this.currentNode.id) || (!node && this.currentNode)))
 			{
 				
-				$('#ScriptEditorAbandonChanges').html('You have selected a new object, but you have unsaved changes on this script. Do you want to abandon these changes? If you choose not to, your changes will remain in the editor, but the script editor will show properties for the previoiusly selected node, not the newly selected one.');
+				$('#ScriptEditorAbandonChanges').text('You have selected a new object, but you have unsaved changes on this script. Do you want to abandon these changes? If you choose not to, your changes will remain in the editor, but the script editor will show properties for the previoiusly selected node, not the newly selected one.');
 				this.PromptAbandon(function(){this.changeSelection(node)});
 				
 			}else

@@ -67,23 +67,23 @@ function Editor()
 	});
 	
 	$('#statusbar').append('<div id="SceneName" class="statusbarElement" />');
-	$('#SceneName').html('Not Saved');	
+	$('#SceneName').text('Not Saved');	
 	$('#statusbar').append('<div id="StatusSelectedID" class="statusbarElement" />');
-	$('#StatusSelectedID').html('No Selection');
+	$('#StatusSelectedID').text('No Selection');
 	$('#statusbar').append('<div id="StatusPickMode" class="statusbarElement" />');
-	$('#StatusPickMode').html('Pick: None');
+	$('#StatusPickMode').text('Pick: None');
 	$('#statusbar').append('<div id="StatusSnaps" class="statusbarElement" />');
-	$('#StatusSnaps').html('Snaps: 15deg, .5m, .1%');
+	$('#StatusSnaps').text('Snaps: 15deg, .5m, .1%');
 	$('#statusbar').append('<div id="StatusAxis" class="statusbarElement" />');
-	$('#StatusAxis').html('Axis: -1');
+	$('#StatusAxis').text('Axis: -1');
 	$('#statusbar').append('<div id="StatusCoords" class="statusbarElement" />');
-	$('#StatusCoords').html('World Coords');
+	$('#StatusCoords').text('World Coords');
 	$('#statusbar').append('<div id="StatusTransform" class="statusbarElement" />');
-	$('#StatusTransform').html('Move');
+	$('#StatusTransform').text('Move');
 	$('#statusbar').append('<div id="StatusGizmoLocation" class="statusbarElement" />');
-	$('#StatusGizmoLocation').html('[0,0,0]');
+	$('#StatusGizmoLocation').text('[0,0,0]');
 	$('#statusbar').append('<div id="StatusCameraLocation" class="statusbarElement" />');
-	$('#StatusCameraLocation').html('[0,0,0]');		
+	$('#StatusCameraLocation').text('[0,0,0]');		
 	var _CoppiedNodes = [];
 	//	$('#vwf-root').mousedown(function(e){
 	var mousedown = function(e)
@@ -176,7 +176,7 @@ function Editor()
 				this.selectionMarquee.css('z-index','100');
 			}
 			
-			$('#StatusAxis').html('Axis: '+axis);
+			$('#StatusAxis').text('Axis: '+axis);
 			for(var i =0; i < MoveGizmo.children.length;i++)
 			{
 				if(MoveGizmo.children[i].material)
@@ -268,7 +268,7 @@ function Editor()
 				dispName = vwf.getProperty(vwfnode,'DisplayName');
 			if(!dispName)
 				dispName = vwfnode;
-			$('#ContextMenuName').html(dispName || "{none selected}");
+			$('#ContextMenuName').text(dispName || "{none selected}");
 			$('#ContextMenuName').attr('VWFID',vwfnode);
 			
 			$('#ContextMenu').show();
@@ -426,7 +426,7 @@ function Editor()
 				}
 			}
 			document.AxisSelected = -1;
-			$('#StatusAxis').html('Axis: -1');
+			$('#StatusAxis').text('Axis: -1');
 			updateGizmoOrientation(true);
 		}
 		
@@ -483,8 +483,8 @@ function Editor()
 			if(SelectedVWFNodes[s])
 			{
 				vwf_view.kernel.deleteNode(SelectedVWFNodes[s].id);
-				$('#StatusSelectedID').html('No Selection');
-				$('#StatusPickMode').html('Pick: None');
+				$('#StatusSelectedID').text('No Selection');
+				$('#StatusPickMode').text('Pick: None');
 				if(_PrimitiveEditor.isOpen())
 					_PrimitiveEditor.hide();
 				if(_MaterialEditor.isOpen())
@@ -899,9 +899,9 @@ function Editor()
 			var t = new	THREE.Vector3();
 			t.getPositionFromMatrix(MoveGizmo.parent.matrixWorld);
 			var gizpos = [t.x,t.y,t.z];
-			$('#StatusGizmoLocation').html(displayVec(gizpos));	
+			$('#StatusGizmoLocation').text(displayVec(gizpos));	
 			var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
-			$('#StatusCameraLocation').html(displayVec(campos));	
+			$('#StatusCameraLocation').text(displayVec(campos));	
 			var ray = GetWorldPickRay(e);
 
 			
@@ -1963,7 +1963,7 @@ function Editor()
 			_Editor.updateGizmoSize();
 			_Editor.updateGizmoOrientation(false);
 			_Editor.updateBounds();
-			$('#StatusSelectedID').html(SelectedVWFNodes[0].id);
+			$('#StatusSelectedID').text(SelectedVWFNodes[0].id);
 			
 			
 	
@@ -2197,7 +2197,7 @@ function Editor()
 		
 		if(type == Move)
 		{
-			$('#StatusTransform').html('Move');	
+			$('#StatusTransform').text('Move');	
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if((i>=0 && i <=2) || (i>=12 && i<=14))
 				{
@@ -2212,7 +2212,7 @@ function Editor()
 		}
 		if(type == Rotate)
 		{
-			$('#StatusTransform').html('Rotate');	
+			$('#StatusTransform').text('Rotate');	
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if(i>=16 && i <=18)
 				{
@@ -2227,7 +2227,7 @@ function Editor()
 		}
 		if(type == Scale)
 		{
-			$('#StatusTransform').html('Scale');
+			$('#StatusTransform').text('Scale');
 			//SetCoordSystem(LocalCoords);			
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if(i>=19 && i <=25)
@@ -2243,7 +2243,7 @@ function Editor()
 		}
 		if(type == Multi)
 		{
-			$('#StatusTransform').html('Multi');	
+			$('#StatusTransform').text('Multi');	
 			for(var i=0; i < MoveGizmo.children.length;i++){
 				if(i <=15)
 				{
@@ -2480,7 +2480,7 @@ function Editor()
 	var SetSelectMode = function(e)
 	{
 		SelectMode = e;
-		$('#StatusPickMode').html('Pick: ' + e);
+		$('#StatusPickMode').text('Pick: ' + e);
 		if(e == 'Pick')
 			$('#MenuSelectPickicon').css('background',"#9999FF");
 		else
@@ -2499,13 +2499,13 @@ function Editor()
 		CoordSystem = e;
 		if(e == WorldCoords)
 		{
-			$('#StatusCoords').html('World Coords');
+			$('#StatusCoords').text('World Coords');
 			$('#MenuWorldicon').css('background',"#9999FF");
 			$('#MenuLocalicon').css('background',"");
 		}
 		else
 		{
-			$('#StatusCoords').html('Local Coords');
+			$('#StatusCoords').text('Local Coords');
 			$('#MenuWorldicon').css('background',"");
 			$('#MenuLocalicon').css('background',"#9999FF");
 		}
@@ -2520,7 +2520,7 @@ function Editor()
 		MoveSnap = m;
 		ScaleSnap = s;
 		
-		$('#StatusSnaps').html('Snaps: '+(r/0.0174532925)+'deg, '+m+'m, '+s+'%');
+		$('#StatusSnaps').text('Snaps: '+(r/0.0174532925)+'deg, '+m+'m, '+s+'%');
 		
 	}.bind(this);
 	this.GetSelectedVWFID = function()

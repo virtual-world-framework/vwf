@@ -201,7 +201,7 @@ function PrimitiveEditor()
 				if(!node.properties)
 					return;
 				
-				$('#ui-dialog-title-ObjectProperties').html(vwf.getProperty(node.id,'DisplayName') + " Properties");
+				$('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id,'DisplayName') + " Properties");
 				$('#dispName').val(vwf.getProperty(node.id,'DisplayName'));
 				if($('#dispName').val() == "")
 				{
@@ -225,7 +225,7 @@ function PrimitiveEditor()
 				}
 				
 				
-				$('#BaseSectionTitle').html(node.properties.type + ": " + node.id);
+				$('#BaseSectionTitle').text(node.properties.type + ": " + node.id);
 				this.SelectionTransformed(null,node);
 				this.setupEditorData(node,true);
 				this.recursevlyAddModifiers(node);

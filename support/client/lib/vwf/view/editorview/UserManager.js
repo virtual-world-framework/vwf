@@ -162,7 +162,7 @@ function UserManager()
 		//_Editor.SelectObject(null);
 		for(i in profile)
 		{
-			$('#Profile' + i).html(profile[i]);
+			$('#Profile' + i).text(profile[i]);
 		}
 		
 		$('#EditProfile').hide();
@@ -196,23 +196,36 @@ function UserManager()
 					scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(_DataManager.GetProfileForUser(this.PlayerNumber))     }; \n" +
 					          "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.PlayerNumber)     }"]
 					};
-	this.Login = function(profile)
+					
+					
+	this.Login = function(username,password)
 	{
 	
-	
-		
+		password = this.EncryptPassword(password,username);
+			
 		//take ownership of the client connection
-		var name = profile.Username;
 		var S = window.location.pathname;
 		
 		var data = jQuery.ajax({
 				type: 'GET',
-				url: PersistanceServer + "/vwfDataManager.svc/login?S="+S+"&UID="+profile.Username+"&P="+profile.Password+"&CID="+vwf.moniker(),
+				url: PersistanceServer + "/vwfDataManager.svc/login?S="+S+"&UID="+username+"&P="+password+"&CID="+vwf.moniker(),
 				data: null,
 				success: null,
 				async:false,
 				dataType: "json"
 			});
+		
+		var profile = _DataManager.GetProfileForUser(username,password,true);
+			if(!profile)
+			{
+				alert('There is no account with that username');
+				return;
+			}
+			if(profile.constructor == String)
+			{
+				alert(profile);
+				return;
+			}
 		
 		if(data.status != 200)
 		{
@@ -227,7 +240,7 @@ function UserManager()
 		this.PlayerProto.source= profile['Avatar'];
 		
 		
-		if(document.Players && document.Players.indexOf(name) != -1)
+		if(document.Players && document.Players.indexOf(username) != -1)
 		{
 			alert('User is already logged into this space');
 			return;
@@ -237,14 +250,14 @@ function UserManager()
 		var newintersectxy = _Editor.GetInsertPoint();
 		
 		$('#Logon').dialog('close');
-		this.PlayerProto.properties.PlayerNumber = name;
-		this.PlayerProto.properties.owner = name;
+		this.PlayerProto.properties.PlayerNumber = username;
+		this.PlayerProto.properties.owner = username;
         this.PlayerProto.properties.ownerClientID = vwf.moniker();
 		this.PlayerProto.properties.profile = profile;
 		this.PlayerProto.properties.translation = newintersectxy;
-		document[name + 'link'] = null;
-		//this.PlayerProto.id = "player"+name;
-		document["PlayerNumber"] = name;
+		document[username + 'link'] = null;
+		//this.PlayerProto.id = "player"+username;
+		document["PlayerNumber"] = username;
 		var parms = new Array();
 		parms.push(JSON.stringify(this.PlayerProto));
 		
@@ -377,19 +390,9 @@ function UserManager()
 	},
 	"Log In": function()
 	{
-			var profile = _DataManager.GetProfileForUser($('#profilenames').val(),CryptoJS.SHA256($('#password').val()) + '',true);
-			if(!profile)
-			{
-				alert('There is no account with that username');
-				return;
-			}
-			if(profile.constructor == String)
-			{
-				alert(profile);
-				return;
-			}
 			
-			_UserManager.Login(profile);
+			
+			_UserManager.Login($('#profilenames').val(),$('#password').val());
 	},
 	"Cancel" : function(){
 		$('#Logon').dialog('close');
@@ -414,10 +417,22 @@ function UserManager()
 			$('#EditProfileDialog').dialog('close');
 			vwf_view.kernel.setProperty(_UserManager.GetCurrentUserID(),'profile',newprofile);
 	}}});
+	
+	this.salt = 'OBS#$%SGSDF##$%#DA';
+	this.EncryptPassword = function(password,username)
+	{
+			var unencrpytedpassword = password + username + this.salt;
+			for(var i = 0; i < 1000; i ++)
+			{
+				unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
+			}
+			return unencrpytedpassword;
+	}
+	
 	$('#CreateProfileDialog').dialog({autoOpen:false,title:'Create New Profile',modal:true,buttons:{"Save and Log in":function(){ 	
 			
 			var newprofile = {};
-			debugger;
+			
 			var inputs = $('#CreateUserProfiletable tbody tr input');
 			
 			for(var i=0; i<inputs.length;i++)
@@ -441,7 +456,8 @@ function UserManager()
 			}
 			
 			delete newprofile.PasswordConfirm;
-			newprofile.Password = CryptoJS.SHA256(newprofile.Password) + '';
+			var unencryptedPassword = newprofile.Password;
+			newprofile.Password = this.EncryptPassword(newprofile.Password,newprofile.Username)
 			
 			newprofile['Avatar'] = $('#SetProfileAvatar').val();
 			
@@ -455,7 +471,7 @@ function UserManager()
 			
 			_DataManager.saveProfile(newprofile);
 			$('#CreateProfileDialog').dialog('close');
-			_UserManager.Login(_DataManager.GetProfileForUser(newprofile.Username));
+			_UserManager.Login(newprofile.Username,unencryptedPassword);
 	},
 	"Cancel" : function()
 	{

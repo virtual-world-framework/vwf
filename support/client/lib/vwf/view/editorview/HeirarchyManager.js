@@ -302,9 +302,9 @@ function hierarchyManager()
 			
 			var dispName = vwf.getProperty(i.name,'DisplayName');
 			if(dispName)
-				$('#' + thisid).html(dispName);
+				$('#' + thisid).text(dispName);
 			else
-				$('#' + thisid).html(i.name);	
+				$('#' + thisid).text(i.name);	
 			for(var t=0; t<i.depth;t++)
 				$('#' + thisid).prepend('<div style="padding-bottom: 5px;border-left: 1px solid lightgray;margin-right: 10px;margin-left: 0px;display: inline;height: 1.3em;white-space: nowrap;" />');
 				
@@ -328,7 +328,7 @@ function hierarchyManager()
 				var thisid = 'THREEChild' + ToSafeID(i.name) + i.depth + count;
 				$('#THREEChildren').append('<div class="hierarchyItem" style="font-weight:normal;white-space: nowrap;text-overflow: ellipsis;height:1.3em;overflow:hidden;background:#FFFFF8;padding-left:0px;" id="'+thisid+'" />');
 				
-				$('#' + thisid).html(i.name);
+				$('#' + thisid).text(i.name);
 				for(var t=0; t<i.depth;t++)
 					$('#' + thisid).prepend('<div style="padding-bottom: 5px;border-left: 1px solid lightgray;margin-right: 10px;margin-left: 0px;display: inline;height: 1.3em;white-space: nowrap;" />');
 					

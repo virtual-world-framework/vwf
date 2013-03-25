@@ -115,7 +115,8 @@ function DataManager()
 			var UID  = this.getCurrentSession();
 			var data = jQuery.ajax({
 				type: 'GET',
-				url: PersistanceServer + '/vwfDataManager.svc/Profile?UID=' + username + "&P=" + password,
+				url: PersistanceServer + '/vwfDataManager.svc/Profile',
+				//url: PersistanceServer + '/vwfDataManager.svc/Profile?UID=' + username + "&P=" + password,
 				data: null,
 				success: null,
 				async:false,
@@ -347,14 +348,14 @@ function DataManager()
 		if(!UID)
 			return;
 		var P = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName()).Password;
-		//var ret = $.ajax('/vwfDataManager.svc/state?SID='+SID+'&UID='+UID+'&P='+P,{type:"DELETE",async:false});
+
 		
 		
 		
 		if(nodes.length > 0)
 		var ret = jQuery.ajax({
 			type: 'POST',
-			url: PersistanceServer + '/vwfDataManager.svc/state?SID='+SID+'&UID='+UID+'&P='+P,
+			url: PersistanceServer + '/vwfDataManager.svc/state',
 			data: JSON.stringify(nodes),
 			success: null,
 			async:false,
@@ -459,6 +460,14 @@ function DataManager()
 			dataType: "json"
 		});
 		data = JSON.parse(JSON.parse(data.responseText).GetStatesResult);
+		
+		//filter out the app name part of the state
+		for(var i = 0; i < data.length; i++)
+		{
+			var parts = data[i].split('_');
+			data[i] = parts[parts.length -2];
+		}
+		
 		return data;
 	}
 	this.switchInstance = function(instance)
@@ -518,7 +527,7 @@ function DataManager()
 	this.getCurrentSession = function()
 	{
 	   var reg = /\w*?(?=\/#*$)/;
-	   
+	   return window.location.pathname;
 	   
 	   return reg.exec(window.location.pathname)[0];
 	}
@@ -566,7 +575,7 @@ function DataManager()
 		var SID  = this.getCurrentSession();
 		var UID = _UserManager.GetCurrentUserName();
 		var P = _DataManager.GetProfileForUser(_UserManager.GetCurrentUserName()).Password;
-		var ret = $.ajax('/vwfDataManager.svc/state?SID='+SID+'&UID='+UID+'&P='+P,{type:"DELETE",async:false});
+		var ret = $.ajax('/vwfDataManager.svc/state',{type:"DELETE",async:false});
 		if(ret.status == 200)
 		{
 		window.onunload = function(e){};
@@ -608,7 +617,7 @@ function DataManager()
 		for(var i in props){if(props[i] !== undefined && i!='EditorData')vwf.setProperty('index-vwf',i,props[i])};
 		
 		this.currentSceneName = name;
-		$('#SceneName').html(name);
+		$('#SceneName').text(name);
 		//push the scene up to the server. Should at this point be no other client, but the server needs to know about the state
 		vwf.respond("","stateLoaded","",[],{});
 	}
@@ -617,15 +626,15 @@ function DataManager()
 		this.rawdata.scenes[name] = s;
 		this.saveData();
 		this.currentSceneName = name;
-		$('#SceneName').html(name);
+		$('#SceneName').text(name);
 	}
 	this.loadFromServer = function()
 	{
 		
-		var UID  = this.getCurrentSession();
+		var SID  = this.getCurrentSession();
 		var data = jQuery.ajax({
 			type: 'GET',
-			url: PersistanceServer + '/vwfDataManager.svc/State?UID=' + UID,
+			url: PersistanceServer + '/vwfDataManager.svc/State?SID=' + SID,
 			data: null,
 			success: null,
 			async:false,
@@ -642,8 +651,8 @@ function DataManager()
 		}
 		
 		this.loadedScene = data;
-		this.rawdata.scenes[UID] = data;
-		this.loadScene(UID);
+		this.rawdata.scenes[SID] = data;
+		this.loadScene(SID);
 	}
 	this.saveTimer = function()
 	{

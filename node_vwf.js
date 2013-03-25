@@ -432,11 +432,7 @@ function startVWF(){
 		
 		//socket.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
 		
-		
-		//todo: align state names with namespace names. currently state filename is not keyed to application name
-		var instance = (namespace.split('/'));
-		instance = instance[instance.length-2];
-		
+		var instance = namespace;
 		//Get the state and load it.
 		//Now the server has a rough idea of what the simulation is
 		var state = SandboxAPI.getState(instance) || [];

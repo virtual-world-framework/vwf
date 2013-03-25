@@ -97,7 +97,7 @@ function InventoryManager()
 	this.deleteSelectedItem = function()
 	{
 		
-		_DataManager.deleteInventoryItem(document.PlayerNumber,_InventoryManager.selectedItem);
+		_DataManager.deleteInventoryItem(_UserManager.GetCurrentUserName(),_InventoryManager.selectedItem);
 		_InventoryManager.BuildGUI();
 	}
 	$('#InventoryManagerDelete').click(this.deleteSelectedItem);
@@ -216,7 +216,7 @@ function InventoryManager()
 			id = _Editor.GetSelectedVWFNode().id
 		var t = _DataManager.getCleanNodePrototype(id);
 		var name = t.properties.DisplayName || GUID();
-		_DataManager.addInventoryItem(document.PlayerNumber,t,name,'object');
+		_DataManager.addInventoryItem(_UserManager.GetCurrentUserName(),t,name,'object');
 		_InventoryManager.BuildGUI();
 		showSidePanel();
 		window.setTimeout(function(){
@@ -226,7 +226,7 @@ function InventoryManager()
 	}	
 	this.createChild = function(parent,name,proto,uri,callback)
 	{
-		if(document.PlayerNumber == null)
+		if(_UserManager.GetCurrentUserName() == null)
 		{
 			_Notifier.notify('You must log in to participate');
 			return;
@@ -256,7 +256,7 @@ function InventoryManager()
 		t.name = name;
 		t.body = body;
 		t.type = type;
-		_DataManager.addInventoryItem(document.PlayerNumber,t,GUID(),'script');
+		_DataManager.addInventoryItem(_UserManager.GetCurrentUserName(),t,GUID(),'script');
 		this.BuildGUI();
 	}
 	this.resize = function()
@@ -295,7 +295,7 @@ function InventoryManager()
 		$('#InventoryRename').hide();
 		if(_InventoryManager.inRename)
 		{
-			_DataManager.renameInventoryItem(document.PlayerNumber,_InventoryManager.selectedName,$('#InventoryRename').val(),_InventoryManager.selectedType);
+			_DataManager.renameInventoryItem(_UserManager.GetCurrentUserName(),_InventoryManager.selectedName,$('#InventoryRename').val(),_InventoryManager.selectedType);
 			_InventoryManager.BuildGUI();
 			_InventoryManager.inRename = false;
 		}
@@ -308,7 +308,7 @@ function InventoryManager()
 		
 		if(_InventoryManager.inRename)
 		{
-			_DataManager.renameInventoryItem(document.PlayerNumber,_InventoryManager.selectedName,$('#InventoryRename').val(),_InventoryManager.selectedType);
+			_DataManager.renameInventoryItem(_UserManager.GetCurrentUserName(),_InventoryManager.selectedName,$('#InventoryRename').val(),_InventoryManager.selectedType);
 			_InventoryManager.BuildGUI();
 			_InventoryManager.inRename = false;
 		}
@@ -324,7 +324,7 @@ function InventoryManager()
 	this.selectItem = function(name,type)
 	{
 
-		var inventory = _DataManager.getInventory(document.PlayerNumber);
+		var inventory = _DataManager.getInventory(_UserManager.GetCurrentUserName());
 		if(type == 'script')
 		_InventoryManager.selectedItem = inventory.scripts[name];
 		if(type == 'object')
@@ -341,7 +341,7 @@ function InventoryManager()
 		if(e.keyCode == 13)
 		{
 			
-			_DataManager.renameInventoryItem(document.PlayerNumber,_InventoryManager.selectedName,$(this).val(),_InventoryManager.selectedType);
+			_DataManager.renameInventoryItem(_UserManager.GetCurrentUserName(),_InventoryManager.selectedName,$(this).val(),_InventoryManager.selectedType);
 				$('#InventoryRename').hide();
 			_InventoryManager.BuildGUI();
 			_InventoryManager.inRename = false;
@@ -361,7 +361,7 @@ function InventoryManager()
 		
 		$('#InventoryDisplay').append("<div id='InventoryObjects'><div style='font-weight:bold;border-bottom: 1px solid black;'>Objects</div></div>");
 		$('#InventoryDisplay').append("<div id='InventoryScripts'><div style='font-weight:bold;border-bottom: 1px solid black;'>Scripts</div></div>");
-		var inventory = _DataManager.getInventory(document.PlayerNumber);
+		var inventory = _DataManager.getInventory(_UserManager.GetCurrentUserName());
 		if(!inventory) return;
 		for(var i in inventory.objects)
 		{

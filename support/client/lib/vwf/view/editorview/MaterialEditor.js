@@ -298,7 +298,7 @@ function MaterialEditor()
 			$('#'+rootid).append('<img id="'+rootid+'thumb" class="BigTextureThumb"/>');
 			$('#'+rootid+'thumb').attr('src',this.currentMaterial.layers[i].src);
 			$('#'+rootid).append('<div id="'+rootid+'thumbsrc" class="BigTextureThumb" style="overflow:hidden; text-overflow:ellipsis; text-align: center;font-weight: bold;border: none;"/>');
-			$('#'+rootid+'thumbsrc').html(this.currentMaterial.layers[i].src);
+			$('#'+rootid+'thumbsrc').text(this.currentMaterial.layers[i].src);
 			
 			$('#'+rootid+'thumb').attr('layer',i);
 			$('#'+rootid+'thumb').click(function(){
@@ -427,7 +427,7 @@ function MaterialEditor()
 	{
 		var i = this.activeTexture;
 		var rootid = 'Layer'+i+'Settings';
-		$('#'+rootid+"thumbsrc").html(e);
+		$('#'+rootid+"thumbsrc").text(e);
 		$('#'+rootid+"thumb").attr('src',e);
 		$('#Layer'+i+'Settingsthumb').attr('class','');
 		window.setTimeout(function(){		

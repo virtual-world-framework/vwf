@@ -33,15 +33,15 @@ ismobile:navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i) 
 
 getajaxmenu:function($, setting){ //function to fetch external page containing the panel DIVs
 	var $menucontainer=$('#'+setting.contentsource[0]) //reference empty div on page that will hold menu
-	$menucontainer.html("Loading Menu...")
+	$menucontainer.text("Loading Menu...")
 	$.ajax({
 		url: setting.contentsource[1], //path to external menu file
 		async: true,
 		error:function(ajaxrequest){
-			$menucontainer.html('Error fetching content. Server Response: '+ajaxrequest.responseText)
+			$menucontainer.text('Error fetching content. Server Response: '+ajaxrequest.responseText)
 		},
 		success:function(content){
-			$menucontainer.html(content)
+			$menucontainer.text(content)
 			ddsmoothmenu.buildmenu($, setting)
 		}
 	})
