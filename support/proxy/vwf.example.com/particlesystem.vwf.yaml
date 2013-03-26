@@ -123,6 +123,13 @@ properties:
   
   additive:
   
+  ## discard pixels with alpha less than value
+  ##
+  ## @name particlesystem.vwf#alphaTest
+  ## @property
+  
+  alphaTest:
+  
   ## alpha value for particles
   ##
   ## @name particlesystem.vwf#opacity

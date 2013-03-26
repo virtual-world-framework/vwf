@@ -17,7 +17,7 @@ function DataManager()
 		this.rawdata = {scenes:{},profiles:{},inventory:{}};
 	
 	$(document.body).append("<div id='NewInstanceDialog'><input type='text' id='NewInstanceName' style='width: 90%;border-radius: 6px;font-size: 1.6em;'/><div style='margin-top: 2em;color: grey;font-size: 0.8em;'>The name of the instance must be a 16 letter word with no spaces and only alphanumeric characters. The string you enter above will be modified to enforce these rules.</div></div>");	
-	
+	$(document.body).append("<div id='CloneInstanceDialog'><input type='text' id='CloneInstanceName' style='width: 90%;border-radius: 6px;font-size: 1.6em;'/><div style='margin-top: 2em;color: grey;font-size: 0.8em;'>The name of the instance must be a 16 letter word with no spaces and only alphanumeric characters. The string you enter above will be modified to enforce these rules.</div></div>");	
 	$(document.body).append("<div id='DeleteInstanceDialog'><div style='margin-top: 2em;color: grey;font-size: 0.8em;'>You must be the owner of an instance to delete it. This world will cease to exist, and the page will load a blank, unsaved world under this name. Simply navigate away after the reload if you do not wish to build in this world again.</div></div>");	
 	
 	
@@ -38,6 +38,38 @@ function DataManager()
 	}
 	}
 	);
+	
+	
+	$('#CloneInstanceDialog').dialog({title:"Clone Instance",modal:true,autoOpen:false,buttons:{
+	Clone:function(){
+		
+		$('#CloneInstanceDialog').dialog('close');
+		var name = _DataManager.CleanInstanceName($('#CloneInstanceName').val());
+		name = window.location.pathname.replace(/\//g,'_').replace(/_[a-zA-Z0-9]*?_$/,'')+'_'+name+'_';
+		_DataManager.saveToServer();
+		$.ajax({url:'/vwfDataManager.svc/clonestate?SID2='+name,success:function(){
+		
+				window.onbeforeunload = '';
+				window.onunload = '';
+				window.location.pathname = name.replace(/_/g,'/');
+		
+		},
+		error:function(e)
+		{
+		   _Notifier.alert(e.responseText);
+		}
+		}
+		);
+
+	},
+	Cancel:function()
+	{
+		$('#CloneInstanceDialog').dialog('close');
+	}
+	}
+	}
+	);
+	
 	
 	
 	$('#DeleteInstanceDialog').dialog({title:"Delete Instance",modal:true,autoOpen:false,buttons:{
@@ -568,6 +600,10 @@ function DataManager()
 	this.DeleteInstance = function()
 	{
 		$('#DeleteInstanceDialog').dialog('open');
+	}
+	this.CloneInstance = function()
+	{
+		$('#CloneInstanceDialog').dialog('open');
 	}
 	this.DeleteInstance_internal = function()
 	{

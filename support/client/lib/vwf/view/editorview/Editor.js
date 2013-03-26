@@ -84,7 +84,7 @@ function Editor()
 	$('#StatusGizmoLocation').text('[0,0,0]');
 	$('#statusbar').append('<div id="StatusCameraLocation" class="statusbarElement" />');
 	$('#StatusCameraLocation').text('[0,0,0]');		
-	var _CoppiedNodes = [];
+	var _CopiedNodes = [];
 	//	$('#vwf-root').mousedown(function(e){
 	var mousedown = function(e)
 	{	
@@ -221,9 +221,9 @@ function Editor()
 	{
 		
 	}.bind(this);
-	this.ThreeJSPick = function(campos,ray, ignoreNodes)
+	this.ThreeJSPick = function(campos,ray, options)
     {
-		var ret = findscene().CPUPick(campos,ray);
+		var ret = findscene().CPUPick(campos,ray,options);
 		return ret;
     }
 	this.ShowContextMenu = function(e)
@@ -1551,7 +1551,7 @@ function Editor()
 	}
 	var Copy = function(nodes)
 	{
-		_CoppiedNodes = [];
+		_CopiedNodes = [];
 		var tocopy = SelectedVWFNodes;
 		if(nodes)
 		tocopy = nodes;
@@ -1573,17 +1573,17 @@ function Editor()
 		//	t.properties.translation[1] = gizoffset[1];
 		//	t.properties.translation[2] = gizoffset[2];
 			
-			_CoppiedNodes.push(t);
+			_CopiedNodes.push(t);
 		}
 	}.bind(this);
 
 	var Paste = function(useMousePoint)
 	{
 		_Editor.SelectObject(null);
-		for(var i = 0; i < _CoppiedNodes.length; i++)
+		for(var i = 0; i < _CopiedNodes.length; i++)
 		{
-			var t = _CoppiedNodes[i];
-			debugger;
+			var t = _CopiedNodes[i];
+			t = _DataManager.getCleanNodePrototype(t);
 			var campos = [_Editor.findcamera().position.x,_Editor.findcamera().position.y,_Editor.findcamera().position.z];
 				
 				var newintersectxy;
@@ -1743,7 +1743,8 @@ function Editor()
 				SelectionBounds[i].updateMatrixWorld(true);
 				SelectionBounds[i].children[0].material = new THREE.MeshBasicMaterial();
 				SelectionBounds[i].children[0].material.wireframe = true;
-				SelectionBounds[i].children[0].renderDepth = 10000 -3;
+				SelectionBounds[i].children[0].material.transparent = true;
+				SelectionBounds[i].children[0].renderDepth = -10000 -3;
 				SelectionBounds[i].children[0].material.depthTest = false;
 				SelectionBounds[i].children[0].material.depthWrite = false;
 				SelectionBounds[i].children[0].material.color.r = color[0];
@@ -2128,7 +2129,7 @@ function Editor()
 			MoveGizmo.children[i].material.originalColor = new THREE.Color();
 			var c = MoveGizmo.children[i].material.color;
 			MoveGizmo.children[i].material.originalColor.setRGB(c.r,c.g,c.b);
-			MoveGizmo.children[i].renderDepth = 10000 - i;
+			MoveGizmo.children[i].renderDepth = -10000 - i;
 			MoveGizmo.children[i].material.depthTest = false;
 			MoveGizmo.children[i].material.depthWrite = false;
 			MoveGizmo.children[i].material.transparent = true;
@@ -2921,6 +2922,7 @@ function Editor()
 		this.SelectionBoundsContainer = new THREE.Object3D();
 		this.SelectionBoundsContainer.name = "SelectionBoundsContainer";
 		this.findscene().add(this.SelectionBoundsContainer);
+		this.SelectionBoundsContainer.InvisibleToCPUPick = true;
 		this.buildContextMenu();
 		
 		this.mouseDownScreenPoint = [0,0];

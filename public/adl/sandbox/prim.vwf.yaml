@@ -78,6 +78,8 @@ scripts:
     this.setupMaterial = function(value)
     {
         
+        if(!this.GetMesh())
+            return;
         this.GetMesh().lastMatDef = value;
         var currentmat = this.GetMesh().material;
         _Editor.setMaterialByDef(currentmat,value);
@@ -91,31 +93,106 @@ scripts:
     {
         return this.mesh;
     }
-    this.updateSelf = function()
+    this.backupMesh = function()
     {
         
-        
-        var lastmatdef = this.mesh.lastMatDef || this.materialDef;
-        var lastmat = this.mesh.material;
-        var parent = this.mesh.parent;
-        var rotation = this.mesh.rotation;
-        parent.remove(this.mesh);
-        this.mesh = new THREE.Mesh(this.Build(),lastmat);
-        this.mesh.castShadow = true;
-        this.mesh.receiveShadow = true;
-        this.mesh.rotation = rotation;
-        this.mesh.lastMatDef = lastmatdef;
+        if(!this.GetMesh())
+            return;
+        var geometry = this.GetMesh().geometry;
+        if(geometry.vertices)
+            geometry.originalPositions = this.copyArray([],geometry.vertices);
+        if(geometry.faces)
+            geometry.originalFaces = this.copyArray([],geometry.faces);
+        if(geometry.normals)
+            geometry.originalNormals = this.copyArray([],geometry.normals);
        
-        parent.add(this.mesh);
     }
-    this.dirtyStack = function()
+    this.copyArray = function(arrNew, arrOld)
     {
-        this.updateStack();
+        if(!arrNew)
+            arrNew = [];
+        arrNew.length = 0;
+        for(var i =0; i< arrOld.length; i++)
+            arrNew.push(arrOld[i].clone());
+        return arrNew;
     }
-    this.updateStack = function()
+    this.restoreMesh = function()
     {
         
-        this.updateSelf();
+      if(!this.GetMesh())
+            return;
+        var geometry = this.GetMesh().geometry;
+        if(!geometry)
+            return;
+        if(geometry.originalPositions)
+             this.copyArray(geometry.vertices,geometry.originalPositions);
+        if(geometry.originalNormals)    
+             this.copyArray(geometry.normals,geometry.originalNormals);
+        if(geometry.originalFaces)
+             this.copyArray(geometry.faces,geometry.originalFaces);
+        
+        geometry.verticesNeedUpdate = true;
+        geometry.normalsNeedUpdate = true;
+        geometry.facesNeedUpdate = true;
+        
+    }
+    this.updateSelf = function(rebuild)
+    {
+        
+        if(!this.mesh || rebuild)
+        {
+          
+           var lastmat;
+           var parent;
+           var rotation = new THREE.Vector3();
+           if(this.mesh && this.mesh.material)
+           {
+                lastmat = this.mesh.material
+                parent = this.mesh.parent;
+                if(!parent)
+                    return;
+                parent.remove(this.mesh);
+                rotation = this.mesh.rotation;
+           }
+           else
+           {
+                return;
+                lastmat = _Editor.getDefaultMaterial();  
+                parent = _Editor.findviewnode(this.id);
+           }                
+           this.mesh = new THREE.Mesh(this.Build(),lastmat);
+           this.mesh.rotation = rotation;
+           this.mesh.castShadow = true;
+           this.mesh.receiveShadow = true;
+           parent.add(this.mesh);
+           this.backupMesh();
+        }
+        else
+        {
+            this.restoreMesh();   
+        }
+        this.mesh.geometry.dirtyMesh = true;
+    //    var lastmatdef = this.mesh.lastMatDef || this.materialDef;
+    //    var lastmat = this.mesh.material;
+    //    var parent = this.mesh.parent;
+    //    var rotation = this.mesh.rotation;
+    //    parent.remove(this.mesh);
+    //    this.mesh = new THREE.Mesh(this.Build(),lastmat);
+    //    this.mesh.castShadow = true;
+    //    this.mesh.receiveShadow = true;
+    //    this.mesh.rotation = rotation;
+    //    this.mesh.lastMatDef = lastmatdef;
+       
+    //    parent.add(this.mesh);
+    }
+    this.dirtyStack = function(rebuild)
+    {
+        this.updateStack(rebuild);
+    }
+    this.updateStack = function(rebuild)
+    {
+        
+        this.updateSelf(rebuild);
         for(var i in this.children)
         {
             return vwf.callMethod(this.children[i].id,'updateStack');

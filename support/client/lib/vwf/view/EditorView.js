@@ -624,6 +624,9 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#MenuDeleteInstance').click(function(e){
 			_DataManager.DeleteInstance();
 		});
+		$('#MenuCloneInstance').click(function(e){
+			_DataManager.CloneInstance();
+		});
 		
 		
 		$('#MenuCreateLightPoint').click(function(e){

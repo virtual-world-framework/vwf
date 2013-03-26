@@ -21,13 +21,13 @@ properties:
             this.radius = value;
             this.radius = Math.max(this.radius,.001);
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   height:
     set: |
             this.height = value;
             this.height = Math.max(this.height,.001);
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   heightsegments:
     set: |
             this.heightsegments = value;
@@ -38,7 +38,7 @@ properties:
             this.heightsegments = this.heightsegments==9?11:this.heightsegments;
             this.heightsegments = this.heightsegments==10?11:this.heightsegments;
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   radialsegments:
     set: |
             this.radialsegments = value;
@@ -46,12 +46,12 @@ properties:
             this.radialsegments = Math.min(this.radialsegments,20);
             this.radialsegments = Math.floor(this.radialsegments);
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   base2pivot:
     set: |
             this.base2pivot = value;
             if(this._initialized == true)
-            this.dirtyStack();            
+            this.dirtyStack(true);            
   EditorData:
     radius:
       displayname: radius
@@ -97,7 +97,7 @@ scripts:
     this.initialize = function(){
         
         
-        if(this.uri == "cylinder.vwf")
+        if(this.id == "cylinder-vwf")
             return;
 
        
@@ -113,7 +113,7 @@ scripts:
        this.mesh.rotation.x = Math.PI/2;
       
        this._initialized = true;
-       this.dirtyStack();
+       this.dirtyStack(true);
        if(this.materialDef)
        this.setupMaterial(this.materialDef);             
     }

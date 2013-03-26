@@ -228,6 +228,46 @@ function checkOwner(node,name)
 function strEndsWith(str, suffix) {
     return str.match(suffix+"$")==suffix;
 }
+
+function isPointerEvent(message)
+{
+	if(!message) return false;
+	if(!message.member) return false;
+	
+	return (message.member == 'pointerMove' || 
+			   message.member == 'pointerHover' ||
+			   message.member == 'pointerEnter' ||
+			   message.member == 'pointerLeave' ||
+			   message.member == 'pointerOver' ||
+			   message.member == 'pointerOut' ||
+			   message.member == 'pointerUp' ||
+			   message.member == 'pointerDown' ||
+			   message.member == 'pointerWheel'
+			   )
+
+}
+//change up the ID of the loaded scene so that they match what the client will have
+		var fixIDs = function(node)
+		{
+			if(node.children)
+			var childnames = {};
+			for(var i in node.children)
+			{
+				childnames[i] = null;
+			}
+			for(var i in childnames)
+			{
+				var childComponent = node.children[i];
+				var childName = i;
+				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
+				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
+				childComponent.id = childID;
+				node.children[childID] = childComponent;
+				delete node.children[i];
+				fixIDs(childComponent);
+			}
+		}
+		
 //Start the VWF server
 function startVWF(){
 
@@ -375,6 +415,34 @@ function startVWF(){
 	
 	//create the server
 	
+	//shell interface defaults
+	var stdin = process.openStdin();
+	stdin.on('data', function(chunk) {
+		if(!chunk) return;
+		chunk = chunk + '  ';
+		chunk = chunk.replace(/\r\n/g,'');
+		var commands = chunk.split( ' ');
+		
+		if(commands[0] && commands[0] == 'show' && commands[1])
+		{
+			if(commands[1] == 'instances')
+			{
+				var keys = Object.keys(global.instances);
+				for(var i in keys)
+					console.log(keys[i]);
+			}
+			if(commands[1] == 'clients')
+			{
+				for(var i in global.instances)
+				{
+					var keys = Object.keys(global.instances[i].clients);
+					for(var j in keys)
+					   console.log(keys[j]);
+				}
+			}
+		}
+	});
+
 	var p = process.argv.indexOf('-p');
 	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
 	
@@ -382,6 +450,10 @@ function startVWF(){
 	var datapath = p >= 0 ? process.argv[p+1] : "C:\\VWFData";
 	SandboxAPI.setDataPath(datapath);
 	
+	p = process.argv.indexOf('-l');
+	global.logLevel = p >= 0 ? process.argv[p+1] : 2;
+	
+	console.log('LogLevel = ' +  global.logLevel);
 	var srv = http.createServer(OnRequest).listen(port);
 	console.log('Serving on port ' + port);
 	
@@ -405,6 +477,17 @@ function startVWF(){
 		global.instances[namespace].clients = {};
 		global.instances[namespace].time = 0.0;
 		global.instances[namespace].state = {};
+		
+		//create or open the log for this instance
+		var log = fs.createWriteStream(SandboxAPI.getDataPath()+'//Logs/'+namespace.replace(/[\\\/]/g,'_'), {'flags': 'a'});
+		global.instances[namespace].Log = function(message,level)
+		{
+			if(global.logLevel >= level)
+			{
+				log.write(message +'\n');
+				console.log(message +'\n');
+			}
+		}
 		//keep track of the timer for this instance
 		global.instances[namespace].timerID = setInterval(function(){
 		
@@ -471,27 +554,7 @@ function startVWF(){
 			}
 		}
 		
-		//change up the ID of the loaded scene so that they match what the client will have
-		var fixIDs = function(node)
-		{
-			if(node.children)
-			var childnames = {};
-			for(var i in node.children)
-			{
-				childnames[i] = null;
-			}
-			for(var i in childnames)
-			{
-				var childComponent = node.children[i];
-				var childName = i;
-				var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
-				childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
-				childComponent.id = childID;
-				node.children[childID] = childComponent;
-				delete node.children[i];
-				fixIDs(childComponent);
-			}
-		}
+		
 		
 		//only really doing this to keep track of the ownership
 		for(var i =0; i < state.length-1; i++)
@@ -504,15 +567,10 @@ function startVWF(){
 			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
 			fixIDs(state[i]);
 		}
-		console.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
-		
-		
+		//console.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
 		
 		//this is a blank world, go ahead and load the default
 		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.instances[namespace].time});
-		
-		
-		
 		socket.pending = false;
 	  }
 	  //this client is not the first, we need to get the state and mark it pending
@@ -521,7 +579,7 @@ function startVWF(){
 		var firstclient = Object.keys(global.instances[namespace].clients)[0];
 		firstclient = global.instances[namespace].clients[firstclient];
 		firstclient.emit('message',{"action":"getState","respond":true,"time":global.instances[namespace].time});
-		console.log('GetState from Client');
+		global.instances[namespace].Log('GetState from Client',2);
 		socket.pending = true;
 	  }
 	  
@@ -531,12 +589,30 @@ function startVWF(){
 		    var message = JSON.parse(msg);
 			//console.log(message);
 			message.client = socket.id;
+			
+			
+			//Log all message if level is high enough
+		   if(isPointerEvent(message))
+		   {
+				global.instances[namespace].Log(JSON.stringify(message), 4);
+		   }
+		   else
+		   {
+				global.instances[namespace].Log(JSON.stringify(message), 3);
+		   }
+			
+				
+				
 			var sendingclient = global.instances[namespace].clients[socket.id];
 			
 			//do not accept messages from clients that have not been claimed by a user
 			//currently, allow getstate from anonymous clients
 			if(!sendingclient.loginData && message.action != "getState")
 			{
+				if(isPointerEvent(message))
+					global.instances[namespace].Log('DENIED ' + JSON.stringify(message), 4);
+				else
+					global.instances[namespace].Log('DENIED ' + JSON.stringify(message), 2);				
 				return;
 			}
 			//We'll only accept a setProperty if the user has ownership of the object
@@ -545,7 +621,7 @@ function startVWF(){
 			      var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
-					console.log('server has no record of ' + message.node);
+					global.instances[namespace].Log('server has no record of ' + message.node,1);
 					return;
 				  }
 				  if(checkOwner(node,sendingclient.loginData.UID))
@@ -553,11 +629,11 @@ function startVWF(){
 						//We need to keep track internally of the properties
 						//mostly just to check that the user has not messed with the ownership manually
 						node.properties[message.member] = message.parameters[0];
-						console.log("Set " +message.member +" of " +node.id+" to " + message.parameters[0]);
+						global.instances[namespace].Log("Set " +message.member +" of " +node.id+" to " + message.parameters[0],1);
 				  }
 				  else
 				  {
-					console.log('permission denied for modifying ' + node.id);
+					global.instances[namespace].Log('permission denied for modifying ' + node.id,1);
 					return;
 				  }
 			}
@@ -568,16 +644,16 @@ function startVWF(){
 			      var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
-					console.log('server has no record of ' + message.node);
+					global.instances[namespace].Log('server has no record of ' + message.node,1);
 					return;
 				  }
 				  if(checkOwner(node,sendingclient.loginData.UID))
 				  {	
-						console.log("Do " +message.action +" of " +node.id);
+						global.instances[namespace].Log("Do " +message.action +" of " +node.id,1);
 				  }
 				  else
 				  {
-					console.log('permission denied for '+message.action+' on ' + node.id);
+					global.instances[namespace].Log('permission denied for '+message.action+' on ' + node.id,1);
 					return;
 				  }
 			}
@@ -587,18 +663,18 @@ function startVWF(){
 				  var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
-					console.log('server has no record of ' + message.node);
+					global.instances[namespace].Log('server has no record of ' + message.node,1);
 					return;
 				  }
 				  if(checkOwner(node,sendingclient.loginData.UID))
 				  {	
 						//we do need to keep some state data, and note that the node is gone
 						global.instances[namespace].state.deleteNode(message.node)
-						console.log("deleted " +node.id);
+						global.instances[namespace].Log("deleted " +node.id,1);
 				  }
 				  else
 				  {
-					console.log('permission denied for deleting ' + node.id);
+					global.instances[namespace].Log('permission denied for deleting ' + node.id,1);
 					return;
 				  }
 			}
@@ -606,11 +682,11 @@ function startVWF(){
 			//Note that you now must share a scene with a user!!!!
 			if(message.action == "createChild")
 			{
-				  console.log(message);
+				  global.instances[namespace].Log(message,1);
 				  var node = global.instances[namespace].state.findNode(message.node);
 				  if(!node)
 				  {
-					console.log('server has no record of ' + message.node);
+					global.instances[namespace].Log('server has no record of ' + message.node,1);
 					return;
 				  }
 				  //Keep a record of the new node
@@ -624,11 +700,11 @@ function startVWF(){
 						if(!node.children) node.children = {};
 						node.children[childID] = childComponent;
 						fixIDs(node.children[childID]);
-						console.log("created " + childID);
+						global.instances[namespace].Log("created " + childID,1);
 				  }
 				  else
 				  {
-					console.log('permission denied for creating child ' + node.id);
+					global.instances[namespace].Log('permission denied for creating child ' + node.id,1);
 					return;
 				  }
 			}
@@ -640,9 +716,9 @@ function startVWF(){
 				//if the message was get state, then fire all the pending messages after firing the setState
 				if(message.action == "getState")
 				{
-					console.log('Got State');
+					global.instances[namespace].Log('Got State',1);
 					var state = message.result;
-					console.log(state);
+					global.instances[namespace].Log(state,2);
 					client.emit('message',{"action":"setState","parameters":[state],"time":global.instances[namespace].time});
 					client.pending = false;
 					for(var j = 0; j < client.pendingList.length; j++)

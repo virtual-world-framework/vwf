@@ -201,7 +201,13 @@ function UserManager()
 	this.Login = function(username,password)
 	{
 	
-		password = this.EncryptPassword(password,username);
+		//clear this. No reason to have it saved in the dom
+		$('#profilenames').val('');
+		$('#password').val('');
+		$('#SetProfilePassword').val('');
+		$('#SetProfileUsername').val('');
+		$('#SetProfilePasswordConfirm').val('');
+		password = _UserManager.EncryptPassword(password,username);
 			
 		//take ownership of the client connection
 		var S = window.location.pathname;
@@ -237,7 +243,8 @@ function UserManager()
 		$('#MenuLogOuticon').css('background',"");
         $('#MenuLogIn').attr('disabled','disabled');
 		$('#MenuLogOut').removeAttr('disabled');
-		this.PlayerProto.source= profile['Avatar'];
+		//disabled until 
+		this.PlayerProto.source= 'usmale.dae';//profile['Avatar'];
 		
 		
 		if(document.Players && document.Players.indexOf(username) != -1)
@@ -457,9 +464,9 @@ function UserManager()
 			
 			delete newprofile.PasswordConfirm;
 			var unencryptedPassword = newprofile.Password;
-			newprofile.Password = this.EncryptPassword(newprofile.Password,newprofile.Username)
+			newprofile.Password = _UserManager.EncryptPassword(newprofile.Password,newprofile.Username)
 			
-			newprofile['Avatar'] = $('#SetProfileAvatar').val();
+			newprofile['Avatar'] = 'usmale.dae';//$('#SetProfileAvatar').val();
 			
 			//var userprofile = _DataManager.GetProfileForUser(newprofile.Username)
 			var users = _DataManager.GetUsers();

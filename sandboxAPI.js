@@ -1,6 +1,6 @@
 var libpath = require('path'),
     http = require("http"),
-    fs = require('fs'),
+    fs = require('fs-extra'),
     url = require("url"),
     mime = require('mime'),
 	sio = require('socket.io'),
@@ -29,6 +29,17 @@ function GUID()
     }
 	
 var datapath = 'C:\\VWFData';
+
+//simple functio to write a response
+function respond(response,status,message)
+{
+	response.writeHead(status, {
+					"Content-Type": "text/plain"
+				});
+	response.write(message + "\n");
+	console.log(message);
+	response.end();
+}
 //Just serve a simple file
 function ServeFile(filename,response,URL, JSONHeader)
 {
@@ -40,11 +51,7 @@ function ServeFile(filename,response,URL, JSONHeader)
 			
 		fs.readFile(filename, datatype, function (err, file) {
 			if (err) {
-				response.writeHead(500, {
-					"Content-Type": "text/plain"
-				});
-				response.write(err + "\n");
-				response.end();
+				respond(response,500,err);
 				return;
 			}
  
@@ -74,12 +81,7 @@ function ServeProfile(filename,response,URL, JSONHeader)
 			
 			//the file could not be read
 			if (err) {
-				response.writeHead(400, {
-					"Content-Type": "text/plain"
-				});
-				response.write("Profile not found" + "\n");
-				console.log('Profile not found ' + filename);
-				response.end();
+				respond(response,400,'Profile Not Found');
 				return;
 			}
  
@@ -93,19 +95,17 @@ function ServeProfile(filename,response,URL, JSONHeader)
 				
 				
 				var o = {};
-				o[JSONHeader] = file;
-				file.Password = '';
+				profile.Password = '';
+				o[JSONHeader] = JSON.stringify(profile);
+				
+				
 				response.write(JSON.stringify(o), "utf8");			
 				response.end();
 				console.log('Served Profile ' + filename);
 			}
 			else
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when getting Profile ' + filename);
+				respond(response,401,'Incorrect password when getting Profile ' + filename);
 				response.end();
 			}
 		});
@@ -127,49 +127,32 @@ function Login(filename,response,URL, JSONHeader)
 			
 			if(!UID || !password || !instance || !cid)
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Login Format incorrect", "utf8");
-				response.end();
+				respond(response,401,'Login Format incorrect');
 				return;
 			}
 			if(!global.instances || !global.instances[instance])
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("instance does not exist", "utf8");
-				response.end();
+				respond(response,401,'instance does not exist');
 				return;
 			}
 			if(!global.instances[instance].clients[cid])
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Client is not connected to instance", "utf8");
-				response.end();
+				
+				respond(response,401,'Client is not connected to instance');
 				return;
 			}
 			if(global.instances[instance].clients[cid].loginData)
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Client is already logged in", "utf8");
-				response.end();
+
+				respond(response,401,'Client is already logged in');
 				return;
 			}
 			for (var i in global.instances[instance].clients)
 			{
 				if(global.instances[instance].clients[i].loginData && global.instances[instance].clients[i].loginData.UID == UID)
 				{
-					response.writeHead(401, {
-						"Content-Type":  "text/plain"
-					});
-					response.write("User is already logged in", "utf8");
-					response.end();
+				
+					respond(response,401,'User is already logged in');
 					return;
 				}
 			}
@@ -177,12 +160,8 @@ function Login(filename,response,URL, JSONHeader)
 			
 				//the file could not be read
 				if (err) {
-					response.writeHead(401, {
-						"Content-Type": "text/plain"
-					});
-					response.write("Profile not found" + "\n");
-					console.log('Profile not found ' + filename);
-					response.end();
+
+					respond(response,401,'Profile not found');
 					return;
 				}
 	 
@@ -210,12 +189,9 @@ function Login(filename,response,URL, JSONHeader)
 				}
 				else
 				{
-					response.writeHead(401, {
-						"Content-Type":  "text/plain"
-					});
-					response.write("Password not correct", "utf8");
-					console.log('Incorrect password when getting Profile ' + filename);
-					response.end();
+					
+					respond(response,401,'Incorrect password when getting Profile ' + filename);
+					
 				}
 				return;
 			});
@@ -230,38 +206,26 @@ function Logout(filename,response,URL, JSONHeader)
 			
 			if(!UID || !password || !instance || !cid)
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Logout Format incorrect", "utf8");
-				response.end();
+			
+				respond(response,401,"Logout Format incorrect");
 				return;
 			}
 			if(!global.instances || !global.instances[instance])
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("instance does not exist", "utf8");
-				response.end();
+				
+				respond(response,401,"instance does not exist");
 				return;
 			}
 			if(!global.instances[instance].clients[cid])
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Client is not connected to instance", "utf8");
-				response.end();
+			
+				respond(response,401,"Client is not connected to instance");
 				return;
 			}
 			if(!global.instances[instance].clients[cid].loginData)
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Client is not logged in", "utf8");
-				response.end();
+				
+				respond(response,401,"Client is not logged in");
 				return;
 			}
 			if(global.instances[instance].clients[cid].loginData.UID == UID && global.instances[instance].clients[cid].loginData.Password == password)
@@ -276,11 +240,8 @@ function Logout(filename,response,URL, JSONHeader)
 				return;
 			}else
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Name or password incorrect", "utf8");
-				response.end();
+			
+				respond(response,401,"Name or password incorrect");
 				return;
 			
 			}
@@ -312,11 +273,8 @@ function SaveProfile(URL,filename,data,response)
 			
 			//the file could not be read
 			if (err) {
-				response.writeHead(500, {
-					"Content-Type": "text/plain"
-				});
-				response.write(err + "\n");
-				response.end();
+				
+				respond(response,500,err);
 				return;
 			}
  
@@ -331,12 +289,9 @@ function SaveProfile(URL,filename,data,response)
 				console.log('Saved Profile ' + filename);
 			}else
 			{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when saving Profile ' + filename);
-				response.end();
+				
+				respond(response,401,'Incorrect password when saving Profile ' + filename);
+				
 			}
 		});
 	}
@@ -431,12 +386,7 @@ function SaveAsset(URL,filename,data,response)
 		//Did no supply a good name password pair
 		if(!e)
 		{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when saving Asset ' + filename);
-				response.end();
+				respond(response,401,'Incorrect password when saving Asset ' + filename);
 				return;
 		}else
 		{
@@ -458,12 +408,8 @@ function SaveAsset(URL,filename,data,response)
 						
 						//trying to overwrite existing file that user is not author of
 						if(!e)
-						{
-							response.writeHead(401, {
-								"Content-Type":  "text/plain"
-							});
-							response.write("Permission denied to overwrite asset", "utf8");
-							console.log('Permission denied to overwrite asset ' + filename);
+						{							
+							respond(response,401,'Permission denied to overwrite asset ' + filename);
 							return;
 						}else
 						{
@@ -493,12 +439,8 @@ function DeleteProfile(URL,filename,response)
 		//Did no supply a good name password pair
 		if(!e)
 		{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when deleting state ' + filename);
-				response.end();
+				
+				respond(response,401,'Incorrect password when deleting state ' + filename);
 				return;
 		}
 		else
@@ -506,24 +448,15 @@ function DeleteProfile(URL,filename,response)
 				//the asset is new
 				if(!fs.existsSync(filename))
 				{
-					response.writeHead(401, {
-								"Content-Type":  "text/plain"
-					});
-					response.write("cant delete profile that does not exist", "utf8");
-					response.end();
-					console.log('cant delete profile that does not exist' + filename);
+					
+					respond(response,401,'cant delete profile that does not exist' + filename);
 					return;
 				}
 				else
 				{
 					fs.unlink(filename);
-					response.writeHead(200, {
-						"Content-Type":  "text/plain"
-					});
-					response.write("Deleted profile", "utf8");
-					response.end();
-					console.log('Deleted profile ' + filename);
-					return;
+					respond(response,200,'Deleted profile '  + filename);
+					
 					return;			
 				}
 		}
@@ -545,6 +478,79 @@ var deleteFolderRecursive = function(path) {
   }
 };
 
+function strBeginsWith(str, prefix) {
+    return str.match('^' + prefix)==prefix;
+}
+function strEndsWith(str, suffix) {
+    return str.match(suffix+"$")==suffix;
+}
+
+//Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
+function CopyState(URL,filename,newname,response)
+{
+	
+	var UID = URL.query.UID || URL.loginData.UID;
+	var P = URL.query.P || URL.loginData.Password;
+	
+	if(!UID || !P)
+	{
+		
+		respond(response,401,'No Credentials to copy state to ' + newname);
+		return;
+	}
+	
+	newname = newname.replace(/[\\\/]/g,'_');
+	var appname = filename.replace(/_[a-zA-Z0-9]*?_$/,'');
+	console.log(appname);
+	var stateID = newname.match(/_([a-zA-Z0-9]*?)_$/)[1];
+	if(!strBeginsWith(newname,appname) || !strEndsWith(newname,'_') || !stateID || stateID.length != 16)
+	{
+		
+		respond(response,401,'Bad new name ' + newname);
+		return;
+	}
+	
+	filename = datapath+"\\states\\" + filename;
+	newname = datapath+"\\states\\" + newname;
+
+	
+	CheckPassword(UID,P,function(e){
+	
+		//Did not supply a good name password pair
+		if(!e)
+		{
+				
+				respond(response,401,'Incorrect password when deleting state ' + filename);
+				return;
+		}
+		else
+		{
+				//the asset is new
+				if(!fs.existsSync(filename))
+				{
+					
+					respond(response,401,'cant delete state that does not exist' + filename);
+					return;
+				}
+				else
+				{
+					if(fs.existsSync(newname))
+					{
+						
+						respond(response,500,'new state name in use' + filename);
+						return;
+					}
+					else
+					{
+						fs.copy(filename,newname,function()
+						{
+							respond(response,200,"Copied state " + filename + " to " + newname);
+						});
+					}
+				}
+		}
+	});
+}
 
 //Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
 function DeleteState(URL,filename,response)
@@ -556,12 +562,8 @@ function DeleteState(URL,filename,response)
 		//Did no supply a good name password pair
 		if(!e)
 		{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when deleting state ' + filename);
-				response.end();
+				
+				respond(response,401,'Incorrect password when deleting state ' + filename);
 				return;
 		}
 		else
@@ -569,12 +571,8 @@ function DeleteState(URL,filename,response)
 				//the asset is new
 				if(!fs.existsSync(filename))
 				{
-					response.writeHead(200, {
-								"Content-Type":  "text/plain"
-					});
-					response.write("cant delete state that does not exist", "utf8");
-					response.end();
-					console.log('cant delete state that does not exist' + filename);
+					
+					respond(response,500,'cant delete state that does not exist' + filename);
 					return;
 				}
 				else
@@ -585,25 +583,14 @@ function DeleteState(URL,filename,response)
 						//trying to delete existing file that user is not author of
 						if(!e)
 						{
-							response.writeHead(401, {
-								"Content-Type":  "text/plain"
-							});
-							response.write("Permission denied to delete state", "utf8");
-							response.end();
-							console.log('Permission denied to delete state ' + filename);
+							
+							respond(response,500,'Permission denied to delete state ' + filename);
 							return;
 						}else
 						{
 							
 							deleteFolderRecursive(filename);
-							
-							
-							response.writeHead(200, {
-								"Content-Type":  "text/plain"
-							});
-							response.write("Deleted state", "utf8");
-							response.end();
-							console.log('Deleted state ' + filename);
+							respond(response,200,'Deleted state ' + filename);
 							return;
 							
 							
@@ -646,12 +633,8 @@ function SaveState(URL,dirname,data,response)
 		//Did no supply a good name password pair
 		if(!e)
 		{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when saving state ' + dirname);
-				response.end();
+				
+				respond(response,401,'Incorrect password when saving state ' + dirname);
 				return;
 		}
 		else
@@ -659,12 +642,8 @@ function SaveState(URL,dirname,data,response)
 				//the state is new
 				if(!fs.existsSync(dirname+'/state'))
 				{
-					response.writeHead(200, {
-								"Content-Type":  "text/plain"
-					});
-					response.write("saving new state", "utf8");
-					response.end();
-					console.log('saving new state' + dirname);
+					
+					respond(response,200,'saving new state' + dirname);
 					MakeDirIfNotExist(dirname,function(){SaveFile(dirname+'/state',data,response);});
 					return;
 				}
@@ -681,22 +660,13 @@ function SaveState(URL,dirname,data,response)
 						//trying to delete existing file that user is not author of
 						if(!e)
 						{
-							response.writeHead(401, {
-								"Content-Type":  "text/plain"
-							});
-							response.write("Cannot change owner of existing state", "utf8");
-							response.end();
-							console.log('Cannot change owner of existing state' + dirname);
+							
+							respond(response,401,'Cannot change owner of existing state' + dirname);
 							return;
 						}else
 						{
 							
-							response.writeHead(200, {
-								"Content-Type":  "text/plain"
-							});
-							response.write("saving over state", "utf8");
-							response.end();
-							console.log('saving over state' + dirname);
+							respond(response,200,'saving over state' + dirname);
 							MakeDirIfNotExist(dirname,function(){
 								RenameFile(dirname+'/state',dirname+'/state_backup' + GUID(),function(){
 								SaveFile(dirname+'/state',data,response);
@@ -722,12 +692,8 @@ function DeleteAsset(URL,filename,response)
 		//Did no supply a good name password pair
 		if(!e)
 		{
-				response.writeHead(401, {
-					"Content-Type":  "text/plain"
-				});
-				response.write("Password not correct", "utf8");
-				console.log('Incorrect password when deleting Asset ' + filename);
-				response.end();
+			
+				respond(response,401,'Incorrect password when deleting Asset ' + filename);
 				return;
 		}
 		else
@@ -735,11 +701,8 @@ function DeleteAsset(URL,filename,response)
 				//the asset is new
 				if(!fs.existsSync(filename))
 				{
-					response.writeHead(401, {
-								"Content-Type":  "text/plain"
-					});
-					response.write("cant delete asset that does not exist", "utf8");
-					console.log('cant delete asset that does not exist' + filename);
+					
+					respond(response,401,'cant delete asset that does not exist' + filename);
 					return;
 				}
 				else
@@ -750,23 +713,15 @@ function DeleteAsset(URL,filename,response)
 						//trying to delete existing file that user is not author of
 						if(!e)
 						{
-							response.writeHead(401, {
-								"Content-Type":  "text/plain"
-							});
-							response.write("Permission denied to delete asset", "utf8");
-							console.log('Permission denied to delete asset ' + filename);
+							
+							respond(response,401,'Permission denied to delete asset ' + filename);
 							return;
 						}else
 						{
 							
 							fs.unlink(filename);
-							response.writeHead(200, {
-								"Content-Type":  "text/plain"
-							});
-							response.write("Deleted asset", "utf8");
-							response.end();
-							console.log('Deleted asset ' + filename);
-							return;
+							
+							respond(response,200,'Deleted asset ' + filename);
 							return;
 						}
 					});
@@ -779,11 +734,7 @@ function SaveFile(filename,data,response)
 {
 	fs.writeFile(filename,data,'binary',function()
 	{
-			response.writeHead(200, {
-				"Content-Type": "text/json"
-			});
-			response.write("ok", "utf8");
-			response.end();
+			respond(response,200,'Saved ' + filename);
 	});
 }
 function _404(response)
@@ -820,6 +771,8 @@ function RecurseDirs(startdir, currentdir, files)
 		}
 	}
 }
+
+//Just return the state data, dont serve a response
 function getState(SID)
 {
 	SID = SID.replace(/[\\,\/]/g,'_');
@@ -832,6 +785,8 @@ function getState(SID)
 	}
 	return null;
 }
+
+//find the session data for a request
 function GetSessionData(request)
 {
   if(!request.headers['cookie'])
@@ -846,8 +801,6 @@ function GetSessionData(request)
     cookies[parts[0].trim()] = (parts[1] || '').trim();
   }
 
-	
-  
   var SessionID = cookies.session;
   
   if(!SessionID) return {};
@@ -862,6 +815,8 @@ function GetSessionData(request)
   }
   return {};
 }
+
+//router
 function serve (request, response)
 {
 	var URL = url.parse(request.url,true);
@@ -889,6 +844,9 @@ function serve (request, response)
 			} break;
 			case "state":{
 				ServeFile(basedir+"states\\" + SID+'\\state',response,URL,'GetStateResult');		
+			} break;
+			case "clonestate":{
+				CopyState(URL,SID,URL.query.SID2,response,'GetStateResult');		
 			} break;
 			case "profile":{
 				ServeProfile(basedir+"profiles\\" + UID,response,URL,'GetProfileResult');		
@@ -972,12 +930,8 @@ function serve (request, response)
 
 			if(body == '')
 			{
-				response.writeHead(500, {
-					"Content-Type": "text/json"
-				});
-				response.write("data is null", "utf8");
-				console.log("Error in post: data is null");
-				response.end();
+				
+				respond(response,500,"Error in post: data is null");
 				return;
 			}
 			
@@ -987,12 +941,7 @@ function serve (request, response)
 				JSON.parse(body);
 			}catch(e)
 			{
-				response.writeHead(500, {
-					"Content-Type": "text/json"
-				});
-				response.write("data parse error", "utf8");
-				console.log("Error in post: data is not json");
-				response.end();
+				respond(response,500,"Error in post: data is not json");
 				return;
 			}
             switch(command)
@@ -1054,4 +1003,8 @@ exports.setDataPath = function(p)
 {
 	console.log("datapath is " + p);
 	datapath = p;
+}
+exports.getDataPath = function()
+{
+	return datapath;
 }

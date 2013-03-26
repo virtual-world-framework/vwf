@@ -325,7 +325,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             //loadingCallback: callback,
                             sceneID: this.state.sceneRootID
                         };
-                        if( !node.threeObject )
+                        if( !node.threeObject && childName)
                             node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
                         //The parent three object did not have any childrent with the name matching the nodeID, so make a new group
                         if( !node.threeObject ) {
@@ -458,7 +458,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {
                     if(propertyName == 'transform' || propertyName == 'localMatrix')
                     {
-                        
+                       
 						
 						 //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transform = goog.vec.Mat4.createFromArray( propertyValue || [] );
@@ -665,6 +665,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     {
                         ps.shaderMaterial_analytic.uniforms.minOrientation.value = propertyValue;
                     }
+					if(propertyName == 'alphaTest')
+                    {
+                        ps.shaderMaterial_analytic.uniforms.alphaTest.value = propertyValue;
+                    }
+					
+					
 					if(propertyName == 'colorRange')
                     {
                          ps.shaderMaterial_analytic.uniforms.colorRange.value.x = propertyValue[0];
@@ -1830,6 +1836,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			"uniform float maxOrientation;\n"+
             "uniform float minOrientation;\n"+
 			"uniform float textureTiles;\n"+
+			"uniform float alphaTest;\n"+
             "void main() {\n"+
 			            " vec2 coord = vec2(0.0,0.0);"+
 			" vec2 orig_coord = vec2(gl_PointCoord.s,1.0-gl_PointCoord.t);"+
@@ -1873,6 +1880,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 endColor:{type: "v4", value:new THREE.Vector4(0,0,0,1)},
                 startSize:{type:"f", value:1},
                 endSize:{type:"f", value:1},
+				alphaTest:{type:"f", value:.5}
             };
             uniforms_default.texture.value.wrapS = uniforms_default.texture.value.wrapT = THREE.RepeatWrapping;
             var shaderMaterial_default = new THREE.ShaderMaterial( {
@@ -1976,6 +1984,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			"uniform float maxOrientation;\n"+
             "uniform float minOrientation;\n"+
 			"uniform float textureTiles;\n"+
+			"uniform float alphaTest;\n"+
             "void main() {\n"+
            
 			//bit of drama for dividing into 4 or 9 'virtual' textures
@@ -1994,7 +2003,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
 			//get the color from the texture and blend with the vertexColor.
 			" vec4 outColor = (vColor * texture2D( texture, coord )) *useTexture + vColor * (1.0-useTexture);\n"+
-            
+            " if(outColor.a < alphaTest) discard;\n" + 
             "   gl_FragColor = outColor;\n"+
             "}\n";
             var attributes_analytic = {

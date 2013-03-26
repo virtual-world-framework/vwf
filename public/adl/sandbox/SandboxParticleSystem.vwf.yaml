@@ -30,8 +30,10 @@ properties:
   endColor_noAplha:
     value: [1 ,1 ,1]
     set: |
+            if(!this.endColor) this.endColor = [0,0,0,0];
             this.endColor = [value[0],value[1],value[2],this.endAlpha]
     get: |
+            if(!this.endColor) this.endColor = [0,0,0,0];
             return [this.endColor[0],this.endColor[1],this.endColor[2]]
   endAlpha:
     value: 1
@@ -42,14 +44,18 @@ properties:
   startAlpha:
     value: 1
     set: |
+            if(!this.startColor) this.startColor = [0,0,0,0];
             this.startColor = [this.startColor[0],this.startColor[1],this.startColor[2],value]
     get: |
+            if(!this.startColor) this.startColor = [0,0,0,0];
             return this.startColor[3];
   alphaRange:
     value: 1
     set: |
+            if(!this.colorRange) this.colorRange = [0,0,0,0];
             this.colorRange = [this.colorRange[0],this.colorRange[1],this.colorRange[2],value]
     get: |
+            if(!this.colorRange) this.colorRange = [0,0,0,0];
             return this.colorRange[3];                       
   EditorData:
     ABstartAlpha:
@@ -142,7 +148,14 @@ properties:
       type: slider
       min: 0
       max: 1
-      step: .001  
+      step: .001
+    ABCAlphaTest:
+      displayname: "Alpha Test (greater)"
+      property: alphaTest
+      type: slider
+      min: 0
+      max: 1
+      step: .001        
     CStartVelocity:
       displayname: Velocity
       property: [minVelocity, maxVelocity]
@@ -266,7 +279,8 @@ scripts:
       
     
       var div = this.nametag;
-      var pos = this.translation;
+      var trans = (new THREE.Vector3()).getPositionFromMatrix(_Editor.findviewnode(this.id).matrixWorld);
+      var pos = [trans.x,trans.y,trans.z];
       pos = [pos[0],pos[1],pos[2],1];
          
       

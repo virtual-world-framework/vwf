@@ -351,6 +351,7 @@ scripts:
        this.skycube = new THREE.Mesh(new THREE.CubeGeometry(1000,1000,1000), this.skymaterial);
        this.skycube.name = "SkyCube";
        this.skycube.renderDepth = -1;
+       this.skycube.InvisibleToCPUPick = true;
        this.skycube.depthWrite = false;
        this.skycube.depthCheck = false;
        findscene().add(this.skycube);

@@ -267,15 +267,7 @@ function GlobalInventoryManager()
 		_GlobalInventoryManager.open =true;
 		this.resize();
 	}
-	this.addScript = function(body,name,type)
-	{
-		var t = {};
-		t.name = name;
-		t.body = body;
-		t.type = type;
-		_DataManager.addInventoryItem("___Global___",t,GUID(),'script');
-		this.BuildGUI();
-	}
+	
 	this.resize = function()
 	{
 		
@@ -316,7 +308,7 @@ function GlobalInventoryManager()
 			
 			if(_GlobalInventoryManager.selectedItem.properties.owner == _UserManager.GetCurrentUserName())
 			{	
-				_DataManager.renameInventoryItem("___Global___",_GlobalInventoryManager.selectedName,$('#InventoryRename').val(),_GlobalInventoryManager.selectedType);
+				//_DataManager.renameInventoryItem("___Global___",_GlobalInventoryManager.selectedName,$('#InventoryRename').val(),_GlobalInventoryManager.selectedType);
 				_GlobalInventoryManager.BuildGUI();
 				_GlobalInventoryManager.inRename = false;
 			}
@@ -335,7 +327,7 @@ function GlobalInventoryManager()
 			
 			if(_GlobalInventoryManager.selectedItem.properties.owner == _UserManager.GetCurrentUserName())
 			{	
-				_DataManager.renameInventoryItem("___Global___",_GlobalInventoryManager.selectedName,$('#InventoryRename').val(),_GlobalInventoryManager.selectedType);
+				//_DataManager.renameInventoryItem("___Global___",_GlobalInventoryManager.selectedName,$('#InventoryRename').val(),_GlobalInventoryManager.selectedType);
 				_GlobalInventoryManager.BuildGUI();
 				_GlobalInventoryManager.inRename = false;
 			}
@@ -371,7 +363,7 @@ function GlobalInventoryManager()
 			
 			if(_GlobalInventoryManager.selectedItem.properties.owner == _UserManager.GetCurrentUserName())
 			{	
-				_DataManager.renameInventoryItem("___Global___",_GlobalInventoryManager.selectedName,$('#InventoryRename').val(),_GlobalInventoryManager.selectedType);
+				//_DataManager.renameInventoryItem("___Global___",_GlobalInventoryManager.selectedName,$('#InventoryRename').val(),_GlobalInventoryManager.selectedType);
 				_GlobalInventoryManager.BuildGUI();
 				_GlobalInventoryManager.inRename = false;
 			}
@@ -425,7 +417,7 @@ function GlobalInventoryManager()
 	}
 	this.BuildGUI = function()
 	{
-		_DataManager.GetProfileForUser("___Global___",true);
+		//_DataManager.GetProfileForUser("___Global___",true);
 		$('#InventoryDisplay').empty();
 		$('#InventoryDisplay').append("<input type='text' id='InventoryRename' style='display: inline-block;top: 22.0px;position: absolute;padding: 0px;font: 1.0em sans-serif;border: 1px solid black;margin: 0px;width: 80%;'/>");
 		$('#InventoryRename').hide();

@@ -171,9 +171,10 @@ scripts:
       slicedTrans[0] = this.prevTranslation[0]*(1.0-timediff) + this.currentTranslation[0]  * timediff;    
       slicedTrans[1] = this.prevTranslation[1]*(1.0-timediff) + this.currentTranslation[1]  * timediff;
       slicedTrans[2] = this.prevTranslation[2]*(1.0-timediff) + this.currentTranslation[2]  * timediff;
-      this.translation =  slicedTrans;    
       
-      this.quaternion = goog.vec.Quaternion.slerp(this.prevQuat,this.currentQuat,timediff,[0,0,0,0]);
+      //seems like this might break replication slightly
+      //this.translation =  slicedTrans;    
+      //this.quaternion = goog.vec.Quaternion.slerp(this.prevQuat,this.currentQuat,timediff,[0,0,0,0]);
       
       
       var rootdiv = document.getElementById('index-vwf');
@@ -384,7 +385,7 @@ scripts:
                 motionvec = MATH.toUnitVec3(motionvec);
                 var testpos = MATH.subVec3(this.translation,MATH.scaleVec3(motionvec,-.15));
                 
-                var intersectfront = _Editor.ThreeJSPick(MATH.addVec3(testpos,[0,0,1]),motionvec,this.PickOptions);
+                var intersectfront = _Editor.ThreeJSPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersectfront)
                 {
                     if(intersectfront.distance < .3)
@@ -406,7 +407,7 @@ scripts:
                 }
                 var falldist = 1000;
                
-                var intersect = _Editor.ThreeJSPick(MATH.addVec3(this.translation,[0,0,1.7]),[0,0,-1],this.PickOptions);
+                var intersect = _Editor.ThreeJSPick(MATH.addVec3(this.translation,[0,0,1.7]),[0,0,-1],{ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 //console.log(intersect.distance);
                 //console.log(intersect);
                
@@ -442,7 +443,7 @@ scripts:
             if(this.inMotion('jump') && this.jumpcounter > 10)
             {
                 this.skin.PickPriority = -1;
-                var intersect = _Editor.ThreeJSPick(MATH.addVec3(this.translation,[0,0,2]),[0,0,-1]);
+                var intersect = _Editor.ThreeJSPick(MATH.addVec3(this.translation,[0,0,2]),[0,0,-1],{ignore:[this.skin,_Editor.GetMoveGizmo()]});
                 if(intersect)
                 {
                     //console.log(zdiff);
@@ -474,8 +475,8 @@ scripts:
         //note that we could change the update mechanism to avoid getting out of sync
         if(this.updatecounter > 80 && document["PlayerNumber"] == this.PlayerNumber)
           {
-            
-             //vwf_view.kernel.setProperties(this.id,{'translation':[this.mesh.getLocX(),this.mesh.getLocY(),this.mesh.getLocZ()],rotZ:this.rotZ},0,null);
+            console.log('sent update');
+            vwf_view.kernel.setProperty(this.id,'transform',this.transform,0,null);
              this.updatecounter = 0;
           }
           

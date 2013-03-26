@@ -839,7 +839,7 @@ THREE.Geometry.prototype.setPickGeometry = function(PickGeometry)
 THREE.Geometry.prototype.CPUPick = function(origin,direction,options)
 {
 
-	  
+	 
 	  if(this.InvisibleToCPUPick)
 		return null;
 	  
@@ -949,7 +949,9 @@ THREE.Object3D.prototype.GetBoundingBox = function(local)
 //boudning box.
 THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 {
-
+	  
+	  if(options && options.ignore && options.ignore.indexOf(this) != -1)
+		return null;
 	  if(options.UserRenderBatches && this.isBatched)
 		return null;
 	  if(this.InvisibleToCPUPick || this.visible == false)
@@ -973,7 +975,8 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 	  }
 	 
 		
-		
+	  if(this.geometry)
+	  {	
 	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
 	  var mat = this.getModelMatrix().slice(0);
 	  mat = MATH.inverseMat4(mat);
@@ -990,8 +993,7 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 	  
 	  
 	  
-		  if(this.geometry)
-		  {
+		  
 				//collide with the mesh
 				var ret2 = this.geometry.CPUPick(newo,newd,options);
 				

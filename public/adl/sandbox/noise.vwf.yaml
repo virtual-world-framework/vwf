@@ -6,6 +6,11 @@ properties:
     set: |
             this.amount = value;
             this.dirtyStack();
+  octaves:
+    value: 256
+    set: |
+            this.octaves = value;
+            this.dirtyStack();          
   noisescale:
     value: 1
     set: |
@@ -16,15 +21,34 @@ properties:
     set: |
             this.iterations = value;
             this.dirtyStack();
+  phase:
+    value: 0
+    set: |
+            this.phase = value;
+            this.dirtyStack();          
   seed:
     value: 1
     set: |
             this.seed = value;
+            
+            this.random = this.Random(this.seed);
+         
+             this.permutation = [];
+             for(var i =0; i < 512; i++)
+             {
+                this.permutation.push(Math.floor(this.random.getRandomNumber()*256));
+             }         
+             this.Perlin = new this.PerlinNoise(this.permutation);
+            
             this.dirtyStack(); 
   effectX:
     set: |
             this.effectX = value;
-            this.dirtyStack(); 
+            this.dirtyStack();
+  ComputeNormals:
+    set: |
+            this.ComputeNormals = value;
+            this.dirtyStack();             
   effectY:
     set: |
             this.effectY = value;
@@ -73,6 +97,13 @@ properties:
       min: 2
       max: 5
       step: 1	
+    octaves:
+      displayname: Octaves
+      property: octaves
+      type: slider
+      min: 8
+      max: 256
+      step: 1	  
     seed:
       displayname: random seed
       property: seed
@@ -80,6 +111,13 @@ properties:
       min: 1
       max: 512
       step: 1
+    phase:
+      displayname: phase
+      property: phase
+      type: slider
+      min: 0
+      max: 1
+      step: .001  
     effectX:
       displayname: Effect X
       property: effectX
@@ -92,6 +130,10 @@ properties:
       displayname: Effect Z
       property: effectZ
       type: check
+    ComputeNormals:
+      displayname: Compute Normals
+      property: ComputeNormals
+      type: check  
     WorldSpace:
       displayname: Use World Positions
       property: WorldSpace
@@ -110,14 +152,35 @@ scripts:
     this.updateSelf = function()
     {
         
+        if(this.id == 'noise-vwf')
+            return;
         var scale = vwf.getProperty(this.id,'noisescale');
         var iterations = vwf.getProperty(this.id,'iterations');
         var seed = vwf.getProperty(this.id,'seed');
+        
+        
+        if(!this.random)
+        {
+            
+            this.random = this.Random(seed);
+         
+             this.permutation = [];
+             for(var i =0; i < 512; i++)
+             {
+                this.permutation.push(Math.floor(this.random.getRandomNumber()*256));
+             }         
+             this.Perlin = new this.PerlinNoise(this.permutation);
+        
+        
+        }
+        
+        
         var x = vwf.getProperty(this.id,'effectX');
         var y = vwf.getProperty(this.id,'effectY');
         var z = vwf.getProperty(this.id,'effectZ');
         var world = vwf.getProperty(this.id,'WorldSpace');
-        this.noise(scale,iterations,seed,x,y,z,world);
+        var phase = vwf.getProperty(this.id,'phase');
+        this.noise(scale,iterations,seed,x,y,z,world,phase);
     }
     var RotateVecAroundAxis = function(Vector, Axis, Radians)
     {
@@ -129,12 +192,14 @@ scripts:
     
     this.PerlinNoise = function(permutation) {
 
-        this.noise = function(x, y, z) {
+        this.noise = function(x, y, z,o) {
 
+           if(!o)
+            o = 256
            var p = new Array(512)
           
-           for (var i=0; i < 256 ; i++) 
-         p[256+i] = p[i] = permutation[i]; 
+           for (var i=0; i < o ; i++) 
+         p[o+i] = p[i] = permutation[i]; 
 
               var X = Math.floor(x) & 255,                  // FIND UNIT CUBE THAT
                   Y = Math.floor(y) & 255,                  // CONTAINS POINT.
@@ -215,37 +280,34 @@ scripts:
         }
         return new Rc4Random(seed +"");
     }
-    this.getNoise= function(randarray,x,y,z,scale,iterations)
+    this.getNoise= function(randarray,x,y,z,scale,iterations,phase)
     {
-            var Perlin = new this.PerlinNoise(this.permutation);
+            
             var z =0;
            // return 10-MATH.lengthVec3([x,y,z]);
             for(var j = 1; j < iterations; j++)
             {
               
-              var z1 = Perlin.noise((randarray[j-1]+(x))*scale*j,
-                                    (randarray[j-1]+(y))*scale*j,
-                                    (randarray[j-1]+(z))*scale*j);
+              var z1 = this.Perlin.noise((randarray[j-1]+(x+ phase))*scale*j ,
+                                    (randarray[j-1]+(y+ phase))*scale*j ,
+                                    (randarray[j-1]+(z+ phase))*scale*j,this.octaves );
               z1 -= .5;
               z1 /= (j);
               z += z1;
             }
             return z;
     }
-    this.noise = function(scale,iterations,seed,effectX,effectY,effectZ,useWorldSpace)
+    this.noise = function(scale,iterations,seed,effectX,effectY,effectZ,useWorldSpace,phase)
     {   
         
-         var Random = this.Random(seed);
          
-          this.permutation = [];
-         for(var i =0; i < 512; i++)
-         {
-            this.permutation.push(Math.floor(Random.getRandomNumber()*256));
-         }         
          
          if(this.amount == undefined) return;
          var mesh = this.GetMesh();
+         if(!mesh)
+            return;
          var m = mesh.geometry;
+         if(!m) return;
          var positions = [];
          
          for(var i=0;i<m.vertices.length; i++)
@@ -280,9 +342,9 @@ scripts:
          var randX = [];
          for(var j = 1; j < iterations; j++)
          {
-            randZ.push(Random.getRandomNumber());
-            randY.push(Random.getRandomNumber());   
-            randX.push(Random.getRandomNumber());               
+            randZ.push(this.permutation[0]);
+            randY.push(this.permutation[1]);   
+            randX.push(this.permutation[2]);               
          }
          for(var i=0;i<positions.length; i+=1)
          {
@@ -295,14 +357,14 @@ scripts:
              if(effectZ)
              {
                 
-                var z = this.getNoise(randZ,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations);
-                var zx1 = this.getNoise(randZ,(thispos[0] +.1)/length,thispos[1]/width,thispos[2]/height,scale,iterations);
-                var zy1 = this.getNoise(randZ,thispos[0]/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations);
+                var z = this.getNoise(randZ,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+                var zx1 = this.getNoise(randZ,(thispos[0] +.1)/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+                var zy1 = this.getNoise(randZ,thispos[0]/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations,phase);
                 var x1 = [positions[i][0]+.1,positions[i][1],positions[i][2]+ zx1*amt];
                 var y1 = [positions[i][0],positions[i][1]+.1,positions[i][2]+ zy1*amt];
                 positions[i][2] += z * amt;
                 
-                var dx = MATH.subVec3(x1,positions[i]);
+            /*    var dx = MATH.subVec3(x1,positions[i]);
                 dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
                 var dy = MATH.subVec3(y1,positions[i]);
                 dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
@@ -315,22 +377,22 @@ scripts:
                 var  tofront_norm = [];
                 
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
-                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
-                if(i < normals.length)
-                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
+                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix()); */
+            //    if(i < normals.length)
+            //    normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
                 //normals[i][1] *= -1;
                  //normals[i][0] *= -1;
              }
              if(effectX)
              {
-                var x = this.getNoise(randX,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations);
-                var xy1 = this.getNoise(randX,(thispos[0])/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations);
-                var xz1 = this.getNoise(randX,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations);
+                var x = this.getNoise(randX,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+                var xy1 = this.getNoise(randX,(thispos[0])/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations,phase);
+                var xz1 = this.getNoise(randX,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations,phase);
                 var y1 = [positions[i][0]+ xy1*amt,positions[i][1]+.1,positions[i][2]];
                 var z1 = [positions[i][0]+ xz1*amt,positions[i][1],positions[i][2]+.1];
                 positions[i][0] += x * amt;
                 
-                var dy = MATH.subVec3(y1,positions[i]);
+             /*   var dy = MATH.subVec3(y1,positions[i]);
                 dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
                 var dz = MATH.subVec3(z1,positions[i]);
                 dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
@@ -343,20 +405,20 @@ scripts:
                 var  tofront_norm = [];
                 
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
-                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
-                if(i < normals.length)
-                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
+                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix()); */
+            //    if(i < normals.length)
+            //    normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
              }
              if(effectY)
              {
-                var y = this.getNoise(randY,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations);
-                var yx1 = this.getNoise(randY,(thispos[0]+.1)/length,(thispos[1])/width,thispos[2]/height,scale,iterations);
-                var yz1 = this.getNoise(randY,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations);
+                var y = this.getNoise(randY,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+                var yx1 = this.getNoise(randY,(thispos[0]+.1)/length,(thispos[1])/width,thispos[2]/height,scale,iterations,phase);
+                var yz1 = this.getNoise(randY,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations,phase);
                 var x1 = [positions[i][0]+.1,positions[i][1]+ yx1*amt,positions[i][2]];
                 var z1 = [positions[i][0],positions[i][1]+ yz1*amt,positions[i][2]+.1];
                 positions[i][1] += y * amt;
                 
-                var dx = MATH.subVec3(x1,positions[i]);
+             /*   var dx = MATH.subVec3(x1,positions[i]);
                 dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
                 var dz = MATH.subVec3(z1,positions[i]);
                 dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
@@ -370,10 +432,10 @@ scripts:
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
                 var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
                 if(i < normals.length)
-                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
+                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]); */
               }
-              if(i < normals.length)
-              normals[i] = MATH.scaleVec3(normals[i],1/MATH.lengthVec3(normals[i]));
+            //  if(i < normals.length)
+            //  normals[i] = MATH.scaleVec3(normals[i],1/MATH.lengthVec3(normals[i]));
          }
          
          for(var i=0;i<positions.length; i+=1)
@@ -387,7 +449,7 @@ scripts:
          
 
          
-         for(var i=0;i<normals.length; i+=1)
+        /* for(var i=0;i<normals.length; i+=1)
          {
             m.faces[i].normal.x = (normals[i][0]);
             m.faces[i].normal.y = (normals[i][1]);
@@ -399,9 +461,13 @@ scripts:
                 m.faces[i].vertexNormals[j].z = (normals[i][2]);
          }
          }
-         m.computeFaceNormals();
-         m.computeVertexNormals();
-         m.normalsNeedUpdate = true;
+         */
+         if(this.ComputeNormals)
+         {
+            m.computeFaceNormals();
+            m.computeVertexNormals();
+            m.normalsNeedUpdate = true;
+         }
         
     }
     this.updateStack = function()

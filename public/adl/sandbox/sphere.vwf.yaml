@@ -21,7 +21,7 @@ properties:
             this.radius = value;
             this.radius = Math.max(this.radius,.001);
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   segments:
     set: |
             
@@ -34,7 +34,7 @@ properties:
             this.segments = Math.min(this.segments,20);
             this.segments = Math.floor(this.segments);
             if(this._initialized == true)
-            this.dirtyStack();          
+            this.dirtyStack(true);          
   EditorData:
     radius:
       displayname: radius
@@ -62,7 +62,7 @@ scripts:
     this.initialize = function(){
         
         
-        if(this.uri == "sphere.vwf")
+        if(this.id == "sphere-vwf")
             return;
 
        
@@ -77,7 +77,7 @@ scripts:
       
        
        this._initialized = true;
-       this.dirtyStack();
+       this.dirtyStack(true);
        
        if(this.materialDef)
        this.setupMaterial(this.materialDef);       

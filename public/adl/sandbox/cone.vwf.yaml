@@ -21,13 +21,13 @@ properties:
             this.radius = value;
             this.radius = Math.max(this.radius,.001);
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   height:
     set: |
             this.height = value;
             this.height = Math.max(this.height,.001);
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   heightsegments:
     set: |
             this.heightsegments = value;
@@ -37,7 +37,7 @@ properties:
             this.heightsegments = this.heightsegments==11?12:this.heightsegments;
             this.heightsegments = this.heightsegments==9?10:this.heightsegments;
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   radialsegments:
     set: |
             this.radialsegments = value;
@@ -47,12 +47,12 @@ properties:
             this.radialsegments = Math.floor(this.radialsegments);
             this.radialsegments = this.radialsegments==15?16:this.radialsegments;
             if(this._initialized == true)
-            this.dirtyStack();
+            this.dirtyStack(true);
   base2pivot:
     set: |
             this.base2pivot = value;
             if(this._initialized == true)
-            this.dirtyStack();            
+            this.dirtyStack(true);            
   EditorData:
     radius:
       displayname: radius
@@ -98,7 +98,7 @@ scripts:
     this.initialize = function(){
         
         
-        if(this.uri == "cone.vwf")
+        if(this.id == "cone-vwf")
             return;
 
        
@@ -115,7 +115,7 @@ scripts:
        this.mesh.rotation.x = -Math.PI/2;
        
        this._initialized = true;
-       this.dirtyStack();
+       this.dirtyStack(true);
         if(this.materialDef)
        this.setupMaterial(this.materialDef);       
     }
