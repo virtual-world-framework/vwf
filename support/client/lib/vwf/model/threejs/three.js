@@ -2185,15 +2185,17 @@ THREE.Matrix4.prototype = {
 		scale.y = y.length();
 		scale.z = z.length();
 
+		if ( this.determinant() < 0 ) {
+
+			scale.x = -scale.x;
+
+		}
+
 		translation.x = te[12];
 		translation.y = te[13];
 		translation.z = te[14];
 
 		// scale the rotation part
-
-		if ( this.determinant() < 0 ) {
-			scale.x = -scale.x;
-		}
 
 		var matrix = THREE.Matrix4.__m1;
 
@@ -2242,7 +2244,9 @@ THREE.Matrix4.prototype = {
 		var scaleZ = 1 / vector.set( me[8], me[9], me[10] ).length();
 
 		if ( this.determinant() < 0 ) {
+
 			scaleX = -scaleX;
+
 		}
 
 		te[0] = me[0] * scaleX;
