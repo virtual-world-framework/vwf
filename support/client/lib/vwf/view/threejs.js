@@ -145,9 +145,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 			}
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
-			sceneNode.axes.position = pos;
-			sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
-			sceneNode.axes.updateMatrix();
+			if ( sceneNode.axes !== undefined ) {
+                sceneNode.axes.position = pos;
+                sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
+                sceneNode.axes.updateMatrix();
+            }
             if(sceneNode.frameCount > 10)
             {
                 
@@ -551,9 +553,15 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                             if ( colladaParent === undefined ) {
                                 colladaParent = obj3js;
                             }
+                            console.info( "===== YAML ===== START" );
                             recurseObject3D.call( sceneView, colladaParent, "", 0 );
-
+                            console.info( "===== YAML ===== END" );
+                            console.info( "===== JSON ===== START" );
+                            recurseJsonObject3D.call( sceneView, colladaParent, "", 0 );
+                            console.info( "===== JSON ===== END" );
+                            console.info( "===== THREEJS ===== START" );
                             consoleScene.call( this, sceneNode.threeScene, 0 ); 
+                            console.info( "===== THREEJS ===== END" );
                         }
                     }
                 } else {
@@ -936,6 +944,43 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
          return count;
     }
 
+    function recurseJsonObject3D( object3, parentName, depth ) {
+ 
+        var tp = getObjectType.call( this, object3 );
+        if ( object3 && object3.name != "" ) {
+            var sOut = indent.call( this, depth );
+            var sIndent = indent.call( this, depth+1 );
+
+            var bindCount = ( object3.children !== undefined ) ? getBindableCount.call( this, object3 ) : 0;
+
+            consoleOut.call( this, sOut + object3.name + ": {");
+            consoleOut.call( this, sIndent + getExtendType.call( this, object3 ) );
+
+            if ( bindCount > 0 ) {
+                var recursedCount = 0;
+                consoleOut.call( this, sIndent + "children: {" );
+                for ( var i = 0; i < object3.children.length; i++ ) {
+                    depth++;
+                    recurseJsonObject3D.call( this, object3.children[i], object3.name, depth + 1 );
+                    depth--;
+                    recursedCount++;
+                }
+                if ( tp == "mesh" ) {
+                    outputJsonMaterial.call( this, depth+2, 0 );
+                }
+                consoleOut.call( this, sIndent + "}," );
+            }
+            consoleOut.call( this, sOut + "}," );
+        }
+
+    }
+
+    function outputJsonMaterial( iIndent, index ) {
+        var sOut = indent.call( this, iIndent + 1 );
+        consoleOut.call( this, indent.call( this, iIndent) + "material" + ( index > 0 ? index : "" ) + ": {" );
+        consoleOut.call( this, sOut + "extends: http://vwf.example.com/material.vwf" );
+        consoleOut.call( this, indent.call( this, iIndent) + "}," );
+    }
 
     function outputObject3D( object3, parentName, iIndent ) {
         var sOut = indent.call( this, iIndent + 1);
@@ -943,15 +988,14 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
         var bindCount = ( object3.children !== undefined ) ? getBindableCount.call( this, object3 ) : 0;
 
         if ( object3.name != "" ) {
-            //consoleOut.call( this, indent.call( this, iIndent ) + objName + ":");
             consoleOut.call( this, indent.call( this, iIndent ) + object3.name + ":");
             consoleOut.call( this, sOut + getExtendType.call( this, object3 ) );
 
             if ( bindCount > 0 ) {
-                consoleOut.call( this, sOut + "children:" );
+                consoleOut.call( this, sOut + "children: " );
                 if ( tp == "mesh" ) {
                     // need to check the multimaterial list here
-                    outputMaterial.call( this, iIndent + 2, 0  )
+                    outputMaterial.call( this, iIndent + 2, 0 );
                 }
             }
         }
@@ -969,21 +1013,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     recurseObject3D.call( this, object3.children[i], object3.name, depth + 1 );
                     depth--;
                 }
-            }
+            }                
         }
 
     }
 
-    function outputMaterial( iIndent, index  ) {
-
+    function outputMaterial( iIndent, index ) {
         var sOut = indent.call( this, iIndent + 1 );
         consoleOut.call( this, indent.call( this, iIndent) + "material" + ( index > 0 ? index : "" ) + ":" );
         consoleOut.call( this, sOut + "extends: http://vwf.example.com/material.vwf" );
-
     }    
 
     function consoleObject( object3, depth ) {
-        //console.info( "consoleObject( "+object3.name+", "+depth+" )" );
         consoleOut.call( this, indent2.call( this, depth ) + object3.name + " -> " + "        type = " + getObjectType.call( this, object3 ) );
     }
 
