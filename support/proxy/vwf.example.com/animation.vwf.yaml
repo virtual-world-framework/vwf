@@ -82,7 +82,7 @@ properties:
       // Range limit the incoming value.
       value = Math.min( Math.max( 0, value ), duration );
       // Keep paused if updating start/pause from null/null.
-      if ( this.animationStartTime$ == null ) {
+      if ( this.animationStartTime$ == null || this.animationPauseTime$ == 0 ) {
         this.animationPauseTime$ = this.time;
       }
       // Calculate the start and stop times that makes the new time work.

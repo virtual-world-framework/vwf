@@ -35,25 +35,27 @@ properties:
     value: 0
   controlValue: 
     set: |
-      this.controlValue = value;
       if(this.positions.length > 1) {
-        if(this.controlValue > this.positions[this.positions.length-1].controlValue) {
+        if(value > this.positions[this.positions.length-1].controlValue) {
           this.controlDirection = -1;
-          this.controlValue = this.positions[this.positions.length-2].controlValue;
+          value = this.positions[this.positions.length-2].controlValue;
         }
-        else if(this.controlValue < this.positions[0].controlValue) {
+        else if(value < this.positions[0].controlValue) {
           this.controlDirection = 1;
-          this.controlValue = this.positions[1].controlValue;
+          value = this.positions[1].controlValue;
         }
       }
       if("animationTime" in this && !this.animationPlaying) {
         for(var i=0; i<this.positions.length; i++) {
-          if(this.controlValue == this.positions[i].controlValue) {
+          if(value == this.positions[i].controlValue) {
             this.animationTime = this.positions[i].animationTime;
           }
         }
       }
-      this.controlValueUpdated();
+      if(value !== this.controlValue) {
+        this.controlValue = value;
+        this.controlValueUpdated();
+      }
     value: 0
   controlScale: 1
   controlDirection: 
@@ -66,6 +68,7 @@ properties:
       }
     value: 1
   controlPlaying: false
+  controlMomentary: false
 methods:
   mouseInit: 
   controlTick:
@@ -179,63 +182,83 @@ scripts:
     this.input.clear();
     this.input.pointerInfo = pointerInfo;
     this.input.pickInfo = pickInfo;
-    this.intermediateValue = this.controlValue;
     this.positions = this.find( "./element(*,'http://vwf.example.com/control/position.vwf')" );
     this.positions.sort(function(a, b) {
       return a.sequence - b.sequence;
     });
+    if(this.controlMomentary) {
+      this.controlPlaying = true;
+      this.controlDirection = 1;
+      this.controlTick(this.positions[this.positions.length-1]);
+    }
+    else {
+      this.intermediateValue = this.controlValue;
+    }
   }
 
   this.pointerUp = function( pointerInfo, pickInfo ) {
-    for(var i=0; i<this.positions.length; i++) {
-      if(this.input.previous.pointerInfo == undefined) {
-        if(this.controlValue == this.positions[i].controlValue) {
-          if(!((i + this.controlDirection) >= 0 && (i + this.controlDirection) < this.positions.length)) {
-            this.controlDirection = this.controlDirection * -1;
-          }
-          this.controlPlaying = true;
-          this.controlTick(this.positions[i + this.controlDirection]);
-          break;
-        }
-        else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
-          if(this.controlDirection == 1) {
+    if(this.controlMomentary) {
+      this.controlPlaying = true;
+      this.controlDirection = -1;
+      this.controlTick(this.positions[0]);
+    }
+    else {
+      for(var i=0; i<this.positions.length; i++) {
+        if(this.input.previous.pointerInfo == undefined) {
+          if(this.controlValue == this.positions[i].controlValue) {
+            if(!((i + this.controlDirection) >= 0 && (i + this.controlDirection) < this.positions.length)) {
+              this.controlDirection = this.controlDirection * -1;
+            }
             this.controlPlaying = true;
-            this.controlTick(this.positions[i + 1]);
+            this.controlTick(this.positions[i + this.controlDirection]);
+            break;
           }
-          else {
-            this.controlPlaying = true;
-            this.controlTick(this.positions[i]);
-          }
-        }
-      }
-      else {
-        if(this.intermediateValue == this.positions[i].controlValue) {
-          this.controlValue = this.positions[i].controlValue;
-          break;
-        }
-        else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
-          var nearPosition, farPosition;
-          if(Math.abs((this.positions[i].controlValue - this.intermediateValue)) < Math.abs((this.positions[i+1].controlValue - this.intermediateValue))) {
-            nearPosition = this.positions[i];
-            farPosition = this.positions[i+1];
-          }
-          else {
-            nearPosition = this.positions[i+1];
-            farPosition = this.positions[i];
-          }
-          switch(nearPosition.controlType) {
-            case 1:
+          else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
+            if(this.controlDirection == 1) {
               this.controlPlaying = true;
-              this.controlDirection = this.intermediateValue < nearPosition.controlValue ? 1 : -1;
-              this.controlTick(nearPosition);
-              break;
-            case -1:
-              // TODO How does this work?
-            case 0:
-              this.controlValue = this.intermediateValue;
-              break;
+              this.controlTick(this.positions[i + 1]);
+            }
+            else {
+              this.controlPlaying = true;
+              this.controlTick(this.positions[i]);
+            }
           }
-          break;
+        }
+        else {
+          if(this.intermediateValue == this.positions[i].controlValue) {
+            this.controlValue = this.positions[i].controlValue;
+          }
+          else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
+            var nearPosition, farPosition;
+            if(Math.abs((this.positions[i].controlValue - this.intermediateValue)) < Math.abs((this.positions[i+1].controlValue - this.intermediateValue))) {
+              nearPosition = this.positions[i];
+              farPosition = this.positions[i+1];
+            }
+            else {
+              nearPosition = this.positions[i+1];
+              farPosition = this.positions[i];
+            }
+            switch(nearPosition.controlType) {
+              case 1:
+                this.controlPlaying = true;
+                this.controlDirection = this.intermediateValue < nearPosition.controlValue ? 1 : -1;
+                this.controlTick(nearPosition);
+                break;
+              case -1:
+                if(this.farPosition.controlType != -1) {
+                  this.controlPlaying = true;
+                  this.conthis.controlDirection = this.intermediateValue < farPosition.controlValue ? 1 : -1;
+                  this.controlTick(farPosition);
+                }
+                else {
+                  this.controlValue = this.intermediateValue;
+                }
+              case 0:
+                this.controlValue = this.intermediateValue;
+                break;
+            }
+            break;
+          }
         }
       }
     }
@@ -243,54 +266,56 @@ scripts:
   }
 
   this.pointerMove = function( pointerInfo, pickInfo ) {
-    var minValue = this.positions[0].controlValue;
-    var maxValue = this.positions[this.positions.length-1].controlValue;
-    this.input.update( pointerInfo, pickInfo );
-    var diff = this.input.change();
-    if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
-      var changeBy = diff[0] * this.controlScale;
-      if(diff[0] > 0 && this.intermediateValue < maxValue) {
-        this.controlDirection = 1;
-        if((this.intermediateValue + changeBy) < maxValue) {
-          this.intermediateValue = this.intermediateValue + changeBy;
+    if(!this.controlMomentary) {
+      var minValue = this.positions[0].controlValue;
+      var maxValue = this.positions[this.positions.length-1].controlValue;
+      this.input.update( pointerInfo, pickInfo );
+      var diff = this.input.change();
+      if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
+        var changeBy = diff[0] * this.controlScale;
+        if(diff[0] > 0 && this.intermediateValue < maxValue) {
+          this.controlDirection = 1;
+          if((this.intermediateValue + changeBy) < maxValue) {
+            this.intermediateValue = this.intermediateValue + changeBy;
+          }
+        }
+        else if(diff[0] < 0 && this.intermediateValue > minValue) {
+          this.controlDirection = -1;
+          if((this.intermediateValue + changeBy) > minValue) {
+            this.intermediateValue = this.intermediateValue + changeBy;
+          }
         }
       }
-      else if(diff[0] < 0 && this.intermediateValue > minValue) {
-        this.controlDirection = -1;
-        if((this.intermediateValue + changeBy) > minValue) {
-          this.intermediateValue = this.intermediateValue + changeBy;
+      else {
+        var changeBy = diff[1] * this.controlScale;
+        if(diff[1] > 0 && this.intermediateValue < maxValue) {
+          this.controlDirection = 1;
+          if((this.intermediateValue + changeBy) < maxValue) {
+            this.intermediateValue = this.intermediateValue + changeBy;
+          }
+        }
+        else if(diff[1] < 0 && this.intermediateValue > minValue) {
+          this.controlDirection = -1;
+          if((this.intermediateValue + changeBy) > minValue) {
+            this.intermediateValue = this.intermediateValue + changeBy;
+          }
         }
       }
+      this.input.previous.pointerInfo = pointerInfo;
+      this.input.previous.pickInfo = pickInfo;
     }
-    else {
-      var changeBy = diff[1] * this.controlScale;
-      if(diff[1] > 0 && this.intermediateValue < maxValue) {
-        this.controlDirection = 1;
-        if((this.intermediateValue + changeBy) < maxValue) {
-          this.intermediateValue = this.intermediateValue + changeBy;
-        }
-      }
-      else if(diff[1] < 0 && this.intermediateValue > minValue) {
-        this.controlDirection = -1;
-        if((this.intermediateValue + changeBy) > minValue) {
-          this.intermediateValue = this.intermediateValue + changeBy;
-        }
-      }
-    }
-    this.input.previous.pointerInfo = pointerInfo;
-    this.input.previous.pickInfo = pickInfo;
   }
 
   this.controlTick = function (nextPosition) {
     if ( this.controlPlaying ) {
-      if ( this.animationTime === nextPosition.animationTime ) {
+      if ( Math.abs(this.animationTime - nextPosition.animationTime) < goog.vec.EPSILON ) {
         this.controlValue = nextPosition.controlValue;
         this.controlPlaying = false;
       }
       // Schedule the next tick if still playing.
       if ( this.controlPlaying ) {
         if ( Math.abs(nextPosition.animationTime - this.animationTime) > 1/60 ) {
-          this.animationTime = this.animationTime + (1/60 * this.controlDirection);
+          this.animationTime = this.animationTime + (1/60 * this.controlDirection * this.animationRate);
           this.in( 1/60 ).controlTick(nextPosition); // next interval
         } else {
           this.animationTime = nextPosition.animationTime;
