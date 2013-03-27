@@ -19,7 +19,7 @@
 	<script type="text/javascript" src="base64.js"></script>
 	<script type="text/javascript">
 	
-	
+	vwf.logger.configure('',null,"error");
 	function findChildColladaNode(node, name)
          {
             
@@ -86,6 +86,7 @@
 			{
 				node.wheelRotateView();
 			}
+			//node[prop] = val;
 		}
 	}
 	vwf_view.calledMethod = function(id,prop,val)
@@ -98,6 +99,22 @@
 			{
 				
 				node.updateView(window);
+			}
+			if(prop == 'hit')
+			{
+			
+				if(document[document.PlayerNumber + 'link'] == node)
+				{
+                var div = document.getElementById('hitscreen');
+                div.style.opacity = '1';
+                $('#hitscreen').stop().animate({
+                    opacity: 0.0,
+                  }, 2000, function() {
+                    // Animation complete.
+                  });
+               
+				}
+			
 			}
 		}
 	}
@@ -119,7 +136,28 @@
 		}
 		
 	}
-	
+	vwf_view.deletedNode = function(nodeID)
+	{
+		
+		var node = this.nodes && this.nodes[nodeID];
+		
+		if(vwf.tickable.nodeIDs.indexOf(nodeID) != -1)
+			vwf.tickable.nodeIDs.splice(vwf.tickable.nodeIDs.indexOf(nodeID));
+		if(node)
+		{
+			var num = node.playernumberback;
+			var div = document.getElementById("Player " + num + 'label');
+			div.parentNode.removeChild(div);
+			document[num + 'link'] = null;
+			if(document.PlayerNumber == num)
+			{
+				$('#Logon').dialog({title:'Game Over!',modal:true,buttons:{"Respawn":function(){$('#Logon').dialog('close');Begin();}}});
+                 
+                 $(document).unbind('keydown');
+                 $(document).unbind('keyup');
+			}
+		}
+	}
 	vwf_view.initializedNode = function( nodeID, childID )
 	{
 		var node = this.nodes && this.nodes[childID];
@@ -139,6 +177,7 @@
 						
 						//this.AmFirstClient();
 						document[this.PlayerNumber +'link'] = this;
+						this.playernumberback = this.PlayerNumber;
 						//If the player that is initializing is the local player, then link up the keypress handlers
 						if(document.PlayerNumber == this.PlayerNumber)
 						{
@@ -416,9 +455,9 @@
 	{
 		
 	    var parms = new Array();
-		parms.push(document[document.PlayerNumber +'link'].id);
+		var id = document[document.PlayerNumber +'link'].id;
 		//alert(JSON.stringify(parms));
-		vwf_view.kernel.callMethod('index-vwf','deleteplayer',parms);
+		vwf_view.kernel.deleteNode(id);
 	}
 	$(document).ready(function(){SceneInitialize();});
 	

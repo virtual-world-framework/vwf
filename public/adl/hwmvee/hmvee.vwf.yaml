@@ -72,13 +72,13 @@ scripts:
          this.initialize = function() {
                 
                
-                if(!this.PlayerNumber)
-                {
-                    debugger;
+            //    if(!this.PlayerNumber)
+            //    {
+            //       
                     loadjscssfile('terrainheight.js','js')
                     loadjscssfile('terrainfunctions.js','js')
            //         return;
-                }
+            //    }
                     
                 
                
@@ -134,33 +134,22 @@ scripts:
          this.hit = function()
          {
              this.Health -= 25;
-             if(document[document.PlayerNumber + 'link'] == this)
-             {
-                var div = document.getElementById('hitscreen');
-                div.style.opacity = '1';
-                $('#hitscreen').stop().animate({
-                    opacity: 0.0,
-                  }, 2000, function() {
-                    // Animation complete.
-                  });
+             
                 if(this.Health < 1)
                 {
-                 SceneDestroy();
+                 this.SceneDestroy();
                  //LogFailure();
-                 $('#Logon').dialog({title:'Game Over!',modal:true,buttons:{"Respawn":function(){$('#Logon').dialog('close');Begin();}}});
                  
-                 $(document).unbind('keydown');
-                 $(document).unbind('keyup');
                 }
-             }
+             
                  
          }
          this.fire = function()
          {
-                
+                goog.vec.Mat4.fromAngleAxis = function(angle,axis){ var quat = goog.vec.Quaternion.fromAngleAxis(angle,axis,[]); return goog.vec.Quaternion.toRotationMatrix4(quat,[]);} ;
                 this.numfired++;
                 var proto = { 
-                    id: 'Missile',
+                   
                     extends: 'http://vwf.example.com/node3.vwf',
                     source: 'missile.dae',
                     type: 'model/vnd.collada+xml',
@@ -170,46 +159,49 @@ scripts:
                         position: {set:"this.translation = value; this.position = value; this.updateCamera();"},
                         orientation: {set:"this.rotation = value; this.orientation = value; this.updateCamera();"},
                         shooter: "",
-                        target: "",
+                        targetpoint: null,
                         age: 0
                         },
                     methods: { 
-                        updatestep: null
+                        updatestep: null,
+                        tick: null
                         },
-                    scripts: [  "this.initialize = function() {"+
-                                "   "+
+                    scripts: [  " goog.vec.Mat4.fromAngleAxis = function(angle,axis){ var quat = goog.vec.Quaternion.fromAngleAxis(angle,axis,[]); return goog.vec.Quaternion.toRotationMatrix4(quat,[]);} ;"+
+                                "this.initialize = function() {"+
+                                "  "+
                                 "this.active = true;"+
                                 //This seems odd as well. I don't think the properties are being initialized.
-                                "this.translation = window.vwf.getNode(this.id).properties.translation;"+
-                                "this.rotation = window.vwf.getNode(this.id).properties.rotation;"+
-                                "this.target = this.GetNearist();"+
-                                "this.targetpoint = null;"+
-                                "if(this.target) {this.targetpoint = this.target.translation;}"+
-                                "this.updatestep(); "+
+                               // "this.translation = window.vwf.getNode(this.id).properties.translation;"+
+                               // "this.rotation = window.vwf.getNode(this.id).properties.rotation;"+
+                                //"this.target = this.GetNearist();"+
+                                //"this.targetpoint = null;"+
+                                //"if(this.target) {this.targetpoint = this.target.translation;}"+
+                                //"this.future(1.0/60.0).updatestep(); "+
                                 "}",
-                                "this.updatestep = function(){    "+
-                                ""+
-                                "this.age++;document.title = this.age;"+
-                                "if(this.age > 200) this.delete();"+
-                                "if(this.translation[2] < document.TerrainFunctions.SampleTerrainByPos(this.translation[0],this.translation[1])) this.delete();"+
-                                "var front = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,0,-1]);"+
-                                "this.translation=       [this.translation[0] + front[0],  "+
-                                "                            this.translation[1] + front[1],  "+
-                                "                            this.translation[2]+ front[2]]; "+
-                                "var testpoint;"+
-                                "if (this.target) testpoint = [this.target.translation[0],this.target.translation[1],this.target.translation[2]];"+
+                                "this.tick = function(){    \n"+
+                                "\n"+
+                                "this.age++;\n"+
+                                "if(this.age > 200) this.delete();\n"+
+                                "if(this.translation[2] < document.TerrainFunctions.SampleTerrainByPos(this.translation[0],this.translation[1]))\n this.delete();\n"+
+                                "var front = goog.vec.Mat4.multVec3(goog.vec.Mat4.fromAngleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,0,-.35],[]);\n"+
+                                "this.translation=       [this.translation[0] + front[0],  \n"+
+                                "                            this.translation[1] + front[1],  \n"+
+                                "                            this.translation[2]+ front[2]]; \n"+
+                                "var testpoint;\n"+
+                                "this.target = this.parent.children[this.targetid];"+
+                                "if (this.target) testpoint = [this.target.translation[0],this.target.translation[1],this.target.translation[2]];\n"+
                                
-                                "if(testpoint){"+
-                                "testpoint[2] += 2;"+
-                                "var dist = GLGE.distanceVec3(this.translation, testpoint);"+
+                                "if(testpoint){\n"+
+                                "testpoint[2] += 2;\n"+
+                                "var dist = goog.vec.Vec3.distance(this.translation, testpoint);\n"+
                                
                                 "if(dist < 40 && this.active==true)"+
                                 "{"+
                                 "    var pointfront = [0,0,-1];"+
-                                "    var to = GLGE.subVec3(testpoint,this.translation);"+
+                                "    var to = goog.vec.Vec3.subtract(testpoint,this.translation,[]);"+
                                 "    to = document.TerrainFunctions.normalize(to);"+
-                                "    var a = GLGE.crossVec3(pointfront,to);"+
-                                "    var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(pointfront,to) );    "+
+                                "    var a = goog.vec.Vec3.cross(pointfront,to,[]);"+
+                                "    var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + goog.vec.Vec3.dot(pointfront,to,[]) );    "+
                                 "    var angle = 0; var axis = [0,0,1];"+
                                 "    var  tofront_norm = [];"+
                                 "    goog.vec.Quaternion.normalize(tofront,tofront_norm);    "+
@@ -222,52 +214,19 @@ scripts:
                                 "}"+
                                 "if(dist < 3 && this.active==true) {this.hit();}"+
                                 "}"+ 
-                                "this.future(1.0/60.0).updatestep();"+
-                                //"this.updateCamera();"+
+                                //"this.future(1.0/60.0).updatestep();"+
+                                
                                 "}",
-                                "this.delete = function(){this.active=false; vwf_view.kernel.kernel.deleteNode(this.id);}",
-                                "this.hit = function() {vwf_view.kernel.kernel.callMethod(this.targetid,'hit',[]);this.delete();}"
-                                ,
-                                 "this.updateCamera = function()"+
-                                 "{"+
-                                 "       if(document[document.PlayerNumber + 'link'].PlayerNumber != this.shooter)"+
-                                 "       return;"+
-                                 "         var cameraTarget = this;"+             
-                                 "         var camera = window.vwf.views[0].state.cameraInUse;"+
-                                 "         var camoffset = [];"+
-                                 "         camoffset = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,5,5]);"+ 
-                                 "         var cameragoal = [cameraTarget.translation[0]+camoffset[0],cameraTarget.translation[1]+camoffset[1],cameraTarget.translation[2]+camoffset[2]];"+
-                                 "         var togoal = [cameragoal[0] - camera.getLocX(),"+
-                                 "                       cameragoal[1] - camera.getLocY(),"+
-                                 "                       cameragoal[2] - camera.getLocZ()];"+
-                                 "         var blendfactor = 30;"+             
-                                 "         camera.setLoc(camera.getLocX() + togoal[0]/blendfactor,"+
-                                 "                       camera.getLocY() + togoal[1]/blendfactor,"+
-                                 "                       camera.getLocZ() + togoal[2]/blendfactor);"+
-                                 "         camera.Lookat([cameraTarget.translation[0],cameraTarget.translation[1],cameraTarget.translation[2]+2]);"+
-                                 "}"
-                                ,
-                                "this.GetNearist = function() { "+
-                                "var dot = -1;"+
-                                "var pos = null;"+
-                                "for(var node in vwf_view.kernel.kernel.models[0].model.nodes) { var lnode = vwf_view.kernel.kernel.models[0].model.nodes[node];"+
-                                    "if(lnode.PlayerNumber && lnode.PlayerNumber != this.shooter){"+
-                                    "   var thisdir = GLGE.subVec3(lnode.translation,this.translation);"+
-                                    "    thisdir = document.TerrainFunctions.normalize(thisdir);"+
-                                    "    var front = GLGE.mulMat4Vec3(GLGE.angleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,0,-1]);"+
-                                    "   var thisdot = GLGE.dotVec3(thisdir,front);"+
-                                    "   if(thisdot > dot){dot = thisdot; pos = lnode; this.targetid = node}"+
-                                    "}"+
-                                "}"+
-                                "return pos;"+
-                                "}"
+                                "this.delete = function(){this.active=false; this.parent.children.delete(this);}",
+                                "this.hit = function() {debugger;this.target.hit();this.delete();}"
                                 ]    
                 };
                
+                
                //Set the missile initial position
-                proto.properties.translation[0] = this.translation[0];
-                proto.properties.translation[1] = this.translation[1];
-                proto.properties.translation[2] = this.translation[2] + 4;
+                //proto.properties.translation[0] = this.translation[0];
+                //proto.properties.translation[1] = this.translation[1];
+                //proto.properties.translation[2] = this.translation[2] + 4;
                 
                 //rotate the missile to face the front of the humvee
                 var modelmatrix = this.turret.getModelMatrix();
@@ -277,37 +236,63 @@ scripts:
                 tempmodelmatrix[3] = 0;
                 tempmodelmatrix[7] = 0;
                 tempmodelmatrix[11] = 0;
-                var forward = GLGE.mulMat4Vec3(tempmodelmatrix,[0,1,0]);
+                tempmodelmatrix = goog.vec.Mat4.transpose(tempmodelmatrix,[]);
+                var forward = goog.vec.Mat4.multVec3(tempmodelmatrix,[0,1,0],[]);
                 var missilerotation = [];
                 var pointfront = [0,0,-1];
                 var to = forward;
                 to = document.TerrainFunctions.normalize(to);
-                var a = GLGE.crossVec3(pointfront,to);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + GLGE.dotVec3(pointfront,to) );    
+                var a = goog.vec.Vec3.cross(pointfront,to,[]);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + goog.vec.Vec3.dot(pointfront,to) );    
                 var angle = 0; var axis = [0,0,1];
                 var  tofront_norm = [];
                 goog.vec.Quaternion.normalize(tofront,tofront_norm);    
                 var currentrot = [];
                
-                angle = goog.vec.Quaternion.toAngleAxis(tofront_norm,axis);
+                var tmatrix = goog.vec.Quaternion.toRotationMatrix4(tofront_norm,[]);
                 missilerotation = [axis[0],axis[1],axis[2],angle/0.0174532925];   
-                
-                proto.properties.rotation[0] = missilerotation[0];
-                proto.properties.rotation[1] = missilerotation[1];
-                proto.properties.rotation[2] = missilerotation[2];
-                proto.properties.rotation[3] = missilerotation[3];
+                tmatrix[12] = this.translation[0];
+                tmatrix[13] = this.translation[1];
+                tmatrix[14] = this.translation[2]+4;
+                proto.properties.transform = tmatrix;
+            //    proto.properties.rotation[0] = missilerotation[0];
+            //    proto.properties.rotation[1] = missilerotation[1];
+            //    proto.properties.rotation[2] = missilerotation[2];
+            //    proto.properties.rotation[3] = missilerotation[3];
                 proto.properties.shooter = this.PlayerNumber;
-               
-                
+                proto.properties.targetpoint = this.GetNearist();
+                proto.properties.targetid = proto.properties.targetpoint[1];
+                proto.properties.targetpoint = proto.properties.targetpoint[0];
                 var newid = "missile" + this.numfired + "" + this.PlayerNumber;
                 console.log(newid);
-                this.camtarget = newid;
-                proto.uri = newid;
-                proto.id = newid;
-                //this.parent.children.create(proto, newid);
-                vwf_view.kernel.kernel.createNode(proto, null);
+               // this.camtarget = newid;
+               // proto.uri = newid;
+               // proto.id = newid;
+               
+                this.parent.children.create(newid,proto);
+                //vwf_view.kernel.kernel.createNode(proto, null);
                 
          }
+        this.GetNearist = function() 
+        { 
+            
+            var dot = -1;
+            var pos = null;
+            var nodename = '';
+            for(var node in this.parent.children)
+            { 
+                var lnode = this.parent.children[node];
+                if(lnode.PlayerNumber && lnode.PlayerNumber != this.PlayerNumber)
+                {
+                   var thisdir = goog.vec.Vec3.subtract(lnode.translation,this.translation,[]);
+                    thisdir = document.TerrainFunctions.normalize(thisdir);
+                    var front = goog.vec.Mat4.multVec3(goog.vec.Mat4.fromAngleAxis(this.rotation[3]*0.0174532925,[this.rotation[0],this.rotation[1],this.rotation[2]]),[0,0,-1],[]);
+                   var thisdot = goog.vec.Vec3.dot(thisdir,front,[]);
+                   if(thisdot > dot){dot = thisdot; pos = lnode.translation; nodename = lnode.name;}
+                }
+            }
+            return [pos,nodename];
+        }
          this.turn = function(dir)
          {
             var t = this.RotationAmt + dir * this.steerAmt/16.0 * .03 * this.Momentum;
@@ -418,7 +403,14 @@ scripts:
                  
          }
          
-     
+        this.SceneDestroy = function()
+        {
+           // var parms = new Array();
+           // parms.push(document[document.PlayerNumber +'link'].id);
+            //alert(JSON.stringify(parms));
+           // vwf_view.kernel.callMethod('index-vwf','deleteplayer',parms);
+           this.parent.children.delete(this);
+        }
          var that = this;
        
         

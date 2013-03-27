@@ -42,19 +42,6 @@ scripts:
       this.camera.transform = [ -1,0,0,0,0,-1,0,0,0,0,1,0,16,616,90,1 ];
          
     }
-    this.deleteplayer = function(e)
-    {
-      
-        var num = vwf_view.kernel.kernel.models[0].model.nodes[e].PlayerNumber;
-        
-      
-        
-        var div = document.getElementById("Player " + num + 'label');
-        div.parentNode.removeChild(div);
-        document[num + 'link'] = null;
-        
-        vwf_view.kernel.kernel.deleteNode(e,0,null);
-        
-    }
+    
     
    
