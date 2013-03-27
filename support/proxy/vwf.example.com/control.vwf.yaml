@@ -18,27 +18,16 @@
 
 ---
 properties:
-  intermediateValue: 
-    set: |
-      this.intermediateValue = value;
-      if("animationTime" in this && !this.animationPlaying) {
-        if(this.positions.length > 1) {
-          for(var i=0; i<(this.positions.length-1); i++) {
-            if(this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
-              var animationRatio = (this.positions[i+1].animationTime - this.positions[i].animationTime) / (this.positions[i+1].controlValue - this.positions[i].controlValue);
-              this.animationTime = this.intermediateValue * animationRatio;
-              break;
-            }
-          }
-        }
-      }
-    value: 0
   controlValue: 
     set: |
       if("animationTime" in this && !this.animationPlaying) {
         for(var i=0; i<this.positions.length; i++) {
           if(value == this.positions[i].controlValue) {
             this.animationTime = this.positions[i].animationTime;
+          }
+          else if(i+1 < this.positions.length && value > this.positions[i].controlValue && value < this.positions[i+1].controlValue) {
+            var animationRatio = (this.positions[i+1].animationTime - this.positions[i].animationTime) / (this.positions[i+1].controlValue - this.positions[i].controlValue);
+            this.animationTime = value * animationRatio;
           }
         }
       }
@@ -183,9 +172,6 @@ scripts:
       this.controlDirection = 1;
       this.controlTick(this.positions[this.positions.length-1]);
     }
-    else {
-      this.intermediateValue = this.controlValue;
-    }
   }
 
   this.pointerUp = function( pointerInfo, pickInfo ) {
@@ -204,7 +190,7 @@ scripts:
             this.controlPlaying = true;
             this.controlTick(this.positions[i + this.controlDirection]);
           }
-          else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
+          else if(i+1 < this.positions.length && this.controlValue > this.positions[i].controlValue && this.controlValue < this.positions[i+1].controlValue) {
             if(this.controlDirection == 1) {
               this.controlPlaying = true;
               this.controlTick(this.positions[i + 1]);
@@ -216,12 +202,9 @@ scripts:
           }
         }
         else {
-          if(this.intermediateValue == this.positions[i].controlValue) {
-            this.controlValue = this.positions[i].controlValue;
-          }
-          else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
+          if(i+1 < this.positions.length && this.controlValue > this.positions[i].controlValue && this.controlValue < this.positions[i+1].controlValue) {
             var nearPosition, farPosition;
-            if(Math.abs((this.positions[i].controlValue - this.intermediateValue)) < Math.abs((this.positions[i+1].controlValue - this.intermediateValue))) {
+            if(Math.abs((this.positions[i].controlValue - this.controlValue)) < Math.abs((this.positions[i+1].controlValue - this.controlValue))) {
               nearPosition = this.positions[i];
               farPosition = this.positions[i+1];
             }
@@ -232,21 +215,15 @@ scripts:
             switch(nearPosition.controlType) {
               case 1:
                 this.controlPlaying = true;
-                this.controlDirection = this.intermediateValue < nearPosition.controlValue ? 1 : -1;
+                this.controlDirection = this.controlValue < nearPosition.controlValue ? 1 : -1;
                 this.controlTick(nearPosition);
                 break;
               case -1:
                 if(this.farPosition.controlType != -1) {
                   this.controlPlaying = true;
-                  this.conthis.controlDirection = this.intermediateValue < farPosition.controlValue ? 1 : -1;
+                  this.conthis.controlDirection = this.controlValue < farPosition.controlValue ? 1 : -1;
                   this.controlTick(farPosition);
                 }
-                else {
-                  this.controlValue = this.intermediateValue;
-                }
-              case 0:
-                this.controlValue = this.intermediateValue;
-                break;
             }
             break;
           }
@@ -265,31 +242,31 @@ scripts:
       var diff = this.input.change();
       if(Math.abs(diff[0]) >= Math.abs(diff[1])) {
         var changeBy = diff[0] * this.controlScale;
-        if(diff[0] > 0 && this.intermediateValue < maxValue) {
+        if(diff[0] > 0 && this.controlValue < maxValue) {
           this.controlDirection = 1;
-          if((this.intermediateValue + changeBy) < maxValue) {
-            this.intermediateValue = this.intermediateValue + changeBy;
+          if((this.controlValue + changeBy) < maxValue) {
+            this.controlValue = this.controlValue + changeBy;
           }
         }
-        else if(diff[0] < 0 && this.intermediateValue > minValue) {
+        else if(diff[0] < 0 && this.controlValue > minValue) {
           this.controlDirection = -1;
-          if((this.intermediateValue + changeBy) > minValue) {
-            this.intermediateValue = this.intermediateValue + changeBy;
+          if((this.controlValue + changeBy) > minValue) {
+            this.controlValue = this.controlValue + changeBy;
           }
         }
       }
       else {
         var changeBy = diff[1] * this.controlScale;
-        if(diff[1] > 0 && this.intermediateValue < maxValue) {
+        if(diff[1] > 0 && this.controlValue < maxValue) {
           this.controlDirection = 1;
-          if((this.intermediateValue + changeBy) < maxValue) {
-            this.intermediateValue = this.intermediateValue + changeBy;
+          if((this.controlValue + changeBy) < maxValue) {
+            this.controlValue = this.controlValue + changeBy;
           }
         }
-        else if(diff[1] < 0 && this.intermediateValue > minValue) {
+        else if(diff[1] < 0 && this.controlValue > minValue) {
           this.controlDirection = -1;
-          if((this.intermediateValue + changeBy) > minValue) {
-            this.intermediateValue = this.intermediateValue + changeBy;
+          if((this.controlValue + changeBy) > minValue) {
+            this.controlValue = this.controlValue + changeBy;
           }
         }
       }
