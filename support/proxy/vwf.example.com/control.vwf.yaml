@@ -35,16 +35,6 @@ properties:
     value: 0
   controlValue: 
     set: |
-      if(this.positions.length > 1) {
-        if(value > this.positions[this.positions.length-1].controlValue) {
-          this.controlDirection = -1;
-          value = this.positions[this.positions.length-2].controlValue;
-        }
-        else if(value < this.positions[0].controlValue) {
-          this.controlDirection = 1;
-          value = this.positions[1].controlValue;
-        }
-      }
       if("animationTime" in this && !this.animationPlaying) {
         for(var i=0; i<this.positions.length; i++) {
           if(value == this.positions[i].controlValue) {
@@ -69,9 +59,11 @@ properties:
     value: 1
   controlPlaying: false
   controlMomentary: false
+  linkedControls: []
 methods:
   mouseInit: 
   controlTick:
+  processLinkedControls:
 events:
   controlValueUpdated:
   pointerDown:
@@ -211,7 +203,6 @@ scripts:
             }
             this.controlPlaying = true;
             this.controlTick(this.positions[i + this.controlDirection]);
-            break;
           }
           else if(i+1 < this.positions.length && this.intermediateValue > this.positions[i].controlValue && this.intermediateValue < this.positions[i+1].controlValue) {
             if(this.controlDirection == 1) {
@@ -262,6 +253,7 @@ scripts:
         }
       }
     }
+    this.processLinkedControls();
     this.input.clear();
   }
 
@@ -301,6 +293,7 @@ scripts:
           }
         }
       }
+      this.processLinkedControls();
       this.input.previous.pointerInfo = pointerInfo;
       this.input.previous.pickInfo = pickInfo;
     }
@@ -312,6 +305,7 @@ scripts:
         this.controlValue = nextPosition.controlValue;
         this.controlPlaying = false;
       }
+      this.processLinkedControls();
       // Schedule the next tick if still playing.
       if ( this.controlPlaying ) {
         if ( Math.abs(nextPosition.animationTime - this.animationTime) > 1/60 ) {
@@ -321,6 +315,17 @@ scripts:
           this.animationTime = nextPosition.animationTime;
           this.at( Math.abs(nextPosition.animationTime - this.animationTime) ).controlTick(nextPosition); // exactly at end
         }
+      }
+    }
+  }
+
+  this.processLinkedControls = function() {
+    for(var i=0; i<this.linkedControls.length; i++) {
+      var linkedControl = this.find("//" + this.linkedControls[i]);
+      if(linkedControl.length > 0) {
+        linkedControl[0].controlDirection = this.controlDirection;
+        linkedControl[0].controlValue = this.controlValue;
+        linkedControl[0].animationTime = this.animationTime;
       }
     }
   }

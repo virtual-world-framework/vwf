@@ -353,6 +353,7 @@ children:
                 properties:
                   controlValue: 1
                   animationTime: 0.5
+                  linkedControls: ["TirePassFront", "TireDriverFront"]
                 children: 
                   Horn: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -401,17 +402,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.TirePassFront.controlValue = this.controlValue;
-                        this.parent.TireDriverFront.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([0.942, 0, 0.335, (time - 0.5) * -720], 0, "rotated");
-                    this.parent.TirePassFront.controlDirection = this.controlDirection;
-                    this.parent.TirePassFront.animationTime = time;
-                    this.parent.TireDriverFront.controlDirection = this.controlDirection;
-                    this.parent.TireDriverFront.animationTime = time;
                   }
               TurnSignal: 
                 extends: http://vwf.example.com/node3.vwf
@@ -1051,6 +1044,7 @@ children:
                   animationTime: 0
                   controlValue: 0
                   controlScale: 2
+                  linkedControls: ["WiperDriver"]
                 children: 
                   Untitled_011: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -1112,14 +1106,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.WiperDriver.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([-1, 0, 0, (time - 0.125) * 360], 0, "rotated");
-                    this.parent.WiperDriver.controlDirection = this.controlDirection;
-                    this.parent.WiperDriver.animationTime = time;
                   }
               WiperDriver: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -1131,6 +1120,7 @@ children:
                   animationTime: 0
                   controlValue: 0
                   controlScale: 2
+                  linkedControls: ["WiperPass"]
                 children: 
                   Untitled_010: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -1192,14 +1182,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.WiperPass.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([-1, 0, 0, (time - 0.125) * 360], 0, "rotated");
-                    this.parent.WiperPass.controlDirection = this.controlDirection;
-                    this.parent.WiperPass.animationTime = time;
                   }
               GunMount: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -1557,6 +1542,7 @@ children:
                   animationRate: 1.5
                   controlValue: 1
                   animationTime: 0.5
+                  linkedControls: ["SteeringWheel", "TireDriverFront"]
                 children: 
                   glgeObj36: 
                     extends: http://vwf.example.com/node3.vwf
@@ -1595,17 +1581,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.TireDriverFront.controlValue = this.controlValue;
-                        this.parent.SteeringWheel.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([0, 0, 1, (time - 0.5) * 60], 0, "rotated");
-                    this.parent.TireDriverFront.controlDirection = this.controlDirection;
-                    this.parent.TireDriverFront.animationTime = time;
-                    this.parent.SteeringWheel.controlDirection = this.controlDirection;
-                    this.parent.SteeringWheel.animationTime = time;
                   }
               TireDriverFront: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -1618,6 +1596,7 @@ children:
                   animationRate: 1.5
                   controlValue: 1
                   animationTime: 0.5
+                  linkedControls: ["SteeringWheel", "TirePassFront"]
                 children: 
                   glgeObj37: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -1656,17 +1635,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.TirePassFront.controlValue = this.controlValue;
-                        this.parent.SteeringWheel.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([0, 0, 1, (time - 0.5) * 60], 0, "rotated");
-                    this.parent.TirePassFront.controlDirection = this.controlDirection;
-                    this.parent.TirePassFront.animationTime = time;
-                    this.parent.SteeringWheel.controlDirection = this.controlDirection;
-                    this.parent.SteeringWheel.animationTime = time;
                   }
               HumveeBody: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -1681,6 +1652,7 @@ children:
                 - http://vwf.example.com/control.vwf
                 properties:
                   controlScale: 2
+                  linkedControls: ["Hood", "HoodLatchDriver"]
                 children: 
                   Untitled_002: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -1710,17 +1682,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.Hood.controlValue = this.controlValue;
-                        this.parent.HoodLatchDriver.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([-1, 0, 0, time * 360], 0, "rotated");
-                    this.parent.Hood.controlDirection = this.controlDirection;
-                    this.parent.Hood.animationTime = time;
-                    this.parent.HoodLatchDriver.controlDirection = this.controlDirection;
-                    this.parent.HoodLatchDriver.animationTime = time;
                   }
               HoodLatchDriver: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -1730,6 +1694,7 @@ children:
                 - http://vwf.example.com/control.vwf
                 properties:
                   controlScale: 2
+                  linkedControls: ["HoodLatchPass", "Hood"]
                 children: 
                   Untitled_001: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -1759,17 +1724,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.Hood.controlValue = this.controlValue;
-                        this.parent.HoodLatchPass.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([1, 0, 0, time * 360], 0, "rotated");
-                    this.parent.Hood.controlDirection = this.controlDirection;
-                    this.parent.Hood.animationTime = time;
-                    this.parent.HoodLatchPass.controlDirection = this.controlDirection;
-                    this.parent.HoodLatchPass.animationTime = time;
                   }
               Hood: 
                 extends: http://vwf.example.com/node3.vwf 
@@ -1779,6 +1736,7 @@ children:
                 - http://vwf.example.com/control.vwf
                 properties:
                   controlScale: 2
+                  linkedControls: ["HoodLatchPass", "HoodLatchDriver"]
                 children: 
                   Untitled: 
                     extends: http://vwf.example.com/node3.vwf 
@@ -1808,17 +1766,9 @@ children:
                   this.animationUpdate = function(time, duration) {
                     if(!initialRotation) {
                       initialRotation = this.rotation;
-                      this.controlValueUpdated = this.events.add(function() {
-                        this.parent.HoodLatchDriver.controlValue = this.controlValue;
-                        this.parent.HoodLatchPass.controlValue = this.controlValue;
-                      }, this);
                     }
                     this.rotation = initialRotation;
                     this.rotateBy([0, -1, 0, time * 360], 0, "rotated");
-                    this.parent.HoodLatchDriver.controlDirection = this.controlDirection;
-                    this.parent.HoodLatchDriver.animationTime = time;
-                    this.parent.HoodLatchPass.controlDirection = this.controlDirection;
-                    this.parent.HoodLatchPass.animationTime = time;
                   }
               Ground: 
                 extends: http://vwf.example.com/node3.vwf 
