@@ -23,8 +23,6 @@ children:
     source: humvee.DAE
     type: model/vnd.collada+xml
     children:
-      interiorCamera:
-        extends: http://vwf.example.com/camera.vwf
       bone2: 
         extends: http://vwf.example.com/node3.vwf 
         children: 
@@ -43,6 +41,11 @@ children:
                   transformDuration: 1
                   maxValue: 1
                   dragSpeed: 5
+              HumveeBody: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj38: 
+                    extends: http://vwf.example.com/node3.vwf 
   lesson:
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
@@ -110,7 +113,7 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Jump In" );
-                var humvee = this.find( "/humvee" )[ 0 ];
+                var humvee = this.find( "/humvee/bone2/Scene/HumveeBody" )[ 0 ];
                 humvee.pointerClick = humvee.events.add( function() {
                   humvee.pointerClick = humvee.events.flush( this );
                   this.logger.info( "Step: Jump In - Completed" );
@@ -207,8 +210,10 @@ scripts:
     this.camera.translation = this.cameraPose1.translation;
     this.camera.far = 3000;
 
-    this.cameraPose14.transform = [-0.8957634568214417,0.44452738761901855,0,0,-0.44452738761901855,-0.8957634568214417,0,0,0,0,1,0,-14.165600776672363,-7.067508220672607,66.83444213867188,1];
-    // [-14.165600776672363,-7.067508220672607,66.83444213867188]
+    this.cameraPose14.transform = [-0.8957634568214417,0.44452738761901855,0,0,
+      -0.44452738761901855,-0.8957634568214417,0,0,
+      0,0,1,0,
+      -14.165600776672363,-7.067508220672607,66.83444213867188,1];
 
     this.cameraPose2.transform = [-0.2800654172897339,0.9599801301956177,0,0,
       -0.9599801301956177,-0.2800654172897339,0,0,
