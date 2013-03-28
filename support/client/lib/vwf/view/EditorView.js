@@ -400,8 +400,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 		$('#MenuCreateUVMap').click(function(e){
 			_Editor.CreateModifier('uvmap',document.PlayerNumber);
 		});
-		$('#MenuCreateNoise').click(function(e){
-			_Editor.CreateModifier('noise',document.PlayerNumber);
+		$('#MenuCreatePerlinNoise').click(function(e){
+			_Editor.CreateModifier('perlinnoise',document.PlayerNumber);
+		});
+		$('#MenuCreateSimplexNoise').click(function(e){
+			_Editor.CreateModifier('simplexnoise',document.PlayerNumber);
 		});
 		$('#MenuCreateOffset').click(function(e){
 			_Editor.CreateModifier('offset',document.PlayerNumber);

@@ -586,7 +586,12 @@ function startVWF(){
 	  socket.on('message', function (msg) {
 		
 			//need to add the client identifier to all outgoing messages
-		    var message = JSON.parse(msg);
+			try(
+				var message = JSON.parse(msg);
+			)catch(e)
+			{
+				return;
+			}
 			//console.log(message);
 			message.client = socket.id;
 			
@@ -693,12 +698,16 @@ function startVWF(){
 				  if(checkOwner(node,sendingclient.loginData.UID) || message.node == 'index-vwf')
 				  {	
 						var childComponent = message.parameters[0];
+						if(!childComponent) return;
 						var childName = message.member;
+						if(!childName) return;
 						var childID = childComponent.id || childComponent.uri || ( childComponent["extends"] ) + "." + childName; 
 						childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); 
 						childComponent.id = childID;
 						if(!node.children) node.children = {};
 						node.children[childID] = childComponent;
+						if(!childComponent.properties)
+							childComponent.properties = {};
 						fixIDs(node.children[childID]);
 						global.instances[namespace].Log("created " + childID,1);
 				  }

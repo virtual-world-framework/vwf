@@ -5,14 +5,9 @@ properties:
     value: 0
     set: |
             this.amount = value;
-            this.dirtyStack();
-  octaves:
-    value: 256
-    set: |
-            this.octaves = value;
-            this.dirtyStack();          
+            this.dirtyStack();        
   noisescale:
-    value: 1
+    value: .1
     set: |
             this.noisescale = value;
             this.dirtyStack();
@@ -30,7 +25,7 @@ properties:
     value: 1
     set: |
             this.seed = value;
-            debugger;
+            
             this.random = this.Random(this.seed);
          
              this.permutation = [];
@@ -38,7 +33,7 @@ properties:
              {
                 this.permutation.push(Math.floor(this.random.getRandomNumber()*256));
              }         
-             this.Perlin = new this.PerlinNoise(this.permutation);
+            
             this.simplex = new SimplexNoise(this.random.getRandomNumber);
             this.dirtyStack(); 
   effectX:
@@ -88,7 +83,7 @@ properties:
       property: noisescale
       type: slider
       min: 0
-      max: 1
+      max: .3
       step: .01
     iterations:
       displayname: iterations
@@ -96,13 +91,6 @@ properties:
       type: slider
       min: 2
       max: 5
-      step: 1	
-    octaves:
-      displayname: Octaves
-      property: octaves
-      type: slider
-      min: 8
-      max: 256
       step: 1	  
     seed:
       displayname: random seed
@@ -169,8 +157,7 @@ scripts:
              {
                 this.permutation.push(Math.floor(this.random.getRandomNumber()*256));
              }         
-             this.Perlin = new this.PerlinNoise(this.permutation);
-             debugger;
+            
              this.simplex = new SimplexNoise(this.random.getRandomNumber);
         
         }
@@ -192,48 +179,7 @@ scripts:
         return MATH.mulMat4Vec3(NewMatrix,Vector);
     }
     
-    this.PerlinNoise = function(permutation) {
 
-        this.noise = function(x, y, z,o) {
-
-           if(!o)
-            o = 256
-           var p = new Array(512)
-          
-           for (var i=0; i < o ; i++) 
-         p[o+i] = p[i] = permutation[i]; 
-
-              var X = Math.floor(x) & 255,                  // FIND UNIT CUBE THAT
-                  Y = Math.floor(y) & 255,                  // CONTAINS POINT.
-                  Z = Math.floor(z) & 255;
-              x -= Math.floor(x);                                // FIND RELATIVE X,Y,Z
-              y -= Math.floor(y);                                // OF POINT IN CUBE.
-              z -= Math.floor(z);
-              var    u = fade(x),                                // COMPUTE FADE CURVES
-                     v = fade(y),                                // FOR EACH OF X,Y,Z.
-                     w = fade(z);
-              var A = p[X  ]+Y, AA = p[A]+Z, AB = p[A+1]+Z,      // HASH COORDINATES OF
-                  B = p[X+1]+Y, BA = p[B]+Z, BB = p[B+1]+Z;      // THE 8 CUBE CORNERS,
-
-              return scale(lerp(w, lerp(v, lerp(u, grad(p[AA  ], x  , y  , z   ),  // AND ADD
-                                             grad(p[BA  ], x-1, y  , z   )), // BLENDED
-                                     lerp(u, grad(p[AB  ], x  , y-1, z   ),  // RESULTS
-                                             grad(p[BB  ], x-1, y-1, z   ))),// FROM  8
-                             lerp(v, lerp(u, grad(p[AA+1], x  , y  , z-1 ),  // CORNERS
-                                             grad(p[BA+1], x-1, y  , z-1 )), // OF CUBE
-                                     lerp(u, grad(p[AB+1], x  , y-1, z-1 ),
-                                             grad(p[BB+1], x-1, y-1, z-1 )))));
-           }
-           function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-           function lerp( t, a, b) { return a + t * (b - a); }
-           function grad(hash, x, y, z) {
-              var h = hash & 15;                      // CONVERT LO 4 BITS OF HASH CODE
-              var u = h<8 ? x : y,                 // INTO 12 GRADIENT DIRECTIONS.
-                     v = h<4 ? y : h==12||h==14 ? x : z;
-              return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
-           } 
-           function scale(n) { return (1 + n)/2; }
-    }
     
     this.Random = function(seed)
     {
@@ -287,13 +233,11 @@ scripts:
     {
             
             var z =0;
-           // return 10-MATH.lengthVec3([x,y,z]);
+        
             for(var j = 1; j < iterations; j++)
             {
               
-              //var z1 = this.Perlin.noise((randarray[j-1]+(x+ phase))*scale*j ,
-              //                      (randarray[j-1]+(y+ phase))*scale*j ,
-              //                      (randarray[j-1]+(z+ phase))*scale*j,this.octaves );
+             
               
               var z1 = this.simplex.noise3D((randarray[j-1]+(x+ phase))*scale*j ,
                                     (randarray[j-1]+(y+ phase))*scale*j ,
@@ -323,11 +267,7 @@ scripts:
             positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
          }
          
-         var normals = [];
-         for(var i=0;i<m.faces.length; i++)
-         {
-            normals.push([m.faces[i].normal.x,m.faces[i].normal.y,m.faces[i].normal.z]);
-         }
+         
          
          var bounds = m.boundingBox;
          if(!bounds)
@@ -356,7 +296,7 @@ scripts:
          }
          for(var i=0;i<positions.length; i+=1)
          {
-             var totalnorm = normals[i] || [0,0,0];
+             
              var thispos = positions[i];
              if(useWorldSpace == true)
              {
@@ -366,84 +306,28 @@ scripts:
              {
                 
                 var z = this.getNoise(randZ,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
-                var zx1 = this.getNoise(randZ,(thispos[0] +.1)/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
-                var zy1 = this.getNoise(randZ,thispos[0]/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations,phase);
-                var x1 = [positions[i][0]+.1,positions[i][1],positions[i][2]+ zx1*amt];
-                var y1 = [positions[i][0],positions[i][1]+.1,positions[i][2]+ zy1*amt];
+               
                 positions[i][2] += z * amt;
                 
-            /*    var dx = MATH.subVec3(x1,positions[i]);
-                dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
-                var dy = MATH.subVec3(y1,positions[i]);
-                dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
-                var norm = MATH.crossVec3(dx,dy);
-                
-                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
-                
-                var a = MATH.crossVec3(norm,[0,0,1]);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[0,0,1]) );  
-                var  tofront_norm = [];
-                
-                goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
-                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix()); */
-            //    if(i < normals.length)
-            //    normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
-                //normals[i][1] *= -1;
-                 //normals[i][0] *= -1;
+           
              }
              if(effectX)
              {
                 var x = this.getNoise(randX,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
-                var xy1 = this.getNoise(randX,(thispos[0])/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations,phase);
-                var xz1 = this.getNoise(randX,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations,phase);
-                var y1 = [positions[i][0]+ xy1*amt,positions[i][1]+.1,positions[i][2]];
-                var z1 = [positions[i][0]+ xz1*amt,positions[i][1],positions[i][2]+.1];
+               
                 positions[i][0] += x * amt;
                 
-             /*   var dy = MATH.subVec3(y1,positions[i]);
-                dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
-                var dz = MATH.subVec3(z1,positions[i]);
-                dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
-                var norm = MATH.crossVec3(dy,dz);
-                
-                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
-                
-                var a = MATH.crossVec3(norm,[1,0,0]);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[1,0,0]) );  
-                var  tofront_norm = [];
-                
-                goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
-                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix()); */
-            //    if(i < normals.length)
-            //    normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
+            
              }
              if(effectY)
              {
                 var y = this.getNoise(randY,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
-                var yx1 = this.getNoise(randY,(thispos[0]+.1)/length,(thispos[1])/width,thispos[2]/height,scale,iterations,phase);
-                var yz1 = this.getNoise(randY,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations,phase);
-                var x1 = [positions[i][0]+.1,positions[i][1]+ yx1*amt,positions[i][2]];
-                var z1 = [positions[i][0],positions[i][1]+ yz1*amt,positions[i][2]+.1];
+               
                 positions[i][1] += y * amt;
                 
-             /*   var dx = MATH.subVec3(x1,positions[i]);
-                dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
-                var dz = MATH.subVec3(z1,positions[i]);
-                dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
-                var norm = MATH.crossVec3(dz,dx);
-                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
-                
-                var a = MATH.crossVec3(norm,[0,1,0]);
-                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[0,1,0]) );  
-                var  tofront_norm = [];
-                
-                goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
-                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
-                if(i < normals.length)
-                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]); */
+             
               }
-            //  if(i < normals.length)
-            //  normals[i] = MATH.scaleVec3(normals[i],1/MATH.lengthVec3(normals[i]));
+            
          }
          
          for(var i=0;i<positions.length; i+=1)
@@ -457,26 +341,14 @@ scripts:
          
 
          
-        /* for(var i=0;i<normals.length; i+=1)
-         {
-            m.faces[i].normal.x = (normals[i][0]);
-            m.faces[i].normal.y = (normals[i][1]);
-            m.faces[i].normal.z = (normals[i][2]);
-            for(var j = 0; j < m.faces[i].vertexNormals.length; j++)
-            {
-                m.faces[i].vertexNormals[j].x = (normals[i][0]);
-                m.faces[i].vertexNormals[j].y = (normals[i][1]);
-                m.faces[i].vertexNormals[j].z = (normals[i][2]);
-         }
-         }
-         */
+        
          if(this.ComputeNormals)
          {
             m.computeFaceNormals();
             m.computeVertexNormals();
             m.normalsNeedUpdate = true;
          }
-        
+         m.dirtyMesh = true;
     }
     this.updateStack = function()
     {

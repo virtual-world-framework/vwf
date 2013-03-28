@@ -699,13 +699,15 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
                 if ( this.now != fields.time ) {
                     this.now = fields.time;
-				
+					
                     var time = (this.now - this.lastTick);
 					if(time < 1)
 					{
 						
-						while(time > .05)
+						while(time > .045)
 						{	
+							
+							
 							this.tick();
 							time -= .05;
 							//console.log('tick',this.now);
@@ -726,7 +728,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 this.client_ = fields.client;
 
                 // Perform the action.
-
+				if(fields.action != 'tick')
                 this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, function( ready ) {
                     if ( Boolean( ready ) != Boolean( queue.ready ) ) {
                         vwf.logger.info( "vwf.dispatch:", ready ? "resuming" : "pausing", "queue at time", queue.time, "for", fields.action );
@@ -740,8 +742,8 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
             // Set the simulation time to the new current time. Tick if the time advances.
 
             if ( queue.ready && this.now != queue.time ) {
-                this.now = queue.time;
-                this.tick();
+                //this.now = queue.time;
+                //this.tick();
             }
             
         };
@@ -770,7 +772,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
 
 			
 		
-             this.models.forEach( function( model ) {
+            this.models.forEach( function( model ) {
                 model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
             }, this );
 			

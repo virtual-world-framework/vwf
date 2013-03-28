@@ -60,12 +60,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             this.state.nodes = {}; // id => { name: string, MATHObject: MATH.Object, MATH.Collada, MATH.Light, or other...? }
             this.state.kernel = this.kernel.kernel.kernel;
             this.state.sceneRootID = "index-vwf";
-
+			
             this.delayedProperties = {};
+			this.subDriverFactory = new SubDriverFactory();
             
         },
 
-
+		initializingNode: function(nodeID,childID)
+		{
+	      
+          var node = this.state.nodes[ childID ]; // { name: childName, MATHObject: undefined }
+          if(!node) node = this.state.scenes[ childID ]; // { name: childName, MATHObject: undefined }
+          var value = undefined;
+          
+          //this driver has no representation of this node, so there is nothing to do.
+          if(!node) return;
+          
+		  if(node.initializingNode)
+				node.initializingNode();
+		},
         // == Model API ============================================================================
 
         // -- creatingNode ------------------------------------------------------------------------
@@ -310,7 +323,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						node.threeObject = new THREE.Object3D();
 						node.threeObject.vwfID = node.ID;
 					}
-				} else
+				} 
+				//use a pluggable model for createing nodes. This should make it easier to develop a driver that is not one long
+				//set of gets and sets
+				else if(childType ==  "subDriver/threejs")
+				{
+					node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, childSource, childName);
+
+					node.name= childName,    
+					node.ID=childID;
+					node.parentID= nodeID;
+					node.sourceType= childType;
+					node.type= childExtendsID;
+					node.sceneID= this.state.sceneRootID;
+
+					node.threeObject = new THREE.Object3D();
+					node.threeObject.add(node.getRoot());
+					threeParent.add(node.threeObject);
+				} 
+				else
 				{     
                         
                         node = this.state.nodes[childID] = {
@@ -342,6 +373,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     if(!node.threeObject.vwfID) node.threeObject.vwfID = childID;
                     if(!node.threeObject.name) node.threeObject.name = childName;
                 }
+				if(node && parentNode)
+				{
+					if(!parentNode.children)
+						parentNode.children = [];
+					parentNode.children.push(node)
+					node.parentNode = parentNode;
+				}
             
             }
             
@@ -373,6 +411,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						
 							restoreObject(childNode.threeObject);
 					}
+					
+					var parentNode = childNode.parentNode;
+					parentNode.children.splice(parentNode.children.indexOf(childNode));
+					
                     delete this.state.nodes[nodeID];
                 }               
             }
@@ -438,6 +480,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
           //this driver has no representation of this node, so there is nothing to do.
           if(!node) return;
           
+		  if(node.settingProperty)
+				value = node.settingProperty(propertyName,propertyValue);
+		  
           var threeObject = node.threeObject;
           if(!threeObject)
             threeObject = node.threeScene;
@@ -1059,6 +1104,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
           //this driver has no representation of this node, so there is nothing to do.
           if(!node) return;
           
+		  if(node.gettingProperty)
+				value = node.gettingProperty(propertyName);
+		  if(value) return value;		
           var threeObject = node.threeObject;
           if( !threeObject )
             threeObject = node.threeScene;
@@ -1232,8 +1280,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-            return undefined;
+        callingMethod: function( nodeID, methodName, args /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+              var value = undefined;
+			  
+			//console.log([nodeID,propertyName,propertyValue]);
+			  var node = this.state.nodes[ nodeID ]; // { name: childName, MATHObject: undefined }
+			  if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, MATHObject: undefined }
+			  
+			  //this driver has no representation of this node, so there is nothing to do.
+			  if(!node) return value;
+			  
+			  if(node.callingMethod)
+					value = node.callingMethod(methodName,args);
+			
+              return value;			
         },
 
 
@@ -3240,7 +3300,94 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         data = decompressJsonStrings(data);
         return data;
     }
-
-
-
+	function SubDriverFactory()
+	{
+		this.factories = {};
+		this.loadSubDriver = function(source)
+		{
+			
+			var script = $.ajax({url:source,async:false}).responseText;
+			if(!script) return null;
+			var factory = eval(script);
+			if(!factory) return null;
+			if(factory.constructor != Function) return null;
+			return factory;
+		
+		}
+		this.createNode = function(childID, childSource, childName)
+		{			
+			
+			var APINames = ['callingMethod','settingProperty','gettingProperty','initializingNode','addingChild'];
+			var node = null;
+			if(this.factories[childSource])
+				node = this.factories[childSource](childID, childSource, childName);
+			else
+			{
+				this.factories[childSource] = this.loadSubDriver(childSource);
+				node = this.factories[childSource](childID, childSource, childName);
+			}
+			
+			if(node.inherits)
+			if(node.inherits.constructor == Array)
+			{
+				for(var i =0; i < node.inherits.length; i++)
+				{	
+					var proto = this.createNode('',node.inherits[i],'');
+					
+					for(var j = 0; j < APINames.length; j++)
+					{	
+						var api = APINames[j];
+						if(!node[api+'Internal'])
+						{
+						
+							var capi = api+"";
+							node[capi+'Internal'] = [];
+							if(node[capi])
+								node[capi+'Internal'].push(node[capi]);
+							node[capi] = eval("var f = function(arg0,arg1,arg2,arg3,arg4,arg5)\n"+
+								"{\n"+
+									"var ret = undefined;\n"+
+									"for(var i =0; i < this['"+capi+'Internal'+"'].length; i++)\n"+
+									"	ret = ret || this['"+capi+'Internal'+"'][i].call(this,arg0,arg1,arg2,arg3,arg4,arg5);\n"+
+									"return ret;\n"+
+								"}; f;"
+								);	
+							if(!proto[api+'Internal'])
+							{
+								if(proto[capi])
+									node[capi+'Internal'].push(proto[capi]);
+							}
+							else
+							{
+								for(var n = 0; n < proto[api+'Internal'].length; n++)
+								{
+									node[api+'Internal'].push(proto[api+'Internal'][n]);
+								}
+							}
+						}else
+						{
+							node[api+'Internal'].push(proto[api]);
+							//node[capi] = node[capi].bind(node);
+						}
+						
+					}
+					var keys = Object.keys(proto);
+					for(var k = 0; k < keys.length; k++ )
+					{
+						var key = keys[k];
+						if(APINames.indexOf(key) == -1)
+							if(!node.hasOwnProperty(key))
+							{
+								if(proto[key].constructor == Function)
+									node[key] = proto[key].bind(node);
+								else
+									node[key] = proto[key];
+							}
+					}		
+				}
+			}
+			return node;
+			
+		}
+	}
 });

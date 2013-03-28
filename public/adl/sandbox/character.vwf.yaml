@@ -475,7 +475,7 @@ scripts:
         //note that we could change the update mechanism to avoid getting out of sync
         if(this.updatecounter > 80 && document["PlayerNumber"] == this.PlayerNumber)
           {
-            console.log('sent update');
+            
             vwf_view.kernel.setProperty(this.id,'transform',this.transform,0,null);
              this.updatecounter = 0;
           }

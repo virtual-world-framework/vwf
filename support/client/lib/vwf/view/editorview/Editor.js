@@ -392,7 +392,7 @@ function Editor()
 							hits[i].object = hits[i].object.parent;
 						if(hits[i] && hits[i].object)
 							vwfnode = hits[i].object.vwfID;
-						if(vwfhits.indexOf(vwfnode) == -1)
+						if(vwfhits.indexOf(vwfnode) == -1 && vwfnode)
 							vwfhits.push(vwfnode);	
 					}
 					SelectObject(vwfhits,this.PickMod);
