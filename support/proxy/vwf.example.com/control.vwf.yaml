@@ -20,7 +20,7 @@
 properties:
   controlValue: 
     set: |
-      if("animationTime" in this && !this.animationPlaying) {
+      if("animationTime" in this && !this.animationPlaying && this.positions) {
         for(var i=0; i<this.positions.length; i++) {
           if(value == this.positions[i].controlValue) {
             this.animationTime = this.positions[i].animationTime;
@@ -119,9 +119,7 @@ scripts:
         this.logger.info( "control position", position.name, position.controlValue );
 
       }, this );
-
     }
-
   } //@ sourceURL=http://vwf.example.com/control.vwf/scripts~initialize
 
   // Sets up the mouse pointer information used for dragging.
@@ -219,9 +217,9 @@ scripts:
                 this.controlTick(nearPosition);
                 break;
               case -1:
-                if(this.farPosition.controlType != -1) {
+                if(farPosition.controlType != -1) {
                   this.controlPlaying = true;
-                  this.conthis.controlDirection = this.controlValue < farPosition.controlValue ? 1 : -1;
+                  this.controlDirection = this.controlValue < farPosition.controlValue ? 1 : -1;
                   this.controlTick(farPosition);
                 }
             }
@@ -280,7 +278,24 @@ scripts:
     if ( this.controlPlaying ) {
       if ( Math.abs(this.animationTime - nextPosition.animationTime) < goog.vec.EPSILON ) {
         this.controlValue = nextPosition.controlValue;
-        this.controlPlaying = false;
+        if(nextPosition.controlType == -1) {
+          for(var i=0; i<this.positions.length; i++) {
+            if(this.positions[i].controlValue == nextPosition.controlValue) {
+              if(i-1 >= 0 && this.positions[i-1].controlType != -1) {
+                this.controlDirection = -1;
+                nextPosition = this.positions[i-1];
+              }
+              else if(i+1 < this.positions.length && this.positions[i+1].controlType != -1) {
+                this.controlDirection = 1;
+                nextPosition = this.positions[i+1];
+              }
+              break;
+            }
+          }
+        }
+        else {
+          this.controlPlaying = false;
+        }
       }
       this.processLinkedControls();
       // Schedule the next tick if still playing.
