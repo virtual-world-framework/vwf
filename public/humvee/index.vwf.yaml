@@ -28,7 +28,6 @@ children:
         var initNode = function( nd ) { 
           if ( Object.getPrototypeOf( nd ).children ) { 
             Object.getPrototypeOf( nd ).children.forEach( function( child ) { 
-              console.info( "create( "+child.name+", { extends: "+ child.id + " } )" );
               this.children.create( child.name, { extends: child.id }, function( newNode ) {
                 initNode( newNode );
               } );
