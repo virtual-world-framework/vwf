@@ -204,17 +204,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             window.requestAnimationFrame( renderScene );
             sceneNode.frameCount++;
             if((time - lastPickTime) > 10) {
-				
                 var newPick = mousePick.call( this, mouse, sceneNode );
-				
-				var newPickId = newPick ? getPickObjectID.call( view, newPick, false ) : view.state.sceneRootID;
-                if(self.lastPickId != newPickId && self.lastEventData)
-				{
-                    view.kernel.dispatchEvent( self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                    view.kernel.dispatchEvent( newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-				}
-				self.lastPickId = newPickId;
-
                 self.lastPick = newPick;
                 if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
                     oldMouseX = mouse.getMousePosition().x;
@@ -515,7 +505,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
-                sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                sceneView.kernel.dispatchEvent( pointerOverID, "pointerOver", eData.eventData, eData.eventNodeData );
             }
         }
 
@@ -528,17 +518,17 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                     if ( pointerPickID ) {
                         if ( pointerOverID ) {
                             if ( pointerPickID != pointerOverID ) {
-                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerOut", eData.eventData, eData.eventNodeData );
                                 pointerOverID = pointerPickID;
-                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                                sceneView.kernel.dispatchEvent( pointerOverID, "pointerOver", eData.eventData, eData.eventNodeData );
                             }
                         } else {
                             pointerOverID = pointerPickID;
-                            sceneView.kernel.dispatchEvent( pointerOverID, "pointerEnter", eData.eventData, eData.eventNodeData );
+                            sceneView.kernel.dispatchEvent( pointerOverID, "pointerOver", eData.eventData, eData.eventNodeData );
                         }
                     } else {
                         if ( pointerOverID ) {
-                            sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave", eData.eventData, eData.eventNodeData );
+                            sceneView.kernel.dispatchEvent( pointerOverID, "pointerOut", eData.eventData, eData.eventNodeData );
                             pointerOverID = undefined;
                         }
                     }
@@ -548,7 +538,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
         canvas.onmouseout = function( e ) {
             if ( pointerOverID ) {
-                sceneView.kernel.dispatchEvent( pointerOverID, "pointerLeave" );
+                sceneView.kernel.dispatchEvent( pointerOverID, "pointerOut" );
                 pointerOverID = undefined;
             }
             self.mouseOverCanvas = false;

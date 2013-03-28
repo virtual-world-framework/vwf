@@ -17,8 +17,8 @@ properties:
   navmode: none
 events:
   pointerMove:
-  pointerEnter:
-  pointerLeave:
+  pointerOver:
+  pointerOut:
   pointerClick: 
   pointerDown:
   pointerUp:  
@@ -61,11 +61,11 @@ scripts:
     {
         console.log([e,ed]);
     }
-    this.pointerEnter = function(e,ed)
+    this.pointerOver = function(e,ed)
     {
         console.log([e,ed]);
     }
-    this.pointerLeave = function(e,ed)
+    this.pointerOut = function(e,ed)
     {
         console.log([e,ed]);
     }
