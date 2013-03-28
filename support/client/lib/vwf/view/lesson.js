@@ -179,7 +179,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     $('#message').css('display', 'none');
                     $('#startButton').css('display', 'none');
                     $('#nextButton').css('display', 'inline-block');
-                    $('#'+vwf_view.kernel.name( vwf.find('task', '/lesson/*')[0] )).trigger('click');
+                    if($('#accordion').html() == '') updateLessonInstructions.call(self, this.lessonSteps);
+                    $( $( $("#accordion").children('div')[0] ).children('h2')[0] ).trigger('click');
                     break;
                   case "completed":
                     $('#lessonProgressBar').css('width', '100%');
@@ -198,15 +199,21 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             {
                 switch (eventName) {
                   case "entering":
-                    $('#'+vwf_view.kernel.name( nodeId )).trigger('click');
+                    var stepDivName = '#' + nodeId.replace(/\:/g, "_");
+                    if($(stepDivName).length) $(stepDivName).trigger('click');
                     break;
                   case "completed":
-                    var numTasks = vwf.find("task", "/lesson/*").length;
+                    var numTasks = 0;
+                    for (var step in this.lessonSteps) { numTasks++; }
                     var widthDelta = Math.ceil(100 / numTasks);
                     var pixelWidth = $('#progress').css('width');
                     pixelWidth = pixelWidth.substring(0, pixelWidth.length-2);
                     this.progressWidth = this.progressWidth + (pixelWidth*widthDelta*0.01);
                     $('#lessonProgressBar').css('width', this.progressWidth+'px');
+                    break;
+                  case "exiting":
+                    var accordionName = '#accordion--' + nodeId.replace(/\:/g, "_");
+                    if($(accordionName).length) $(accordionName).accordion("activate", false);
                     break;
                 }
             }
@@ -238,7 +245,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             }
             else if(parentID == currentTaskID)
             {
-                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<h2><a id='" + step + "' href='#'>" + lessonSteps[step] + "</a></h2>");
+                $('#accordion--'+parentID.replace(/\:/g, "_")).append("<h2><a id='" + step.replace(/\:/g, "_") + "' href='#'>" + lessonSteps[step] + "</a></h2>");
                 $('#accordion--'+parentID.replace(/\:/g, "_")).append("<div id='div--" + step.replace(/\:/g, "_") + "'></div>");  
             }
             else
