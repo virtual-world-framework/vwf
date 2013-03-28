@@ -586,9 +586,9 @@ function startVWF(){
 	  socket.on('message', function (msg) {
 		
 			//need to add the client identifier to all outgoing messages
-			try(
+			try{
 				var message = JSON.parse(msg);
-			)catch(e)
+			}catch(e)
 			{
 				return;
 			}
