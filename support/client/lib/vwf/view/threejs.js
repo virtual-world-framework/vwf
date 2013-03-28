@@ -132,17 +132,19 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 				return list;
 		}
         function renderScene(time) {
+
             requestAnimFrame( renderScene );
             sceneNode.frameCount++;
 			var now = ( performance !== undefined && performance.now !== undefined ) ? performance.now() : time;
 			var timepassed = now - sceneNode.lastTime;
-			
+
 			var pss = GetParticleSystems(sceneNode.threeScene);
 			for(var i in pss)
 			{
 				if(pss[i].update)
 					pss[i].update(timepassed);
 			}
+
 			var camera = sceneNode.camera.threeJScameras[sceneNode.camera.ID];
 			var pos = camera.localToWorld(new THREE.Vector3(-.4,.275,-1.0))
 			if ( sceneNode.axes !== undefined ) {
@@ -150,10 +152,13 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 sceneNode.axes.scale = new THREE.Vector3(.005,.005,.005);
                 sceneNode.axes.updateMatrix();
             }
+
+            // Every tenth frame do a pick calculation
+            // Note: this is a costly operation and should be optimized if possible
             if(sceneNode.frameCount > 10)
             {
                 
-                sceneNode.frameCount == 0
+                sceneNode.frameCount = 0;
             
                 
                 var newPick = ThreeJSPick.call( self, mycanvas, sceneNode );
@@ -182,6 +187,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 }
                 
             }
+
             renderer.render(scene,sceneNode.camera.threeJScameras[sceneNode.camera.ID]);
 			sceneNode.lastTime = now;
         };
