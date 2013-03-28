@@ -35,6 +35,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
  
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.prototypes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.kernel = this.kernel;
 
             this.state.sceneRootID = this.kernel.find("", "/")[0];
@@ -49,11 +50,36 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
 
-            var node, parentNode, glgeChild, prototypes, glgeParent;
-            var kernel = this.kernel;
+            var prototypeID = isPrototype.call( this, nodeID, childID );
 
-            if ( childExtendsID === undefined /* || childName === undefined */ )
+            //console.log(["creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
+            if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
+                if ( nodeID != 0 || childID != this.state.sceneRootID ) {
+                    var ptID = nodeID ? nodeID : childID;
+                    if ( this.state.prototypes[ ptID ] !== undefined ) {
+                        ptID = childID;
+                    }
+                    this.state.prototypes[ ptID ] = {
+                        parentID: nodeID,
+                        ID: childID,
+                        extendsID: childExtendsID,
+                        implementsID: childImplementsIDs,
+                        source: childSource, 
+                        type: childType,
+                        uri: childURI,
+                        name: childName
+                    };
+                    return;
+                } 
+            }
+            if ( childExtendsID === undefined )
                 return;
+
+            //console.log("Create " + childID);
+
+            var node, parentNode, glgeChild, glgeParent;
+            var kernel = this.kernel;
+            var prototypes = getPrototypes.call( this, kernel, childExtendsID );
 
 //            this.logger.enabled = true;
 //            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
@@ -72,12 +98,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     var recursive = false;
                     if ( glgeParent && childName ) {
                         recursive = ( glgeParent.constructor == GLGE.Collada );
-                        glgeChild = glgeObjectChild.call( this, glgeParent, childName, childExtendsID, recursive );
+                        glgeChild = glgeObjectChild.call( this, glgeParent, childName, childExtendsID, prototypes, recursive );
                     }
                 }
             }
 
-            prototypes = getPrototypes.call( this, kernel, childExtendsID );
+            
             if ( prototypes && isGlgeSceneDefinition.call( this, prototypes ) && childID == this.state.sceneRootID ) {
 
                 var sceneNode = this.state.scenes[childID] = {
@@ -134,176 +160,185 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
            
             } else if ( prototypes && isGlgeCameraDefinition.call( this, prototypes ) ) {
-                var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
-                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: glgeChild,
-                    ID: childID,
-                    parentID: nodeID,
-                    sceneID: this.state.sceneRootID,
-                    glgeScene: sceneNode ? sceneNode.glgeScene : undefined,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
+                if ( childName !== undefined ) {
+                    var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
+                    var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: glgeChild,
+                        ID: childID,
+                        parentID: nodeID,
+                        sceneID: this.state.sceneRootID,
+                        glgeScene: sceneNode ? sceneNode.glgeScene : undefined,
+                        type: childExtendsID,
+                        sourceType: childType,
+                    };
 
-                if ( nodeID != 0 && !node.glgeObject ) {
-                    createCamera.call( this, nodeID, childID, childName );
-                }
-
-                if ( sceneNode && sceneNode.camera ) {
-                    if ( childID == sceneNode.camera.defaultCamID ) {
-                        if ( !sceneNode.camera.glgeCameras[ childID ] ) {
-                            var cam = new GLGE.Camera();
-                            sceneNode.camera.glgeCameras[ childID ] = cam;
-                            initCamera.call( this, cam );
-                        }
-                        node.name = camName;
-                        node.glgeObject = sceneNode.camera.glgeCameras[ childID ];
-                  
-                    } else if ( node.glgeObject ) {
-                        sceneNode.camera.glgeCameras[ childID ] = node.glgeObject;
+                    if ( nodeID != 0 && !node.glgeObject ) {
+                        createCamera.call( this, nodeID, childID, childName );
                     }
-                }               
+
+                    if ( sceneNode && sceneNode.camera ) {
+                        if ( childID == sceneNode.camera.defaultCamID ) {
+                            if ( !sceneNode.camera.glgeCameras[ childID ] ) {
+                                var cam = new GLGE.Camera();
+                                sceneNode.camera.glgeCameras[ childID ] = cam;
+                                initCamera.call( this, cam );
+                            }
+                            node.name = camName;
+                            node.glgeObject = sceneNode.camera.glgeCameras[ childID ];
+                      
+                        } else if ( node.glgeObject ) {
+                            sceneNode.camera.glgeCameras[ childID ] = node.glgeObject;
+                        }
+                    } 
+                }              
             } else if ( prototypes && isGlgeLightDefinition.call( this, prototypes ) ) {
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: glgeChild,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
-                if ( nodeID != 0 && !node.glgeObject ) {
-                    createLight.call( this, nodeID, childID, childName );
+                if ( childName !== undefined ) {
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: glgeChild,
+                        ID: childID,
+                        parentID: nodeID,
+                        type: childExtendsID,
+                        sourceType: childType,
+                    };
+                    if ( nodeID != 0 && !node.glgeObject ) {
+                        createLight.call( this, nodeID, childID, childName );
+                    }
                 }
             } else if ( prototypes && isGlgeParticleSystemDefinition.call( this, prototypes ) ) {
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: glgeChild,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID
-                };
-                if ( nodeID != 0 && !node.glgeObject ) {
-                    createParticleSystem.call( this, nodeID, childID, childName );
+                if ( childName !== undefined ) {
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: glgeChild,
+                        ID: childID,
+                        parentID: nodeID,
+                        type: childExtendsID
+                    };
+                    if ( nodeID != 0 && !node.glgeObject ) {
+                        createParticleSystem.call( this, nodeID, childID, childName );
+                    }
                 }
             } else if ( prototypes && isGlgeNodeDefinition.call( this, prototypes ) ) {
 
-                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                switch ( childType ) {
-                    case "model/vnd.collada+xml":
-                        callback( false );
-                        node = this.state.nodes[childID] = {
-                            name: childName,  
-                            glgeObject: undefined,
-                            source: utility.resolveURI( childSource, childURI ),
-                            ID: childID,
-                            parentID: nodeID,
-                            sourceType: childType,
-                            type: childExtendsID,
-                            loadingCollada: callback,
-                            glgeScene: sceneNode
-                        };
-                        loadCollada.call( this, parentNode, node ); 
-                        break;
-
-                    case "text/xml":
-                        node = this.state.nodes[childID] = {
-                            name: childName,  
-                            glgeObject: undefined,
-                            source: childSource,
-                            ID: childID,                                
-                            parentID: nodeID,
-                            type: childExtendsID,
-                            sourceType: childType,
-                            glgeScene: sceneNode 
-                        };
-                            
-                        if ( sceneNode && sceneNode.glgeDocument ){
-                            var meshDef = sceneNode.glgeDocument.getElement( node.source );
-                            if ( meshDef ) {
-                                node.glgeObject = new GLGE.Object();
-                                node.glgeObject.setMesh( meshDef );
-                                if ( glgeParent ) {
-                                    glgeParent.addObject( node.glgeObject );
-                                } else {
-                                    if ( sceneNode.glgeScene ) {
-                                        sceneNode.glgeScene.addObject( node.glgeObject );
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                        
-                    case "definition/mesh": {
+                if ( childName !== undefined ) {
+                    var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                    switch ( childType ) {
+                        case "model/vnd.collada+xml":
+                            callback( false );
                             node = this.state.nodes[childID] = {
                                 name: childName,  
                                 glgeObject: undefined,
-                                glgeParent: glgeParent,
+                                source: utility.resolveURI( childSource, childURI ),
+                                ID: childID,
+                                parentID: nodeID,
+                                sourceType: childType,
+                                type: childExtendsID,
+                                loadingCollada: callback,
+                                glgeScene: sceneNode
+                            };
+                            loadCollada.call( this, parentNode, node ); 
+                            break;
+
+                        case "text/xml":
+                            node = this.state.nodes[childID] = {
+                                name: childName,  
+                                glgeObject: undefined,
                                 source: childSource,
                                 ID: childID,                                
                                 parentID: nodeID,
                                 type: childExtendsID,
                                 sourceType: childType,
-                                glgeScene: sceneNode  
+                                glgeScene: sceneNode 
                             };
-                            createMesh.call( this, node );
-                        }
-                        break;
-
-                    default:
-                        node = this.state.nodes[childID] = {
-                            name: childName,  
-                            glgeObject: glgeChild,
-                            ID: childID,
-                            parentID: nodeID,
-                            type: childExtendsID,
-                            sourceType: childType,
-                            glgeScene: sceneNode  
-                        };
-                        if ( node.glgeObject ) {
-                            if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
-                                callback( false );
-                                node.glgeObject.vwfID = childID;
-                                sceneNode.xmlColladaObjects.push( node.glgeObject );
-                                setupColladaCallback.call( this, node.glgeObject, sceneNode );
-                                node.loadingCollada = callback;                                    
-                            }
-                        } else {
-                            if ( nodeID != 0 ) {
-                                node.glgeObject = new GLGE.Group();
-                                if ( parentNode ) {
-                                    if ( parentNode.glgeObject ) {
-                                        parentNode.glgeObject.addObject( node.glgeObject );
-                                    } else if ( parentNode.glgeScene ) {
-                                        parentNode.glgeScene.addObject( node.glgeObject );
+                                
+                            if ( sceneNode && sceneNode.glgeDocument ){
+                                var meshDef = sceneNode.glgeDocument.getElement( node.source );
+                                if ( meshDef ) {
+                                    node.glgeObject = new GLGE.Object();
+                                    node.glgeObject.setMesh( meshDef );
+                                    if ( glgeParent ) {
+                                        glgeParent.addObject( node.glgeObject );
+                                    } else {
+                                        if ( sceneNode.glgeScene ) {
+                                            sceneNode.glgeScene.addObject( node.glgeObject );
+                                        }
                                     }
                                 }
-                        
-                                node.gui = node.glgeObject.uid;
-                                node.glgeObject.name = childName;  
                             }
-                        }
-                        break;
-                }  
+                            break;
+                            
+                        case "definition/mesh": {
+                                node = this.state.nodes[childID] = {
+                                    name: childName,  
+                                    glgeObject: undefined,
+                                    glgeParent: glgeParent,
+                                    source: childSource,
+                                    ID: childID,                                
+                                    parentID: nodeID,
+                                    type: childExtendsID,
+                                    sourceType: childType,
+                                    glgeScene: sceneNode  
+                                };
+                                createMesh.call( this, node );
+                            }
+                            break;
 
-                this.settingProperty( childID, "playing", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
-                this.settingProperty( childID, "looping", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
-                this.settingProperty( childID, "speed", 1 );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                        default:
+                            node = this.state.nodes[childID] = {
+                                name: childName,  
+                                glgeObject: glgeChild,
+                                ID: childID,
+                                parentID: nodeID,
+                                type: childExtendsID,
+                                sourceType: childType,
+                                glgeScene: sceneNode  
+                            };
+                            if ( node.glgeObject ) {
+                                if ( ( node.glgeObject.constructor == GLGE.Collada ) ) {
+                                    callback( false );
+                                    node.glgeObject.vwfID = childID;
+                                    sceneNode.xmlColladaObjects.push( node.glgeObject );
+                                    setupColladaCallback.call( this, node.glgeObject, sceneNode );
+                                    node.loadingCollada = callback;                                    
+                                }
+                            } else {
+                                if ( nodeID != 0 ) {
+                                    node.glgeObject = new GLGE.Group();
+                                    if ( parentNode ) {
+                                        if ( parentNode.glgeObject ) {
+                                            parentNode.glgeObject.addObject( node.glgeObject );
+                                        } else if ( parentNode.glgeScene ) {
+                                            parentNode.glgeScene.addObject( node.glgeObject );
+                                        }
+                                    }
+                            
+                                    node.gui = node.glgeObject.uid;
+                                    node.glgeObject.name = childName;  
+                                }
+                            }
+                            break;
+                    }  
 
+                    this.settingProperty( childID, "playing", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                    this.settingProperty( childID, "looping", false );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
+                    this.settingProperty( childID, "speed", 1 );  // TODO: these are matching the defaults in node3; they should be sent through creatingProperty() so that we don't have to ask
 
+                }
             } else if ( prototypes && isGlgeMaterialDefinition.call( this, prototypes ) ) {
-                node = this.state.nodes[childID] = {
-                    name: childName,
-                    glgeObject: undefined,
-                    glgeMaterial: true,
-                    ID: childID,
-                    parentID: nodeID,
-                    type: childExtendsID,
-                    sourceType: childType,
-                };
-                findMaterial.call( this, nodeID, childName, node );
+                if ( childName !== undefined ) {
+                    node = this.state.nodes[childID] = {
+                        name: childName,
+                        glgeObject: undefined,
+                        glgeMaterial: true,
+                        ID: childID,
+                        parentID: nodeID,
+                        type: childExtendsID,
+                        sourceType: childType,
+                    };
+                    findMaterial.call( this, nodeID, childName, node );
+                }
             } else {
 
                 switch ( childExtendsID ) {
@@ -800,6 +835,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
 
         function colladaLoaded( collada ) { 
+
             sceneNode.pendingLoads--;
             collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
             var removed = false;
@@ -1737,7 +1773,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // -- findGlgeObject ------------------------------------------------------------------------------
 
-    function findGlgeObject( objName, type ) {
+    function findGlgeObject( objName, type, prototypes ) {
 
         var obj = undefined;
         var assetObj = undefined;
@@ -2155,6 +2191,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         return prototypes;
     }
 
+    function isPrototype( nodeID, childID ) {
+        if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
+            if ( nodeID != 0 || childID != this.state.sceneRootID ) {
+                var ptID = nodeID ? nodeID : childID;
+                if ( this.state.prototypes[ ptID ] !== undefined ) {
+                    ptID = childID;
+                }
+                return ptID;
+            } 
+        }
+        return undefined;
+    }
+
+
     function isGlgeSceneDefinition( prototypes ) {
         var foundGlge = false;
         if ( prototypes ) {
@@ -2235,17 +2285,19 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // Search a GLGE.Object, GLGE.Collada, GLGE.Light for a child with the given name.  TODO: really, it's anything with children[]; could be the same as glgeSceneChild().
 
-    function glgeObjectChild( glgeObject, childName, childType, recursive ) {
+    function glgeObjectChild( glgeObject, childName, childType, prototypes, recursive ) {
         
         var childToReturn = jQuery.grep( glgeObject.children || [], function ( glgeChild ) {
             return (glgeChild.colladaName || glgeChild.colladaId || glgeChild.name || glgeChild.id || "") == childName;
         }).shift();
 
         // to slow, and may bind to the incorrect object
-        if ( recursive && !childToReturn ) {
-            childToReturn = findGlgeObject.call( this, childName, childType );
+        if ( recursive && childToReturn === undefined ) {
+            if ( glgeObject.children ) {
+            for ( var i = 0; i < glgeObject.children.length && childToReturn === undefined; i++ )
+                childToReturn = glgeObjectChild.call( this, glgeObject.children[i], childName, childType, prototypes, recursive );
+            }
         }
-        //this.logger.info("      glgeObjectChild( " + childName + " ) returns " + childToReturn);
         return childToReturn;
 
     }
@@ -2329,7 +2381,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function createMesh( node ) {
-        //console.info( "createMesh( "+node.name+" )" );
         if ( !node.glgeParent ) {
             node.glgeParent = this.state.nodes[ node.parentID ];    
         }
