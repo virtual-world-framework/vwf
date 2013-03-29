@@ -65,24 +65,18 @@ children:
                       glgeObj3: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 1
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -115,40 +109,30 @@ children:
                       glgeObj4: 
                         extends: http://vwf.example.com/node3.vwf 
                   rear:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   neutral:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 1
                   drive:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 2
                   second:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 3
                   first:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -181,8 +165,6 @@ children:
                       glgeObj5: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -190,8 +172,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -200,8 +180,6 @@ children:
                       sequence: 1
                       animationTime: 0.5
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -235,16 +213,12 @@ children:
                       glgeObj6: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -277,16 +251,12 @@ children:
                       glgeObj7: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -319,16 +289,12 @@ children:
                       glgeObj8: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -369,16 +335,12 @@ children:
                       glgeObj10: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -387,8 +349,6 @@ children:
                       controlValue: 1
                       animationTime: 0.5
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -423,16 +383,12 @@ children:
                       glgeObj11: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -441,8 +397,6 @@ children:
                       controlValue: 1
                       animationTime: 0.5
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -475,16 +429,12 @@ children:
                       glgeObj12: 
                         extends: http://vwf.example.com/node3.vwf 
                   stop:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   run:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -492,8 +442,6 @@ children:
                       sequence: 1
                       controlType: 1
                   start:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -551,8 +499,6 @@ children:
                       glgeObj16: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -560,8 +506,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -570,8 +514,6 @@ children:
                       sequence: 1
                       animationTime: 0.25
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -580,8 +522,6 @@ children:
                       sequence: 2
                       animationTime: 0.5
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -590,8 +530,6 @@ children:
                       sequence: 3
                       animationTime: 0.75
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -624,8 +562,6 @@ children:
                       glgeObj17: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -633,8 +569,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -643,8 +577,6 @@ children:
                       sequence: 1
                       animationTime: 0.25
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -653,8 +585,6 @@ children:
                       sequence: 2
                       animationTime: 0.5
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -663,8 +593,6 @@ children:
                       sequence: 3
                       animationTime: 0.75
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -699,8 +627,6 @@ children:
                       glgeObj18: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -708,8 +634,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -718,8 +642,6 @@ children:
                       sequence: 1
                       animationTime: 0.25
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -728,8 +650,6 @@ children:
                       sequence: 2
                       animationTime: 0.5
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -738,8 +658,6 @@ children:
                       sequence: 3
                       animationTime: 0.75
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -774,8 +692,6 @@ children:
                       glgeObj19: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -783,8 +699,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -793,8 +707,6 @@ children:
                       sequence: 1
                       animationTime: 0.25
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -803,8 +715,6 @@ children:
                       sequence: 2
                       animationTime: 0.5
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -813,8 +723,6 @@ children:
                       sequence: 3
                       animationTime: 0.75
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -849,8 +757,6 @@ children:
                       glgeObj20: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -858,8 +764,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -868,8 +772,6 @@ children:
                       sequence: 1
                       animationTime: 0.25
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -878,8 +780,6 @@ children:
                       sequence: 2
                       animationTime: 0.55
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -888,8 +788,6 @@ children:
                       sequence: 3
                       animationTime: 0.8
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -924,8 +822,6 @@ children:
                       glgeObj21: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -933,8 +829,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -943,8 +837,6 @@ children:
                       sequence: 1
                       animationTime: 0.25
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -953,8 +845,6 @@ children:
                       sequence: 2
                       animationTime: 0.5
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -963,8 +853,6 @@ children:
                       sequence: 3
                       animationTime: 0.75
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -997,16 +885,12 @@ children:
                       glgeObj22: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1038,16 +922,12 @@ children:
                       glgeObj23: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1084,8 +964,6 @@ children:
                       glgeObj24: 
                         extends: http://vwf.example.com/node3.vwf  
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1093,8 +971,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1103,8 +979,6 @@ children:
                       sequence: 1
                       animationTime: 0.125
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1113,8 +987,6 @@ children:
                       sequence: 2
                       animationTime: 0.25
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1123,8 +995,6 @@ children:
                       sequence: 3
                       animationTime: 0.375
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1160,8 +1030,6 @@ children:
                       glgeObj25: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1169,8 +1037,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1179,8 +1045,6 @@ children:
                       sequence: 1
                       animationTime: 0.125
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1189,8 +1053,6 @@ children:
                       sequence: 2
                       animationTime: 0.25
                   delta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1199,8 +1061,6 @@ children:
                       sequence: 3
                       animationTime: 0.375
                   epsilon:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1251,16 +1111,12 @@ children:
                               glgeObj26: 
                                 extends: http://vwf.example.com/node3.vwf 
                           alpha:
-                            extends:
-                              http://vwf.example.com/node3.vwf
                             implements:
                             - http://vwf.example.com/animation/position.vwf
                             - http://vwf.example.com/control/position.vwf
                             properties:
                               sequence: 0
                           beta:
-                            extends:
-                              http://vwf.example.com/node3.vwf
                             implements:
                             - http://vwf.example.com/animation/position.vwf
                             - http://vwf.example.com/control/position.vwf
@@ -1268,8 +1124,6 @@ children:
                               sequence: 1
                               animationTime: 0.161
                           gamma:
-                            extends:
-                              http://vwf.example.com/node3.vwf
                             implements:
                             - http://vwf.example.com/animation/position.vwf
                             - http://vwf.example.com/control/position.vwf
@@ -1277,8 +1131,6 @@ children:
                               sequence: 2
                               animationTime: 0.322
                           delta:
-                            extends:
-                              http://vwf.example.com/node3.vwf
                             implements:
                             - http://vwf.example.com/animation/position.vwf
                             - http://vwf.example.com/control/position.vwf
@@ -1301,16 +1153,12 @@ children:
                           glgeObj27: 
                             extends: http://vwf.example.com/node3.vwf 
                       alpha:
-                        extends:
-                          http://vwf.example.com/node3.vwf
                         implements:
                         - http://vwf.example.com/animation/position.vwf
                         - http://vwf.example.com/control/position.vwf
                         properties:
                           sequence: 0
                       beta:
-                        extends:
-                          http://vwf.example.com/node3.vwf
                         implements:
                         - http://vwf.example.com/animation/position.vwf
                         - http://vwf.example.com/control/position.vwf
@@ -1318,8 +1166,6 @@ children:
                           sequence: 1
                           animationTime: 0.167
                       gamma:
-                        extends:
-                          http://vwf.example.com/node3.vwf
                         implements:
                         - http://vwf.example.com/animation/position.vwf
                         - http://vwf.example.com/control/position.vwf
@@ -1327,8 +1173,6 @@ children:
                           sequence: 2
                           animationTime: 0.333
                       delta:
-                        extends:
-                          http://vwf.example.com/node3.vwf
                         implements:
                         - http://vwf.example.com/animation/position.vwf
                         - http://vwf.example.com/control/position.vwf
@@ -1351,24 +1195,18 @@ children:
                       glgeObj28: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 1
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1399,16 +1237,12 @@ children:
                       glgeObj29: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1440,16 +1274,12 @@ children:
                       glgeObj30: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1486,16 +1316,12 @@ children:
                       glgeObj32: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1527,16 +1353,12 @@ children:
                       glgeObj33: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1579,8 +1401,6 @@ children:
                   glgeObj36: 
                     extends: http://vwf.example.com/node3.vwf
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1588,8 +1408,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1598,8 +1416,6 @@ children:
                       sequence: 1
                       animationTime: 0.5
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1633,8 +1449,6 @@ children:
                   glgeObj37: 
                     extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1642,8 +1456,6 @@ children:
                       controlValue: 0
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1652,8 +1464,6 @@ children:
                       sequence: 1
                       animationTime: 0.5
                   gamma:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1692,16 +1502,12 @@ children:
                       glgeObj39: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1734,16 +1540,12 @@ children:
                       glgeObj40: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
@@ -1776,16 +1578,12 @@ children:
                       glgeObj41: 
                         extends: http://vwf.example.com/node3.vwf 
                   alpha:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 0
                   beta:
-                    extends:
-                      http://vwf.example.com/node3.vwf
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
