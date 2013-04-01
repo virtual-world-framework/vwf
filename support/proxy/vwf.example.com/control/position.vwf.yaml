@@ -47,9 +47,9 @@ properties:
 
   controlValue:
 
-  ## The attraction or repulsion between the time cursor and this position. Positive values indicate
-  ## attraction, negative values indicate repulsion, and `0` is netural. The strings `detent`,
-  ## `spring` and `neutral` may be used to mean `1`, `-1` and `0`, respectively.
+  ## The attraction or repulsion between the time cursor and this position. "detent" indicates
+  ## attraction, "spring" indicates repulsion, and "netural" is neither. The values `1`, `-1` and `0`
+  ## may be used to mean `detent`, `spring` and `neutral`, respectively.
 
   ## Attracting positions define a detent--a location that the control will tend to snap to.
   ## Repelling positions define a spring-loaded location--one that the control will avoid except
@@ -57,7 +57,23 @@ properties:
 
   # TODO: held by how?
 
-  controlType: 0
+  controlType: 
+    set: |
+      switch(value) {
+        case "detent":
+        case 1: 
+          this.controlType = 1;
+          break;
+        case "spring":
+        case -1:
+          this.controlType = -1;
+          break;
+        case "neutral":
+        case 0:
+          this.controlType = 0;
+          break;
+      }
+    value: 0
 
 
   # animation positions and control positions are not necessarily coincident, although they typically are

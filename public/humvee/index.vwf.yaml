@@ -440,14 +440,14 @@ children:
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 1
-                      controlType: 1
+                      controlType: "detent"
                   start:
                     implements:
                     - http://vwf.example.com/animation/position.vwf
                     - http://vwf.example.com/control/position.vwf
                     properties:
                       sequence: 1
-                      controlType: -1
+                      controlType: "spring"
                 scripts:
                 - |
                   var initialRotation;
