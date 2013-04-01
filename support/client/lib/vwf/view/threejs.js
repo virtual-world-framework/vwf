@@ -413,11 +413,6 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             if ( camera ) { 
                 worldCamTrans = camera.matrix.getPosition();
                 worldCamPos = [ worldCamTrans.x, worldCamTrans.y, worldCamTrans.y];
-                //worldCamPos = [ camera.getLocX(), camera.getLocY(), camera.getLocZ() ]; 
-//                worldCamTrans = goog.vec.Mat4.createFromArray( camera.getLocalMatrix() );
-//                goog.vec.Mat4.transpose( worldCamTrans, worldCamTrans );
-//                camInverse = goog.vec.Mat4.create();
-//                goog.vec.Mat4.invert( worldCamTrans, camInverse );
             }
 
             returnData.eventNodeData = { "": [ {
