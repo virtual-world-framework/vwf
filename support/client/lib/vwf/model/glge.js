@@ -35,7 +35,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
  
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
-            this.state.prototypes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.prototypes = {}; 
             this.state.kernel = this.kernel;
 
             this.state.sceneRootID = this.kernel.find("", "/")[0];
@@ -50,27 +50,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
 
-            var prototypeID = isPrototype.call( this, nodeID, childID );
-
             //console.log(["creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
-            if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
-                if ( nodeID != 0 || childID != this.state.sceneRootID ) {
-                    var ptID = nodeID ? nodeID : childID;
-                    if ( this.state.prototypes[ ptID ] !== undefined ) {
-                        ptID = childID;
-                    }
-                    this.state.prototypes[ ptID ] = {
-                        parentID: nodeID,
-                        ID: childID,
-                        extendsID: childExtendsID,
-                        implementsID: childImplementsIDs,
-                        source: childSource, 
-                        type: childType,
-                        uri: childURI,
-                        name: childName
-                    };
-                    return;
-                } 
+            var prototypeID = isPrototype.call( this, nodeID, childID );
+            if ( prototypeID !== undefined ) {
+                console.info( "FOUND prototype: " + prototypeID );
+                this.state.prototypes[ prototypeID ] = {
+                    parentID: nodeID,
+                    ID: childID,
+                    extendsID: childExtendsID,
+                    implementsID: childImplementsIDs,
+                    source: childSource, 
+                    type: childType,
+                    uri: childURI,
+                    name: childName
+                };
+                return;                
             }
             if ( childExtendsID === undefined )
                 return;
@@ -2192,9 +2186,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function isPrototype( nodeID, childID ) {
+        var ptID;
         if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
             if ( nodeID != 0 || childID != this.state.sceneRootID ) {
-                var ptID = nodeID ? nodeID : childID;
+                ptID = nodeID ? nodeID : childID;
                 if ( this.state.prototypes[ ptID ] !== undefined ) {
                     ptID = childID;
                 }
