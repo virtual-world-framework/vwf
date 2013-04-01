@@ -2,6 +2,30 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.6
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change.
+
+- CHG: Remove unneeded lines from humvee-lesson. Refs #1684.
+- NEW: Add lesson sequence for 'entering vehicle' task component. Fixes #1689.
+- CHG: Fix bugs relating to instruction and progress bar progression for multiple levels of tasks. Refs #1684.
+- CHG: Update lesson view driver to allow for multiple levels of tasks. Create test/lesson application to show down to five levels. Fixes #1708.
+- NEW: This commit fixes #1719 - moved the 7z package to our own production servers and reference the download from this location.
+- NEW: Add configuration file to lesson application to pull in lesson view driver. Fixes #1709.
+- CHG: Update lesson cookbook recipe to use lesson view driver instead of the html overlay. Fixes # 1709.
+- CHG: Add comments for event cookbook recipe. Hide link to events recipe until it's completed.
+- CHG: Trap the WebSocketError from em-websocket when the connection is closing. References #1209, #1640, #1710.
+- CHG: Fixes null reference crash on method serialization
+- CHG: Fix missing image files error, and remove dependency on jquery file. Refs #1639.
+- CHG: Task #1706 css/js path for documentation referencing incorrect relative path. Missing image files for JQuery UI.
+- CHG: Add lesson view driver to autogenerate the lesson UI. Update lesson and humvee-lesson app to use the new driver, and add a driver configuration file to each. Fixes #1608 and #1639.
+- CHG: Updating rack to the currently supported rails version for servers running rails applications with VWF.
+- NEW: Add humvee lesson template for GameTech tutorial.
+- CHG: Update .gitignore after the switch from Ruby 1.8.7 to 1.9.3. For the Windows stand-alone build. 
+- CHG: Added support to kernel to serialize methods in getNode. This commit fixes #1659
+- CHG: Reset progress bar width on start lesson.
+
+----------------------------------
 0.6.5
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change.
