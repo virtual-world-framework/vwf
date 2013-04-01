@@ -18,13 +18,13 @@ import "utility.rake"
 
 # Names and URLs of ruby and the RubyInstaller Developer Kit.
 
-RUBY = "ruby-1.8.7-p357-i386-mingw32"
-RUBY_URL = "http://rubyforge.org/frs/download.php/75680/#{RUBY}.7z"
+RUBY = "ruby-1.9.3-p392-i386-mingw32"
+RUBY_URL = "http://rubyforge.org/frs/download.php/76799/#{RUBY}.7z"
 
 DEVKIT = "DevKit-tdm-32-4.5.2-20111229-1559-sfx"
 DEVKIT_URL = "https://github.com/downloads/oneclick/rubyinstaller/#{DEVKIT}.exe"
 
-RUBY_GEM_HOME = "#{RUBY}/lib/ruby/gems/1.8"
+RUBY_GEM_HOME = "#{RUBY}/lib/ruby/gems/1.9.1"
 
 # Path to an optional cache directory to share downloads between projects.
 

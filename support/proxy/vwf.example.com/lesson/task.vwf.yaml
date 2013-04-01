@@ -133,7 +133,7 @@ scripts:
             var camera = this.scene.camera;
             if ( camera ) {
               var duration = 2;
-              camera.transformTo( newCameraPose.transform, duration);
+              camera.worldTransformTo( newCameraPose.worldTransform, duration);
             }
             else
               console.error( "Could not find camera - to move the 3D camera using cameraPose, make sure the " +

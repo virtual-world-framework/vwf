@@ -45,7 +45,7 @@ scripts:
     this.deleteplayer = function(e)
     {
       
-        var num = vwf_view.kernel.kernel.models[0].model.nodes[e].PlayerNumber;
+        var num = vwf_view.kernel.kernel.models["vwf/model/javascript"].model.nodes[e].PlayerNumber;
         
       
         
@@ -72,7 +72,7 @@ scripts:
             //This is odd. It seems like supplying an ID for the new object causes the initialize not to fire
             proto.id = "player-"+proto.properties.PlayerNumber;
             proto.uri = "player-"+proto.properties.PlayerNumber;
-            vwf_view.kernel.kernel.createNode(proto,  function(){vwf_view.kernel.kernel.models[0].model.nodes[proto.id].initialize();
+            vwf_view.kernel.kernel.createNode(proto,  function(){vwf_view.kernel.kernel.models["vwf/model/javascript"].model.nodes[proto.id].initialize();
             });
         }
     }
