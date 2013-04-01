@@ -20,7 +20,7 @@
 properties:
   controlValue: 
     set: |
-      if("animationTime" in this && !this.animationPlaying && this.positions) {
+      if("animationTime" in this && this.positions) {
         for(var i=0; i<this.positions.length; i++) {
           if(value == this.positions[i].controlValue) {
             this.animationTime = this.positions[i].animationTime;
