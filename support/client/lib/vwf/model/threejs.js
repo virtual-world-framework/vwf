@@ -57,8 +57,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.prototypes = {}; 
             this.state.kernel = this.kernel.kernel.kernel;
-            this.state.sceneRootID = "index-vwf";
+            this.state.sceneRootID = this.kernel.find("", "/")[0];;
 
 
             // shouldn't this just be vwf time? 			
@@ -82,6 +83,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
+
+            var prototypeID = isPrototype.call( this, nodeID, childID );
+            if ( prototypeID !== undefined ) {
+                this.state.prototypes[ prototypeID ] = {
+                    parentID: nodeID,
+                    ID: childID,
+                    extendsID: childExtendsID,
+                    implementsID: childImplementsIDs,
+                    source: childSource, 
+                    type: childType,
+                    uri: childURI,
+                    name: childName
+                };
+                return;                
+            }
             
             //console.log(["creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
             //console.log("Create " + childID);
@@ -1234,6 +1250,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 
         return prototypes;
     }
+
+    function isPrototype( nodeID, childID ) {
+        var ptID;
+        if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
+            if ( nodeID != 0 || childID != this.state.sceneRootID ) {
+                ptID = nodeID ? nodeID : childID;
+                if ( this.state.prototypes[ ptID ] !== undefined ) {
+                    ptID = childID;
+                }
+                return ptID;
+            } 
+        }
+        return undefined;
+    }
+
     function isSceneDefinition( prototypes ) {
         var foundScene = false;
         if ( prototypes ) {
