@@ -451,7 +451,7 @@ children:
                   ic40Channel:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties: 
                       controlType: rotate
                       controlMode: continuous
@@ -470,7 +470,7 @@ children:
                   ic40Down:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -488,7 +488,7 @@ children:
                   ic40P0:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -501,7 +501,7 @@ children:
                   ic40P1:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -514,7 +514,7 @@ children:
                   ic40P2:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -527,7 +527,7 @@ children:
                   ic40P3:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -540,7 +540,7 @@ children:
                   ic40PTT:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -553,7 +553,7 @@ children:
                   ic40Red:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -566,7 +566,7 @@ children:
                   ic40Up:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       controlType: translate
                       controlMode: momentary
@@ -579,7 +579,7 @@ children:
                   ic40Volume:
                     extends: http://vwf.example.com/node3.vwf
                     implements:
-                    - http://vwf.example.com/control.vwf
+                    - http://vwf.example.com/control-old.vwf
                     properties:
                       rotation: [0, 0, 1, 0]
                       controlType: rotate
