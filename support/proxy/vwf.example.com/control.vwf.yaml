@@ -116,8 +116,6 @@ scripts:
 
         }
 
-        this.logger.info( "control position", position.name, position.controlValue );
-
       }, this );
     }
   } //@ sourceURL=http://vwf.example.com/control.vwf/scripts~initialize

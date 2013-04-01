@@ -77,8 +77,6 @@ scripts:
 
         }
 
-        this.logger.info( "animation position", position.name, position.animationTime );
-
       }, this );
 
     }
