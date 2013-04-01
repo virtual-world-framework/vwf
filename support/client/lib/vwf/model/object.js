@@ -77,6 +77,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                 //     descendant: true,          // node is a descendant still within the component
                 //     internals: true,           // random, seed, or sequence has changed
                 //     properties: true,          // placeholder for a property change list
+                //     methods: [],               // array of method names for methods that changed
                 // },
 
                 initialized: false,

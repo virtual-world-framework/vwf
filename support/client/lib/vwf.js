@@ -245,6 +245,7 @@
                 { library: "vwf/view/document", active: true },
                 { library: "vwf/view/editor", active: true },
                 { library: "vwf/view/glge", active: false },
+                { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", active: false },
                 { library: "vwf/view/touch", active: false},
                 { library: "vwf/utility", active: true },
@@ -268,6 +269,7 @@
                     { library: "vwf/view/threejs", parameters: "#vwf-root", active: false },
                     { library: "vwf/view/document", active: true },
                     { library: "vwf/view/editor", active: true },
+                    { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/touch", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false }
@@ -1573,15 +1575,21 @@ if ( ! nodeURI.match( RegExp( "^http://vwf.example.com/|appscene.vwf$" ) ) ) {  
 
             // Methods.
 
-            // nodeComponent.methods = {};  // TODO
+            // Because methods are much more data than properties, we only send them when patching
+            if ( patches && patches.methods ) {
+                var self = this;
+                nodeComponent.methods = {};
+                patches.methods.forEach( function( methodName ) {
+                    var method = self.models.javascript.nodes[ nodeID ].methods.node.private.bodies[ methodName ];
+                    if ( method )
+                        nodeComponent.methods[ methodName ] = method.toString();
+                } );
 
-            // for ( var methodName in nodeComponent.methods ) {
-            //     nodeComponent.methods[methodName] === undefined &&
-            //         delete nodeComponent.methods[methodName];
-            // }
-
-            // Object.keys( nodeComponent.methods ).length ||
-            //     delete nodeComponent.methods;
+                if ( Object.keys( nodeComponent.methods ).length == 0 )
+                    delete nodeComponent.methods;
+                else
+                    patched = true;
+            }
 
             // Events.
 
