@@ -28,6 +28,10 @@
 			{
 				return this.rootnode.children[0];
 			}
+			this.GetBounds = function()
+			{
+				return this.GetMesh().getBoundingBox(true);
+			}
 			this.updateSelf = function(rebuild)
 			{
 				if(rebuild)

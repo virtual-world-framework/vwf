@@ -702,4 +702,6 @@ function DataManager()
 		localStorage[this.datahandle] = JSON.stringify(this.rawdata);
 	}
 }
+
 _DataManager = new DataManager();
+PersistanceServer = _DataManager.getCurrentSession();

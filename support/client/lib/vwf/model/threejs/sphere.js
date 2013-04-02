@@ -56,13 +56,6 @@
 					return 'Sphere-subDriver';
 				}
 			}
-			
-			//must be defined by the object
-			this.getRoot = function()
-			{
-				return this.rootnode;
-			}
-		
 			this.BuildMesh = function(mat)
 			{
 				var mesh=  new THREE.Mesh(new THREE.SphereGeometry(this.radius, this.rsegs, this.ssegs), mat);
@@ -70,6 +63,11 @@
 				return mesh;
 			}
 			
+			//must be defined by the object
+			this.getRoot = function()
+			{
+				return this.rootnode;
+			}
 			this.rootnode = new THREE.Object3D();
 			//this.Build();
 		}

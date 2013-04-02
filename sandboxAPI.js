@@ -167,7 +167,7 @@ function Login(filename,response,URL, JSONHeader)
 	 
 				//check that the user can get the data
 				var profile = JSON.parse(file);
-				//def3735d7a0d2696775d6d72f379e4536c4d9e3cd6367f27a0bcb7f40d4558fb
+				
 				var storedPassword = profile.Password;
 				
 				if(storedPassword == password)
@@ -181,7 +181,7 @@ function Login(filename,response,URL, JSONHeader)
 					global.instances[instance].clients[cid].loginData.SessionID = SessionID;
 					response.writeHead(200, {
 						"Content-Type":  "text/plain",
-						"Set-Cookie": "session="+SessionID+"; HttpOnly" 
+						"Set-Cookie": "session="+SessionID+"; HttpOnly; Path="+instance 
 					});
 					response.write("Login Successful", "utf8");
 					console.log('Client Logged in');
@@ -280,7 +280,7 @@ function SaveProfile(URL,filename,data,response)
  
 			//check that the user can get the data
 			var profile = JSON.parse(file);
-			//def3735d7a0d2696775d6d72f379e4536c4d9e3cd6367f27a0bcb7f40d4558fb
+			
 			var storedPassword = profile.Password;
 			var suppliedPassword = URL.query.P;
 			if(storedPassword == suppliedPassword)
@@ -601,9 +601,15 @@ function DeleteState(URL,filename,response)
 	});
 }
 
-function RenameFile(filename,newname,callback)
+function RenameFile(filename,newname,callback,sync)
 {
-	fs.rename(filename,newname,callback);
+	if(!sync)
+		fs.rename(filename,newname,callback);
+	else
+	{
+		fs.renameSync(filename,newname);
+		callback();
+	}
 }
 
 //make a directory if the directory does not exist
@@ -622,8 +628,24 @@ function MakeDirIfNotExist(dirname,callback)
 	
 	});
 }
+//hash a string
+function hash(str)
+{
+	return require('crypto').createHash('md5').update(str).digest("hex");
+}
+//no point clogging up the disk with backups if the state does not change.
+function CheckHash(filename,data,callback)
+{
+	fs.readFile(filename, "utf8", function (err, file) {
+			
+			console.log("hash is:"+hash(data) +" "+ hash(file));
+			callback(hash(data) == hash(file));
+		});
+		return;
 
-//Save an asset. the POST URL must contain valid name/password and that UID must match the Asset Author
+}
+
+//Save an instance. the POST URL must contain valid name/password and that UID must match the Asset Author
 function SaveState(URL,dirname,data,response)
 {
 	var UID = URL.query.UID || URL.loginData.UID;
@@ -667,9 +689,20 @@ function SaveState(URL,dirname,data,response)
 						{
 							
 							respond(response,200,'saving over state' + dirname);
-							MakeDirIfNotExist(dirname,function(){
-								RenameFile(dirname+'/state',dirname+'/state_backup' + GUID(),function(){
-								SaveFile(dirname+'/state',data,response);
+							MakeDirIfNotExist(dirname,function(){     //pretty sure the dir must exist at this point
+								//dont write the same file over and over
+								CheckHash(dirname+'/state',data,function(same){
+									if(!same)
+									{
+										//rename must be sync
+										RenameFile(dirname+'/state',dirname+'/state_backup' + GUID(),function(){
+										//writeing over a file must by sync
+										SaveFile(dirname+'/state',data,response,true);
+										},true);
+									}else
+									{
+										respond(response,200,'The state has not changed' + dirname);
+									}
 								});
 							});
 							return;
@@ -730,12 +763,19 @@ function DeleteAsset(URL,filename,response)
 	});
 }
 
-function SaveFile(filename,data,response)
+function SaveFile(filename,data,response,sync)
 {
-	fs.writeFile(filename,data,'binary',function()
+	if(!sync)
 	{
-			respond(response,200,'Saved ' + filename);
-	});
+		fs.writeFile(filename,data,'binary',function()
+		{
+				respond(response,200,'Saved ' + filename);
+		});
+	}else
+	{
+		fs.writeFileSync(filename,data,'binary');
+		respond(response,200,'Saved ' + filename);
+	}
 }
 function _404(response)
 {
