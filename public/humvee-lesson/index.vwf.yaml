@@ -15,9 +15,17 @@
 extends: http://vwf.example.com/navscene.vwf
 properties:
   ambientColor: [ 183, 183, 183 ]
+  backgroundColor: [ 83, 157, 194 ]
   navmode: "walk"
   translationSpeed: 10.0
 children:
+  flat_terrain:
+    extends: http://vwf.example.com/node3.vwf
+    source: terrain.dae
+    type: model/vnd.collada+xml
+    properties:
+      translation: [ -500, 1000, 0 ]
+      scale: [ 0.001, 0.001, 0.000001 ]
   humvee:
     extends: http://vwf.example.com/node3.vwf
     source: humvee.DAE
@@ -95,9 +103,12 @@ children:
                 this.logger.info( "Step: Open Door" );
                 var humveeDoor = this.find( "/humvee/bone2/Scene/DoorDriverFront" )[ 0 ];
                 humveeDoor.pointerClick = humveeDoor.events.add( function() {
-                  humveeDoor.pointerClick = humveeDoor.events.flush( this );
-                  this.logger.info( "Step: Open Door - Completed" );
-                  this.completed();
+                  if(this.parent.parent.parent.humvee.bone2.Scene.DoorDriverFront.controlValue == 0)
+                  {
+                    humveeDoor.pointerClick = humveeDoor.events.flush( this );
+                    this.logger.info( "Step: Open Door - Completed" );
+                    this.completed();
+                  }
                 }, this );
               }
           jumpIn:
