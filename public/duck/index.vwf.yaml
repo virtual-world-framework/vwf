@@ -50,11 +50,11 @@ children:
       enable: true
       distance: 2000
       intensity: 2
-      color: [ 255, 255, 255 ]
+      color: [ 128, 128, 128 ]
       glge-constantAttenuation: 0.3
       glge-linearAttenuation: 0.00000001
       glge-quadraticAttenuation: 0.0000001  
-      translation: [ -400, 400, 900 ]
+      translation: [ -400, 400, -900 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
     implements:
@@ -63,12 +63,12 @@ children:
       lightType: "point"
       enable: true
       distance: 2000
-      intensity: 4
-      color: [ 255, 255, 255 ]
+      intensity: 2
+      color: [ 128, 128, 128 ]
       glge-constantAttenuation: 0.3
       glge-linearAttenuation: 0.00000001
       glge-quadraticAttenuation: 0.0000001  
-      translation: [ -400, 400, 900 ]
+      translation: [ 400, 400, 900 ]
 scripts:
 - |
     this.initialize = function(){
