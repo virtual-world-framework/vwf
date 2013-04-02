@@ -1200,7 +1200,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         /// To create a node, we first make the prototoype available by loading it (if it has not
         /// already been loaded). This is a recursive call to createNode() with the prototype
         /// specification. Then we add new, and modify existing, properties, methods, and events
-        /// according to the component specification. Then we load an add any children, again
+        /// according to the component specification. Then we load and add any children, again
         /// recursively calling createNode() for each. Finally, we attach any new scripts and invoke
         /// an initialization function.
         /// 

@@ -234,9 +234,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             sceneNode.glgeRenderer = new GLGE.Renderer( canvas );
             sceneNode.glgeRenderer.setScene( sceneNode.glgeScene );
 
-            // ambientColor is a property of the scene now
-            // that property should be set instead of hardcoding here
-            //sceneNode.glgeScene.setAmbientColor( [ 183, 183, 183 ] );
+            // Set a default ambient color that can be overridden
+            // TODO: This should really be a property in scene.vwf, but that doesn't set the ambient
+            //       correctly right now because the renderer scene isn't created until after scene.vwf
+            //       (and at that time there is no scene to set the ambient color on)
+            sceneNode.glgeScene.setAmbientColor( [ 50, 50, 50 ] );
 
             this.state.cameraInUse = sceneNode.glgeScene.camera;
             this.state.cameraInUse.setAspect( ( canvas.width / canvas.height)  );
