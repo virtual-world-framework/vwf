@@ -84,12 +84,11 @@ children:
                       sequence: 2
                 scripts:
                 - |
-                  var initialTranslation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialTranslation) {
-                      initialTranslation = this.translation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.translation = initialTranslation;
+                    this.transform = this.initialTransform;
                     this.translateBy([0, 0, -1 * time], 0);
                   }
               GearShift: 
@@ -140,12 +139,11 @@ children:
                       sequence: 4
                 scripts:
                 - |
-                  var initialTranslation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialTranslation) {
-                      initialTranslation = this.translation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.translation = initialTranslation;
+                    this.transform = this.initialTransform;
                     this.translateBy([1 * (time - 0.5) * 8, 0, 0], 0);
                   }
               HighLowSelector: 
@@ -189,12 +187,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialTranslation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialTranslation) {
-                      initialTranslation = this.translation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.translation = initialTranslation;
+                    this.transform = this.initialTransform;
                     this.translateBy([1 * (time - 0.5) * 6, 0, 0], 0);
                   }
               EmergencyBrake: 
@@ -226,12 +223,11 @@ children:
                       sequence: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 1, 0, time * 45], 0, "rotated");
                   }
               Accelerator: 
@@ -264,12 +260,11 @@ children:
                       sequence: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 1, 0, time * 10], 0, "rotated");
                   }
               Brake: 
@@ -302,12 +297,11 @@ children:
                       sequence: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 1, 0, time * 10], 0, "rotated");
                   }
               SteeringWheel: 
@@ -358,12 +352,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0.942, 0, 0.335, (time - 0.5) * -720], 0, "rotated");
                   }
               TurnSignal: 
@@ -406,12 +399,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0.942, 0, 0.335, (time - 0.5) * 60], 0, "rotated");
                   }
               Ignition: 
@@ -450,12 +442,11 @@ children:
                       controlType: "spring"
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([-1, 0, 0, time * 70], 0, "rotated");
                   }
               Switch03: 
@@ -539,12 +530,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialTranslation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialTranslation) {
-                      initialTranslation = this.translation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.translation = initialTranslation;
+                    this.transform = this.initialTransform;
                     this.translateBy([0, 1 * (time - 0.5) * 2, 0], 0);
                   }
               SpeedNeedle: 
@@ -602,12 +592,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0.986, 0, 0.164, time * -240], 0, "rotated");
                   }
               VoltMeter: 
@@ -667,12 +656,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0.986, 0, 0.164, (time - 0.5) * -72], 0, "rotated");
                   }
               TempNeedle: 
@@ -732,12 +720,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0.986, 0, 0.164, (time - 0.5) * -72], 0, "rotated");
                   }
               OilNeedle: 
@@ -797,12 +784,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0.986, 0, 0.164, (time - 0.55) * -90], 0, "rotated");
                   }
               FuelNeedle: 
@@ -862,12 +848,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0.986, 0, 0.164, (time - 0.5) * -80], 0, "rotated");
                   }
               DoorPassFront: 
@@ -899,12 +884,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
                   }
               DoorPassRear: 
@@ -936,12 +920,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
                   }
               Omni002: 
@@ -1004,12 +987,11 @@ children:
                       animationTime: 0.5
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([-1, 0, 0, (time - 0.125) * 360], 0, "rotated");
                   }
               WiperDriver: 
@@ -1070,12 +1052,11 @@ children:
                       animationTime: 0.5
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([-1, 0, 0, (time - 0.125) * 360], 0, "rotated");
                   }
               GunMount: 
@@ -1139,12 +1120,11 @@ children:
                               animationTime: 0.483
                         scripts:
                         - |
-                          var initialRotation;
                           this.animationUpdate = function(time, duration) {
-                            if(!initialRotation) {
-                              initialRotation = this.rotation;
+                            if(!this.initialTransform) {
+                              this.initialTransform = this.transform;
                             }
-                            this.rotation = initialRotation;
+                            this.transform = this.initialTransform;
                             this.rotateBy([0, 1, 0, time * 360], 0, "rotated");
                           }
                       Untitled_008: 
@@ -1181,12 +1161,11 @@ children:
                           animationTime: 0.5
                     scripts:
                     - |
-                      var initialRotation;
                       this.animationUpdate = function(time, duration) {
-                        if(!initialRotation) {
-                          initialRotation = this.rotation;
+                        if(!this.initialTransform) {
+                          this.initialTransform = this.transform;
                         }
-                        this.rotation = initialRotation;
+                        this.transform = this.initialTransform; 
                         this.rotateBy([1, 0, 0, time * 360], 0, "rotated");
                       }
                   Untitled_007: 
@@ -1214,12 +1193,11 @@ children:
                       sequence: 2
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
                   }
               DoorDriverFront: 
@@ -1251,12 +1229,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, -1, time * 360], 0, "rotated");
                   }
               RearHatch: 
@@ -1288,12 +1265,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, -1, 0, time * 360], 0, "rotated");
                   }
               SpareMount: 
@@ -1330,12 +1306,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, 1, time * 360], 0, "rotated");
                   }
               DoorDriverRear: 
@@ -1367,12 +1342,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, -1, time * 360], 0, "rotated");
                   }
               TireDriverRear: 
@@ -1425,12 +1399,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, 1, (time - 0.5) * 60], 0, "rotated");
                   }
               TireDriverFront: 
@@ -1473,12 +1446,11 @@ children:
                       animationTime: 1
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, 0, 1, (time - 0.5) * 60], 0, "rotated");
                   }
               HumveeBody: 
@@ -1516,12 +1488,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([-1, 0, 0, time * 360], 0, "rotated");
                   }
               HoodLatchDriver: 
@@ -1554,12 +1525,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([1, 0, 0, time * 360], 0, "rotated");
                   }
               Hood: 
@@ -1592,12 +1562,11 @@ children:
                       animationTime: 0.125
                 scripts:
                 - |
-                  var initialRotation;
                   this.animationUpdate = function(time, duration) {
-                    if(!initialRotation) {
-                      initialRotation = this.rotation;
+                    if(!this.initialTransform) {
+                      this.initialTransform = this.transform;
                     }
-                    this.rotation = initialRotation;
+                    this.transform = this.initialTransform;
                     this.rotateBy([0, -1, 0, time * 360], 0, "rotated");
                   }
               Ground: 

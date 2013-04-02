@@ -49,6 +49,7 @@ properties:
   controlPlaying: false
   controlMomentary: false
   linkedControls: []
+  initialTransform: 
 methods:
   mouseInit: 
   controlTick:
