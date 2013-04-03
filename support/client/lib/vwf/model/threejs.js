@@ -84,7 +84,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
 
-            var prototypeID = isPrototype.call( this, nodeID, childID );
+            var self = this;
+
+            var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
             if ( prototypeID !== undefined ) {
                 this.state.prototypes[ prototypeID ] = {
                     parentID: nodeID,
@@ -129,11 +131,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var cam = CreateThreeCamera();
                 sceneNode.camera.threeJScameras[sceneNode.camera.defaultCamID] = cam;
                 sceneNode.camera.ID= sceneNode.camera.defaultCamID;
-                
-                // TODO: This should really be a property in scene.vwf, but that doesn't set the ambient
-                //       correctly right now because the renderer scene isn't created until after scene.vwf
-                //       (and at that time there is no scene to set the ambient color on)
-                createAmbientLight.call( this, sceneNode.threeScene, [ 0.2, 0.2, 0.2 ] );
 
                 sceneNode.threeScene.add(cam);
                 
@@ -241,8 +238,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 if ( childType == "model/vnd.collada+xml" || childType == "model/vnd.osgjs+json+compressed") {
                     
-                    //Do we need this when we have an async load? currently seems to break things
+                    // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
+
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         threeObject: threeChild,
@@ -251,11 +249,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         parentID: nodeID,
                         sourceType: childType,
                         type: childExtendsID,
-                        //no load callback, maybe don't need this?
+                        // Hang on to the callback and call it again in assetLoaded with ready=true
                         loadingCallback: callback,
                         sceneID: this.state.sceneRootID
                     };
-                    loadAsset.call( this, parentNode, node, childType );     
+                    loadAsset.call( this, parentNode, node, childType, notifyDriverOfPrototypeAndBehaviorProps );     
                 } else if ( childType == "mesh/definition" ) {
                     
                     callback( false );
@@ -308,7 +306,30 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 }
             
             }
-            
+
+            // If we do not have a load a model for this node, then we are almost done, so we can update all
+            // the driver properties w/ the stop-gap function below.
+            // Else, it will be called at the end of the assetLoaded callback
+            if ( ! ( childType == "model/vnd.collada+xml" || 
+                     childType == "model/vnd.osgjs+json+compressed") )
+                notifyDriverOfPrototypeAndBehaviorProps();
+
+            // Since prototypes are created before the object, it does not get "setProperty" updates for
+            // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
+            // notify the drivers of the property values so they can react accordingly
+            // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+            function notifyDriverOfPrototypeAndBehaviorProps() {
+                protos.forEach( function( prototypeID ) {
+                    for ( var propertyName in kernel.getProperties( prototypeID ) )
+                        self.settingProperty( childID, propertyName, 
+                                              kernel.getProperty( childExtendsID, propertyName ) );
+                } );
+                childImplementsIDs.forEach( function( behaviorID ) {
+                    for ( var propertyName in kernel.getProperties( behaviorID ) ) 
+                        self.settingProperty( childID, propertyName, 
+                                              kernel.getProperty( behaviorID, propertyName ) );
+                } );
+            }
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -384,7 +405,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-        
+
             //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
@@ -1003,23 +1024,23 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
-                    if ( propertyName == 'distance' ) {
+                    else if ( propertyName == 'distance' ) {
                         value = Number( propertyValue );
                         threeObject.distance = value;
                     }
-                    if ( propertyName == 'color' ) {
+                    else if ( propertyName == 'color' ) {
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
                         }
                         value = colorToString.call( this, vwfColor );
                     }
-                    if ( propertyName == 'intensity' ) {
+                    else if ( propertyName == 'intensity' ) {
                         value = parseFloat( propertyValue );
                         threeObject.intensity = value;
                         threeObject.updateMatrix();
                     }                    
-                    if ( propertyName == 'castShadows' ) {
+                    else if ( propertyName == 'castShadows' ) {
                         value = Boolean( propertyValue );
                         threeObject.castShadow = value;
                     }
@@ -1254,7 +1275,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         return prototypes;
     }
 
-    function isPrototype( nodeID, childID ) {
+    function ifPrototypeGetId( nodeID, childID ) {
         var ptID;
         if ( ( nodeID == 0 && childID != this.state.sceneRootID ) || this.state.prototypes[ nodeID ] !== undefined ) {
             if ( nodeID != 0 || childID != this.state.sceneRootID ) {
@@ -1645,7 +1666,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             geo.computeCentroids();
         }         
     }
-    function loadAsset( parentNode, node, childType ) {
+    function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
 
         var nodeCopy = node; 
         var nodeID = node.ID;
@@ -1696,6 +1717,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     removed = true;
                 }
             } 
+
+            // Since prototypes are created before the object, it does not get "setProperty" updates for
+            // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
+            // notify the drivers of the property values so they can react accordingly
+            // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+            propertyNotifyCallback();
 
             // let vwf know the asset is loaded 
             if ( nodeCopy.loadingCallback ) {

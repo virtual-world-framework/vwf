@@ -14,7 +14,6 @@
 ---
 extends: navtouch.vwf
 properties:
-  ambientColor: [ 183, 183, 183 ]
   navmode: "orbit"
   speed: 4.0
 methods:
@@ -775,16 +774,18 @@ children:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
+      translation: [ 0, 0, 10 ]
+      rotation: [ 1, 0, 0, -10 ]
       quadraticAttenuation: 10
       specular: false # the highlights are way too hot (materials or light?)
-      rotation: [ 1, 0, 0, -10 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
     properties:
       lightType: "directional"
+      translation: [ 0, 0, 10 ]
+      rotation: [ -1, 0, 0, 200 ]
       quadraticAttenuation: 10
       specular: false # the highlights are way too hot (materials or light?)
-      rotation: [ -1, 0, 0, 200 ]
 scripts:
 - |
   this.initialize = function() {
@@ -806,6 +807,6 @@ scripts:
       this.navmode='walk'; 
       this.activeCamera = this.hmmwv.interiorCamera.id;
     }
-  }
+  } //@ sourceURL=index.vwf
 
 # Paste into the console to jump to an inside view: vwf.execute( "index-vwf", "this.navmode = 'walk' ; this.camera.transform = [-0.4292135238647461, 0.9031997919082642, -0.000008751301720621996, 0, -0.8462061285972595, -0.40213271975517273, -0.34959691762924194, 0, -0.31576135754585266, -0.150045245885849, 0.9368997812271118, 0, -15.161749839782715, -28.28612518310547, 72.89060974121094, 1]" )

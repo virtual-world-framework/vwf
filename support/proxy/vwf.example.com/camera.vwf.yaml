@@ -83,7 +83,7 @@ properties:
   ## @name camera.vwf#aspect
   ## @property
 
-  aspect: 1.0
+  aspect:
 
   ## Type of camera (perspective vs. orthographic)
   ## 
