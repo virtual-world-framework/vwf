@@ -229,7 +229,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 parentID: nodeID,
                                 sourceType: childType,
                                 type: childExtendsID,
-                                loadingCollada: callback,
+                                loadedCallback: callback,
                                 glgeScene: sceneNode
                             };
                             loadCollada.call( this, parentNode, node ); 
@@ -294,8 +294,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                     callback( false );
                                     node.glgeObject.vwfID = childID;
                                     sceneNode.xmlColladaObjects.push( node.glgeObject );
-                                    setupColladaCallback.call( this, node.glgeObject, sceneNode );
-                                    node.loadingCollada = callback;                                    
+                                    setColladaCallback.call( this, node.glgeObject, sceneNode );
+                                    node.loadedCallback = callback;                                    
                                 }
                             } else {
                                 if ( nodeID != 0 ) {
@@ -822,66 +822,24 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     
     function loadCollada( parentNode, node ) {
 
-        var nodeCopy = node; 
-        var nodeID = node.ID;
-        var childName = node.name;
-        var glgeModel = this;
-        var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-
-        function colladaLoaded( collada ) { 
-
-            sceneNode.pendingLoads--;
-            collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
-            var removed = false;
-            if ( nodeCopy && nodeCopy.colladaLoaded ) {
-                nodeCopy.colladaLoaded( true );
-            }
-            for ( var j = 0; j < sceneNode.srcColladaObjects.length; j++ ) {
-                if ( sceneNode.srcColladaObjects[j] == collada ){
-                    sceneNode.srcColladaObjects.splice( j, 1 );
-                    removed = true;
-                }
-            } 
-            if ( removed ) {
-                if ( sceneNode.srcColladaObjects.length == 0 ) {
-                    //vwf.setProperty( glgeModel.state.sceneRootID, "loadDone", true );
-                    loadComplete.call( glgeModel );
-                }
-
-                var id = collada.vwfID;
-                if ( !id ) id = getObjectID.call( glgeModel, collada, true, false );
-                if ( id && id != "" ){
-                    //glgeModel.kernel.callMethod( id, "loadComplete" );
-                    if ( glgeModel.state.nodes[id] ) {
-                        var colladaNode = glgeModel.state.nodes[id];
-                        if ( colladaNode.loadingCollada ) {
-                            colladaNode.loadingCollada( true );                    
-                        }
-                    }
-                }
-            }
-        }
-
-        node.name = childName;
+        // Create new GLGE collada object
         node.glgeObject = new GLGE.Collada;
-        sceneNode.srcColladaObjects.push( node.glgeObject );
-        node.glgeObject.vwfID = nodeID;
 
-        node.glgeObject.setDocument( node.source, window.location.href, colladaLoaded );
-        node.glgeObject.loadedCallback = colladaLoaded;
-        sceneNode.pendingLoads++;
+        // Set properties on new GLGE collada object
+        var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+        var colladaLoadedCallback = setColladaCallback.call( this, node.glgeObject, sceneNode );
+        node.glgeObject.vwfID = node.ID;
+        node.glgeObject.setDocument( node.source, window.location.href, colladaLoadedCallback );
+
+        // Add the new GLGE collada object to the list of those that need to be loaded
+        sceneNode.srcColladaObjects.push( node.glgeObject );
         
-        if ( parentNode && parentNode.glgeObject ) {
+        // If the new node has a parent, attach its GLGE object to that of the parent
+        // Else, attach it to the scene directly as a top-level object
+        if ( parentNode && parentNode.glgeObject )
             parentNode.glgeObject.addCollada( node.glgeObject );
-         } else if ( sceneNode ) {
-//          if ( !sceneNode.glgeScene ) {
-//              this.initScene.call( this, sceneNode );
-//          }
-            if ( sceneNode.glgeScene ) {
-                sceneNode.glgeScene.addCollada( node.glgeObject );
-            }
-             
-        }
+        else if ( sceneNode && sceneNode.glgeScene )
+            sceneNode.glgeScene.addCollada( node.glgeObject );
     }
 
 
@@ -899,7 +857,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     var glgeModel = this;
 
                     sceneNode.xmlColladaObjects.push( children[i] );
-                    setupColladaCallback.call( this, children[i], sceneNode );
+                    setColladaCallback.call( this, children[i], sceneNode );
 
                     children[i].loadedCallback = colladaLoaded;
                     sceneNode.pendingLoads++;
@@ -910,43 +868,58 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
 
-    // -- setupColladaCallback ------------------------------------------------------------------------
+    // -- setColladaCallback ------------------------------------------------------------------------
 
-    function setupColladaCallback( glgeCollada, scene ) {
+    function setColladaCallback( glgeColladaObject, scene ) {
 
-        var glgeModel = this;
+        var self = this;
         var sceneNode = scene;
-        function colladaLoaded( collada ) { 
+
+        // Update the number of pending loads on the scene node
+        // This information is just for our own knowledge; it is not used anywhere
+        // (But double-check to make sure no one has added a reference before you do anything drastic)
+        sceneNode.pendingLoads++;
+
+        // Set the callback as defined below
+        glgeColladaObject.loadedCallback = colladaLoaded;
+
+        function colladaLoaded( colladaObject ) {
+
+            // Undo default GLGE rotation applied in GLGE.Collada.initVisualScene that adjusts for +Y up
+            colladaObject.setRot( 0, 0, 0 );
+
+            // Update the number of pending loads on the scene node
+            // This information is just for our own knowledge; it is not used anywhere
+            // (But double-check to make sure no one has added a reference before you do anything drastic)
             sceneNode.pendingLoads--;
-            collada.setRot( 0, 0, 0 ); // undo the default GLGE rotation applied in GLGE.Collada.initVisualScene that is adjusting for +Y up
-            var bRemoved = false;
-            for ( var j = 0; j < sceneNode.xmlColladaObjects.length; j++ ) {
-                if ( sceneNode.xmlColladaObjects[j] == collada ){
-                    sceneNode.xmlColladaObjects.splice( j, 1 );
-                    bRemoved = true;
-                }
-            } 
-            if ( bRemoved ){
-                if ( sceneNode.xmlColladaObjects.length == 0 ) {
-                    //this.kernel.setProperty( modelID, "loadDone", true );
-                    loadComplete.call( glgeModel );
+
+            // Now that this object has loaded, remove it from the list of objects to be loaded            
+            var removedFromLoadList = false;
+            for ( var i = 0; !removedFromLoadList && i < sceneNode.srcColladaObjects.length; i++ ) {
+                if ( sceneNode.srcColladaObjects[ i ] == colladaObject ){
+                    sceneNode.srcColladaObjects.splice( i, 1 );
+                    removedFromLoadList = true;
                 }
             }
-            var id = collada.vwfID;
-            if ( !id ) id = getObjectID.call( glgeModel, collada, true, false );
-            if ( id && id != "" ){
-                //glgeModel.kernel.callMethod( id, "loadComplete" );
-                if ( glgeModel.state.nodes[id] ) {
-                    var colladaNode = glgeModel.state.nodes[id];
-                    if ( colladaNode.loadingCollada ) {
-                        colladaNode.loadingCollada( true );                    
-                    }
+            for ( var i = 0; !removedFromLoadList && i < sceneNode.xmlColladaObjects.length; i++ ) {
+                if ( sceneNode.xmlColladaObjects[ i ] == colladaObject ){
+                    sceneNode.xmlColladaObjects.splice( i, 1 );
+                    removedFromLoadList = true;
+                }
+            }
+
+            // If the VWF node for the newly loaded collada has a callback function, call it
+            // TODO: Since the callback resumes the queue, maybe we should not call it if there are still
+            //       objects to be loaded
+            var id = colladaObject.vwfID || getObjectID.call( self, colladaObject, true, false );
+            if ( id && ( id != "" ) ) {
+                var colladaNode = self.state.nodes[ id ];
+                if ( colladaNode && colladaNode.loadedCallback ) {
+                    colladaNode.loadedCallback( true );                    
                 }
             }
         }
-        glgeCollada.loadedCallback = colladaLoaded;
-        sceneNode.pendingLoads++;
-
+        return colladaLoaded;
     }
 
     // -- findColladaParent ------------------------------------------------------------------------
@@ -2167,9 +2140,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
         return vertexIndices;
-    }
-
-    function loadComplete() {
     }
 
     // get the list of types this ID extends
