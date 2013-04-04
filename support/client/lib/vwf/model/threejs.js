@@ -318,6 +318,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
             // notify the drivers of the property values so they can react accordingly
             // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+            // NOTE: Identical code exists in GLGE driver, so if an change is necessary, it should be made
+            //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) )

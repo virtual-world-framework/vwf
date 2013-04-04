@@ -50,6 +50,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childURI, childName, callback ) {
 
+            var self = this;
+
             //console.log(["creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
             var prototypeID = isPrototype.call( this, nodeID, childID );
             if ( prototypeID !== undefined ) {
@@ -232,7 +234,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 loadedCallback: callback,
                                 glgeScene: sceneNode
                             };
-                            loadCollada.call( this, parentNode, node ); 
+                            loadCollada.call( this, parentNode, node, notifyDriverOfPrototypeAndBehaviorProps ); 
                             break;
 
                         case "text/xml":
@@ -358,8 +360,32 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                  }  // end of switch
             } // end of else
 
-//            this.logger.enabled = false;
-               
+            // If we do not have a load a model for this node, then we are almost done, so we can update all
+            // the driver properties w/ the stop-gap function below.
+            // Else, it will be called at the end of the assetLoaded callback
+            if ( ! ( childType == "model/vnd.collada+xml" || 
+                     childType == "model/vnd.osgjs+json+compressed" ) )
+                notifyDriverOfPrototypeAndBehaviorProps();
+
+            // Since prototypes are created before the object, it does not get "setProperty" updates for
+            // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
+            // notify the drivers of the property values so they can react accordingly
+            // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+            // NOTE: Identical code exists in three.js driver, so if an change is necessary, it should be made
+            //       there, too
+            function notifyDriverOfPrototypeAndBehaviorProps() {
+                var protos = getPrototypes.call( this, kernel, childExtendsID );
+                protos.forEach( function( prototypeID ) {
+                    for ( var propertyName in kernel.getProperties( prototypeID ) )
+                        self.settingProperty( childID, propertyName, 
+                                              kernel.getProperty( childExtendsID, propertyName ) );
+                } );
+                childImplementsIDs.forEach( function( behaviorID ) {
+                    for ( var propertyName in kernel.getProperties( behaviorID ) )
+                        self.settingProperty( childID, propertyName, 
+                                              kernel.getProperty( behaviorID, propertyName ) );
+                } );
+            }   
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -820,14 +846,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // -- loadCollada ------------------------------------------------------------------------  
     
-    function loadCollada( parentNode, node ) {
+    function loadCollada( parentNode, node, propertyNotifyCallback ) {
 
         // Create new GLGE collada object
         node.glgeObject = new GLGE.Collada;
 
         // Set properties on new GLGE collada object
         var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-        var colladaLoadedCallback = setColladaCallback.call( this, node.glgeObject, sceneNode );
+        var colladaLoadedCallback = setColladaCallback.call( this, node.glgeObject, sceneNode, 
+                                                             propertyNotifyCallback );
         node.glgeObject.vwfID = node.ID;
         node.glgeObject.setDocument( node.source, window.location.href, colladaLoadedCallback );
 
@@ -870,10 +897,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     // -- setColladaCallback ------------------------------------------------------------------------
 
-    function setColladaCallback( glgeColladaObject, scene ) {
+    function setColladaCallback( glgeColladaObject, sceneNode, propertyNotifyCallback ) {
 
         var self = this;
-        var sceneNode = scene;
 
         // Update the number of pending loads on the scene node
         // This information is just for our own knowledge; it is not used anywhere
@@ -907,6 +933,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     removedFromLoadList = true;
                 }
             }
+
+            // Since prototypes are created before the object, it does not get "setProperty" updates for
+            // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
+            // notify the drivers of the property values so they can react accordingly
+            // TODO: Have the kernel send the "setProperty" updates itself so the driver need not
+            if ( propertyNotifyCallback )
+                propertyNotifyCallback();
 
             // If the VWF node for the newly loaded collada has a callback function, call it
             // TODO: Since the callback resumes the queue, maybe we should not call it if there are still
@@ -958,7 +991,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         if ( sceneNode && sceneNode.glgeScene ) {
             switch ( propertyName ) {
                 case "ambientColor":
-                    sceneNode.glgeScene.setAmbientColor( propertyValue );
+                    if ( propertyValue )
+                        sceneNode.glgeScene.setAmbientColor( propertyValue );
+                    else
+                        this.logger.warn( "Invalid ambient color");
                     break;
                 case "activeCamera":
                         if ( this.state.nodes[ propertyValue ] ) {
@@ -966,7 +1002,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         }
                     break;
                 case "backgroundColor":
-                    sceneNode.glgeScene.setBackgroundColor( propertyValue );
+                    if ( propertyValue )
+                        sceneNode.glgeScene.setBackgroundColor( propertyValue );
+                    else
+                        this.logger.warn( "Invalid background color");
                     break;
 
                 default:
@@ -1007,37 +1046,53 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setLoop( propertyValue );
                 break;
             case "velocity":
-                node.glgeObject.setVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;
             case "maxVelocity":
-                node.glgeObject.setMaxVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMaxVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;            
             case "minVelocity":
-                node.glgeObject.setMinVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMinVelocity( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;    
             case "startAcceleration":
-                node.glgeObject.setStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setStartAccelertaion( propertyValue[0], propertyValue[1], 
+                                                          propertyValue[2] );
                 break;
             case "endAcceleration":
-                node.glgeObject.setEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
                 break;
             case "maxStartAcceleration":
-                node.glgeObject.setMaxStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMaxStartAccelertaion( propertyValue[0], propertyValue[1], 
+                                                             propertyValue[2] );
                 break;
             case "maxEndAcceleration":
-                node.glgeObject.setMaxEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMaxEndAccelertaion( propertyValue[0], propertyValue[1], 
+                                                           propertyValue[2] );
                 break;
             case "minStartAcceleration":
-                node.glgeObject.setMinStartAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMinStartAccelertaion( propertyValue[0], propertyValue[1], 
+                                                             propertyValue[2] );
                 break;
             case "minEndAcceleration":
-                node.glgeObject.setMinEndAccelertaion( propertyValue[0], propertyValue[1], propertyValue[2] );
+                if ( propertyValue )
+                    node.glgeObject.setMinEndAccelertaion( propertyValue[0], propertyValue[1], 
+                                                           propertyValue[2] );
                 break;
             case "startColor":
-                node.glgeObject.setStartColor( propertyValue );
+                if ( propertyValue )
+                    node.glgeObject.setStartColor( propertyValue );
                 break;
             case "endColor":
-                node.glgeObject.setEndColor( propertyValue );
+                if ( propertyValue )
+                    node.glgeObject.setEndColor( propertyValue );
                 break;
             case "image":
                 node.glgeObject.setImage( propertyValue );
@@ -1080,7 +1135,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node.glgeObject.setFovY( Number( propertyValue ) );
                 break;            
             case "aspect":
-                node.glgeObject.setAspect( Number( propertyValue ) );
+                
+                // If the propertyValue is real, set it
+                // Else, it will be set to be the aspect ratio of the GLGE canvas
+                if ( propertyValue )
+                    node.glgeObject.setAspect( Number( propertyValue ) );
                 break;            
 //            case "orthoscale":
 //                if ( propertyValue ) { 
