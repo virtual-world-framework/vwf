@@ -65,30 +65,20 @@ scripts:
 children:
   Omni01:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
       distance: 2000
       intensity: 0.3
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       translation: [ 0, -30, 8 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
       distance: 2000
       intensity: 0.3
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001 
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
   radio: 
