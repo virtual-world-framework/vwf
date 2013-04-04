@@ -57,10 +57,6 @@ properties:
   ## @name scene.vwf#ambientColor
   ## @property
 
-  # TODO: This property gets set before the scene exists and therefore, this setting does not affect the scene
-  #       However, there are stop-gaps in the GLGE and three.js drivers to set the ambient color
-  #       Setting this property from your scene will affect the ambient color correctly.
-
   ambientColor: [ 50, 50, 50 ]
 
   ## Back ground color
@@ -68,7 +64,7 @@ properties:
   ## @name scene.vwf#backgroundColor
   ## @property
 
-  backgroundColor:   
+  backgroundColor: [ 0, 0, 0 ]
 
 scripts:
 - |
