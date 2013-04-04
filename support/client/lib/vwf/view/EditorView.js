@@ -41,7 +41,8 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 						$(document.body).append(data);
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/ddsmoothmenu.js"></script>');
 						
-						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_THREERayTracer.js"></script>');
+						
+						
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/Editor.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/MaterialEditor.js"></script>');
 						$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PrimitiveEditor.js"></script>');
@@ -209,6 +210,11 @@ define( [ "module", "version", "vwf/view" ], function( module, version, view ) {
 				
 			}
 		});
+		
+		
+		
+		
+		
 		$('#vwf-root').keyup(function(e){
 
 			_Editor.keyup(e)

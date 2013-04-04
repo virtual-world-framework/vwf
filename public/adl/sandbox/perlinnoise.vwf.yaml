@@ -470,6 +470,7 @@ scripts:
             m.normalsNeedUpdate = true;
          }
          m.dirtyMesh = true;
+         m.sceneManagerUpdate();
     }
     this.updateStack = function()
     {

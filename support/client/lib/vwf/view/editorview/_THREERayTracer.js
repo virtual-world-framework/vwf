@@ -27,6 +27,8 @@ THREE.Object3D.prototype.getLocalMatrix = function()
 THREE.CPUPickOptions = function()
 {
 	this.UserRenderBatches = false;
+	this.ignore = [];
+	this.OneHitPerMesh = false;
 }
 // Return the nearsest, highest priority hit 
 THREE.Scene.prototype.CPUPick = function(origin,direction,options)
@@ -308,14 +310,18 @@ function SimpleFaceListRTAS(faces,verts)
 	}
 }
 //Intersect a ray with a list of faces
-SimpleFaceListRTAS.prototype.intersect = function(origin,direction)
+SimpleFaceListRTAS.prototype.intersect = function(origin,direction,opts)
 {
 	var intersects = [];
     for(var i =0; i < this.faces.length; i++)
 	{
 		var intersect = this.faces[i].intersect1(origin,direction);
 		if(intersect)
-		intersects.push(intersect);
+		{
+			intersects.push(intersect);
+			if(opts && opts.OneHitPerMesh)
+				return intersects;
+		}
 	}
 	return intersects;
 }
@@ -579,7 +585,7 @@ OctreeRegion.prototype.distributeFace = function(face)
 	}
 }
 //Test a ray against an octree region
-OctreeRegion.prototype.intersect = function(o,d)
+OctreeRegion.prototype.intersect = function(o,d,opts)
 {
 	
 	var hits = [];
@@ -599,7 +605,14 @@ OctreeRegion.prototype.intersect = function(o,d)
 	{
 		var facehits = facelist[i].intersect1(o,d);
 		if(facehits)
+		{
 			hits.push(facehits);
+			if(opts && opts.OneHitPerMesh)
+			{
+				
+				return hits;
+			}
+		}
 	}
 	
 	//reject this node if the ray does not intersect it's bounding box
@@ -614,11 +627,18 @@ OctreeRegion.prototype.intersect = function(o,d)
 	{
 		for(var i = 0; i < this.children.length; i++)
 		{
-			var childhits = this.children[i].intersect(o,d);
+			var childhits = this.children[i].intersect(o,d,opts);
 			if(childhits)
 			{
 				for(var j = 0; j < childhits.length; j++)
+				{
 				    hits.push(childhits[j]);
+					if(opts && opts.OneHitPerMesh)
+					{
+						
+						return hits;
+					}
+				}
 			}
 		}
 	}
@@ -765,9 +785,9 @@ function OctreeRTAS(faces,verts,min,max)
 		this.root.addFace(this.faces[i]);
 }
 //just intersect with the root octant
-OctreeRTAS.prototype.intersect = function(o,d)
+OctreeRTAS.prototype.intersect = function(o,d,opts)
 {
-	return this.root.intersect(o,d);
+	return this.root.intersect(o,d,opts);
 }
 OctreeRTAS.prototype.intersectFrustrum = function(frustrum)
 {
@@ -879,7 +899,7 @@ THREE.Geometry.prototype.CPUPick = function(origin,direction,options)
 				
 			 }
 			 //do actual mesh intersection
-			 intersections = this.RayTraceAccelerationStructure.intersect(origin,direction); 		 
+			 intersections = this.RayTraceAccelerationStructure.intersect(origin,direction,options); 		 
 		 }
 	  }
 	  this.dirtyMesh = false;
@@ -950,6 +970,13 @@ THREE.Object3D.prototype.GetBoundingBox = function(local)
 THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 {
 	  
+	 if(options && options.filter && this)
+	 {
+			
+			if(!options.filter(this))
+				return null;
+	  }
+	  
 	  if(options && options.ignore && options.ignore.indexOf(this) != -1)
 		return null;
 	  if(options.UserRenderBatches && this.isBatched)
@@ -988,8 +1015,11 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 	  mat[11] = 0;
 	  mat = MATH.inverseMat4(mat);
       var newd = MATH.mulMat4Vec3(mat,direction);
-	  
-	  
+	  var mat2 = this.getModelMatrix().slice(0);
+	  var mat3 = this.getModelMatrix().slice(0);
+	  mat3[3] = 0;
+	  mat3[7] = 0;
+	  mat3[11] = 0;
 	  
 	  
 	  
@@ -1001,12 +1031,10 @@ THREE.Object3D.prototype.CPUPick = function(origin,direction,options)
 				{	
 					
 					//move the normal and hit point into worldspace
-					var mat2 = this.getModelMatrix().slice(0);
+					
 					ret2[i].point = MATH.mulMat4Vec3(mat2,ret2[i].point);
-					mat2[3] = 0;
-					mat2[7] = 0;
-					mat2[11] = 0;
-					ret2[i].norm = MATH.mulMat4Vec3(mat2,ret2[i].norm);
+					
+					ret2[i].norm = MATH.mulMat4Vec3(mat3,ret2[i].norm);
 					ret2[i].norm = MATH.scaleVec3(ret2[i].norm,1.0/MATH.lengthVec3(ret2[i].norm));
 					ret2[i].distance = MATH.distanceVec3(origin,ret2[i].point);
 					ret2[i].object = this;
@@ -1096,25 +1124,29 @@ THREE.Object3D.prototype.FrustrumCast = function(frustrum)
 	  }
 		
 		
-	  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
-	  var mat;
-	  var mat2;
 	  
-	 
-	  mat = this.getModelMatrix().slice(0);
-	  mat = MATH.inverseMat4(mat);
-	  var tfrustrum = frustrum.transformBy(mat);
 	  
 	  
       if(this.geometry)
 	  {
+	  
+			  //at this point, were going to move the ray into the space relative to the mesh. until now, the ray has been in worldspace.
+			  var mat;
+			  var mat2;
+			  
+			 
+			  mat = this.getModelMatrix().slice(0);
+			  mat = MATH.inverseMat4(mat);
+			  var tfrustrum = frustrum.transformBy(mat);
+	  
 			//collide with the mesh
 			ret = this.geometry.FrustrumCast(tfrustrum);
-			
+			if(ret.length)
+				mat2 = this.getModelMatrix().slice(0);
 			for(var i = 0; i < ret.length; i++)
 			{	
 				//move the normal and hit point into worldspace
-				var mat2 = this.getModelMatrix().slice(0);
+				
 				ret[i].point = MATH.mulMat4Vec3(mat2,ret[i].point);
 				mat2[3] = 0;
 				mat2[7] = 0;

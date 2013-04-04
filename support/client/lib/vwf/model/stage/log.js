@@ -29,36 +29,36 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         return function() {
 
-            var logees = Array.prototype.slice.call( arguments );
+            // var logees = Array.prototype.slice.call( arguments );
 
-            switch ( kernelFunctionName ) {
+            // switch ( kernelFunctionName ) {
 
-                case "createNode": // nodeComponent, callback /* ( nodeID ) */
-                    objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // nodeComponent
-                    break;
+                // case "createNode": // nodeComponent, callback /* ( nodeID ) */
+                    // objectIsComponent( logees[0] ) && ( logees[0] = JSON.stringify( loggableComponent( logees[0] ) ) ); // nodeComponent
+                    // break;
 
-                case "createChild": // nodeID, childName, childComponent, callback /* ( childID ) */
-                    objectIsComponent( logees[2] ) && ( logees[2] = JSON.stringify( loggableComponent( logees[2] ) ) ); // childComponent
-                    break;
+                // case "createChild": // nodeID, childName, childComponent, callback /* ( childID ) */
+                    // objectIsComponent( logees[2] ) && ( logees[2] = JSON.stringify( loggableComponent( logees[2] ) ) ); // childComponent
+                    // break;
 
-                case "createProperty":
-                    logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet
-                    logees[4] && ( logees[4] = loggableScript( logees[4] ) ); // propertySet
-                    break;
+                // case "createProperty":
+                    // logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet
+                    // logees[4] && ( logees[4] = loggableScript( logees[4] ) ); // propertySet
+                    // break;
 
-                case "execute":
-                    logees[1] && ( logees[1] = loggableScript( logees[1] ) ); // scriptText
-                    break;
+                // case "execute":
+                    // logees[1] && ( logees[1] = loggableScript( logees[1] ) ); // scriptText
+                    // break;
 
-                case "time":
-                    logees = undefined; // no logging for kernel.time()
-                    break;
+                // case "time":
+                    // logees = undefined; // no logging for kernel.time()
+                    // break;
 
-            }
+            // }
 
-            if ( logees ) {
-                this.logger.debugc.apply( this.logger, [ kernelFunctionName ].concat( logees ) );
-            } 
+            // if ( logees ) {
+                // this.logger.debugc.apply( this.logger, [ kernelFunctionName ].concat( logees ) );
+            // } 
 
             return this.kernel[kernelFunctionName].apply( this.kernel, arguments );
         };
@@ -71,32 +71,32 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             if ( this.model[modelFunctionName] ) {
 
-                var logees = Array.prototype.slice.call( arguments );
+                // var logees = Array.prototype.slice.call( arguments );
 
-                switch ( modelFunctionName ) {
+                // switch ( modelFunctionName ) {
 
-                    case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */
-                        logees[8] = undefined; // callback /* ( ready ) */
-                        break;
+                    // case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */
+                        // logees[8] = undefined; // callback /* ( ready ) */
+                        // break;
 
-                    case "creatingProperty":
-                        logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet
-                        logees[4] && ( logees[4] = loggableScript( logees[4] ) ); // propertySet
-                        break;
+                    // case "creatingProperty":
+                        // logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet
+                        // logees[4] && ( logees[4] = loggableScript( logees[4] ) ); // propertySet
+                        // break;
 
-                    case "executing":
-                        logees[1] && ( logees[1] = loggableScript( logees[1] ) ); // scriptText
-                        break;
+                    // case "executing":
+                        // logees[1] && ( logees[1] = loggableScript( logees[1] ) ); // scriptText
+                        // break;
 
-                    case "ticking":
-                        logees = undefined; // no logging for model.ticking()
-                        break;
+                    // case "ticking":
+                        // logees = undefined; // no logging for model.ticking()
+                        // break;
 
-                }
+                // }
 
-                if ( logees ) {
-                    this.logger.debugc.apply( this.logger, [ modelFunctionName ].concat( logees ) );
-                }
+                // if ( logees ) {
+                    // this.logger.debugc.apply( this.logger, [ modelFunctionName ].concat( logees ) );
+                // }
 
                 return this.model[modelFunctionName].apply( this.model, arguments );
             }

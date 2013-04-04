@@ -918,7 +918,7 @@ function ScriptEditor()
 	}
 	this.changeSelection = function(node)
 	{
-			if(node)
+			if(node && this.isOpen())
 			{
 				if(!this.currentNode || (this.currentNode.id != node.id))
 				{

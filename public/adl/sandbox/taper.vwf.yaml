@@ -85,6 +85,8 @@ scripts:
          }
          
          m.verticesNeedUpdate = true;
+         m.dirtyMesh = true;
+         m.sceneManagerUpdate();
     }
     this.updateStack = function()
     {

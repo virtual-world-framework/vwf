@@ -465,7 +465,7 @@ function MaterialEditor()
 	{
 		try{
 			
-			if(node)
+			if(node && this.isOpen())
 			{
 				this.currentMaterial = vwf.getProperty(node.id,'materialDef');
 				if(!this.currentMaterial)

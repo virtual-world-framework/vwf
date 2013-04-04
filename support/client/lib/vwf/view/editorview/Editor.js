@@ -223,8 +223,17 @@ function Editor()
 	}.bind(this);
 	this.ThreeJSPick = function(campos,ray, options)
     {
-		var ret = findscene().CPUPick(campos,ray,options);
-		return ret;
+	//	var now = performance.now();
+		
+		var ret1 = _SceneManager.CPUPick(campos,ray,options);
+	//	var time1 = performance.now() - now;
+	//	now = performance.now();
+	//	var ret2 = findscene().CPUPick(campos,ray,options);
+	//	var time2 = performance.now() - now;
+	//	if(ret2 && ret1 && ret1.object !=  ret2.object)
+	//		console.log('Error! New pick give different results!!!');
+	//	console.log("New Time: " + time1,"Old Time: " + time2);
+		return ret1;
     }
 	this.ShowContextMenu = function(e)
 	{
@@ -233,8 +242,11 @@ function Editor()
 			var ray = GetWorldPickRay(e);
 			var campos = [findcamera().position.x,findcamera().position.y,findcamera().position.z];
 			
+			var pickopts = new THREE.CPUPickOptions();
+			pickopts.OneHitPerMesh = true;
+			
 			MoveGizmo.InvisibleToCPUPick = true;
-			var pick = this.ThreeJSPick(campos,ray);
+			var pick = this.ThreeJSPick(campos,ray,pickopts);
 			MoveGizmo.InvisibleToCPUPick = false;
 			
 			var vwfnode;
@@ -345,7 +357,11 @@ function Editor()
 				if(picksize < 10)
 				{
 					if(vwf.views[0].lastPickId)
+					{
+						
 						SelectObject(vwf.getNode(vwf.views[0].lastPickId),this.PickMod);	
+						
+					}
 				}
 				else
 				{
@@ -1713,7 +1729,7 @@ function Editor()
 			
 			for(var i =0; i < SelectionBounds.length; i++)
 			{
-				SelectionBounds[i].parent.remove(SelectionBounds[i]);
+				SelectionBounds[i].parent.remove(SelectionBounds[i],true);
 			}
 			SelectionBounds = [];
 			for(var i =0; i < SelectedVWFNodes.length; i++)
@@ -1736,7 +1752,7 @@ function Editor()
 				
 				SelectionBounds[i] = new THREE.Object3D();
 				SelectionBounds[i].name = "Bounds_+" + SelectedVWFNodes[i].id;
-				SelectionBounds[i].add(BuildBox([box.max.x - box.min.x,box.max.y - box.min.y,box.max.z - box.min.z],[box.min.x + (box.max.x - box.min.x)/2,box.min.y + (box.max.y - box.min.y)/2,box.min.z + (box.max.z - box.min.z)/2],color));
+				SelectionBounds[i].add(BuildBox([box.max.x - box.min.x,box.max.y - box.min.y,box.max.z - box.min.z],[box.min.x + (box.max.x - box.min.x)/2,box.min.y + (box.max.y - box.min.y)/2,box.min.z + (box.max.z - box.min.z)/2],color),true);
 				SelectionBounds[i].children[0].name = "Bounds_+" + SelectedVWFNodes[i].id + "_Mesh";
 				SelectionBounds[i].matrixAutoUpdate = false;
 				SelectionBounds[i].matrix.elements = MATH.transposeMat4(mat);
@@ -1765,7 +1781,7 @@ function Editor()
 				SelectionBounds[i].vwfid = SelectedVWFNodes[i].id;
 				
 			//	SelectionBounds[i].setMaterial(MATH.MaterialManager.findMaterialRecord(SelectionBounds[i].getMaterial()).material);
-				this.SelectionBoundsContainer.add(SelectionBounds[i]);
+				this.SelectionBoundsContainer.add(SelectionBounds[i],true);
 			}
 	}
 	this.updateBoundsTransform = function(id)
@@ -1933,7 +1949,7 @@ function Editor()
 			{
 				for(var i =0; i < SelectionBounds.length; i++)
 				{
-					SelectionBounds[i].parent.remove(SelectionBounds[i]);
+					SelectionBounds[i].parent.remove(SelectionBounds[i],true);
 				}
 				SelectionBounds = [];
 			}
@@ -2022,9 +2038,9 @@ function Editor()
                 cubeZ.position.set(.15,.15,5.00);
                 
                 MoveGizmo = new THREE.Object3D();
-                MoveGizmo.add(cubeX);
-                MoveGizmo.add(cubeY);
-                MoveGizmo.add(cubeZ);
+                MoveGizmo.add(cubeX,true);
+                MoveGizmo.add(cubeY,true);
+                MoveGizmo.add(cubeZ,true);
 				
 				cubeX.geometry.setPickGeometry(new THREE.CubeGeometry( 10.00, 1.80, 1.80 ));
 				cubeY.geometry.setPickGeometry(new THREE.CubeGeometry( 1.80, 10.00, 1.80 ));
@@ -2043,43 +2059,43 @@ function Editor()
                     new THREE.MeshLambertMaterial( { color: 0x0000FF, emissive:0x0000FF} )
                 );
                 
-				MoveGizmo.add(rotx);
+				MoveGizmo.add(rotx,true);
 				
 				roty.rotation.x = Math.PI/2;
-                MoveGizmo.add(roty);
+                MoveGizmo.add(roty,true);
 				rotx.rotation.y = Math.PI/2;
-                MoveGizmo.add(rotz);
+                MoveGizmo.add(rotz,true);
 				rotz.rotation.z = 90;
 				
 		
 		
-		MoveGizmo.add(BuildBox([.5,.5,.5],[10.25,0,0],red));//scale x		
-		MoveGizmo.add(BuildBox([.5,.5,.5],[0,10.25,0],green));//scale y
-		MoveGizmo.add(BuildBox([.5,.5,.5],[0,0,10.25],blue));//scale z
-		MoveGizmo.add(BuildBox([.85,.85,.85],[9.25,0,0],red));//scale xyz
-		MoveGizmo.add(BuildBox([.85,.85,.85],[0,9.25,0],green));//scale xyz
-		MoveGizmo.add(BuildBox([.85,.85,.85],[0,0,9.25],blue));//scale xyz
-		MoveGizmo.add(BuildBox([1.50,1.50,.30],[.75,.75,.15],[75,75,0,1]));//movexy
-		MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, 8, .30 ));
-		MoveGizmo.add(BuildBox([1.50,.30,1.50],[.75,.15,.75],[75,0,75,1]));//movexz
-		MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, .30, 8 ));
-		MoveGizmo.add(BuildBox([.30,1.50,1.50],[.15,.75,.75],[0,75,75,1]));//moveyz
-		MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( .30, 8, 8 ));
+		MoveGizmo.add(BuildBox([.5,.5,.5],[10.25,0,0],red),true);//scale x		
+		MoveGizmo.add(BuildBox([.5,.5,.5],[0,10.25,0],green),true);//scale y
+		MoveGizmo.add(BuildBox([.5,.5,.5],[0,0,10.25],blue),true);//scale z
+		MoveGizmo.add(BuildBox([.85,.85,.85],[9.25,0,0],red),true);//scale xyz
+		MoveGizmo.add(BuildBox([.85,.85,.85],[0,9.25,0],green),true);//scale xyz
+		MoveGizmo.add(BuildBox([.85,.85,.85],[0,0,9.25],blue),true);//scale xyz
+		MoveGizmo.add(BuildBox([1.50,1.50,.30],[.75,.75,.15],[75,75,0,1]),true);//movexy
+	//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, 8, .30 ));
+		MoveGizmo.add(BuildBox([1.50,.30,1.50],[.75,.15,.75],[75,0,75,1]),true);//movexz
+	//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( 8, .30, 8 ));
+		MoveGizmo.add(BuildBox([.30,1.50,1.50],[.15,.75,.75],[0,75,75,1]),true);//moveyz
+	//	MoveGizmo.children[MoveGizmo.children.length -1].geometry.setPickGeometry(new THREE.CubeGeometry( .30, 8, 8 ));
 		
 		
-		MoveGizmo.add(BuildRing(12,.7,[0,0,1],30,[1,1,1,1],90,450));//rotate z
+		MoveGizmo.add(BuildRing(12,.7,[0,0,1],30,[1,1,1,1],90,450),true);//rotate z
 		
-		MoveGizmo.add(BuildRing(7,0.5,[1,0,0],37,red,0,370));//rotate x
-		MoveGizmo.add(BuildRing(7,0.5,[0,1,0],37,green,0,370));//rotate y
-		MoveGizmo.add(BuildRing(7,0.5,[0,0,1],37,blue,0,370));//rotate z
+		MoveGizmo.add(BuildRing(7,0.5,[1,0,0],37,red,0,370),true);//rotate x
+		MoveGizmo.add(BuildRing(7,0.5,[0,1,0],37,green,0,370),true);//rotate y
+		MoveGizmo.add(BuildRing(7,0.5,[0,0,1],37,blue,0,370),true);//rotate z
 		
-		MoveGizmo.add(BuildBox([5,5,5],[0,0,0],[1,1,1,1]));//scale uniform
-		MoveGizmo.add(BuildBox([0.30,5,5],[5,0,0],red));//scale uniform
-		MoveGizmo.add(BuildBox([5,.30,5],[0,5,0],green));//scale uniform
-		MoveGizmo.add(BuildBox([5,5,.30],[0,0,5],blue));//scale uniform
-		MoveGizmo.add(BuildBox([.30,5,5],[-5,0,0],red));//scale uniform
-		MoveGizmo.add(BuildBox([5,.30,5],[0,-5,0],green));//scale uniform
-		MoveGizmo.add(BuildBox([5,5,.30],[0,0,-5],blue));//scale uniform		
+		MoveGizmo.add(BuildBox([5,5,5],[0,0,0],[1,1,1,1]),true);//scale uniform
+		MoveGizmo.add(BuildBox([0.30,5,5],[5,0,0],red),true);//scale uniform
+		MoveGizmo.add(BuildBox([5,.30,5],[0,5,0],green),true);//scale uniform
+		MoveGizmo.add(BuildBox([5,5,.30],[0,0,5],blue),true);//scale uniform
+		MoveGizmo.add(BuildBox([.30,5,5],[-5,0,0],red),true);//scale uniform
+		MoveGizmo.add(BuildBox([5,.30,5],[0,-5,0],green),true);//scale uniform
+		MoveGizmo.add(BuildBox([5,5,.30],[0,0,-5],blue),true);//scale uniform		
 				
 
 		MoveGizmo.children[0].name = 'XRotation';
@@ -2120,8 +2136,17 @@ function Editor()
 				var movegizhead = new THREE.Object3D();
 				movegizhead.name = "MoveGizmoRoot";
 				movegizhead.matrixAutoUpdate = false;
-				movegizhead.add(MoveGizmo);
-		findscene().add(movegizhead);
+				movegizhead.add(MoveGizmo,true);
+		
+		//since the picking system will use the scenemanager, must add.
+		//but use special add because there is no point in constantly re organizing the
+		//graph based on the gizmo
+		if(!_SceneManager)
+			alert('No SceneManager!');
+			
+		_SceneManager.addToRoot(movegizhead);	
+				
+		findscene().add(movegizhead,true);
 		MoveGizmo.matrixAutoUpdate = false;
 		
 		for(var i =0; i < MoveGizmo.children.length; i++)
@@ -2921,7 +2946,7 @@ function Editor()
 		document.oncontextmenu = function() {return false;};
 		this.SelectionBoundsContainer = new THREE.Object3D();
 		this.SelectionBoundsContainer.name = "SelectionBoundsContainer";
-		this.findscene().add(this.SelectionBoundsContainer);
+		this.findscene().add(this.SelectionBoundsContainer,true);
 		this.SelectionBoundsContainer.InvisibleToCPUPick = true;
 		this.buildContextMenu();
 		

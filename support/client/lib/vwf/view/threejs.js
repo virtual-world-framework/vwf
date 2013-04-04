@@ -735,7 +735,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         canvas.onmousemove = function( e ) {
-            var eData = getEventData( e, false );
+            
+			var eData = getEventData( e, false );
             
             if ( eData ) {
                 if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
@@ -1013,7 +1014,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         this.ray.set(pos, directionVector);
 		var caster = new THREE.Raycaster(pos,directionVector);
 		var intersects;
-		if(!sceneNode.threeScene.CPUPick)
+		if(!sceneNode.threeScene.CPUPick || !_SceneManager)
 		{
 			intersects = caster.intersectObjects(sceneNode.threeScene.children, true);
 			if (intersects.length) {
@@ -1051,7 +1052,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 		}else
 		{
 			
-			intersects = sceneNode.threeScene.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z]);
+			intersects = _SceneManager.CPUPick([pos.x,pos.y,pos.z],[directionVector.x,directionVector.y,directionVector.z]);
 			return intersects;
 		}
     }

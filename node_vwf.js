@@ -4,9 +4,10 @@ var libpath = require('path'),
     url = require("url"),
     mime = require('mime'),
 	sio = require('socket.io'),
-	YAML = require('js-yaml');
-	SandboxAPI = require('./sandboxAPI');
-
+	YAML = require('js-yaml'),
+	SandboxAPI = require('./sandboxAPI'),
+	Shell = require('./ShellInterface.js');
+	
 // pick the application name out of the URL by finding the index.vwf.yaml
 function findAppName(uri)
 {
@@ -30,6 +31,26 @@ function findAppName(uri)
 
 //Generate a random ID for a instance
 var ValidIDChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+global.log = function()
+{
+	var args = Array.prototype.slice.call(arguments);
+	var level = args.splice(args.length-1)[0];
+	
+	if(!isNaN(parseInt(level)))
+	{
+		level = parseInt(level);
+	}
+	else
+	{
+		args.push(level)
+		level = 1;
+	};
+	
+	if(level <= global.logLevel)
+		console.log.apply(this,args);
+}
+
 function makeid()
 {
     var text = "";
@@ -164,12 +185,12 @@ function ServeYAML(filename,response, URL)
 				response.end();
 				return;
 			}
-			//console.log(tf);
+			//global.log(tf);
 			try{
 			var deYAML = JSON.stringify(YAML.load(file));
 			}catch(e)
 			{
-				console.log("error parsing YAML " + filename );
+				global.log("error parsing YAML " + filename );
 				_404(response);
 				return;
 			}
@@ -280,7 +301,7 @@ function startVWF(){
 			
 			var URL = url.parse(request.url,true);
 			var uri = URL.pathname;
-			//console.log(uri);
+			//global.log(uri);
 			uri = uri.replace(/\//g,'\\');
 			
 			if(URL.pathname.toLowerCase().indexOf('/vwfdatamanager.svc/') != -1)
@@ -292,7 +313,7 @@ function startVWF(){
 			
 			var filename = libpath.join(path, uri);
 			var instance = Findinstance(filename);
-			//console.log(instance);
+			//global.log(instance);
 			//remove the instance identifier from the request
 			filename = filterinstance(filename,instance);
 			
@@ -302,7 +323,7 @@ function startVWF(){
 			var c2;
 			
 			
-			//console.log(filename);
+			//global.log(filename);
 			c1 = libpath.existsSync(filename);
 			c2 = libpath.existsSync(filename+".yaml");
 			if(!c1 && !c2)
@@ -357,7 +378,7 @@ function startVWF(){
 					//no app name but is directory. Not listing directories, so 404
 					if(!appname)
 					{
-						console.log(filename + "is a directory")
+						global.log(filename + "is a directory")
 						_404(response);
 						
 						return;
@@ -395,7 +416,7 @@ function startVWF(){
 			}
 			else
 			{
-				console.log("404 : " + filename)
+				global.log("404 : " + filename)
 				_404(response);
 				
 				return;
@@ -415,33 +436,7 @@ function startVWF(){
 	
 	//create the server
 	
-	//shell interface defaults
-	var stdin = process.openStdin();
-	stdin.on('data', function(chunk) {
-		if(!chunk) return;
-		chunk = chunk + '  ';
-		chunk = chunk.replace(/\r\n/g,'');
-		var commands = chunk.split( ' ');
-		
-		if(commands[0] && commands[0] == 'show' && commands[1])
-		{
-			if(commands[1] == 'instances')
-			{
-				var keys = Object.keys(global.instances);
-				for(var i in keys)
-					console.log(keys[i]);
-			}
-			if(commands[1] == 'clients')
-			{
-				for(var i in global.instances)
-				{
-					var keys = Object.keys(global.instances[i].clients);
-					for(var j in keys)
-					   console.log(keys[j]);
-				}
-			}
-		}
-	});
+	
 
 	var p = process.argv.indexOf('-p');
 	var port = p >= 0 ? parseInt(process.argv[p+1]) : 3000;
@@ -453,16 +448,17 @@ function startVWF(){
 	p = process.argv.indexOf('-l');
 	global.logLevel = p >= 0 ? process.argv[p+1] : 2;
 	
-	console.log('LogLevel = ' +  global.logLevel);
+	global.log('LogLevel = ' +  global.logLevel,0);
 	var srv = http.createServer(OnRequest).listen(port);
-	console.log('Serving on port ' + port);
+	global.log('Serving on port ' + port,0);
 	
+	Shell.StartShellInterface();  
 	//create socket server
 	sio = sio.listen(srv,{log:false});
 	sio.set('transports', ['websocket']);
 	sio.sockets.on('connection', function (socket) {
 	  
-	  
+	
 	  //get instance for new connection
 	  var namespace = getNamespace(socket);
 	  
@@ -485,7 +481,7 @@ function startVWF(){
 			if(global.logLevel >= level)
 			{
 				log.write(message +'\n');
-				console.log(message +'\n');
+				global.log(message +'\n');
 			}
 		}
 		//keep track of the timer for this instance
@@ -567,7 +563,7 @@ function startVWF(){
 			global.instances[namespace].state.nodes['index-vwf'].children[childID] = state[i];
 			fixIDs(state[i]);
 		}
-		//console.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
+		//global.log(Object.keys(global.instances[namespace].state.nodes['index-vwf'].children));
 		
 		//this is a blank world, go ahead and load the default
 		socket.emit('message',{"action":"createNode","parameters":["index.vwf"],"time":global.instances[namespace].time});
@@ -592,7 +588,7 @@ function startVWF(){
 			{
 				return;
 			}
-			//console.log(message);
+			//global.log(message);
 			message.client = socket.id;
 			
 			
@@ -612,7 +608,7 @@ function startVWF(){
 			
 			//do not accept messages from clients that have not been claimed by a user
 			//currently, allow getstate from anonymous clients
-			if(!sendingclient.loginData && message.action != "getState")
+			if(!sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
 			{
 				if(isPointerEvent(message))
 					global.instances[namespace].Log('DENIED ' + JSON.stringify(message), 4);
@@ -752,9 +748,26 @@ function startVWF(){
 	  //When a client disconnects, go ahead and remove the instance data
 	  socket.on('disconnect', function () {
 		  
-		  global.instances[namespace].clients[socket.id] = null;	 
+		  var loginData = global.instances[namespace].clients[socket.id].loginData;
+		  global.log(socket.id,loginData )
+		  global.instances[namespace].clients[socket.id] = null;	
 		  delete global.instances[namespace].clients[socket.id];
 		  //if it's the last client, delete the data and the timer
+		  
+		  if(loginData)
+		  {
+			  for(var i in global.instances[namespace].clients)
+			  {
+					var avatarID = 'character-vwf-'+loginData.UID;
+					//deleting node for avatar
+					global.log("Unexpected disconnect. Deleting node for user avatar " + loginData.UID);
+					var cl = global.instances[namespace].clients[i];
+					cl.emit('message',{"action":"deleteNode","node":avatarID,"time":global.instances[namespace].time});
+					global.instances[namespace].state.deleteNode(avatarID);					
+			  }
+		  }
+		  
+		  
 		  if(Object.keys(global.instances[namespace].clients).length == 0)
 		  {
 			clearInterval(global.instances[namespace].timerID);

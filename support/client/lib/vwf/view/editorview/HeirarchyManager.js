@@ -351,7 +351,7 @@ function hierarchyManager()
 				this.SelectionBounds = null;
 			}
 			
-			if(node)
+			if(node&&this.isOpen())
 			{	
 				this.selectedID = node.id
 				this.BuildGUI();

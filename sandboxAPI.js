@@ -37,13 +37,13 @@ function respond(response,status,message)
 					"Content-Type": "text/plain"
 				});
 	response.write(message + "\n");
-	console.log(message);
+	global.log(message);
 	response.end();
 }
 //Just serve a simple file
 function ServeFile(filename,response,URL, JSONHeader)
 {
-		console.log(filename);
+		global.log(filename);
 		
 		var datatype = 	"binary";
 		if(JSONHeader)
@@ -101,7 +101,7 @@ function ServeProfile(filename,response,URL, JSONHeader)
 				
 				response.write(JSON.stringify(o), "utf8");			
 				response.end();
-				console.log('Served Profile ' + filename);
+				global.log('Served Profile ' + filename);
 			}
 			else
 			{
@@ -121,8 +121,8 @@ function Login(filename,response,URL, JSONHeader)
 			var UID = URL.query.UID;
 			var password = URL.query.P;
 			var instance = URL.query.S;
-			console.log(instance);
-			console.log(global.instances);
+			global.log(instance);
+			global.log(global.instances);
 			var cid = URL.query.CID;
 			
 			if(!UID || !password || !instance || !cid)
@@ -184,7 +184,7 @@ function Login(filename,response,URL, JSONHeader)
 						"Set-Cookie": "session="+SessionID+"; HttpOnly; Path="+instance 
 					});
 					response.write("Login Successful", "utf8");
-					console.log('Client Logged in');
+					global.log('Client Logged in');
 					response.end();
 				}
 				else
@@ -264,7 +264,7 @@ function SaveProfile(URL,filename,data,response)
 	if(!fs.existsSync(filename))
 	{
 		SaveFile(filename,data,response);
-		console.log('Saved Profile ' + filename);
+		global.log('Saved Profile ' + filename);
 	}
 	//the profile exists
 	else
@@ -286,7 +286,7 @@ function SaveProfile(URL,filename,data,response)
 			if(storedPassword == suppliedPassword)
 			{
 				SaveFile(filename,data,response);
-				console.log('Saved Profile ' + filename);
+				global.log('Saved Profile ' + filename);
 			}else
 			{
 				
@@ -335,11 +335,11 @@ function CheckAuthor(UID,assetFilename, callback)
 	{
 		fs.readFile(assetFilename, "utf8", function (err, file) {
 			var asset = JSON.parse(file);
-			console.log(asset);
+			global.log(asset);
 			var storedAuthor = asset.Author;
 			
 			var suppliedAuthor = UID;
-			console.log(storedAuthor,suppliedAuthor);
+			global.log(storedAuthor,suppliedAuthor);
 			callback(storedAuthor == suppliedAuthor);
 		});
 		return;
@@ -362,12 +362,12 @@ function CheckOwner(UID,stateFilename, callback)
 	{
 		fs.readFile(stateFilename, "utf8", function (err, file) {
 			var asset = JSON.parse(file);
-			console.log(asset);
+			global.log(asset);
 			
 			var storedOwner = asset[asset.length-1].owner;
 			
 			var suppliedOwner = UID;
-			console.log(storedOwner,suppliedOwner);
+			global.log(storedOwner,suppliedOwner);
 			callback(storedOwner == suppliedOwner);
 		});
 		return;
@@ -394,12 +394,12 @@ function SaveAsset(URL,filename,data,response)
 				if(!fs.existsSync(filename))
 				{
 					//Save the asset Author info
-					console.log('parse asset');
+					global.log('parse asset');
 					var asset = JSON.parse(data);
 					asset.Author = URL.query.UID;
 					data = JSON.stringify(asset);
 					SaveFile(filename,data,response);
-					console.log('Saved Asset ' + filename);
+					global.log('Saved Asset ' + filename);
 					return;
 				}else
 				{
@@ -418,7 +418,7 @@ function SaveAsset(URL,filename,data,response)
 							asset.Author = URL.query.UID;
 							data = JSON.stringify(asset);
 							SaveFile(filename,data,response);
-							console.log('Saved Asset ' + filename);
+							global.log('Saved Asset ' + filename);
 							return;
 						}
 					});
@@ -501,7 +501,7 @@ function CopyState(URL,filename,newname,response)
 	
 	newname = newname.replace(/[\\\/]/g,'_');
 	var appname = filename.replace(/_[a-zA-Z0-9]*?_$/,'');
-	console.log(appname);
+	global.log(appname);
 	var stateID = newname.match(/_([a-zA-Z0-9]*?)_$/)[1];
 	if(!strBeginsWith(newname,appname) || !strEndsWith(newname,'_') || !stateID || stateID.length != 16)
 	{
@@ -638,7 +638,7 @@ function CheckHash(filename,data,callback)
 {
 	fs.readFile(filename, "utf8", function (err, file) {
 			
-			console.log("hash is:"+hash(data) +" "+ hash(file));
+			global.log("hash is:"+hash(data) +" "+ hash(file));
 			callback(hash(data) == hash(file));
 		});
 		return;
@@ -674,7 +674,7 @@ function SaveState(URL,dirname,data,response)
 					//overwriting the state;
 					//check that the owner property of hte state did not change
 					var asset = JSON.parse(data);
-					console.log(asset);
+					global.log(asset);
 					var storedOwner = asset[asset.length-1].owner;
 			
 					CheckOwner(storedOwner,dirname+'/state',function(e){
@@ -817,7 +817,7 @@ function getState(SID)
 {
 	SID = SID.replace(/[\\,\/]/g,'_');
 	var basedir = datapath + "\\";
-	console.log('servestate ' + basedir+"states\\" + SID);
+	global.log('servestate ' + basedir+"states\\" + SID);
 	if(fs.existsSync(basedir+"states\\" + SID+'\\state'))
 	{
 		file = fs.readFileSync(basedir+"states\\" + SID+'\\state','utf8');
@@ -844,7 +844,7 @@ function GetSessionData(request)
   var SessionID = cookies.session;
   
   if(!SessionID) return {};
-  console.log(SessionID);
+  global.log(SessionID);
   for(var i in global.instances)
   {
 	for(var j in global.instances[i].clients)
@@ -871,7 +871,7 @@ function serve (request, response)
 	 SID = SID.replace(/[\\,\/]/g,'_');
 	 
 	var basedir = datapath + "\\";
-	console.log(command,UID);
+	global.log(command,UID);
 	if(request.method == "GET")
 	{
 		switch(command)
@@ -997,7 +997,7 @@ function serve (request, response)
 				}break;
 				default:
 				{
-					console.log("POST");
+					global.log("POST");
 					_404(response);
 					return;
 				}
@@ -1026,7 +1026,7 @@ function serve (request, response)
 				}break;
 				default:
 				{
-					console.log("DELETE");
+					global.log("DELETE");
 					_404(response);
 					return;
 				}
@@ -1041,7 +1041,7 @@ exports.serve = serve;
 exports.getState = getState;
 exports.setDataPath = function(p)
 {
-	console.log("datapath is " + p);
+	global.log("datapath is " + p,0);
 	datapath = p;
 }
 exports.getDataPath = function()

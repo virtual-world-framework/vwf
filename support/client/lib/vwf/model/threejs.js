@@ -63,6 +63,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 			
             this.delayedProperties = {};
 			this.subDriverFactory = new SubDriverFactory();
+			$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/_THREERayTracer.js"></script>');
+			$(document.head).append('<script type="text/javascript" src="vwf/model/threejs/SceneManager.js"></script>');
             
         },
 
@@ -113,6 +115,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if(isSceneDefinition.call(this, protos) && childID == this.state.sceneRootID)
             {
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
+				_SceneManager.initialize(sceneNode.threeScene);
                 this.state.scenes[childID] = sceneNode;
                 
                 var cam = CreateThreeCamera();
@@ -126,6 +129,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 				sceneNode.threeScene.add(ambient);
                 sceneNode.threeScene.add(cam);
                 
+				
+				
                 ///////////////////////////////////////////////
                 //temp mesh for all geometry to test
                 var cubeX = new THREE.Mesh(
@@ -145,9 +150,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 cubeZ.position.set(.15,.15,5.00);
                 
                 var group = new THREE.Object3D();
-                group.add(cubeX);
-                group.add(cubeY);
-                group.add(cubeZ);
+             ////   group.add(cubeX);
+             //   group.add(cubeY);
+             //   group.add(cubeZ);
                 group.vwfID = "TEST DUMMY AXIS GIZMO";
                 
 				sceneNode.axes = group;
@@ -262,8 +267,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 if ( childType == "model/vnd.collada+xml" || childType == "model/vnd.osgjs+json+compressed") {
                     
-                    //Do we need this when we have an async load? currently seems to break things
-                    callback( false );
+                    
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         threeObject: threeChild,
@@ -276,7 +280,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         loadingCallback: callback,
                         sceneID: this.state.sceneRootID
                     };
-                    loadAsset.call( this, parentNode, node, childType );     
+					//pass the callback. We'll only call it if we cant load sync from memory
+                    loadAsset.call( this, parentNode, node, childType,callback );     
                 } else if ( childType == "mesh/definition" ) {
                     
                     callback( false );
@@ -400,7 +405,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						var threeObject = childNode.threeObject;
 						if(threeObject && threeObject.parent)
 						{
+							
 							threeObject.parent.remove(threeObject);
+							
 						}
 					}
 					//This node is a sub node of an asset that was loaded by the VWF. Deleteing the VWF node should reset the asset sub node.
@@ -526,7 +533,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 						
                             threeObject.matrixAutoUpdate = false;
                             threeObject.matrix.elements = matCpy(transform);
-                            threeObject.updateMatrixWorld(true);                        
+                            threeObject.updateMatrixWorld(true);      
+							threeObject.sceneManagerUpdate();							
                                                     
                     
                     }
@@ -1656,7 +1664,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             geo.computeCentroids();
         }         
     }
-    function loadAsset( parentNode, node, childType ) {
+    function loadAsset( parentNode, node, childType,callback ) {
 
         var nodeCopy = node; 
         var nodeID = node.ID;
@@ -1725,6 +1733,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     }
                 }
             }
+			
+			reg = threeModel.assetRegistry[nodeCopy.source];
+			reg.pending = false;
+			reg.loaded = true;
+			reg.node = asset;
+			
+			for(var i = 0; i < reg.callbacks.length; i++)
+				reg.callbacks[i](asset);
+			reg.callbacks = [];	
         }
         node.name = childName;
         if(!node.threeObject)
@@ -1732,17 +1749,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             node.threeObject = new THREE.Object3D();
 			node.threeObject.matrixAutoUpdate = false;
 			
-			//node.threeObject.matrix.elements = [1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1];
-			//node.threeObject.matrix.elements =  [0, 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 1];
+		
 			node.threeObject.updateMatrixWorld(true);
 			
 		}
-        sceneNode.srcAssetObjects.push( node.threeObject );
-        node.threeObject.vwfID = nodeID;
-
-        //todo, set when dealing with actual collada load. Three js should have some sort of loader with a callback. 
-        //node.MATHObject.loadedCallback = assetLoaded;
-        sceneNode.pendingLoads++;
+       
         
         if ( parentNode && parentNode.threeObject ) {
             parentNode.threeObject.add(node.threeObject);
@@ -1755,22 +1766,71 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
              
         }
-        ////////////////////////////////////
-        //manually call callback, since there is no async load currently
-        //assetLoaded(node.threeObject);
-        if(childType == "model/vnd.collada+xml")
-        {
-            node.loader = new THREE.ColladaLoader();
-            node.loader.load(node.source,assetLoaded.bind(this));
-        }
-        if(childType == "model/vnd.osgjs+json+compressed")
-        {
-            node.loader = new UTF8JsonLoader(node,assetLoaded.bind(this));
-        }
 		
-						
-            
-        
+		
+		if(!this.assetRegistry)
+		{
+			this.assetRegistry = {};
+		}
+		if(!this.assetRegistry[node.source])
+		{
+			this.assetRegistry[node.source] = {};
+			this.assetRegistry[node.source].loaded = false;
+			this.assetRegistry[node.source].pending = false;
+			this.assetRegistry[node.source].callbacks = [];
+		}
+		var reg = this.assetRegistry[node.source];
+		
+		if(reg.loaded == false && reg.pending == false)
+		{
+			reg.pending = true;
+			
+			sceneNode.srcAssetObjects.push( node.threeObject );
+			node.threeObject.vwfID = nodeID;
+			sceneNode.pendingLoads++;
+		
+		     //Do we need this when we have an async load? currently seems to break things
+             //this pauses the queue. Resume by calling with true
+			 callback( false );
+		
+			if(childType == "model/vnd.collada+xml")
+			{
+				node.loader = new THREE.ColladaLoader();
+				node.loader.load(node.source,assetLoaded.bind(this));
+			}
+			if(childType == "model/vnd.osgjs+json+compressed")
+			{
+				node.loader = new UTF8JsonLoader(node,assetLoaded.bind(this));
+			}
+			
+			
+		}else if(reg.loaded == true && reg.pending == false)
+		{
+			node.threeObject.add(reg.node.clone());
+			$(document).trigger('EndParse');
+		}
+		else if(reg.loaded == false && reg.pending == true)
+		{	
+			sceneNode.srcAssetObjects.push( node.threeObject );
+			node.threeObject.vwfID = nodeID;
+			sceneNode.pendingLoads++;
+		
+		     //Do we need this when we have an async load? currently seems to break things
+             //this pauses the queue. Resume by calling with true
+			 callback( false );
+		
+			var tcal = callback;
+			reg.callbacks.push(function(node)
+			{
+				
+				
+				$(document).trigger('EndParse');
+				nodeCopy.threeObject.add(node.clone());
+				nodeCopy.threeObject.updateMatrixWorld(true);
+				nodeCopy.threeObject.sceneManagerUpdate();
+				tcal( true );
+			});
+		}
     }
     function loadComplete() {
         var itemsToDelete = [];

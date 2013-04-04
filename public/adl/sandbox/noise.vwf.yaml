@@ -30,7 +30,7 @@ properties:
     value: 1
     set: |
             this.seed = value;
-            debugger;
+            
             this.random = this.Random(this.seed);
          
              this.permutation = [];
@@ -170,7 +170,7 @@ scripts:
                 this.permutation.push(Math.floor(this.random.getRandomNumber()*256));
              }         
              this.Perlin = new this.PerlinNoise(this.permutation);
-             debugger;
+            
              this.simplex = new SimplexNoise(this.random.getRandomNumber);
         
         }
@@ -291,13 +291,13 @@ scripts:
             for(var j = 1; j < iterations; j++)
             {
               
-              //var z1 = this.Perlin.noise((randarray[j-1]+(x+ phase))*scale*j ,
-              //                      (randarray[j-1]+(y+ phase))*scale*j ,
-              //                      (randarray[j-1]+(z+ phase))*scale*j,this.octaves );
-              
-              var z1 = this.simplex.noise3D((randarray[j-1]+(x+ phase))*scale*j ,
+              var z1 = this.Perlin.noise((randarray[j-1]+(x+ phase))*scale*j ,
                                     (randarray[j-1]+(y+ phase))*scale*j ,
-                                    (randarray[j-1]+(z+ phase))*scale*j);
+                                    (randarray[j-1]+(z+ phase))*scale*j,this.octaves );
+              
+        //     var z1 = this.simplex.noise3D((randarray[j-1]+(x+ phase))*scale*j ,
+        //                            (randarray[j-1]+(y+ phase))*scale*j ,
+        //                            (randarray[j-1]+(z+ phase))*scale*j);
               
               z1 -= .5;
               z1 /= (j);
@@ -454,7 +454,8 @@ scripts:
          }
          
          m.verticesNeedUpdate = true;
-         
+         m.dirtyMesh = true;
+        m.sceneManagerUpdate();
 
          
         /* for(var i=0;i<normals.length; i+=1)

@@ -32,7 +32,7 @@ scripts:
 
     this.initialize = function(){
         
-        if(this.id == 'character.vwf') return;
+        if(this.id == 'NPCcharacter.vwf') return;
        
          this.DownKeys= [];
         // this.motionStack= [];
@@ -137,8 +137,8 @@ scripts:
     {
     
       var newdiv = document.createElement('div');
-      $(newdiv).attr('style',"text-transform: uppercase; font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: white; text-shadow: black 0.1em 0.1em 0.4em; ");
-      newdiv.style.position = 'fixed';
+      $(newdiv).attr('style',"font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: gray;  ");
+      newdiv.style.position = 'absolute';
       newdiv.id = "Player " + PlayerNumber + 'label';
       newdiv.innerHTML = "" + PlayerNumber;
       newdiv.style.left = '0px';
@@ -219,7 +219,7 @@ scripts:
         this.updatecounter++;
         var updateFreqDivisor = 1;
         
-        if(this.id == 'character-vwf') return;
+        if(this.id == 'NPCcharacter-vwf') return;
        
         
       
@@ -359,7 +359,7 @@ scripts:
                         var len = MATH.lengthVec3(offset);
                         offset = MATH.scaleVec3(offset,1/MATH.lengthVec3(offset));
                         var norm = [intersectfront.norm[0],intersectfront.norm[1],intersectfront.norm[2]];
-                        console.log(norm);
+                        
                         if(Math.abs(norm[0]) < .05) norm[0] = 0;
                         if(Math.abs(norm[1]) < .05) norm[1] = 0;
                         if(Math.abs(norm[2]) < .05) norm[2] = 0;
@@ -436,11 +436,34 @@ scripts:
             finalt = [finalt,finalt,0];
         //every 2 seconds, update the position and rotation that tend to run out of sync
         //note that we could change the update mechanism to avoid getting out of sync
-        if(this.updatecounter > 180 && document["PlayerNumber"] == this.PlayerNumber)
+        
+        if(this.updatecounter > Math.random() * 180)
           {
-            
-            vwf_view.kernel.setProperty(this.id,'transform',this.transform,0,null);
+           
+            //vwf_view.kernel.setProperty(this.id,'transform',this.transform,0,null);
              this.updatecounter = 0;
+               
+             var rnd = Math.floor(Math.random() * 5);
+             if(rnd == 0)
+                this.stand();
+             if(rnd == 1)
+                this.walk();
+          //   if(rnd == 2)
+          //      this.jump();
+             if(rnd == 3)
+             {
+                
+                this.removeMotion('turnleft');
+                this.removeMotion('turnright');
+                this.addMotion('turnright');
+             }
+             if(rnd == 4)
+             {
+                this.removeMotion('turnright');
+                this.removeMotion('turnleft');
+                this.addMotion('turnleft');				
+             }
+               
           }
           
         for(var i = 0; i < this.updateCallbacks.length; i++)
@@ -457,7 +480,7 @@ scripts:
     this.tick = function()
     {
         
-      if(this.id == 'character-vwf') return;
+      if(this.id == 'NPCcharacter-vwf') return;
       try{
         this.update();
         }catch(e){}
@@ -585,7 +608,7 @@ scripts:
 
     this.keyUp = function(e)
          {          
-             if(this.id == 'character-vwf') return;
+             if(this.id == 'NPCcharacter-vwf') return;
             if(vwf.client() != this.ownerClientID) return;
             if(!e.keysDown.W)
                 this.removeMotion('walk');
@@ -605,7 +628,7 @@ scripts:
          }
     this.keyDown = function(e)
          {
-            if(this.id == 'character-vwf') return;
+            if(this.id == 'NPCcharacter-vwf') return;
            if(vwf.client() != this.ownerClientID) return;
             if(e.keysDown.W)
                 this.walk();

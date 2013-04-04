@@ -154,6 +154,8 @@ scripts:
          m.computeFaceNormals();
          m.computeVertexNormals();
          m.normalsNeedUpdate = true;
+         m.dirtyMesh = true;
+         m.sceneManagerUpdate();
     }
     this.updateStack = function()
     {

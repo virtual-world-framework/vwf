@@ -146,6 +146,9 @@ properties:
 events:
   keyDown:
   keyUp:
+  disconnected:
+  newClient:
+  clientDisconnect:
 methods:  
   AmLocal:
   newplayer:
@@ -294,6 +297,32 @@ scripts:
     {
        for(var i in this.children)
         this.children[i].keyUp(e);
+    }
+    //the system is notifiying us that it has become disconnected from the server
+    this.disconnected = function()
+    {
+        
+        alert('This client has been disconnected from server. The page must be reloaded.');
+        var user = _UserManager.GetCurrentUserID();
+        
+        try{vwf.deleteNode(user)} catch(e){};
+        document[document.PlayerNumber +'link'] = null;
+        document.PlayerNumber = null;
+        _UserManager.currentUsername = null;
+        window.onbeforeunload = null;
+        $(window).unbind();
+        window.location.reload();
+    }
+    //a new client has joined the simulation
+    this.newClient = function(id)
+    {
+    
+    
+    }
+    // a client other than this one has left
+    this.clientDisconnect = function(id)
+    {
+    
     }
     this.CreatePlane = function(width,height)
     {

@@ -412,7 +412,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 socket.on( "message", function( message ) {
 
                     // this.logger.info( "vwf.socket message " + message );
-
+					
                     try {
 
                         // Unpack the arguments.
@@ -436,7 +436,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                         // The simulation may perform immediate actions at the current time or it
                         // may post actions to the queue to be performed in the future. But we only
                         // move time forward for items arriving in the queue from the reflector.
-
+						
                         vwf.dispatch( fields.time );
 
                     } catch ( e ) {
@@ -449,9 +449,9 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                 } );
 
                 socket.on( "disconnect", function() {
-
                     vwf.logger.info( "vwf.socket disconnected" );
-
+					
+					vwf.dispatchEvent('index-vwf','disconnected',[]);
                 } );
 
                 socket.on( "error", function(e) { 
@@ -623,7 +623,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // Handle receipt of a message. Unpack the arguments and call the appropriate handler.
 
         this.receive = function( nodeID, actionName, memberName, parameters, respond, callback /* ( ready ) */ ) {
-
+		
 // TODO: delegate parsing and validation to each action.
 
             // Look up the action handler and invoke it with the remaining parameters.
@@ -662,7 +662,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
                     break;
 
             }
-
+			//return;
             // Invoke the action.
 
             var result = this[actionName] && this[actionName].apply( this, args );
@@ -767,7 +767,7 @@ if ( modelName == "vwf/model/object" ) {  // TODO: this is peeking inside of vwf
         // TODO: otherwise, all clients must receive exactly the same ticks at the same times.
 
         this.tick = function() {
-
+			
             // Call ticking() on each model.
 
 			
@@ -2514,6 +2514,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.fireEvent = function( nodeID, eventName, eventParameters ) {
 
+			
             this.logger.group( "vwf.fireEvent " + nodeID + " " + eventName + " " + eventParameters );
 
             // Call firingEvent() on each model.
@@ -2541,6 +2542,7 @@ vwf.addChild( nodeID, childID, childName );  // TODO: addChild is (almost) impli
 
         this.dispatchEvent = function( nodeID, eventName, eventParameters, eventNodeParameters ) {
 
+			
             this.logger.group( "vwf.dispatchEvent " + nodeID + " " + eventName + " " + eventParameters + " " + eventNodeParameters );
 
             // Defaults for the parameter parameters.

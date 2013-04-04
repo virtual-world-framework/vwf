@@ -236,7 +236,8 @@ scripts:
          }
          
          m.verticesNeedUpdate = true;
-         
+         m.dirtyMesh = true;
+         m.sceneManagerUpdate();
          
 
          for(var i=0;i<normals.length; i+=1)
