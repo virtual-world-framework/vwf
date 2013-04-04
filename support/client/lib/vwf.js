@@ -309,8 +309,11 @@
                             userLibraries[libraryType] = {};
                         }
                         Object.keys(configLibraries[libraryType]).forEach(function(libraryName) {
-                            if(!userLibraries[libraryType][libraryName] || configLibraries[libraryType][libraryName]) {
+                            if(userLibraries[libraryType][libraryName] == undefined) {
                                 userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
+                            }
+                            else if(typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object") {
+                                userLibraries[libraryType][libraryName] = $.extend({}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
                             }
                         });
                     });
