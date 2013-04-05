@@ -20,7 +20,7 @@ children:
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
       text: "1.0 Enter the Vehicle"
-      cameraPoseRef: /cameraPose1
+      cameraPoseRef: /lesson/cameraPose1
     children:
       walkToVehicle:
         extends: http://vwf.example.com/lesson/task.vwf
@@ -37,7 +37,7 @@ children:
             this.logger.info( "Step: Walk to Vehicle" );
             this.parent.parent.parent.keyUp = this.events.add( function() {
               var trans = this.parent.parent.parent.camera.translation;
-              if( trans[0] > -65 && trans[0] < -25 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
+              if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
               {
                 this.logger.info( "Step: Walk to Vehicle - Completed" );
                 this.completed();                    
@@ -92,7 +92,7 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "1.4 Close vehicle door"
-          cameraPoseRef: /cameraPose14
+          cameraPoseRef: /lesson/cameraPose14
         children:
           openDoorInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
@@ -118,7 +118,7 @@ children:
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
       text: "2.0 Start the Engine"
-      cameraPoseRef: /cameraPose2
+      cameraPoseRef: /lesson/cameraPose2
     children:
       turnKey:
         extends: http://vwf.example.com/lesson/task.vwf
@@ -148,13 +148,29 @@ children:
       this.entering = function() {
         
       }
+  cameraPose1:
+    extends: http://vwf.example.com/node3.vwf
+    properties:
+      translation: [ 150, -360, 74 ]
+      rotation: [ 0, 0, 1, 30 ]
+  cameraPose14:
+    extends: http://vwf.example.com/node3.vwf
+  cameraPose2:
+    extends: http://vwf.example.com/node3.vwf
   cameraPose3:
     extends: http://vwf.example.com/node3.vwf
 scripts:
 - |
   this.initialize = function() {
-    this.cameraPose3.transform = [-0.2800654172897339,0.9599801301956177,0,0,
+    this.cameraPose14.transform = [-0.8957634568214417,0.44452738761901855,0,0,
+      -0.44452738761901855,-0.8957634568214417,0,0,
+      0,0,1,0,
+      -14.165600776672363,-7.067508220672607,66.83444213867188,1];
+
+    this.cameraPose2.transform = [-0.2800654172897339,0.9599801301956177,0,0,
       -0.9599801301956177,-0.2800654172897339,0,0,
       0,0,1,0,
       9.367589950561523,-10.260942459106445,66.83444213867188,1];
+
+    this.cameraPose3.transform = this.cameraPose2.transform;
   }

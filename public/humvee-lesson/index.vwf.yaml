@@ -30,14 +30,6 @@ children:
     includes: humvee.vwf
   lesson:
     includes: lesson.vwf
-  cameraPose1:
-    extends: http://vwf.example.com/node3.vwf
-    properties:
-      translation: [ -45, -380, 74 ]
-  cameraPose14:
-    extends: http://vwf.example.com/node3.vwf
-  cameraPose2:
-    extends: http://vwf.example.com/node3.vwf
   dir1:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -55,18 +47,7 @@ children:
 scripts:
 - |
   this.initialize = function() {
-    this.camera.translation = [ -45, -380, 74 ];
+    this.camera.translation = this.lesson.cameraPose1.translation;
+    this.camera.rotation = this.lesson.cameraPose1.rotation;
     this.camera.far = 3000;
-
-    this.cameraPose14.transform = [-0.8957634568214417,0.44452738761901855,0,0,
-      -0.44452738761901855,-0.8957634568214417,0,0,
-      0,0,1,0,
-      -14.165600776672363,-7.067508220672607,66.83444213867188,1];
-
-    this.cameraPose2.transform = [-0.2800654172897339,0.9599801301956177,0,0,
-      -0.9599801301956177,-0.2800654172897339,0,0,
-      0,0,1,0,
-      9.367589950561523,-10.260942459106445,66.83444213867188,1];
-
-    //this.cameraPose3.transform = this.cameraPose2.transform;
   }
