@@ -55,7 +55,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             //console.log(["creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
             var prototypeID = isPrototype.call( this, nodeID, childID );
             if ( prototypeID !== undefined ) {
-                console.info( "FOUND prototype: " + prototypeID );
+                //console.info( "FOUND prototype: " + prototypeID );
                 this.state.prototypes[ prototypeID ] = {
                     parentID: nodeID,
                     ID: childID,
@@ -374,18 +374,24 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             // NOTE: Identical code exists in three.js driver, so if an change is necessary, it should be made
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
-                var protos = getPrototypes.call( this, kernel, childExtendsID );
+                var ptPropValue;
                 protos.forEach( function( prototypeID ) {
-                    for ( var propertyName in kernel.getProperties( prototypeID ) )
-                        self.settingProperty( childID, propertyName, 
-                                              kernel.getProperty( childExtendsID, propertyName ) );
+                    for ( var propertyName in kernel.getProperties( prototypeID ) ) {
+                        ptPropValue = kernel.getProperty( childExtendsID, propertyName );
+                        if ( ptPropValue ) {
+                            self.settingProperty( childID, propertyName, ptPropValue );
+                        }
+                    }
                 } );
                 childImplementsIDs.forEach( function( behaviorID ) {
-                    for ( var propertyName in kernel.getProperties( behaviorID ) )
-                        self.settingProperty( childID, propertyName, 
-                                              kernel.getProperty( behaviorID, propertyName ) );
+                    ptPropValue = kernel.getProperty( childExtendsID, propertyName );
+                    for ( var propertyName in kernel.getProperties( behaviorID ) ) {
+                        if ( ptPropValue ) {
+                            self.settingProperty( childID, propertyName, ptPropValue );
+                        }
+                    }
                 } );
-            }   
+            }; 
         },
          
         // -- deletingNode -------------------------------------------------------------------------

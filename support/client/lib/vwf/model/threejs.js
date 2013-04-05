@@ -88,6 +88,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
             if ( prototypeID !== undefined ) {
+                //console.log(["CCC   creating prototype Node:",nodeID,childID,childName,childExtendsID,childType]);
                 this.state.prototypes[ prototypeID ] = {
                     parentID: nodeID,
                     ID: childID,
@@ -96,15 +97,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     source: childSource, 
                     type: childType,
                     uri: childURI,
-                    name: childName
+                    name: childName,
                 };
                 return;                
             }
             
-            //console.log(["creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
+            //console.log(["      creatingNode:",nodeID,childID,childName,childExtendsID,childType]);
             //console.log("Create " + childID);
-            var parentNode, threeChild, threeParent;
-            
+            var node = undefined, parentNode, threeChild, threeParent, waiting = false;
+           
             if ( nodeID )
             {
                 var parentNode = this.state.nodes[nodeID];
@@ -121,9 +122,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
             var kernel = this.kernel.kernel.kernel;
             
-            
             var protos = getPrototypes.call( this, kernel, childExtendsID );
-            if(isSceneDefinition.call(this, protos) && childID == this.state.sceneRootID)
+            if ( isSceneDefinition.call(this, protos) && childID == this.state.sceneRootID )
             {
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
                 this.state.scenes[childID] = sceneNode;
@@ -149,7 +149,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 
                 var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                var node = this.state.nodes[childID] = {
+                node = this.state.nodes[childID] = {
                     name: childName,
                     threeObject: threeChild,
                     ID: childID,
@@ -158,6 +158,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     threeScene: sceneNode ? sceneNode.threeScene : undefined,
                     type: childExtendsID,
                     sourceType: childType,
+                    prototypes: protos,
                 };
                 // if there was not a preexisting object, then you have to make a new camera
                 if ( !node.threeObject ) {
@@ -182,9 +183,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         sceneNode.threeScene.add(cam); 
                     }
                 }               
-            }
-            else if(protos && isLightDefinition.call(this,protos))
-            {
+            } else if(protos && isLightDefinition.call(this,protos)) {
                 node = this.state.nodes[childID] = {
                     name: childName,
                     threeObject: threeChild,
@@ -198,8 +197,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     createLight.call(this,nodeID,childID,childName);
                 }
             
-            }else if ( protos && isMaterialDefinition.call( this, protos ) ) {
-            
+            } else if ( protos && isMaterialDefinition.call( this, protos ) ) {
                 
                 node = this.state.nodes[childID] = {
                     name: childName,
@@ -215,9 +213,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     node.threeMaterial = new THREE.MeshPhongMaterial();
                     SetMaterial(node.threeObject,node.threeMaterial,childName)
                 }
-            }
-            else if ( protos && isParticleDefinition.call( this, protos ) ) {
-            
+            } else if ( protos && isParticleDefinition.call( this, protos ) ) {
                 
                 node = this.state.nodes[childID] = {
                     name: childName,
@@ -232,8 +228,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 {   
                     CreateParticleSystem.call(this,nodeID,childID,childName);
                 }
-            }
-            else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
+            } else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
                 
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 if ( childType == "model/vnd.collada+xml" || childType == "model/vnd.osgjs+json+compressed") {
@@ -251,7 +246,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         type: childExtendsID,
                         // Hang on to the callback and call it again in assetLoaded with ready=true
                         loadingCallback: callback,
-                        sceneID: this.state.sceneRootID
+                        sceneID: this.state.sceneRootID,
                     };
                     loadAsset.call( this, parentNode, node, childType, notifyDriverOfPrototypeAndBehaviorProps );     
                 } else if ( childType == "mesh/definition" ) {
@@ -284,7 +279,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             type: childExtendsID,
                             //no load callback, maybe don't need this?
                             //loadingCallback: callback,
-                            sceneID: this.state.sceneRootID
+                            sceneID: this.state.sceneRootID,
                         };
                         if( !node.threeObject )
                             node.threeObject = findThreeObjectInParent.call(this,childName,nodeID);
@@ -321,17 +316,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             // NOTE: Identical code exists in GLGE driver, so if an change is necessary, it should be made
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
+                var ptPropValue;
                 protos.forEach( function( prototypeID ) {
-                    for ( var propertyName in kernel.getProperties( prototypeID ) )
-                        self.settingProperty( childID, propertyName, 
-                                              kernel.getProperty( childExtendsID, propertyName ) );
+                    for ( var propertyName in kernel.getProperties( prototypeID ) ) {
+                        ptPropValue = kernel.getProperty( childExtendsID, propertyName );
+                        if ( ptPropValue ) {
+                            self.settingProperty( childID, propertyName, ptPropValue );
+                        }
+                    }
                 } );
                 childImplementsIDs.forEach( function( behaviorID ) {
-                    for ( var propertyName in kernel.getProperties( behaviorID ) ) 
-                        self.settingProperty( childID, propertyName, 
-                                              kernel.getProperty( behaviorID, propertyName ) );
+                    ptPropValue = kernel.getProperty( childExtendsID, propertyName );
+                    for ( var propertyName in kernel.getProperties( behaviorID ) ) {
+                        if ( ptPropValue ) {
+                            self.settingProperty( childID, propertyName, ptPropValue );
+                        }
+                    }
                 } );
-            }
+            };
+
         },
          
         // -- deletingNode -------------------------------------------------------------------------
@@ -383,8 +386,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             if ( propertyValue !== undefined ) {
                 var node = this.state.nodes[ nodeID ];
-                if ( !node ) node = this.state.scenes[ nodeID ];
-                if ( node ) {
+                if ( node === undefined ) node = this.state.scenes[ nodeID ];
+                if ( node !== undefined ) {
                     switch ( propertyName ) {
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue );
@@ -410,7 +413,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
             //console.log(["settingProperty: ",nodeID,propertyName,propertyValue]);
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
-            if(!node) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            if( node === undefined ) node = this.state.scenes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
             //this driver has no representation of this node, so there is nothing to do.
@@ -430,6 +433,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if(!threeObject) return value;    
           
 
+            //console.log(["       settingProperty: ",nodeID,propertyName,propertyValue]);
             if ( propertyValue !== undefined ) 
             {
                 if(threeObject instanceof THREE.Object3D)
