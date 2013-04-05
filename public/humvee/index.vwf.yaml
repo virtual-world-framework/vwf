@@ -323,6 +323,13 @@ children:
                         children: 
                           glgeObj9: 
                             extends: http://vwf.example.com/node3.vwf 
+                    methods: 
+                      honkHorn:
+                    scripts:
+                    - |
+                      this.pointerUp = function( pointerInfo, pickInfo ) {
+                        this.honkHorn();
+                      }
                   Untitled_025: 
                     extends: http://vwf.example.com/node3.vwf 
                     children: 
