@@ -323,7 +323,7 @@ var scriptText = " \
     }\n\
     \n\
     initializers.forEach( function( initialize ) {\n\
-        this.logger.warn( 'initializing', this.id, 'from', initialize.id );\n\
+        // this.logger.warn( 'initializing', this.id, 'from', initialize.id );\n\
         initialize.func.call( this );\n\
     }, this );\n\
     \
