@@ -1,0 +1,65 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+---
+extends: http://vwf.example.com/node3.vwf
+source: humvee.dae
+type: model/vnd.collada+xml
+children:
+  bone2: 
+    extends: http://vwf.example.com/node3.vwf 
+    children: 
+      Scene: 
+        extends: http://vwf.example.com/node3.vwf 
+        children: 
+          DoorDriverFront: 
+            extends: http://vwf.example.com/node3.vwf 
+            implements: 
+            - http://vwf.example.com/animation.vwf
+            - http://vwf.example.com/node3/animation.vwf
+            - http://vwf.example.com/control.vwf
+            properties:
+              controlScale: 2
+            children: 
+              Untitled_006: 
+                extends: http://vwf.example.com/node3.vwf 
+                children: 
+                  glgeObj29: 
+                    extends: http://vwf.example.com/node3.vwf 
+              alpha:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 0
+              beta:
+                implements:
+                - http://vwf.example.com/animation/position.vwf
+                - http://vwf.example.com/control/position.vwf
+                properties:
+                  sequence: 1
+                  animationTime: 0.125
+            scripts:
+            - |
+              this.animationUpdate = function(time, duration) {
+                if(!this.initialTransform) {
+                  this.initialTransform = this.transform;
+                }
+                this.transform = this.initialTransform;
+                this.rotateBy([0, 0, -1, time * 360], 0, "rotated");
+              }
+          HumveeBody: 
+            extends: http://vwf.example.com/node3.vwf 
+            children: 
+              glgeObj38: 
+                extends: http://vwf.example.com/node3.vwf 
