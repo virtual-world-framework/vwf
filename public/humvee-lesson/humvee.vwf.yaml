@@ -15,6 +15,8 @@
 extends: http://vwf.example.com/node3.vwf
 source: humvee.dae
 type: model/vnd.collada+xml
+properties:
+  started: false
 children:
   interiorCamera:
     extends: http://vwf.example.com/camera.vwf
@@ -27,6 +29,54 @@ children:
           ParkingBrake: 
             extends: http://vwf.example.com/node3.vwf 
             children: 
+              brake:
+                extends: http://vwf.example.com/node3.vwf
+                source: brake.dae
+                type: model/vnd.collada+xml
+                properties:
+                  transform: [-0.34999996423721313, -0.00008858287037583068, 0.00008858287037583068, 0, 0.00008858287037583068, 1.1979989444910188e-8, 0.34999996423721313, 0, -0.00008858287037583068, 0.34999996423721313, 1.1979989444910188e-8, 0, 0.05000000074505806, 0.3400000035762787, 0, 1]
+                  braked:
+                    set: |
+                      switch(value) {
+                        case true:
+                          this.braked = value;
+                          this.bone2.Scene.Circle.glgeObj1.material.color = "#ff0000";
+                          this.bone2.Scene.Text.glgeObj2.material.emit = 1;
+                          break;
+                        case false:
+                          this.braked = value;
+                          this.bone2.Scene.Circle.glgeObj1.material.color = "#bb0000";
+                          this.bone2.Scene.Text.glgeObj2.material.emit = 0.1;
+                          break;
+                      }
+                    value: true
+                children:
+                  bone2: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      Scene: 
+                        extends: http://vwf.example.com/node3.vwf 
+                        children: 
+                          Circle: 
+                            extends: http://vwf.example.com/node3.vwf 
+                            children: 
+                              glgeObj1: 
+                                extends: http://vwf.example.com/node3.vwf 
+                                children:
+                                  material:
+                                    extends: http://vwf.example.com/material.vwf
+                                    properties:
+                                      color: "#bb0000" 
+                          Text: 
+                            extends: http://vwf.example.com/node3.vwf 
+                            children: 
+                              glgeObj2: 
+                                extends: http://vwf.example.com/node3.vwf 
+                                children:
+                                  material:
+                                    extends: http://vwf.example.com/material.vwf
+                                    properties:
+                                      emit: 0.1
               Untitled_034: 
                 extends: http://vwf.example.com/node3.vwf 
                 children: 
@@ -34,12 +84,65 @@ children:
                     extends: http://vwf.example.com/node3.vwf 
           WaitToStart: 
             extends: http://vwf.example.com/node3.vwf 
-            children: 
+            children:               
+              wait:
+                extends: http://vwf.example.com/node3.vwf
+                source: wait.dae
+                type: model/vnd.collada+xml
+                properties:
+                  transform: [-0.34999996423721313, -0.00006472349923569709, 0.00006472349923569709, 0, 0.00006472349195973948, 1.1979989444910188e-8, 0.3499999940395355, 0, -0.00006472349195973948, 0.3499999940395355, 1.1979989444910188e-8, 0, 0.05000000074505806, 0.33000001311302185, 0, 1]
+                  waiting:
+                    set: |
+                      switch(value) {
+                        case true:
+                          this.waiting = value;
+                          this.bone2.Scene.Circle.glgeObj1.material.color = "#ff0000";
+                          this.bone2.Scene.Text.glgeObj2.material.emit = 1;
+                          break;
+                        case false:
+                          this.waiting = value;
+                          this.bone2.Scene.Circle.glgeObj1.material.color = "#bb0000";
+                          this.bone2.Scene.Text.glgeObj2.material.emit = 0.1;
+                          break;
+                      }
+                    value: false
+                children:
+                  bone2: 
+                    extends: http://vwf.example.com/node3.vwf 
+                    children: 
+                      Scene: 
+                        extends: http://vwf.example.com/node3.vwf 
+                        children: 
+                          Circle: 
+                            extends: http://vwf.example.com/node3.vwf 
+                            children: 
+                              glgeObj1: 
+                                extends: http://vwf.example.com/node3.vwf 
+                                children:
+                                  material:
+                                    extends: http://vwf.example.com/material.vwf
+                                    properties:
+                                      color: "#bb0000" 
+                          Text: 
+                            extends: http://vwf.example.com/node3.vwf 
+                            children: 
+                              glgeObj2: 
+                                extends: http://vwf.example.com/node3.vwf 
+                                children:
+                                  material:
+                                    extends: http://vwf.example.com/material.vwf
+                                    properties:
+                                      emit: 0.1
               Untitled_033: 
                 extends: http://vwf.example.com/node3.vwf 
                 children: 
                   glgeObj2: 
                     extends: http://vwf.example.com/node3.vwf 
+                    children:
+                      material:
+                        extends: http://vwf.example.com/material.vwf
+                        properties:
+                          texture: 
           AirFan: 
             extends: http://vwf.example.com/node3.vwf 
             implements: 
@@ -221,6 +324,14 @@ children:
                 this.transform = this.initialTransform;
                 this.rotateBy([0, 1, 0, time * 45], 0, "rotated");
               }
+              this.controlValueUpdated = this.events.add(function(controlValue) {
+                if(this.controlValue == this.children.alpha.controlValue) {
+                  this.parent.ParkingBrake.brake.braked = true;
+                }
+                else if(this.controlValue == this.children.beta.controlValue) {
+                  this.parent.ParkingBrake.brake.braked = false;
+                }
+              }, this);
           Accelerator: 
             extends: http://vwf.example.com/node3.vwf 
             implements: 
@@ -436,16 +547,38 @@ children:
                 - http://vwf.example.com/animation/position.vwf
                 - http://vwf.example.com/control/position.vwf
                 properties:
-                  sequence: 1
+                  sequence: 2
                   controlType: "spring"
+            methods:
+              finishWait: 
             scripts:
             - |
+              var initialControlValue;
               this.animationUpdate = function(time, duration) {
                 if(!this.initialTransform) {
                   this.initialTransform = this.transform;
                 }
                 this.transform = this.initialTransform;
                 this.rotateBy([-1, 0, 0, time * 70], 0, "rotated");
+              }
+              this.pointerDown = function() {
+                initialControlValue = this.controlValue;
+              }
+              this.controlValueUpdated = this.events.add(function() {
+                if(initialControlValue !== undefined) {
+                  if(initialControlValue < this.run.controlValue && this.controlValue == this.run.controlValue) {
+                    this.controlDisabled = true;
+                    this.parent.WaitToStart.wait.waiting = true;
+                    this.in(2).finishWait();
+                  }
+                  else if(initialControlValue == this.run.controlValue && this.controlValue > (this.start.controlValue - 0.1)) {
+                    this.parent.parent.parent.started = true;
+                  }
+                }
+              }, this);
+              this.finishWait = function() {
+                this.controlDisabled = false;
+                this.parent.WaitToStart.wait.waiting = false;
               }
           Switch03: 
             extends: http://vwf.example.com/node3.vwf 

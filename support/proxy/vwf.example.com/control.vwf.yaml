@@ -50,6 +50,7 @@ properties:
   controlMomentary: false
   linkedControls: []
   initialTransform: 
+  controlDisabled: false
 methods:
   mouseInit: 
   controlTick:
@@ -156,83 +157,87 @@ scripts:
   }
   
   this.pointerDown = function( pointerInfo, pickInfo ) {
-    if ( !this.input ) this.mouseInit();
-    this.input.clear();
-    this.input.pointerInfo = pointerInfo;
-    this.input.pickInfo = pickInfo;
-    this.positions = this.find( "./element(*,'http://vwf.example.com/control/position.vwf')" );
-    this.positions.sort(function(a, b) {
-      return a.sequence - b.sequence;
-    });
-    if(this.controlMomentary) {
-      this.controlPlaying = true;
-      this.controlDirection = 1;
-      this.controlTick(this.positions[this.positions.length-1]);
+    if(!this.controlDisabled) {
+      if ( !this.input ) this.mouseInit();
+      this.input.clear();
+      this.input.pointerInfo = pointerInfo;
+      this.input.pickInfo = pickInfo;
+      this.positions = this.find( "./element(*,'http://vwf.example.com/control/position.vwf')" );
+      this.positions.sort(function(a, b) {
+        return a.sequence - b.sequence;
+      });
+      if(this.controlMomentary) {
+        this.controlPlaying = true;
+        this.controlDirection = 1;
+        this.controlTick(this.positions[this.positions.length-1]);
+      }
     }
   }
 
   this.pointerUp = function( pointerInfo, pickInfo ) {
-    if(this.controlMomentary) {
-      this.controlPlaying = true;
-      this.controlDirection = -1;
-      this.controlTick(this.positions[0]);
-    }
-    else {
-      for(var i=0; i<this.positions.length; i++) {
-        if(this.input.previous.pointerInfo == undefined) {
-          if(this.controlValue == this.positions[i].controlValue) {
-            if(!((i + this.controlDirection) >= 0 && (i + this.controlDirection) < this.positions.length)) {
-              this.controlDirection = this.controlDirection * -1;
-            }
-            this.controlPlaying = true;
-            this.controlTick(this.positions[i + this.controlDirection]);
-          }
-          else if(i+1 < this.positions.length && this.controlValue > this.positions[i].controlValue && this.controlValue < this.positions[i+1].controlValue) {
-            if(this.controlDirection == 1) {
+    if(!this.controlDisabled) {
+      if(this.controlMomentary) {
+        this.controlPlaying = true;
+        this.controlDirection = -1;
+        this.controlTick(this.positions[0]);
+      }
+      else {
+        for(var i=0; i<this.positions.length; i++) {
+          if(this.input.previous.pointerInfo == undefined) {
+            if(this.controlValue == this.positions[i].controlValue) {
+              if(!((i + this.controlDirection) >= 0 && (i + this.controlDirection) < this.positions.length)) {
+                this.controlDirection = this.controlDirection * -1;
+              }
               this.controlPlaying = true;
-              this.controlTick(this.positions[i + 1]);
+              this.controlTick(this.positions[i + this.controlDirection]);
             }
-            else {
-              this.controlPlaying = true;
-              this.controlTick(this.positions[i]);
-            }
-          }
-        }
-        else {
-          if(i+1 < this.positions.length && this.controlValue > this.positions[i].controlValue && this.controlValue < this.positions[i+1].controlValue) {
-            var nearPosition, farPosition;
-            if(Math.abs((this.positions[i].controlValue - this.controlValue)) < Math.abs((this.positions[i+1].controlValue - this.controlValue))) {
-              nearPosition = this.positions[i];
-              farPosition = this.positions[i+1];
-            }
-            else {
-              nearPosition = this.positions[i+1];
-              farPosition = this.positions[i];
-            }
-            switch(nearPosition.controlType) {
-              case 1:
+            else if(i+1 < this.positions.length && this.controlValue > this.positions[i].controlValue && this.controlValue < this.positions[i+1].controlValue) {
+              if(this.controlDirection == 1) {
                 this.controlPlaying = true;
-                this.controlDirection = this.controlValue < nearPosition.controlValue ? 1 : -1;
-                this.controlTick(nearPosition);
-                break;
-              case -1:
-                if(farPosition.controlType != -1) {
-                  this.controlPlaying = true;
-                  this.controlDirection = this.controlValue < farPosition.controlValue ? 1 : -1;
-                  this.controlTick(farPosition);
-                }
+                this.controlTick(this.positions[i + 1]);
+              }
+              else {
+                this.controlPlaying = true;
+                this.controlTick(this.positions[i]);
+              }
             }
-            break;
+          }
+          else {
+            if(i+1 < this.positions.length && this.controlValue > this.positions[i].controlValue && this.controlValue < this.positions[i+1].controlValue) {
+              var nearPosition, farPosition;
+              if(Math.abs((this.positions[i].controlValue - this.controlValue)) < Math.abs((this.positions[i+1].controlValue - this.controlValue))) {
+                nearPosition = this.positions[i];
+                farPosition = this.positions[i+1];
+              }
+              else {
+                nearPosition = this.positions[i+1];
+                farPosition = this.positions[i];
+              }
+              switch(nearPosition.controlType) {
+                case 1:
+                  this.controlPlaying = true;
+                  this.controlDirection = this.controlValue < nearPosition.controlValue ? 1 : -1;
+                  this.controlTick(nearPosition);
+                  break;
+                case -1:
+                  if(farPosition.controlType != -1) {
+                    this.controlPlaying = true;
+                    this.controlDirection = this.controlValue < farPosition.controlValue ? 1 : -1;
+                    this.controlTick(farPosition);
+                  }
+              }
+              break;
+            }
           }
         }
       }
+      this.processLinkedControls();
+      this.input.clear();
     }
-    this.processLinkedControls();
-    this.input.clear();
   }
 
   this.pointerMove = function( pointerInfo, pickInfo ) {
-    if(!this.controlMomentary) {
+    if(!this.controlDisabled && !this.controlMomentary) {
       var minValue = this.positions[0].controlValue;
       var maxValue = this.positions[this.positions.length-1].controlValue;
       this.input.update( pointerInfo, pickInfo );
